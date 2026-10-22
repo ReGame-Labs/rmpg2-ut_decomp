@@ -60,7 +60,15 @@ TARGETS = [
 # maspsx). GCC 2.8.1 -O2: the compiler-ID experiment's verdict (docs/TOOLCHAIN.md "Compiler"); 2.8.0 generates the
 # same code, 2.8.1 is the one Psy-Q 4.3 shipped.
 DEFAULT_CC = "2.8.1"
-CC_OVERRIDES: dict[str, str] = {}      # "src/main/foo.c": "2.7.2"
+# The sound driver (the four pieces linked between the Psy-Q objects: docs/TOOLCHAIN.md "Compiler") was built with
+# GCC 2.7.2: its stores to globals go through the assembler's macro form (`sh $v1, sym`, a `lui $at` once
+# assembled), which 2.8.x never emits, and 2.7.2 matches 72 of its functions against 2.8.1's 32.
+CC_OVERRIDES: dict[str, str] = {
+    "src/main/game_80063A88.c": "2.7.2",
+    "src/main/game_8006BB14.c": "2.7.2",
+    "src/main/game_80076C8C.c": "2.7.2",
+    "src/main/game_80078A40.c": "2.7.2",
+}
 # -G per target: the executable's code makes no $gp-relative access at all (docs/TOOLCHAIN.md), so every file is
 # -G0. Exceptions by C path in G_OVERRIDES (none expected for the executable; the overlays are settled separately).
 DEFAULT_G = {"main": 0}  # targets not listed: 0

@@ -153,6 +153,16 @@ The functions with jump tables or `.rodata` constants (102 of the 1,868; exclude
 with the cases out of order or without the constants) change nothing: of the 7 the `--no-exclude` run scored, one
 (`func_8002C814`) is exact on 2.8.x and 2.9x alike, the rest are below 100 % on every compiler.
 
+### The sound driver: GCC 2.7.2
+
+The four pieces of the game's own code that sit between the Psy-Q objects (`game_80063A88`, `game_8006BB14`,
+`game_80076C8C`, `game_80078A40`: the sound driver, `docs/DISC_LAYOUT.md` "The files") were built with **GCC 2.7.2**,
+not 2.8.1: their stores to globals go through the assembler's macro form (`sh $v1, sym`, which assembles to a
+`lui $at` pair), a form 2.8.x never emits because it splits every address itself, and over the experiment's drafts
+2.7.2 matches 72 of their functions where 2.8.1 matches 32 (`game_8006BB14`: 47 against 16, mean 89.5 % against
+73.4 %). `configure.py`'s `CC_OVERRIDES` names them; `tools/cc_psx.sh` pairs 2.7.2 with ASPSX 2.56. The sound setup
+in `game_800633EC`, the game's own code, stays on 2.8.1 (78 % against 58 %).
+
 ### `-G0` everywhere
 
 `$gp` is set to `0x80097EA4` by crt0 and then never used: the executable's code makes no `$gp`-relative load, store
