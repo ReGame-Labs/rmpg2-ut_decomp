@@ -61,12 +61,144 @@ segments:
     start: 0x800
     vram: 0x80010000
     subsegments:
-      # The first split (docs/DISC_LAYOUT.md "The executable"): one unit per region, to be split into the original
-      # source files with evidence (docs/MATCHING.md "Splitting a target into files").
+      # The regions (docs/DISC_LAYOUT.md "The executable"). The game's code is to be split into its source files
+      # with evidence (docs/MATCHING.md "Splitting a target into files"); the Psy-Q libraries are one unit per
+      # library object, named by signature (tools/psyq_match.py, docs/TOOLCHAIN.md), never decompiled.
       - [0x800, rodata, rodata]        # 0x80010000 .rodata of every object, in link order (psylink)
       - [0x7F58, asm, crt0]            # 0x80017758 Psy-Q 2MBYTE.OBJ: the entry point (0x80017760), calls main
       - [0x801C, asm, game]            # 0x8001781C the game's code, main first
-      - [0x54798, asm, psyq]           # 0x80063F98 the Psy-Q libraries (tools/psyq_match.py), one unit until named
+      # The Psy-Q objects, in link order: psyq/<library>/<object>. Each holds only the functions the game references
+      # (the linker dropped the rest), so a unit is often shorter than the library's object; the names come from
+      # per-function signature matching (tools/psyq_match.py --functions). Four pieces of the game's own code sit
+      # between library objects: the linker pulled them from the game's own library during the same passes.
+      - [0x54278, asm, psyq/libapi/c57]         # 0x80063A78 InitHeap; the InitHeap stub crt0 calls, placed between game objects
+      - [0x54288, asm, game_80063A88]           # 0x80063A88 game code: the SPU setup (SpuInit, SpuSetReverbModeParam...), linked after the first library object
+      - [0x547A8, asm, psyq/libcd/c_011]        # 0x80063FA8 StCdInterrupt
+      - [0x55298, asm, psyq/libcd/c_003]        # 0x80064A98 StUnSetRing
+      - [0x55318, asm, psyq/libgpu/sys]         # 0x80064B18 ResetGraph, SetGraphDebug, SetDispMask...; sys.c $Id 1998/01/12; 17 of 36 functions kept
+      - [0x57918, asm, psyq/libcd/cdread2]      # 0x80067118 CdRead2, StCdInterrupt2
+      - [0x579C8, asm, psyq/libcd/c_005]        # 0x800671C8 StSetStream
+      - [0x57A58, asm, psyq/libcd/cdrom]        # 0x80067258 StSetRing
+      - [0x57A88, asm, psyq/libcd/c_009]        # 0x80067288 StGetNext
+      - [0x57B48, asm, psyq/libcd/sys]          # 0x80067348 CdStatus, CdMode, CdLastPos...; CdFlush/CdSync/CdReady by their CD_* callees
+      - [0x58128, asm, psyq/libcd/c_007]        # 0x80067928 StFreeRing
+      - [0x581D8, asm, psyq/libetc/vsync]       # 0x800679D8 VSync
+      - [0x583E8, asm, psyq/libgpu/ext]         # 0x80067BE8 SetDefDrawEnv, SetDefDispEnv
+      - [0x584D8, asm, psyq/libspu/s_sm]        # 0x80067CD8 SpuSetMute
+      - [0x58538, asm, psyq/libmcrd/libmcrd]    # 0x80067D38 MemCardInit, MemCardStart, MemCardExist...; 14 of 19 functions kept
+      - [0x59860, asm, psyq/libc2/memset]       # 0x80069060 memset
+      - [0x59890, asm, psyq/libapi/counter]     # 0x80069090 SetRCnt, GetRCnt, StartRCnt; 3 of 5 functions kept
+      - [0x59994, asm, psyq/libetc/intr]        # 0x80069194 ResetCallback, InterruptCallback, DMACallback...; intr.c $Id 1997/02/07; 7 of 10 entry points kept
+      - [0x59FDC, asm, psyq/libapi/a91]         # 0x800697DC ChangeClearPAD
+      - [0x59FEC, asm, psyq/libgte/reg13]       # 0x800697EC SetGeomScreen
+      - [0x59FFC, asm, psyq/libgte/msc00]       # 0x800697FC InitGeom; 4.3 only
+      - [0x5A08C, asm, psyq/libpad/padentry]    # 0x8006988C PadStartCom, PadGetState, PadInfoAct...; PadStartCom by its callee _padStartCom (PadChkVsync is byte-identical)
+      - [0x5A2C8, asm, psyq/libcd/event]        # 0x80069AC8 CdInit, def_cbsync, def_cbready...; 4.3-4.7
+      - [0x5A418, asm, psyq/libpad/padportm]    # 0x80069C18 PadInitMtap; 4.3 only
+      - [0x5AC78, asm, psyq/libapi/a37]         # 0x8006A478 ExitCriticalSection
+      - [0x5AC88, asm, psyq/libgpu/p01]         # 0x8006A488 GetClut
+      - [0x5ACA8, asm, psyq/libgpu/p00]         # 0x8006A4A8 GetTPage
+      - [0x5ACE8, asm, psyq/libapi/a36]         # 0x8006A4E8 EnterCriticalSection
+      - [0x5ACF8, asm, psyq/libc2/memcpy]       # 0x8006A4F8 memcpy
+      - [0x5AD38, asm, psyq/libc2/sprintf]      # 0x8006A538 sprintf
+      - [0x5B5B8, asm, psyq/libc2/strlen]       # 0x8006ADB8 strlen
+      - [0x5B5F8, asm, psyq/libgte/ratan]       # 0x8006ADF8 ratan2
+      - [0x5B778, asm, psyq/libgpu/p33]         # 0x8006AF78 SetDrawTPage
+      - [0x5B7A8, asm, psyq/libc2/printf]       # 0x8006AFA8 printf
+      - [0x5B7E8, asm, psyq/libgpu/p06]         # 0x8006AFE8 AddPrim
+      - [0x5B828, asm, psyq/libgte/geo_01]      # 0x8006B028 rcos
+      - [0x5B8C8, asm, psyq/libgte/geo_00]      # 0x8006B0C8 rsin, sin_1
+      - [0x5B998, asm, psyq/libc2/strchr]       # 0x8006B198 strchr
+      - [0x5B9D8, asm, psyq/libc2/strcmp]       # 0x8006B1D8 strcmp
+      - [0x5BA48, asm, psyq/libc2/strcpy]       # 0x8006B248 strcpy
+      - [0x5BA98, asm, psyq/libcd/cdread]       # 0x8006B298 CdRead, CdReadSync; 4.3 only; CdReadBreak, CdReadCallback, CdReadMode dropped
+      - [0x5C194, asm, psyq/libspu/s_stsa]      # 0x8006B994 SpuSetTransferStartAddr
+      - [0x5C1F4, asm, psyq/libspu/s_w]         # 0x8006B9F4 SpuWrite; SpuWrite by its callee _spu_Fw (SpuRead is byte-identical)
+      - [0x5C254, asm, psyq/libspu/s_itc]       # 0x8006BA54 SpuIsTransferCompleted
+      - [0x5C304, asm, psyq/libapi/c68]         # 0x8006BB04 FlushCache
+      - [0x5C314, asm, game_8006BB14]           # 0x8006BB14 game code between library objects: the sound driver (SpuSetKey, SpuSetVoiceAttr; the SPSX string)
+      - [0x61114, asm, psyq/libspu/s_m_init]    # 0x80070914 SpuInitMalloc
+      - [0x61174, asm, psyq/libspu/s_stm]       # 0x80070974 SpuSetTransferMode
+      - [0x611A4, asm, psyq/libspu/s_srmp]      # 0x800709A4 SpuSetReverbModeParam
+      - [0x61684, asm, psyq/libspu/s_sca]       # 0x80070E84 SpuSetCommonAttr
+      - [0x61A04, asm, psyq/libspu/s_srd]       # 0x80071204 SpuSetReverbDepth
+      - [0x61A84, asm, psyq/libspu/s_sr]        # 0x80071284 SpuSetReverb
+      - [0x61B54, asm, psyq/libspu/s_i]         # 0x80071354 SpuInit
+      - [0x61B74, asm, psyq/libcd/bios]         # 0x80071374 CD_sync, CD_ready, CD_cw...; bios.c $Id 1997/03/28
+      - [0x6324C, asm, psyq/libcd/c_008]        # 0x80072A4C init_ring_status
+      - [0x6328C, asm, psyq/libcd/c_004]        # 0x80072A8C data_ready_callback
+      - [0x63318, asm, psyq/libds/dscb]         # 0x80072B18 DsReadyCallback, DsDataCallback; DsReadyCallback and DsDataCallback, which libcd's StUnSetRing calls in its libds mode
+      - [0x63350, asm, psyq/libapi/c73]         # 0x80072B50 GPU_cw
+      - [0x63360, asm, psyq/libetc/vmode]       # 0x80072B60 GetVideoMode; GetVideoMode only
+      - [0x6337C, asm, psyq/libcd/c_010]        # 0x80072B7C StSetMask
+      - [0x6339C, asm, psyq/libcd/c_002]        # 0x80072B9C StClearRing
+      - [0x633FC, asm, psyq/libetc/intr_vb]     # 0x80072BFC startIntrVSync, setIntrVSync; 4.3-4.7
+      - [0x6351C, asm, psyq/libc2/puts]         # 0x80072D1C puts
+      - [0x6357C, asm, psyq/libapi/l10]         # 0x80072D7C ChangeClearRCnt
+      - [0x6358C, asm, psyq/libspu/spu]         # 0x80072D8C _spu_init, _spu_FiDMA, _spu_t...; _spu_Fr_, _spu_Fr, _spu_FgetRXXa dropped
+      - [0x63F84, asm, psyq/libmcrd/bios]       # 0x80073784 funcEvSpIOE, funcEvSpError, funcEvSpTimeout...; the eight funcEvSp* handlers first
+      - [0x64560, asm, psyq/libmcrd/userfunc]   # 0x80073D60 UserFuncInit, UserFuncOpen, UserFuncExecute...
+      - [0x64670, asm, psyq/libcard/c171]       # 0x80073E70 _card_info
+      - [0x64680, asm, psyq/libcard/card]       # 0x80073E80 _card_clear
+      - [0x646C0, asm, psyq/libcard/c172]       # 0x80073EC0 _card_load
+      - [0x646D0, asm, psyq/libc2/strcat]       # 0x80073ED0 strcat
+      - [0x64780, asm, psyq/libapi/a50]         # 0x80073F80 open
+      - [0x64790, asm, psyq/libapi/a54]         # 0x80073F90 close
+      - [0x647A0, asm, psyq/libapi/a51]         # 0x80073FA0 lseek
+      - [0x647B0, asm, psyq/libapi/a52]         # 0x80073FB0 read
+      - [0x647C0, asm, psyq/libapi/a53]         # 0x80073FC0 write
+      - [0x647D0, asm, psyq/libapi/a65]         # 0x80073FD0 format
+      - [0x647E0, asm, psyq/libcard/a80]        # 0x80073FE0 _new_card
+      - [0x647F0, asm, psyq/libcard/a78]        # 0x80073FF0 _card_write
+      - [0x64800, asm, psyq/libc2/setjmp]       # 0x80074000 setjmp; setjmp only
+      - [0x6483C, asm, psyq/libapi/a25]         # 0x8007403C HookEntryInt
+      - [0x6484C, asm, psyq/libetc/intr_dma]    # 0x8007404C startIntrDMA
+      - [0x64AEC, asm, psyq/libapi/c114]        # 0x800742EC _96_remove; 4.3 only
+      - [0x64B0C, asm, psyq/libapi/a23]         # 0x8007430C ReturnFromException
+      - [0x64B1C, asm, psyq/libapi/a24]         # 0x8007431C ResetEntryInt
+      - [0x64B2C, asm, psyq/libgte/patchgte]    # 0x8007432C _patch_gte
+      - [0x64C0C, asm, psyq/libpad/padmain]     # 0x8007440C _padSetVsyncParam, _padStartCom, _padInitSioMode...; 4.3 only
+      - [0x6579C, asm, psyq/libpad/padcmd]      # 0x80074F9C _padSetAct, _padSendAtLoadInfo, _padRecvAtLoadInfo...; _padSetAct first (PadSetAct calls it)
+      - [0x65FA0, asm, psyq/libapi/a07]         # 0x800757A0 DeliverEvent
+      - [0x65FB0, asm, psyq/libpad/padseqm]     # 0x800757B0 _padInitMtapSeq, _mtapFailAuto; 4.3 only
+      - [0x668E0, asm, psyq/libc2/bzero]        # 0x800760E0 bzero
+      - [0x66910, asm, psyq/libc2/memchr]       # 0x80076110 memchr
+      - [0x66960, asm, psyq/libc2/memmove]      # 0x80076160 memmove
+      - [0x669D0, asm, psyq/libc2/prnt]         # 0x800761D0 prnt
+      - [0x67070, asm, psyq/libspu/s_ini]       # 0x80076870 _SpuInit, SpuStart
+      - [0x671D0, asm, psyq/libapi/a11]         # 0x800769D0 TestEvent
+      - [0x671E0, asm, psyq/libspu/s_skowa]     # 0x800769E0 SpuSetKeyOnWithAttr
+      - [0x67210, asm, psyq/libspu/s_sk]        # 0x80076A10 SpuSetKey
+      - [0x673D0, asm, psyq/libspu/sr_gaks]     # 0x80076BD0 SpuGetAllKeysStatus
+      - [0x6745C, asm, psyq/libspu/s_srv]       # 0x80076C5C SpuSetReverbVoice
+      - [0x6748C, asm, game_80076C8C]           # 0x80076C8C game code between library objects: more of the sound driver (calls into the piece above)
+      - [0x68BC0, asm, psyq/libspu/s_q]         # 0x800783C0 SpuQuit
+      - [0x68C40, asm, psyq/libspu/s_sva]       # 0x80078440 SpuSetVoiceAttr
+      - [0x69240, asm, game_80078A40]           # 0x80078A40 game code between library objects: one sound-driver function (calls into the first piece)
+      - [0x69288, asm, psyq/libapi/a12]         # 0x80078A88 EnableEvent
+      - [0x69298, asm, psyq/libsn/_udivdi3]     # 0x80078A98 __udivdi3
+      - [0x692B8, asm, psyq/libapi/a08]         # 0x80078AB8 OpenEvent
+      - [0x692C8, asm, psyq/libapi/a13]         # 0x80078AC8 DisableEvent
+      - [0x692D8, asm, psyq/libapi/a09]         # 0x80078AD8 CloseEvent
+      - [0x692E8, asm, psyq/libspu/s_m_util]    # 0x80078AE8 _SpuIsInAllocateArea_
+      - [0x69378, asm, psyq/libspu/s_sra]       # 0x80078B78 _spu_setReverbAttr
+      - [0x69848, asm, psyq/libspu/s_crwa]      # 0x80079048 SpuClearReverbWorkArea
+      - [0x699E8, asm, psyq/libc2/putchar]      # 0x800791E8 _putchar, _putchar_flash; _putchar and _putchar_flash; putchar dropped
+      - [0x69B20, asm, psyq/libcard/init]       # 0x80079320 InitCARD, StartCARD; StopCARD dropped
+      - [0x69BC4, asm, psyq/libcard/c112]       # 0x800793C4 _bu_init; _bu_init; LIBAPI has a byte-identical C112.OBJ
+      - [0x69BD4, asm, psyq/libapi/l03]         # 0x800793D4 SysDeqIntRP
+      - [0x69BE4, asm, psyq/libapi/l02]         # 0x800793E4 SysEnqIntRP
+      - [0x69BF4, asm, psyq/libpad/waitrc2]     # 0x800793F4 setRC2wait, chkRC2wait; 4.3-4.5
+      - [0x69CB4, asm, psyq/libpad/padif]       # 0x800794B4 ; 4.3 only; no function names in the signature database
+      - [0x6A2A4, asm, psyq/libspu/s_dcb]       # 0x80079AA4 _SpuDataCallback
+      - [0x6A2D4, asm, psyq/libspu/s_sav]       # 0x80079AD4 _SpuSetAnyVoice
+      - [0x6A594, asm, psyq/libspu/s_n2p]       # 0x80079D94 _spu_note2pitch; 4.3-4.7
+      - [0x6A664, asm, psyq/libsn/_udivmod]     # 0x80079E64 __udivmoddi4
+      - [0x6AC74, asm, psyq/libapi/a10]         # 0x8007A474 WaitEvent
+      - [0x6AC84, asm, psyq/libapi/pad]         # 0x8007A484 ReadInitPadFlag; ReadInitPadFlag, which InitCARD calls
+      - [0x6AC94, asm, psyq/libcard/a74]        # 0x8007A494 InitCARD2
+      - [0x6ACA4, asm, psyq/libcard/patch]      # 0x8007A4A4 _patch_card, _patch_card2, _copy_memcard_patch; 4.1-4.4
+      - [0x6AE74, asm, psyq/libcard/a75]        # 0x8007A674 StartCARD2
       - [0x6AE84, data, data]          # 0x8007A684 .data, to the end of the image's contents (last non-zero word
                                        #            0x80097E9C); no .sdata/.sbss: nothing is reached through $gp
       - [0x886A4, pad, pad]            # 0x80097EA4 zeros: the file is padded to a whole sector; the overlay region

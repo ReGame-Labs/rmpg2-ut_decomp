@@ -43,8 +43,8 @@ The regions (`config/main.yaml`; the code regions are the first split, to be ref
 |---|---|---|
 | `0x80010000`–`0x80017758` | 30,552 | `.rodata` of every object, in link order (psylink puts them before all `.text`); the first 0x580 bytes are the file table's checksums (below) |
 | `0x80017758`–`0x8001781C` | 196 | crt0 (Psy-Q `2MBYTE.OBJ`): clears `.bss`, reads `_ramsize` (2 MB, from its own table at `0x80017810`) and `_stacksize` (`0x600`, at `0x8007A70C`), sets `$sp = 0x80200000` and `$gp`, calls `InitHeap` (the BIOS call stub at `0x80063A78`) and `main` |
-| `0x8001781C`–`0x80063F98` | 313,212 | The game's code, `main` first (1,868 functions as splat finds them) |
-| `0x80063F98`–`0x8007A684` | 92,396 | The Psy-Q libraries (`docs/TOOLCHAIN.md`) |
+| `0x8001781C`–`0x80063FA8` | 313,228 | The game's code, `main` first; the `InitHeap` stub (16 bytes at `0x80063A78`, the first library object) sits between two of its objects |
+| `0x80063FA8`–`0x8007A684` | 91,868 | The Psy-Q library objects (123 objects, 65,888 bytes; `docs/TOOLCHAIN.md`), with three pieces of the game's sound driver between them (25,980 bytes) |
 | `0x8007A684`–`0x80097EA4` | 120,352 | `.data`; the last non-zero word is at `0x80097E9C`. No `.sdata` or `.sbss`: the code makes no `$gp`-relative access, and `$gp` is simply the end of `.data` |
 | `0x80097EA4`–`0x80098000` | 348 | Zeros: the file is padded to a whole sector (`t_size` is a multiple of 0x800). The overlay region starts here |
 

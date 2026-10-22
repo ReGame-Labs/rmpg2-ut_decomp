@@ -21,39 +21,80 @@ on the disc).
 The `$Id` dates bound the SDK from below (libgpu from January 1998). Psy-Q 4.3 and 4.4 are the releases of the game's
 time (March 1999).
 
-## Psy-Q libraries (signature match)
+## Psy-Q libraries
 
-`tools/psyq_match.py extracted/disc/SLUS_007.42` (lab313ru/psx_psyq_signatures, Psy-Q 2.6–4.7):
+The library code follows the game's: `0x80063FA8`–`0x8007A684` (91,868 bytes), with one library object before it,
+the `InitHeap` stub at `0x80063A78` that crt0 calls, placed between two of the game's objects. The objects were
+identified with `tools/psyq_match.py` over lab313ru/psx_psyq_signatures (the `.text` of every object of Psy-Q 2.6
+to 4.7, relocated bytes masked): first whole objects (`psyq_match.py extracted/disc/SLUS_007.42`), then, for the
+units that lists, function by function (`--functions`). `config/main.yaml` holds the result as one
+`psyq/<library>/<object>` unit per object, `config/symbol_addrs.txt` the 242 function names.
 
-- **Library span:** `0x80063F98`–`0x8007A684` (92 KB), after the game's code; crt0 (`2MBYTE.OBJ`, 196 bytes) at
-  `0x80017758`, right before `main` at `0x8001781C`.
-- **100 objects placed** (29 KB of the 92 KB span); 16 gaps inside the span total about 62 KB of library code the
-  signature database does not know (the matcher reports each gap).
-- **Version:** 98.5 % of the matched bytes are consistent with **Psy-Q 4.3**; 5 objects (`LIBCD SYS.OBJ`, `BIOS_2.OBJ`,
-  `S_003/S_004/S_005`, 400 bytes in all) match only the 4.6/4.7 signatures, which points at a libcd newer than the
-  rest (a patch release, or a 4.4 whose signatures the database lacks). To be settled by naming the gaps (issue
-  "Psy-Q library identification").
+**The linker dropped the library functions nothing references.** Most objects in the image are shorter than the
+library's: libetc's `INTR.OBJ` holds 7 of its 10 entry points (no `StopCallback`, `RestartCallback`,
+`GetIntrMask`), libapi's `COUNTER.OBJ` 3 of 5, libgpu's `SYS.OBJ` 12 of 33, libmcrd's `LIBMCRD.OBJ` 14 of 19. The
+functions that remain keep the library's order and bytes, so an object is recognised function by function: each
+version's signature is cut at its function labels (a slice runs to the next function label, static code included),
+the slices are searched in the unit in label order, and a slice that fits nowhere is a dropped function. The unit
+of dropping is an entry point with the static code that follows it: every function kept is called from the
+executable or from an overlay (the overlays call `CdRead2`, the `St*` streaming functions, `MemCard*`, `strchr`,
+`strcmp`), or is followed by static code that is (`SetDrawEnv`, `DrawOTag2`, `MemCardReadData`,
+`MemCardWriteData`, `MemCardUnformat`, `PadInfoAct`, `_spu_FsetPCR`, `CD_set_test_parmnum`).
 
-| Library | Objects | Bytes |
-|---|---|---|
-| LIBSPU | 19 | 7,936 |
-| LIBPAD | 4 | 6,208 |
-| LIBC2 | 13 | 4,832 |
-| LIBCD | 14 | 4,544 |
-| LIBSN | 1 | 1,552 |
-| LIBETC | 3 | 1,488 |
-| LIBGTE | 6 | 1,136 |
-| LIBCARD | 8 | 624 |
-| LIBAPI | 21 | 352 |
-| LIBMCRD | 1 | 272 |
-| LIBGPU | 4 | 208 |
-| crt0 `2MBYTE.OBJ` | 1 | 196 |
-| LIBGS | 4 | 96 |
-| LIBCOMB | 1 | 16 |
+**Four pieces of the game's own code sit between the library objects** (`game_80063A88`, `game_8006BB14`,
+`game_80076C8C`, `game_80078A40` in `config/main.yaml`: 27,292 bytes, 147 functions): the game's SPU setup and its
+sound driver, which call `SpuSetKey`, `SpuSetVoiceAttr` and the rest of libspu and hold the `SPSX` string. No
+signature of any version matches them. The linker pulled them from the game's own library in the same passes as
+the Psy-Q objects, which is why they are interleaved; they belong to the game's code and will be split into files
+with the rest.
 
-LIBGPU's 208 bytes cannot be all of it (its `sys.c` banner is in the image): most of LIBGPU, LIBGTE and LIBSND (if
-any) are in the gaps. 7 placed objects are ambiguous between libraries (tiny byte-identical twins) and stay unnamed
-until link facts settle them.
+**Version: Psy-Q 4.3.** Every object is consistent with 4.3; six are consistent with 4.3 only (libcd's
+`CDREAD.OBJ`, libpad's `PADPORTM`, `PADMAIN`, `PADSEQM` and `PADIF`, libmcrd's `LIBMCRD.OBJ`) and three more with
+4.2–4.3 (libgpu's `SYS.OBJ`, libpad's `PADENTRY.OBJ` and `PADCMD.OBJ`). The whole-object match
+reports five libcd hits consistent with 4.6/4.7 only (`SYS.OBJ`, `BIOS_2.OBJ`, `S_003`/`S_004`/`S_005`); those are
+4.6's one-function objects matching functions that 4.3 keeps inside its `SYS.OBJ` and `BIOS.OBJ`, whose static code
+is byte-identical to 4.3's and not to 4.4's or 4.5's. The `$Id` dates above (libgpu `sys.c` of January 1998) fit a
+1998 release. One libds object is linked, `DSCB.OBJ` (`DsReadyCallback` and `DsDataCallback`), because libcd's
+`StUnSetRing` calls them in its libds mode; nothing else of libds is present.
+
+| Library | Objects | Bytes | Versions consistent with every object |
+|---|---|---|---|
+| LIBCD | 15 | 13,472 | 4.3 |
+| LIBPAD | 7 | 11,792 | 4.3 |
+| LIBSPU | 25 | 11,124 | 4.3–4.6 |
+| LIBGPU | 6 | 10,176 | 4.2–4.3 |
+| LIBMCRD | 3 | 6,676 | 4.3 |
+| LIBC2 | 16 | 5,252 | 4.1–4.7 |
+| LIBETC | 5 | 3,124 | 4.3–4.7 |
+| LIBSN | 2 | 1,584 | 3.3–4.6 |
+| LIBGTE | 6 | 1,136 | 4.1–4.7 |
+| LIBCARD | 10 | 804 | 4.1–4.4 |
+| LIBAPI | 28 | 708 | 4.1–4.7 |
+| LIBDS | 1 | 56 | 4.0–4.5 |
+| crt0 `2MBYTE.OBJ` | 1 | 196 | all |
+
+124 objects, 65,904 bytes of library code (plus crt0). No libsnd, libpress (it is in `OVERMOVE.BIN`), libgs or
+libmath object is linked; the game's sound runs on libspu and its own driver.
+
+**Byte-identical twins**, settled from the callers and callees rather than the bytes:
+- `PadStartCom` at `0x8006988C` (libpad `PADENTRY.OBJ`), not `PadChkVsync` or `PadStopCom`: it calls
+  `_padStartCom`.
+- `SpuWrite` at `0x8006B9F4` (`S_W.OBJ`), not `SpuRead` (`S_R.OBJ`): it calls `_spu_Fw`.
+- `CdFlush`, `CdSync` and `CdReady` at `0x800673E0`, `0x80067400`, `0x80067420`: each calls its `CD_*` routine;
+  `CdSyncCallback` and `CdReadyCallback` follow them in the object's order (`CdSetDebug` precedes `CdSync` in the
+  library, so it is one of the dropped functions).
+- `DsReadyCallback` at `0x80072B18`, not `DsSyncCallback` or `DsStartCallback`: `StUnSetRing` calls it where its
+  libcd branch calls `CdReadyCallback`.
+- `_bu_init` at `0x800793C4`: `C112.OBJ` exists in both libcard and libapi with the same bytes; it follows
+  libcard's `INIT.OBJ` and is filed under libcard.
+- The eight `funcEvSp*` handlers of libmcrd's `BIOS.OBJ` and the `_get_card_event`/`_chk_card_event` pairs are
+  named in the library's order.
+- Whole-object hits that were coincidences: the 16-byte `GsGetWorkBase` at `0x80063F98` and `0x8007A484` (a getter
+  of a game variable, and libapi's `ReadInitPadFlag`), and `COMB_3.OBJ` at `0x80067108` (inside libgpu's `SYS.OBJ`).
+
+**Not named:** the static functions of the objects (they stay `func_…`; some carry a name because an older version
+of the library exported it, such as libgpu's `_addque` and `set_alarm`), and the five functions of libpad's
+`PADIF.OBJ`, for which the signature database has no labels.
 
 ## Compiler: GCC 2.8.1 `-O2 -G0`
 

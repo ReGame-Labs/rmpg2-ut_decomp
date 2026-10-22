@@ -1,5 +1,374 @@
 // Names for the executable SLUS_007.42, splat's symbol_addrs format: `name = 0x80012345; // type:func size:0x34`.
 // The single source of truth for the executable's names (docs/MATCHING.md "Conventions"); overlays use
 // config/<overlay>.symbols.txt. Keep splat's default names (func_8001xxxx, D_8001xxxx) for what is not understood.
-// Psy-Q library names come from tools/psyq_match.py --symbols and stay Sony's.
+// Psy-Q library names come from tools/psyq_match.py (--symbols, then --functions per psyq/ unit) and stay Sony's.
 main = 0x8001781C; // type:func  crt0 calls it right after setting $gp (docs/TOOLCHAIN.md)
+
+// The Psy-Q library objects (config/main.yaml's psyq/ units), function by function (tools/psyq_match.py
+// --functions; docs/TOOLCHAIN.md). Byte-identical twins were settled from callers and callees: PadStartCom,
+// SpuWrite, CdFlush/CdSync/CdReady, DsReadyCallback.
+// LIBAPI C57.OBJ
+InitHeap = 0x80063A78; // type:func
+// LIBCD C_011.OBJ
+StCdInterrupt = 0x80063FA8; // type:func
+// LIBCD C_003.OBJ
+StUnSetRing = 0x80064A98; // type:func
+// LIBGPU SYS.OBJ
+ResetGraph = 0x80064B18; // type:func
+SetGraphDebug = 0x80064C8C; // type:func
+SetDispMask = 0x80064CE8; // type:func
+DrawSync = 0x80064D80; // type:func
+ClearImage = 0x80064F04; // type:func
+LoadImage = 0x80064F94; // type:func
+ClearOTagR = 0x80064FF4; // type:func
+DrawOTag = 0x800650A0; // type:func
+PutDrawEnv = 0x80065110; // type:func
+PutDispEnv = 0x800651D0; // type:func
+SetDrawEnv = 0x800656C8; // type:func
+_status = 0x80065D1C; // type:func
+_param = 0x800665C0; // type:func
+_addque = 0x800665F0; // type:func
+set_alarm = 0x80066DB0; // type:func
+DrawOTag2 = 0x80066FC8; // type:func
+_GPU_ResetCallback = 0x800670C4; // type:func
+// LIBCD CDREAD2.OBJ
+CdRead2 = 0x80067118; // type:func
+StCdInterrupt2 = 0x8006719C; // type:func
+// LIBCD C_005.OBJ
+StSetStream = 0x800671C8; // type:func
+// LIBCD CDROM.OBJ
+StSetRing = 0x80067258; // type:func
+// LIBCD C_009.OBJ
+StGetNext = 0x80067288; // type:func
+// LIBCD SYS.OBJ
+CdStatus = 0x80067348; // type:func
+CdMode = 0x80067358; // type:func
+CdLastPos = 0x80067368; // type:func
+CdReset = 0x80067374; // type:func
+CdFlush = 0x800673E0; // type:func
+CdSync = 0x80067400; // type:func
+CdReady = 0x80067420; // type:func
+CdSyncCallback = 0x80067440; // type:func
+CdReadyCallback = 0x80067454; // type:func
+CdControl = 0x80067468; // type:func
+CdControlF = 0x800675A4; // type:func
+CdControlB = 0x800676D8; // type:func
+CdGetSector = 0x80067824; // type:func
+CdGetSector2 = 0x80067844; // type:func
+CdDataCallback = 0x80067864; // type:func
+CdDataSync = 0x80067888; // type:func
+CdPosToInt = 0x800678A8; // type:func
+// LIBCD C_007.OBJ
+StFreeRing = 0x80067928; // type:func
+// LIBETC VSYNC.OBJ
+VSync = 0x800679D8; // type:func
+// LIBGPU EXT.OBJ
+SetDefDrawEnv = 0x80067BE8; // type:func
+SetDefDispEnv = 0x80067C9C; // type:func
+// LIBSPU S_SM.OBJ
+SpuSetMute = 0x80067CD8; // type:func
+// LIBMCRD LIBMCRD.OBJ
+MemCardInit = 0x80067D38; // type:func
+MemCardStart = 0x80067D64; // type:func
+MemCardExist = 0x80067DB4; // type:func
+MemCardAccept = 0x80067FF0; // type:func
+MemCardReadData = 0x8006828C; // type:func
+MemCardWriteData = 0x80068480; // type:func
+MemCardReadFile = 0x80068674; // type:func
+MemCardWriteFile = 0x80068894; // type:func
+MemCardCallback = 0x80068AB4; // type:func
+MemCardSync = 0x80068AC8; // type:func
+MemCardCreateFile = 0x80068BE4; // type:func
+MemCardFormat = 0x80068DEC; // type:func
+MemCardUnformat = 0x80068E78; // type:func
+_make_file_discrpt = 0x80069004; // type:func
+// LIBC2 MEMSET.OBJ
+memset = 0x80069060; // type:func
+// LIBAPI COUNTER.OBJ
+SetRCnt = 0x80069090; // type:func
+GetRCnt = 0x8006912C; // type:func
+StartRCnt = 0x80069164; // type:func
+// LIBETC INTR.OBJ
+ResetCallback = 0x80069194; // type:func
+InterruptCallback = 0x800691C4; // type:func
+DMACallback = 0x800691F4; // type:func
+VSyncCallback = 0x80069224; // type:func
+VSyncCallbacks = 0x80069258; // type:func
+CheckCallback = 0x80069288; // type:func
+SetIntrMask = 0x80069298; // type:func
+// LIBAPI A91.OBJ
+ChangeClearPAD = 0x800697DC; // type:func
+// LIBGTE REG13.OBJ
+SetGeomScreen = 0x800697EC; // type:func
+// LIBGTE MSC00.OBJ
+InitGeom = 0x80069804; // type:func
+// LIBPAD PADENTRY.OBJ
+PadStartCom = 0x8006988C; // type:func
+PadGetState = 0x800698AC; // type:func
+PadInfoAct = 0x8006996C; // type:func
+PadSetActAlign = 0x80069A40; // type:func
+PadSetAct = 0x80069A78; // type:func
+// LIBCD EVENT.OBJ
+CdInit = 0x80069AC8; // type:func
+def_cbsync = 0x80069B94; // type:func
+def_cbready = 0x80069BBC; // type:func
+def_cbread = 0x80069BE4; // type:func
+// LIBPAD PADPORTM.OBJ
+PadInitMtap = 0x80069C18; // type:func
+// LIBAPI A37.OBJ
+ExitCriticalSection = 0x8006A478; // type:func
+// LIBGPU P01.OBJ
+GetClut = 0x8006A488; // type:func
+// LIBGPU P00.OBJ
+GetTPage = 0x8006A4A8; // type:func
+// LIBAPI A36.OBJ
+EnterCriticalSection = 0x8006A4E8; // type:func
+// LIBC2 MEMCPY.OBJ
+memcpy = 0x8006A4F8; // type:func
+// LIBC2 SPRINTF.OBJ
+sprintf = 0x8006A538; // type:func
+// LIBC2 STRLEN.OBJ
+strlen = 0x8006ADB8; // type:func
+// LIBGTE RATAN.OBJ
+ratan2 = 0x8006ADF8; // type:func
+// LIBGPU P33.OBJ
+SetDrawTPage = 0x8006AF78; // type:func
+// LIBC2 PRINTF.OBJ
+printf = 0x8006AFA8; // type:func
+// LIBGPU P06.OBJ
+AddPrim = 0x8006AFE8; // type:func
+// LIBGTE GEO_01.OBJ
+rcos = 0x8006B028; // type:func
+// LIBGTE GEO_00.OBJ
+rsin = 0x8006B0C8; // type:func
+sin_1 = 0x8006B104; // type:func
+// LIBC2 STRCHR.OBJ
+strchr = 0x8006B198; // type:func
+// LIBC2 STRCMP.OBJ
+strcmp = 0x8006B1D8; // type:func
+// LIBC2 STRCPY.OBJ
+strcpy = 0x8006B248; // type:func
+// LIBCD CDREAD.OBJ
+CdRead = 0x8006B7CC; // type:func
+CdReadSync = 0x8006B8CC; // type:func
+// LIBSPU S_STSA.OBJ
+SpuSetTransferStartAddr = 0x8006B994; // type:func
+// LIBSPU S_W.OBJ
+SpuWrite = 0x8006B9F4; // type:func
+// LIBSPU S_ITC.OBJ
+SpuIsTransferCompleted = 0x8006BA54; // type:func
+// LIBAPI C68.OBJ
+FlushCache = 0x8006BB04; // type:func
+// LIBSPU S_M_INIT.OBJ
+SpuInitMalloc = 0x80070914; // type:func
+// LIBSPU S_STM.OBJ
+SpuSetTransferMode = 0x80070974; // type:func
+// LIBSPU S_SRMP.OBJ
+SpuSetReverbModeParam = 0x800709A4; // type:func
+// LIBSPU S_SCA.OBJ
+SpuSetCommonAttr = 0x80070E84; // type:func
+// LIBSPU S_SRD.OBJ
+SpuSetReverbDepth = 0x80071204; // type:func
+// LIBSPU S_SR.OBJ
+SpuSetReverb = 0x80071284; // type:func
+// LIBSPU S_I.OBJ
+SpuInit = 0x80071354; // type:func
+// LIBCD BIOS.OBJ
+CD_sync = 0x800718D0; // type:func
+CD_ready = 0x80071B50; // type:func
+CD_cw = 0x80071E18; // type:func
+CD_flush = 0x80072224; // type:func
+CD_initvol = 0x800722F8; // type:func
+CD_initintr = 0x800723E8; // type:func
+CD_init = 0x80072434; // type:func
+CD_datasync = 0x80072614; // type:func
+CD_getsector = 0x8007277C; // type:func
+CD_getsector2 = 0x8007287C; // type:func
+CD_set_test_parmnum = 0x80072968; // type:func
+// LIBCD C_008.OBJ
+init_ring_status = 0x80072A4C; // type:func
+// LIBCD C_004.OBJ
+data_ready_callback = 0x80072A8C; // type:func
+// LIBDS DSCB.OBJ
+DsReadyCallback = 0x80072B18; // type:func
+DsDataCallback = 0x80072B2C; // type:func
+// LIBAPI C73.OBJ
+GPU_cw = 0x80072B50; // type:func
+// LIBETC VMODE.OBJ
+GetVideoMode = 0x80072B60; // type:func
+// LIBCD C_010.OBJ
+StSetMask = 0x80072B7C; // type:func
+// LIBCD C_002.OBJ
+StClearRing = 0x80072B9C; // type:func
+// LIBETC INTR_VB.OBJ
+startIntrVSync = 0x80072BFC; // type:func
+setIntrVSync = 0x80072CC0; // type:func
+// LIBC2 PUTS.OBJ
+puts = 0x80072D1C; // type:func
+// LIBAPI L10.OBJ
+ChangeClearRCnt = 0x80072D7C; // type:func
+// LIBSPU SPU.OBJ
+_spu_init = 0x80072D8C; // type:func
+_spu_FiDMA = 0x800731CC; // type:func
+_spu_t = 0x80073288; // type:func
+_spu_Fw = 0x80073508; // type:func
+_spu_FsetRXX = 0x8007358C; // type:func
+_spu_FsetRXXa = 0x800735D0; // type:func
+_spu_FsetPCR = 0x80073674; // type:func
+_spu_Fw1ts = 0x8007371C; // type:func
+// LIBMCRD BIOS.OBJ
+funcEvSpIOE = 0x80073784; // type:func
+funcEvSpError = 0x80073798; // type:func
+funcEvSpTimeout = 0x800737AC; // type:func
+funcEvSpNewcard = 0x800737C0; // type:func
+funcEvSpIOEx = 0x800737D4; // type:func
+funcEvSpErrorx = 0x800737E8; // type:func
+funcEvSpTimeoutx = 0x800737FC; // type:func
+funcEvSpNewcardx = 0x80073810; // type:func
+_card_open = 0x80073824; // type:func
+_card_start = 0x80073854; // type:func
+_clr_card_event = 0x80073A30; // type:func
+_get_card_event = 0x80073B38; // type:func
+_get_card_event_x = 0x80073C10; // type:func
+_chk_card_event = 0x80073CE8; // type:func
+_chk_card_event_x = 0x80073D24; // type:func
+// LIBMCRD USERFUNC.OBJ
+UserFuncInit = 0x80073D60; // type:func
+UserFuncOpen = 0x80073D70; // type:func
+UserFuncExecute = 0x80073DEC; // type:func
+UserFuncComplete = 0x80073E58; // type:func
+// LIBCARD C171.OBJ
+_card_info = 0x80073E70; // type:func
+// LIBCARD CARD.OBJ
+_card_clear = 0x80073E80; // type:func
+// LIBCARD C172.OBJ
+_card_load = 0x80073EC0; // type:func
+// LIBC2 STRCAT.OBJ
+strcat = 0x80073ED0; // type:func
+// LIBAPI A50.OBJ
+open = 0x80073F80; // type:func
+// LIBAPI A54.OBJ
+close = 0x80073F90; // type:func
+// LIBAPI A51.OBJ
+lseek = 0x80073FA0; // type:func
+// LIBAPI A52.OBJ
+read = 0x80073FB0; // type:func
+// LIBAPI A53.OBJ
+write = 0x80073FC0; // type:func
+// LIBAPI A65.OBJ
+format = 0x80073FD0; // type:func
+// LIBCARD A80.OBJ
+_new_card = 0x80073FE0; // type:func
+// LIBCARD A78.OBJ
+_card_write = 0x80073FF0; // type:func
+// LIBC2 SETJMP.OBJ
+setjmp = 0x80074000; // type:func
+// LIBAPI A25.OBJ
+HookEntryInt = 0x8007403C; // type:func
+// LIBETC INTR_DMA.OBJ
+startIntrDMA = 0x8007404C; // type:func
+// LIBAPI C114.OBJ
+_96_remove = 0x800742F4; // type:func
+// LIBAPI A23.OBJ
+ReturnFromException = 0x8007430C; // type:func
+// LIBAPI A24.OBJ
+ResetEntryInt = 0x8007431C; // type:func
+// LIBGTE PATCHGTE.OBJ
+_patch_gte = 0x8007432C; // type:func
+// LIBPAD PADMAIN.OBJ
+_padSetVsyncParam = 0x8007440C; // type:func
+_padStartCom = 0x8007460C; // type:func
+_padInitSioMode = 0x800746D8; // type:func
+_padSioRW = 0x80074AD4; // type:func
+_padSioRW2 = 0x80074CAC; // type:func
+_padClrIntSio0 = 0x80074EE4; // type:func
+_padWaitRXready = 0x80074F74; // type:func
+// LIBPAD PADCMD.OBJ
+_padSetAct = 0x80074F9C; // type:func
+_padSendAtLoadInfo = 0x80074FA8; // type:func
+_padRecvAtLoadInfo = 0x8007502C; // type:func
+_padGetActSize = 0x80075178; // type:func
+_padLoadActInfo = 0x800751B0; // type:func
+_padSetActAlign = 0x800755A0; // type:func
+_padCmdParaMode = 0x800756EC; // type:func
+// LIBAPI A07.OBJ
+DeliverEvent = 0x800757A0; // type:func
+// LIBPAD PADSEQM.OBJ
+_padInitMtapSeq = 0x800757B0; // type:func
+_mtapFailAuto = 0x80075D4C; // type:func
+// LIBC2 BZERO.OBJ
+bzero = 0x800760E0; // type:func
+// LIBC2 MEMCHR.OBJ
+memchr = 0x80076110; // type:func
+// LIBC2 MEMMOVE.OBJ
+memmove = 0x80076160; // type:func
+// LIBC2 PRNT.OBJ
+prnt = 0x800761D0; // type:func
+// LIBSPU S_INI.OBJ
+_SpuInit = 0x80076870; // type:func
+SpuStart = 0x80076958; // type:func
+// LIBAPI A11.OBJ
+TestEvent = 0x800769D0; // type:func
+// LIBSPU S_SKOWA.OBJ
+SpuSetKeyOnWithAttr = 0x800769E0; // type:func
+// LIBSPU S_SK.OBJ
+SpuSetKey = 0x80076A10; // type:func
+// LIBSPU SR_GAKS.OBJ
+SpuGetAllKeysStatus = 0x80076BD0; // type:func
+// LIBSPU S_SRV.OBJ
+SpuSetReverbVoice = 0x80076C5C; // type:func
+// LIBSPU S_Q.OBJ
+SpuQuit = 0x800783C0; // type:func
+// LIBSPU S_SVA.OBJ
+SpuSetVoiceAttr = 0x80078440; // type:func
+// LIBAPI A12.OBJ
+EnableEvent = 0x80078A88; // type:func
+// LIBSN _UDIVDI3.OBJ
+__udivdi3 = 0x80078A98; // type:func
+// LIBAPI A08.OBJ
+OpenEvent = 0x80078AB8; // type:func
+// LIBAPI A13.OBJ
+DisableEvent = 0x80078AC8; // type:func
+// LIBAPI A09.OBJ
+CloseEvent = 0x80078AD8; // type:func
+// LIBSPU S_M_UTIL.OBJ
+_SpuIsInAllocateArea_ = 0x80078AE8; // type:func
+// LIBSPU S_SRA.OBJ
+_spu_setReverbAttr = 0x80078B78; // type:func
+// LIBSPU S_CRWA.OBJ
+SpuClearReverbWorkArea = 0x80079048; // type:func
+// LIBC2 PUTCHAR.OBJ
+_putchar = 0x800791E8; // type:func
+_putchar_flash = 0x800792E4; // type:func
+// LIBCARD INIT.OBJ
+InitCARD = 0x80079320; // type:func
+StartCARD = 0x8007938C; // type:func
+// LIBCARD C112.OBJ
+_bu_init = 0x800793C4; // type:func
+// LIBAPI L03.OBJ
+SysDeqIntRP = 0x800793D4; // type:func
+// LIBAPI L02.OBJ
+SysEnqIntRP = 0x800793E4; // type:func
+// LIBPAD WAITRC2.OBJ
+setRC2wait = 0x800793F4; // type:func
+chkRC2wait = 0x80079414; // type:func
+// LIBSPU S_DCB.OBJ
+_SpuDataCallback = 0x80079AA4; // type:func
+// LIBSPU S_SAV.OBJ
+_SpuSetAnyVoice = 0x80079AD4; // type:func
+// LIBSPU S_N2P.OBJ
+_spu_note2pitch = 0x80079D94; // type:func
+// LIBSN _UDIVMOD.OBJ
+__udivmoddi4 = 0x80079E64; // type:func
+// LIBAPI A10.OBJ
+WaitEvent = 0x8007A474; // type:func
+// LIBAPI PAD.OBJ
+ReadInitPadFlag = 0x8007A484; // type:func
+// LIBCARD A74.OBJ
+InitCARD2 = 0x8007A494; // type:func
+// LIBCARD PATCH.OBJ
+_patch_card = 0x8007A53C; // type:func
+_patch_card2 = 0x8007A5D0; // type:func
+_copy_memcard_patch = 0x8007A640; // type:func
+// LIBCARD A75.OBJ
+StartCARD2 = 0x8007A674; // type:func
