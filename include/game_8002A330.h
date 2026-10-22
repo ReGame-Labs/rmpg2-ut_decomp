@@ -236,7 +236,8 @@ struct UnkStruct1 {  /* provisional: fields as the code reaches them */
     s16 unk_36;
     u8 pad_38[0xc];
     s32 unk_44;
-    u8 pad_48[0x10];
+    u8 pad_48[0xE];
+    s16 unk_56;
     u16 unk_58;
     u8 pad_5A[0x2];
     void *unk_5C;
@@ -256,6 +257,12 @@ struct UnkStruct1 {  /* provisional: fields as the code reaches them */
     s32 unk_90;
     s32 unk_94;
     struct UnkStruct4 *unk_98;
+    u8 pad_9C[0xA4];
+    s16 unk_140;
+    u8 pad_142[0x2];
+    s16 unk_144;
+    u8 pad_146[0x40];
+    u16 unk_186;
 };
 
 struct UnkStruct2 {  /* provisional: fields as the code reaches them */
@@ -346,7 +353,7 @@ void func_8002D144(s32 arg0, UnkStruct1 *arg1);
 s32 func_8002D2CC(s32 arg0, UnkStruct1 *arg1);
 s32 * func_8002E658(s32);
 void func_8002E5F4(s32 arg0);
-void func_8003C894(s32 *);
+void func_8003C894(void **);
 void func_8002E614(s32 arg0);
 void func_8002ED28(void);
 void func_80030698(s32, s32, void *);
