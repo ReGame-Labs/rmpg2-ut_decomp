@@ -32,7 +32,8 @@ typedef union {
 struct Entity;
 
 typedef struct Body {
-    /* 0x00 */ u8 unk_00[0xC];
+    /* 0x00 */ struct Body *unk_00;          /* the next in the sprite list (D_801E28C0 is the sentinel head) */
+    /* 0x04 */ u8 unk_04[0x8];
     /* 0x0C */ s32 unk_0C;
     /* 0x10 */ s32 unk_10;
     /* 0x14 */ s16 unk_14;
@@ -40,7 +41,9 @@ typedef struct Body {
     /* 0x18 */ Fixed32 unk_18;
     /* 0x1C */ u8 unk_1C[6];
     /* 0x22 */ u16 unk_22;
-    /* 0x24 */ u8 unk_24[0xC];
+    /* 0x24 */ u8 unk_24[0x4];
+    /* 0x28 */ u32 unk_28;
+    /* 0x2C */ u8 unk_2C[0x4];
     /* 0x30 */ u16 unk_30;
     /* 0x32 */ u16 unk_32;
     /* 0x34 */ u8 unk_34[0x10];
@@ -49,7 +52,11 @@ typedef struct Body {
     /* 0x5C */ s32 *unk_5C;
     /* 0x60 */ u8 unk_60[0xC];
     /* 0x6C */ u16 unk_6C;
-    /* 0x6E */ u8 unk_6E[0x12];
+    /* 0x6E */ u8 unk_6E[0x2];
+    /* 0x70 */ u16 unk_70;      /* an id (0x790 + the monster's slot for the status sprites) */
+    /* 0x72 */ u8 unk_72[0x6];
+    /* 0x78 */ u32 unk_78;      /* a colour, 0x808080 = neutral */
+    /* 0x7C */ u8 unk_7C[0x4];
     /* 0x80 */ s16 unk_80;
     /* 0x82 */ u8 unk_82[0xE];
     /* 0x90 */ struct Entity *unk_90;        /* the Entity this body belongs to */
@@ -135,7 +142,9 @@ typedef struct Entity {
     /* 0x05E */ s16 unk_05E;
     /* 0x060 */ u8 unk_060[0x8];
     /* 0x068 */ Body *unk_068;
-    /* 0x06C */ u8 unk_06C[0x5C];
+    /* 0x06C */ Body *unk_06C;
+    /* 0x070 */ Body *unk_070;
+    /* 0x074 */ u8 unk_074[0x54];
     /* 0x0C8 */ u16 unk_0C8;
     /* 0x0CA */ u8 unk_0CA[2];
     /* 0x0CC */ u16 unk_0CC;
