@@ -11,7 +11,7 @@ assembled from asm/main/. Scores come from natural m2c C only, never from permut
 Needs a split tree (scripts/build.sh); reads every game unit in asm/main/. Work files go to build/compiler_id/; the results are
 build/compiler_id/results.csv and a summary on stdout.
 
-  tools/venv/bin/python tools/compiler_id.py [--max N] [--min-insns N] [--max-insns N] [-j N]
+  tools/venv/bin/python tools/compiler_id.py [--max N] [--min-insns N] [--max-insns N] [--no-exclude] [-j N]
   tools/venv/bin/python tools/compiler_id.py --target overmove --rodata-start 0x80xxxxxx --rodata-end 0x80xxxxxx  # an overlay
 
 Adapted from gascarcella/dw2003recomp's tools/compiler_id.py (MIT; docs/THIRD_PARTY.md).
@@ -123,6 +123,9 @@ def main():
     ap.add_argument("--max", type=int, default=150, help="number of functions (evenly spread by size)")
     ap.add_argument("--min-insns", type=int, default=4)
     ap.add_argument("--max-insns", type=int, default=150)
+    ap.add_argument("--no-exclude", action="store_true",
+                    help="keep functions with jump tables or .rodata references (excluded by default: m2c drafts "
+                         "them with the table's cases out of order or without the constants)")
     ap.add_argument("-j", type=int, default=os.cpu_count())
     ap.add_argument("--target", default="main", help="splat target: asm/<target>/ (default main)")
     ap.add_argument("--rodata-end", type=lambda x: int(x, 0),
@@ -141,8 +144,11 @@ def main():
     print(f"{len(funcs)} functions in {len(units)} game units")
     excl = defaultdict(int)
     cands = []
+    # Pieces spimdisasm cut at a switch case are never whole functions; the jump-table and .rodata users are left
+    # out by default (--no-exclude keeps them).
+    exclusions = ("split_case",) if args.no_exclude else ("split_case", "jtbl", "rodata")
     for f in funcs:
-        for k in ("split_case", "jtbl", "rodata"):
+        for k in exclusions:
             if f[k]:
                 excl[k] += 1
                 break

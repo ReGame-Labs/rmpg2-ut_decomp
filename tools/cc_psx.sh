@@ -3,8 +3,8 @@
 # Used by build.ninja (configure.py), decomp-permuter and experiments, so all compile the same way.
 #
 # Usage: tools/cc_psx.sh [-V GCC_VERSION] [-G N] [-MD DEPFILE] [--data-in-c] [-I DIR|-D DEF ...] input.c -o output.o
-#   -V   old-gcc version in tools/gcc/ (default: configure.py's DEFAULT_CC, 2.8.1 until the compiler-ID experiment
-#        settles it: docs/TOOLCHAIN.md); maspsx emulates the ASPSX of the same Psy-Q
+#   -V   old-gcc version in tools/gcc/ (default: configure.py's DEFAULT_CC, 2.8.1: docs/TOOLCHAIN.md "Compiler");
+#        maspsx emulates the ASPSX of the same Psy-Q
 #   -G   small-data size for cc1 and maspsx (default 0)
 #   -MD  write a make-style dependency file (headers and .include'd asm)
 #   --data-in-c  the file defines its own .bss/.sbss (configure.py DATA_IN_C): no --use-comm-section
@@ -38,7 +38,7 @@ done
 
 # GCC version -> ASPSX version of the same Psy-Q release (decomp.me's table). 2.8.1 pairs with 2.80 rather than 2.79
 # so that maspsx can take the address of a $gp variable (`addiu rX, $gp, %gp_rel(x)`, gp_allow_la); it changes
-# nothing else. Revisit when docs/TOOLCHAIN.md settles the compiler.
+# nothing else, and the executable makes no $gp-relative access anyway (docs/TOOLCHAIN.md "Compiler").
 case "$ver" in
     2.7.2) aspsx=2.56 ;; 2.8.0) aspsx=2.77 ;; 2.8.1) aspsx=2.80 ;;
     2.91.66) aspsx=2.81 ;; 2.95.2) aspsx=2.86 ;;

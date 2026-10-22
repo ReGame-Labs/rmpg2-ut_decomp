@@ -1,8 +1,8 @@
 # Matching functions
 
 The practical guide to turning a function's assembly into C that rebuilds byte-identical. The compiler evidence is
-in [`TOOLCHAIN.md`](TOOLCHAIN.md); the C patterns at the end were found on GCC 2.8.1 code in another PS1 project of
-the same era ([`THIRD_PARTY.md`](THIRD_PARTY.md)) and hold here if the compiler identification confirms 2.8.x.
+in [`TOOLCHAIN.md`](TOOLCHAIN.md): GCC 2.8.1 `-O2 -G0`, the same compiler the C patterns at the end were found on,
+in another PS1 project of the same era ([`THIRD_PARTY.md`](THIRD_PARTY.md)), so they apply here as they are.
 
 ## Setup
 
