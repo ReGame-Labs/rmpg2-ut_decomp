@@ -25,7 +25,7 @@ START, END = "<!-- progress:start -->", "<!-- progress:end -->"
 WIDTH = 20
 
 # Display names and order of the targets (objdiff unit names are "<target>/<unit>").
-OVERLAYS: list[str] = []  # "overattr", "overmove" once they are targets
+OVERLAYS = ["overattr", "overmove"]
 
 
 def bar(frac: float) -> str:

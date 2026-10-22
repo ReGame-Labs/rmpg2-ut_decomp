@@ -49,9 +49,10 @@ OVERLAY_BASE, OVERLAY_END = 0x80097EA4, 0x800AA240
 
 TARGETS = [
     Target("main", "config/main.yaml", "build/SLUS_007.42", "config/SLUS_007.42.sha1"),
-    # The overlays OVERLAYS/OVERATTR.BIN and OVERLAYS/OVERMOVE.BIN get a Target each once they are split
-    # (docs/DISC_LAYOUT.md "Overlays"): Target("overmove", "config/overmove.yaml", "build/OVERMOVE.BIN",
-    # "config/OVERMOVE.BIN.sha1", (EXE_SYMS,)).
+    # The overlays (docs/DISC_LAYOUT.md "Overlays"): headerless images loaded at OVERLAY_BASE, linked against the
+    # executable's symbols (EXE_SYMS: the calls into the executable resolve to its own definitions).
+    Target("overattr", "config/overattr.yaml", "build/OVERATTR.BIN", "config/OVERATTR.BIN.sha1", (EXE_SYMS,)),
+    Target("overmove", "config/overmove.yaml", "build/OVERMOVE.BIN", "config/OVERMOVE.BIN.sha1", (EXE_SYMS,)),
 ]
 
 # Compiler per C file; anything not listed uses DEFAULT_CC (tools/cc_psx.sh picks the matching ASPSX version for
@@ -87,7 +88,7 @@ CC_INCLUDES = "-Iinclude -Iinclude/asm_generated -I."
 
 # Progress categories for objdiff: "game" (the game's code) and "sdk" (Psy-Q library code: crt0 and the library
 # units under psyq/, excluded from progress). Unit names are <target>/<path under asm/<t>/ or src/<t>/>.
-SDK_UNIT_PREFIXES = {"main": ("crt0", "psyq")}
+SDK_UNIT_PREFIXES = {"main": ("crt0", "psyq"), "overattr": ("psyq",), "overmove": ("psyq",)}
 
 
 # The executable's names for the overlays' splat configs: config/symbol_addrs.txt with `absolute:True` added,

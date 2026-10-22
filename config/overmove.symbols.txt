@@ -1,0 +1,13 @@
+// Names for the overlay OVERLAYS/OVERMOVE.BIN (splat's symbol_addrs format, as config/symbol_addrs.txt). The
+// executable's names are not repeated here: configure.py passes them as build/exe_symbols.txt.
+
+// Psy-Q libpress (tools/psyq_match.py --raw --base 0x80097EA4 --functions --yaml config/overmove.yaml; the
+// static helpers after DecDCToutCallback keep splat's names: the database labels them text_*, not as functions).
+// LIBPRESS.LIB/VLC.OBJ (DecDCTvlcSize dropped by the linker)
+DecDCTvlc = 0x80097EF8; // type:func  4.3-4.7
+// LIBPRESS.LIB/LIBPRESS.OBJ (DecDCTGetEnv, DecDCTPutEnv, DecDCTBufSize, DecDCTinSync, DecDCToutSync, DecDCTinCallback dropped)
+DecDCTReset = 0x80098248; // type:func  4.1-4.7
+DecDCTin = 0x8009827C; // type:func  3.3-4.7
+DecDCTout = 0x800982F8; // type:func  3.3-4.7, the 32 bytes between DecDCTin and DecDCToutCallback (DecDCTout's size in the library, DecDCTinSync and DecDCToutSync are 60)
+DecDCToutCallback = 0x80098318; // type:func  4.2-4.7, its static helpers follow it to 0x8009870C
+MDEC_status = 0x80098670; // type:func  2.6-4.7

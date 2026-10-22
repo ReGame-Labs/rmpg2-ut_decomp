@@ -1,0 +1,2 @@
+// Names for the overlay OVERLAYS/OVERATTR.BIN (splat's symbol_addrs format, as config/symbol_addrs.txt). The
+// executable's names are not repeated here: configure.py passes them as build/exe_symbols.txt.

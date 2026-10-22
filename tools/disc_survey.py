@@ -5,7 +5,7 @@ table against the disc, the files by extension and directory, and the overlays' 
 Reproduces the findings in docs/DISC_LAYOUT.md. Run after scripts/extract.sh:
     tools/venv/bin/python tools/disc_survey.py [--checksums]
 
---checksums rewrites config/SLUS_007.42.sha1 and config/overlays.sha1.
+--checksums rewrites config/SLUS_007.42.sha1 and config/<overlay>.sha1.
 Adapted from gascarcella/dw2003recomp's tools/disc_survey.py (MIT; docs/THIRD_PARTY.md).
 """
 import argparse
@@ -210,9 +210,11 @@ def check_overlays():
 def write_checksums():
     cfg = ROOT / "config"
     (cfg / "SLUS_007.42.sha1").write_text(f"{hashlib.sha1(EXE.read_bytes()).hexdigest()}  SLUS_007.42\n")
-    lines = [f"{hashlib.sha1(p.read_bytes()).hexdigest()}  OVERLAYS/{p.name}" for p in sorted(OVERLAYS.glob("*.BIN"))]
-    (cfg / "overlays.sha1").write_text("\n".join(lines) + "\n")
-    print(f"== wrote config/SLUS_007.42.sha1 and config/overlays.sha1 ({len(lines)} overlays)")
+    names = []
+    for p in sorted(OVERLAYS.glob("*.BIN")):
+        (cfg / f"{p.name}.sha1").write_text(f"{hashlib.sha1(p.read_bytes()).hexdigest()}  {p.name}\n")
+        names.append(p.name)
+    print(f"== wrote config/SLUS_007.42.sha1 and config/<overlay>.sha1 ({', '.join(names)})")
 
 
 def main():
