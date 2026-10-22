@@ -26,7 +26,7 @@ Every file already rebuilds byte-identical from split assembly; the work is turn
 | [`docs/THIRD_PARTY.md`](docs/THIRD_PARTY.md) | Everything borrowed from other projects |
 | [`tests/README.md`](tests/README.md) | The checks |
 
-Problems and planned work are in the [issues](https://github.com/ReGame-Labs/rmpg2-wt/issues).
+Problems and planned work are in the [issues](https://github.com/ReGame-Labs/rmpg2-ut_decomp/issues).
 
 ## Contributing
 

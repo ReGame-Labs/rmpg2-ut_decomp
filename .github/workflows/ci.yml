@@ -1,8 +1,8 @@
 # CI: the checks of scripts/test.sh (tests/README.md), on pull requests (not drafts) and pushes to main, not on
 # changes that touch only documentation. A newer push to a pull request cancels the run of the older one.
 #
-# With the maintainers' secret DEPENDENCIES_DEPLOY_KEY (a read-only deploy key of the private checkout
-# <owner>/rmpg2-wt_dependencies, whose gamedata/disc holds the executable and the overlays) the `game` job rebuilds
+# With the maintainers' secret PRIVATEDATA_DEPLOY_KEY (a read-only deploy key of the private checkout
+# <owner>/rmpg2-ut_privatedata, whose gamedata/disc holds the executable and the overlays) the `game` job rebuilds
 # every game file byte-identical from scratch, writes the objdiff report and uploads it to decmp.dev (which comments
 # how a pull request changes progress). Fork pull requests get no secrets, so they get the disc-free part only: the
 # scripts parse, the Python compiles, the workaround census, and the toolchain is built and smoke-tested.
@@ -72,7 +72,7 @@ jobs:
         with:
           tools: binutils venv cmake mkpsxiso gcc objdiff ext
           cache: game
-          deploy-key: ${{ secrets.DEPENDENCIES_DEPLOY_KEY }}
+          deploy-key: ${{ secrets.PRIVATEDATA_DEPLOY_KEY }}
 
       - name: Toolchain smoke test
         run: scripts/check_toolchain.sh
@@ -85,7 +85,7 @@ jobs:
         if: env.HAVE_GAME_FILES == 'true'
         run: tools/venv/bin/python tools/progress.py
 
-      # The report to decmp.dev: the project page https://decmp.dev/ReGame-Labs/rmpg2-wt. The uploader is decmp's
+      # The report to decmp.dev: the project page https://decmp.dev/ReGame-Labs/rmpg2-ut_decomp. The uploader is decmp's
       # own script (decmp/upload-action's script build), pinned by its SHA-256 rather than taken as an action: the
       # action's v1 tag shipped a malformed action.yml that failed the job at setup, and a hash pin cannot move.
       # name and platform count on the first upload only; afterwards they are managed on decmp.dev.

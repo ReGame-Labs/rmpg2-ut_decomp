@@ -19,8 +19,8 @@ is in the [README](../README.md).
 ## What you can work on
 
 - **Open issues**, in particular those labelled
-  [`good first issue`](https://github.com/ReGame-Labs/rmpg2-wt/labels/good%20first%20issue) or
-  [`help wanted`](https://github.com/ReGame-Labs/rmpg2-wt/labels/help%20wanted).
+  [`good first issue`](https://github.com/ReGame-Labs/rmpg2-ut_decomp/labels/good%20first%20issue) or
+  [`help wanted`](https://github.com/ReGame-Labs/rmpg2-ut_decomp/labels/help%20wanted).
 - **Matching functions** ([`PROGRESS.md`](PROGRESS.md); `INCLUDE_ASM` in `src/`).
 - **Names and types:** most functions and data are still `func_…`/`D_…`.
 - **File formats** (`.CMB`, `.SPB`, `.SPT`, `.IXA`, ...): documenting one helps name the code that reads it.
@@ -76,5 +76,5 @@ scripts/ci_local.sh --check # the same in CI's Docker image, if you have Docker
 
 ## Reporting issues
 
-Use the [issue templates](https://github.com/ReGame-Labs/rmpg2-wt/issues/new/choose). Never attach game files or a
+Use the [issue templates](https://github.com/ReGame-Labs/rmpg2-ut_decomp/issues/new/choose). Never attach game files or a
 disc image.

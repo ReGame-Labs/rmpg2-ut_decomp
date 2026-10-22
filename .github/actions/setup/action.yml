@@ -13,7 +13,7 @@ inputs:
     description: "The tool cache's name (the job's)"
     required: true
   deploy-key:
-    description: "The private checkout's read-only deploy key (secrets.DEPENDENCIES_DEPLOY_KEY; empty on fork pull requests)"
+    description: "The private checkout's read-only deploy key (secrets.PRIVATEDATA_DEPLOY_KEY; empty on fork pull requests)"
     default: ""
 runs:
   using: composite
@@ -22,16 +22,16 @@ runs:
       shell: bash
       run: |
         echo "RMPG2_UBUNTU_MIRROR=http://azure.archive.ubuntu.com/ubuntu" >> "$GITHUB_ENV"
-        echo "RMPG2_PRIVATE=$GITHUB_WORKSPACE/rmpg2-wt_dependencies" >> "$GITHUB_ENV"
+        echo "RMPG2_PRIVATE=$GITHUB_WORKSPACE/rmpg2-ut_privatedata" >> "$GITHUB_ENV"
 
     # The private checkout (maintainers only): the executable and the overlays the build reads, nothing else.
     - name: Private checkout
       if: inputs.deploy-key != ''
       uses: actions/checkout@v5
       with:
-        repository: ${{ github.repository_owner }}/rmpg2-wt_dependencies
+        repository: ${{ github.repository_owner }}/rmpg2-ut_privatedata
         ssh-key: ${{ inputs.deploy-key }}
-        path: rmpg2-wt_dependencies
+        path: rmpg2-ut_privatedata
         sparse-checkout: gamedata/disc
         persist-credentials: false
 
