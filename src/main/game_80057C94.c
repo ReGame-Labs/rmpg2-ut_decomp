@@ -300,7 +300,46 @@ void func_80058264(Entity *e) {
     func_80057B94(e, D_800845B4);
 }
 
+#ifdef NON_MATCHING
+/* 87.8%: register and load order around the direction branches */
+void func_80058288(Entity *e) {
+    Unk54728 *u;
+    s32 *table;
+    Body *b;
+    u16 x;
+    u16 dir;
+    u16 v;
+
+    u = func_80054728(e->unk_1B2);
+    b = D_800AA268.p;
+    table = D_800845EC;
+    x = b->unk_16;
+    if (u != NULL) {
+        dir = e->unk_1B0;
+        if (dir == 2) {
+            v = u->unk_0E;
+            if (b->unk_22 & 0x10) {
+                x = v + 8;
+            } else {
+                x = v - 4;
+                table = D_800850F8;
+            }
+        } else if (dir == 1) {
+            v = u->unk_04;
+            if (b->unk_22 & 0x10) {
+                x = v + 4;
+                table = D_800850F8;
+            } else {
+                x = v - 8;
+            }
+        }
+    }
+    D_800AA268.p->unk_16 = x;
+    func_80057B94(e, table);
+}
+#else
 INCLUDE_ASM("asm/main/nonmatchings/game_80057C94", func_80058288);
+#endif
 
 void func_8005834C(Entity *e) {
     func_80057B94(e, D_80084640);
@@ -687,7 +726,27 @@ void func_80059180(Entity *e) {
     func_80057B94(e, D_80084DCC);
 }
 
+#ifdef NON_MATCHING
+/* 91.5%: the branch layout after the direction range check */
+void func_800591F8(Entity *e, s32 *table) {
+    u16 dir;
+
+    dir = e->unk_1B0;
+    if (dir != 3) {
+        if (((dir - 1) & 0xFFFF) < 2) {
+            func_80059270(e);
+            return;
+        }
+        if (D_800AA268.p->unk_18.h.i != 0xE1) {
+            func_80057B94(e, D_80084E20);
+            return;
+        }
+    }
+    func_80059294(e);
+}
+#else
 INCLUDE_ASM("asm/main/nonmatchings/game_80057C94", func_800591F8);
+#endif
 
 void func_80059270(Entity *e) {
     func_80057B94(e, D_80084E3C);
@@ -823,7 +882,24 @@ INCLUDE_ASM("asm/main/nonmatchings/game_80057C94", func_80059710);
 
 INCLUDE_ASM("asm/main/nonmatchings/game_80057C94", func_800598F4);
 
+#ifdef NON_MATCHING
+/* 97.2%: the state block's base lands in a2 instead of a1 */
+void func_80059B00(void) {
+    Entity *e;
+    s32 v;
+
+    e = D_800AA248.unk_20->unk_90;
+    if (e->unk_168 == 7) {
+        v = 0xFFFA0000;
+    } else {
+        v = 0x50000;
+    }
+    e->unk_100 = v | 0x8000;
+    D_800AA248.unk_20->unk_0C = v | 0x8000;
+}
+#else
 INCLUDE_ASM("asm/main/nonmatchings/game_80057C94", func_80059B00);
+#endif
 
 void func_80059B40(void) {
     Entity *e;
@@ -853,7 +929,34 @@ void func_80059C00(void) {
     func_8001F724(0x20);
 }
 
+#ifdef NON_MATCHING
+/* 99.1%: the state compares are made on a u16-truncated copy (andi) in the original; a local for it makes GCC hoist a constant out of the loop */
+void func_80059C2C(void) {
+    Body *saved;
+    Unk1D85C8 *ai;
+    u16 n;
+
+    saved = D_800AA268.p;
+    func_8001F7CC(0xFF, 0x21);
+    func_80029118(9, 0x10);
+    if (D_801D870C != 0) {
+        ai = D_801D85C8;
+        n = 5;
+        do {
+            if (ai->unk_2E == 0 && ((u32) (ai->unk_08 - 2) < 2U || ai->unk_08 == 0xA || ai->unk_08 == 0xB || ai->unk_08 == 4 || (u32) (ai->unk_08 - 0x15) < 5U)) {
+                ai->unk_0C = 1;
+                ai->unk_08 = 0x33;
+                ai->unk_2E = 0;
+                func_8003D71C(ai);
+            }
+            ai++;
+        } while (--n != 0);
+    }
+    D_800AA268.p = saved;
+}
+#else
 INCLUDE_ASM("asm/main/nonmatchings/game_80057C94", func_80059C2C);
+#endif
 
 void func_80059D2C(void) {
     Body *saved;

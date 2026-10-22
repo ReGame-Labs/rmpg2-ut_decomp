@@ -250,7 +250,17 @@ void func_8005E3CC(void) {
 
 INCLUDE_ASM("asm/main/nonmatchings/game_8005D198", func_8005E4E4);
 
+#ifdef NON_MATCHING
+/* 86.5%: the result is set to 1 before the last test in the original */
+s32 func_8005E5C8(void) {
+    if (D_800AA2DC <= 0 || (D_800AA2DC >= 3 && D_800AA2DC != 4) || D_801FB46C == 0) {
+        return 0;
+    }
+    return 1;
+}
+#else
 INCLUDE_ASM("asm/main/nonmatchings/game_8005D198", func_8005E5C8);
+#endif
 
 INCLUDE_ASM("asm/main/nonmatchings/game_8005D198", func_8005E60C);
 
@@ -283,7 +293,52 @@ INCLUDE_ASM("asm/main/nonmatchings/game_8005D198", func_8005FEF4);
 
 INCLUDE_ASM("asm/main/nonmatchings/game_8005D198", func_8006036C);
 
+#ifdef NON_MATCHING
+/* 87.4%: the sprite and the hit pointer get each other's registers (a0/t0), and the colour load is scheduled later */
+void func_800603FC(s32 *id, s32 dx, s32 dy, s32 x, s32 y) {
+    Body *s;
+    Body *hit;
+    u32 c;
+    u16 nx;
+    u16 ny;
+    s32 packed;
+    Body *head;
+
+    if (*id != 0) {
+        head = &D_801E28C0;
+        s = head->unk_00;
+        hit = NULL;
+        if (s != head) {
+            do {
+            if (s->unk_70 == *id) {
+                c = s->unk_78;
+                ny = s->unk_18.h.i + dy;
+                s->unk_18.h.i = ny;
+                packed = s->unk_28 | (ny << 0x10);
+                s->unk_28 = packed;
+                nx = s->unk_16 + dx;
+                s->unk_16 = nx;
+                s->unk_28 = (packed & 0xFFFF0000) | nx;
+                if (c <= 0x80807FU) {
+                    s->unk_78 = c + 0x40404;
+                } else if (c > 0x808080U) {
+                    s->unk_78 = 0x808080;
+                }
+                hit = s;
+            }
+            s = s->unk_00;
+            } while (s != head);
+        }
+        if (hit != NULL && hit->unk_16 == x && hit->unk_18.h.i == y) {
+            func_80060A7C(*id, 0x808080, 1);
+            func_8001F724(5);
+            *id = 0;
+        }
+    }
+}
+#else
 INCLUDE_ASM("asm/main/nonmatchings/game_8005D198", func_800603FC);
+#endif
 
 INCLUDE_ASM("asm/main/nonmatchings/game_8005D198", func_80060524);
 
@@ -338,4 +393,44 @@ INCLUDE_ASM("asm/main/nonmatchings/game_8005D198", func_80060BA8);
 
 INCLUDE_ASM("asm/main/nonmatchings/game_8005D198", func_80060D44);
 
+#ifdef NON_MATCHING
+/* 96.6%: the saved body pointer gets s2 in the original, s5 here (the hoisted address constants take s3-s5) */
+void func_80060DCC(void) {
+    Body *saved;
+    Unk800AA248Node *node;
+
+    saved = D_800AA268.p;
+    switch (D_801FA960) {
+    case 0x18:
+    case 0x31:
+    case 0x4A:
+    case 0x63:
+        if (D_801FA890 != 0) {
+            if (!(D_8007BD78.unk_00 & 0x800)) {
+                node = func_8001D110();
+                node->unk_28 = &D_80016A84;
+                node->unk_10.h.i = 0xC8;
+                node->unk_14.h.i = 0xFA;
+                node->unk_20 = 0x7000;
+                node->unk_0C = 0x7D0;
+                node->unk_00 = D_80016A84;
+                node->unk_06 |= 0x20;
+                D_800AA248.unk_20 = func_8001DCB4();
+                D_801FA890 += 0x28;
+                func_80060A7C(D_8007BD78.unk_54, 0x40404, 1);
+                D_8007BD78.unk_54 = 0x7D0;
+                D_800AA248.unk_20 = saved;
+                D_8007BD78.unk_00 |= 0x800;
+                return;
+            }
+            if (D_8007BD78.unk_54 != 0) {
+                func_800603FC(&D_8007BD78.unk_54, 0, -5, 0xC8, 0x3C);
+            }
+        }
+        break;
+    }
+    D_800AA268.p = saved;
+}
+#else
 INCLUDE_ASM("asm/main/nonmatchings/game_8005D198", func_80060DCC);
+#endif

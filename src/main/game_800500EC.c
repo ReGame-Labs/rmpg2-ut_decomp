@@ -423,7 +423,43 @@ INCLUDE_ASM("asm/main/nonmatchings/game_800500EC", func_80051A80);
 
 INCLUDE_ASM("asm/main/nonmatchings/game_800500EC", func_80051B38);
 
+#ifdef NON_MATCHING
+/* 84.3%: the two state checks after func_80056AC8/func_80056840 are laid out differently (the original falls through to func_80051B38 from the second) */
+void func_80051C9C(Entity *e) {
+    void *p;
+    u16 state;
+
+    p = e->unk_16C;
+    if (p != NULL) {
+        func_8001E4B0(p);
+        e->unk_16C = NULL;
+    }
+    e->unk_1B0 = 0;
+    e->unk_1B2 = 0;
+    D_800AA248.unk_24 = e->unk_0CC;
+    if ((u32) (e->unk_0CC - 4) < 3U) {
+        if (e->unk_168 == 7) {
+            func_80056AC8(e);
+            D_800AA248.unk_14 = e->unk_05A;
+            state = e->unk_05A;
+            if (state != 2 && state != 0x4E) {
+                func_800531C0(e);
+                return;
+            }
+        } else {
+            func_80056840(e);
+            state = e->unk_05A;
+            if (state != 2 && state != 0x4E) {
+                func_800531C0(e);
+                return;
+            }
+        }
+    }
+    func_80051B38(e);
+}
+#else
 INCLUDE_ASM("asm/main/nonmatchings/game_800500EC", func_80051C9C);
+#endif
 
 INCLUDE_ASM("asm/main/nonmatchings/game_800500EC", func_80051D8C);
 
@@ -828,9 +864,103 @@ void func_80054A18(Entity *e) {
     func_800578E0(e, func_80054728(e->unk_1B2));
 }
 
-INCLUDE_ASM("asm/main/nonmatchings/game_800500EC", func_80054A50);
+#ifdef NON_MATCHING
+/* 90.5%: as func_80054BA4 (its twin for the other state) */
+void func_80054A50(Entity *e) {
+    Unk54728 *u;
+    Unk800AA248 *g;
+    s32 limit;
+    u16 kind;
 
+    u = func_80054728(e->unk_1B2);
+    if (!func_80057AD8(e, u, 2)) {
+        func_80056F38(e, u);
+        func_800578E0(e, u);
+        g = &D_800AA248;
+        if (g->unk_14 == 5) {
+            g->unk_0C = e->unk_0F4;
+            g->unk_10 = g->unk_20->unk_18.h.i;
+            if ((u32) (g->unk_24 - 4) < 3U) {
+                if (func_800573C8(e, u) != 1) {
+                    func_8005640C(e, u);
+                    return;
+                }
+            } else {
+                kind = u->unk_08;
+                limit = 0xE3;
+                if (kind != 0x300) {
+                    limit = 0xDB;
+                    if (kind != 0x200) {
+                        limit = 0xD3;
+                    }
+                }
+                g = &D_800AA248;
+                if (g->unk_10 >= limit) {
+                    func_8005618C(e, u);
+                    return;
+                }
+                if (func_800574EC(e, u) != 1) {
+                    func_80054CF8(e, u);
+                    return;
+                }
+            }
+            e->unk_104 = 0;
+            g->unk_20->unk_10 = 0;
+        }
+    }
+}
+#else
+INCLUDE_ASM("asm/main/nonmatchings/game_800500EC", func_80054A50);
+#endif
+
+#ifdef NON_MATCHING
+/* 90.5%: the original keeps the state block's base (&D_800AA248) in a saved register across the calls and recomputes it in the kind branch; GCC here uses a temporary */
+void func_80054BA4(Entity *e) {
+    Unk54728 *u;
+    Unk800AA248 *g;
+    s32 limit;
+    u16 kind;
+
+    u = func_80054728(e->unk_1B2);
+    if (!func_80057AD8(e, u, 1)) {
+        func_80056F38(e, u);
+        func_800578E0(e, u);
+        g = &D_800AA248;
+        if (g->unk_14 == 5) {
+            g->unk_0C = e->unk_0F4;
+            g->unk_10 = g->unk_20->unk_18.h.i;
+            if ((u32) (g->unk_24 - 4) < 3U) {
+                if (func_800576B8(e, u) != 1) {
+                    func_8005640C(e, u);
+                    return;
+                }
+            } else {
+                kind = u->unk_08;
+                limit = 0xE3;
+                if (kind != 0x300) {
+                    limit = 0xDB;
+                    if (kind != 0x200) {
+                        limit = 0xD3;
+                    }
+                }
+                g = &D_800AA248;
+                if (g->unk_10 >= limit) {
+                    func_8005618C(e, u);
+                    return;
+                }
+                if (func_800577DC(e, u) != 1) {
+                    func_80054CF8(e, u);
+                    return;
+                }
+            }
+            e->unk_104 = 0;
+            g->unk_20->unk_10 = 0;
+        }
+    }
+}
+#else
 INCLUDE_ASM("asm/main/nonmatchings/game_800500EC", func_80054BA4);
+#endif
 
 INCLUDE_ASM("asm/main/nonmatchings/game_800500EC", func_80054CF8);
 
@@ -1238,7 +1368,15 @@ INCLUDE_ASM("asm/main/nonmatchings/game_800500EC", func_80057B94);
 
 INCLUDE_ASM("asm/main/nonmatchings/game_800500EC", func_80057BD4);
 
+#ifdef NON_MATCHING
+/* 99.5%: the original steps the table pointer in a2; GCC here moves it to a1 */
+void func_80057C38(s32 n, u16 *p, s32 *table) {
+    table += (u16) (*p - 1);
+    func_8004C2B8(*func_8001B660(*table + (u16) n * 4, table), p);
+}
+#else
 INCLUDE_ASM("asm/main/nonmatchings/game_800500EC", func_80057C38);
+#endif
 
 void func_80057C8C(void) {
 }
