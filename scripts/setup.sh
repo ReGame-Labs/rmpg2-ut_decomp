@@ -162,7 +162,7 @@ step_venv() {
     local venv="$INSTALL/venv"
     # A venv's console scripts (pip, splat, ...) hard-code the interpreter's path: a venv restored under another
     # path (a renamed checkout, CI's cache from another workspace) cannot run them. Recreate it.
-    if [[ -f "$venv/bin/pip" && "$(sed -n '1s/^#!//p' "$venv/bin/pip")" != "$venv/bin/python" ]]; then
+    if [[ -f "$venv/bin/pip" && "$(dirname "$(sed -n '1s/^#!//p' "$venv/bin/pip")")" != "$venv/bin" ]]; then
         log "venv: made for another path ($(sed -n '1s/^#!//p' "$venv/bin/pip")); recreating"
         rm -rf "$venv"
     fi
