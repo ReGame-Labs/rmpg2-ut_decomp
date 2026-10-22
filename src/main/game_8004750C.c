@@ -5,6 +5,13 @@
 #include "gameobject.h"
 #include "psyq/libc2.h"
 
+/* A thrown object's bookkeeping (func_8004B660). */
+typedef struct {
+    /* 0x00 */ GameObject *obj;
+    /* 0x04 */ u8 unk_04[0x0A];
+    /* 0x0E */ u16 armed;
+} Throw;
+
 void func_8001E4B0(GameObject *obj);                        /* free an object */
 void func_8001F724(s32 sound);
 void func_8001F7CC(u16 sound, u16 variant);
@@ -18,6 +25,11 @@ s32 func_8001EB10(s32 range, s32 x);
 void func_8004B204(void);
 void func_8004B3D0(void);
 void func_8004AEA4(void *slot);
+void func_8004AD18(Throw *slot);
+ObjectDef *func_8001D110(void);
+u16 func_80047F64(u16, u16, s32);
+u16 func_80047DEC(u16 a, u16 b, s16 dx, s16 dy, s32 e);
+u16 func_80047EA0(u16 a, u16 b, s32 c);
 u16 func_8004B6C4(GameObject *obj, s16 range, s32 mode);
 void func_8004EFAC(void);
 void func_8004AF80(void);
@@ -26,7 +38,7 @@ void func_8004AF1C();
 extern u8 D_8007F634[];
 extern s16 D_801D8850;
 extern s16 D_801D8724;
-extern u8 D_801E1CC4[];                /* 21 slots of 0x10 bytes */
+extern Throw D_801E1CC4[];             /* 21 slots */
 extern u8 D_801F9A54[];                /* 3 records of 0x1C bytes */
 extern u16 D_801E2A4C;
 extern s16 D_801E2A54;
@@ -38,12 +50,6 @@ extern s16 D_801E28F0;
 extern s32 D_801FA7D8;
 extern s16 D_801E0D4C;
 
-/* A thrown object's bookkeeping (func_8004B660). */
-typedef struct {
-    /* 0x00 */ GameObject *obj;
-    /* 0x04 */ u8 unk_04[0x0A];
-    /* 0x0E */ u16 armed;
-} Throw;
 
 INCLUDE_ASM("asm/main/nonmatchings/game_8004750C", func_8004750C);
 
@@ -64,7 +70,23 @@ void func_800476A8(void) {
     D_801D8724 = n;
 }
 
-INCLUDE_ASM("asm/main/nonmatchings/game_8004750C", func_800476FC);
+void func_800476FC(void) {
+    GameObject *saved = D_800AA248.cur_obj;
+    u16 *p = saved->arg.h;
+    u16 variant = *p++;
+    u16 sound = *p++;
+    u16 a = *p;
+
+    if (!(saved->unk_6C & 0x80)) {
+        if (variant != 0) {
+            func_8001F7CC(sound, variant);
+        }
+        if (a != 0) {
+            func_8004A9B0(0, a, 1, 0, 0);
+        }
+    }
+    D_800AA248.cur_obj = saved;
+}
 
 void func_80047780(void) {
     GameObject *saved = D_800AA248.cur_obj;
@@ -83,7 +105,21 @@ void func_80047780(void) {
 
 INCLUDE_ASM("asm/main/nonmatchings/game_8004750C", func_800477F0);
 
-INCLUDE_ASM("asm/main/nonmatchings/game_8004750C", func_8004799C);
+void func_8004799C(void) {
+    GameObject *saved = D_800AA248.cur_obj;
+    u16 *p = saved->arg.h;
+    u16 variant = *p++;
+    u16 sound = *p++;
+    u16 a = *p;
+
+    if (!(saved->unk_6C & 0x80)) {
+        if (variant != 0) {
+            func_8001F7CC(sound, variant);
+        }
+        func_8004A9B0(0, a, 17, 0, 0);
+    }
+    D_800AA248.cur_obj = saved;
+}
 
 void func_80047A1C(void) {
     GameObject *saved = D_800AA248.cur_obj;
@@ -194,15 +230,56 @@ void func_80047D0C(void) {
     D_800AA248.cur_obj = saved;
 }
 
-INCLUDE_ASM("asm/main/nonmatchings/game_8004750C", func_80047D7C);
+void func_80047D7C(void) {
+    GameObject *obj = D_800AA248.cur_obj;
+    u16 *p = obj->arg.h;
+    u16 variant = *p++;
+    u16 sound = *p;
+
+    if (!(obj->unk_6C & 0x80) && variant != 0xFFFF) {
+        func_8001F7CC(sound, variant);
+    }
+}
 
 void func_80047DCC(void) {
     D_800AA248.cur_obj->script_pc = *D_800AA248.cur_obj->arg.w;
 }
 
-INCLUDE_ASM("asm/main/nonmatchings/game_8004750C", func_80047DEC);
+u16 func_80047DEC(u16 a, u16 b, s16 dx, s16 dy, s32 e) {
+    ObjectDef *def;
+    s16 x = dx;
 
-INCLUDE_ASM("asm/main/nonmatchings/game_8004750C", func_80047EA0);
+    def = func_8001D110();
+    D_800AA248.new_def = def;
+    if (!(D_800AA248.cur_obj->unk_20.f.flags & 0x10)) {
+        x = -dx;
+    }
+    def->x = x + (u16) D_800AA248.cur_obj->pos_x.p.i;
+    def->y = dy + (u16) D_800AA248.cur_obj->pos_y.p.i;
+    return func_80047F64(a, b, e);
+}
+
+u16 func_80047EA0(u16 a, u16 b, s32 c) {
+    ObjectDef *def = func_8001D110();
+    GameObject *cur;
+    SpriteFrame *fr;
+    s16 dx;
+    s16 dy;
+    s16 x;
+
+    D_800AA248.new_def = def;
+    cur = D_800AA248.cur_obj;
+    fr = cur->frame;
+    dx = fr->unk_10 - fr->unk_08;
+    x = dx;
+    dy = fr->unk_12 - fr->unk_0A;
+    if (cur->unk_20.f.flags & 0x10) {
+        x = -dx;
+    }
+    def->x = x + (u16) cur->pos_x.p.i;
+    def->y = dy + (u16) D_800AA248.cur_obj->pos_y.p.i;
+    return func_80047F64(a, b, c);
+}
 
 INCLUDE_ASM("asm/main/nonmatchings/game_8004750C", func_80047F64);
 
@@ -262,7 +339,37 @@ INCLUDE_ASM("asm/main/nonmatchings/game_8004750C", func_8004A044);
 
 INCLUDE_ASM("asm/main/nonmatchings/game_8004750C", func_8004A1F8);
 
-INCLUDE_ASM("asm/main/nonmatchings/game_8004750C", func_8004A468);
+s32 func_8004A468(Monster *m) {
+    Monster *target = m->target;
+    GameObject *obj;
+    s16 r;
+    s16 d;
+
+    if (target == NULL || (obj = target->obj) == NULL) {
+        return 3;
+    }
+    d = (u16) D_800AA248.cur_obj->pos_y.p.i - (u16) obj->pos_y.p.i - 0x23;
+    if (d <= 0) {
+        d = -d;
+        r = 4;
+        if (d >= 0x18) {
+            r = 5;
+            if (d >= 0x30) {
+                r = 7;
+                if (d < 0x48) {
+                    r = 6;
+                }
+            }
+        }
+    } else if (d < 0x18) {
+        r = 3;
+    } else if (d < 0x30) {
+        r = 2;
+    } else {
+        r = d < 0x48;
+    }
+    return r;
+}
 
 INCLUDE_ASM("asm/main/nonmatchings/game_8004750C", func_8004A51C);
 
@@ -305,7 +412,26 @@ INCLUDE_ASM("asm/main/nonmatchings/game_8004750C", func_8004A93C);
 
 INCLUDE_ASM("asm/main/nonmatchings/game_8004750C", func_8004A9B0);
 
-INCLUDE_ASM("asm/main/nonmatchings/game_8004750C", func_8004AC84);
+void func_8004AC84(void) {
+    GameObject *saved = D_800AA248.cur_obj;
+    Throw *slot;
+    u16 i;
+    GameObject *obj;
+
+    if (D_801D8724 != 0) {
+        slot = D_801E1CC4;
+        i = 1;
+        do {
+            obj = slot->obj;
+            D_800AA248.cur_obj = obj;
+            if (obj != NULL) {
+                func_8004AD18(slot);
+            }
+            slot++;
+        } while ((i += 1) < 22);
+    }
+    D_800AA248.cur_obj = saved;
+}
 
 INCLUDE_ASM("asm/main/nonmatchings/game_8004750C", func_8004AD18);
 

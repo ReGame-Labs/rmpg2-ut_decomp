@@ -84,6 +84,9 @@ typedef struct SpriteFrame {
     /* 0x06 */ u16 unk_06;             /* height */
     /* 0x08 */ u16 unk_08;             /* x offset */
     /* 0x0A */ u16 unk_0A;             /* y offset */
+    /* 0x0C */ u8 unk_0C[0x04];
+    /* 0x10 */ u16 unk_10;             /* a second point: x (game_8004750C, the throw's origin) */
+    /* 0x12 */ u16 unk_12;             /* y */
 } SpriteFrame;
 
 /* What func_8001D110 hands out to describe an object to create; func_8001DCB4 creates it from
@@ -113,7 +116,8 @@ typedef struct Monster {
     /* 0x008 */ Fixed16 unk_008;
     /* 0x00C */ u8 unk_00C[0x04];
     /* 0x010 */ s32 unk_010;           /* a vertical speed, 16.16 */
-    /* 0x014 */ u8 unk_014[0x08];
+    /* 0x014 */ struct Monster *target;  /* the monster this one is attacking (game_8004750C) */
+    /* 0x018 */ u8 unk_018[0x04];
     /* 0x01C */ u16 unk_01C;           /* a countdown set from a random draw (game_8004750C) */
     /* 0x01E */ u8 unk_01E[0x0A];
     /* 0x028 */ u16 unk_028;
