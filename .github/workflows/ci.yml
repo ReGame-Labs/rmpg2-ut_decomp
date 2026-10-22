@@ -1,0 +1,97 @@
+# CI: the checks of scripts/test.sh (tests/README.md), on pull requests (not drafts) and pushes to main, not on
+# changes that touch only documentation. A newer push to a pull request cancels the run of the older one.
+#
+# With the maintainers' secret DEPENDENCIES_DEPLOY_KEY (a read-only deploy key of the private checkout
+# <owner>/rmpg2-wt_dependencies, whose gamedata/disc holds the executable and the overlays) the `game` job rebuilds
+# every game file byte-identical from scratch, writes the objdiff report and uploads it to decmp.dev (which comments
+# how a pull request changes progress). Fork pull requests get no secrets, so they get the disc-free part only: the
+# scripts parse, the Python compiles, the workaround census, and the toolchain is built and smoke-tested.
+#
+# Run the same locally before a push: scripts/ci_local.sh (Docker, the runner's Ubuntu) or scripts/test.sh.
+name: CI
+on:
+  push:
+    branches: [main]
+    paths-ignore:
+      - "docs/**"
+      - "**/*.md"
+      - "LICENSE"
+      - ".gitignore"
+      - ".github/ISSUE_TEMPLATE/**"
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+    paths-ignore:
+      - "docs/**"
+      - "**/*.md"
+      - "LICENSE"
+      - ".gitignore"
+      - ".github/ISSUE_TEMPLATE/**"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.event.pull_request.number || github.sha }}
+  cancel-in-progress: true
+
+env:
+  RMPG2_JOBS: "4"
+
+jobs:
+  # Disc-free, a minute: the scripts parse, the Python compiles, the workaround census (tools/hacks.py).
+  check:
+    if: ${{ !github.event.pull_request.draft }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+      - name: Scripts parse, Python compiles, workaround census
+        run: |
+          bash -n scripts/*.sh tools/*.sh
+          python3 -m py_compile configure.py diff_settings.py tools/*.py
+          python3 tools/hacks.py --check
+
+  # The toolchain (cached on its pins) and its smoke test; with the game files the byte-identical rebuild from
+  # scratch, the objdiff report and its upload to decmp.dev.
+  game:
+    if: ${{ !github.event.pull_request.draft }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    permissions:
+      contents: read
+      id-token: write        # decmp.dev verifies the run belongs to this repository
+      pull-requests: write   # decmp.dev's progress comment on pull requests
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+      - uses: ./.github/actions/setup
+        with:
+          tools: binutils venv cmake mkpsxiso gcc objdiff ext
+          cache: game
+          deploy-key: ${{ secrets.DEPENDENCIES_DEPLOY_KEY }}
+
+      - name: Toolchain smoke test
+        run: scripts/check_toolchain.sh
+
+      - name: Byte-identical rebuild of every game file
+        if: env.HAVE_GAME_FILES == 'true'
+        run: scripts/build.sh --check
+
+      - name: Progress report (objdiff)
+        if: env.HAVE_GAME_FILES == 'true'
+        run: tools/venv/bin/python tools/progress.py
+
+      # The report to decmp.dev: the project page https://decmp.dev/ReGame-Labs/rmpg2-wt. name, platform and banner
+      # count on the first upload only; afterwards they are managed on decmp.dev.
+      - name: Upload the progress report to decmp.dev
+        if: env.HAVE_GAME_FILES == 'true' && github.event_name != 'workflow_dispatch'
+        uses: decmp/upload-action@v1
+        with:
+          report: build/report.json
+          version: SLUS_007.42
+          name: "Rampage 2: Universal Tour"
+          platform: ps

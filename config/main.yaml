@@ -1,0 +1,71 @@
+# splat config for the boot executable SLUS_007.42 (Rampage 2: Universal Tour, USA).
+# Memory map: docs/DISC_LAYOUT.md. Library boundaries: tools/psyq_match.py (docs/TOOLCHAIN.md).
+# Run through configure.py (it splits, then writes build.ninja), or by hand:
+#   tools/venv/bin/splat split config/main.yaml
+#
+# Overlays get their own config/<name>.yaml with the same layout of paths (asm/<name>/, src/<name>/, build/<name>/)
+# and link against this executable's symbols.
+name: SLUS_007.42
+sha1: 3cb8f02ac807c1cf74a94e5df19a03633a14d962
+options:
+  basename: SLUS_007.42
+  base_path: ..
+  target_path: extracted/disc/SLUS_007.42
+  elf_path: build/main/SLUS_007.42.elf
+  platform: psx
+  compiler: GCC
+
+  build_path: build/main
+  asm_path: asm/main
+  src_path: src/main
+  asset_path: assets/main
+  ld_script_path: build/main/SLUS_007.42.ld
+  symbol_addrs_path:
+    - config/symbol_addrs.txt
+  create_undefined_funcs_auto: True
+  undefined_funcs_auto_path: build/main/undefined_funcs_auto.txt
+  create_undefined_syms_auto: True
+  undefined_syms_auto_path: build/main/undefined_syms_auto.txt
+
+  # crt0 (2MBYTE.OBJ at 0x80017758) sets $gp to 0x80097EA4: small data at the end of the image.
+  gp_value: 0x80097EA4
+  # psylink puts each object's .rodata before all .text.
+  section_order: [".rodata", ".text", ".data", ".sdata", ".sbss", ".bss"]
+  # The file holds its data to the end of the image (the header has no bss fields), so the image is what the
+  # segments cover; .bss sits above 0x80098000 (docs/DISC_LAYOUT.md, to be settled).
+  ld_bss_is_noload: False
+  # psylink packs objects at 4-byte alignment; GNU as would give every section 16.
+  subalign: 4
+  ld_align_section_vram_end: False
+  ld_align_segment_vram_end: False
+
+  find_file_boundaries: True
+  migrate_rodata_to_functions: True
+  use_legacy_include_asm: False
+  asm_function_macro: glabel
+  asm_jtbl_label_macro: jlabel
+  asm_data_macro: dlabel
+  # Also write a full .s for each c segment: assembled, it is objdiff's "target" object.
+  make_full_disasm_for_code: True
+  generate_asm_macros_files: True
+  generated_asm_macros_directory: include/asm_generated
+
+segments:
+  - name: header
+    type: header
+    start: 0x0
+
+  - name: main
+    type: code
+    start: 0x800
+    vram: 0x80010000
+    subsegments:
+      # The first split (docs/DISC_LAYOUT.md "The executable"): one unit per region, to be split into the original
+      # source files with evidence (docs/MATCHING.md "Splitting a target into files").
+      - [0x800, rodata, rodata]        # 0x80010000 .rodata of every object, in link order (psylink)
+      - [0x7F58, asm, crt0]            # 0x80017758 Psy-Q 2MBYTE.OBJ: the entry point (0x80017760), calls main
+      - [0x801C, asm, game]            # 0x8001781C the game's code, main first
+      - [0x54798, asm, psyq]           # 0x80063F98 the Psy-Q libraries (tools/psyq_match.py), one unit until named
+      - [0x6AE84, data, data]          # 0x8007A684 .data (and the small data around $gp) to the end of the image
+
+  - [0x88800]                          # 0x80098000 end of the image (t_size 0x88000)

@@ -1,0 +1,69 @@
+# A CI job's setup (ci.yml): the tool cache, scripts/setup.sh for the tools the job names, and with the maintainers'
+# deploy key the private checkout holding the original binaries (scripts/worktree_init.sh links them as
+# extracted/disc). The tool cache's key is the pins (scripts/setup.sh --pins: every version, tag, hash and URL),
+# tools/requirements.txt and the job's tool list, not the text of setup.sh: an edit to the script's logic keeps the
+# cache valid, a changed pin rebuilds the tools once.
+name: Toolchain and game files
+description: The cached tools (scripts/setup.sh) and, with the deploy key, the game files from the private checkout
+inputs:
+  tools:
+    description: "The scripts/setup.sh steps this job needs (space separated)"
+    required: true
+  cache:
+    description: "The tool cache's name (the job's)"
+    required: true
+  deploy-key:
+    description: "The private checkout's read-only deploy key (secrets.DEPENDENCIES_DEPLOY_KEY; empty on fork pull requests)"
+    default: ""
+runs:
+  using: composite
+  steps:
+    - name: Environment
+      shell: bash
+      run: |
+        echo "RMPG2_UBUNTU_MIRROR=http://azure.archive.ubuntu.com/ubuntu" >> "$GITHUB_ENV"
+        echo "RMPG2_PRIVATE=$GITHUB_WORKSPACE/rmpg2-wt_dependencies" >> "$GITHUB_ENV"
+
+    # The private checkout (maintainers only): the executable and the overlays the build reads, nothing else.
+    - name: Private checkout
+      if: inputs.deploy-key != ''
+      uses: actions/checkout@v5
+      with:
+        repository: ${{ github.repository_owner }}/rmpg2-wt_dependencies
+        ssh-key: ${{ inputs.deploy-key }}
+        path: rmpg2-wt_dependencies
+        sparse-checkout: gamedata/disc
+        persist-credentials: false
+
+    - name: The pins (the tool cache's key)
+      id: pins
+      shell: bash
+      run: |
+        hash=$({ scripts/setup.sh --pins; cat tools/requirements.txt; echo "${{ inputs.tools }}"; } | sha256sum | cut -c1-16)
+        echo "hash=$hash" >> "$GITHUB_OUTPUT"
+
+    - name: Cached tools
+      uses: actions/cache@v4
+      with:
+        path: |
+          tools/binutils
+          tools/mkpsxiso
+          tools/venv
+          tools/gcc
+          tools/bin
+          tools/ext
+        key: tools-${{ inputs.cache }}-${{ runner.os }}-${{ steps.pins.outputs.hash }}
+
+    - name: Toolchain (scripts/setup.sh ${{ inputs.tools }})
+      shell: bash
+      run: |
+        scripts/setup.sh ${{ inputs.tools }}
+        echo "$GITHUB_WORKSPACE/tools/venv/bin" >> "$GITHUB_PATH"
+
+    # Links gamedata/disc as extracted/disc; HAVE_GAME_FILES gates the job's steps that need it.
+    - name: Game files from the private checkout
+      if: inputs.deploy-key != ''
+      shell: bash
+      run: |
+        scripts/worktree_init.sh
+        test -f extracted/disc/SLUS_007.42 && echo "HAVE_GAME_FILES=true" >> "$GITHUB_ENV"

@@ -1,0 +1,4 @@
+# The image is built from the Dockerfile alone: the repository is streamed into the container by scripts/ci_local.sh
+# (the tracked files only), never copied into the image.
+*
+!Dockerfile
