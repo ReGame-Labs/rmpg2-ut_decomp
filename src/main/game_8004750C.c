@@ -7,13 +7,14 @@
 
 void func_8001E4B0(GameObject *obj);                        /* free an object */
 void func_8001F724(s32 sound);
-void func_8001F7CC(s32 sound, s32 variant);
+void func_8001F7CC(u16 sound, u16 variant);
 u16 *func_80025C08(void *);
 s32 func_80025DF8(s32 player);
 void func_80029118(s32, s32);
 void func_80053C50(s32, Monster *m);
 void func_8006353C(s32);
-void func_8004A9B0(s32, s32, s32, s32, s32);
+u16 func_8004A9B0(Monster *m, u16 a, s32 kind, s16 b, s16 c);
+s32 func_8001EB10(s32 range, s32 x);
 void func_8004B204(void);
 void func_8004B3D0(void);
 void func_8004AEA4(void *slot);
@@ -65,13 +66,11 @@ void func_800476A8(void) {
 
 INCLUDE_ASM("asm/main/nonmatchings/game_8004750C", func_800476FC);
 
-#ifdef NON_MATCHING
-/* 98%: register names only: the original tests the object's flags in v1 and keeps the operands' address in v0, here the other way round */
 void func_80047780(void) {
     GameObject *saved = D_800AA248.cur_obj;
     u16 *arg = saved->arg.h;
-    u16 variant = arg[0];
-    u16 sound = arg[1];
+    u16 variant = *arg++;
+    u16 sound = *arg;
 
     if (!(saved->unk_6C & 0x80)) {
         if (variant != 0) {
@@ -81,21 +80,16 @@ void func_80047780(void) {
     }
     D_800AA248.cur_obj = saved;
 }
-#else
-INCLUDE_ASM("asm/main/nonmatchings/game_8004750C", func_80047780);
-#endif
 
 INCLUDE_ASM("asm/main/nonmatchings/game_8004750C", func_800477F0);
 
 INCLUDE_ASM("asm/main/nonmatchings/game_8004750C", func_8004799C);
 
-#ifdef NON_MATCHING
-/* 98%: register names only: the original tests the object's flags in v1 and keeps the operands' address in v0, here the other way round */
 void func_80047A1C(void) {
     GameObject *saved = D_800AA248.cur_obj;
     u16 *arg = saved->arg.h;
-    u16 variant = arg[0];
-    u16 sound = arg[1];
+    u16 variant = *arg++;
+    u16 sound = *arg;
 
     if (!(saved->unk_6C & 0x80)) {
         if (variant != 0) {
@@ -105,17 +99,12 @@ void func_80047A1C(void) {
     }
     D_800AA248.cur_obj = saved;
 }
-#else
-INCLUDE_ASM("asm/main/nonmatchings/game_8004750C", func_80047A1C);
-#endif
 
-#ifdef NON_MATCHING
-/* 98%: register names only: the original tests the object's flags in v1 and keeps the operands' address in v0, here the other way round */
 void func_80047A8C(void) {
     GameObject *saved = D_800AA248.cur_obj;
     u16 *arg = saved->arg.h;
-    u16 variant = arg[0];
-    u16 sound = arg[1];
+    u16 variant = *arg++;
+    u16 sound = *arg;
 
     if (!(saved->unk_6C & 0x80)) {
         if (variant != 0) {
@@ -125,17 +114,12 @@ void func_80047A8C(void) {
     }
     D_800AA248.cur_obj = saved;
 }
-#else
-INCLUDE_ASM("asm/main/nonmatchings/game_8004750C", func_80047A8C);
-#endif
 
-#ifdef NON_MATCHING
-/* 98%: register names only: the original tests the object's flags in v1 and keeps the operands' address in v0, here the other way round */
 void func_80047AFC(void) {
     GameObject *saved = D_800AA248.cur_obj;
     u16 *arg = saved->arg.h;
-    u16 variant = arg[0];
-    u16 sound = arg[1];
+    u16 variant = *arg++;
+    u16 sound = *arg;
 
     if (!(saved->unk_6C & 0x80)) {
         if (variant != 0) {
@@ -145,19 +129,46 @@ void func_80047AFC(void) {
     }
     D_800AA248.cur_obj = saved;
 }
-#else
-INCLUDE_ASM("asm/main/nonmatchings/game_8004750C", func_80047AFC);
-#endif
 
-INCLUDE_ASM("asm/main/nonmatchings/game_8004750C", func_80047B6C);
+void func_80047B6C(void) {
+    GameObject *saved = D_800AA248.cur_obj;
+    Monster *m;
+    u16 kind;
 
-#ifdef NON_MATCHING
-/* 98%: register names only: the original tests the object's flags in v1 and keeps the operands' address in v0, here the other way round */
+    saved->script_pc += 4;
+    m = saved->owner.monster;
+    kind = m->unk_02A;
+    if (kind != 0) {
+        GameObject *obj = D_800AA248.cur_obj;
+        u16 *p = obj->arg.h;
+        s16 variant = *p++;
+        u16 sound = *p++;
+        u16 a = *p++;
+        s16 b = *p++;
+        s16 c = *p;
+
+        if (!(obj->unk_6C & 0x80)) {
+            if (kind != 1) {
+                if (func_8004A9B0(m, a, 5, b, c) == 0) {
+                    m->unk_02A = 0;
+                    m->unk_01C = func_8001EB10(4, 2);
+                }
+            } else {
+                if (variant != 0) {
+                    func_8001F7CC(sound, variant);
+                }
+                func_8004A9B0(m, a, 6, b, c);
+            }
+        }
+    }
+    D_800AA248.cur_obj = saved;
+}
+
 void func_80047C9C(void) {
     GameObject *saved = D_800AA248.cur_obj;
     u16 *arg = saved->arg.h;
-    u16 variant = arg[0];
-    u16 sound = arg[1];
+    u16 variant = *arg++;
+    u16 sound = *arg;
 
     if (!(saved->unk_6C & 0x80)) {
         if (variant != 0) {
@@ -167,17 +178,12 @@ void func_80047C9C(void) {
     }
     D_800AA248.cur_obj = saved;
 }
-#else
-INCLUDE_ASM("asm/main/nonmatchings/game_8004750C", func_80047C9C);
-#endif
 
-#ifdef NON_MATCHING
-/* 98%: register names only: the original tests the object's flags in v1 and keeps the operands' address in v0, here the other way round */
 void func_80047D0C(void) {
     GameObject *saved = D_800AA248.cur_obj;
     u16 *arg = saved->arg.h;
-    u16 variant = arg[0];
-    u16 sound = arg[1];
+    u16 variant = *arg++;
+    u16 sound = *arg;
 
     if (!(saved->unk_6C & 0x80)) {
         if (variant != 0) {
@@ -187,9 +193,6 @@ void func_80047D0C(void) {
     }
     D_800AA248.cur_obj = saved;
 }
-#else
-INCLUDE_ASM("asm/main/nonmatchings/game_8004750C", func_80047D0C);
-#endif
 
 INCLUDE_ASM("asm/main/nonmatchings/game_8004750C", func_80047D7C);
 

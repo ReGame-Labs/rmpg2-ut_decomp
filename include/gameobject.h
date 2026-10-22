@@ -113,9 +113,11 @@ typedef struct Monster {
     /* 0x008 */ Fixed16 unk_008;
     /* 0x00C */ u8 unk_00C[0x04];
     /* 0x010 */ s32 unk_010;           /* a vertical speed, 16.16 */
-    /* 0x014 */ u8 unk_014[0x14];
+    /* 0x014 */ u8 unk_014[0x08];
+    /* 0x01C */ u16 unk_01C;           /* a countdown set from a random draw (game_8004750C) */
+    /* 0x01E */ u8 unk_01E[0x0A];
     /* 0x028 */ u16 unk_028;
-    /* 0x02A */ s16 unk_02A;
+    /* 0x02A */ u16 unk_02A;           /* the kind of throw in progress, 0 none (game_8004750C) */
     /* 0x02C */ u8 unk_02C[0x10];
     /* 0x03C */ u16 unk_03C;
     /* 0x03E */ u16 unk_03E;
