@@ -27,13 +27,14 @@ options:
   create_undefined_syms_auto: True
   undefined_syms_auto_path: build/main/undefined_syms_auto.txt
 
-  # crt0 (2MBYTE.OBJ at 0x80017758) sets $gp to 0x80097EA4: small data at the end of the image.
+  # crt0 (2MBYTE.OBJ at 0x80017758) sets $gp to 0x80097EA4, the end of .data; the code makes no $gp-relative access
+  # (everything -G0, no .sdata/.sbss).
   gp_value: 0x80097EA4
   # psylink puts each object's .rodata before all .text.
   section_order: [".rodata", ".text", ".data", ".sdata", ".sbss", ".bss"]
-  # The file holds its data to the end of the image (the header has no bss fields), so the image is what the
-  # segments cover; .bss sits above 0x80098000 (docs/DISC_LAYOUT.md, to be settled).
-  ld_bss_is_noload: False
+  # .bss is not in the file (the header has no bss fields): it is the `bss` segment below, cleared by crt0, after the
+  # overlay region (docs/DISC_LAYOUT.md "Memory map").
+  ld_bss_is_noload: True
   # psylink packs objects at 4-byte alignment; GNU as would give every section 16.
   subalign: 4
   ld_align_section_vram_end: False
@@ -66,6 +67,17 @@ segments:
       - [0x7F58, asm, crt0]            # 0x80017758 Psy-Q 2MBYTE.OBJ: the entry point (0x80017760), calls main
       - [0x801C, asm, game]            # 0x8001781C the game's code, main first
       - [0x54798, asm, psyq]           # 0x80063F98 the Psy-Q libraries (tools/psyq_match.py), one unit until named
-      - [0x6AE84, data, data]          # 0x8007A684 .data (and the small data around $gp) to the end of the image
+      - [0x6AE84, data, data]          # 0x8007A684 .data, to the end of the image's contents (last non-zero word
+                                       #            0x80097E9C); no .sdata/.sbss: nothing is reached through $gp
+      - [0x886A4, pad, pad]            # 0x80097EA4 zeros: the file is padded to a whole sector; the overlay region
+                                       #            starts here (the loaders' destination, .rodata 0x80016AC8/ACC)
+
+  # .bss: 0x800AA240-0x801FE208, the range crt0 clears; the code references 0x800AA240-0x801FE1C8 and nothing
+  # between the overlay region's end (0x800AA240 = where OVERMOVE.BIN ends) and it. Not in the file (NOLOAD).
+  - name: bss
+    type: bss
+    start: 0x88800
+    vram: 0x800AA240
+    bss_size: 0x153FC8
 
   - [0x88800]                          # 0x80098000 end of the image (t_size 0x88000)
