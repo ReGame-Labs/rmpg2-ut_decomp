@@ -5,6 +5,9 @@
 
 /* Declarations of src/main/game_8002A330.c: provisional types from the code's own use; refined as functions match. */
 
+extern u8 D_80011BA4[];
+extern u8 D_80011E18[];
+extern s32 D_8007BD78;
 extern u8 D_8007C934[];
 extern u8 D_8007D0B8[];
 extern u8 D_8007D104[];
@@ -183,7 +186,7 @@ extern u8 D_80093E30[];
 extern u8 D_80093EF8[];
 extern u8 D_80093F10[];
 extern u8 D_80093F44[];
-extern s32 D_800AA268;
+extern s32 D_800AA2DC;
 extern s16 D_801D376C;
 extern s16 D_801D37B8;
 extern u16 D_801D37BC;
@@ -192,22 +195,178 @@ extern s32 D_801D857C;
 extern s16 D_801D87B0;
 extern s16 D_801D87B4;
 extern s32 D_801D8864;
+extern s16 D_801E1E40;
 extern s16 D_801F9AB0;
+extern s16 D_801FA890;
 extern s16 D_801FA98C;
 extern s16 D_801FA990;
 extern s16 D_801FAC84;
 extern s16 D_801FAC8C;
 extern s16 D_801FAC90;
 
+typedef struct UnkStruct1 UnkStruct1;
+typedef struct UnkStruct2 UnkStruct2;
+typedef struct UnkStruct3 UnkStruct3;
+typedef struct UnkStruct4 UnkStruct4;
+typedef struct UnkStruct5 UnkStruct5;
+typedef struct UnkStruct6 UnkStruct6;
+
+struct UnkStruct1 {  /* provisional: fields as the code reaches them */
+    u16 unk_00;
+    u16 unk_02;
+    u8 pad_04[0x8];
+    s16 unk_0C;
+    u8 pad_0E[0x2];
+    u16 unk_10;
+    u8 pad_12[0x2];
+    s16 unk_14;
+    u16 unk_16;
+    u8 pad_18[0x2];
+    s16 unk_1A;
+    u8 pad_1C[0x4];
+    void *unk_20;
+    s16 unk_24;
+    s16 unk_26;
+    s16 unk_28;
+    u16 unk_2A;
+    s16 unk_2C;
+    s16 unk_2E;
+    s16 unk_30;
+    u8 pad_32[0x4];
+    s16 unk_36;
+    u8 pad_38[0xc];
+    s32 unk_44;
+    u8 pad_48[0x10];
+    u16 unk_58;
+    u8 pad_5A[0x2];
+    void *unk_5C;
+    u8 pad_60[0x4];
+    void *unk_64;
+    u8 pad_68[0x8];
+    UnkStruct2 *unk_70;
+    u8 pad_74[0x2];
+    u16 unk_76;
+    u16 unk_78;
+    u8 pad_7A[0x6];
+    u16 unk_80;
+    u16 unk_82;
+    void *unk_84;
+    u16 unk_88;
+    u8 pad_8A[0x6];
+    s32 unk_90;
+    s32 unk_94;
+    struct UnkStruct4 *unk_98;
+};
+
+struct UnkStruct2 {  /* provisional: fields as the code reaches them */
+    void *unk_00;
+    u16 unk_04;
+    u16 unk_06;
+    UnkStruct1 *unk_08;
+    s16 unk_0C;
+    s16 unk_0E;
+    s32 unk_10;
+    s32 unk_14;
+    void * unk_18;
+    s16 unk_1C;
+    u8 pad_1E[0x2];
+    s16 unk_20;
+    u8 pad_22[0x14];
+    s16 unk_36;
+    s16 unk_38;
+    u8 pad_3A[0x16];
+    s16 unk_50;
+};
+
+struct UnkStruct3 {  /* provisional: fields as the code reaches them */
+    UnkStruct1 *unk_00;
+    u8 pad_04[0x6];
+    u16 unk_0A;
+};
+
+struct UnkStruct4 {  /* provisional: what D_800AA268 points to */
+    u8 pad_00[0x44];
+    s32 unk_44;
+    u8 pad_48[0x14];
+    s32 *unk_5C;
+    u8 pad_60[0x30];
+    UnkStruct2 *unk_90;
+    s32 unk_94;
+};
+
+struct UnkStruct6 {  /* provisional */
+    u8 pad_00[0x18];
+    UnkStruct3 *unk_18;
+};
+
+struct UnkStruct5 {  /* provisional: func_800309AC's argument */
+    UnkStruct1 *unk_00;
+    u16 unk_04;
+    u8 pad_06[0x2];
+    UnkStruct6 *unk_08;
+    u8 unk_0C[0x18];
+    u8 unk_24[0x18];
+    u8 unk_3C[0x18];
+};
+
+/* A struct member in the original, not a scalar: GCC 2.8 keeps its stores ordered with struct-field accesses only
+ * then (docs/MATCHING.md "Structs, globals and aliasing"; func_8002C75C, func_8002D144). */
+extern struct { UnkStruct4 *obj; } D_800AA268;
+
 s32 * func_80025C08(void *);
 void func_8002A330(void);
+s32 func_8002BF70(void *);
+void func_8002E278(s32, void *);
+s32 func_8004F7A4(void *);
+void func_8002BFE4(s32 arg0, UnkStruct1 *arg1);
+void func_8002EB00();
+void func_8002C19C(UnkStruct1 *arg0);
+void func_8002ED90();
+void func_8002C1E8(UnkStruct1 *arg0);
+void func_8002FEA4();
+void func_8002C228(UnkStruct1 *arg0);
+void func_8002E854();
+void func_80030B5C(void *);
+void func_8002C25C(UnkStruct1 *arg0);
+void func_8002F084();
+void func_8002C3C4(UnkStruct1 *arg0);
+void func_8002C6A0();
+void func_8002C738(UnkStruct1 *arg0);
+void func_8001E698(void *, void *);
+void func_8001F724(s32);
+void func_8002C75C(UnkStruct1 *arg0);
+void func_8002C7D0(UnkStruct1 *arg0);
+void func_8002C814(UnkStruct1 *arg0);
+void func_8002C858(UnkStruct1 *arg0);
+void func_8002CE40(UnkStruct2 *arg0, s32 arg1);
+void func_8002D228(s32, void *);
+void func_8002F5B0(s32 arg0, UnkStruct1 *arg1);
+void func_8003089C(s32, s32);
+void func_8002D144(s32 arg0, UnkStruct1 *arg1);
+s32 func_8002D2CC(s32 arg0, UnkStruct1 *arg1);
 s32 * func_8002E658(s32);
 void func_8002E5F4(s32 arg0);
 void func_8003C894(s32 *);
 void func_8002E614(s32 arg0);
 void func_8002ED28(void);
-void func_80030114();
+void func_80030698(s32, s32, void *);
+void func_8001E4B0(void *);
+void func_80025B7C(void *);
+void func_8002F9BC(void);
+void func_8002F9F4(UnkStruct2 *arg0);
 void func_800300F4(void);
+void func_800300A0(UnkStruct1 *arg0, UnkStruct1 *arg1);
+void func_80030114();
+void func_800308EC(s16, void *);
+void func_800309AC(s16 arg0, UnkStruct5 *arg1);
+void func_800256B0(void *);
+void func_800256CC(void *);
+void func_800257C4(void *);
+void func_8002F630(void *, s32, void *);
+void func_8003CD5C(void *);
+void func_80030FA4(void);
+void * func_8003D1F8(s32);
+void func_80031224(void);
 s32 func_80031420(s32 arg0, s32 arg1);
 void func_800245F8();
 void func_8002A3A4();
@@ -219,8 +378,9 @@ void func_80031A3C(void);
 void func_80031B10(void);
 void func_80031444(void);
 void func_8001E7A0();
-void func_80020BA0(s32, s32, s32);
+void func_80020BA0(s32, s32, void *);
 void func_80031A68(void);
+void func_80031AC8(void);
 void func_80031CB4(void *, s32);
 void func_80031B74(s32 arg0);
 void func_80031B9C(s32 arg0);
@@ -234,7 +394,7 @@ void func_80032668(s32 arg0);
 void func_80032710(s32 arg0);
 void func_80032738(s32 arg0);
 void func_80032760(s32 arg0);
-void func_8003EB5C(void *, s32);
+void func_8003EB5C(void *, void *);
 void func_80032788(void);
 void func_800327B4(void);
 void func_800327E0(void);
@@ -398,6 +558,8 @@ void func_800342DC(void);
 void func_80034308(void);
 void func_80034334(void);
 void func_80034360(void);
+void func_8003438C(void);
+void func_800343A8(void);
 void func_800343C0(void);
 void func_800343EC(void);
 
