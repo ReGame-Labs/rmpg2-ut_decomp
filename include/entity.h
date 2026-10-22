@@ -79,7 +79,8 @@ typedef struct Unk54728 {
     /* 0x08 */ u16 unk_08;
     /* 0x0A */ u8 unk_0A[0x4];
     /* 0x0E */ u16 unk_0E;
-    /* 0x10 */ u8 unk_10[0x4];
+    /* 0x10 */ u16 unk_10;
+    /* 0x12 */ u16 unk_12;
     /* 0x14 */ u16 unk_14;
     /* 0x16 */ u8 unk_16[0x2];
     /* 0x18 */ Unk54728Sub18 *unk_18;
@@ -110,8 +111,7 @@ typedef struct Entity {
     /* 0x006 */ u8 unk_006[0x2];
     /* 0x008 */ s32 unk_008;
     /* 0x00C */ u8 unk_00C[4];
-    /* 0x010 */ s16 unk_010;
-    /* 0x012 */ s16 unk_012;
+    /* 0x010 */ Half32 unk_010;              /* also two s16 halves (unk_012 = unk_010.h.hi) */
     /* 0x014 */ u8 unk_014[0x14];
     /* 0x028 */ s16 unk_028;
     /* 0x02A */ u8 unk_02A[0x1C];
@@ -148,7 +148,9 @@ typedef struct Entity {
     /* 0x126 */ s16 unk_126;
     /* 0x128 */ u8 unk_128[0x16];
     /* 0x13E */ u16 unk_13E;
-    /* 0x140 */ u8 unk_140[0x28];
+    /* 0x140 */ u8 unk_140[0x24];
+    /* 0x164 */ s16 unk_164;
+    /* 0x166 */ u8 unk_166[0x2];
     /* 0x168 */ u16 unk_168;
     /* 0x16A */ u8 unk_16A[2];
     /* 0x16C */ void *unk_16C;
@@ -168,7 +170,7 @@ typedef struct Entity {
     /* 0x1CA */ u8 unk_1CA[0x2];
     /* 0x1CC */ u16 unk_1CC;
     /* 0x1CE */ u8 unk_1CE[0x6];
-    /* 0x1D4 */ void *unk_1D4;
+    /* 0x1D4 */ struct EntityLink *unk_1D4;
     /* 0x1D8 */ u8 unk_1D8[0x48];
 } Entity;
 
@@ -204,5 +206,26 @@ typedef struct Unk1D3D64 {
 } Unk1D3D64;
 
 extern Unk1D3D64 D_801D3D64;
+
+/* What Entity.unk_1D4 points to: a link to another object's body (a target, a rider?). */
+typedef struct EntityLink {
+    /* 0x00 */ Body *unk_00;
+    /* 0x04 */ u8 unk_04[2];
+    /* 0x06 */ u16 unk_06;
+} EntityLink;
+
+/* The five 0x40-byte records at D_801D85C8 (the monsters' behaviour states; another unit's view is `Ai` in
+ * include/game.h): a state at 0x08, a "new state" flag at 0x0C, a flag at 0x2E. */
+typedef struct Unk1D85C8 {
+    /* 0x00 */ u8 unk_00[8];
+    /* 0x08 */ u16 unk_08;
+    /* 0x0A */ u8 unk_0A[2];
+    /* 0x0C */ s16 unk_0C;
+    /* 0x0E */ u8 unk_0E[0x20];
+    /* 0x2E */ u16 unk_2E;
+    /* 0x30 */ u8 unk_30[0x10];
+} Unk1D85C8;
+
+extern Unk1D85C8 D_801D85C8[5];
 
 #endif /* ENTITY_H */

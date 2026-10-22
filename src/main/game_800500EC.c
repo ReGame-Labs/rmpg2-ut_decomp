@@ -114,7 +114,7 @@ void func_80056E2C(Entity *, Unk54728 *);
 void func_80056EB8(Entity *, Unk54728 *);
 u16 func_80057A08(Entity *);
 Unk800AA248Node *func_8001D110(void);
-void func_8001DCB4(s32);
+void *func_8001DCB4(void);
 void func_8004F470(Entity *, Entity *);
 void func_80051330(Entity *, Entity *);
 void func_800513EC(Entity *, Entity *);
@@ -718,7 +718,32 @@ void func_80053D68(s32 amount, Entity *e) {
 void func_80053DE4(void) {
 }
 
-INCLUDE_ASM("asm/main/nonmatchings/game_800500EC", func_80053DEC);
+void func_80053DEC(void) {
+    Body *b;
+    Unk800AA248Node *node;
+    u16 x;
+    s32 id;
+
+    b = D_800AA268.p;
+    func_8001F724(0x29);
+    b = b->unk_90->unk_068;
+    if (b->unk_22 & 0x10) {
+        x = D_801FAC90;
+    } else {
+        x = D_801FAC8C;
+    }
+    node = func_8001D110();
+    id = 0x010035C2;
+    node->unk_0C = 0x738;
+    node->unk_20 = 0x4000;
+    node->unk_14.h.i = 0xED;
+    node->unk_10.h.i = x;
+    node->unk_00 = id;
+    node->unk_28 = &D_800954CC;
+    D_800AA248.unk_3C = node;
+    func_8001DCB4();
+    D_800AA248.unk_20 = b;
+}
 
 INCLUDE_ASM("asm/main/nonmatchings/game_800500EC", func_80053EA8);
 

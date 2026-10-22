@@ -115,8 +115,8 @@ void func_80061068(s32 *arg0, s16 arg1, s16 arg2) {
     saved = D_800AA248.unk_20;
     node = func_8001D110();
     D_800AA248.unk_3C = node;
-    node->unk_12 = arg1;
-    node->unk_16 = arg2;
+    node->unk_10.h.i = arg1;
+    node->unk_14.h.i = arg2;
     node->unk_20 = 0x7000;
     node->unk_28 = arg0;
     node->unk_00 = *arg0;
@@ -137,11 +137,11 @@ void func_80061110(void) {
 }
 
 void func_8006113C(void) {
-    D_800AA268.p->unk_90->unk_012 = 1;
+    D_800AA268.p->unk_90->unk_010.h.hi = 1;
 }
 
 void func_80061158(void) {
-    D_800AA268.p->unk_90->unk_012 = 0;
+    D_800AA268.p->unk_90->unk_010.h.hi = 0;
 }
 
 s32 func_80061170(s32 index) {
