@@ -6,5 +6,6 @@
 #include "common.h"
 
 void *memcpy(void *dst, const void *src, u32 n);
+void *memset(void *dst, int c, unsigned int n);
 
 #endif /* PSYQ_LIBC2_H */
