@@ -315,6 +315,9 @@ typedef struct Unk22D58 {
     s16 unk_2A;
     u8 pad_2C[0x4];
     s32 unk_30;
+    s32 unk_34;
+    s16 unk_38;
+    u8 pad_3A[0x6];
 } Unk22D58;
 
 typedef struct Unk233E0 {
