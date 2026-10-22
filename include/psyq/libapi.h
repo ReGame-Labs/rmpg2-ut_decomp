@@ -9,5 +9,7 @@ long StartRCnt(unsigned long spec);
 void FlushCache(void);
 void EnterCriticalSection(void);
 void ExitCriticalSection(void);
+long OpenEvent(unsigned long desc, long spec, long mode, long (*func)());
+long EnableEvent(unsigned long event);
 
 #endif /* PSYQ_LIBAPI_H */

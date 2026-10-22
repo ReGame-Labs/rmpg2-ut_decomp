@@ -2,9 +2,27 @@
  * The boundaries and their evidence: config/main.yaml (docs/MATCHING.md "Splitting a target into files"). */
 #include "common.h"
 
-INCLUDE_ASM("asm/main/nonmatchings/game_8005D198", func_8005D198);
+s32 func_8001A3AC(void);
+void func_8001E450(s32);
+void func_8001ED54(s32 *);
+void func_8005EE54(void);
 
-INCLUDE_ASM("asm/main/nonmatchings/game_8005D198", func_8005D1BC);
+extern s32 D_80089624[];
+extern s32 D_80089644[];
+extern s32 D_800AA2DC;
+extern s16 D_801FB468;
+extern s16 D_801FB46C;
+
+s32 func_8005D198(void) {
+    return func_8001A3AC() >= 0x46;
+}
+
+void func_8005D1BC(s32 arg0, s32 n) {
+    func_8001E450((u16)(n + 0x790));
+    func_8001E450((u16)(n + 0x798));
+    func_8001E450((u16)(n + 0x7A8));
+    func_8001E450((u16)(n + 0x7A0));
+}
 
 INCLUDE_ASM("asm/main/nonmatchings/game_8005D198", func_8005D20C);
 
@@ -35,9 +53,36 @@ INCLUDE_ASM("asm/main/nonmatchings/game_8005D198", func_8005E19C);
 
 INCLUDE_ASM("asm/main/nonmatchings/game_8005D198", func_8005E214);
 
-INCLUDE_ASM("asm/main/nonmatchings/game_8005D198", func_8005E2D8);
+void func_8005E2D8(void) {
+    s16 t;
 
-INCLUDE_ASM("asm/main/nonmatchings/game_8005D198", func_8005E398);
+    if (D_801FB46C != 0) {
+        t = D_801FB46C + 1;
+        D_801FB46C = t;
+        switch (t) {
+        case 0x3C:
+            func_8001E450(0x401);
+            func_8001ED54(D_80089624);
+            break;
+        case 0x78:
+            func_8001E450(0x401);
+            func_8001ED54(D_80089644);
+            break;
+        case 0xB4:
+            func_8001E450(0x401);
+            func_8001E450(0x402);
+            D_801FB46C = 0;
+            break;
+        }
+    }
+}
+
+void func_8005E398(void) {
+    D_801FB468 = 0;
+    if (D_800AA2DC != 0) {
+        func_8005EE54();
+    }
+}
 
 INCLUDE_ASM("asm/main/nonmatchings/game_8005D198", func_8005E3CC);
 

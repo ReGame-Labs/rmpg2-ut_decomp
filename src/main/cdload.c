@@ -110,7 +110,7 @@ s32 func_80061014(s32 arg0) {
 
 void func_80061068(s32 *arg0, s16 arg1, s16 arg2) {
     Unk800AA248Node *node;
-    s32 saved;
+    Body *saved;
 
     saved = D_800AA248.unk_20;
     node = func_8001D110();
@@ -128,20 +128,20 @@ void func_800610E8(void) {
 }
 
 void func_800610F0(void) {
-    D_800AA268->unk_80 = *D_800AA268->unk_5C;
+    D_800AA268.p->unk_80 = *D_800AA268.p->unk_5C;
 }
 
 void func_80061110(void) {
-    D_800AA268->unk_18 = 0x02000000;
+    D_800AA268.p->unk_18.w = 0x02000000;
     func_800415B4();
 }
 
 void func_8006113C(void) {
-    D_800AA268->unk_90->unk_12 = 1;
+    D_800AA268.p->unk_90->unk_012 = 1;
 }
 
 void func_80061158(void) {
-    D_800AA268->unk_90->unk_12 = 0;
+    D_800AA268.p->unk_90->unk_012 = 0;
 }
 
 s32 func_80061170(s32 index) {
