@@ -44,16 +44,16 @@ INCLUDE_ASM("asm/main/nonmatchings/game_8003B568", func_8003BE34);
 INCLUDE_ASM("asm/main/nonmatchings/game_8003B568", func_8003BF34);
 
 void func_8003C080(void) {
-    (D_800AA268.obj->unk_90)->unk_06 = 0;
+    (D_800AA248.unk_20->unk_90)->unk_06 = 0;
     func_8004CFC0();
 }
 
 void func_8003C0AC(void) {
-    (D_800AA268.obj->unk_90)->unk_0C = 1;
+    (D_800AA248.unk_20->unk_90)->unk_0C = 1;
 }
 
 void func_8003C0C8(void) {
-    (D_800AA268.obj->unk_90)->unk_1C = 0;
+    (D_800AA248.unk_20->unk_90)->unk_1C = 0;
 }
 
 void func_8003C0E0(void) {

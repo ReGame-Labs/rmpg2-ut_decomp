@@ -228,7 +228,7 @@ typedef struct UnkStruct5 UnkStruct5;
 typedef struct UnkStruct6 UnkStruct6;
 
 struct UnkStruct2 {  /* provisional: fields as the code reaches them */
-    void *unk_00;
+    UnkStruct4 *unk_00;
     u16 unk_04;
     u16 unk_06;
     UnkStruct1 *unk_08;
@@ -260,8 +260,7 @@ struct UnkStruct1 {  /* provisional: fields as the code reaches them */
     u16 unk_12;
     s16 unk_14;
     u16 unk_16;
-    u8 pad_18[0x2];
-    s16 unk_1A;
+    s32 unk_18;
     u8 pad_1C[0x4];
     void *unk_20;
     s16 unk_24;
@@ -295,12 +294,11 @@ struct UnkStruct1 {  /* provisional: fields as the code reaches them */
     u16 unk_82;
     void *unk_84;
     u16 unk_88;
-    u8 pad_8A[0x6];
+    u16 unk_8A;
+    u8 pad_8C[0x4];
     s32 unk_90;
     s32 unk_94;
-    struct UnkStruct4 *unk_98;
-    u8 pad_9C[0x50];
-    UnkStruct2 unk_EC;
+    UnkStruct2 unk_98[2];
     s16 unk_140;
     u8 pad_142[0x2];
     s16 unk_144;
@@ -339,14 +337,41 @@ struct UnkStruct6 {  /* provisional */
     UnkStruct3 *unk_18;
 };
 
+typedef struct UnkStruct13 {  /* provisional: the records UnkStruct12 points at (func_800308EC, func_80030A70, func_80030BAC) */
+    u8 pad_00[0x10];
+    s32 unk_10;
+    u8 pad_14[0x2];
+    u16 unk_16;
+    s32 unk_18;
+} UnkStruct13;
+
+typedef struct UnkStruct14 {  /* provisional */
+    UnkStruct13 *unk_00;
+    u16 unk_04;
+} UnkStruct14;
+
+typedef struct UnkStruct12 {  /* provisional: 0x18 bytes, three of them in UnkStruct5 */
+    UnkStruct13 *unk_00;
+    u8 pad_04[0x4];
+    UnkStruct13 **unk_08;
+    UnkStruct14 *unk_0C;
+    UnkStruct13 *unk_10;
+    u8 pad_14[0x4];
+} UnkStruct12;
+
+typedef struct UnkStruct15 {  /* provisional: func_800300A0's first argument */
+    u8 pad_00[0x1A];
+    s16 unk_1A;
+} UnkStruct15;
+
 struct UnkStruct5 {  /* provisional: func_800309AC's argument */
     UnkStruct1 *unk_00;
     u16 unk_04;
     u8 pad_06[0x2];
     UnkStruct6 *unk_08;
-    u8 unk_0C[0x18];
-    u8 unk_24[0x18];
-    u8 unk_3C[0x18];
+    UnkStruct12 unk_0C;
+    UnkStruct12 unk_24;
+    UnkStruct12 unk_3C;
 };
 
 typedef struct UnkStruct9 {  /* provisional: the second argument of the func_80031xxx/80032xxx handlers */
@@ -361,7 +386,10 @@ typedef struct UnkStruct9 {  /* provisional: the second argument of the func_800
 } UnkStruct9;
 
 typedef struct UnkStruct7 {  /* provisional: the 0x220-byte records at D_801E0B78 */
-    u8 pad_00[0x8];
+    u8 pad_00[0x2];
+    s16 unk_02;
+    s16 unk_04;
+    u8 pad_06[0x2];
     s32 unk_08;
     u8 pad_0C[0x214];
 } UnkStruct7;
@@ -410,20 +438,20 @@ void func_8002E5F4(s32 arg0);
 void func_8003C894(void **);
 void func_8002E614(s32 arg0);
 void func_8002ED28(void);
-void func_80030698(s32, s32, void *);
+void func_80030698(s32, s32, UnkStruct2 *);
 void func_8001E4B0(void *);
 void func_80025B7C(UnkStruct2 *);
 void func_8002F9BC(void);
 void func_8002F9F4(UnkStruct2 *arg0);
 void func_800300F4(void);
-void func_800300A0(UnkStruct1 *arg0, UnkStruct1 *arg1);
+void func_800300A0(UnkStruct15 *, UnkStruct1 *);
 void func_80030114();
-void func_800308EC(s16, void *);
+void func_800308EC(s16, UnkStruct12 *);
 void func_800309AC(s16 arg0, UnkStruct5 *arg1);
 void func_800256B0(void *);
 void func_800256CC(void *);
 void func_800257C4(void *);
-void func_8002F630(void *, s32, void *);
+void func_8002F630(UnkStruct1 *, s32, UnkStruct2 *);
 void func_8003CD5C(void *);
 void func_80030FA4(void);
 void * func_8003D1F8(s32);
@@ -639,7 +667,7 @@ void func_8001F39C(void *);
 extern u8 D_8007C944[];
 extern u8 D_8007C95C[];
 extern s32 *D_801D85A4;
-void func_8002DFA8();
+void func_8002DFA8(s32, UnkStruct1 *);
 void func_8002E148();
 void func_8002D370();
 void func_8002FDC0();
@@ -652,4 +680,17 @@ void func_8002E0C8(s32, UnkStruct1 *);
 void func_8003E788(UnkStruct9 *);
 extern s32 D_800AA260;
 extern s32 D_800AA2DC;
+void func_8002F688();
+void func_8002FB38(void *, UnkStruct4 *);
+void func_8002E348(s32, UnkStruct2 *);
+void func_80030D14(s32, UnkStruct2 *);
+void func_8002B878();
+void func_8002BA70(s32);
+extern u16 D_8007A688;
+extern u8 D_801FA8A0[7];
+void func_8002FAA4(s32, UnkStruct2 *);
+void func_80030BAC(UnkStruct12 *);
+void func_80030A70(s32, UnkStruct12 *);
+void func_8002F65C(UnkStruct1 *, s32, UnkStruct2 *);
+void func_80032008(s16, s32, UnkStruct9 *);
 #endif /* GAME_8002A330_H */
