@@ -274,14 +274,13 @@ void func_80041A3C(const AiHandler *handlers, Ai *ai) {
     }
 }
 
-/* 98.6%: the original adds the index into the table register (addu a0,a0,v0) and reads through it */
-#ifdef NON_MATCHING
 void func_80041A70(const AiHandler *handlers, Ai *ai) {
-    (*(handlers + ai->unk_A))(ai);
+    const AiHandler *handler;
+
+    handler = handlers;
+    handler += ai->unk_A;
+    (*handler)(ai);
 }
-#else
-INCLUDE_ASM("asm/main/nonmatchings/game_8004160C", func_80041A70);
-#endif
 
 void func_80041AA8(Ai *ai) {
     func_800416AC(D_8007E930, ai);
