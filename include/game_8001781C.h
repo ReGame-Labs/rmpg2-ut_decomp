@@ -3,6 +3,7 @@
 
 #include "common.h"
 #include "psyq/libc.h"
+#include "psyq/libapi.h"
 
 /* Provisional types of src/main/game_8001781C.c, the first file of the game's code (main, the game loop, the
  * sprite objects). Field names are offsets until their meaning is known; the types are the ones the code's loads and
@@ -18,7 +19,7 @@ typedef struct SpriteImage {
 /* A sprite object: linked (unk_68), with flags at unk_1A, unk_22 and unk_6C. */
 typedef struct Sprite {
     struct Sprite *unk_0;
-    u8 pad_4[0x4];
+    struct Sprite *unk_4;
     s16 unk_8;
     s16 unk_A;
     s32 unk_C;
@@ -40,7 +41,8 @@ typedef struct Sprite {
     SpriteImage *unk_34;
     s32 unk_38;
     u16 unk_3C;
-    u8 pad_3E[0x6];
+    u8 pad_3E[0x2];
+    struct Sprite *unk_40;
     s32 unk_44;
     s32 unk_48;
     s8 unk_4C;
@@ -53,8 +55,16 @@ typedef struct Sprite {
     struct Sprite *unk_68;
     u16 unk_6C;
     u16 unk_6E;
-    u8 pad_70[0x1C];
-    u8 unk_8C[0x40];
+    u16 unk_70;
+    u8 pad_72[0x2];
+    s16 unk_74;
+    u8 pad_76[0xA];
+    u16 unk_80;
+    u16 unk_82;
+    u8 pad_84[0x8];
+    u8 unk_8C[0x4];
+    void *unk_90;
+    u8 pad_94[0x38];
 } Sprite;
 
 /* Three slots of freed resources (SpriteSlots.unk_C, unk_24, unk_3C ... released through func_8001E4B0). */
@@ -120,27 +130,100 @@ typedef struct Monster {
     u16 unk_5C;
     u8 pad_5E[0xA];
     Sprite *unk_68;
-    u8 pad_6C[0x60];
+    u8 pad_6C[0x5C];
+    u16 unk_C8;
+    u8 pad_CA[0x2];
     u16 unk_CC;
     s16 unk_CE;
-    u8 pad_D0[0x4];
+    u16 unk_D0;
+    u8 pad_D2[0x2];
     s16 unk_D4;
-    u8 pad_D6[0x8];
+    u8 pad_D6[0x2];
+    s32 unk_D8;
+    u8 pad_DC[0x2];
     s16 unk_DE;
     u8 pad_E0[0x24];
     s32 unk_104;
     u8 pad_108[0x1E];
     s16 unk_126;
-    u8 pad_128[0x40];
+    u16 unk_128;
+    u8 pad_12A[0x2];
+    u16 unk_12C;
+    u8 pad_12E[0x10];
+    s16 unk_13E;
+    u8 pad_140[0x28];
     u16 unk_168;
     u8 pad_16A[0x20];
     s16 unk_18A;
-    u8 pad_18C[0x54];
-    s16 unk_1E0;
+    u16 unk_18C;
+    u8 pad_18E[0x1C];
+    u16 unk_1AA;
+    u8 pad_1AC[0x12];
+    u16 unk_1BE;
+    u8 pad_1C0[0x20];
+    u16 unk_1E0;
     u8 pad_1E2[0x16];
     s32 unk_1F8;
     u8 pad_1FC[0x24];
 } Monster;
+
+/* The block at 0x801D3D64. */
+typedef struct Unk801D3D64 {
+    u8 pad_0[0x1A];
+    u16 unk_1A;
+    u16 unk_1C;
+    u8 pad_1E[0x6];
+    s16 unk_24;
+    s16 unk_26;
+    s16 unk_28;
+    u8 pad_2A[0x2];
+    s32 unk_2C;
+    u8 pad_30[0x2C];
+    u16 unk_5C;
+    u16 unk_5E;
+    u8 pad_60[0x2];
+    u16 unk_62;
+} Unk801D3D64;
+
+/* A 0x14-byte record of the 1024-entry table at 0x801C542C. */
+typedef struct Unk1C542C {
+    s16 unk_0;
+    u8 pad_2[0x12];
+} Unk1C542C;
+
+/* The 13 blocks of 0x584 bytes at 0x801D3DC8: a 0x98-byte head and 15 items of 0x54 bytes. */
+typedef struct Unk1D3DC8Item {
+    u8 pad_0[0x54];
+} Unk1D3DC8Item;
+
+typedef struct Unk1D3DC8 {
+    u8 pad_0[0x98];
+    Unk1D3DC8Item items[15];
+} Unk1D3DC8;
+
+/* The record func_8001D110 hands out (a sprite's draw request?). */
+typedef struct Unk1D110 {
+    s32 unk_0;
+    u8 pad_4[0x2];
+    u16 unk_6;
+    u8 pad_8[0x4];
+    s32 unk_C;
+    s32 unk_10;
+    s32 unk_14;
+    u8 pad_18[0x8];
+    s32 unk_20;
+} Unk1D110;
+
+/* The object of func_80029510: a value at unk_8 clamped to 0x440000. */
+typedef struct Unk29510 {
+    u8 pad_0[0x8];
+    s32 unk_8;
+    u8 pad_C[0x58];
+    u16 unk_64;
+    u8 pad_66[0x2];
+    u8 pad_68[0x88];
+    s32 unk_F0;
+} Unk29510;
 
 /* An 8-byte record of the two 20-entry tables at 0x801FA738 and 0x801FA7EC. */
 typedef struct UnkFA738 {
