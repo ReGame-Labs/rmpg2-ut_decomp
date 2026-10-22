@@ -46,6 +46,9 @@ GCC 2.8.1's sources, for reading why the compiler chose something:
 - Names and sizes: `config/symbol_addrs.txt` (the executable) and `config/<overlay>.symbols.txt` (`name = 0x80012345;
   // type:func`, `size:0x34` for structs).
 - After a symbol-file change splat can keep stale `asm/<t>/nonmatchings/*.s`: delete `asm/<t>` or run `build.sh --check`.
+- Several names for one address (the original's distinct symbols that the link placed together): splat takes one
+  name per address, so the extra names go in `config/aliases.ld` as `other_name = name;` lines, a linker-script
+  fragment the executable's link reads; the C uses the names the original did.
 - `permuter_settings.toml` compiles at `-G 0`; set the file's `-G` there when permuting a function of another file.
 
 ## The loop per function

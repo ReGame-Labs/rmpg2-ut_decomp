@@ -48,7 +48,8 @@ EXE_SYMS = "build/main/SLUS_007.42.syms.ld"
 OVERLAY_BASE, OVERLAY_END = 0x80097EA4, 0x800AA240
 
 TARGETS = [
-    Target("main", "config/main.yaml", "build/SLUS_007.42", "config/SLUS_007.42.sha1"),
+    # config/aliases.ld: extra names for addresses that have several (docs/MATCHING.md "How targets are configured").
+    Target("main", "config/main.yaml", "build/SLUS_007.42", "config/SLUS_007.42.sha1", ("config/aliases.ld",)),
     # The overlays (docs/DISC_LAYOUT.md "Overlays"): headerless images loaded at OVERLAY_BASE, linked against the
     # executable's symbols (EXE_SYMS: the calls into the executable resolve to its own definitions).
     Target("overattr", "config/overattr.yaml", "build/OVERATTR.BIN", "config/OVERATTR.BIN.sha1", (EXE_SYMS,)),
