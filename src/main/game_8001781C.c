@@ -99,11 +99,8 @@ extern u16 D_801FAF6C;
 extern u16 D_801FAF6E;
 extern u16 D_801FAF70;
 extern s16 D_801FB18C;
-void DrawSync(s32);
 void MemCardInit(s32);
 void MemCardStart(void);
-void SetDispMask(s32);
-void VSync(s32);
 void cdload_load_overlay(s32);
 void func_800193B8(void);
 void func_80019764(void);
@@ -116,7 +113,7 @@ void func_8001B350();
 void func_8001B694(void);
 void func_8001BA98(void);
 void func_8001C404(void);
-void func_8001D184(void);
+void func_8001D184();
 void func_8001D7D0(void);
 s32 func_8001D998(Sprite *);
 void func_8001DF98(void);
@@ -294,7 +291,7 @@ void func_8001D598(void);
 extern s16 D_801D872C;
 extern s16 D_801E28A0;
 extern s16 D_801F9944;
-extern s16 D_801F9AE0;
+extern u16 D_801F9AE0;
 extern s32 D_801E28E0;
 void func_8001BDCC(void);
 extern UnkFA738 D_801FA7EC[];
@@ -357,6 +354,26 @@ extern s16 D_801F9914;
 void func_80026A6C(void);
 Unk1D110 *func_8001D110(void);
 extern Unk1D110 *D_800AA284;
+s32 func_80023C58(s32 arg0);
+s32 func_80023AC0(Sprite *arg0);
+s32 func_80026D54(void *);
+s32 func_80026D90(void *);
+s32 func_80027348(void);
+void func_80026C4C(Monster *arg0);
+s32 func_800272FC(void);
+void func_800580F8(void *);
+void func_80026F98(Monster *arg0);
+void func_80020AF4(void *);
+void func_800273F4(Monster *, s32);
+void func_80027394(void);
+extern s32 D_801C51D0;
+s32 func_8001A0A0(void);
+extern u8 D_8007AB70[];
+extern u16 D_8007AB84[];
+void func_8001D6A0(void);
+extern s32 D_801E299C;
+extern s32 D_801FA974;
+extern Unk1FAC80 *D_801FAC80;
 /* decls:end */
 
 INCLUDE_ASM("asm/main/nonmatchings/game_8001781C", main);
@@ -522,7 +539,20 @@ INCLUDE_ASM("asm/main/nonmatchings/game_8001781C", func_800193B8);
 
 INCLUDE_ASM("asm/main/nonmatchings/game_8001781C", func_80019764);
 
-INCLUDE_ASM("asm/main/nonmatchings/game_8001781C", func_80019890);
+void func_80019890(void) {
+    u32 color;
+
+    DrawSync(0);
+    VSync(0);
+    D_801FA974 = D_801E299C;
+    color = D_801FA9A4;
+    D_801FAC80->draw.r0 = color >> 0x10;
+    D_801FAC80->draw.g0 = color >> 8;
+    D_801FAC80->draw.b0 = color;
+    PutDispEnv(&D_801FAC80->disp);
+    PutDrawEnv(&D_801FAC80->draw);
+    DrawOTag(D_801FAC80->ot);
+}
 
 INCLUDE_ASM("asm/main/nonmatchings/game_8001781C", func_80019920);
 
@@ -540,7 +570,15 @@ INCLUDE_ASM("asm/main/nonmatchings/game_8001781C", func_80019B08);
 
 INCLUDE_ASM("asm/main/nonmatchings/game_8001781C", func_80019DAC);
 
-INCLUDE_ASM("asm/main/nonmatchings/game_8001781C", func_8001A0A0);
+s32 func_8001A0A0(void) {
+    s32 index;
+
+    do {
+        index = (u8) D_801C51D0 | 0x200;
+        D_801C51D0 += 1;
+    } while (D_801C542C[index].unk_0 != -1);
+    return index;
+}
 
 INCLUDE_ASM("asm/main/nonmatchings/game_8001781C", func_8001A0E4);
 
@@ -1042,7 +1080,29 @@ INCLUDE_ASM("asm/main/nonmatchings/game_8001781C", func_8001D4B8);
 
 INCLUDE_ASM("asm/main/nonmatchings/game_8001781C", func_8001D598);
 
-INCLUDE_ASM("asm/main/nonmatchings/game_8001781C", func_8001D6A0);
+void func_8001D6A0(void) {
+    u16 temp_v0;
+    u8 temp_v1;
+
+    D_801D3780 = 0;
+    if ((D_801F9AE0 != 1) && (D_801F9AE0 != 7) && (D_801F9AE0 != 0xC)) {
+        temp_v1 = D_8007AB70[D_801F9AE0];
+        if (temp_v1 == 1) {
+            D_801F9A3C = (s16) temp_v1;
+        }
+        if ((D_801F9AE0 == 3) || (D_801F9AE0 == 9) || (D_801F9AE0 == 0xE)) {
+            D_801FA9A4 = 0;
+        }
+        func_8001D184();
+        D_801F9A3C = 0;
+    }
+    temp_v0 = D_801F9AE0 + 1;
+    D_801F9AE0 = temp_v0;
+    if ((u32) (temp_v0 & 0xFFFF) >= 0x12U) {
+        D_801F9AE0 = 0;
+    }
+    D_801E29BC = D_8007AB84[D_801F9AE0];
+}
 
 void func_8001D77C(void) {
     D_801D3780 = 0;
@@ -1226,7 +1286,30 @@ void func_8001E7A0(void) {
     func_8001E7C8(D_800AA268);
 }
 
-INCLUDE_ASM("asm/main/nonmatchings/game_8001781C", func_8001E7C8);
+void func_8001E7C8(Sprite *arg0) {
+    Sprite *next;
+    Sprite *p;
+
+    if (!(arg0->unk_6C & 0x4000)) {
+        func_8001B5E8(0x10);
+    }
+    arg0->unk_6C = (u16) (arg0->unk_6C & 0xBFFF);
+    func_80020AF4(arg0);
+    next = D_801D8584;
+    if (arg0 == next) {
+        next = arg0->unk_40;
+        D_801D8584 = next;
+        return;
+    }
+    do {
+        p = next;
+        next = p->unk_40;
+        if (next == NULL) {
+            func_8001B5E8(0x11);
+        }
+    } while (next != arg0);
+    p->unk_40 = arg0->unk_40;
+}
 
 INCLUDE_ASM("asm/main/nonmatchings/game_8001781C", func_8001E878);
 
@@ -1581,11 +1664,61 @@ INCLUDE_ASM("asm/main/nonmatchings/game_8001781C", func_80023764);
 
 INCLUDE_ASM("asm/main/nonmatchings/game_8001781C", func_800239F4);
 
+#ifdef NON_MATCHING
+/* 99.8 %: the negation reads the copy's register in the original (negu v0, v0), the s16 delta's here. */
+s32 func_80023AC0(Sprite *arg0) {
+    s16 delta;
+    s32 dist;
+    s32 step;
+
+    delta = arg0->unk_28 - D_800AA268->unk_1A;
+    dist = delta;
+    if (delta < 0) {
+        dist = -dist;
+    }
+    if (dist < 0xB) {
+        D_800AA268->unk_10 = 0;
+        return 1;
+    }
+    step = 0xFFFE0000;
+    if (delta >= 0) {
+        step = 0x10000;
+    }
+    D_800AA268->unk_10 = step | 0x8000;
+    return 0;
+}
+#else
 INCLUDE_ASM("asm/main/nonmatchings/game_8001781C", func_80023AC0);
+#endif
 
 INCLUDE_ASM("asm/main/nonmatchings/game_8001781C", func_80023B20);
 
+#ifdef NON_MATCHING
+/* 99.8 %: the negation reads the copy's register in the original (negu v0, v0), the s16 delta's here. */
+s32 func_80023C58(s32 arg0) {
+    s16 delta;
+    s32 dist;
+    s32 step;
+
+    delta = arg0 - D_800AA268->unk_1A;
+    dist = delta;
+    if (delta < 0) {
+        dist = -dist;
+    }
+    if (dist < 0xB) {
+        D_800AA268->unk_10 = 0;
+        return 1;
+    }
+    step = 0xFFFE0000;
+    if (delta >= 0) {
+        step = 0x10000;
+    }
+    D_800AA268->unk_10 = step | 0x8000;
+    return 0;
+}
+#else
 INCLUDE_ASM("asm/main/nonmatchings/game_8001781C", func_80023C58);
+#endif
 
 INCLUDE_ASM("asm/main/nonmatchings/game_8001781C", func_80023CB8);
 
@@ -1950,7 +2083,28 @@ void func_80026BC4(Monster *arg0) {
 
 INCLUDE_ASM("asm/main/nonmatchings/game_8001781C", func_80026C04);
 
+#ifdef NON_MATCHING
+/* 89.8 %: the zero stored into unk_3C/unk_3E goes through a register in the original (a variable that is 0 on both paths). */
+void func_80026C4C(Monster *arg0) {
+    u16 value;
+
+    if ((arg0->unk_D0 & 2) && !(func_80027348() & 0xFFFF) && !(func_80026D54(arg0) & 0xFFFF)) {
+        if (arg0->unk_18E == 0) {
+            value = arg0->unk_3C;
+            if ((value == 0) || (value = 0, ((func_80026D90(arg0) & 0xFFFF) == 0))) {
+                arg0->unk_3E = value;
+                arg0->unk_3C = value;
+            }
+            arg0->unk_18A = 0;
+            func_80026CFC(arg0);
+            return;
+        }
+        arg0->unk_5A = 0x40;
+    }
+}
+#else
 INCLUDE_ASM("asm/main/nonmatchings/game_8001781C", func_80026C4C);
+#endif
 
 void func_80026CFC(Monster *arg0) {
     u16 temp_v1;
@@ -1998,7 +2152,30 @@ void func_80026F58(Monster *arg0) {
     func_80057DD8();
 }
 
+#ifdef NON_MATCHING
+/* 89.9 %: the call's argument is set up early and the (u16)(state - 5) truncation is kept in the original. */
+void func_80026F98(Monster *arg0) {
+    u16 temp_v1;
+
+    D_800AA248.unk_20 = arg0->unk_68;
+    if ((arg0->unk_D0 & 4) && !(func_800272FC() & 0xFFFF)) {
+        temp_v1 = arg0->unk_5A;
+        if (temp_v1 == 0x53) {
+            arg0->unk_5A = 0x54U;
+            return;
+        }
+        arg0->unk_152 = (u16) (temp_v1 - 5) < 2;
+        arg0->unk_5A = 2U;
+        func_800580F8(arg0);
+        if (arg0->unk_18E == 0) {
+            arg0->unk_5A = 0x4EU;
+        }
+        arg0->unk_1B0 = 0;
+    }
+}
+#else
 INCLUDE_ASM("asm/main/nonmatchings/game_8001781C", func_80026F98);
+#endif
 
 INCLUDE_ASM("asm/main/nonmatchings/game_8001781C", func_8002703C);
 
@@ -2008,7 +2185,15 @@ INCLUDE_ASM("asm/main/nonmatchings/game_8001781C", func_800272FC);
 
 INCLUDE_ASM("asm/main/nonmatchings/game_8001781C", func_80027348);
 
-INCLUDE_ASM("asm/main/nonmatchings/game_8001781C", func_80027394);
+void func_80027394(void) {
+    s32 i;
+
+    i = 0;
+    do {
+        i += 1;
+        func_800273F4(&D_801E0B78[func_80025DF8(i)], i & 0xFFFF);
+    } while (i < 3);
+}
 
 INCLUDE_ASM("asm/main/nonmatchings/game_8001781C", func_800273F4);
 

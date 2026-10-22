@@ -4,6 +4,8 @@
 #include "common.h"
 #include "psyq/libc.h"
 #include "psyq/libapi.h"
+#include "psyq/libgpu.h"
+#include "psyq/libetc.h"
 
 /* Provisional types of src/main/game_8001781C.c, the first file of the game's code (main, the game loop, the
  * sprite objects). Field names are offsets until their meaning is known; the types are the ones the code's loads and
@@ -123,7 +125,10 @@ typedef struct GameState {
 /* A monster (player or AI): its state machine at unk_5A, its sprite at unk_68. */
 typedef struct Monster {
     u16 unk_0;
-    u8 pad_2[0x44];
+    u8 pad_2[0x3A];
+    u16 unk_3C;
+    u16 unk_3E;
+    u8 pad_40[0x6];
     u16 unk_46;
     u8 pad_48[0x12];
     u16 unk_5A;
@@ -151,14 +156,19 @@ typedef struct Monster {
     u16 unk_12C;
     u8 pad_12E[0x10];
     s16 unk_13E;
-    u8 pad_140[0x28];
+    u8 pad_140[0x12];
+    s16 unk_152;
+    u8 pad_154[0x14];
     u16 unk_168;
     u8 pad_16A[0x20];
     s16 unk_18A;
     u16 unk_18C;
-    u8 pad_18E[0x1C];
+    u16 unk_18E;
+    u8 pad_190[0x1A];
     u16 unk_1AA;
-    u8 pad_1AC[0x12];
+    u8 pad_1AC[0x4];
+    u16 unk_1B0;
+    u8 pad_1B2[0xC];
     u16 unk_1BE;
     u8 pad_1C0[0x20];
     u16 unk_1E0;
@@ -200,6 +210,14 @@ typedef struct Unk1D3DC8 {
     u8 pad_0[0x98];
     Unk1D3DC8Item items[15];
 } Unk1D3DC8;
+
+/* The frame's drawing state at D_801FAC80: the draw and display environments, the ordering table at 0x154. */
+typedef struct Unk1FAC80 {
+    DRAWENV draw;
+    DISPENV disp;
+    u8 pad_70[0xE4];
+    unsigned long ot[1];
+} Unk1FAC80;
 
 /* The record func_8001D110 hands out (a sprite's draw request?). */
 typedef struct Unk1D110 {
