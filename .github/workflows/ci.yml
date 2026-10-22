@@ -85,13 +85,19 @@ jobs:
         if: env.HAVE_GAME_FILES == 'true'
         run: tools/venv/bin/python tools/progress.py
 
-      # The report to decmp.dev: the project page https://decmp.dev/ReGame-Labs/rmpg2-wt. name, platform and banner
-      # count on the first upload only; afterwards they are managed on decmp.dev.
+      # The report to decmp.dev: the project page https://decmp.dev/ReGame-Labs/rmpg2-wt. The uploader is decmp's
+      # own script (decmp/upload-action's script build), pinned by its SHA-256 rather than taken as an action: the
+      # action's v1 tag shipped a malformed action.yml that failed the job at setup, and a hash pin cannot move.
+      # name and platform count on the first upload only; afterwards they are managed on decmp.dev.
       - name: Upload the progress report to decmp.dev
         if: env.HAVE_GAME_FILES == 'true' && github.event_name != 'workflow_dispatch'
-        uses: decmp/upload-action@v1
-        with:
-          report: build/report.json
-          version: SLUS_007.42
-          name: "Rampage 2: Universal Tour"
-          platform: ps
+        run: |
+          curl -fsSL https://api.decmp.dev/action/v1.1.0.mjs -o decmp.mjs
+          echo "10fb0039a067b4ffe67510959356a691efa6efbb0aae16450c04f8c64da0a5f8  decmp.mjs" | sha256sum -c
+          node decmp.mjs
+        env:
+          DECMP_REPORT: build/report.json
+          DECMP_VERSION: SLUS_007.42
+          DECMP_NAME: "Rampage 2: Universal Tour"
+          DECMP_PLATFORM: ps
+          GITHUB_TOKEN: ${{ github.token }}
