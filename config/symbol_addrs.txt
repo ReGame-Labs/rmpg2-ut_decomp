@@ -372,3 +372,13 @@ _patch_card2 = 0x8007A5D0; // type:func
 _copy_memcard_patch = 0x8007A640; // type:func
 // LIBCARD A75.OBJ
 StartCARD2 = 0x8007A674; // type:func
+
+// cdload (src/main/cdload.c), the CD file reader and the overlay loader (docs/DISC_LAYOUT.md "The file table" and
+// "Overlays"). Files are read by index into the file table, checksummed and retried.
+cdload_wait_sync = 0x800613AC; // type:func  waits on CdSync, 600 tries
+cdload_wait_read_sync = 0x800614F0; // type:func  waits on CdReadSync, 10 s cap
+cdload_checksum = 0x80061564; // type:func  the exclusive-or of a buffer's words, the tail zero-padded
+cdload_read_file = 0x8006118C; // type:func  (index, buffer) CdlSetmode, CdlSetloc, CdRead, the checksum, 5 retries, returns the size
+cdload_city_file_index = 0x800615FC; // type:func  (which) the current city's .BIN (1) or .CMB file index
+cdload_load_overlay = 0x8006180C; // type:func  (n) 0 OVERATTR.BIN, 1 OVERMOVE.BIN, 2 none, copied to 0x80097EA4
+cdload_load_city_table = 0x800618F4; // type:func  (index) a city's .BIN table into the overlay region

@@ -43,10 +43,54 @@ The regions (`config/main.yaml`; the code regions are the first split, to be ref
 |---|---|---|
 | `0x80010000`–`0x80017758` | 30,552 | `.rodata` of every object, in link order (psylink puts them before all `.text`); the first 0x580 bytes are the file table's checksums (below) |
 | `0x80017758`–`0x8001781C` | 196 | crt0 (Psy-Q `2MBYTE.OBJ`): clears `.bss`, reads `_ramsize` (2 MB, from its own table at `0x80017810`) and `_stacksize` (`0x600`, at `0x8007A70C`), sets `$sp = 0x80200000` and `$gp`, calls `InitHeap` (the BIOS call stub at `0x80063A78`) and `main` |
-| `0x8001781C`–`0x80063FA8` | 313,228 | The game's code, `main` first; the `InitHeap` stub (16 bytes at `0x80063A78`, the first library object) sits between two of its objects |
+| `0x8001781C`–`0x80063FA8` | 313,228 | The game's code, `main` first, split into files ("The files" below); the `InitHeap` stub (16 bytes at `0x80063A78`, the first library object) sits between two of its objects |
 | `0x80063FA8`–`0x8007A684` | 91,868 | The Psy-Q library objects (123 objects, 65,888 bytes; `docs/TOOLCHAIN.md`), with three pieces of the game's sound driver between them (25,980 bytes) |
 | `0x8007A684`–`0x80097EA4` | 120,352 | `.data`; the last non-zero word is at `0x80097E9C`. No `.sdata` or `.sbss`: the code makes no `$gp`-relative access, and `$gp` is simply the end of `.data` |
 | `0x80097EA4`–`0x80098000` | 348 | Zeros: the file is padded to a whole sector (`t_size` is a multiple of 0x800). The overlay region starts here |
+
+## The files
+
+The game's code is split into the files below (`config/main.yaml`, one `c` subsegment each with its `.rodata` and
+`.data`; the evidence of every boundary is in the YAML's comments, following [`MATCHING.md`](MATCHING.md)
+"Splitting a target into files"). The link order is the order of the `.text`: psylink placed each object's
+`.rodata` and `.data` in that order, with data-only objects between the code files (the file table's checksums
+first of all, the screens' tables between `game_800500EC` and `game_80057C94`, the overlay region's address after
+`cdload`, and the tables pulled from a library after the Psy-Q objects). Twelve boundaries are proven by jump-table
+parity, their position inside the window then taken from the `.data` pieces each side uses (weak where the window
+has none); the others by a file's `.data` and its callers. Files are named after their first function until their
+contents are understood; `cdload` is the CD file reader.
+
+| File | `.text` | `.rodata` | `.data` | Contents |
+|---|---|---|---|---|
+| `game_8001781C` | `0x8001781C`–`0x8002A330` | `0x800105A8`–`0x80010784` | `0x8007A684`–`0x8007C934` | `main` and the start of the game: 352 functions |
+| `game_8002A330` | `0x8002A330`–`0x80034590` | `0x80010784`–`0x800108D8` | `0x8007C934`–`0x8007D448` | 340 functions |
+| `game_80034590` | `0x80034590`–`0x8003B568` | `0x800108D8`–`0x80010CB4` | `0x8007D448`–`0x8007DB60` | 141 functions |
+| `game_8003B568` | `0x8003B568`–`0x8003CD08` | `0x80010CB4`–`0x80010D70` | `0x8007DB60`–`0x8007DE44` | 36 functions |
+| `game_8003CD08` | `0x8003CD08`–`0x8004160C` | `0x80010D70`–`0x80010E64` | `0x8007DE44`–`0x8007E6C8` | 120 functions |
+| `game_8004160C` | `0x8004160C`–`0x80043118` | `0x80010E64`–`0x80010F78` | `0x8007E6C8`–`0x8007ED64` | 82 functions; a run of 11-instruction stubs before `func_80042670` |
+| `game_80043118` | `0x80043118`–`0x80043E28` | `0x80010F78`–`0x8001107C` |  | 49 functions, starting with a run of 11-instruction stubs; no `.data` of its own |
+| `game_80043E28` | `0x80043E28`–`0x8004750C` | `0x8001107C`–`0x80011340` | `0x8007F1F4`–`0x8007F228` | 116 functions, starting with a run of 11-instruction stubs |
+| `game_8004750C` | `0x8004750C`–`0x8004C064` | `0x80011340`–`0x800113FC` | `0x8007F228`–`0x8007F680` | 73 functions |
+| `game_8004C064` | `0x8004C064`–`0x8004E574` | `0x800113FC`–`0x800114E0` | `0x8007F680`–`0x8007F710` | 79 functions |
+| `game_8004E574` | `0x8004E574`–`0x800500EC` | `0x800114E0`–`0x80011534` | `0x8007F710`–`0x8007F8FC` | 58 functions |
+| `game_800500EC` | `0x800500EC`–`0x80057C94` | `0x80011534`–`0x80011594` | `0x8007F8FC`–`0x8007FC84` | the last file whose `.data` precedes the screens' tables |
+| `game_80057C94` | `0x80057C94`–`0x8005D198` | `0x80011594`–`0x800115D8` | `0x8008434C`–`0x80085264` | the first file whose `.data` follows the screens' tables; 150 small tables, one per function |
+| `game_8005D198` | `0x8005D198`–`0x80060F3C` | `0x800115D8`–`0x8001169C` |  | 38 functions; uses the config tables `D_8008427C`–`D_8008433C` |
+| `cdload` | `0x80060F3C`–`0x800633EC` | `0x80016A90`–`0x80016AC8` | `0x80085264`–`0x80085328` | the CD file reader and the overlay loader (`cdload_read_file`, `cdload_load_overlay`); `func_800619A4`–`func_80062868` and the stream reader `func_80062C10`–`func_800632E8` may be files of their own |
+| `game_800633EC` | `0x800633EC`–`0x80063A78` |  | `0x80085328`–`0x800853C0` | the sound setup, before the `InitHeap` stub |
+| `game_80063A88` | `0x80063A88`–`0x80063FA8` |  | `0x800853C0`–`0x800853F4` | the SPU setup, between the first two library objects |
+| `game_8006BB14` | `0x8006BB14`–`0x80070914` |  |  | the sound driver (the `SPSX` string), between library objects |
+| `game_80076C8C` | `0x80076C8C`–`0x800783C0` |  |  | more of the sound driver |
+| `game_80078A40` | `0x80078A40`–`0x80078A88` |  |  | one sound-driver function |
+
+The `.rodata` between the files' pieces holds data-only objects: `0x80010000`–`0x800105A8` the file table's
+checksums, `0x8001169C`–`0x80016A90` const tables and strings used from `.data` and from code all over,
+`0x80016AC8`–`0x80017758` the overlay region's address (twice, `D_80016AC8` and `D_80016ACC`), `D_80016AD0` and
+the libraries' `.rodata`. The `.data` outside the files: `0x8007ED64`–`0x8007F1F4` and `0x8007FC84`–`0x8008434C`
+the screens' tables (500-byte records with 16-byte descriptors) and the config tables `D_8008427C`–`D_8008433C`,
+`0x800853F4`–`0x800888DC` the Psy-Q libraries' `.data` in link order, `0x800888DC`–`0x80097EA4` the tables linked
+after the libraries, the file table among them. `.bss` stays one unit: uninitialised globals are COMMON symbols,
+placed by the linker in an order of its own.
 
 ## Memory map
 
