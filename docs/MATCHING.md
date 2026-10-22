@@ -89,17 +89,23 @@ GCC 2.8.1's sources, for reading why the compiler chose something:
 Each target is split into the C files the original had, and every boundary carries its evidence in the YAML:
 - **Jump-table parity:** objects are packed at 4, tables 8-aligned within their object, so a table whose
   `(address - base) mod 8` differs from the previous one's starts a new object. A zero pad word after an odd-length
-  table ties the next table to the same object.
-- **Positions:** create/update pairs, static helpers placed just before their only caller, define-before-use, `.data`
-  and `.bss` in link order, each module's function table, `$gp` users (ASPSX uses `$gp` only for symbols defined
-  earlier in the same file, so a `$gp` user and its variable share a file), helpers duplicated byte for byte (a copy
-  of a known file proves both its boundaries).
-- `.rodata` is split per file too (psylink puts every object's `.rodata`, in link order, before all `.text`): the
-  order of the `.rodata` pieces is the order of the files.
+  table ties the next table to the same object. Equal parity proves nothing (a coin toss per boundary).
+- **Link order:** psylink places every object's `.rodata` (before all `.text`) and `.data` in link order, which is
+  the order of the objects' `.text`. A jump table or a string literal belongs to the object of the function that
+  uses it, so the sequence of their users along `.rodata` is the file order; a `.data` piece belongs to the object
+  at its position in `.data`, whoever uses it (globals are used from anywhere, so `.data` order places a file's
+  definitions, not its users). Data-only objects (tables, strings, generated files) sit between code files in both
+  sections: a run of `.data` with no code users between two files' pieces proves a boundary between those files.
+- **Positions:** create/update pairs, static helpers placed just before their only caller, define-before-use, each
+  module's function table, `$gp` users (ASPSX uses `$gp` only for symbols defined earlier in the same file, so a
+  `$gp` user and its variable share a file), helpers duplicated byte for byte (a copy of a known file proves both
+  its boundaries). Function alignment is not evidence (every function is 4-aligned).
+- `.bss` is no evidence here: uninitialised globals are COMMON symbols, placed by the linker in an order of its own.
 
-Then replace the `asm` subsegments in `config/<target>.yaml` with per-file `.rodata` and `c` subsegments, a comment
-with each boundary's evidence (weak ones marked weak), run `configure.py`, check the build stays byte-identical and
-commit the split before decompiling. No evidence: no split.
+Then replace the `asm` subsegments in `config/<target>.yaml` with per-file `.rodata`, `c` and `data` subsegments, a
+comment with each boundary's evidence (weak ones marked weak), run `configure.py`, check the build stays
+byte-identical and commit the split before decompiling. No evidence: no split. The executable's files and what is
+known of them are in [`DISC_LAYOUT.md`](DISC_LAYOUT.md) "The files".
 
 ## C patterns
 
