@@ -8,7 +8,8 @@
 
 /* A moving thing in the world: positions are 16.16 fixed point, read as s16 integer parts where the code needs
  * them (unk_16, unk_1A). Reached through D_800AA248.unk_20 by the AI handlers (game_8004160C). */
-typedef struct Anim Anim;   /* animation data in the tables linked after the libraries; not read yet */
+typedef struct Anim Anim;
+typedef struct AiOrder AiOrder;   /* animation data in the tables linked after the libraries; not read yet */
 
 typedef struct Mover {
     /* 0x00 */ u8 unk_0[0xC];
@@ -53,11 +54,11 @@ typedef struct Ai {
     /* 0x0A */ u16 unk_A;       /* the state: the index into the handler table */
     /* 0x0C */ u16 unk_C;       /* 1 while the state is new */
     /* 0x0E */ u8 unk_E[0x2];
-    /* 0x10 */ struct AiOrder *unk_10;
+    /* 0x10 */ AiOrder *unk_10;
     /* 0x14 */ struct AiTarget *unk_14;
     /* 0x18 */ s16 unk_18;
     /* 0x1A */ u16 unk_1A;
-    /* 0x1C */ s32 unk_1C;
+    /* 0x1C */ AiOrder *unk_1C;
     /* 0x20 */ u8 unk_20[0x2];
     /* 0x22 */ u16 unk_22;
     /* 0x24 */ u16 unk_24;
@@ -70,18 +71,22 @@ typedef struct Ai {
     /* 0x34 */ u16 unk_34;
     /* 0x36 */ s16 unk_36;
     /* 0x38 */ u16 unk_38;      /* a countdown */
-} Ai;
+    /* 0x3A */ u8 unk_3A[0x6];
+} Ai;                       /* 0x40: D_801D85C8 holds five */
 
-typedef struct AiOrder {
-    /* 0x00 */ u8 unk_0[0x6];
+struct AiOrder {
+    /* 0x00 */ u8 unk_0[0x4];
+    /* 0x04 */ u16 unk_4;
     /* 0x06 */ u16 unk_6;
     /* 0x08 */ s32 unk_8;
-    /* 0x0C */ u8 unk_C[0x8];
+    /* 0x0C */ s32 unk_C;
+    /* 0x10 */ u8 unk_10[0x4];
     /* 0x14 */ u16 unk_14;
-} AiOrder;
+};
 
 typedef struct AiLink {
-    /* 0x00 */ u8 unk_0[0x8];
+    /* 0x00 */ u8 unk_0[0x6];
+    /* 0x06 */ u16 unk_6;
     /* 0x08 */ struct AiLinkInfo *unk_8;
 } AiLink;
 
@@ -103,7 +108,9 @@ typedef void (*AiHandler)(Ai *ai);
 typedef struct Player {
     /* 0x000 */ u8 unk_0[0x24];
     /* 0x024 */ u16 unk_24;
-    /* 0x026 */ u8 unk_26[0x34];
+    /* 0x026 */ u16 unk_26;
+    /* 0x028 */ u16 unk_28;
+    /* 0x02A */ u8 unk_2A[0x30];
     /* 0x05A */ s16 unk_5A;
     /* 0x05C */ u8 unk_5C[0xC4];
     /* 0x120 */ u16 unk_120;
@@ -114,6 +121,8 @@ typedef struct Player {
     /* 0x18A */ s16 unk_18A;
     /* 0x18C */ u8 unk_18C[0x20];
     /* 0x1AC */ u16 unk_1AC;
+    /* 0x1AE */ u8 unk_1AE[0x56];
+    /* 0x204 */ u16 unk_204;
 } Player;
 
 /* A thing on screen with a mover and an animation set, driven by a state (unk_4) and a kind (unk_6): the
@@ -127,19 +136,22 @@ typedef struct Actor {
     /* 0x0E */ u16 unk_E;
     /* 0x10 */ u8 unk_10[0x4];
     /* 0x14 */ u16 unk_14;
-    /* 0x16 */ u8 unk_16[0x6];
+    /* 0x16 */ u16 unk_16;
+    /* 0x18 */ u8 unk_18[0x4];
     /* 0x1C */ u16 unk_1C;
     /* 0x1E */ u8 unk_1E[0x6];
     /* 0x24 */ Anim **unk_24;   /* one animation per kind */
     /* 0x28 */ u16 unk_28;
     /* 0x2A */ u16 unk_2A;
     /* 0x2C */ Player *unk_2C;
-    /* 0x30 */ u8 unk_30[0x4];
+    /* 0x30 */ u16 unk_30;      /* a countdown */
+    /* 0x32 */ u16 unk_32;
     /* 0x34 */ struct ActorLink *unk_34;
     /* 0x38 */ u8 unk_38[0x2];
     /* 0x3A */ u16 unk_3A;
     /* 0x3C */ u16 unk_3C;
-} Actor;
+    /* 0x3E */ u8 unk_3E[0x2];
+} Actor;                    /* 0x40: D_801E1E48 holds twelve */
 
 typedef struct ActorLink {
     /* 0x00 */ u8 unk_0[0x10];
@@ -148,7 +160,9 @@ typedef struct ActorLink {
 
 /* The game's globals at 0x800AA248 (.bss): the fields are those the code reaches through its address. */
 typedef struct GameGlobals {
-    /* 0x00 */ u8 unk_0[0x20];
+    /* 0x00 */ u8 unk_0[0x4];
+    /* 0x04 */ s32 unk_4;
+    /* 0x08 */ u8 unk_8[0x18];
     /* 0x20 */ Mover *unk_20;   /* the monster being moved */
     /* 0x24 */ u8 unk_24[0x28];
     /* 0x4C */ s32 unk_4C;
