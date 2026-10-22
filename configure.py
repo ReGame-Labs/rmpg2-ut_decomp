@@ -54,11 +54,12 @@ TARGETS = [
 ]
 
 # Compiler per C file; anything not listed uses DEFAULT_CC (tools/cc_psx.sh picks the matching ASPSX version for
-# maspsx). 2.8.1 is the working assumption until tools/compiler_id.py settles it (docs/TOOLCHAIN.md).
+# maspsx). GCC 2.8.1 -O2: the compiler-ID experiment's verdict (docs/TOOLCHAIN.md "Compiler"); 2.8.0 generates the
+# same code, 2.8.1 is the one Psy-Q 4.3 shipped.
 DEFAULT_CC = "2.8.1"
 CC_OVERRIDES: dict[str, str] = {}      # "src/main/foo.c": "2.7.2"
-# -G per target; the executable uses $gp for a handful of variables only (docs/TOOLCHAIN.md), so -G0 is the default
-# until the compiler-ID experiment says otherwise. Exceptions by C path in G_OVERRIDES.
+# -G per target: the executable's code makes no $gp-relative access at all (docs/TOOLCHAIN.md), so every file is
+# -G0. Exceptions by C path in G_OVERRIDES (none expected for the executable; the overlays are settled separately).
 DEFAULT_G = {"main": 0}  # targets not listed: 0
 G_OVERRIDES: dict[str, int] = {}
 

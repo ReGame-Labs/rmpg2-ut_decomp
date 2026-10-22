@@ -85,7 +85,9 @@ def exe_regions(d, base):
             lo -= 0x10000 if lo & 0x8000 else 0
             print(f"  $gp = 0x{((w & 0xFFFF) << 16) + lo:08x} (set at 0x{base + i * 4:08x})")
     gp = sum(1 for w in ws if (w >> 21) & 31 == 28 and w >> 26 in LOADS_STORES)
-    print(f"  {gp} $gp-relative loads/stores/addiu")
+    # Over the whole image, data included: words of .rodata/.data decode as instructions too (docs/TOOLCHAIN.md
+    # "Compiler" has the count over the code alone: none).
+    print(f"  {gp} words decoding as $gp-relative loads/stores/addiu (data included)")
     last = max(i for i, w in enumerate(ws) if w)
     print(f"  last non-zero word 0x{base + last * 4:08x}; image end 0x{base + len(ws) * 4:08x}")
 
