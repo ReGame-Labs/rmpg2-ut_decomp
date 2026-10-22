@@ -2,6 +2,7 @@
 #define GAME_8002A330_H
 
 #include "common.h"
+#include "psyq/libc.h"
 
 /* The state block at D_800AA248 (.bss), as func_80032064 reaches it: a base address with field offsets (its member
  * at +0x20 is the object pointer that the rest of the code reaches as the scalar D_800AA268: the two forms give
@@ -282,7 +283,7 @@ struct UnkStruct1 {  /* provisional: fields as the code reaches them */
     u16 unk_58;
     u8 pad_5A[0x2];
     void *unk_5C;
-    u8 pad_60[0x4];
+    void *unk_60;
     void *unk_64;
     u8 pad_68[0x8];
     UnkStruct2 *unk_70;
@@ -321,7 +322,9 @@ struct UnkStruct4 {  /* provisional: what the game state's unk_20 (D_800AA268) p
     s32 unk_18;
     u8 pad_1C[0x6];
     u16 unk_22;
-    u8 pad_24[0x20];
+    u8 pad_24[0x10];
+    void *unk_34;
+    u8 pad_38[0xC];
     s32 unk_44;
     u8 pad_48[0x14];
     s32 *unk_5C;
@@ -391,7 +394,8 @@ typedef struct UnkStruct7 {  /* provisional: the 0x220-byte records at D_801E0B7
     s16 unk_04;
     u8 pad_06[0x2];
     s32 unk_08;
-    u8 pad_0C[0x214];
+    u8 pad_0C[0x4C];
+    u8 unk_58[0x1C8];
 } UnkStruct7;
 
 typedef struct UnkStruct8 {  /* provisional: func_80030268's third argument */
@@ -415,7 +419,7 @@ void func_8002C1E8(UnkStruct1 *arg0);
 void func_8002FEA4();
 void func_8002C228(UnkStruct1 *arg0);
 void func_8002E854();
-void func_80030B5C(void *);
+void func_80030B5C(UnkStruct1 *);
 void func_8002C25C(UnkStruct1 *arg0);
 void func_8002F084();
 void func_8002C3C4(UnkStruct1 *arg0);
@@ -467,7 +471,7 @@ void func_80031A3C(void);
 void func_80031B10(void);
 void func_80031444(void);
 void func_8001E7A0();
-void func_80020BA0(s32, s32, void *);
+void func_80020BA0();
 void func_80031A68(void);
 void func_80031AC8(void);
 void func_80031CB4(void *, s32);
@@ -693,4 +697,10 @@ void func_80030BAC(UnkStruct12 *);
 void func_80030A70(s32, UnkStruct12 *);
 void func_8002F65C(UnkStruct1 *, s32, UnkStruct2 *);
 void func_80032008(s16, s32, UnkStruct9 *);
+void func_80030C7C(UnkStruct2 *);
+void func_8003DB74(UnkStruct9 *);
+void func_80031FD4(s32, UnkStruct9 *);
+void func_80030834(UnkStruct1 *, s32);
+void func_8002E9A4(UnkStruct1 *);
+void func_8002BE30(UnkStruct7 *);
 #endif /* GAME_8002A330_H */

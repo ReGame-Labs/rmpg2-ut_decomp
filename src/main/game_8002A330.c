@@ -93,7 +93,18 @@ INCLUDE_ASM("asm/main/nonmatchings/game_8002A330", func_8002BA70);
 
 INCLUDE_ASM("asm/main/nonmatchings/game_8002A330", func_8002BAEC);
 
+#ifdef NON_MATCHING
+/* 99.8 %: the original's frame is 32 bytes (a spilled or address-taken local?), this one's 24. */
+void func_8002BE30(UnkStruct7 *arg0) {
+    if (D_8007A7D4 & 1) {
+        memset(arg0, 0, 0x220);
+    } else {
+        memset(arg0->unk_58, 0, 0x1C0);
+    }
+}
+#else
 INCLUDE_ASM("asm/main/nonmatchings/game_8002A330", func_8002BE30);
+#endif
 
 INCLUDE_ASM("asm/main/nonmatchings/game_8002A330", func_8002BE78);
 
@@ -465,7 +476,17 @@ INCLUDE_ASM("asm/main/nonmatchings/game_8002A330", func_8002E658);
 
 INCLUDE_ASM("asm/main/nonmatchings/game_8002A330", func_8002E854);
 
-INCLUDE_ASM("asm/main/nonmatchings/game_8002A330", func_8002E9A4);
+void func_8002E9A4(UnkStruct1 *arg0) {
+    UnkStruct4 *temp_a0;
+    UnkStruct4 *temp_s1;
+
+    temp_a0 = arg0->unk_98[0].unk_00;
+    temp_s1 = D_800AA248.unk_20;
+    D_800AA248.unk_20 = temp_a0;
+    temp_a0->unk_80 = 0x20A;
+    func_8001E698(temp_a0, arg0->unk_60);
+    D_800AA248.unk_20 = temp_s1;
+}
 
 INCLUDE_ASM("asm/main/nonmatchings/game_8002A330", func_8002E9F8);
 
@@ -582,7 +603,11 @@ void func_8002FAA4(s32 arg0, UnkStruct2 *arg1) {
     D_800AA248.unk_20 = temp_s1;
 }
 
-INCLUDE_ASM("asm/main/nonmatchings/game_8002A330", func_8002FB38);
+void func_8002FB38(void *arg0, UnkStruct4 *arg1) {
+    if (arg1->unk_34 != arg0) {
+        func_80020BA0(arg0, 0x8002, arg1);
+    }
+}
 
 INCLUDE_ASM("asm/main/nonmatchings/game_8002A330", func_8002FB6C);
 
@@ -639,7 +664,36 @@ INCLUDE_ASM("asm/main/nonmatchings/game_8002A330", func_80030698);
 
 INCLUDE_ASM("asm/main/nonmatchings/game_8002A330", func_80030754);
 
+#ifdef NON_MATCHING
+/* 91 %: the original keeps the difference in v1 and masks it twice, with var_v0/var_v1 in v0/v1; every
+ * form tried masks once and puts var_v0 in a1. */
+void func_80030834(UnkStruct1 *arg0, s32 arg1) {
+    s16 var_v0;
+    s16 var_v1;
+    s32 temp_v0;
+
+    if ((u16) arg0->unk_14 == 0) {
+        temp_v0 = arg0->unk_12 - arg1;
+        if ((u16) temp_v0 != 0) {
+            var_v0 = 0x1A;
+            if ((u16) temp_v0 < 4U) {
+                var_v1 = 3;
+                goto block_6;
+            }
+            var_v0 = 0xE;
+            if ((u16) temp_v0 < 6U) {
+                var_v1 = 1;
+block_6:
+                arg0->unk_30 = var_v0;
+                arg0->unk_0C = var_v1;
+                arg0->unk_14 = 3;
+            }
+        }
+    }
+}
+#else
 INCLUDE_ASM("asm/main/nonmatchings/game_8002A330", func_80030834);
+#endif
 
 INCLUDE_ASM("asm/main/nonmatchings/game_8002A330", func_8003089C);
 
@@ -724,7 +778,23 @@ void func_80030A70(s32 arg0, UnkStruct12 *arg1) {
 
 INCLUDE_ASM("asm/main/nonmatchings/game_8002A330", func_80030B00);
 
+#ifdef NON_MATCHING
+/* 95 %: the original computes the first record's address in two steps (unk_98, then + 0x54), as a loop
+ * induction variable would; the indexed form moves the base into s2 instead. */
+void func_80030B5C(UnkStruct1 *arg0) {
+    u16 var_s1;
+    UnkStruct2 *var_s0;
+
+    var_s1 = arg0->unk_00 - 1;
+    var_s0 = &arg0->unk_98[1];
+    do {
+        func_80030C7C(var_s0);
+        var_s0++;
+    } while (--var_s1 != 0);
+}
+#else
 INCLUDE_ASM("asm/main/nonmatchings/game_8002A330", func_80030B5C);
+#endif
 
 void func_80030BAC(UnkStruct12 *arg0) {
     UnkStruct13 **temp_v0;
@@ -951,7 +1021,11 @@ void func_80031F98(s32 arg0, UnkStruct9 *arg1) {
     }
 }
 
-INCLUDE_ASM("asm/main/nonmatchings/game_8002A330", func_80031FD4);
+void func_80031FD4(s32 arg0, UnkStruct9 *arg1) {
+    if (arg1->unk_0C == 1) {
+        func_8003DB74(arg1);
+    }
+}
 
 #ifdef NON_MATCHING
 /* 94.5 %: the original puts `move a0, v1` (the call's first argument) in the jal's delay slot, after the two stores;
