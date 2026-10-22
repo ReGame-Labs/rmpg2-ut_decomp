@@ -16,7 +16,9 @@ extern s32 D_80010000[];
 /* The object func_8001D110 allocates (a display-list node?); only the fields cdload touches are known. */
 typedef struct {
     /* 0x00 */ s32 unk_00;
-    /* 0x04 */ u8 unk_04[0xE];
+    /* 0x04 */ u8 unk_04[0x8];
+    /* 0x0C */ s32 unk_0C;
+    /* 0x10 */ u8 unk_10[0x2];
     /* 0x12 */ s16 unk_12;
     /* 0x14 */ s16 unk_14;
     /* 0x16 */ s16 unk_16;
