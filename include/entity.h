@@ -39,7 +39,8 @@ typedef struct Body {
     /* 0x14 */ s16 unk_14;
     /* 0x16 */ s16 unk_16;
     /* 0x18 */ Fixed32 unk_18;
-    /* 0x1C */ u8 unk_1C[6];
+    /* 0x1C */ u8 unk_1C[0x4];
+    /* 0x20 */ u16 unk_20;
     /* 0x22 */ u16 unk_22;
     /* 0x24 */ u8 unk_24[0x4];
     /* 0x28 */ u32 unk_28;
@@ -133,7 +134,10 @@ typedef struct Entity {
     /* 0x010 */ Half32 unk_010;              /* also two s16 halves (unk_012 = unk_010.h.hi) */
     /* 0x014 */ u8 unk_014[0x14];
     /* 0x028 */ s16 unk_028;
-    /* 0x02A */ u8 unk_02A[0x1C];
+    /* 0x02A */ u8 unk_02A[0xA];
+    /* 0x034 */ s32 unk_034;
+    /* 0x038 */ s32 unk_038;
+    /* 0x03C */ u8 unk_03C[0xA];
     /* 0x046 */ s16 unk_046;
     /* 0x048 */ u8 unk_048[0x10];
     /* 0x058 */ u16 unk_058;
@@ -144,7 +148,9 @@ typedef struct Entity {
     /* 0x068 */ Body *unk_068;
     /* 0x06C */ Body *unk_06C;
     /* 0x070 */ Body *unk_070;
-    /* 0x074 */ u8 unk_074[0x54];
+    /* 0x074 */ u8 unk_074[0xC];
+    /* 0x080 */ Body *unk_080[6];           /* the score's digit sprites */
+    /* 0x098 */ u8 unk_098[0x30];
     /* 0x0C8 */ u16 unk_0C8;
     /* 0x0CA */ u8 unk_0CA[2];
     /* 0x0CC */ u16 unk_0CC;
@@ -175,7 +181,9 @@ typedef struct Entity {
     /* 0x168 */ u16 unk_168;
     /* 0x16A */ u8 unk_16A[2];
     /* 0x16C */ void *unk_16C;
-    /* 0x170 */ u8 unk_170[0x14];
+    /* 0x170 */ u8 unk_170[0xC];
+    /* 0x17C */ s32 unk_17C;
+    /* 0x180 */ u8 unk_180[0x4];
     /* 0x184 */ u16 unk_184;
     /* 0x186 */ u8 unk_186[0x2];
     /* 0x188 */ u16 unk_188;
@@ -250,5 +258,12 @@ typedef struct Unk1D85C8 {
 } Unk1D85C8;
 
 extern Unk1D85C8 D_801D85C8[5];
+
+/* The flags word at D_8007BD78 (most units read it as a scalar; game_8005D198 also uses the word at +0x54). */
+typedef struct Unk7BD78 {
+    /* 0x00 */ s32 unk_00;
+    /* 0x04 */ u8 unk_04[0x50];
+    /* 0x54 */ s32 unk_54;
+} Unk7BD78;
 
 #endif /* ENTITY_H */
