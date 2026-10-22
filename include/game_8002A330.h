@@ -3,6 +3,23 @@
 
 #include "common.h"
 
+/* The state block at D_800AA248 (.bss), as func_80032064 reaches it: a base address with field offsets (its member
+ * at +0x20 is the object pointer that the rest of the code reaches as the scalar D_800AA268: the two forms give
+ * different code, so each function keeps the form the original used). This unit's view of it; include/game.h has
+ * another unit's (GameGlobals), to be unified. */
+struct UnkStruct4;
+
+typedef struct GameState {
+    u8 pad_00[0x20];
+    struct UnkStruct4 *unk_20;  /* D_800AA268 */
+} GameState;
+
+extern GameState D_800AA248;
+
+/* A struct member in the original, not a scalar: GCC 2.8 keeps its stores ordered with struct-field accesses only
+ * then (docs/MATCHING.md "Structs, globals and aliasing"; func_8002C75C, func_8002D144 of game_8002A330). */
+extern struct { struct UnkStruct4 *obj; } D_800AA268;
+
 /* Declarations of src/main/game_8002A330.c: provisional types from the code's own use; refined as functions match. */
 
 extern u8 D_80011BA4[];
@@ -186,7 +203,6 @@ extern u8 D_80093E30[];
 extern u8 D_80093EF8[];
 extern u8 D_80093F10[];
 extern u8 D_80093F44[];
-extern s32 D_800AA2DC;
 extern s16 D_801D376C;
 extern s16 D_801D37B8;
 extern u16 D_801D37BC;
@@ -299,12 +315,21 @@ struct UnkStruct3 {  /* provisional: fields as the code reaches them */
     u16 unk_0A;
 };
 
-struct UnkStruct4 {  /* provisional: what D_800AA268 points to */
-    u8 pad_00[0x44];
+struct UnkStruct4 {  /* provisional: what the game state's unk_20 (D_800AA268) points to */
+    u8 pad_00[0xC];
+    s32 unk_0C;
+    s32 unk_10;
+    u8 pad_14[0x4];
+    s32 unk_18;
+    u8 pad_1C[0x6];
+    u16 unk_22;
+    u8 pad_24[0x20];
     s32 unk_44;
     u8 pad_48[0x14];
     s32 *unk_5C;
-    u8 pad_60[0x30];
+    u8 pad_60[0x20];
+    u16 unk_80;
+    u8 pad_82[0xE];
     UnkStruct2 *unk_90;
     s32 unk_94;
 };
@@ -324,6 +349,17 @@ struct UnkStruct5 {  /* provisional: func_800309AC's argument */
     u8 unk_3C[0x18];
 };
 
+typedef struct UnkStruct9 {  /* provisional: the second argument of the func_80031xxx/80032xxx handlers */
+    u8 pad_00[0x8];
+    s16 unk_08;
+    u16 unk_0A;
+    u16 unk_0C;
+    u8 pad_0E[0x16];
+    s16 unk_24;
+    u8 pad_26[0x10];
+    s16 unk_36;
+} UnkStruct9;
+
 typedef struct UnkStruct7 {  /* provisional: the 0x220-byte records at D_801E0B78 */
     u8 pad_00[0x8];
     s32 unk_08;
@@ -337,9 +373,6 @@ typedef struct UnkStruct8 {  /* provisional: func_80030268's third argument */
     s16 unk_F4;
 } UnkStruct8;
 
-/* A struct member in the original, not a scalar: GCC 2.8 keeps its stores ordered with struct-field accesses only
- * then (docs/MATCHING.md "Structs, globals and aliasing"; func_8002C75C, func_8002D144). */
-extern struct { UnkStruct4 *obj; } D_800AA268;
 
 s32 * func_80025C08(void *);
 s32 *func_8002A330(void);
@@ -595,7 +628,6 @@ extern u8 D_801E0D98[];
 void func_80025898(UnkStruct2 *);
 void func_8003CD08(void *);
 void func_8003D60C(void *);
-extern s32 D_800AA260;
 s32 func_8001EA78();
 extern s32 D_801FB19C[0x50];
 extern s32 D_801FB2DC[0x50];
@@ -615,4 +647,9 @@ void func_8002E440();
 void func_8002FB6C(s32, UnkStruct2 *, UnkStruct1 *);
 void func_8002D448(s32, UnkStruct1 *);
 void func_8002E9F8(UnkStruct1 *);
+void func_80032630(s32, UnkStruct9 *);
+void func_8002E0C8(s32, UnkStruct1 *);
+void func_8003E788(UnkStruct9 *);
+extern s32 D_800AA260;
+extern s32 D_800AA2DC;
 #endif /* GAME_8002A330_H */
