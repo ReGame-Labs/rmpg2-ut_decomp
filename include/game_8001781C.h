@@ -113,7 +113,9 @@ typedef struct GameState {
 /* A monster (player or AI): its state machine at unk_5A, its sprite at unk_68. */
 typedef struct Monster {
     u16 unk_0;
-    u8 pad_2[0x58];
+    u8 pad_2[0x44];
+    u16 unk_46;
+    u8 pad_48[0x12];
     u16 unk_5A;
     u16 unk_5C;
     u8 pad_5E[0xA];
@@ -133,7 +135,19 @@ typedef struct Monster {
     u16 unk_168;
     u8 pad_16A[0x20];
     s16 unk_18A;
+    u8 pad_18C[0x54];
+    s16 unk_1E0;
+    u8 pad_1E2[0x16];
+    s32 unk_1F8;
+    u8 pad_1FC[0x24];
 } Monster;
+
+/* An 8-byte record of the two 20-entry tables at 0x801FA738 and 0x801FA7EC. */
+typedef struct UnkFA738 {
+    s32 unk_0;
+    s16 unk_4;
+    s16 unk_6;
+} UnkFA738;
 
 typedef struct Unk1E638 {
     u8 pad_0[0x4];
