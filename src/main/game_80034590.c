@@ -1,8 +1,126 @@
-/* A file of the game's code, named after its first function until its contents are understood.
+/* A file of the game's code, named after its first function until its contents are understood: the records of
+ * D_801FAC9C (Npc, include/game_80034590.h) and their per-kind updaters.
  * The boundaries and their evidence: config/main.yaml (docs/MATCHING.md "Splitting a target into files"). */
 #include "common.h"
+#include "game.h"
+#include "game_80034590.h"
 
-INCLUDE_ASM("asm/main/nonmatchings/game_80034590", func_80034590);
+/* Other units. */
+void func_8001BB68(Mover *mover);
+void func_8001BB88(Mover *mover);
+s16 func_8001EB10(s32 arg0, s32 arg1);
+void func_8001F724(s32 sound);
+void func_80020D20(void *npc);
+void func_800242A8(void);
+s32 func_80025DF8(s32 n);
+void func_8003EB5C(u8 *anim, Mover *mover);
+u16 func_8003BE34(Npc *npc);
+void func_8004CFC0(void);
+void func_80054374(s32 n, Player *player);
+void func_80053C50(s32 n, Player *player);
+void func_8004A90C(Player *player);
+void func_800215C0(s16 x, s16 y);
+void func_8003C080(s32 x);
+void func_800634D4(Player *player, s32 n);
+void *memset(void *s, s32 c, u32 n);
+s32 abs(s32 n);
+
+/* This unit. */
+void func_800345F8(Npc *npc);
+void func_80034418(void);
+void func_80034670();                /* called with the record and without: no prototype in the original */
+void func_8003AA7C(NpcS *npc);
+u16 func_80038DA8(NpcS *npc);
+void func_800380F0(NpcS *npc);
+void func_80038058(NpcS *npc);
+void func_80038198(NpcS *npc);
+void func_800381E4(NpcS *npc);
+void func_80038240(NpcS *npc);
+void func_800382A8(NpcS *npc);
+void func_80038A2C(NpcS *npc);
+void func_80038920(NpcS *npc);
+Player *func_80039B60(s32 x);
+void func_80034988(Npc *npc);
+void func_80034C54(Mover *mover);
+void func_80034D28(Npc *npc);
+void func_80034DAC(Npc *npc);
+void func_80034E48(Npc *npc);
+void func_80035040(void);
+void func_800351CC(void);
+void func_800354A4(void);
+void func_80035464(Npc *npc);
+void func_80035550(Npc *npc);
+void func_80035590(Npc *npc);
+void func_80035620(Npc *npc);
+void func_80035A88(void);
+void func_80035DFC(void);
+void func_80035FF0(void);
+void func_80036300(Npc *npc);
+void func_800369F8(Npc *npc);
+u16 func_80037574(s16 x, s16 y, s32 arg2);
+u16 func_8003761C(s16 x, s16 y, Player *player, NpcS *npc);
+void func_800376E0(NpcS *npc);
+void func_80037960(NpcS *npc, s32 arg1);
+void func_80037BB4(NpcS *npc);
+void func_80037C1C(NpcS *npc);
+void func_80037CA0(NpcS *npc);
+void func_80037CF4(void);
+void func_80037D78(NpcS *npc);
+void func_80037E1C(NpcS *npc);
+void func_80037E78(NpcS *npc);
+void func_80037EE0(NpcS *npc);
+void func_800380C0(Mover *mover);
+void func_80038528(NpcS *npc);
+void func_800385F4(void);
+void func_80038754(NpcS *npc);
+void func_80038800(NpcS *npc);
+void func_80038838(void);
+u16 func_80038C1C(void);
+u16 func_80038F3C(u16 *out, NpcS *npc);
+u16 func_800391F8(u16 *out, NpcS *npc);
+u16 func_80039220(u16 *out, NpcS *npc);
+void func_800398D4(void);
+s32 func_80039C40(s32 x, s32 left, s32 right);
+s32 func_80039C98(s32 x, s32 left, s32 right);
+void func_8003A328(NpcS *npc, s32 arg1);
+void func_8003AAF8(NpcS *npc);
+void func_8003ABE8(NpcS *npc);
+void func_8003AC74(NpcS *npc);
+void func_8003AEA0(NpcS *npc);
+void func_8003AF40(NpcS *npc);
+void func_8003B1D0(NpcS *npc);
+
+extern u8 *D_8007D4C0[];           /* animations per kind */
+extern void (*D_8007D558[])(void);  /* per kind */
+extern void (*D_8007D5A4[])(void);  /* per kind */
+extern u8 *D_8007D45C[];
+extern u8 *D_8007DA68[];
+extern u8 *D_8007DA78[][4];
+extern u8 D_8008A47C[];
+extern u8 D_8008AA10[];
+extern u8 D_8008A374[];
+extern u8 D_80095EF0[];
+extern u8 D_8009585C[];
+extern u8 D_80095E24[];
+extern u8 D_80095E68[];
+extern u8 D_80095EAC[];
+extern u8 D_80095874[];
+extern s32 D_801D8864[];           /* [0]: the world's width minus one, a mask (16.16); the code reloads it across struct stores */
+extern s32 D_801F9AC8;              /* the screen's left edge (16.16) */
+extern u16 D_801D8730;              /* how many of D_801FAC9C are live */
+extern s16 D_801E2A50;
+extern Npc D_801FAC9C[6];
+extern Mover *D_801FB44C[3];
+extern u16 D_801FA98C;
+extern u16 D_801FA990;
+extern Player D_801E0B78[3];
+
+void func_80034590(Npc *npc) {
+    npc->unk_8 = 2;
+    npc->unk_1E = func_8001EB10(0x190, 0);
+    npc->unk_22 = 0;
+    func_8003EB5C(D_8007D4C0[npc->unk_6 - 1], D_800AA248.unk_20);
+}
 
 INCLUDE_ASM("asm/main/nonmatchings/game_80034590", func_800345F8);
 
@@ -14,27 +132,94 @@ INCLUDE_ASM("asm/main/nonmatchings/game_80034590", func_800347E4);
 
 INCLUDE_ASM("asm/main/nonmatchings/game_80034590", func_80034898);
 
-INCLUDE_ASM("asm/main/nonmatchings/game_80034590", func_80034924);
+void func_80034924(Npc *npc) {
+    func_8001F724(0x60);
+    if (!((D_800AA248.unk_20->unk_22 ^ npc->unk_44) & 0x10)) {
+        func_80034988(npc);
+        return;
+    }
+    func_800345F8(npc);
+}
 
-INCLUDE_ASM("asm/main/nonmatchings/game_80034590", func_80034988);
+void func_80034988(Npc *npc) {
+    void (*handler)(void) = D_8007D558[npc->unk_6 - 1];
 
-INCLUDE_ASM("asm/main/nonmatchings/game_80034590", func_800349E0);
+    if (handler == NULL) {
+        func_800345F8(npc);
+        return;
+    }
+    handler();
+}
+
+void func_800349E0(Npc *npc) {
+    void (*handler)(void) = D_8007D5A4[npc->unk_6 - 1];
+
+    if (handler == NULL) {
+        func_800345F8(npc);
+        return;
+    }
+    handler();
+}
 
 INCLUDE_ASM("asm/main/nonmatchings/game_80034590", func_80034A38);
 
 INCLUDE_ASM("asm/main/nonmatchings/game_80034590", func_80034AB4);
 
-INCLUDE_ASM("asm/main/nonmatchings/game_80034590", func_80034B68);
+void func_80034B68(s32 speed) {
+    if (D_800AA248.unk_20->unk_22 & 0x10) {
+        speed = -speed;
+    }
+    D_800AA248.unk_20->unk_C = speed;
+}
 
-INCLUDE_ASM("asm/main/nonmatchings/game_80034590", func_80034B94);
+void func_80034B94(Npc *npc) {
+    D_800AA248.unk_20 = npc->unk_0;
+    switch (npc->unk_8) {
+    case 1:
+        func_80034E48(npc);
+        return;
+    case 2:
+        func_80035040();
+        return;
+    case 3:
+        func_80034D28(npc);
+        return;
+    case 4:
+        func_80034DAC(npc);
+        return;
+    }
+}
 
-INCLUDE_ASM("asm/main/nonmatchings/game_80034590", func_80034C34);
+void func_80034C34(void) {
+    ((u16 *)&D_800AA248.unk_20->unk_18)[1] -= 0x14;
+}
 
-INCLUDE_ASM("asm/main/nonmatchings/game_80034590", func_80034C54);
+void func_80034C54(Mover *mover) {
+    mover->unk_48 = (Anim *)D_8007D45C[mover->unk_68];
+}
 
-INCLUDE_ASM("asm/main/nonmatchings/game_80034590", func_80034C74);
+void func_80034C74(void) {
+    func_8001F724(0x62);
+    if (D_801FB44C[0] != NULL) {
+        func_80034C54(D_801FB44C[0]);
+        D_801FB44C[0] = NULL;
+    }
+}
 
-INCLUDE_ASM("asm/main/nonmatchings/game_80034590", func_80034CB8);
+void func_80034CB8(void) {
+    s32 slot;
+
+    func_8001F724(0x62);
+    slot = D_800AA248.unk_20->unk_6A + 1;
+    if (slot < 3) {
+        Mover *mover = D_801FB44C[slot];
+
+        if (mover != NULL) {
+            func_80034C54(mover);
+            D_801FB44C[slot] = NULL;
+        }
+    }
+}
 
 INCLUDE_ASM("asm/main/nonmatchings/game_80034590", func_80034D28);
 
@@ -42,31 +227,118 @@ INCLUDE_ASM("asm/main/nonmatchings/game_80034590", func_80034DAC);
 
 INCLUDE_ASM("asm/main/nonmatchings/game_80034590", func_80034E48);
 
-INCLUDE_ASM("asm/main/nonmatchings/game_80034590", func_80035040);
+void func_80035040(void) {
+    s32 i;
+
+    D_800AA248.unk_20->unk_14 = (D_800AA248.unk_20->unk_14 + D_800AA248.unk_20->unk_C) & D_801D8864[0];
+    for (i = 0; i < 3; i++) {
+        Mover *mover = D_801FB44C[i];
+
+        if (mover != NULL) {
+            mover->unk_14 = (mover->unk_14 + D_800AA248.unk_20->unk_C) & D_801D8864[0];
+        }
+    }
+}
 
 INCLUDE_ASM("asm/main/nonmatchings/game_80034590", func_800350C0);
 
-INCLUDE_ASM("asm/main/nonmatchings/game_80034590", func_8003518C);
+void func_8003518C(Npc *npc) {
+    u16 n = npc->unk_1C;
+
+    if (n == 0) {
+        func_800351CC();
+        return;
+    }
+    npc->unk_1C = n - 1;
+    func_800242A8();
+}
 
 INCLUDE_ASM("asm/main/nonmatchings/game_80034590", func_800351CC);
 
-INCLUDE_ASM("asm/main/nonmatchings/game_80034590", func_80035260);
+void func_80035260(Npc *npc) {
+    u16 n = npc->unk_1C;
+
+    if (n == 0) {
+        func_800351CC();
+        return;
+    }
+    npc->unk_1C = n - 1;
+    func_800242A8();
+}
 
 INCLUDE_ASM("asm/main/nonmatchings/game_80034590", func_800352A0);
 
-INCLUDE_ASM("asm/main/nonmatchings/game_80034590", func_80035330);
+void func_80035330(Npc *npc) {
+    if (npc->unk_C != 0) {
+        npc->unk_1C = 0x384;
+        npc->unk_8 = 0x64;
+        func_800242A8();
+        func_8003EB5C(D_8008A47C, D_800AA248.unk_20);
+    }
+}
 
-INCLUDE_ASM("asm/main/nonmatchings/game_80034590", func_8003537C);
+void func_8003537C(Npc *npc) {
+    D_800AA248.unk_20 = npc->unk_0;
+    if (npc->unk_6 == 0x15) {
+        func_80034418();
+    }
+    switch (npc->unk_8) {
+    case 0x64:
+        func_80035550(npc);
+        return;
+    case 3:
+        func_80035590(npc);
+        return;
+    case 4:
+        func_80035620(npc);
+        return;
+    case 1:
+        func_80035464(npc);
+        return;
+    default:
+        if (func_8003BE34(npc) == 1) {
+            npc->unk_8 = 0x64;
+            npc->unk_1C = 0x2EE;
+            func_800242A8();
+        }
+        return;
+    }
+}
 
-INCLUDE_ASM("asm/main/nonmatchings/game_80034590", func_80035464);
+void func_80035464(Npc *npc) {
+    u16 n = npc->unk_1C;
+
+    if (n == 0) {
+        func_800354A4();
+        return;
+    }
+    npc->unk_1C = n - 1;
+    func_800242A8();
+}
 
 INCLUDE_ASM("asm/main/nonmatchings/game_80034590", func_800354A4);
 
-INCLUDE_ASM("asm/main/nonmatchings/game_80034590", func_80035550);
+void func_80035550(Npc *npc) {
+    u16 n = npc->unk_1C;
+
+    if (n == 0) {
+        func_800354A4();
+        return;
+    }
+    npc->unk_1C = n - 1;
+    func_800242A8();
+}
 
 INCLUDE_ASM("asm/main/nonmatchings/game_80034590", func_80035590);
 
-INCLUDE_ASM("asm/main/nonmatchings/game_80034590", func_80035620);
+void func_80035620(Npc *npc) {
+    if (npc->unk_C != 0) {
+        npc->unk_1C = 0x384;
+        npc->unk_8 = 0x64;
+        func_800242A8();
+        func_8003EB5C(D_8008AA10, D_800AA248.unk_20);
+    }
+}
 
 INCLUDE_ASM("asm/main/nonmatchings/game_80034590", func_8003566C);
 
@@ -78,27 +350,85 @@ INCLUDE_ASM("asm/main/nonmatchings/game_80034590", func_80035928);
 
 INCLUDE_ASM("asm/main/nonmatchings/game_80034590", func_8003599C);
 
-INCLUDE_ASM("asm/main/nonmatchings/game_80034590", func_80035A3C);
+void func_80035A3C(Npc *npc) {
+    u16 n;
+
+    D_800AA248.unk_20->unk_18 = 0x01900000;
+    n = npc->unk_1C;
+    if (n == 0) {
+        func_80035A88();
+        return;
+    }
+    npc->unk_1C = n - 1;
+}
 
 INCLUDE_ASM("asm/main/nonmatchings/game_80034590", func_80035A88);
 
-INCLUDE_ASM("asm/main/nonmatchings/game_80034590", func_80035B30);
+void func_80035B30(Npc *npc) {
+    u16 n = npc->unk_1C;
+
+    if (n == 0) {
+        func_80035A88();
+        return;
+    }
+    npc->unk_1C = n - 1;
+}
 
 INCLUDE_ASM("asm/main/nonmatchings/game_80034590", func_80035B6C);
 
-INCLUDE_ASM("asm/main/nonmatchings/game_80034590", func_80035BE8);
+void func_80035BE8(Npc *npc) {
+    u16 n = npc->unk_1C;
+
+    if (n == 0) {
+        npc->unk_1C = 0xBE;
+        npc->unk_8 = 0x33;
+        D_800AA248.unk_20->unk_14 = 0x02000000;
+        D_800AA248.unk_20->unk_18 = 0x02000000;
+        func_8003C080(0x02000000);
+        return;
+    }
+    npc->unk_1C = n - 1;
+}
 
 INCLUDE_ASM("asm/main/nonmatchings/game_80034590", func_80035C4C);
 
-INCLUDE_ASM("asm/main/nonmatchings/game_80034590", func_80035DC0);
+void func_80035DC0(Npc *npc) {
+    u16 n = npc->unk_1C;
+
+    if (n == 0) {
+        func_80035DFC();
+        return;
+    }
+    npc->unk_1C = n - 1;
+}
 
 INCLUDE_ASM("asm/main/nonmatchings/game_80034590", func_80035DFC);
 
-INCLUDE_ASM("asm/main/nonmatchings/game_80034590", func_80035E80);
+void func_80035E80(Npc *npc) {
+    u16 n = npc->unk_1C;
+
+    if (n == 0) {
+        func_80035DFC();
+        return;
+    }
+    npc->unk_1C = n - 1;
+}
 
 INCLUDE_ASM("asm/main/nonmatchings/game_80034590", func_80035EBC);
 
-INCLUDE_ASM("asm/main/nonmatchings/game_80034590", func_80035F8C);
+void func_80035F8C(Npc *npc) {
+    u16 n = npc->unk_1C;
+
+    if (n == 0) {
+        npc->unk_1C = 0xBE;
+        npc->unk_8 = 0x33;
+        D_800AA248.unk_20->unk_18 = 0x02000000;
+        D_800AA248.unk_20->unk_14 = 0x02000000;
+        func_8003C080(0x02000000);
+        return;
+    }
+    npc->unk_1C = n - 1;
+}
 
 INCLUDE_ASM("asm/main/nonmatchings/game_80034590", func_80035FF0);
 
@@ -106,11 +436,34 @@ INCLUDE_ASM("asm/main/nonmatchings/game_80034590", func_80036028);
 
 INCLUDE_ASM("asm/main/nonmatchings/game_80034590", func_800360D8);
 
-INCLUDE_ASM("asm/main/nonmatchings/game_80034590", func_80036298);
+void func_80036298(void) {
+    Npc *npc = D_801FAC9C;
+    u16 n = D_801D8730;
+
+    if (n != 0) {
+        if (n >= 7) {
+            n = 6;
+        }
+        do {
+            func_80036300(npc);
+            npc++;
+        } while (--n != 0);
+    }
+}
 
 INCLUDE_ASM("asm/main/nonmatchings/game_80034590", func_80036300);
 
-INCLUDE_ASM("asm/main/nonmatchings/game_80034590", func_800363E4);
+void func_800363E4(void) {
+    Npc *npc = D_801FAC9C;
+    u16 n = 6;
+
+    do {
+        func_800369F8(npc);
+        npc++;
+    } while (--n != 0);
+    D_801D8730 = n;
+    D_801E2A50 = n;
+}
 
 INCLUDE_ASM("asm/main/nonmatchings/game_80034590", func_80036440);
 
@@ -120,7 +473,10 @@ INCLUDE_ASM("asm/main/nonmatchings/game_80034590", func_80036818);
 
 INCLUDE_ASM("asm/main/nonmatchings/game_80034590", func_8003684C);
 
-INCLUDE_ASM("asm/main/nonmatchings/game_80034590", func_800369F8);
+void func_800369F8(Npc *npc) {
+    memset(npc, 0, sizeof(Npc));
+    D_801D8730 = 0;
+}
 
 INCLUDE_ASM("asm/main/nonmatchings/game_80034590", func_80036A20);
 
@@ -128,13 +484,36 @@ INCLUDE_ASM("asm/main/nonmatchings/game_80034590", func_80036C30);
 
 INCLUDE_ASM("asm/main/nonmatchings/game_80034590", func_80036FD0);
 
-INCLUDE_ASM("asm/main/nonmatchings/game_80034590", func_80037078);
+void func_80037078(Player *player, Npc *npc) {
+    player->unk_24++;
+    func_80054374(0x28, player);
+    func_800634D4(player, 4);
+    npc->unk_8 = 3;
+    npc->unk_60 = player;
+    npc->unk_54 = D_800AA248.unk_20->unk_22;
+    npc->unk_5C = player->unk_120;
+    npc->unk_5E = player->unk_122;
+    if (player->unk_142 != 0) {
+        npc->unk_1A += 0xA;
+    }
+    player->unk_18A = 1;
+}
 
 INCLUDE_ASM("asm/main/nonmatchings/game_80034590", func_8003712C);
 
 INCLUDE_ASM("asm/main/nonmatchings/game_80034590", func_800372DC);
 
-INCLUDE_ASM("asm/main/nonmatchings/game_80034590", func_800374FC);
+u16 func_800374FC(s16 x, s16 y, Npc *npc, s32 arg3) {
+    MoverTarget *target = D_800AA248.unk_20->unk_94;
+
+    if (target != NULL) {
+        Npc *other = (Npc *)target->unk_4->unk_90;
+        if (other != npc && other->unk_A != 2) {
+            return func_80037574(x, y, arg3);
+        }
+    }
+    return 0;
+}
 
 INCLUDE_ASM("asm/main/nonmatchings/game_80034590", func_80037574);
 
@@ -149,67 +528,296 @@ INCLUDE_ASM("asm/main/nonmatchings/game_80034590", func_800377B4);
 
 INCLUDE_ASM("asm/main/nonmatchings/game_80034590", func_80037960);
 
-INCLUDE_ASM("asm/main/nonmatchings/game_80034590", func_80037A88);
+void func_80037A88(NpcS *npc) {
+    D_800AA248.unk_20 = npc->unk_0;
+    switch (npc->unk_8) {
+    case 0x64:
+        func_80037BB4(npc);
+        return;
+    case 3:
+        func_80037CA0(npc);
+        return;
+    case 0xD:
+        func_80037D78(npc);
+        return;
+    case 0x3B:
+    case 1:
+        func_80037C1C(npc);
+        return;
+    case 5:
+        func_80037E1C(npc);
+        return;
+    case 4:
+        func_80037E78(npc);
+        return;
+    case 0x33:
+        return;
+    default:
+        if (npc->unk_A != 0) {
+            func_80037EE0(npc);
+            return;
+        }
+        func_80020D20(npc);
+        func_800376E0(npc);
+        return;
+    }
+}
 
-INCLUDE_ASM("asm/main/nonmatchings/game_80034590", func_80037BB4);
+void func_80037BB4(NpcS *npc) {
+    if (npc->unk_1C == 0) {
+        func_80037C1C(npc);
+        return;
+    }
+    npc->unk_1C--;
+    D_800AA248.unk_20->unk_C = D_801F9AC8 - 0x19A0000;
+    D_800AA248.unk_20->unk_10 = 0;
+}
 
-INCLUDE_ASM("asm/main/nonmatchings/game_80034590", func_80037C1C);
+void func_80037C1C(NpcS *npc) {
+    if (npc->unk_1C != 0) {
+        npc->unk_1C--;
+        D_800AA248.unk_20->unk_18 = 0x01900000;
+        return;
+    }
+    func_80035FF0();
+    func_800380C0(D_800AA248.unk_20);
+    npc->unk_8 = 2;
+    npc->unk_22 = 0;
+    func_8003EB5C(D_8008A374, D_800AA248.unk_20);
+}
 
-INCLUDE_ASM("asm/main/nonmatchings/game_80034590", func_80037CA0);
+void func_80037CA0(NpcS *npc) {
+    if ((D_800AA248.unk_20->unk_22 ^ npc->unk_54) & 0x10) {
+        func_80037E1C(npc);
+        return;
+    }
+    func_80037CF4();
+}
 
 INCLUDE_ASM("asm/main/nonmatchings/game_80034590", func_80037CF4);
 
 INCLUDE_ASM("asm/main/nonmatchings/game_80034590", func_80037D78);
 
-INCLUDE_ASM("asm/main/nonmatchings/game_80034590", func_80037E1C);
+void func_80037E1C(NpcS *npc) {
+    func_8001F724(5);
+    D_800AA248.unk_20->unk_C = 0;
+    D_800AA248.unk_20->unk_10 = 0;
+    npc->unk_8 = 4;
+    npc->unk_1C = 3;
+    func_80034670();
+}
 
 INCLUDE_ASM("asm/main/nonmatchings/game_80034590", func_80037E78);
 
 INCLUDE_ASM("asm/main/nonmatchings/game_80034590", func_80037EE0);
 
-INCLUDE_ASM("asm/main/nonmatchings/game_80034590", func_80037F20);
+void func_80037F20(NpcS *npc) {
+    D_800AA248.unk_20 = npc->unk_0;
+    switch (npc->unk_8) {
+    case 0x64:
+        func_80038058(npc);
+        return;
+    case 0x1E:
+        func_80038198(npc);
+        return;
+    case 0x3B:
+    case 1:
+        func_800380F0(npc);
+        return;
+    case 3:
+    case 5:
+        func_800381E4(npc);
+        return;
+    case 4:
+        func_80038240(npc);
+        return;
+    case 0xD:
+    case 0x33:
+        return;
+    default:
+        if (npc->unk_A != 0) {
+            func_800382A8(npc);
+            return;
+        }
+        func_80020D20(npc);
+        func_800376E0(npc);
+        return;
+    }
+}
 
-INCLUDE_ASM("asm/main/nonmatchings/game_80034590", func_80038058);
+void func_80038058(NpcS *npc) {
+    if (npc->unk_1C == 0) {
+        func_800380F0(npc);
+        return;
+    }
+    npc->unk_1C--;
+    D_800AA248.unk_20->unk_14 = D_801F9AC8 - 0x19A0000;
+    D_800AA248.unk_20->unk_10 = 0;
+}
 
-INCLUDE_ASM("asm/main/nonmatchings/game_80034590", func_800380C0);
+void func_800380C0(Mover *mover) {
+    if (!(mover->unk_22 & 0x10)) {
+        mover->unk_18 = 0xEB0000;
+    } else {
+        mover->unk_18 = 0xE30000;
+    }
+    mover->unk_80 = ((u16 *)&mover->unk_18)[1] + 0xF23;
+}
 
 INCLUDE_ASM("asm/main/nonmatchings/game_80034590", func_800380F0);
 
 INCLUDE_ASM("asm/main/nonmatchings/game_80034590", func_80038198);
 
-INCLUDE_ASM("asm/main/nonmatchings/game_80034590", func_800381E4);
+void func_800381E4(NpcS *npc) {
+    func_8001F724(5);
+    D_800AA248.unk_20->unk_C = 0;
+    D_800AA248.unk_20->unk_10 = 0;
+    npc->unk_8 = 4;
+    npc->unk_1C = 3;
+    func_80034670();
+}
 
 INCLUDE_ASM("asm/main/nonmatchings/game_80034590", func_80038240);
 
 INCLUDE_ASM("asm/main/nonmatchings/game_80034590", func_800382A8);
 
-INCLUDE_ASM("asm/main/nonmatchings/game_80034590", func_800382E8);
+void func_800382E8(void) {
+    ((NpcS *)D_800AA248.unk_20->unk_90)->unk_1C = 0;
+}
 
-INCLUDE_ASM("asm/main/nonmatchings/game_80034590", func_80038300);
+void func_80038300(void) {
+    ((NpcS *)D_800AA248.unk_20->unk_90)->unk_C = 1;
+}
 
-INCLUDE_ASM("asm/main/nonmatchings/game_80034590", func_8003831C);
+void func_8003831C(void) {
+    ((NpcS *)D_800AA248.unk_20->unk_90)->unk_6 = 0;
+    func_8004CFC0();
+}
 
 INCLUDE_ASM("asm/main/nonmatchings/game_80034590", func_80038348);
 
-INCLUDE_ASM("asm/main/nonmatchings/game_80034590", func_800383F4);
+void func_800383F4(NpcS *npc) {
+    if (npc->unk_1C == 0) {
+        if (func_80039C40(D_800AA248.unk_20->unk_14, -0x280000, -0x280000) == 0) {
+            npc->unk_6 = 0xF;
+            npc->unk_8 = 2;
+            func_8003EB5C(D_80095EF0, D_800AA248.unk_20);
+            func_8001BB88(D_800AA248.unk_20);
+        }
+    } else {
+        npc->unk_1C--;
+        func_8001BB68(D_800AA248.unk_20);
+    }
+}
 
-INCLUDE_ASM("asm/main/nonmatchings/game_80034590", func_80038494);
+void func_80038494(NpcS *npc) {
+    u16 n = npc->unk_1A;
 
-INCLUDE_ASM("asm/main/nonmatchings/game_80034590", func_800384E8);
+    if (n >= 2) {
+        func_80038754(npc);
+        return;
+    }
+    npc->unk_1A = n + 1;
+    npc->unk_8 = 0x32;
+    npc->unk_20 = 1;
+    func_800398D4();
+}
 
-INCLUDE_ASM("asm/main/nonmatchings/game_80034590", func_80038528);
+void func_800384E8(NpcS *npc) {
+    if (npc->unk_64 == NULL) {
+        func_800385F4();
+        return;
+    }
+    func_80038528(npc);
+}
+
+void func_80038528(NpcS *npc) {
+    switch (npc->unk_64->unk_CC) {
+    case 6:
+    case 7:
+    case 8:
+        if (D_800AA248.unk_20->unk_22 & 0x10) {
+            npc->unk_20 = 0;
+        } else {
+            npc->unk_20 = 1;
+        }
+        npc->unk_22 = 3;
+        D_800AA248.unk_20->unk_C = 0;
+        break;
+    case 2:
+    case 3:
+    case 4:
+        if (!(D_800AA248.unk_20->unk_22 & 0x10)) {
+            npc->unk_20 = 0;
+        } else {
+            npc->unk_20 = 1;
+        }
+        npc->unk_22 = 3;
+        D_800AA248.unk_20->unk_C = 0;
+        break;
+    default:
+        npc->unk_22 = 1;
+        break;
+    }
+    func_800385F4();
+}
 
 INCLUDE_ASM("asm/main/nonmatchings/game_80034590", func_800385F4);
 
-INCLUDE_ASM("asm/main/nonmatchings/game_80034590", func_80038754);
+void func_80038754(NpcS *npc) {
+    Player *player;
 
-INCLUDE_ASM("asm/main/nonmatchings/game_80034590", func_80038800);
+    func_8001F724(5);
+    D_800AA248.unk_20->unk_C = 0;
+    D_800AA248.unk_20->unk_10 = 0;
+    player = npc->unk_64;
+    npc->unk_8 = 4;
+    npc->unk_1C = 3;
+    if (player != NULL) {
+        func_80053C50(0x80000, player);
+        func_8004A90C(player);
+        npc->unk_64 = NULL;
+        player->unk_1D4 = 0;
+    }
+    func_800215C0(((s16 *)&D_800AA248.unk_20->unk_14)[1], ((u16 *)&D_800AA248.unk_20->unk_18)[1] - 0xA);
+}
+
+void func_80038800(NpcS *npc) {
+    if (npc->unk_1C != 0) {
+        npc->unk_1C--;
+        return;
+    }
+    func_80038838();
+}
 
 INCLUDE_ASM("asm/main/nonmatchings/game_80034590", func_80038838);
 
 INCLUDE_ASM("asm/main/nonmatchings/game_80034590", func_80038920);
 
-INCLUDE_ASM("asm/main/nonmatchings/game_80034590", func_80038A2C);
+void func_80038A2C(NpcS *npc) {
+    u16 move = npc->unk_2A;
+
+    if (move != 0) {
+        npc->unk_2C = move;
+        if (func_80038DA8(npc) != 0) {
+            s32 kind = npc->unk_2A;
+
+            npc->unk_4++;
+            switch (kind) {
+            case 3:
+                func_8003EB5C(D_80095E24, D_800AA248.unk_20);
+                return;
+            case 2:
+                func_8003EB5C(D_80095E68, D_800AA248.unk_20);
+                return;
+            default:
+                func_8003EB5C(D_80095EAC, D_800AA248.unk_20);
+                return;
+            }
+        }
+    }
+    func_80038920(npc);
+}
 
 INCLUDE_ASM("asm/main/nonmatchings/game_80034590", func_80038AE8);
 
@@ -219,9 +827,30 @@ INCLUDE_ASM("asm/main/nonmatchings/game_80034590", func_80038DA8);
 
 INCLUDE_ASM("asm/main/nonmatchings/game_80034590", func_80038F3C);
 
-INCLUDE_ASM("asm/main/nonmatchings/game_80034590", func_800391F8);
+u16 func_800391F8(u16 *out, NpcS *npc) {
+    *out = npc->unk_2C;
+    if (npc->unk_64 != NULL) {
+        npc->unk_4 = 3;
+    }
+    return 1;
+}
 
-INCLUDE_ASM("asm/main/nonmatchings/game_80034590", func_80039220);
+u16 func_80039220(u16 *out, NpcS *npc) {
+    u16 state = npc->unk_4;
+
+    if (state != 0) {
+        if (state < 3) {
+            return func_800391F8(out, npc);
+        }
+        if (npc->unk_4E != 0) {
+            npc->unk_8 = 0x32;
+            npc->unk_20 = 0;
+            npc->unk_4 = 0;
+        }
+        return 0;
+    }
+    return func_80038F3C(out, npc);
+}
 
 INCLUDE_ASM("asm/main/nonmatchings/game_80034590", func_80039290);
 
@@ -235,27 +864,122 @@ INCLUDE_ASM("asm/main/nonmatchings/game_80034590", func_800398D4);
 
 INCLUDE_ASM("asm/main/nonmatchings/game_80034590", func_80039958);
 
-INCLUDE_ASM("asm/main/nonmatchings/game_80034590", func_80039A58);
+void func_80039A58(NpcS *npc) {
+    if (npc->unk_1C == 0) {
+        if (func_80039C40(D_800AA248.unk_20->unk_14, -0x280000, -0x280000) == 0) {
+            npc->unk_6 = 0x31;
+            npc->unk_8 = 2;
+            npc->unk_1C = 0x3C;
+            npc->unk_1A = 0;
+            func_8003EB5C(D_8009585C, D_800AA248.unk_20);
+            func_8001BB88(D_800AA248.unk_20);
+        }
+    } else {
+        npc->unk_1C--;
+        func_8001BB68(D_800AA248.unk_20);
+    }
+}
 
 INCLUDE_ASM("asm/main/nonmatchings/game_80034590", func_80039B04);
 
-INCLUDE_ASM("asm/main/nonmatchings/game_80034590", func_80039B60);
+Player *func_80039B60(s32 x) {
+    Player *best = NULL;
+    s32 bestDist = 0x1FFF0000;
+    s32 i;
 
-INCLUDE_ASM("asm/main/nonmatchings/game_80034590", func_80039C40);
+    for (i = 0; i < 3; i++) {
+        s32 slot = func_80025DF8(i + 1);
 
-INCLUDE_ASM("asm/main/nonmatchings/game_80034590", func_80039C98);
+        if (*(u16 *)&D_801E0B78[slot] != 0) {
+            s32 pos = D_801E0B78[slot].unk_68->unk_14;
+            s32 dist;
+
+            if (pos < D_801F9AC8) {
+                pos += D_801D8864[0];
+            }
+            dist = abs(pos - x);
+            if (dist < bestDist) {
+                bestDist = dist;
+                best = &D_801E0B78[slot];
+            }
+        }
+    }
+    return best;
+}
+
+s32 func_80039C40(s32 x, s32 left, s32 right) {
+    if (x < D_801F9AC8) {
+        x += D_801D8864[0] + 1;
+    }
+    if (x < D_801F9AC8 + left || D_801F9AC8 + (0x01900000 - right) < x) {
+        return 0;
+    }
+    return 1;
+}
+
+s32 func_80039C98(s32 x, s32 left, s32 right) {
+    if (x < D_801F9AC8) {
+        x += D_801D8864[0] + 1;
+    }
+    if ((D_801F9AC8 < x && x < D_801F9AC8 + left) ||
+        (D_801F9AC8 + (0x01900000 - right) < x && x < D_801F9AC8 + 0x01900000)) {
+        return 1;
+    }
+    return 0;
+}
 
 INCLUDE_ASM("asm/main/nonmatchings/game_80034590", func_80039D04);
 
 INCLUDE_ASM("asm/main/nonmatchings/game_80034590", func_80039EC4);
 
-INCLUDE_ASM("asm/main/nonmatchings/game_80034590", func_8003A0A8);
+void func_8003A0A8(NpcS *npc) {
+    if (D_801FA990 != 0 || D_801FA98C != 0) {
+        if (((s16 *)&D_800AA248.unk_20->unk_14)[1] > D_801FA98C && ((s16 *)&D_800AA248.unk_20->unk_14)[1] < D_801FA98C + 4 &&
+            !(D_800AA248.unk_20->unk_22 & 0x10)) {
+            goto stop;
+        }
+        if (((s16 *)&D_800AA248.unk_20->unk_14)[1] < D_801FA990 && D_801FA990 - 4 < ((s16 *)&D_800AA248.unk_20->unk_14)[1] &&
+            (D_800AA248.unk_20->unk_22 & 0x10)) {
+            goto stop;
+        }
+    }
+    if (func_80039C40(D_800AA248.unk_20->unk_14, 0x460000, 0x460000) == 0) {
+        func_8003EB5C(D_80095874, D_800AA248.unk_20);
+        if (D_800AA248.unk_20->unk_22 & 0x10) {
+            npc->unk_34 = -0x28000;
+            D_800AA248.unk_20->unk_C = 0;
+            return;
+        }
+        npc->unk_34 = 0x28000;
+        D_800AA248.unk_20->unk_C = 0;
+        return;
+    }
+stop:
+    npc->unk_8 = 2;
+    npc->unk_1C = 0x1E;
+    func_8003EB5C(D_8009585C, D_800AA248.unk_20);
+    npc->unk_34 = 0;
+    D_800AA248.unk_20->unk_C = 0;
+    npc->unk_24 = 0;
+}
 
 INCLUDE_ASM("asm/main/nonmatchings/game_80034590", func_8003A218);
 
 INCLUDE_ASM("asm/main/nonmatchings/game_80034590", func_8003A328);
 
-INCLUDE_ASM("asm/main/nonmatchings/game_80034590", func_8003A4A0);
+void func_8003A4A0(Npc *npc) {
+    u16 n;
+
+    D_800AA248.unk_20->unk_C = 0;
+    n = npc->unk_1C - 1;
+    npc->unk_1C = n;
+    npc->unk_34 = npc->unk_34 * 6 / 7;
+    if ((s16)n == -1) {
+        npc->unk_8 = 0x10;
+        npc->unk_34 = 0;
+        npc->unk_1C = 0x28;
+    }
+}
 
 INCLUDE_ASM("asm/main/nonmatchings/game_80034590", func_8003A520);
 
@@ -271,7 +995,21 @@ INCLUDE_ASM("asm/main/nonmatchings/game_80034590", func_8003AA7C);
 
 INCLUDE_ASM("asm/main/nonmatchings/game_80034590", func_8003AAF8);
 
-INCLUDE_ASM("asm/main/nonmatchings/game_80034590", func_8003ABE8);
+void func_8003ABE8(NpcS *npc) {
+    if (D_800AA248.unk_20->unk_22 & 0x10) {
+        npc->unk_34 = -0x40000;
+    } else {
+        npc->unk_34 = 0x40000;
+    }
+    D_800AA248.unk_20->unk_C = 0;
+    if (npc->unk_1C != 0) {
+        npc->unk_1C--;
+        return;
+    }
+    if (D_800AA248.unk_20->unk_6C & 0x80) {
+        func_8003AA7C(npc);
+    }
+}
 
 INCLUDE_ASM("asm/main/nonmatchings/game_80034590", func_8003AC74);
 
@@ -279,8 +1017,61 @@ INCLUDE_ASM("asm/main/nonmatchings/game_80034590", func_8003AEA0);
 
 INCLUDE_ASM("asm/main/nonmatchings/game_80034590", func_8003AF40);
 
-INCLUDE_ASM("asm/main/nonmatchings/game_80034590", func_8003B1D0);
+void func_8003B1D0(NpcS *npc) {
+    if (npc->unk_C != 0) {
+        if (npc->unk_1C > 0) {
+            npc->unk_1C--;
+        }
+        if (func_80039C40(D_800AA248.unk_20->unk_14, 0xA0000, 0xA0000) == 0) {
+            npc->unk_8 = 0x15;
+            return;
+        }
+        if (npc->unk_1C == 0) {
+            if (func_80039C98(D_800AA248.unk_20->unk_14, 0x460000, 0x460000) != 0) {
+                npc->unk_8 = 0x16;
+                npc->unk_24 = 0;
+                return;
+            }
+            npc->unk_8 = 0x16;
+            npc->unk_24 = 3;
+            npc->unk_1C = 0x14;
+        }
+    }
+}
 
-INCLUDE_ASM("asm/main/nonmatchings/game_80034590", func_8003B294);
+void func_8003B294(NpcS *npc) {
+    u16 action;
+
+    D_800AA248.unk_20 = npc->unk_0;
+    func_80020D20(npc);
+    action = npc->unk_8;
+    if (action != 0x63 && action != 1) {
+        func_8003AC74(npc);
+    }
+    switch (npc->unk_8) {
+    case 0x3B:
+    case 1:
+        func_8003AAF8(npc);
+        return;
+    case 2:
+        func_8003B1D0(npc);
+        return;
+    case 0x63:
+        func_8003ABE8(npc);
+        return;
+    case 0x15:
+        func_8003AEA0(npc);
+        return;
+    case 0x16:
+        func_8003AF40(npc);
+        return;
+    case 3:
+        func_8003A328(npc, 0);
+        return;
+    case 4:
+        func_80038800(npc);
+        return;
+    }
+}
 
 INCLUDE_ASM("asm/main/nonmatchings/game_80034590", func_8003B3C8);
