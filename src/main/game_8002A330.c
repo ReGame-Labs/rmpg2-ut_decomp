@@ -170,7 +170,7 @@ void func_8002C19C(UnkStruct1 *arg0) {
 
 void func_8002C1E8(UnkStruct1 *arg0) {
     if (((u16) arg0->unk_30) != 0) {
-        func_8002ED90();
+        func_8002ED90(arg0);
         return;
     }
     arg0->unk_14 = 0;
@@ -516,7 +516,29 @@ void func_8002ED28(void) {
 
 INCLUDE_ASM("asm/main/nonmatchings/game_8002A330", func_8002ED30);
 
-INCLUDE_ASM("asm/main/nonmatchings/game_8002A330", func_8002ED90);
+void func_8002ED90(UnkStruct1 *arg0) {
+    u16 var_s1;
+    s16 var_s2;
+    u16 temp_v0;
+    u32 temp_v1;
+    UnkStruct2 *var_s0;
+
+    var_s2 = arg0->unk_0C;
+    var_s1 = arg0->unk_00 - 1;
+    temp_v0 = (u16) arg0->unk_30 - 1;
+    temp_v1 = temp_v0 & 3;
+    arg0->unk_30 = temp_v0;
+    var_s0 = &arg0->unk_98[1];
+    if (temp_v1 < 2U) {
+        if (temp_v1 == 0) {
+            var_s2 = -var_s2;
+        }
+        do {
+            func_8002EE14(var_s2, var_s0);
+            var_s0++;
+        } while (--var_s1 != 0);
+    }
+}
 
 INCLUDE_ASM("asm/main/nonmatchings/game_8002A330", func_8002EE14);
 
@@ -611,7 +633,26 @@ void func_8002FB38(void *arg0, UnkStruct4 *arg1) {
 
 INCLUDE_ASM("asm/main/nonmatchings/game_8002A330", func_8002FB6C);
 
-INCLUDE_ASM("asm/main/nonmatchings/game_8002A330", func_8002FD24);
+void func_8002FD24(UnkStruct1 *arg0, UnkStruct1 *arg1) {
+    u16 i;
+    u16 temp_a3;
+    UnkStruct7 *temp_a2;
+
+    i = 7;
+    do {
+        temp_a2 = &D_801E0B78[i];
+        if (temp_a2->unk_58 & 1) {
+            temp_a3 = temp_a2->unk_1B0;
+            if (temp_a3 != 0) {
+                if ((temp_a2->unk_1B2 == arg1->unk_1E) && (temp_a3 != 3)) {
+                    if (temp_a2->unk_1B4 >= arg0->unk_04) {
+                        temp_a2->unk_5A = 0xF;
+                    }
+                }
+            }
+        }
+    } while (--i != 0);
+}
 
 INCLUDE_ASM("asm/main/nonmatchings/game_8002A330", func_8002FDC0);
 
@@ -660,7 +701,33 @@ INCLUDE_ASM("asm/main/nonmatchings/game_8002A330", func_8003047C);
 
 INCLUDE_ASM("asm/main/nonmatchings/game_8002A330", func_800305C8);
 
+#ifdef NON_MATCHING
+/* 93 %: the original saves arg1 into s2 and copies arg0 into v1 at the very start (the call passes the raw
+ * argument, the compares its s16 value); every form tried orders the prologue differently. */
+void func_80030698(s32 arg0, UnkStruct1 *arg1, UnkStruct2 *arg2) {
+    s16 temp_s0;
+    u16 temp_v0;
+    u32 temp_a1;
+    UnkStruct1 *temp_s1;
+
+    temp_s1 = arg2->unk_08;
+    temp_s0 = arg0;
+    if ((temp_s1 != NULL) && ((u16) temp_s1->unk_14 < 9U) && (temp_s0 < 7)) {
+        func_80031154(arg0 & 0xFFFF);
+        if (temp_s0 >= 0) {
+            temp_v0 = temp_s1->unk_10 + D_8007CFE8[temp_s0];
+            temp_a1 = temp_v0 & 0xFFFF;
+            temp_s1->unk_10 = temp_v0;
+            func_80030834(temp_s1, temp_a1);
+            if (temp_a1 < temp_s1->unk_12) {
+                func_8003111C(1, arg1);
+            }
+        }
+    }
+}
+#else
 INCLUDE_ASM("asm/main/nonmatchings/game_8002A330", func_80030698);
+#endif
 
 INCLUDE_ASM("asm/main/nonmatchings/game_8002A330", func_80030754);
 
