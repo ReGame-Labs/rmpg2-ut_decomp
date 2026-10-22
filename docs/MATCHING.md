@@ -31,7 +31,7 @@ scripts/build.sh                  # splat + ninja; must end "build passed" (also
 | asm-differ (`tools/ext/asm-differ/diff.py -mw <func>`) | Live terminal diff |
 | decomp-permuter (`tools/ext/decomp-permuter`) | Random source mutations scored against the target; a hint, never the answer |
 | `tools/split_case_sizes.py asm/<t>/X.s` | `size:` lines that merge switch-case pieces spimdisasm split off as `jlabel` functions |
-| `tools/psyq_match.py` | Psy-Q library objects by signature; `--symbols` writes their names |
+| `tools/psyq_match.py` | Psy-Q library objects by signature (`--symbols` writes their names); `--functions` names the functions of the config's `psyq/` units one by one |
 | cc1 dump flags | `-dL` (loop.c hoisting decisions), `-dl`/`-dg` (local/global allocation priorities) |
 
 GCC 2.8.1's sources, for reading why the compiler chose something:

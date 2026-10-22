@@ -12,9 +12,17 @@ SDK version. Overlapping hits are resolved by keeping the longest signature.
 Usage:
   psyq_match.py extracted/disc/SLUS_007.42         # PS-X EXE (header skipped)
   psyq_match.py --raw --base 0x80xxxxxx OVERMOVE.BIN   # headerless overlay (its load address)
+  psyq_match.py --functions [--yaml config/main.yaml] extracted/disc/SLUS_007.42   # name the functions per unit
   options: --symbols FILE   write symbol_addrs.txt lines for named labels
            --min-size N     ignore signatures shorter than N bytes (default 16)
            --min-cluster N  ignore runs of adjacent hits under N bytes (default 128)
+
+The linker kept only the functions the game references out of each library object, so most objects are shorter
+than their signature and the whole-object match above misses them. --functions works per function instead: for
+every psyq/<lib>/<obj> unit of the splat config it cuts each version's signature at its function labels (a slice
+runs to the next function label, static code included), searches the slices in the unit's bytes in label order,
+and prints a symbol line per hit, with the versions whose slice matched and the byte-identical twins that would
+fit the same place (settle those from the callers or callees).
 Adapted from gascarcella/dw2003recomp's tools/psyq_match.py (MIT; docs/THIRD_PARTY.md).
 """
 import argparse
@@ -76,6 +84,8 @@ def main():
                     help="ignore runs of adjacent hits smaller than this (default 128 B)")
     ap.add_argument("--symbols", help="write symbol_addrs.txt-style lines here")
     ap.add_argument("--prefix", default="", help="prefix for emitted symbol names (overlays)")
+    ap.add_argument("--functions", action="store_true", help="per-function names for the config's psyq/ units")
+    ap.add_argument("--yaml", default="config/main.yaml", help="splat config with the psyq/<lib>/<obj> units")
     args = ap.parse_args()
 
     data = Path(args.binary).read_bytes()
@@ -87,6 +97,9 @@ def main():
         assert data[:8] == b"PS-X EXE", "not a PS-X EXE"
         base = struct.unpack_from("<I", data, 0x18)[0]
         code = data[0x800:]
+
+    if args.functions:
+        return name_functions(code, base, args.yaml, args.prefix)
 
     sigs = [s for s in load_sigs() if len(s["sig"].split()) >= args.min_size]
     hits = []
@@ -257,6 +270,103 @@ def main():
                 lines.append(f"{name} = 0x{addr:08X}; // type:func")
         Path(args.symbols).write_text("\n".join(lines) + "\n")
         print(f"\nwrote {len(seen)} symbols to {args.symbols} ({skipped} ambiguous objects left unnamed)")
+
+
+def psyq_units(yaml_path):
+    """The psyq/<lib>/<obj> units of a splat config: [(vram start, vram end, lib, obj)]."""
+    import yaml
+    cfg = yaml.safe_load(Path(yaml_path).read_text())
+    units = []
+    for seg in cfg["segments"]:
+        if not isinstance(seg, dict) or seg.get("type") != "code":
+            continue
+        subs = [s for s in seg["subsegments"] if isinstance(s, list)]
+        for i, s in enumerate(subs):
+            if len(s) >= 3 and isinstance(s[2], str) and s[2].startswith("psyq/"):
+                end = subs[i + 1][0] if i + 1 < len(subs) else None
+                vram = seg["vram"] + s[0] - seg["start"]
+                _, lib, obj = s[2].split("/")
+                units.append((vram, seg["vram"] + end - seg["start"] if end else None, lib.upper() + ".LIB", obj.upper() + ".OBJ"))
+    return units
+
+
+def name_functions(code, base, yaml_path, prefix):
+    by_obj = defaultdict(list)  # (lib, obj) -> [sig entries]
+    for s in load_sigs():
+        by_obj[(s["lib"], s["obj"])].append(s)
+    total = 0
+    for start, end, lib, obj in psyq_units(yaml_path):
+        if end is None:
+            continue
+        span = code[start - base:end - base]
+        found = defaultdict(lambda: defaultdict(set))  # addr -> name -> versions whose label slice matched
+        sizes = {}  # (name, version) -> slice size
+        alts = defaultdict(set)  # addr -> other labels whose slice fits there too
+        for e in by_obj.get((lib, obj), []):
+            toks = e["sig"].split()
+            for v in e["versions"]:
+                labels = sorted((l["offset"], l["name"]) for l in e["labels"][v])
+                funcs = [(o, n) for o, n in labels if is_func_label(n)]
+                slices = []
+                for i, (o, n) in enumerate(funcs):
+                    nxt = funcs[i + 1][0] if i + 1 < len(funcs) else len(toks)
+                    if nxt - o >= 8:
+                        slices.append((n, to_regex(" ".join(toks[o:nxt]))))
+                        sizes[(n, v)] = nxt - o
+                # Walk the unit in label order: at each step the remaining slice that matches earliest (ties to
+                # the earliest label) is the next function; the labels before it were dropped by the linker.
+                cur, i = 0, 0
+                while i < len(slices):
+                    best = None
+                    for j in range(i, len(slices)):
+                        m = slices[j][1].search(span, cur)
+                        while m and m.start() % 4:
+                            m = slices[j][1].search(span, m.start() + 1)
+                        if m and (best is None or m.start() < best[0]):
+                            best = (m.start(), j, m.end())
+                    if best is None:
+                        break
+                    pos, j, stop = best
+                    found[start + pos][slices[j][0]].add(v)
+                    cur, i = stop, j + 1
+                for n, rx in slices:
+                    for a in list(found):
+                        m = rx.match(span, a - start)
+                        if m and n not in found[a]:
+                            alts[a].add(n)
+        if not found:
+            print(f"// {lib}/{obj} {start:08X}-{end:08X}: no function named (no labels, or no slice matched)")
+            continue
+        # A function is consistent with a version when that version's object holds its bytes, labelled or not
+        # (static functions carry labels in some versions only): search the function's bytes in each signature.
+        consistent = {}
+        for a in found:
+            n = max(found[a], key=lambda n: len(found[a][n]))
+            size = max(sizes[(n, v)] for v in found[a][n])
+            pat = re.compile("".join(f"(?:{b:02X}|\\?\\?)" for b in span[a - start:a - start + size]))
+            vs = set()
+            for e in by_obj.get((lib, obj), []):
+                hexsig = "".join("??" if t == "??" else t.upper() for t in e["sig"].split())
+                m = pat.search(hexsig)
+                while m and m.start() % 8:
+                    m = pat.search(hexsig, m.start() + 1)
+                if m:
+                    vs.update(e["versions"])
+            consistent[a] = vs
+        common = set(VERSIONS).intersection(*consistent.values())
+        vs = ", ".join(vname(v) for v in VERSIONS if v in common) or "none"
+        print(f"// {lib}/{obj} {start:08X}-{end:08X}: {len(found)} functions; versions consistent with all: {vs}")
+        for a in sorted(found):
+            names = found[a]
+            best = max(names, key=lambda n: ("430" in names[n], len(names[n]), n))
+            v = sorted(consistent[a], key=VERSIONS.index)
+            note = f"{vname(v[0])}-{vname(v[-1])}" if len(v) > 1 else vname(v[0])
+            other = sorted((set(names) - {best}) | alts[a])
+            if other:
+                note += "; or " + ", ".join(other)
+            print(f"{prefix}{best} = 0x{a:08X}; // type:func  {note}")
+            total += 1
+    print(f"// {total} functions named", file=sys.stderr)
 
 
 if __name__ == "__main__":
