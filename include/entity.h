@@ -40,7 +40,10 @@ typedef struct Body {
     /* 0x18 */ Fixed32 unk_18;
     /* 0x1C */ u8 unk_1C[6];
     /* 0x22 */ u16 unk_22;
-    /* 0x24 */ u8 unk_24[0x20];
+    /* 0x24 */ u8 unk_24[0xC];
+    /* 0x30 */ u16 unk_30;
+    /* 0x32 */ u16 unk_32;
+    /* 0x34 */ u8 unk_34[0x10];
     /* 0x44 */ s32 unk_44;
     /* 0x48 */ u8 unk_48[0x14];
     /* 0x5C */ s32 *unk_5C;
@@ -72,8 +75,16 @@ typedef struct Unk54728Sub18 {
     /* 0x1E */ s16 unk_1E;
 } Unk54728Sub18;
 
+/* The 0x54-byte items a city record holds from 0x98 (not read yet). */
+typedef struct Unk54728Item {
+    /* 0x00 */ u8 unk_00[0x6];
+    /* 0x06 */ u16 unk_06;
+    /* 0x08 */ u8 unk_08[0x4C];
+} Unk54728Item;
+
 typedef struct Unk54728 {
-    /* 0x00 */ u8 unk_00[4];
+    /* 0x00 */ u16 unk_00;
+    /* 0x02 */ u8 unk_02[2];
     /* 0x04 */ u16 unk_04;
     /* 0x06 */ u8 unk_06[0x2];
     /* 0x08 */ u16 unk_08;
@@ -98,7 +109,8 @@ typedef struct Unk54728 {
     /* 0x78 */ u16 unk_78;
     /* 0x7A */ u8 unk_7A[0x8];
     /* 0x82 */ u16 unk_82;
-    /* 0x84 */ u8 unk_84[0x500];
+    /* 0x84 */ u8 unk_84[0x14];
+    /* 0x98 */ Unk54728Item unk_98[15];     /* 0x54-byte items */
 } Unk54728;                     /* 0x584: D_801D3DC8 is an array of them */
 
 /* The object the state functions of game_800500EC and game_80057C94 take (the monsters and the other actors:
@@ -154,7 +166,9 @@ typedef struct Entity {
     /* 0x168 */ u16 unk_168;
     /* 0x16A */ u8 unk_16A[2];
     /* 0x16C */ void *unk_16C;
-    /* 0x170 */ u8 unk_170[0x18];
+    /* 0x170 */ u8 unk_170[0x14];
+    /* 0x184 */ u16 unk_184;
+    /* 0x186 */ u8 unk_186[0x2];
     /* 0x188 */ u16 unk_188;
     /* 0x18A */ u16 unk_18A;
     /* 0x18C */ u8 unk_18C[2];
