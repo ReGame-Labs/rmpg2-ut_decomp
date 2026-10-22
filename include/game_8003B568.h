@@ -7,17 +7,36 @@
 /* Declarations of src/main/game_8003B568.c: provisional types from the code's own use; refined as functions match. */
 
 typedef struct UnkStructB1 {  /* provisional: a 0x58-byte record of the table at D_801FA9BC */
-    void *unk_00;
+    UnkStruct4 *unk_00;
     u8 pad_04[0x2];
     u16 unk_06;
-    u8 pad_08[0xC];
+    u16 unk_08;
+    s16 unk_0A;
+    u8 pad_0C[0x8];
     UnkStruct1 *unk_14;
     u8 pad_18[0x2];
     u16 unk_1A;
-    u8 pad_1C[0x3C];
+    u8 pad_1C[0x18];
+    s32 unk_34;
+    u8 pad_38[0x8];
+    UnkStruct4 *unk_40;
+    u8 pad_44[0x14];
 } UnkStructB1;
 
+typedef struct UnkStructB2 {  /* provisional: a 0x30-byte record of the table at D_801D3824 (D_801D8738 of them) */
+    u8 pad_00[0x4];
+    u16 unk_04;
+    u8 pad_06[0x16];
+    u16 unk_1C;
+    u8 pad_1E[0x12];
+} UnkStructB2;
+
+extern UnkStructB2 D_801D3824[];
+extern u16 D_801D8738;
 extern u16 D_801E1C80;
+extern s16 D_801F9980;
+extern s16 D_801F9984;
+extern s16 D_801F9988;
 extern u16 D_801E29B0;
 extern UnkStructB1 D_801FA9BC[];
 
@@ -28,10 +47,26 @@ void func_8005DD48(UnkStruct1 *);
 
 void func_8003B568(void);
 void func_8003B5D0(UnkStructB1 *);
+void func_8003B68C(void);
+void func_8003B9A0(UnkStructB1 *);
+void func_8003C130(void);
+void func_8003C344(void);
 void func_8003C080(void);
 void func_8003C0AC(void);
 void func_8003C0C8(void);
 void func_8003C0E0(void);
+void func_8003BD48(UnkStructB1 *);
+void func_8003BF34(UnkStruct4 *, UnkStructB1 *, u16);   /* the third argument is not used */
+extern u16 D_801D37BC;
+extern s16 D_801F9AB0;
+extern s16 D_801FA98C;
+extern s16 D_801FA990;
+extern s16 D_801FAC84;
+extern u8 D_8008A494[];
+extern u8 D_8008A4A0[];
+extern u8 D_8008A4B8[];
+extern u8 D_8008A4C4[];
+void func_8003C1C0(u16, UnkStructB2 *);
 void func_8003C674(void);
 void func_8003C894(void **arg0);
 void func_8003C8D4(UnkStructB1 *arg0);

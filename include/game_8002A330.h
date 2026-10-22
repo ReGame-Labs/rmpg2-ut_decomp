@@ -13,6 +13,8 @@ struct UnkStruct4;
 typedef struct GameState {
     u8 pad_00[0x20];
     struct UnkStruct4 *unk_20;  /* D_800AA268 */
+    u8 pad_24[0x18];
+    struct UnkStructD110 *unk_3C;  /* the record func_8001D110 handed out last */
 } GameState;
 
 extern GameState D_800AA248;
@@ -221,6 +223,42 @@ extern s16 D_801FAC84;
 extern s16 D_801FAC8C;
 extern s16 D_801FAC90;
 
+/* A 16.16 value whose high half the code also reads and writes on its own. */
+typedef union Fix1616 {
+    s32 w;
+    struct {
+        u16 lo;
+        u16 hi;
+    } h;
+} Fix1616;
+
+typedef struct UnkStructPair {  /* provisional: s16 pairs: D_801D8804 (func_800303DC), the tables D_8007CE08 and D_8007CE34 */
+    s16 unk_00;
+    s16 unk_02;
+} UnkStructPair;
+
+typedef struct UnkStructD110 {  /* provisional: the record func_8001D110 hands out (a sprite request: an animation and a position) */
+    s32 unk_00;
+    u8 pad_04[0xE];
+    u16 unk_12;
+    u8 pad_14[0x2];
+    u16 unk_16;
+    u8 pad_18[0x8];
+    s32 unk_20;
+    u8 pad_24[0x4];
+    s32 *unk_28;
+} UnkStructD110;
+
+typedef struct UnkStructFEA4 {  /* provisional: func_8002FEA4's and func_800305C8's argument */
+    u8 pad_00[0x2];
+    u16 unk_02;
+    s16 unk_04;
+    u16 unk_06;
+    u16 unk_08;
+    u8 pad_0A[0x4];
+    s16 unk_0E;
+} UnkStructFEA4;
+
 typedef struct UnkStruct1 UnkStruct1;
 typedef struct UnkStruct2 UnkStruct2;
 typedef struct UnkStruct3 UnkStruct3;
@@ -259,9 +297,9 @@ struct UnkStruct1 {  /* provisional: fields as the code reaches them */
     u8 pad_0E[0x2];
     u16 unk_10;
     u16 unk_12;
-    s16 unk_14;
+    u16 unk_14;
     u16 unk_16;
-    s32 unk_18;
+    Fix1616 unk_18;
     u16 unk_1C;
     u16 unk_1E;
     void *unk_20;
@@ -271,12 +309,12 @@ struct UnkStruct1 {  /* provisional: fields as the code reaches them */
     u16 unk_2A;
     s16 unk_2C;
     s16 unk_2E;
-    s16 unk_30;
+    u16 unk_30;
     u16 unk_32;
     u16 unk_34;
     u16 unk_36;
     u16 unk_38;
-    u8 pad_3A[0x8];
+    u16 unk_3A[4];
     u16 unk_42;
     s32 unk_44;
     u8 pad_48[0xE];
@@ -302,11 +340,14 @@ struct UnkStruct1 {  /* provisional: fields as the code reaches them */
     s32 unk_94;
     UnkStruct2 unk_98[2];
     s16 unk_140;
-    u8 pad_142[0x2];
+    u16 unk_142;
     s16 unk_144;
     u8 pad_146[0x40];
     u16 unk_186;
-};
+    u8 pad_188[0x2];
+    s16 unk_18A;
+    u8 pad_18C[0x3F8];
+};   /* 0x584 bytes: the array at D_801D3DC8 (D_801E29A4 of them) steps by that */
 
 
 struct UnkStruct3 {  /* provisional: fields as the code reaches them */
@@ -315,13 +356,17 @@ struct UnkStruct3 {  /* provisional: fields as the code reaches them */
     u16 unk_0A;
 };
 
-struct UnkStruct4 {  /* provisional: what the game state's unk_20 (D_800AA268) points to */
-    u8 pad_00[0xC];
+struct UnkStruct4 {  /* provisional: what the game state's unk_20 (D_800AA268) points to; the records UnkStruct12 points at too */
+    u8 pad_00[0x4];
+    u16 unk_04;
+    u8 pad_06[0x6];
     s32 unk_0C;
     s32 unk_10;
-    u8 pad_14[0x4];
-    s32 unk_18;
-    u8 pad_1C[0x6];
+    u16 unk_14;
+    u16 unk_16;
+    Fix1616 unk_18;
+    u16 unk_1C;
+    u8 pad_1E[0x4];
     u16 unk_22;
     u8 pad_24[0x10];
     void *unk_34;
@@ -329,7 +374,11 @@ struct UnkStruct4 {  /* provisional: what the game state's unk_20 (D_800AA268) p
     s32 unk_44;
     u8 pad_48[0x14];
     s32 *unk_5C;
-    u8 pad_60[0x20];
+    u8 pad_60[0xC];
+    u16 unk_6C;      /* flags; 0x80 */
+    u8 pad_6E[0x2];
+    s16 unk_70;
+    u8 pad_72[0xE];
     u16 unk_80;
     u8 pad_82[0xE];
     UnkStruct2 *unk_90;
@@ -337,17 +386,13 @@ struct UnkStruct4 {  /* provisional: what the game state's unk_20 (D_800AA268) p
 };
 
 struct UnkStruct6 {  /* provisional */
-    u8 pad_00[0x18];
+    u8 pad_00[0x2];
+    u16 unk_02;
+    u8 pad_04[0x14];
     UnkStruct3 *unk_18;
 };
 
-typedef struct UnkStruct13 {  /* provisional: the records UnkStruct12 points at (func_800308EC, func_80030A70, func_80030BAC) */
-    u8 pad_00[0x10];
-    s32 unk_10;
-    u8 pad_14[0x2];
-    u16 unk_16;
-    s32 unk_18;
-} UnkStruct13;
+typedef UnkStruct4 UnkStruct13;   /* the records UnkStruct12 points at are the same kind as the current object's */
 
 typedef struct UnkStruct14 {  /* provisional */
     UnkStruct13 *unk_00;
@@ -361,7 +406,8 @@ typedef struct UnkStruct12 {  /* provisional: 0x18 bytes, three of them in UnkSt
     UnkStruct13 **unk_08;
     UnkStruct14 *unk_0C;
     UnkStruct13 *unk_10;
-    u8 pad_14[0x4];
+    u8 pad_14[0x2];
+    s16 unk_16;
 } UnkStruct12;
 
 typedef struct UnkStruct15 {  /* provisional: func_800300A0's first argument */
@@ -396,10 +442,18 @@ typedef struct UnkStruct7 {  /* provisional: the 0x220-byte records at D_801E0B7
     s16 unk_04;
     u8 pad_06[0x2];
     s32 unk_08;
-    u8 pad_0C[0x4C];
+    u8 pad_0C[0x4];
+    u16 unk_10;
+    u16 unk_12;
+    u16 unk_14;
+    u8 pad_16[0x1C];
+    u16 unk_32;
+    u8 pad_34[0x24];
     u16 unk_58;
     s16 unk_5A;
-    u8 pad_5C[0x154];
+    u8 pad_5C[0x3C];
+    UnkStruct4 *unk_98;
+    u8 pad_9C[0x114];
     u16 unk_1B0;
     u16 unk_1B2;
     u16 unk_1B4;
@@ -424,7 +478,7 @@ void func_8002EB00();
 void func_8002C19C(UnkStruct1 *arg0);
 void func_8002ED90(UnkStruct1 *);
 void func_8002C1E8(UnkStruct1 *arg0);
-void func_8002FEA4();
+void func_8002FEA4(UnkStructFEA4 *);
 void func_8002C228(UnkStruct1 *arg0);
 void func_8002E854();
 void func_80030B5C(UnkStruct1 *);
@@ -442,13 +496,13 @@ void func_8002C858(UnkStruct1 *arg0);
 void func_8002CE40(UnkStruct2 *arg0, s32 arg1);
 void func_8002D228(s32, UnkStruct1 *);
 void func_8002F5B0(s32 arg0, UnkStruct1 *arg1);
-void func_8003089C(s32, s32);
+void func_8003089C(u16, UnkStruct1 *);
 void func_8002D144(s32 arg0, UnkStruct1 *arg1);
 s32 func_8002D2CC(s32 arg0, UnkStruct1 *arg1);
-s32 * func_8002E658(s32);
-void func_8002E5F4(s32 arg0);
+s32 *func_8002E658(u16, UnkStruct5 *);
+void func_8002E5F4(u16, UnkStruct5 *);
 void func_8003C894(void **);
-void func_8002E614(s32 arg0);
+void func_8002E614(u16, UnkStruct5 *);
 void func_8002ED28(void);
 void func_80030698(s32, UnkStruct1 *, UnkStruct2 *);
 void func_8001E4B0(void *);
@@ -680,8 +734,8 @@ extern u8 D_8007C944[];
 extern u8 D_8007C95C[];
 extern s32 *D_801D85A4;
 void func_8002DFA8(s32, UnkStruct1 *);
-void func_8002E148();
-void func_8002D370();
+void func_8002E148(s32, UnkStruct1 *);
+void func_8002D370(s32, UnkStruct1 *, UnkStruct1 *);
 void func_8002FDC0();
 void func_8002E440();
 void func_8002FB6C(s32, UnkStruct2 *, UnkStruct1 *);
@@ -695,7 +749,7 @@ extern s32 D_800AA2DC;
 void func_8002F688();
 void func_8002FB38(void *, UnkStruct4 *);
 void func_8002E348(s32, UnkStruct2 *);
-void func_80030D14(s32, UnkStruct2 *);
+void func_80030D14();   /* called with one and with two arguments: no prototype in the original */
 void func_8002B878();
 void func_8002BA70(s32);
 extern u16 D_8007A688;
@@ -711,13 +765,54 @@ void func_80031FD4(s32, UnkStruct9 *);
 void func_80030834(UnkStruct1 *, s32);
 void func_8002E9A4(UnkStruct1 *);
 void func_8002BE30(UnkStruct7 *);
-void func_80031154(s32);
+void func_80031154(s32, UnkStruct1 *);
 extern u16 D_8007CFE8[];
-extern u8 D_8007CE08[];
-extern u8 D_8007CE34[];
-void func_8002EE14(s32, UnkStruct2 *);
+extern UnkStructPair D_8007CE08[];
+extern UnkStructPair D_8007CE34[];
+void func_8002EE14(s16, UnkStruct5 *);
 void func_80030E04(s32, UnkStruct2 *);
 void func_8002FD24(UnkStruct1 *, UnkStruct1 *);
-s32 func_8002DB3C(s32, s32, UnkStruct5 *);
+s32 func_8002DB3C(u16, u16, UnkStruct5 *);
 void func_80034418(UnkStruct1 *);
+void func_8002F898(UnkStruct6 *, UnkStruct2 *);
+UnkStruct2 *func_8002ED30(u16, void *);   /* called with an actor and with one of its records */
+u16 func_8002F558(UnkStruct1 *);
+void func_8002DBF4(u16, s32, s32, UnkStruct1 *);
+void func_80025848(UnkStruct2 *);
+void func_80024964(s32, UnkStruct4 *);
+extern u8 D_8001236C[];
+extern u8 D_80012394[];
+extern UnkStructPair D_801D8804[13];
+extern UnkStruct1 D_801D3DC8[];
+extern u16 D_801E29A4;
+extern s16 D_801FA734;
+extern u16 D_8007CFF8[];   /* a u16 table after a header word (func_8003089C) */
+void func_800303DC(UnkStruct1 *, UnkStruct4 *);
+void func_80030D74(void);
+void func_8002CFAC(UnkStruct1 *, UnkStruct7 *);
+UnkStruct2 *func_8002CD24(u16, UnkStruct1 *, UnkStruct2 *);
+void func_80031280(s32, UnkStruct1 *);
+void func_8002CE74(u16, UnkStruct1 *, UnkStruct2 *);
+void func_8003111C(s32, UnkStruct1 *);
+void func_80031364(UnkStruct1 *);
+extern void *D_8007D008[];
+extern void *D_8007D060[];
+s32 func_8001A3AC(void);
+UnkStructD110 *func_8001D110(void);
+UnkStruct4 *func_8001DCB4(void);
+void func_8002CBF4(UnkStruct7 *);
+extern s32 D_80011E68[];
+extern s32 D_80011ED0[];
+extern s32 D_80011ED8[];
+extern s32 D_80012068[];
+extern s16 D_8007A690;
+void func_800305C8(s32 *, s16, UnkStruct4 *, UnkStructFEA4 *);
+void func_8002DE08(u16, s16, s32, UnkStruct5 *);
+void *func_8002DAAC(u16, u16, UnkStruct5 *);
+void func_80030754(UnkStruct12 *, s16, s32, UnkStruct5 *);
+s32 func_8001EB10(s32, s32);
+extern u16 D_801D8866;
+void func_8002CA8C(void);
+extern s32 D_80011E10[];
+extern s32 D_80011E90[];
 #endif /* GAME_8002A330_H */
