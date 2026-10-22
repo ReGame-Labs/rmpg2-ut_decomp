@@ -10,8 +10,11 @@ recompiles into a byte-identical copy of the game's executable and overlays, bui
 
 ## State
 
+[![code matched](https://api.decmp.dev/badge/ReGame-Labs/rmpg2-ut_decomp.svg?measure=matched_code_percent&label=code)](https://decmp.dev/ReGame-Labs/rmpg2-ut_decomp)
+
 Every file already rebuilds byte-identical from split assembly; the work is turning that assembly into matching C.
-[`docs/PROGRESS.md`](docs/PROGRESS.md) has the numbers.
+[`docs/PROGRESS.md`](docs/PROGRESS.md) has the numbers per part, [decmp.dev](https://decmp.dev/ReGame-Labs/rmpg2-ut_decomp)
+the history: CI uploads the report on every push to `main`.
 
 ## Documentation
 
