@@ -29,8 +29,7 @@ typedef struct Npc {
     /* 0x34 */ s32 unk_34;
     /* 0x38 */ u8 unk_38[0x6];
     /* 0x3E */ s16 unk_3E;
-    /* 0x40 */ s16 unk_40;
-    /* 0x42 */ s16 unk_42;
+    /* 0x40 */ Mover *unk_40;
     /* 0x44 */ u16 unk_44;      /* the mover's flags when it was set up */
     /* 0x46 */ s16 unk_46;
     /* 0x48 */ s16 unk_48;
@@ -38,13 +37,15 @@ typedef struct Npc {
     /* 0x4C */ s16 unk_4C;
     /* 0x4E */ u16 unk_4E;
     /* 0x50 */ u8 unk_50[0x4];
-    /* 0x54 */ u16 unk_54;      /* the mover's flags when it was set up */
-    /* 0x56 */ u8 unk_56[0x6];
+    /* 0x54 */ Player *unk_54;
+    /* 0x58 */ u8 unk_58[0x4];
     /* 0x5C */ u16 unk_5C;
     /* 0x5E */ u16 unk_5E;
     /* 0x60 */ Player *unk_60;
     /* 0x64 */ Player *unk_64;
-    /* 0x68 */ u8 unk_68[0x10];
+    /* 0x68 */ u8 unk_68[0x8];
+    /* 0x70 */ Mover *unk_70;
+    /* 0x74 */ Mover *unk_74;
 } Npc;                      /* 0x78 */
 
 /* The same record as the later functions declare it: signed counters. */
@@ -87,5 +88,23 @@ typedef struct NpcS {
     /* 0x64 */ Player *unk_64;
     /* 0x68 */ u8 unk_68[0x10];
 } NpcS;
+
+/* What func_8001D110 returns and func_8001DCB4 takes: an effect to spawn, described by a table (unk_28, its first
+ * word copied to unk_0) at a position (unk_12, unk_16). */
+typedef struct EffectDef {
+    /* 0x00 */ s32 unk_0;       /* copied into the effect's unk_0 */
+} EffectDef;
+
+typedef struct Effect {
+    /* 0x00 */ s32 unk_0;
+    /* 0x04 */ u8 unk_4[0xE];
+    /* 0x12 */ s16 unk_12;
+    /* 0x14 */ u8 unk_14[0x2];
+    /* 0x16 */ s16 unk_16;
+    /* 0x18 */ u8 unk_18[0x8];
+    /* 0x20 */ s32 unk_20;
+    /* 0x24 */ u8 unk_24[0x4];
+    /* 0x28 */ EffectDef *unk_28;
+} Effect;
 
 #endif /* GAME_80034590_H */

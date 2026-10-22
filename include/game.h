@@ -181,7 +181,9 @@ typedef struct GameGlobals {
     /* 0x04 */ s32 unk_4;
     /* 0x08 */ u8 unk_8[0x18];
     /* 0x20 */ Mover *unk_20;   /* the monster being moved */
-    /* 0x24 */ u8 unk_24[0x28];
+    /* 0x24 */ u8 unk_24[0x18];
+    /* 0x3C */ struct Effect *unk_3C;  /* the effect being set up (game_80034590: what func_8001D110 returns) */
+    /* 0x40 */ u8 unk_40[0xC];
     /* 0x4C */ s32 unk_4C;
     /* 0x50 */ u8 unk_50[0x2A];
     /* 0x7A */ u16 unk_7A;      /* func_8003EB5C's result: 1 when the animation was already current */
