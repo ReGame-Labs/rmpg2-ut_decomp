@@ -43,13 +43,14 @@ class Target:
 # The executable's global symbols as a linker script, for the overlays to link against (their calls into the
 # executable resolve to its own definitions). Made from the executable's ELF by ninja.
 EXE_SYMS = "build/main/SLUS_007.42.syms.ld"
-# Overlays load above this address (docs/DISC_LAYOUT.md "Overlays"; to be settled: the end of the EXE's .bss).
-OVERLAY_BASE = 0x80098000
+# Both overlays load at OVERLAY_BASE, between the executable's .data and its .bss (docs/DISC_LAYOUT.md "Overlays");
+# the executable's symbols in that region are the overlays' own and are left out of EXE_SYMS.
+OVERLAY_BASE, OVERLAY_END = 0x80097EA4, 0x800AA240
 
 TARGETS = [
     Target("main", "config/main.yaml", "build/SLUS_007.42", "config/SLUS_007.42.sha1"),
-    # The overlays OVERLAYS/OVERATTR.BIN and OVERLAYS/OVERMOVE.BIN get a Target each once their load addresses are
-    # known (docs/DISC_LAYOUT.md): Target("overmove", "config/overmove.yaml", "build/OVERMOVE.BIN",
+    # The overlays OVERLAYS/OVERATTR.BIN and OVERLAYS/OVERMOVE.BIN get a Target each once they are split
+    # (docs/DISC_LAYOUT.md "Overlays"): Target("overmove", "config/overmove.yaml", "build/OVERMOVE.BIN",
     # "config/OVERMOVE.BIN.sha1", (EXE_SYMS,)).
 ]
 
@@ -192,7 +193,8 @@ def main():
     n.rule("sha1", f"echo \"$$(cut -d' ' -f1 $sha1)  $in\" | sha1sum --quiet -c - && touch $out",
            "sha1 $in")
     n.rule("syms", f"{BINUTILS}nm --defined-only -g $in | "
-           f"awk '$$1 < \"{OVERLAY_BASE:08x}\" {{ printf \"%s = 0x%s;\\n\", $$3, $$1 }}' > $out",
+           f"awk '$$1 < \"{OVERLAY_BASE:08x}\" || $$1 >= \"{OVERLAY_END:08x}\" "
+           f"{{ printf \"%s = 0x%s;\\n\", $$3, $$1 }}' > $out",
            "syms $out")
     n.rule("configure", f"{PYTHON} configure.py", "configure", generator="1")
     n.build(EXE_SYMS, "syms", "build/main/SLUS_007.42.elf")

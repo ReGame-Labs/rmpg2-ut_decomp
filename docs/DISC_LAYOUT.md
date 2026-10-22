@@ -37,21 +37,71 @@ each of `.IXA`, `.LCD`, `.WMD`, `.WSD`, `.CNF`.
 | `s_addr` | `0x801FFFF0` |
 | marker | `Sony Computer Entertainment Inc. for North America area` |
 
-The regions (`config/main.yaml`; the boundaries are the first split, to be refined with evidence):
+The regions (`config/main.yaml`; the code regions are the first split, to be refined with evidence):
 
 | Address | Size | What |
 |---|---|---|
-| `0x80010000`–`0x80017758` | 30,552 | `.rodata` of every object, in link order (psylink puts them before all `.text`) |
-| `0x80017758`–`0x8001781C` | 196 | crt0 (Psy-Q `2MBYTE.OBJ`): clears `0x800AA240`–`0x801FE208`, reads the RAM size word at `0x80017810` (`0x00200000`), sets `$sp = 0x80200000` and `$gp`, calls the heap setup at `0x80063A78` and `main` |
+| `0x80010000`–`0x80017758` | 30,552 | `.rodata` of every object, in link order (psylink puts them before all `.text`); the first 0x580 bytes are the file table's checksums (below) |
+| `0x80017758`–`0x8001781C` | 196 | crt0 (Psy-Q `2MBYTE.OBJ`): clears `.bss`, reads `_ramsize` (2 MB, from its own table at `0x80017810`) and `_stacksize` (`0x600`, at `0x8007A70C`), sets `$sp = 0x80200000` and `$gp`, calls `InitHeap` (the BIOS call stub at `0x80063A78`) and `main` |
 | `0x8001781C`–`0x80063F98` | 313,212 | The game's code, `main` first (1,868 functions as splat finds them) |
 | `0x80063F98`–`0x8007A684` | 92,396 | The Psy-Q libraries (`docs/TOOLCHAIN.md`) |
-| `0x8007A684`–`0x80098000` | 120,700 | `.data`, then the small data around `$gp` (`0x80097EA4`); the last non-zero word is at `0x80097E9C` |
-| `0x80098000`– | | `.bss`: not in the file; its end is where the overlays or the heap begin (open) |
+| `0x8007A684`–`0x80097EA4` | 120,352 | `.data`; the last non-zero word is at `0x80097E9C`. No `.sdata` or `.sbss`: the code makes no `$gp`-relative access, and `$gp` is simply the end of `.data` |
+| `0x80097EA4`–`0x80098000` | 348 | Zeros: the file is padded to a whole sector (`t_size` is a multiple of 0x800). The overlay region starts here |
+
+## Memory map
+
+| Address | Size | What |
+|---|---|---|
+| `0x80010000`–`0x80098000` | 557,056 | The executable's image, above |
+| `0x80097EA4`–`0x800AA240` | 74,652 | The overlay region: `OVERATTR.BIN`, `OVERMOVE.BIN` or a city's `.BIN` table, one at a time (below). Sized for the larger overlay: `OVERMOVE.BIN` ends exactly where `.bss` starts |
+| `0x800AA240`–`0x801FE208` | 1,392,584 | `.bss`, cleared by crt0; the code references `0x800AA240`–`0x801FE1C8` and nothing between the overlay region and it. Not in the file (`config/main.yaml`'s `bss` segment) |
+| `0x801FE20C`–`0x801FFA04` | 6,136 | The Psy-Q heap: `InitHeap(_end + 4, _ramsize - _stacksize - _end)` |
+| `0x801FFA00`–`0x80200000` | 1,536 | `_stacksize` below the initial `$sp = 0x80200000` (`SYSTEM.CNF` says `STACK = 801ffffc`; the stack grows down through the heap's space when it needs more) |
+
+`tools/disc_survey.py` ("memory map") checks the ranges against crt0 and the addresses the code builds with
+`lui`/`addiu` pairs.
 
 ## Overlays
 
-`OVERLAYS/OVERATTR.BIN` and `OVERLAYS/OVERMOVE.BIN` are headerless code images the executable loads over a fixed
-address (open). `tools/disc_survey.py` lists the addresses each one's code references, from which the load address
-follows: OVERATTR's references are mostly `0x800Axxxx` (and the top of RAM, `0x801Dxxxx`–`0x801Fxxxx`), OVERMOVE's
-`0x8009xxxx` and `0x800Axxxx`. Each becomes a link unit of its own (`config/<name>.yaml`, a `Target` in `configure.py`,
-`config/overlays.sha1`) once that is known, and links against the executable's symbols.
+`OVERLAYS/OVERATTR.BIN` (72,220 bytes: the attract mode, the credits and the memory-card screens; it holds the save
+header `BASLUS-00742`) and `OVERLAYS/OVERMOVE.BIN` (74,652 bytes: the movie player, with libpress) are headerless
+images that both load at **`0x80097EA4`**, right after `.data`, into the region `0x80097EA4`–`0x800AA240`. The
+executable loads one at a time: it reads the file into a buffer (the pointer at `D_801E1C78`) through the file table
+below and copies it to the region (`func_8006180C`: `0` for `OVERATTR.BIN`, `1` for `OVERMOVE.BIN`, from the index
+table `D_80085274` = `{0x52, 0x53}`; `D_80085278` remembers which one is loaded). A second loader
+(`func_800618F4`) puts a city's `.BIN` table (`RACKS*/`, `BONUS/`: 1–3 KB of data, not code) in the same region.
+The load address is a constant in `.rodata` (`0x80016AC8` and `0x80016ACC`, one per loader).
+
+Evidence for the address: with it, `OVERMOVE.BIN` ends exactly at the start of `.bss` (`0x800AA240`); the
+executable's `.data` holds 1,670 pointers into `0x80097EA8`–`0x80098AD0`, which are `OVERATTR.BIN`'s strings
+(`0x80098310` is `SAVING GAME`); and the addresses each overlay's code builds land inside itself, in the executable
+or in `.bss` (`tools/disc_survey.py` "overlays").
+
+The executable and the overlays were linked together, as psylink overlay groups: the executable calls overlay
+functions by absolute address (`jal` to 13 addresses in the region, `func_800A9890` in `OVERMOVE.BIN` eight times,
+with a movie number) and reads and writes overlay variables (`D_800A9220`, `D_800A9840`, `D_800A98B8`, ...) and
+tables (`D_800A5DD8`, ...); the overlays call the executable's functions and use its `.bss`. There is no entry
+table: each overlay's symbols have fixed addresses, which are what `config/<overlay>.symbols.txt` will hold when the
+overlays become link units (`configure.py` leaves the region out of the executable's symbol script for them).
+
+Each overlay's layout, by instruction density (psylink order: `.rodata`, `.text`, `.data`, `.bss`):
+
+| Overlay | `.rodata` | `.text` | `.data`, `.bss` |
+|---|---|---|---|
+| `OVERATTR.BIN` | `0x80097EA4`– (the save header, the credits' strings) | about `0x800987A4`–`0x800A3358` (83 prologues, 118 returns) | to `0x800A92A4`, then zeros to the file's end `0x800A98C0`: its `.bss`, written by the executable. The file table says 72,244 bytes, 24 more than the file: the loader copies that much |
+| `OVERMOVE.BIN` | `0x80097EA4`– (libpress's strings) | about `0x800980A4`–`0x800AA0E4`, with libpress's tables inside | to `0x800AA240` |
+
+## The file table
+
+The executable never opens a file by name. It holds a table of the data track's files in disc order: a `CdlLOC`
+(BCD minute, second, sector, track) per file at `D_80089820`, the sizes at `D_80089DA0` and a checksum per file
+(the exclusive-or of its words, the tail zero-padded to a word) at `0x80010000`, the first 0x580 bytes of
+`.rodata`. Entry `n` is the `n`-th file on the disc after `SYSTEM.CNF` and the executable (0 = `MISC/FILE00.IXA`,
+82 and 83 = the overlays, 84 = `RACKS00/SALTLAKE.BIN`, 347 = `BONUS/BONUSGRU.CMB`); 348 of the 352 entries are
+used, and the `CDPAD*.DAT` padding files are not in it. `tools/disc_survey.py` ("file table") checks the sizes
+against the extracted files.
+
+The reader (`func_8006118C(index, buffer)`) sets double speed (`CdlSetmode`), seeks to the entry (`CdlSetloc`),
+reads `(size + 0x7FF) / 0x800` sectors (`CdRead`, waiting on `CdReadSync`), checksums the buffer against the table
+and retries up to five times, re-initialising the drive on failure; it returns the size. Streams (`FILE00.IXA`,
+the `.XAS` movies) are in the table with the placeholder checksum `0x2032B3CC`: they are played, not read.

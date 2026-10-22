@@ -14,7 +14,7 @@ on the disc).
 | `Library Programs (c) 1993-1997 Sony Computer Entertainment Inc., All Rights Reserved.` | `.rodata` | Psy-Q runtime banner |
 | `2MBYTE.OBJ` crt0 at `0x80017758` (entry `0x80017760`): clears a block, reads the RAM size word, sets `$gp`, calls `InitHeap`-like code and then `main` | `.text` | SN Systems psylink startup |
 | `.rodata` at `0x80010000`, before all `.text` | layout | psylink ordering: each object's `.rodata` in link order, then every `.text` |
-| `$gp = 0x80097EA4`, set by crt0; no `$gp`-relative load, store or `addiu` anywhere in the code | crt0 / code | Everything built with `-G0` ("Compiler" below) |
+| `$gp = 0x80097EA4`, the end of `.data`, set by crt0; no `$gp`-relative load, store or `addiu` anywhere in the code | crt0 / code | Everything built with `-G0` ("Compiler" below): no `.sdata`, no `.sbss` |
 | libpress strings (`MDEC_rest:bad option`) | `OVERLAYS/OVERMOVE.BIN` | libpress is linked into the movie overlay, not the executable |
 | `BASLUS-00742` / `RAMPAGE` | `OVERLAYS/OVERATTR.BIN` | The memory-card file header: the attract/save code is in that overlay |
 
@@ -136,6 +136,5 @@ decompile once the code is split into files: their drafts are already matching C
 
 ## Unknowns
 
-- The end of `.data` and the small-data sections around `$gp`; the `.bss` range (the header has no bss fields; crt0
-  zeroes `0x800AA240`–`0x801FE208`, which looks like the heap rather than `.bss`).
-- The overlays' load addresses and whether their code was compiled like the executable's.
+- Whether the overlays' code was compiled like the executable's (their layout and load address:
+  `DISC_LAYOUT.md` "Overlays").
