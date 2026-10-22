@@ -24,7 +24,9 @@ typedef struct Mover {
     /* 0x48 */ Anim *unk_48;    /* the current animation (func_8003EB5C) */
     /* 0x4C */ s8 unk_4C;
     /* 0x4D */ s8 unk_4D;
-    /* 0x4E */ u8 unk_4E[0x16];
+    /* 0x4E */ u8 unk_4E[0xE];
+    /* 0x5C */ u16 *unk_5C;     /* three halfwords the record reads (game_80034590: func_80039890, func_8003A520) */
+    /* 0x60 */ u8 unk_60[0x4];
     /* 0x64 */ s32 unk_64;
     /* 0x68 */ u16 unk_68;      /* an animation index (game_80034590: func_80034C54) */
     /* 0x6A */ u16 unk_6A;      /* game_80034590: func_80034CB8 */
