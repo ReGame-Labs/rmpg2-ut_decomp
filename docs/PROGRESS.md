@@ -9,6 +9,9 @@ _Code compiled from matching C (objdiff, Psy-Q SDK excluded); updated 2026-10-22
 
 | Part | Progress | Matched | Functions | Code bytes |
 |---|---|---:|---:|---:|
-| **All game code** | `░░░░░░░░░░░░░░░░░░░░` |   0.2% | 70 / 2005 | 339,192 |
+| **All game code** | `░░░░░░░░░░░░░░░░░░░░` |   0.1% | 70 / 2122 | 385,404 |
 | Executable (`SLUS_007.42`) | `░░░░░░░░░░░░░░░░░░░░` |   0.2% | 70 / 2005 | 339,192 |
+| Overlays (2) | `░░░░░░░░░░░░░░░░░░░░` |   0.0% | 0 / 117 | 46,212 |
+| `OVERATTR` | `░░░░░░░░░░░░░░░░░░░░` |   0.0% | 0 / 108 | 44,072 |
+| `OVERMOVE` | `░░░░░░░░░░░░░░░░░░░░` |   0.0% | 0 / 9 | 2,140 |
 <!-- progress:end -->

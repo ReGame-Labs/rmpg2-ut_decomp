@@ -111,10 +111,10 @@ placed by the linker in an order of its own.
 header `BASLUS-00742`) and `OVERLAYS/OVERMOVE.BIN` (74,652 bytes: the movie player, with libpress) are headerless
 images that both load at **`0x80097EA4`**, right after `.data`, into the region `0x80097EA4`–`0x800AA240`. The
 executable loads one at a time: it reads the file into a buffer (the pointer at `D_801E1C78`) through the file table
-below and copies it to the region (`func_8006180C`: `0` for `OVERATTR.BIN`, `1` for `OVERMOVE.BIN`, from the index
-table `D_80085274` = `{0x52, 0x53}`; `D_80085278` remembers which one is loaded). A second loader
-(`func_800618F4`) puts a city's `.BIN` table (`RACKS*/`, `BONUS/`: 1–3 KB of data, not code) in the same region.
-The load address is a constant in `.rodata` (`0x80016AC8` and `0x80016ACC`, one per loader).
+below and copies it to the region (`cdload_load_overlay`: `0` for `OVERATTR.BIN`, `1` for `OVERMOVE.BIN`, from the
+index table `D_80085274` = `{0x52, 0x53}`; `D_80085278` remembers which one is loaded). A second loader
+(`cdload_load_city_table`) puts a city's `.BIN` table (`RACKS*/`, `BONUS/`: 1–3 KB of data, not code) in the same
+region. The load address is a constant in `.rodata` (`0x80016AC8` and `0x80016ACC`, one per loader).
 
 Evidence for the address: with it, `OVERMOVE.BIN` ends exactly at the start of `.bss` (`0x800AA240`); the
 executable's `.data` holds 1,670 pointers into `0x80097EA8`–`0x80098AD0`, which are `OVERATTR.BIN`'s strings
@@ -124,16 +124,26 @@ or in `.bss` (`tools/disc_survey.py` "overlays").
 The executable and the overlays were linked together, as psylink overlay groups: the executable calls overlay
 functions by absolute address (`jal` to 13 addresses in the region, `func_800A9890` in `OVERMOVE.BIN` eight times,
 with a movie number) and reads and writes overlay variables (`D_800A9220`, `D_800A9840`, `D_800A98B8`, ...) and
-tables (`D_800A5DD8`, ...); the overlays call the executable's functions and use its `.bss`. There is no entry
-table: each overlay's symbols have fixed addresses, which are what `config/<overlay>.symbols.txt` will hold when the
-overlays become link units (`configure.py` leaves the region out of the executable's symbol script for them).
+tables (`D_800A5DD8`, ...); the overlays call the executable's functions (`OVERATTR.BIN` the memory-card and screen
+code, `OVERMOVE.BIN` the CD streaming and `func_80063DF8`) and use its `.bss`. There is no entry table: each
+overlay's symbols have fixed addresses.
 
-Each overlay's layout, by instruction density (psylink order: `.rodata`, `.text`, `.data`, `.bss`):
+Each overlay is a link unit of its own (`config/overattr.yaml`, `config/overmove.yaml`; a `Target` in
+`configure.py`; `config/OVERATTR.BIN.sha1`, `config/OVERMOVE.BIN.sha1`). It links against the executable's symbols
+(`build/main/SLUS_007.42.syms.ld`, made from the executable's ELF without the overlay region) so its calls into the
+executable resolve to the executable's own definitions; splat gets the executable's names from
+`build/exe_symbols.txt`, written by `configure.py` from `config/symbol_addrs.txt`. The overlay's own names are in
+`config/<overlay>.symbols.txt`. Both were compiled like the executable, GCC 2.8.1 `-O2 -G0`
+([`TOOLCHAIN.md`](TOOLCHAIN.md) "The overlays").
 
-| Overlay | `.rodata` | `.text` | `.data`, `.bss` |
+| Overlay | `.rodata` | `.text` | `.data` and `.bss` |
 |---|---|---|---|
-| `OVERATTR.BIN` | `0x80097EA4`– (the save header, the credits' strings) | about `0x800987A4`–`0x800A3358` (83 prologues, 118 returns) | to `0x800A92A4`, then zeros to the file's end `0x800A98C0`: its `.bss`, written by the executable. The file table says 72,244 bytes, 24 more than the file: the loader copies that much |
-| `OVERMOVE.BIN` | `0x80097EA4`– (libpress's strings) | about `0x800980A4`–`0x800AA0E4`, with libpress's tables inside | to `0x800AA240` |
+| `OVERATTR.BIN` | `0x80097EA4`–`0x80098730`: the save header, the credits' and the memory-card screens' strings, nine jump tables | `0x80098730`–`0x800A3360`: 108 functions, one file (`overattr`) until the evidence says otherwise (its jump tables share one parity, the string users run in text order) | `0x800A3360`–`0x800A92A4` `.data`, then zeros to the file's end `0x800A98C0`: its `.bss`, inside the file. The file table says 72,244 bytes, 24 more than the file: the loader copies that much, so the image in memory extends 24 bytes past the file's last word |
+| `OVERMOVE.BIN` | `0x80097EA4`–`0x80097EF8`: libpress's strings (`MDEC_rest`, `MDEC_in_sync`, ...) | `0x80097EF8`–`0x800AA0EC`: libpress first (`psyq/libpress/vlc`: `DecDCTvlc`; `psyq/libpress/libpress`: `DecDCTReset`, `DecDCTin`, `DecDCTout`, `DecDCToutCallback` and its static helpers; `psyq/libpress/vlctbl`: the VLC decoding tables, 70 KB of data in `.text`, `0x8009870C`–`0x800A9890`), then the game's movie player (`overmove`, 9 functions from `0x800A9890`) | `0x800AA0EC`–`0x800AA240`: the movie table and the player's state |
+
+No other library code is in the overlays: `OVERATTR.BIN` calls the executable's `MemCard*`, `strchr`, `strcmp` and
+`sprintf`; `OVERMOVE.BIN` the executable's `CdRead2`, the `St*` streaming functions, `DMACallback`, `ResetCallback`
+and `printf`.
 
 ## The file table
 

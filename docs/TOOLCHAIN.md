@@ -175,7 +175,18 @@ Each run prints the table and writes `build/compiler_id/results.csv` (one row pe
 each function's draft and objects under `build/compiler_id/<function>/`. The exact matches are the first functions to
 decompile once the code is split into files: their drafts are already matching C.
 
-## Unknowns
+## The overlays
 
-- Whether the overlays' code was compiled like the executable's (their layout and load address:
-  `DISC_LAYOUT.md` "Overlays").
+`OVERLAYS/OVERMOVE.BIN` carries the only library code outside the executable: Psy-Q libpress, as three objects
+(`config/overmove.yaml`, named by `tools/psyq_match.py --raw --base 0x80097EA4 --functions --yaml
+config/overmove.yaml`): `VLC.OBJ` (`DecDCTvlc` alone, `DecDCTvlcSize` dropped), `LIBPRESS.OBJ` (`DecDCTReset`,
+`DecDCTin`, `DecDCTout`, `DecDCToutCallback` with its static helpers; `DecDCTGetEnv`, `DecDCTPutEnv`,
+`DecDCTBufSize`, `DecDCTinSync`, `DecDCToutSync` and `DecDCTinCallback` dropped) and the VLC decoding tables, 70 KB
+of data in `.text` with no function. The libpress code is consistent with Psy-Q 4.2–4.7 (`DecDCTvlc` with 4.3–4.7),
+in line with the executable's 4.3. `OVERATTR.BIN` holds no library code; both overlays call the executable's library
+functions by absolute address.
+
+Both overlays were compiled like the executable. `tools/compiler_id.py --target overattr --rodata-start 0x80097EA4
+--rodata-end 0x80098730` scores 72 functions: 8 exact with GCC 2.8.0 and 2.8.1, 7 with 2.95.2, 4 with 2.91.66, none
+with 2.7.2, and `func_8009C7E4` matches 2.8.x only; `--target overmove --rodata-end 0x80097EF8` scores 8: 2 exact
+with 2.8.x (`func_800A9CC0` with 2.8.x only), 1 with 2.9x. No `$gp`-relative access in either: `-G0`.

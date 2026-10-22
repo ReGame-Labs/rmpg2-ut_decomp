@@ -1,0 +1,62 @@
+# splat config for the overlay OVERLAYS/OVERATTR.BIN (docs/DISC_LAYOUT.md "Overlays"): loaded at 0x80097EA4 by the
+# executable, linked with it as a psylink overlay group (absolute calls both ways). The executable's names come from
+# build/exe_symbols.txt (configure.py writes it from config/symbol_addrs.txt); this overlay's own names are in
+# config/overattr.symbols.txt. Run through configure.py.
+name: OVERATTR.BIN
+sha1: cc94a54eecf5cf5d1c9a6317f4ba1182ba75dc3e
+options:
+  basename: OVERATTR.BIN
+  base_path: ..
+  target_path: extracted/disc/OVERLAYS/OVERATTR.BIN
+  elf_path: build/overattr/OVERATTR.BIN.elf
+  platform: psx
+  compiler: GCC
+
+  build_path: build/overattr
+  asm_path: asm/overattr
+  src_path: src/overattr
+  asset_path: assets/overattr
+  ld_script_path: build/overattr/OVERATTR.BIN.ld
+  symbol_addrs_path:
+    - config/overattr.symbols.txt
+    - build/exe_symbols.txt
+  create_undefined_funcs_auto: True
+  undefined_funcs_auto_path: build/overattr/undefined_funcs_auto.txt
+  create_undefined_syms_auto: True
+  undefined_syms_auto_path: build/overattr/undefined_syms_auto.txt
+
+  # The overlays were linked with the executable: the same $gp, never used (-G0).
+  gp_value: 0x80097EA4
+  # psylink puts each object's .rodata before all .text.
+  section_order: [".rodata", ".text", ".data", ".sdata", ".sbss", ".bss"]
+  # The overlay's .bss, if any, is inside the file (zeros at its end) and loaded with it.
+  ld_bss_is_noload: False
+  # psylink packs objects at 4-byte alignment; GNU as would give every section 16.
+  subalign: 4
+  ld_align_section_vram_end: False
+  ld_align_segment_vram_end: False
+
+  find_file_boundaries: True
+  migrate_rodata_to_functions: True
+  use_legacy_include_asm: False
+  asm_function_macro: glabel
+  asm_jtbl_label_macro: jlabel
+  asm_data_macro: dlabel
+  # Also write a full .s for each c segment: assembled, it is objdiff's "target" object.
+  make_full_disasm_for_code: True
+  generate_asm_macros_files: True
+  generated_asm_macros_directory: include/asm_generated
+
+segments:
+  - name: overattr
+    type: code
+    start: 0x0
+    vram: 0x80097EA4
+    subsegments:
+      # One file until the evidence says otherwise: its nine jump tables share one parity (no object boundary
+      # among them) and the string users run in text order (docs/MATCHING.md "Splitting a target into files").
+      - [0x0, .rodata, overattr]              # 0x80097EA4 the save header BASLUS-00742, the credits, the memory-card texts, the jump tables
+      - [0x88C, c, overattr]                  # 0x80098730 the attract mode, the credits and the memory-card screens (108 functions)
+      - [0xB4BC, data, data]                  # 0x800A3360 .data, then zeros from 0x800A92A4: the overlay's .bss, inside the file
+
+  - [0x11A1C]

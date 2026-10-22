@@ -1,0 +1,66 @@
+# splat config for the overlay OVERLAYS/OVERMOVE.BIN (docs/DISC_LAYOUT.md "Overlays"): loaded at 0x80097EA4 by the
+# executable, linked with it as a psylink overlay group (absolute calls both ways). The executable's names come from
+# build/exe_symbols.txt (configure.py writes it from config/symbol_addrs.txt); this overlay's own names are in
+# config/overmove.symbols.txt. Run through configure.py.
+name: OVERMOVE.BIN
+sha1: 248eb0fc89a8cbe97782b73ed8ccf31a8d21bc7c
+options:
+  basename: OVERMOVE.BIN
+  base_path: ..
+  target_path: extracted/disc/OVERLAYS/OVERMOVE.BIN
+  elf_path: build/overmove/OVERMOVE.BIN.elf
+  platform: psx
+  compiler: GCC
+
+  build_path: build/overmove
+  asm_path: asm/overmove
+  src_path: src/overmove
+  asset_path: assets/overmove
+  ld_script_path: build/overmove/OVERMOVE.BIN.ld
+  symbol_addrs_path:
+    - config/overmove.symbols.txt
+    - build/exe_symbols.txt
+  create_undefined_funcs_auto: True
+  undefined_funcs_auto_path: build/overmove/undefined_funcs_auto.txt
+  create_undefined_syms_auto: True
+  undefined_syms_auto_path: build/overmove/undefined_syms_auto.txt
+
+  # The overlays were linked with the executable: the same $gp, never used (-G0).
+  gp_value: 0x80097EA4
+  # psylink puts each object's .rodata before all .text.
+  section_order: [".rodata", ".text", ".data", ".sdata", ".sbss", ".bss"]
+  # The overlay's .bss, if any, is inside the file (zeros at its end) and loaded with it.
+  ld_bss_is_noload: False
+  # psylink packs objects at 4-byte alignment; GNU as would give every section 16.
+  subalign: 4
+  ld_align_section_vram_end: False
+  ld_align_segment_vram_end: False
+
+  find_file_boundaries: True
+  migrate_rodata_to_functions: True
+  use_legacy_include_asm: False
+  asm_function_macro: glabel
+  asm_jtbl_label_macro: jlabel
+  asm_data_macro: dlabel
+  # Also write a full .s for each c segment: assembled, it is objdiff's "target" object.
+  make_full_disasm_for_code: True
+  generate_asm_macros_files: True
+  generated_asm_macros_directory: include/asm_generated
+
+segments:
+  - name: overmove
+    type: code
+    start: 0x0
+    vram: 0x80097EA4
+    subsegments:
+      # .rodata: libpress's strings (MDEC_rest, MDEC_in_sync...), nothing of the game's.
+      - [0x0, rodata, rodata]
+      # The Psy-Q objects first (psyq/<library>/<object>, named by tools/psyq_match.py --functions --yaml
+      # config/overmove.yaml; docs/TOOLCHAIN.md), then the game's movie player.
+      - [0x54, asm, psyq/libpress/vlc]        # 0x80097EF8 DecDCTvlc (the rest of the object dropped by the linker)
+      - [0x3A4, asm, psyq/libpress/libpress]  # 0x80098248 DecDCTReset, DecDCTin, DecDCToutCallback...
+      - [0x868, asm, psyq/libpress/vlctbl]    # 0x8009870C the VLC decoding tables, data in .text (a table object of libpress, no function)
+      - [0x119EC, c, overmove]                # 0x800A9890 the game's movie player: func_800A9890 is what the executable calls, with a movie number
+      - [0x12248, data, data]                 # 0x800AA0EC the movie table and the player's state
+
+  - [0x1239C]

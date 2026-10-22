@@ -36,8 +36,8 @@ scripts/check_toolchain.sh  # smoke test of the compilers and diff tools (no dis
 scripts/rebuild_iso.sh      # rebuild the disc image from extracted/ and compare it to yours
 ```
 
-Outputs: `build/SLUS_007.42`, checked byte-identical against the original. Functions not yet decompiled are built from
-split assembly.
+Outputs: `build/SLUS_007.42`, `build/OVERATTR.BIN` and `build/OVERMOVE.BIN`, each checked byte-identical against the
+original (`config/*.sha1`). Functions not yet decompiled are built from split assembly.
 
 ## Checks
 
