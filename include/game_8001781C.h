@@ -195,7 +195,9 @@ typedef struct Monster {
     u16 unk_1BE;
     u8 pad_1C0[0x20];
     u16 unk_1E0;
-    u8 pad_1E2[0x16];
+    u8 pad_1E2[0x2];
+    s16 *unk_1E4;           /* the demo's input script: 12-byte records (frame, direction, buttons), 0x7FFF ends it */
+    u8 pad_1E8[0x10];
     s32 unk_1F8;
     u8 pad_1FC[0x24];
 } Monster;
@@ -262,10 +264,12 @@ typedef struct Unk1D110 {
     u16 unk_6;
     u8 pad_8[0x4];
     s32 unk_C;
-    s32 unk_10;
-    s32 unk_14;
+    Fixed unk_10;           /* a position, whole or its integer half */
+    Fixed unk_14;
     u8 pad_18[0x8];
     s32 unk_20;
+    u8 pad_24[0x4];
+    struct Anim *unk_28;
 } Unk1D110;
 
 /* The object of func_80029510: a value at unk_8 clamped to 0x440000. */
@@ -291,6 +295,53 @@ typedef struct Unk1E638 {
     s32 unk_4;
     s32 unk_8;
 } Unk1E638;
+
+/* The sprite func_800299C4 drives (the "press start" banner?) at 0x801E2894: the sprite, a frame counter, a state. */
+typedef struct Unk1E2894 {
+    Sprite *unk_0;
+    u16 unk_4;
+    s16 unk_6;
+} Unk1E2894;
+
+/* The record func_80025124 sets up from its definition (unk_20): a count at unk_0, a state at unk_58, its sprite
+ * and the item that owns it at unk_98 (the same record agent code elsewhere walks from unk_98 on). */
+typedef struct Unk25124Def {
+    u16 unk_0;
+    u8 pad_2[0x6];
+    s32 unk_8;
+    s32 unk_C;
+    s32 unk_10;
+} Unk25124Def;
+
+typedef struct Unk25124Item {
+    Sprite *unk_0;
+    s16 unk_4;
+    u8 pad_6[0x2];
+    struct Unk25124 *unk_8;
+} Unk25124Item;
+
+typedef struct Unk25124 {
+    s16 unk_0;
+    u16 unk_2;
+    u16 unk_4;
+    u16 unk_6;
+    u16 unk_8;
+    s16 unk_A;
+    u8 pad_C[0x6];
+    s16 unk_12;
+    u8 pad_14[0xC];
+    Unk25124Def *unk_20;
+    u8 pad_24[0x34];
+    s16 unk_58;
+    u8 pad_5A[0x2];
+    s32 unk_5C;
+    s32 unk_60;
+    u8 pad_64[0xC];
+    Unk25124Item *unk_70;
+    s16 unk_74;
+    u8 pad_76[0x22];
+    Unk25124Item unk_98;
+} Unk25124;
 
 /* An animation (the tables in .data from 0x8008AE40 on); opaque here. */
 typedef struct Anim Anim;

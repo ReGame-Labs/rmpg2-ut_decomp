@@ -72,7 +72,7 @@ extern s16 D_801E1CB4;
 extern s16 D_801E1E18;
 extern s16 D_801E1E40;
 extern s16 D_801E2150;
-extern u8 D_801E2894[];
+extern Unk1E2894 D_801E2894;
 extern Sprite D_801E28C0;
 extern s16 D_801E28DC;
 extern s16 D_801E2994;
@@ -271,7 +271,7 @@ void func_80026CFC(Monster *arg0);
 void func_80026E0C(Monster *arg0);
 void func_80026F58(Monster *arg0);
 void func_80027FC8(void);
-void func_80028140(s32 arg0, Monster *arg1, s16 arg2);
+void func_80028140(s32 arg0, Monster *arg1, s32 arg2);
 void func_800284D8(void);
 void func_80028508(void);
 void func_8002994C(void);
@@ -326,7 +326,7 @@ extern u16 D_801FA994;
 extern u16 D_801FA99C;
 void func_80017B24(void);
 void func_8001AC18(s32, s32);
-Sprite *func_8001DCB4(s32);
+Sprite *func_8001DCB4();   /* no argument: it reads D_800AA284 (the callers' a0 is incidental) */
 void func_80062C30(void);
 void func_800A30B4(void);
 extern u8 D_800A5DD8[];
@@ -357,6 +357,19 @@ extern s16 D_801F9914;
 void func_80026A6C(void);
 Unk1D110 *func_8001D110(void);
 extern Unk1D110 *D_800AA284;
+void func_8002503C(Unk25124 *, Sprite *);
+void func_800252CC(Unk25124 *);
+s32 func_8005F208(void);
+u16 func_80029B80(void);
+extern Unk25124Def D_800135E8;
+extern Unk25124Def D_8001687C;
+extern u16 D_8007C124[];
+extern u16 D_8007C144[];
+extern u32 D_801E0D7C;
+extern s16 D_801D3D8A;
+extern u16 D_801FA734;
+extern Anim D_80093F78;
+extern Anim D_80093FAC;
 u16 func_80023C58(s16 arg0, Unk22D58 *ai);
 s32 func_80023AC0(Sprite *arg0);
 s32 func_80026D54(Monster *);
@@ -540,8 +553,8 @@ void func_800180E4(void) {
     kind = 0x7000;
     request = func_8001D110();
     D_800AA284 = request;
-    request->unk_10 = 0xA00000;
-    request->unk_14 = 0xD70000;
+    request->unk_10.full = 0xA00000;
+    request->unk_14.full = 0xD70000;
     request->unk_0 = 0x4F002808;
     request->unk_20 = kind;
     request->unk_6 |= 0x20;
@@ -2643,7 +2656,61 @@ INCLUDE_ASM("asm/main/nonmatchings/game_8001781C", func_80024E08);
 
 INCLUDE_ASM("asm/main/nonmatchings/game_8001781C", func_8002503C);
 
-INCLUDE_ASM("asm/main/nonmatchings/game_8001781C", func_80025124);
+void func_80025124(Unk25124 *rec) {
+    Unk25124Def *def;
+    Unk1D110 *request;
+    Sprite *sprite;
+    Unk25124Item *item;
+    u16 kind;
+
+    def = rec->unk_20;
+    rec->unk_58 = 1;
+    rec->unk_5C = def->unk_C;
+    rec->unk_60 = def->unk_10;
+    rec->unk_2 = def->unk_0;
+    request = func_8001D110();
+    request->unk_C = 0x728;
+    request->unk_14.u.hi = rec->unk_6;
+    request->unk_10.u.hi = rec->unk_4;
+    kind = rec->unk_8;
+    item = &rec->unk_98;
+    if (def->unk_8 != 0) {
+        request->unk_0 = def->unk_8;
+        D_800AA284 = request;
+        sprite = func_8001DCB4();
+        rec->unk_98.unk_0 = sprite;
+        sprite->unk_90 = item;
+        sprite->unk_80 = kind;
+        item->unk_8 = rec;
+        item->unk_4 = 1;
+        rec->unk_0 = 1;
+        rec->unk_A = 0;
+        rec->unk_70 = item;
+        if (def == &D_800135E8) {
+            rec->unk_74 = sprite->unk_18.u.hi - 0x5C;
+            sprite->unk_70 = 0x72A;
+            rec->unk_58 = 2;
+            rec->unk_12 = 2;
+            func_8002503C(rec, sprite);
+        } else if (def == &D_8001687C) {
+            rec->unk_74 = sprite->unk_18.u.hi - 0x3E;
+            sprite->unk_70 = 0x72A;
+            rec->unk_58 = 3;
+            rec->unk_12 = 0x7D;
+        } else {
+            rec->unk_12 = 5;
+            if ((D_800AA2DC != 0) && (func_8005F208() == 4)) {
+                u16 y = sprite->unk_18.u.hi;
+
+                rec->unk_58 = 0;
+                rec->unk_74 = y - 0x1F;
+            } else {
+                rec->unk_74 = sprite->unk_18.u.hi - 0x3E;
+            }
+        }
+        func_800252CC(rec);
+    }
+}
 
 INCLUDE_ASM("asm/main/nonmatchings/game_8001781C", func_800252CC);
 
@@ -2874,7 +2941,69 @@ void func_800267CC(Monster *monster) {
     }
 }
 
-INCLUDE_ASM("asm/main/nonmatchings/game_8001781C", func_800268BC);
+void func_800268BC(void) {
+    u16 x3;
+    u16 x1;
+    u16 x2;
+    Monster *m1;
+    Monster *m2;
+    Monster *m3;
+    s16 r2;
+    s16 r1;
+    s16 r3;
+
+    x3 = 0;
+    x2 = 0;
+    x1 = 0;
+    m1 = &D_801E0B78[func_80025DF8(1)];
+    m2 = &D_801E0B78[func_80025DF8(2)];
+    m3 = &D_801E0B78[func_80025DF8(3)];
+    if ((m1->unk_0 != 0) && (m3->unk_68 != NULL)) {
+        x1 = m1->unk_68->unk_18.u.hi;
+    }
+    if ((m2->unk_0 != 0) && (m3->unk_68 != NULL)) {
+        x2 = m2->unk_68->unk_18.u.hi;
+    }
+    if ((m3->unk_0 != 0) && (m3->unk_68 != NULL)) {
+        x3 = m3->unk_68->unk_18.u.hi;
+    }
+    if ((s16) x1 <= (s16) x2) {
+        if ((s16) x1 < (s16) x3) {
+            if ((s16) x3 >= (s16) x2) {
+                r3 = 8;
+                r2 = 4;
+                r1 = 1;
+            } else {
+                r2 = 8;
+                r1 = 4;
+                r3 = 1;
+            }
+        } else {
+            r2 = 8;
+            r1 = 4;
+            r3 = 1;
+        }
+    } else {
+        if ((s16) x3 >= (s16) x1) {
+            r3 = 8;
+            r1 = 4;
+            r2 = 1;
+        } else {
+            if ((s16) x3 < (s16) x2) {
+                r1 = 8;
+                r2 = 4;
+                r3 = 1;
+            } else {
+                r1 = 8;
+                r3 = 4;
+                r2 = 1;
+            }
+        }
+    }
+    m1->unk_128 = r1;
+    m2->unk_128 = r2;
+    m3->unk_128 = r3;
+}
 
 void func_80026A6C(void) {
     s16 var_a0;
@@ -3065,7 +3194,87 @@ void func_80027394(void) {
     } while (i < 3);
 }
 
+/* 99.8 %: the raw load of the previous direction (unk_CC) lands in a0 instead of v1 before its andi into s0, in both
+ * branches; every other instruction matches (variable sharing, declaration order and types tried). */
+#ifdef NON_MATCHING
+void func_800273F4(Monster *monster, s32 arg1) {
+    s16 *script;
+    u16 buttons;
+    u16 held;
+    u16 dir;
+    u16 prevDir;
+    u32 bits;
+    u16 raw;
+    s32 key;
+
+    if (D_801D36FC == 0x120) {
+        if ((D_801F9AE0 == 2) || (D_801F9AE0 == 8) || (D_801F9AE0 == 0xD)) {
+            script = monster->unk_1E4;
+            if (script != NULL) {
+                if ((D_801D3758 > script[0]) && (script[0] != 0x7FFF)) {
+                    monster->unk_1E4 = script + 3;
+                    script += 3;
+                }
+                buttons = script[2];
+                if (buttons != 0) {
+                    monster->unk_13E = 0x1A4;
+                }
+                held = monster->unk_C8;
+                monster->unk_C8 = buttons;
+                func_8002808C(buttons, held, monster);
+                dir = script[1];
+                if (dir != 0) {
+                    monster->unk_13E = 0x1A4;
+                }
+                prevDir = monster->unk_CC;
+                monster->unk_CC = dir;
+                func_80028140(prevDir, monster, dir);
+                func_80028140(prevDir, monster, dir);
+                if (dir != 0) {
+                    monster->unk_D4 = dir;
+                }
+                if (prevDir == dir) {
+                    monster->unk_D8++;
+                } else {
+                    monster->unk_D8 = 0;
+                }
+            }
+            return;
+        }
+    }
+    key = arg1 & 0xFFFF;
+    if (key != 0) {
+        raw = D_801E0D7C >> D_8007C144[key - 1];
+    } else {
+        raw = 0;
+    }
+    bits = raw & 0x3FF;
+    buttons = bits >> 4;
+    if (buttons != 0) {
+        monster->unk_13E = 0x1A4;
+    }
+    held = monster->unk_C8;
+    monster->unk_C8 = buttons;
+    func_8002808C(buttons, held, monster);
+    dir = D_8007C124[bits & 0xF];
+    if (dir != 0) {
+        monster->unk_13E = 0x1A4;
+    }
+    prevDir = monster->unk_CC;
+    monster->unk_CC = dir;
+    func_80028140(prevDir, monster, dir);
+    if (dir != 0) {
+        monster->unk_D4 = dir;
+    }
+    if (prevDir == dir) {
+        monster->unk_D8++;
+    } else {
+        monster->unk_D8 = 0;
+    }
+}
+#else
 INCLUDE_ASM("asm/main/nonmatchings/game_8001781C", func_800273F4);
+#endif
 
 INCLUDE_ASM("asm/main/nonmatchings/game_8001781C", func_800275F8);
 
@@ -3119,7 +3328,7 @@ void func_8002808C(u16 buttons, u16 held, Monster *monster) {
     }
 }
 
-void func_80028140(s32 arg0, Monster *arg1, s16 arg2) {
+void func_80028140(s32 arg0, Monster *arg1, s32 arg2) {
     if ((arg0 & 0xFFFF) != (arg2 & 0xFFFF)) {
         arg1->unk_CE = arg2;
         return;
@@ -3229,7 +3438,54 @@ void func_8002994C(void) {
 
 INCLUDE_ASM("asm/main/nonmatchings/game_8001781C", func_80029984);
 
-INCLUDE_ASM("asm/main/nonmatchings/game_8001781C", func_800299C4);
+void func_800299C4(void) {
+    Sprite *sprite;
+    Unk1D110 *request;
+    s32 count;
+
+    sprite = D_801E2894.unk_0;
+    if ((D_801E1E40 == 0) || (D_801FA890 > 0) || (D_801FA734 != 0) || (D_801D3D8A != 0) || (D_801F9ACC != 0)) {
+        if (sprite != NULL) {
+            D_801E2894.unk_4 = 0;
+            sprite->unk_18.s.hi = 0x190;
+            D_801E2894.unk_6 = 0;
+        }
+    } else {
+        count = D_801E2894.unk_4 + 1;
+        if (count >= 0xB4) {
+            if (sprite == NULL) {
+                request = func_8001D110();
+                D_800AA284 = request;
+                request->unk_20 = 0x7000;
+                request->unk_28 = &D_80093F78;
+                request->unk_10.s.hi = 0x150;
+                request->unk_0 = 0x4F0000A2;
+                request->unk_14.s.hi = 0x190;
+                request->unk_6 |= 0x20;
+                sprite = func_8001DCB4();
+                D_801E2894.unk_0 = sprite;
+                sprite->unk_90 = &D_801E2894;
+                D_801E2894.unk_6 = 1;
+                return;
+            }
+            D_801E2894.unk_6 = 1;
+            sprite->unk_18.s.hi = 0x7C;
+            if (func_80029B80()) {
+                sprite->unk_14.s.hi = 0x30;
+                func_8003EB5C(&D_80093FAC, sprite);
+            } else {
+                sprite->unk_14.s.hi = 0x150;
+                func_8003EB5C(&D_80093F78, sprite);
+            }
+            return;
+        }
+        D_801E2894.unk_4 = count;
+        if (sprite != NULL) {
+            sprite->unk_18.s.hi = 0x190;
+            D_801E2894.unk_6 = 0;
+        }
+    }
+}
 
 void func_80029B54(void) {
     memset(&D_801E2894, 0, 8);
