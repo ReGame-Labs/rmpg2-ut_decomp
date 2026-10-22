@@ -24,9 +24,12 @@ typedef struct Mover {
     /* 0x48 */ Anim *unk_48;    /* the current animation (func_8003EB5C) */
     /* 0x4C */ s8 unk_4C;
     /* 0x4D */ s8 unk_4D;
-    /* 0x4E */ u8 unk_4E[0x16];
+    /* 0x4E */ u8 unk_4E[0xE];
+    /* 0x5C */ u16 *unk_5C;     /* three halfwords the record reads (game_80034590: func_80039890, func_8003A520) */
+    /* 0x60 */ u8 unk_60[0x4];
     /* 0x64 */ s32 unk_64;
-    /* 0x68 */ u8 unk_68[0x4];
+    /* 0x68 */ u16 unk_68;      /* an animation index (game_80034590: func_80034C54) */
+    /* 0x6A */ u16 unk_6A;      /* game_80034590: func_80034CB8 */
     /* 0x6C */ u16 unk_6C;      /* flags; 0x80 */
     /* 0x6E */ u8 unk_6E[0x12];
     /* 0x80 */ s16 unk_80;
@@ -35,7 +38,14 @@ typedef struct Mover {
     /* 0x88 */ s32 unk_88;
     /* 0x8C */ u8 unk_8C[0x4];
     /* 0x90 */ struct MoverLink *unk_90;
+    /* 0x94 */ struct MoverTarget *unk_94;  /* game_80034590: func_800374FC */
 } Mover;
+
+/* What a mover's unk_94 points at: a record holding another mover (game_80034590). */
+typedef struct MoverTarget {
+    /* 0x00 */ u8 unk_0[0x4];
+    /* 0x04 */ Mover *unk_4;
+} MoverTarget;
 
 typedef struct MoverLink {
     /* 0x00 */ u8 unk_0[0x4];
@@ -112,18 +122,27 @@ typedef struct Player {
     /* 0x028 */ u16 unk_28;
     /* 0x02A */ u8 unk_2A[0x30];
     /* 0x05A */ s16 unk_5A;
-    /* 0x05C */ u8 unk_5C[0xC4];
+    /* 0x05C */ u8 unk_5C[0xC];
+    /* 0x068 */ Mover *unk_68;     /* the player's monster's mover (game_80034590: func_80039B60) */
+    /* 0x06C */ u8 unk_6C[0x60];
+    /* 0x0CC */ u16 unk_CC;      /* game_80034590: func_80038528 */
+    /* 0x0CE */ u8 unk_CE[0x52];
     /* 0x120 */ u16 unk_120;
     /* 0x122 */ u16 unk_122;
     /* 0x124 */ u8 unk_124[0x2];
     /* 0x126 */ s16 unk_126;
-    /* 0x128 */ u8 unk_128[0x62];
+    /* 0x128 */ u8 unk_128[0x1A];
+    /* 0x142 */ u16 unk_142;     /* game_80034590: func_80037078 */
+    /* 0x144 */ u8 unk_144[0x46];
     /* 0x18A */ s16 unk_18A;
     /* 0x18C */ u8 unk_18C[0x20];
     /* 0x1AC */ u16 unk_1AC;
-    /* 0x1AE */ u8 unk_1AE[0x56];
+    /* 0x1AE */ u8 unk_1AE[0x26];
+    /* 0x1D4 */ s32 unk_1D4;     /* game_80034590: func_80038754 clears it when the player is dropped */
+    /* 0x1D8 */ u8 unk_1D8[0x2C];
     /* 0x204 */ u16 unk_204;
-} Player;
+    /* 0x206 */ u8 unk_206[0x1A];
+} Player;                   /* 0x220: D_801E0B78 holds three, one per player slot */
 
 /* A thing on screen with a mover and an animation set, driven by a state (unk_4) and a kind (unk_6): the
  * actors of game_8003CD08. */
@@ -164,7 +183,9 @@ typedef struct GameGlobals {
     /* 0x04 */ s32 unk_4;
     /* 0x08 */ u8 unk_8[0x18];
     /* 0x20 */ Mover *unk_20;   /* the monster being moved */
-    /* 0x24 */ u8 unk_24[0x28];
+    /* 0x24 */ u8 unk_24[0x18];
+    /* 0x3C */ struct Effect *unk_3C;  /* the effect being set up (game_80034590: what func_8001D110 returns) */
+    /* 0x40 */ u8 unk_40[0xC];
     /* 0x4C */ s32 unk_4C;
     /* 0x50 */ u8 unk_50[0x2A];
     /* 0x7A */ u16 unk_7A;      /* func_8003EB5C's result: 1 when the animation was already current */
