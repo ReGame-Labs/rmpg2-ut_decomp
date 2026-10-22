@@ -11,14 +11,30 @@
  * sprite objects). Field names are offsets until their meaning is known; the types are the ones the code's loads and
  * stores imply. */
 
+/* A 16.16 fixed-point value read whole or by halves (the integer part is the high half), signed or unsigned as
+ * the code needs. */
+typedef union Fixed {
+    s32 full;
+    struct {
+        s16 lo;
+        s16 hi;
+    } s;
+    struct {
+        u16 lo;
+        u16 hi;
+    } u;
+} Fixed;
+
 /* The image a sprite draws (reached through Sprite.unk_34). */
 typedef struct SpriteImage {
-    u8 pad_0[0x8];
-    u16 unk_8;
-    u16 unk_A;
+    s32 unk_0;
+    s32 unk_4;
+    Fixed unk_8;
+    s32 unk_C;
 } SpriteImage;
 
-/* A sprite object: linked (unk_68), with flags at unk_1A, unk_22 and unk_6C. */
+
+/* A sprite object: linked (unk_68), its position at unk_14/unk_18 (16.16), with flags at unk_22 and unk_6C. */
 typedef struct Sprite {
     struct Sprite *unk_0;
     struct Sprite *unk_4;
@@ -26,18 +42,14 @@ typedef struct Sprite {
     s16 unk_A;
     s32 unk_C;
     s32 unk_10;
-    s16 unk_14;
-    u16 unk_16;
-    s16 unk_18;
-    u16 unk_1A;
-    u16 unk_1C;
-    u16 unk_1E;
+    Fixed unk_14;
+    Fixed unk_18;
+    Fixed unk_1C;
     u16 unk_20;
     u16 unk_22;
     s16 unk_24;
     s16 unk_26;
-    s16 unk_28;
-    s16 unk_2A;
+    Fixed unk_28;
     s32 unk_2C;
     s32 unk_30;
     SpriteImage *unk_34;
@@ -50,7 +62,7 @@ typedef struct Sprite {
     s8 unk_4C;
     s8 unk_4D;
     u8 pad_4E[0x2];
-    s32 unk_50;
+    struct Sprite *unk_50;
     u8 pad_54[0xC];
     s32 unk_60;
     u8 pad_64[0x4];
@@ -59,8 +71,10 @@ typedef struct Sprite {
     u16 unk_6E;
     u16 unk_70;
     u8 pad_72[0x2];
-    s16 unk_74;
-    u8 pad_76[0xA];
+    u16 unk_74;
+    u8 pad_76[0x2];
+    s32 unk_78;
+    s32 unk_7C;
     u16 unk_80;
     u16 unk_82;
     u8 pad_84[0x8];
@@ -71,22 +85,25 @@ typedef struct Sprite {
 
 /* Three slots of freed resources (SpriteSlots.unk_C, unk_24, unk_3C ... released through func_8001E4B0). */
 typedef struct SpriteSlots {
-    s32 unk_0;
+    Sprite *unk_0;
     u8 pad_4[0x8];
-    s32 unk_C;
-    u8 pad_10[0x8];
+    Sprite *unk_C;
+    u8 pad_10[0x4];
+    struct Unk22D58 *unk_14;
     s32 unk_18;
-    s32 unk_1C;
+    Sprite *unk_1C;
     u8 pad_20[0x4];
-    s32 unk_24;
-    u8 pad_28[0x8];
+    Sprite *unk_24;
+    u8 pad_28[0x4];
+    struct Unk22D58 *unk_2C;
     s32 unk_30;
-    s32 unk_34;
+    Sprite *unk_34;
     u8 pad_38[0x4];
-    s32 unk_3C;
-    u8 pad_40[0x8];
+    Sprite *unk_3C;
+    u8 pad_40[0x4];
+    struct Unk22D58 *unk_44;
     s32 unk_48;
-    s32 unk_4C;
+    Sprite *unk_4C;
 } SpriteSlots;
 
 /* The game's state block at 0x800AA248 (the current sprite at unk_20, 0x800AA268). */
@@ -118,14 +135,18 @@ typedef struct GameState {
     u8 pad_64[0x10];
     s32 unk_74;
     u8 pad_78[0x2];
-    s16 unk_7A;
+    u16 unk_7A;
     u8 pad_7C[0x4];
 } GameState;
 
 /* A monster (player or AI): its state machine at unk_5A, its sprite at unk_68. */
 typedef struct Monster {
     u16 unk_0;
-    u8 pad_2[0x3A];
+    u8 pad_2[0xE];
+    s32 unk_10;
+    u8 pad_14[0x6];
+    u16 unk_1A;
+    u8 pad_1C[0x20];
     u16 unk_3C;
     u16 unk_3E;
     u8 pad_40[0x6];
@@ -135,7 +156,9 @@ typedef struct Monster {
     u16 unk_5C;
     u8 pad_5E[0xA];
     Sprite *unk_68;
-    u8 pad_6C[0x5C];
+    u8 pad_6C[0x48];
+    s32 unk_B4[2];
+    u8 pad_BC[0xC];
     u16 unk_C8;
     u8 pad_CA[0x2];
     u16 unk_CC;
@@ -202,12 +225,25 @@ typedef struct Unk1C542C {
 } Unk1C542C;
 
 /* The 13 blocks of 0x584 bytes at 0x801D3DC8: a 0x98-byte head and 15 items of 0x54 bytes. */
+typedef struct Unk1D3DC8Part {
+    u8 pad_0[0x14];
+    s16 unk_14;
+    u8 pad_16[0x2];
+} Unk1D3DC8Part;
+
 typedef struct Unk1D3DC8Item {
-    u8 pad_0[0x54];
+    u8 pad_0[0xC];
+    Unk1D3DC8Part unk_C;
+    Unk1D3DC8Part unk_24;
+    Unk1D3DC8Part unk_3C;
 } Unk1D3DC8Item;
 
 typedef struct Unk1D3DC8 {
-    u8 pad_0[0x98];
+    u16 unk_0;
+    u8 pad_2[0x34];
+    s16 unk_36;
+    u16 unk_38;
+    s16 unk_3A[0x2F];
     Unk1D3DC8Item items[15];
 } Unk1D3DC8;
 
@@ -256,12 +292,32 @@ typedef struct Unk1E638 {
     s32 unk_8;
 } Unk1E638;
 
+/* An animation (the tables in .data from 0x8008AE40 on); opaque here. */
+typedef struct Anim Anim;
+
+/* A monster's behaviour state (the handlers func_80022490 ... func_80023080 run on the current sprite,
+ * D_800AA268): its kind at unk_6, the state index at unk_A, "the state is new" at unk_C. */
 typedef struct Unk22D58 {
-    u8 pad_0[0xA];
-    s16 unk_A;
+    Sprite *unk_0;
+    u8 pad_4[0x2];
+    u16 unk_6;
+    s16 unk_8;
+    u16 unk_A;
     u16 unk_C;
-    u8 pad_E[0x1C];
+    u8 pad_E[0x2];
+    struct Monster *unk_10;
+    u8 pad_14[0x8];
+    s16 unk_1C;
+    u8 pad_1E[0x4];
+    s16 unk_22;
+    s16 unk_24;
+    u8 pad_26[0x4];
     s16 unk_2A;
+    u8 pad_2C[0x4];
+    s32 unk_30;
+    s32 unk_34;
+    s16 unk_38;
+    u8 pad_3A[0x6];
 } Unk22D58;
 
 typedef struct Unk233E0 {
@@ -273,5 +329,53 @@ typedef struct Unk233E0 {
     u8 pad_2A[0x12];
     u16 unk_3C;
 } Unk233E0;
+
+/* A glyph of the font (func_8001B128 maps a packed glyph index to one): its size at unk_4/unk_6. */
+typedef struct Glyph {
+    s32 unk_0;
+    s16 unk_4;
+    s16 unk_6;
+} Glyph;
+
+/* The text printer's state at 0x801D8588 (func_8001EDE4 ... func_8001F61C): the string at unk_1C, the pen at
+ * unk_C/unk_E, the glyph table at unk_14, the flags at unk_24. */
+typedef struct TextState {
+    s32 unk_0;
+    void (*unk_4)(void);
+    s32 unk_8;
+    u16 unk_C;
+    u16 unk_E;
+    s32 unk_10;
+    s32 *unk_14;
+    s32 unk_18;
+    u8 *unk_1C;
+    u16 unk_20;
+    u16 unk_22;
+    s32 unk_24;
+    u16 unk_28;
+    u16 unk_2A;
+    s16 unk_2C;
+    s16 unk_2E;
+    s16 unk_30;
+    u16 unk_32;
+    u16 unk_34;
+    u16 unk_36;
+    s16 unk_38;
+    u8 unk_3A;
+    u8 pad_3B;
+    s32 unk_3C;
+} TextState;
+
+/* A text message record as func_8001F39C loads it into the printer: the string follows at 0x18. */
+typedef struct TextMessage {
+    s32 *unk_0;
+    s32 unk_4;
+    u16 unk_8;
+    u16 unk_A;
+    s32 unk_C;
+    void (*unk_10)(void);
+    s32 unk_14;
+    u8 unk_18[1];
+} TextMessage;
 
 #endif /* GAME_8001781C_H */
