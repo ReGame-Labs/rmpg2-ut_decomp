@@ -39,7 +39,8 @@ runs:
       id: pins
       shell: bash
       run: |
-        hash=$({ scripts/setup.sh --pins; cat tools/requirements.txt; echo "${{ inputs.tools }}"; } | sha256sum | cut -c1-16)
+        # The workspace path too: the venv's scripts hard-code it (a renamed repository gets a fresh cache).
+        hash=$({ scripts/setup.sh --pins; cat tools/requirements.txt; echo "${{ inputs.tools }}"; echo "$GITHUB_WORKSPACE"; } | sha256sum | cut -c1-16)
         echo "hash=$hash" >> "$GITHUB_OUTPUT"
 
     - name: Cached tools
