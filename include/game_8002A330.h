@@ -15,6 +15,8 @@ typedef struct GameState {
     struct UnkStruct4 *unk_20;  /* D_800AA268 */
     u8 pad_24[0x18];
     struct UnkStructD110 *unk_3C;  /* the record func_8001D110 handed out last */
+    u8 pad_40[0x38];
+    s16 unk_78;     /* set when the current object is gone (func_8003BE34) */
 } GameState;
 
 extern GameState D_800AA248;
@@ -365,11 +367,10 @@ struct UnkStruct4 {  /* provisional: what the game state's unk_20 (D_800AA268) p
     u8 pad_00[0x4];
     u16 unk_04;
     u8 pad_06[0x6];
-    s32 unk_0C;
-    s32 unk_10;
-    u16 unk_14;
-    u16 unk_16;
-    Fix1616 unk_18;
+    s32 unk_0C;     /* x velocity, 16.16 */
+    s32 unk_10;     /* y velocity, 16.16 */
+    Fix1616 unk_14; /* x, 16.16 */
+    Fix1616 unk_18; /* y, 16.16 */
     u16 unk_1C;
     u8 pad_1E[0x4];
     u16 unk_22;

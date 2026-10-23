@@ -16,9 +16,11 @@ typedef struct UnkStructB1 {  /* provisional: a 0x58-byte record of the table at
     UnkStruct1 *unk_14;
     u8 pad_18[0x2];
     u16 unk_1A;
-    u8 pad_1C[0x18];
-    s32 unk_34;
-    u8 pad_38[0x8];
+    u8 pad_1C[0x14];
+    s32 unk_30;     /* y acceleration, 16.16 */
+    s32 unk_34;     /* x acceleration, 16.16 */
+    u8 pad_38[0x6];
+    u16 unk_3E;
     UnkStruct4 *unk_40;
     u8 pad_44[0x14];
 } UnkStructB1;

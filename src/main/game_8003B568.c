@@ -63,7 +63,7 @@ s32 func_8003B9C8(UnkStruct4 *obj, UnkStruct7 *m) {
     s16 m_top;
     s16 m_bottom;
 
-    x = (s16) obj->unk_16;
+    x = (s16) obj->unk_14.h.hi;
     box = obj->unk_34;
     if (x < D_801F9ACA) {
         x += (D_801D8864 + 1) >> 16;
@@ -118,7 +118,7 @@ void func_8003BD48(UnkStructB1 *b) {
         if (D_801FAC84 != 0) {
             limit = D_801FAC84;
             obj = D_800AA268.obj;
-            x = obj->unk_16;
+            x = obj->unk_14.h.hi;
             if (obj->unk_22 & 0x10) {
                 d = (u16) D_801F9AB0 - x + 0x31;
             } else {
@@ -131,7 +131,7 @@ void func_8003BD48(UnkStructB1 *b) {
             if (D_801FA98C != 0) {
                 limit = D_801FA98C;
                 obj = D_800AA268.obj;
-                x = obj->unk_16;
+                x = obj->unk_14.h.hi;
                 if (obj->unk_22 & 0x10) {
                     d = (u16) D_801FA990 - x + 0x31;
                 } else {
@@ -148,7 +148,27 @@ void func_8003BD48(UnkStructB1 *b) {
 INCLUDE_ASM("asm/main/nonmatchings/game_8003B568", func_8003BD48);
 #endif
 
-INCLUDE_ASM("asm/main/nonmatchings/game_8003B568", func_8003BE34);
+s32 func_8003BE34(UnkStructB1 *rec) {
+    D_800AA248.unk_20->unk_10 += rec->unk_30;
+    D_800AA248.unk_20->unk_18.w += D_800AA248.unk_20->unk_10;
+    D_800AA248.unk_20->unk_0C += rec->unk_34;
+    D_800AA248.unk_20->unk_14.w += D_800AA248.unk_20->unk_0C;
+    D_800AA248.unk_20->unk_14.w &= D_801D8864;
+    if (rec->unk_3E != 0) {
+        if (D_800AA248.unk_20->unk_6C & 0x80) {
+            D_800AA248.unk_78 = 1;
+            return 1;
+        }
+        D_800AA248.unk_78 = 0;
+        return 0;
+    }
+    if (!(D_800AA248.unk_20->unk_6C & 0x80)) {
+        rec->unk_3E = 1;
+    }
+    D_800AA248.unk_78 = 0;
+    return 0;
+}
+
 
 #ifdef NON_MATCHING
 /* 98.8 %: the first test's second range check masks `st - 0xD` to 16 bits (andi) in the original; the same
