@@ -525,8 +525,6 @@ void func_8004CBFC(void) {
     D_800AA248.cur_obj->vel_y.v = 0;
 }
 
-#ifdef NON_MATCHING
-/* 96%: register names (the level state's address in a0) */
 void func_8004CC0C(void) {
     Monster *m = D_800AA248.cur_obj->owner.monster;
     s32 *arg;
@@ -534,15 +532,10 @@ void func_8004CC0C(void) {
     m->action = 1;
     m->unk_168 = 7;
     arg = D_800AA248.cur_obj->arg.w;
-    D_800AA248.cur_obj->unk_48 = arg[0];
-    D_800AA248.cur_obj->script_pc = arg[1];
+    D_800AA248.cur_obj->unk_48 = *arg++;
+    D_800AA248.cur_obj->script_pc = *arg;
 }
-#else
-INCLUDE_ASM("asm/main/nonmatchings/game_8004C064", func_8004CC0C);
-#endif
 
-#ifdef NON_MATCHING
-/* 96%: as func_8004CC0C */
 void func_8004CC5C(void) {
     Monster *m = D_800AA248.cur_obj->owner.monster;
     s32 *arg;
@@ -550,12 +543,9 @@ void func_8004CC5C(void) {
     m->action = 1;
     m->unk_168 = 3;
     arg = D_800AA248.cur_obj->arg.w;
-    D_800AA248.cur_obj->unk_48 = arg[0];
-    D_800AA248.cur_obj->script_pc = arg[1];
+    D_800AA248.cur_obj->unk_48 = *arg++;
+    D_800AA248.cur_obj->script_pc = *arg;
 }
-#else
-INCLUDE_ASM("asm/main/nonmatchings/game_8004C064", func_8004CC5C);
-#endif
 
 void func_8004CCAC(void) {
     Monster *m = D_800AA248.cur_obj->owner.monster;
@@ -1300,18 +1290,13 @@ void func_8004E264(void) {
     }
 }
 
-#ifdef NON_MATCHING
-/* 95%: register names (the object in v1, the operands in v0) */
 void func_8004E2A0(void) {
-    GameObject *obj = D_800AA248.cur_obj;
+    GameObject *obj = D_800AA268;
     s32 *arg = obj->arg.w;
 
-    obj->vel_y.v = arg[0];
-    obj->owner.monster->unk_104 = arg[1];
+    obj->vel_y.v = *arg++;
+    obj->owner.monster->unk_104 = *arg;
 }
-#else
-INCLUDE_ASM("asm/main/nonmatchings/game_8004C064", func_8004E2A0);
-#endif
 
 void func_8004E2D0(void) {
     Monster *m = D_800AA248.cur_obj->owner.monster;
