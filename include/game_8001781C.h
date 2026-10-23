@@ -51,7 +51,7 @@ typedef struct Sprite {
     s16 unk_26;
     Fixed unk_28;
     s32 unk_2C;
-    s32 unk_30;
+    Fixed unk_30;
     SpriteImage *unk_34;
     s32 unk_38;
     u16 unk_3C;
@@ -115,7 +115,7 @@ typedef struct GameState {
     s32 unk_10;
     s32 unk_14;
     s32 unk_18;
-    s32 unk_1C;
+    struct Unk1D110 *unk_1C;
     Sprite *unk_20;
     s32 unk_24;
     s32 *unk_28;
@@ -151,7 +151,8 @@ typedef struct Monster {
     u16 unk_3E;
     u8 pad_40[0x6];
     u16 unk_46;
-    u8 pad_48[0x12];
+    u8 pad_48[0x10];
+    u16 unk_58;
     u16 unk_5A;
     u16 unk_5C;
     u8 pad_5E[0xA];
@@ -193,7 +194,8 @@ typedef struct Monster {
     u16 unk_1B0;
     u8 pad_1B2[0xC];
     u16 unk_1BE;
-    u8 pad_1C0[0x20];
+    u8 pad_1C0[0x1E];
+    u16 unk_1DE;
     u16 unk_1E0;
     u8 pad_1E2[0x2];
     s16 *unk_1E4;           /* the demo's input script: 12-byte records (frame, direction, buttons), 0x7FFF ends it */
@@ -242,7 +244,13 @@ typedef struct Unk1D3DC8Item {
 
 typedef struct Unk1D3DC8 {
     u16 unk_0;
-    u8 pad_2[0x34];
+    u16 unk_2;
+    s16 unk_4;
+    u8 pad_6[0x8];
+    s16 unk_E;
+    u8 pad_10[0x4];
+    u16 unk_14;
+    u8 pad_16[0x20];
     s16 unk_36;
     u16 unk_38;
     s16 unk_3A[0x2F];
@@ -266,7 +274,8 @@ typedef struct Unk1D110 {
     s32 unk_C;
     Fixed unk_10;           /* a position, whole or its integer half */
     Fixed unk_14;
-    u8 pad_18[0x8];
+    u8 pad_18[0x4];
+    s32 unk_1C;
     s32 unk_20;
     u8 pad_24[0x4];
     struct Anim *unk_28;
@@ -343,6 +352,13 @@ typedef struct Unk25124 {
     Unk25124Item unk_98;
 } Unk25124;
 
+/* A sprite bank's header (func_8001AD1C loads its images): the counts of 256x256 and 256x128 images. */
+typedef struct Unk1AD1C {
+    u8 pad_0[0x4];
+    u32 unk_4;
+    u32 unk_8;
+} Unk1AD1C;
+
 /* An animation (the tables in .data from 0x8008AE40 on); opaque here. */
 typedef struct Anim Anim;
 
@@ -368,7 +384,8 @@ typedef struct Unk22D58 {
     s32 unk_30;
     s32 unk_34;
     s16 unk_38;
-    u8 pad_3A[0x6];
+    u16 unk_3A;
+    u8 pad_3C[0x4];
 } Unk22D58;
 
 typedef struct Unk233E0 {
