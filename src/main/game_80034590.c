@@ -35,7 +35,18 @@ void func_800634D4(Player *player, s32 n);
 void *memset(void *s, s32 c, u32 n);
 s32 abs(s32 n);
 
+void func_80029D1C(void);
+void func_8004BBC8(Npc *npc);
+void func_80020DDC(Npc *npc);
+
 /* This unit. */
+void func_80036818(Npc *npc);
+void func_80037A88(NpcS *npc);
+void func_80037F20(NpcS *npc);
+void func_80038348(NpcS *npc);
+void func_8003A98C(NpcS *npc);
+void func_8003B294(NpcS *npc);
+void func_8003B3C8(NpcS *npc);
 void func_80035260();                /* called without the record it takes: no prototype in the original */
 void func_8003518C(Npc *npc);
 void func_80035330(Npc *npc);
@@ -989,7 +1000,42 @@ void func_80036298(void) {
     }
 }
 
-INCLUDE_ASM("asm/main/nonmatchings/game_80034590", func_80036300);
+void func_80036300(Npc *npc) {
+    D_800AA268 = npc->unk_0;
+    func_80029D1C();
+    func_80036818(npc);
+    switch (npc->unk_6) {
+    case 3:
+        func_8004BBC8(npc);
+        break;
+    case 0x3B:
+        func_80037A88((NpcS *)npc);
+        break;
+    case 0x3E:
+    case 0x3F:
+        func_80037F20((NpcS *)npc);
+        break;
+    case 0xF:
+        func_80038348((NpcS *)npc);
+        break;
+    case 0x11:
+    case 0x12:
+        func_80020DDC(npc);
+        break;
+    case 0x31:
+        func_8003A98C((NpcS *)npc);
+        break;
+    case 0x13:
+        func_8003B294((NpcS *)npc);
+        break;
+    case 0x14:
+    case 0x15:
+        func_8003B3C8((NpcS *)npc);
+        break;
+    case 0x42:
+        break;
+    }
+}
 
 void func_800363E4(void) {
     Npc *npc = D_801FAC9C;
