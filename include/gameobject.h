@@ -24,7 +24,8 @@ struct Attacker;
  * Fields from game_80043E28 and game_8004E574; the size is not known. */
 typedef struct GameObject {
     /* 0x00 */ s32 unk_00;             /* the sprite/animation id it was created from */
-    /* 0x04 */ u8 unk_04[0x08];
+    /* 0x04 */ u8 unk_04[0x04];
+    /* 0x08 */ s32 unk_08;
     /* 0x0C */ Fixed16 vel_x;
     /* 0x10 */ Fixed16 vel_y;
     /* 0x14 */ Fixed16 pos_x;
@@ -66,7 +67,8 @@ typedef struct GameObject {
     /* 0x82 */ u8 unk_82[0x02];
     /* 0x84 */ s32 unk_84;             /* a horizontal acceleration, 16.16 */
     /* 0x88 */ s32 unk_88;
-    /* 0x8C */ u8 unk_8C[0x04];
+    /* 0x8C */ u16 unk_8C;             /* a lifetime in frames (game_8004750C) */
+    /* 0x8E */ u8 unk_8E[0x02];
     /* 0x90 */ union {                 /* what drives this object */
                    void *p;
                    struct Monster *monster;
@@ -90,13 +92,17 @@ typedef struct SpriteFrame {
     /* 0x0C */ u8 unk_0C[0x04];
     /* 0x10 */ u16 unk_10;             /* a second point: x (game_8004750C, the throw's origin) */
     /* 0x12 */ u16 unk_12;             /* y */
+    /* 0x14 */ u8 unk_14[0x0C];
+    /* 0x20 */ u16 unk_20;             /* a third point: x (game_8004750C, a spawn origin) */
+    /* 0x22 */ u16 unk_22;             /* y */
 } SpriteFrame;
 
 /* What func_8001D110 hands out to describe an object to create; func_8001DCB4 creates it from
  * GameState.new_def. */
 typedef struct {
     /* 0x00 */ s32 id;                 /* the sprite/animation id */
-    /* 0x04 */ u8 unk_04[0x08];
+    /* 0x04 */ u16 unk_04;             /* flags: 0x10 faces left (game_8004750C) */
+    /* 0x06 */ u8 unk_06[0x06];
     /* 0x0C */ s32 unk_0C;
     /* 0x10 */ Fixed16 pos_x;          /* written whole from an object's position, or its integer half alone */
     /* 0x14 */ Fixed16 pos_y;
@@ -113,7 +119,7 @@ typedef struct Monster {
     /* 0x000 */ u16 id;                /* 1..7 */
     /* 0x002 */ u8 unk_002[0x02];
     /* 0x004 */ s16 unk_004;
-    /* 0x006 */ u8 unk_006[0x02];
+    /* 0x006 */ u16 unk_006;           /* the monster kind: 0x15 has its own thrown objects (game_8004750C) */
     /* 0x008 */ Fixed16 unk_008;
     /* 0x00C */ u8 unk_00C[0x04];
     /* 0x010 */ s32 unk_010;           /* a vertical speed, 16.16 */
