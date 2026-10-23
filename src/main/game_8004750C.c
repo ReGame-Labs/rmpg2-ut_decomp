@@ -139,7 +139,32 @@ void func_80047554(void *anim, Attacker *at) {
     D_800AA248.cur_obj = saved;
 }
 
+#ifdef NON_MATCHING
+/* 99.6 %: the wrap's 'and' takes the mask as its first operand (and v1,v1,v0); the sum first moves the object to v1 instead of a0 */
+void func_80044204(Attacker *a);
+
+void func_800475F4(Attacker *at) {
+    GameObject *saved;
+    GameObject *obj;
+    s32 vel;
+
+    obj = at->obj;
+    saved = D_800AA248.cur_obj;
+    D_800AA248.cur_obj = obj;
+    vel = obj->vel_x.v;
+    obj->pos_x.v = D_801D8864.v & (obj->pos_x.v + vel);
+    vel = D_800AA248.cur_obj->vel_y.v + 0x6500;
+    D_800AA248.cur_obj->vel_y.v = vel;
+    D_800AA248.cur_obj->pos_y.v += vel;
+    if (D_800AA248.cur_obj->pos_y.v > 0xE0FFFF) {
+        D_800AA248.cur_obj->pos_y.v = 0xE10000;
+        func_80044204(at);
+    }
+    D_800AA248.cur_obj = saved;
+}
+#else
 INCLUDE_ASM("asm/main/nonmatchings/game_8004750C", func_800475F4);
+#endif
 
 void func_800476A8(void) {
     u8 *slot;
@@ -460,12 +485,104 @@ u16 func_80047F64(u16 kind, u16 b, Throw *t) {
 INCLUDE_ASM("asm/main/nonmatchings/game_8004750C", func_80047F64);
 #endif
 
-INCLUDE_ASM("asm/main/nonmatchings/game_8004750C", func_80048070);
+extern s32 D_80091B54[];
+extern GameObject *D_800AA268;
 
-INCLUDE_ASM("asm/main/nonmatchings/game_8004750C", func_800481FC);
+u16 func_80048070(u16 kind, s16 b, Throw *t) {
+    GameObject *saved = D_800AA248.cur_obj;
+    ObjectDef *def;
+    GameObject *cur;
+    SpriteFrame *fr;
+    s16 dx;
+    s16 dy;
+    s16 x;
+
+    def = func_8001D110();
+    D_800AA248.new_def = def;
+    cur = D_800AA248.cur_obj;
+    fr = cur->frame;
+    dx = fr->unk_20 - fr->unk_08;
+    x = dx;
+    dy = fr->unk_22 - fr->unk_0A;
+    if (cur->unk_20.f.flags & 0x10) {
+        x = -dx;
+        def->unk_04 |= 0x10;
+    }
+    def->pos_x.p.i = D_800AA248.cur_obj->pos_x.p.i + x;
+    def->pos_y.p.i = D_800AA248.cur_obj->pos_y.p.i + dy;
+    def->flags = 0x1005;
+    def->anim = D_80091B54;
+    def->id = 0x4F0000AA;
+    def->unk_0C = 0x735;
+    D_800AA248.cur_obj = func_8001DCB4();
+    if (D_800AA248.cur_obj == NULL) {
+        D_800AA248.cur_obj = saved;
+        return 1;
+    }
+    t->obj = D_800AA248.cur_obj;
+    t->unk_08 = b;
+    t->unk_0A = 1;
+    D_800AA248.cur_obj->unk_94.p = t;
+    D_800AA248.cur_obj->vel_y.v = D_8007F2A4[kind].vy;
+    if (saved->unk_20.f.flags & 0x10) {
+        D_800AA248.cur_obj->vel_x.v = -D_8007F2A4[kind].vx;
+    } else {
+        D_800AA248.cur_obj->vel_x.v = D_8007F2A4[kind].vx;
+    }
+    D_800AA268 = saved;
+    return 0;
+}
+
+u16 func_800481FC(u16 kind, s16 b, Throw *t) {
+    GameObject *saved = D_800AA248.cur_obj;
+    ObjectDef *def;
+    GameObject *cur;
+    SpriteFrame *fr;
+    s16 dx;
+    s16 dy;
+    s16 x;
+    s32 vx;
+
+    D_800AA248.new_def = func_8001D110();
+    def = D_800AA248.new_def;
+    cur = D_800AA248.cur_obj;
+    fr = cur->frame;
+    dy = fr->unk_22 - fr->unk_0A;
+    dx = fr->unk_20 - fr->unk_08;
+    x = dx;
+    if (cur->unk_20.f.flags & 0x10) {
+        x = -dx;
+        def->unk_04 |= 0x10;
+    } else {
+        def->unk_04 &= ~0x10;
+    }
+    def->pos_x.p.i = D_800AA248.cur_obj->pos_x.p.i + x;
+    def->pos_y.p.i = D_800AA248.cur_obj->pos_y.p.i + dy;
+    def->flags = 0x1005;
+    def->anim = &D_8008C804;
+    def->id = 0x4F0000D6;
+    def->unk_0C = 0x720;
+    D_800AA248.cur_obj = func_8001DCB4();
+    if (D_800AA248.cur_obj == NULL) {
+        D_800AA248.cur_obj = saved;
+        return 1;
+    }
+    t->obj = D_800AA248.cur_obj;
+    t->unk_08 = b;
+    t->unk_0A = 1;
+    D_800AA248.cur_obj->unk_94.p = t;
+    D_800AA248.cur_obj->vel_y.v = D_8007F2A4[kind].vy;
+    vx = D_8007F2A4[kind].vx;
+    if (D_800AA248.cur_obj->unk_20.f.flags & 0x10) {
+        vx = -vx;
+    }
+    D_800AA248.cur_obj->vel_x.v = vx;
+    D_800AA248.cur_obj = saved;
+    return 0;
+}
 
 #ifdef NON_MATCHING
-/* 87%: the original stores the new object's x right after computing it, before the constant fields; here the scheduler puts the constants first */
+/* 99.4 %: the absolute distance: the original copies the sign-extended distance (v0) into a1 in the branch's delay slot and negates the copy; every form here negates v0 in place */
 u16 func_80048384(u16 b, Throw *t) {
     GameObject *saved = D_800AA248.cur_obj;
     ObjectDef *def;
@@ -474,7 +591,7 @@ u16 func_80048384(u16 b, Throw *t) {
     s16 dy;
     s16 dx;
     s16 x;
-    s16 d;
+    s32 d;
     u16 left = 0;
     s32 vx;
 
@@ -491,11 +608,11 @@ u16 func_80048384(u16 b, Throw *t) {
         left = 1;
     }
     def->pos_x.p.i = (u16) D_800AA248.cur_obj->pos_x.p.i + x;
+    def->pos_y.p.i = (u16) D_800AA248.cur_obj->pos_y.p.i + dy;
     def->flags = 0x1005;
     def->unk_0C = 0x721;
     def->id = 0x4F0000D8;
     def->anim = D_800916D8;
-    def->pos_y.p.i = (u16) D_800AA248.cur_obj->pos_y.p.i + dy;
     D_800AA248.cur_obj = func_8001DCB4();
     if (D_800AA248.cur_obj == NULL) {
         D_800AA248.cur_obj = saved;
@@ -538,7 +655,38 @@ INCLUDE_ASM("asm/main/nonmatchings/game_8004750C", func_80048B98);
 
 INCLUDE_ASM("asm/main/nonmatchings/game_8004750C", func_80048D4C);
 
-INCLUDE_ASM("asm/main/nonmatchings/game_8004750C", func_80048E6C);
+extern s32 D_80091A70[];
+
+u16 func_80048E6C(s16 b, Throw *t) {
+    GameObject *saved = D_800AA248.cur_obj;
+    ObjectDef *def;
+    SpriteFrame *fr;
+    s16 dx;
+    s16 dy;
+
+    def = func_8001D110();
+    D_800AA248.new_def = def;
+    def->id = 0x4F0000E6;
+    fr = D_800AA248.cur_obj->frame;
+    dx = fr->unk_10 - fr->unk_08;
+    dy = fr->unk_12 - fr->unk_0A;
+    def->pos_x.p.i = D_800AA248.cur_obj->pos_x.p.i + dx;
+    def->pos_y.p.i = D_800AA248.cur_obj->pos_y.p.i + dy;
+    def->unk_0C = 0x723;
+    def->flags = 0x1005;
+    def->anim = D_80091A70;
+    D_800AA248.cur_obj = func_8001DCB4();
+    if (D_800AA248.cur_obj == NULL) {
+        D_800AA248.cur_obj = saved;
+        return 1;
+    }
+    t->obj = D_800AA248.cur_obj;
+    t->unk_08 = b;
+    t->unk_0A = 1;
+    D_800AA248.cur_obj->unk_94.p = t;
+    D_800AA248.cur_obj = saved;
+    return 0;
+}
 
 INCLUDE_ASM("asm/main/nonmatchings/game_8004750C", func_80048F60);
 
@@ -568,7 +716,26 @@ INCLUDE_ASM("asm/main/nonmatchings/game_8004750C", func_800499F4);
 
 INCLUDE_ASM("asm/main/nonmatchings/game_8004750C", func_80049B9C);
 
+#ifdef NON_MATCHING
+/* 97.5 %: register allocation of the wrap statement: the original gives the current object v0 and ties the sum to the velocity's register (v1); here the object gets v1 (as in func_800475F4 and func_80044F08) */
+void func_80049D90(void) {
+    s32 vel;
+
+    D_800AA248.cur_obj->pos_x.v = (D_800AA248.cur_obj->pos_x.v + D_800AA248.cur_obj->vel_x.v) & D_801D8864.v;
+    vel = D_800AA248.cur_obj->vel_y.v + 0x4000;
+    if (vel > 0x9FFFF) {
+        vel = 0xA0000;
+    }
+    D_800AA248.cur_obj->vel_y.v = vel;
+    vel += D_800AA248.cur_obj->pos_y.v;
+    if (vel > 0xD90000) {
+        vel = 0xD90000;
+    }
+    D_800AA248.cur_obj->pos_y.v = vel;
+}
+#else
 INCLUDE_ASM("asm/main/nonmatchings/game_8004750C", func_80049D90);
+#endif
 
 INCLUDE_ASM("asm/main/nonmatchings/game_8004750C", func_80049E10);
 

@@ -90,13 +90,17 @@ typedef struct SpriteFrame {
     /* 0x0C */ u8 unk_0C[0x04];
     /* 0x10 */ u16 unk_10;             /* a second point: x (game_8004750C, the throw's origin) */
     /* 0x12 */ u16 unk_12;             /* y */
+    /* 0x14 */ u8 unk_14[0x0C];
+    /* 0x20 */ u16 unk_20;             /* a third point: x (game_8004750C, a spawn origin) */
+    /* 0x22 */ u16 unk_22;             /* y */
 } SpriteFrame;
 
 /* What func_8001D110 hands out to describe an object to create; func_8001DCB4 creates it from
  * GameState.new_def. */
 typedef struct {
     /* 0x00 */ s32 id;                 /* the sprite/animation id */
-    /* 0x04 */ u8 unk_04[0x08];
+    /* 0x04 */ u16 unk_04;             /* flags: 0x10 faces left (game_8004750C) */
+    /* 0x06 */ u8 unk_06[0x06];
     /* 0x0C */ s32 unk_0C;
     /* 0x10 */ Fixed16 pos_x;          /* written whole from an object's position, or its integer half alone */
     /* 0x14 */ Fixed16 pos_y;
