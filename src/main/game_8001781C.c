@@ -151,7 +151,7 @@ extern u16 D_801D876C[];
 void func_80025E68(void);
 void func_8002A72C(void);
 void func_8002AF28(void);
-void func_800377B4(void);
+void func_800377B4(Unk22D58 *);
 void func_8003C894(s32);
 void func_80044D34(void);
 void func_80057DD8(void);
@@ -246,7 +246,7 @@ void func_8002107C(void);
 void func_80022D58(Unk22D58 *arg0);
 void func_80023064(s32 arg0);
 void func_800232AC(s32 arg0);
-void func_800233E0(Unk233E0 *arg0);
+void func_800233E0(Unk22D58 *arg0);
 void func_80023F64(Unk22D58 *arg0);
 void func_800240F0(Unk22D58 *arg0);
 void func_8002423C(Unk22D58 *arg0);
@@ -395,7 +395,7 @@ extern u16 D_801FA734;
 extern Anim D_80093F78;
 extern Anim D_80093FAC;
 u16 func_80023C58(s16 arg0, Unk22D58 *ai);
-s32 func_80023AC0(Sprite *arg0);
+u16 func_80023AC0(Unk22D58 *ai);
 s32 func_80026D54(Monster *);
 s32 func_80026D90(void *);
 s32 func_80027348(void);
@@ -443,7 +443,7 @@ extern Anim D_80097850;
 extern s32 D_801D8864;
 extern s32 D_801F9AC8;
 s32 func_8003EB5C(Anim *, Sprite *);
-void func_800377B4(void);
+void func_800377B4(Unk22D58 *);
 u16 func_80023CB8(void);
 s16 func_8002439C(Unk22D58 *);
 u16 func_8002326C(s16);
@@ -2333,7 +2333,44 @@ INCLUDE_ASM("asm/main/nonmatchings/game_8001781C", func_800221BC);
 
 INCLUDE_ASM("asm/main/nonmatchings/game_8001781C", func_800222E8);
 
+/* 92 %: the result is masked into its own register before the stores and the four stores are scheduled in source order; the C copies the result and moves the counter's store first */
+#ifdef NON_MATCHING
+void func_8002235C(Unk22D58 *ai) {
+    u16 result;
+
+    if (ai->unk_C != 0) {
+        if (ai->unk_6 == 0x11) {
+            func_8003EB5C(&D_80097640, D_800AA268);
+        } else {
+            func_8003EB5C(&D_8008B248, D_800AA268);
+        }
+        result = func_80023AC0(ai);
+        if (result == 1) {
+            ai->unk_2A = result;
+            ai->unk_22 = 0x30;
+            ai->unk_C = 0;
+            ai->unk_A++;
+            if (ai->unk_38 != 2) {
+                if (ai->unk_6 == 0x11) {
+                    func_8003EB5C(&D_80097750, D_800AA268);
+                } else {
+                    func_8003EB5C(&D_8008B358, D_800AA268);
+                }
+            } else {
+                if (ai->unk_6 == 0x11) {
+                    func_8003EB5C(&D_80097850, D_800AA268);
+                } else {
+                    func_8003EB5C(&D_8008B458, D_800AA268);
+                }
+            }
+            return;
+        }
+        D_800AA268->unk_C = 0;
+    }
+}
+#else
 INCLUDE_ASM("asm/main/nonmatchings/game_8001781C", func_8002235C);
+#endif
 
 void func_80022490(Unk22D58 *ai) {
     if (ai->unk_C == 0) {
@@ -2466,7 +2503,7 @@ void func_80022C68(Unk22D58 *ai) {
     s16 kind;
 
     if (ai->unk_10 == NULL) {
-        func_800377B4();
+        func_800377B4(ai);
     }
     func_800232D8(ai);
     kind = func_8002439C(ai);
@@ -2590,9 +2627,40 @@ void func_800232AC(s32 arg0) {
     D_800AA268->unk_C = var_a0;
 }
 
-INCLUDE_ASM("asm/main/nonmatchings/game_8001781C", func_800232D8);
+void func_800232D8(Unk22D58 *ai) {
+    Monster *target;
+    Sprite *sprite;
+    s16 y;
+    u16 x;
 
-void func_800233E0(Unk233E0 *arg0) {
+    target = ai->unk_10;
+    if (target != NULL) {
+        sprite = target->unk_68;
+        if (!(target->unk_58 & 1) || (target->unk_5A == 0x37)) {
+            func_800377B4(ai);
+            target = ai->unk_10;
+            if ((target == NULL) || !(target->unk_58 & 1) || (target->unk_5A == 0x37)) {
+                ai->unk_28 = 0x64;
+                ai->unk_26 = (D_801F9ACA + 0xC8) & D_801D8866;
+                return;
+            }
+            sprite = target->unk_68;
+        }
+        y = sprite->unk_18.u.hi - 0x16;
+        if (y >= 0xE1) {
+            y = 0x64;
+        }
+        ai->unk_28 = y;
+        x = sprite->unk_14.u.hi;
+        if (sprite->unk_22 & 0x10) {
+            ai->unk_26 = x - 1;
+        } else {
+            ai->unk_26 = x + 0x10;
+        }
+    }
+}
+
+void func_800233E0(Unk22D58 *arg0) {
     s16 var_v0;
     Monster *temp_v0;
     Sprite *temp_v1;
@@ -2601,7 +2669,7 @@ void func_800233E0(Unk233E0 *arg0) {
     if (temp_v0 != NULL) {
         temp_v1 = temp_v0->unk_68;
         if (temp_v1 == NULL) {
-            func_800377B4();
+            func_800377B4(arg0);
             return;
         }
         arg0->unk_28 = (s16) (temp_v1->unk_18.u.hi - 0x1E);
@@ -2634,7 +2702,7 @@ u16 func_800239F4(Unk22D58 *ai) {
     if (target != NULL) {
         sprite = target->unk_68;
         if (sprite == NULL) {
-            func_800377B4();
+            func_800377B4(ai);
             return func_800239F4(ai);
         }
         dy = (s16) ((sprite->unk_18.u.hi - 0x58) - D_800AA268->unk_18.u.hi);
@@ -2662,12 +2730,12 @@ INCLUDE_ASM("asm/main/nonmatchings/game_8001781C", func_800239F4);
 
 #ifdef NON_MATCHING
 /* 99.8 %: the negation reads the copy's register in the original (negu v0, v0), the s16 delta's here. */
-s32 func_80023AC0(Sprite *arg0) {
+u16 func_80023AC0(Unk22D58 *ai) {
     s16 delta;
     s32 dist;
     s32 step;
 
-    delta = arg0->unk_28.s.lo - D_800AA268->unk_18.u.hi;
+    delta = ai->unk_28 - D_800AA268->unk_18.u.hi;
     dist = delta;
     if (delta < 0) {
         dist = -dist;
@@ -2729,7 +2797,7 @@ void func_80023CFC(Unk22D58 *ai) {
     if (target != NULL) {
         sprite = target->unk_68;
         if (sprite == NULL) {
-            func_800377B4();
+            func_800377B4(ai);
             return;
         }
         tx = sprite->unk_14.u.hi;

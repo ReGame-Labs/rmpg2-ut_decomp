@@ -420,25 +420,16 @@ typedef struct Unk22D58 {
     s16 unk_22;
     s16 unk_24;
     s16 unk_26;
-    u8 pad_28[0x2];
+    s16 unk_28;
     s16 unk_2A;
     u8 pad_2C[0x4];
     s32 unk_30;
     s32 unk_34;
-    s16 unk_38;
+    u16 unk_38;
     u16 unk_3A;
-    u8 pad_3C[0x4];
-} Unk22D58;
-
-typedef struct Unk233E0 {
-    u8 pad_0[0x10];
-    Monster *unk_10;
-    u8 pad_14[0x12];
-    s16 unk_26;
-    s16 unk_28;
-    u8 pad_2A[0x12];
     u16 unk_3C;
-} Unk233E0;
+    u8 pad_3E[0x2];
+} Unk22D58;
 
 /* A glyph of the font (func_8001B128 maps a packed glyph index to one): its size at unk_4/unk_6. */
 typedef struct Glyph {
