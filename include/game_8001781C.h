@@ -242,7 +242,21 @@ typedef struct Unk1F9AE4 {
     s32 unk_C;
 } Unk1F9AE4;
 
-/* The 13 blocks of 0x584 bytes at 0x801D3DC8: a 0x98-byte head and 15 items of 0x54 bytes. */
+/* The definition a building record is made from (its unk_20): a kind at unk_0 (4: not a building, func_80025124),
+ * its size and the words copied into the record. */
+typedef struct Unk25124Def {
+    Fixed unk_0;
+    u16 unk_4;
+    u8 pad_6[0x2];
+    s32 unk_8;
+    s32 unk_C;
+    s32 unk_10;
+    s32 unk_14;
+    s32 unk_18;
+} Unk25124Def;
+
+/* The 13 records of 0x584 bytes at 0x801D3DC8 (the buildings, and the other objects func_80025124 sets up): a
+ * 0x98-byte head and 15 items of 0x54 bytes (a sprite each). */
 typedef struct Unk1D3DC8Part {
     u8 pad_0[0x14];
     s16 unk_14;
@@ -250,26 +264,72 @@ typedef struct Unk1D3DC8Part {
 } Unk1D3DC8Part;
 
 typedef struct Unk1D3DC8Item {
-    u8 pad_0[0xC];
+    Sprite *unk_0;
+    s16 unk_4;
+    u8 pad_6[0x2];
+    struct Unk1D3DC8 *unk_8;
     Unk1D3DC8Part unk_C;
     Unk1D3DC8Part unk_24;
     Unk1D3DC8Part unk_3C;
 } Unk1D3DC8Item;
 
 typedef struct Unk1D3DC8 {
-    u16 unk_0;
+    u16 unk_0;              /* the item count */
     u16 unk_2;
-    s16 unk_4;
-    u8 pad_6[0x8];
+    s16 unk_4;              /* x */
+    s16 unk_6;
+    u16 unk_8;
+    s16 unk_A;
+    u8 pad_C[0x2];
     s16 unk_E;
-    u8 pad_10[0x4];
+    u8 pad_10[0x2];
+    s16 unk_12;
     u16 unk_14;
-    u8 pad_16[0x20];
+    u8 pad_16[0x2];
+    s32 unk_18;
+    s16 unk_1C;
+    s16 unk_1E;             /* its index + 1 */
+    Unk25124Def *unk_20;
+    u8 pad_24[0x6];
+    s16 unk_2A;
+    u8 pad_2C[0x8];
+    s16 unk_34;
     s16 unk_36;
     u16 unk_38;
-    s16 unk_3A[0x2F];
+    s16 unk_3A[0xF];
+    s16 unk_58;
+    u8 pad_5A[0x2];
+    s32 unk_5C;
+    s32 unk_60;
+    s32 unk_64;
+    s32 unk_68;
+    u8 pad_6C[0x4];
+    Unk1D3DC8Item *unk_70;
+    s16 unk_74;
+    u8 pad_76[0x4];
+    u16 unk_7A;
+    u8 pad_7C[0x4];
+    u16 unk_80;
+    u8 pad_82[0x8];
+    u16 unk_8A;
+    s32 unk_8C;
+    u8 pad_90[0x8];
     Unk1D3DC8Item items[15];
 } Unk1D3DC8;
+
+/* An entry of the building lists func_80025C08 returns (func_80024C2C): the definition, then the placement. */
+typedef struct Unk24C2C {
+    Unk25124Def *unk_0;
+    s32 unk_4;
+    u16 unk_8;
+    u16 unk_A;
+    u16 unk_C;
+    u8 pad_E[0x2];
+    u16 unk_10;
+    u16 unk_12;
+    u16 unk_14;
+    u8 pad_16[0x2];
+} Unk24C2C;
 
 /* The frame's drawing state at D_801FAC80: the draw and display environments, the ordering table at 0x154. */
 typedef struct Unk1FAC80 {
@@ -326,45 +386,6 @@ typedef struct Unk1E2894 {
     s16 unk_6;
 } Unk1E2894;
 
-/* The record func_80025124 sets up from its definition (unk_20): a count at unk_0, a state at unk_58, its sprite
- * and the item that owns it at unk_98 (the same record agent code elsewhere walks from unk_98 on). */
-typedef struct Unk25124Def {
-    u16 unk_0;
-    u8 pad_2[0x6];
-    s32 unk_8;
-    s32 unk_C;
-    s32 unk_10;
-} Unk25124Def;
-
-typedef struct Unk25124Item {
-    Sprite *unk_0;
-    s16 unk_4;
-    u8 pad_6[0x2];
-    struct Unk25124 *unk_8;
-} Unk25124Item;
-
-typedef struct Unk25124 {
-    s16 unk_0;
-    u16 unk_2;
-    u16 unk_4;
-    u16 unk_6;
-    u16 unk_8;
-    s16 unk_A;
-    u8 pad_C[0x6];
-    s16 unk_12;
-    u8 pad_14[0xC];
-    Unk25124Def *unk_20;
-    u8 pad_24[0x34];
-    s16 unk_58;
-    u8 pad_5A[0x2];
-    s32 unk_5C;
-    s32 unk_60;
-    u8 pad_64[0xC];
-    Unk25124Item *unk_70;
-    s16 unk_74;
-    u8 pad_76[0x22];
-    Unk25124Item unk_98;
-} Unk25124;
 
 /* A sprite bank's header (func_8001AD1C loads its images): the counts of 256x256 and 256x128 images. */
 typedef struct Unk1AD1C {

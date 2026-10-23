@@ -377,8 +377,12 @@ extern s16 D_801F9914;
 void func_80026A6C(void);
 Unk1D110 *func_8001D110(void);
 extern Unk1D110 *D_800AA284;
-void func_8002503C(Unk25124 *, Sprite *);
-void func_800252CC(Unk25124 *);
+void func_8002503C(Unk1D3DC8 *, Sprite *);
+void func_800252CC(Unk1D3DC8 *);
+void func_80025124(Unk1D3DC8 *);
+void func_80024E08(Unk1D3DC8 *);
+void func_800258C8(void);
+extern u8 D_80082E94[];
 s32 func_8005F208(void);
 u16 func_80029B80(void);
 extern Unk25124Def D_800135E8;
@@ -3028,35 +3032,95 @@ void func_80024C08(void *arg0) {
     memset(arg0, 0, 0x20);
 }
 
+/* 91 %: the height sum keeps -9 as an addiu on the definition's size before adding the x (the C narrows it to a 0xFFF7 constant hoisted out of the loop), and the definition pointer lands in a0 instead of a1 */
+#ifdef NON_MATCHING
+void func_80024C2C(void) {
+    Unk24C2C *e;
+    Unk1D3DC8 *rec;
+    Unk25124Def *def;
+    s16 n;
+    u16 type;
+    s16 tile;
+
+    func_80024AEC();
+    n = 0;
+    rec = D_801D3DC8;
+    e = func_80025C08(D_80082E94);
+    do {
+        def = e->unk_0;
+        rec->unk_1E = ++n;
+        rec->unk_20 = def;
+        rec->unk_80 = e->unk_C;
+        rec->unk_7A = e->unk_A;
+        rec->unk_18 = e->unk_4;
+        rec->unk_8A = e->unk_8;
+        rec->unk_A = e->unk_14;
+        rec->unk_14 = 0;
+        rec->unk_8 = type = e->unk_12;
+        if (type != 0x200) {
+            tile = 0xC5;
+            if (type == 0x300) {
+                tile = 0xD5;
+            }
+        } else {
+            tile = 0xCD;
+        }
+        rec->unk_6 = tile;
+        rec->unk_4 = e->unk_10;
+        rec->unk_E = e->unk_10 + (s16) (def->unk_4 - 9);
+        if (def->unk_0.full != 4) {
+            rec->unk_5C = def->unk_8;
+            rec->unk_60 = def->unk_C;
+            rec->unk_64 = def->unk_10;
+            rec->unk_68 = def->unk_14;
+            rec->unk_8C = def->unk_18;
+            rec->unk_2 = def->unk_0.u.lo;
+            rec->unk_1C = func_8001EB10(0x1E, 0) % 2 + 1;
+            rec->unk_34 = 1;
+            rec->unk_36 = 1;
+            rec->unk_2A = 1;
+            func_80024E08(rec);
+        } else {
+            func_80025124(rec);
+        }
+        rec++;
+        e++;
+    } while (e->unk_0 != NULL);
+    D_801E29A4 = n;
+    D_801E1E40 = n;
+    func_800258C8();
+}
+#else
 INCLUDE_ASM("asm/main/nonmatchings/game_8001781C", func_80024C2C);
+#endif
 
 INCLUDE_ASM("asm/main/nonmatchings/game_8001781C", func_80024E08);
 
 INCLUDE_ASM("asm/main/nonmatchings/game_8001781C", func_8002503C);
 
-void func_80025124(Unk25124 *rec) {
+void func_80025124(Unk1D3DC8 *rec) {
     Unk25124Def *def;
     Unk1D110 *request;
     Sprite *sprite;
-    Unk25124Item *item;
+    Unk1D3DC8Item *item;
     u16 kind;
 
     def = rec->unk_20;
     rec->unk_58 = 1;
     rec->unk_5C = def->unk_C;
     rec->unk_60 = def->unk_10;
-    rec->unk_2 = def->unk_0;
+    rec->unk_2 = def->unk_0.u.lo;
     request = func_8001D110();
     request->unk_C = 0x728;
     request->unk_14.u.hi = rec->unk_6;
     request->unk_10.u.hi = rec->unk_4;
     kind = rec->unk_8;
-    item = &rec->unk_98;
+    item = &rec->items[0];
     if (def->unk_8 != 0) {
         request->unk_0 = def->unk_8;
         D_800AA284 = request;
         sprite = func_8001DCB4();
-        rec->unk_98.unk_0 = sprite;
+        rec->items[0].unk_0 = sprite;
         sprite->unk_90 = item;
         sprite->unk_80 = kind;
         item->unk_8 = rec;
