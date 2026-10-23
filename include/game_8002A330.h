@@ -346,7 +346,8 @@ struct UnkStruct1 {  /* provisional: fields as the code reaches them */
     s16 unk_140;
     u16 unk_142;
     s16 unk_144;
-    u8 pad_146[0x40];
+    s16 unk_146;
+    u8 pad_148[0x3E];
     u16 unk_186;
     u8 pad_188[0x2];
     s16 unk_18A;

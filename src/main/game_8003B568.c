@@ -212,7 +212,23 @@ void func_8003C0C8(void) {
 void func_8003C0E0(void) {
 }
 
-INCLUDE_ASM("asm/main/nonmatchings/game_8003B568", func_8003C0E8);
+void func_8003C0E8(void) {
+    s32 i;
+
+    i = func_8001EB10(0x1F, 0);
+    D_8007DDB4[i & 7]();
+}
+
+
+
+
+
+
+
+
+
+
+
 
 void func_8003C130(void) {
     UnkStructB2 *p = D_801D3824;
@@ -451,7 +467,52 @@ void func_8003CB68(s16 n, UnkStruct1 *a) {
 
 
 
-INCLUDE_ASM("asm/main/nonmatchings/game_8003B568", func_8003CBE0);
+s32 func_8003CBE0(UnkStructB1 *rec, UnkStruct1 *a) {
+    s32 kind;
+
+    if (a == NULL) {
+        goto fail;
+    }
+    switch (a->unk_00) {
+    case 1:
+        kind = 4;
+        break;
+    case 2:
+        kind = 5;
+        break;
+    case 3:
+        kind = 6;
+        break;
+    case 4:
+        kind = 1;
+        break;
+    case 5:
+        kind = 2;
+        break;
+    case 6:
+        kind = 3;
+        break;
+    case 7:
+        kind = 7;
+        break;
+    default:
+        goto fail;
+    }
+    if (kind != rec->unk_06) {
+fail:
+        return 0;
+    }
+    rec->unk_1A = 0xB;
+    a->unk_146 = 0x5A;
+    a->unk_56 = 7;
+    return 1;
+}
+
+
+
+
+
+
 
 u16 func_8003CC84(UnkStructB3 *p, s32 hit) {
     if (hit == 0) {
