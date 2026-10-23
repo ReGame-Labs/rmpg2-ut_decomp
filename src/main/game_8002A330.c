@@ -132,7 +132,19 @@ UnkStruct7 *func_8002BA30(s32 arg0) {
     return temp_a1;
 }
 
-INCLUDE_ASM("asm/main/nonmatchings/game_8002A330", func_8002BA70);
+void func_8002BA70(s32 n) {
+    UnkStruct7 *m;
+    UnkStruct4 *saved;
+
+    m = &D_801E0B78[(u16) n];
+    saved = D_800AA248.unk_20;
+    func_8002BE30(m);
+    m->unk_00 = n;
+    m->unk_128 = n;
+    func_8002BAEC(m);
+    D_800AA248.unk_20 = saved;
+}
+
 
 INCLUDE_ASM("asm/main/nonmatchings/game_8002A330", func_8002BAEC);
 
@@ -813,7 +825,27 @@ void func_8002DFA8(s32 arg0, UnkStruct1 *arg1) {
     D_800AA248.unk_20 = temp_s2;
 }
 
-INCLUDE_ASM("asm/main/nonmatchings/game_8002A330", func_8002E0C8);
+void func_8002E0C8(s32 n, UnkStruct1 *a) {
+    UnkStruct2 *end;
+    UnkStruct2 *p;
+
+    end = a->unk_70;
+    func_8002F5B0(n, a);
+    func_8003D60C(a);
+    p = a->unk_98;
+    func_8002FAA4(n, p);
+    do {
+        p++;
+        func_80030E04(0, p);
+    } while (end != p);
+    a->unk_16 = a->unk_00;
+}
+
+
+
+
+
+
 
 void func_8002E148(s32 arg0, UnkStruct1 *a) {
     UnkStruct4 *saved = D_800AA268.obj;
@@ -972,7 +1004,26 @@ void func_8002ECA0(UnkStruct1 *arg0) {
 void func_8002ED28(void) {
 }
 
-INCLUDE_ASM("asm/main/nonmatchings/game_8002A330", func_8002ED30);
+UnkStruct2 *func_8002ED30(u16 which, void *arg1) {
+    UnkStruct5 *rec = arg1;
+    UnkStruct12 *slot;
+
+    slot = NULL;
+    switch (which) {
+    case 1:
+        slot = &rec->unk_0C;
+        break;
+    case 2:
+        slot = &rec->unk_24;
+        break;
+    case 3:
+        slot = &rec->unk_3C;
+        break;
+    }
+    return (UnkStruct2 *) slot;
+}
+
+
 
 void func_8002ED90(UnkStruct1 *arg0) {
     u16 var_s1;
@@ -1313,7 +1364,32 @@ s32 func_80030268(s16 arg0, s32 arg1, UnkStruct8 *arg2) {
     return 0;
 }
 
-INCLUDE_ASM("asm/main/nonmatchings/game_8002A330", func_800302AC);
+void func_800302AC(u16 kind, UnkStruct7 *m) {
+    s16 action;
+    s32 push;
+
+    switch (kind) {
+    case 1:
+        action = 0x46;
+        push = 0x60000;
+        break;
+    case 2:
+        action = 0x49;
+        push = 0x30000;
+        break;
+    case 3:
+        action = 0x47;
+        push = 0x50000;
+        break;
+    default:
+        return;
+    }
+    m->unk_5A = action;
+    m->unk_5C = 0;
+    func_80053C50(push, m);
+    m->unk_13C = 0x4B;
+}
+
 
 INCLUDE_ASM("asm/main/nonmatchings/game_8002A330", func_80030338);
 
@@ -1587,7 +1663,21 @@ s32 func_80030CD4(UnkStruct17 *part) {
 
 
 
-INCLUDE_ASM("asm/main/nonmatchings/game_8002A330", func_80030D14);
+void func_80030D14(UnkStruct19 *p) {
+    UnkStruct4 *saved;
+    UnkStruct4 *obj;
+
+    saved = D_800AA248.unk_20;
+    if (p != NULL) {
+        obj = p->unk_00;
+        D_800AA248.unk_20 = obj;
+        func_8001E698(obj, p->unk_04);
+        func_8001F724(0x42);
+    }
+    D_800AA248.unk_20 = saved;
+}
+
+
 
 #ifdef NON_MATCHING
 /* 83.8 %: the loop's pointer register is &p->unk_98 in the original (negative offsets for unk_70 and unk_14),
@@ -1718,7 +1808,29 @@ INCLUDE_ASM("asm/main/nonmatchings/game_8002A330", func_8003149C);
 
 INCLUDE_ASM("asm/main/nonmatchings/game_8002A330", func_800315D8);
 
+/* 83 %: the level's two lists; the original loads r->unk_04 after the two stores to D_801D37BC/D_801D37C0 (so they may alias it: likely fields of one struct, not scalars) and sets up D_801E1E34 before the call's argument */
+#ifdef NON_MATCHING
+void func_80031690(void) {
+    s32 *lists;
+    UnkStruct18 *r;
+
+    lists = D_801E1E34;
+    r = (UnkStruct18 *) func_80025C08(&D_80084028[0]);
+    D_801D37BC = r->unk_00;
+    D_801D37C0 = r->unk_02;
+    D_801D857C = r->unk_04;
+    if (D_801D857C != 0) {
+        func_8003197C(r->unk_0C, D_801D857C, &lists[0]);
+        func_8003197C(r->unk_18, r->unk_08, &lists[1]);
+    }
+}
+#else
 INCLUDE_ASM("asm/main/nonmatchings/game_8002A330", func_80031690);
+#endif
+
+
+
+
 
 INCLUDE_ASM("asm/main/nonmatchings/game_8002A330", func_80031714);
 

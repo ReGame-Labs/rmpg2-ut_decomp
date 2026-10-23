@@ -440,7 +440,7 @@ typedef struct UnkStruct9 {  /* provisional: the second argument of the func_800
 } UnkStruct9;
 
 typedef struct UnkStruct7 {  /* provisional: the 0x220-byte records at D_801E0B78 */
-    u8 pad_00[0x2];
+    s16 unk_00;     /* its own index */
     s16 unk_02;
     s16 unk_04;
     u8 pad_06[0x2];
@@ -453,10 +453,15 @@ typedef struct UnkStruct7 {  /* provisional: the 0x220-byte records at D_801E0B7
     u16 unk_32;
     u8 pad_34[0x24];
     u16 unk_58;
-    s16 unk_5A;
-    u8 pad_5C[0x3C];
+    s16 unk_5A;     /* the action */
+    s16 unk_5C;
+    u8 pad_5E[0x3A];
     UnkStruct4 *unk_98;
-    u8 pad_9C[0x114];
+    u8 pad_9C[0x8C];
+    s16 unk_128;
+    u8 pad_12A[0x12];
+    s16 unk_13C;
+    u8 pad_13E[0x72];
     u16 unk_1B0;
     u16 unk_1B2;
     u16 unk_1B4;
@@ -883,4 +888,23 @@ typedef struct UnkStruct17 {  /* provisional: a building's part (what a building
     s16 unk_1C;
     s16 unk_1E;     /* top y */
 } UnkStruct17;
+typedef struct UnkStruct18 {  /* provisional: what func_80025C08(D_80084028) returns (two counts and two lists) */
+    u16 unk_00;
+    u16 unk_02;
+    s32 unk_04;
+    s32 unk_08;
+    u8 unk_0C[0xC];
+    u8 unk_18[0xC];
+} UnkStruct18;
+
+typedef struct UnkStruct19 {  /* provisional: an object and the animation to start on it (func_80030D14) */
+    UnkStruct4 *unk_00;
+    void *unk_04;
+} UnkStruct19;
+
+extern u8 D_80084028[];
+extern s32 D_801E1E34[2];
+void func_8003197C(void *, s32, s32 *);
+void func_80053C50(s32, UnkStruct7 *);
+void func_8002BAEC(UnkStruct7 *);
 #endif /* GAME_8002A330_H */
