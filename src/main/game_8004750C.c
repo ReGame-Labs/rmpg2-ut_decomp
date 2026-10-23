@@ -42,6 +42,20 @@ extern s32 D_80091820[];
 void func_80049D90(Throw *t);
 void func_8004A90C(Monster *m);
 u16 func_80053AC4(s16 x, s16 y, s32 a, s32 b, Monster *m);
+/* The handlers of the thrown objects, one per throw kind (func_8004AD18 dispatches on Throw.unk_08). */
+void func_800490D4(Throw *t);
+void func_80049304(Throw *t);
+void func_800494B4(Throw *t);
+void func_80049650(Throw *t);
+void func_80049850(Throw *t);
+void func_800499F4(Throw *t);
+void func_80049B9C(Throw *t);
+void func_80049E10(Throw *t);
+void func_8004A044(Throw *t);
+void func_8004A1F8(Throw *t);
+void func_8004A698(Throw *t);
+void func_8003A744(Throw *t);
+void func_8003956C(Throw *t);
 extern s32 D_8008C804;
 extern u16 D_801D8850;
 
@@ -1683,7 +1697,53 @@ void func_8004AC84(void) {
     D_800AA248.cur_obj = saved;
 }
 
-INCLUDE_ASM("asm/main/nonmatchings/game_8004750C", func_8004AD18);
+void func_8004AD18(Throw *t) {
+    switch (t->unk_08) {
+    case 1:
+    case 9:
+    case 18:
+        func_80049E10(t);
+        break;
+    case 11:
+        func_80049304(t);
+        break;
+    case 12:
+        func_80049850(t);
+        break;
+    case 19:
+        func_80049650(t);
+        break;
+    case 2:
+    case 8:
+        func_800490D4(t);
+        break;
+    case 3:
+        func_800499F4(t);
+        break;
+    case 4:
+        func_80049B9C(t);
+        break;
+    case 5:
+        func_8004A698(t);
+        break;
+    case 6:
+        func_8004A1F8(t);
+        break;
+    case 21:
+    case 22:
+        func_8003A744(t);
+        break;
+    case 17:
+        func_8004A044(t);
+        break;
+    case 23:
+        func_800494B4(t);
+        break;
+    case 7:
+        func_8003956C(t);
+        break;
+    }
+}
 
 void func_8004AE2C(void) {
     void *other = D_800AA248.cur_obj->unk_94.p;
