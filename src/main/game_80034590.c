@@ -189,6 +189,9 @@ extern s32 D_801E1E14;
 extern u8 D_800956C4[];
 extern u8 D_801FA8A0[];
 extern s32 D_801D3D98[];
+extern EffectDef *D_8007D448[];
+extern u8 D_8008A59C[];
+extern u8 D_8008A620[];
 
 void func_80034590(Npc *npc) {
     npc->unk_8 = 2;
@@ -427,7 +430,74 @@ void func_80034DAC(Npc *npc) {
     }
 }
 
+/* 86.73%: the three spawned movers are right; the prologue's setup order, the loop counters' increments (placed before the mask load here, after the store in the original) and the register of the 0x17 constant at the end differ */
+#ifdef NON_MATCHING
+void func_80034E48(Npc *npc) {
+    Mover *mover;
+    Mover **slot;
+    Mover *spawned;
+    Effect *effect;
+    EffectDef *def;
+    s32 kind;
+    s32 i;
+    s32 n;
+    s32 step;
+    s32 offset;
+
+    i = 0;
+    n = 1;
+    mover = D_800AA248.unk_20;
+    slot = D_801FB44C;
+    do {
+        kind = 4;
+        if (npc->unk_6 != 0x17) {
+            kind = func_8001EA78() & 3;
+        }
+        def = D_8007D448[kind];
+        effect = func_8001D110();
+        D_800AA248.unk_3C = effect;
+        effect->unk_28 = def;
+        effect->unk_0 = def->unk_0;
+        effect->unk_20 = (u16)mover->unk_80;
+        spawned = func_8001DCB4();
+        *slot = spawned;
+        spawned->unk_22 = mover->unk_22;
+        spawned->unk_70 = 0x71A;
+        *(s32 *)&spawned->unk_68 = (i << 16) | kind;
+        step = 0x68;
+        if (npc->unk_6 == 0x17) {
+            step = 0x64;
+        }
+        if (mover->unk_22 & 0x10) {
+            offset = n * step;
+        } else {
+            offset = n * -step;
+        }
+        ((s16 *)&spawned->unk_14)[1] = (((u16 *)&mover->unk_14)[1] + offset) & (D_801D8864[0] >> 16);
+        ((u16 *)&spawned->unk_18)[1] = ((u16 *)&mover->unk_18)[1];
+        n++;
+        i++;
+        slot++;
+    } while (i < 3);
+    D_800AA268 = mover;
+    if (npc->unk_6 == 0x17) {
+        mover->unk_C = 0x50000;
+    } else {
+        mover->unk_C = 0x20000;
+    }
+    if (D_800AA248.unk_20->unk_22 & 0x10) {
+        D_800AA248.unk_20->unk_C = -D_800AA248.unk_20->unk_C;
+    }
+    if (npc->unk_6 == 0x17) {
+        func_8003EB5C(D_8008A59C, D_800AA248.unk_20);
+    } else {
+        func_8003EB5C(D_8008A620, D_800AA248.unk_20);
+    }
+    npc->unk_8 = 2;
+}
+#else
 INCLUDE_ASM("asm/main/nonmatchings/game_80034590", func_80034E48);
+#endif
 
 void func_80035040(void) {
     s32 i;

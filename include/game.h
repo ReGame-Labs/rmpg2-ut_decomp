@@ -38,7 +38,9 @@ typedef struct Mover {
     /* 0x68 */ u16 unk_68;      /* an animation index (game_80034590: func_80034C54) */
     /* 0x6A */ u16 unk_6A;      /* game_80034590: func_80034CB8 */
     /* 0x6C */ u16 unk_6C;      /* flags; 0x80 */
-    /* 0x6E */ u8 unk_6E[0x12];
+    /* 0x6E */ u8 unk_6E[0x2];
+    /* 0x70 */ u16 unk_70;      /* an id (game_80034590: func_80034E48) */
+    /* 0x72 */ u8 unk_72[0xE];
     /* 0x80 */ s16 unk_80;
     /* 0x82 */ u8 unk_82[0x2];
     /* 0x84 */ s32 unk_84;
