@@ -8,7 +8,7 @@
 
 typedef struct UnkStructB1 {  /* provisional: a 0x58-byte record of the table at D_801FA9BC */
     UnkStruct4 *unk_00;
-    u8 pad_04[0x2];
+    s16 unk_04;
     u16 unk_06;
     u16 unk_08;
     s16 unk_0A;
@@ -82,6 +82,14 @@ void func_8003C894(void **arg0);
 void func_8003C8D4(UnkStructB1 *arg0);
 void func_8003C934(UnkStructB1 *);
 void func_8003C9E8(UnkStructB1 *arg0);
+typedef struct UnkStructB4 {  /* provisional: 8-byte records of D_8007DDD4 (an animation and a value per step) */
+    void *unk_00;
+    u16 unk_04;
+} UnkStructB4;
+extern UnkStructB4 D_8007DDD4[];
+void func_80054374(u16, UnkStruct1 *);
+extern s16 D_801F9ACA;
+s32 func_8003B9C8(UnkStruct4 *, UnkStruct7 *);
 void func_8003CA28(UnkStructB1 *arg0);
 void func_8003CA70(UnkStructB1 *);
 void func_8003CADC(UnkStruct1 *arg0);

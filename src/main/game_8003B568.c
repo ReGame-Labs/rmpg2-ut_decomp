@@ -45,7 +45,63 @@ void func_8003B9A0(UnkStructB1 *p) {
     D_801E29B0 = 0;
 }
 
+/* 83 %: an object's hit box against a monster's; the original computes -w + x with negu in place (here x - w), loads the object's y and flags before the box, and loads the monster's four edges in another order */
+#ifdef NON_MATCHING
+s32 func_8003B9C8(UnkStruct4 *obj, UnkStruct7 *m) {
+    UnkStruct16 *box;
+    s16 x;
+    u16 y;
+    s32 flip;
+    u16 w;
+    s16 a;
+    s16 left;
+    s16 right;
+    s16 top;
+    s16 bottom;
+    s16 m_right;
+    s16 m_left;
+    s16 m_top;
+    s16 m_bottom;
+
+    x = (s16) obj->unk_16;
+    box = obj->unk_34;
+    if (x < D_801F9ACA) {
+        x += (D_801D8864 + 1) >> 16;
+    }
+    y = obj->unk_18.h.hi;
+    flip = obj->unk_22 & 0x10;
+    a = box->unk_10 + x;
+    if (flip) {
+        a = (u16) -box->unk_10 + x;
+    }
+    left = a;
+    w = box->unk_14;
+    top = box->unk_12 + y;
+    if (flip) {
+        w = -w;
+    }
+    right = w + x;
+    bottom = box->unk_16 + y;
+    if (flip) {
+        left = right;
+        right = a;
+    }
+    m_bottom = m->unk_11E;
+    m_right = m->unk_11C;
+    m_left = m->unk_118;
+    m_top = m->unk_11A;
+    if (left < m_right && m_left < right && top < m_bottom && m_top < bottom) {
+        return 1;
+    }
+    return 0;
+}
+#else
 INCLUDE_ASM("asm/main/nonmatchings/game_8003B568", func_8003B9C8);
+#endif
+
+
+
+
 
 INCLUDE_ASM("asm/main/nonmatchings/game_8003B568", func_8003BAB0);
 
@@ -274,7 +330,30 @@ block_4:
     func_8003CCC0(arg0);
 }
 
-INCLUDE_ASM("asm/main/nonmatchings/game_8003B568", func_8003C934);
+void func_8003C934(UnkStructB1 *rec) {
+    UnkStruct4 *saved;
+    UnkStructB4 *step;
+    u16 k;
+
+    saved = D_800AA248.unk_20;
+    rec->unk_04 = 8;
+    D_800AA248.unk_20 = rec->unk_00;
+    func_8003C9E8(rec);
+    step = D_8007DDD4;
+    k = rec->unk_1A;
+    if (k >= 14) {
+        k = 2;
+    }
+    if (k != 0) {
+        step += k;
+        if (rec->unk_14 != NULL) {
+            func_80054374(step->unk_04, rec->unk_14);
+        }
+        func_8001E698(D_800AA248.unk_20, step->unk_00);
+    }
+    D_800AA268.obj = saved;
+}
+
 
 void func_8003C9E8(UnkStructB1 *arg0) {
     if (arg0->unk_1A == 0xA) {

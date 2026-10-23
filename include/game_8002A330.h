@@ -458,7 +458,12 @@ typedef struct UnkStruct7 {  /* provisional: the 0x220-byte records at D_801E0B7
     s16 unk_5C;
     u8 pad_5E[0x3A];
     UnkStruct4 *unk_98;
-    u8 pad_9C[0x8C];
+    u8 pad_9C[0x7C];
+    u16 unk_118;    /* its hit box: left, top, right, bottom */
+    u16 unk_11A;
+    s16 unk_11C;
+    u16 unk_11E;
+    u8 pad_120[0x8];
     s16 unk_128;
     u8 pad_12A[0x12];
     s16 unk_13C;
@@ -873,7 +878,8 @@ typedef struct UnkStruct16 {  /* provisional: what an object's unk_34 points to 
     u8 pad_00[0x10];
     u16 unk_10;
     u16 unk_12;
-    u8 pad_14[0x4];
+    u16 unk_14;
+    u16 unk_16;
     u16 unk_18;
     u16 unk_1A;
     u8 pad_1C[0x4];
