@@ -196,7 +196,8 @@ typedef struct Monster {
     u16 unk_1B0;
     u8 pad_1B2[0xC];
     u16 unk_1BE;
-    u8 pad_1C0[0x1E];
+    s32 unk_1C0;
+    u8 pad_1C4[0x1A];
     u16 unk_1DE;
     u16 unk_1E0;
     u8 pad_1E2[0x2];
@@ -208,7 +209,9 @@ typedef struct Monster {
 
 /* The block at 0x801D3D64. */
 typedef struct Unk801D3D64 {
-    u8 pad_0[0x1A];
+    u8 pad_0[0x8];
+    s16 unk_8;              /* = D_801D3D6C */
+    u8 pad_A[0x10];
     u16 unk_1A;
     u16 unk_1C;
     u8 pad_1E[0x6];

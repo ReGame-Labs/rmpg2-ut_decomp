@@ -4,6 +4,7 @@
 #include "game_8001781C.h"
 
 /* decls:begin */
+extern s32 D_801D3DA8[];
 void func_80063084(s32, s32);
 extern s32 D_8007B100[];
 extern u8 D_801F998C[];
@@ -606,7 +607,18 @@ void func_80017AC8(void) {
     func_8001E980();
 }
 
-INCLUDE_ASM("asm/main/nonmatchings/game_8001781C", func_80017B24);
+void func_80017B24(void) {
+    Sprite *saved;
+
+    D_801D8708 = 0;
+    D_801F9AD0 = 0;
+    D_800AA2D4 = 0;
+    D_801D3D64.unk_8 = 0;
+    saved = D_800AA248.unk_20;
+    func_80017B90();
+    func_8001E980();
+    D_800AA248.unk_20 = saved;
+}
 
 void func_80017B88(void) {
 }
@@ -1713,7 +1725,21 @@ u16 func_8001D844(void) {
     return 0;
 }
 
-INCLUDE_ASM("asm/main/nonmatchings/game_8001781C", func_8001D878);
+s32 func_8001D878(void) {
+    s32 result;
+    s32 k;
+    s32 i;
+
+    result = 0;
+    for (k = 0; k < 3; k++) {
+        for (i = 0; i < 7; i++) {
+            if ((u8) D_801FA8A0[i] == k + 1) {
+                result |= D_801E0D7C & (0x3FF << (k * 10));
+            }
+        }
+    }
+    return result;
+}
 
 void func_8001D8E8(void) {
     s32 temp_s0;
@@ -3745,7 +3771,21 @@ INCLUDE_ASM("asm/main/nonmatchings/game_8001781C", func_80025C08);
 
 INCLUDE_ASM("asm/main/nonmatchings/game_8001781C", func_80025C54);
 
-INCLUDE_ASM("asm/main/nonmatchings/game_8001781C", func_80025DF8);
+s32 func_80025DF8(s32 id) {
+    s32 i;
+
+    for (i = 0; i < 7; i++) {
+        if ((u8) D_801FA8A0[i] == id) {
+            return i + 1;
+        }
+    }
+    for (i = 0; i < 7; i++) {
+        if ((u8) D_801FA8A0[i] == 0) {
+            return i + 1;
+        }
+    }
+    return 1;
+}
 
 INCLUDE_ASM("asm/main/nonmatchings/game_8001781C", func_80025E68);
 
@@ -4179,7 +4219,21 @@ void func_80027AB0(void) {
     }
 }
 
+/* 64 %: the original keeps the slot table's address (index - 1, not folded into the load's offset) and computes slot * 4 - 4 once for both tables; the C folds the -1 into the load and scales slot - 1 */
+#ifdef NON_MATCHING
+void func_80027B20(s32 player, Monster *monster) {
+    s32 slot;
+
+    slot = (u8) D_801FA8A0[(player & 0xFFFF) - 1];
+    if (slot != 0) {
+        D_801D3D9C[slot - 1] = 0x12C0000;
+        D_801D3DA8[slot - 1] = 0;
+        monster->unk_1C0 = 0;
+    }
+}
+#else
 INCLUDE_ASM("asm/main/nonmatchings/game_8001781C", func_80027B20);
+#endif
 
 INCLUDE_ASM("asm/main/nonmatchings/game_8001781C", func_80027B78);
 
@@ -4297,7 +4351,18 @@ void func_80029118(s16 arg0, u16 arg1) {
     }
 }
 
-INCLUDE_ASM("asm/main/nonmatchings/game_8001781C", func_80029170);
+void func_80029170(void) {
+    if (D_801D3D64.unk_5C != 0) {
+        if (D_801D3D64.unk_5C & 1) {
+            D_801F9ACC -= D_801D3D64.unk_5E << 16;
+        } else {
+            D_801F9ACC += D_801D3D64.unk_5E << 16;
+        }
+        D_801D3D64.unk_5C--;
+        return;
+    }
+    D_801D3D64.unk_5E = 0;
+}
 
 INCLUDE_ASM("asm/main/nonmatchings/game_8001781C", func_800291DC);
 
