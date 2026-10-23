@@ -7,6 +7,14 @@
 /* The records of game_80034590: 0x78 bytes each, six at D_801FAC9C (D_801D8730 counts them), each with a mover
  * (unk_0), a kind (unk_6), an action (unk_8) and a state (unk_A), updated by a dispatcher per kind on the action.
  * The later functions of the file read the same record with signed counters (NpcS below): a second declaration. */
+/* What an Npc's unk_14 points at: two velocities set when it is hit (game_8003CD08: func_8003D30C). */
+typedef struct NpcTarget {
+    /* 0x00 */ u8 unk_0[0x8];
+    /* 0x08 */ s32 unk_8;
+    /* 0x0C */ u8 unk_C[0x4];
+    /* 0x10 */ s32 unk_10;
+} NpcTarget;
+
 typedef struct Npc {
     /* 0x00 */ Mover *unk_0;
     /* 0x04 */ u16 unk_4;
@@ -14,7 +22,10 @@ typedef struct Npc {
     /* 0x08 */ u16 unk_8;       /* the action */
     /* 0x0A */ u16 unk_A;
     /* 0x0C */ u16 unk_C;       /* 1 while the action is new */
-    /* 0x0E */ u8 unk_E[0xC];
+    /* 0x0E */ u16 unk_E;       /* game_8003CD08: func_8003D30C */
+    /* 0x10 */ u8 unk_10[0x4];
+    /* 0x14 */ struct NpcTarget *unk_14;  /* game_8003CD08: func_8003D30C */
+    /* 0x18 */ s16 unk_18;      /* game_8003CD08: func_8003D228 */
     /* 0x1A */ u16 unk_1A;
     /* 0x1C */ u16 unk_1C;      /* a countdown */
     /* 0x1E */ s16 unk_1E;
@@ -99,7 +110,9 @@ typedef struct EffectDef {
 
 typedef struct Effect {
     /* 0x00 */ s32 unk_0;
-    /* 0x04 */ u8 unk_4[0xE];
+    /* 0x04 */ u8 unk_4[0x8];
+    /* 0x0C */ s32 unk_C;       /* game_8003CD08: func_8003ED4C */
+    /* 0x10 */ u8 unk_10[0x2];
     /* 0x12 */ s16 unk_12;
     /* 0x14 */ u8 unk_14[0x2];
     /* 0x16 */ s16 unk_16;
