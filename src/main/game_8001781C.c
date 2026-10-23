@@ -137,7 +137,9 @@ void func_8001DF98(void);
 void func_8001E0AC(void);
 void func_8001E450(s32);
 void func_8001E4B0(Sprite *);
-void func_8001E664(void *, s32);
+void func_8001E664(Fixed *, s32, Fixed *, s32 *);
+s32 func_8001B660(s32);
+extern s16 D_800AA2C0;
 void func_8001E700(Sprite *);
 void func_8001E7C8(Sprite *);
 s16 func_8001EA10(void);
@@ -231,7 +233,7 @@ s32 func_8001D950(void);
 s32 func_8001D974(void);
 s32 func_8001E2B8(Sprite *arg0);
 void func_8001E528(Sprite *arg0);
-void func_8001E638(Unk1E638 *arg0, s32 arg1, s32 *arg2);
+void func_8001E638(Unk1E638 *arg0, s32 arg1, Fixed *arg2, s32 *arg3);
 void func_8001E698(Sprite *arg0, s32 arg1);
 void func_8001E6CC(Sprite *arg0);
 void func_8001E758(void);
@@ -1191,7 +1193,12 @@ loop_1:
     goto loop_1;
 }
 
-INCLUDE_ASM("asm/main/nonmatchings/game_8001781C", func_8001B660);
+s32 func_8001B660(s32 id) {
+    if (id < 0) {
+        return id;
+    }
+    return D_801FA7EC[(u32) id >> 28].unk_0 + (((u32) id << 4) >> 4);
+}
 
 #ifdef NON_MATCHING
 /* 95.7 %: the two registers of the first sum are swapped and the monster table's base address is formed before the first call instead of after it. */
@@ -1587,7 +1594,13 @@ void func_8001D15C(void *dst, void *src, s32 size) {
 void func_8001D17C(void) {
 }
 
-INCLUDE_ASM("asm/main/nonmatchings/game_8001781C", func_8001D184);
+void func_8001D184(void) {
+    Sprite *saved;
+
+    saved = D_800AA248.unk_20;
+    func_8001D0C0();
+    D_800AA248.unk_20 = saved;
+}
 
 void func_8001D1C0(void) {
 }
@@ -1682,7 +1695,14 @@ void func_8001D7D0(void) {
     } while (i >= 0);
 }
 
-INCLUDE_ASM("asm/main/nonmatchings/game_8001781C", func_8001D844);
+u16 func_8001D844(void) {
+    if (D_801E0D7C != 0) {
+        D_800AA2C0 = 1;
+        return 1;
+    }
+    D_800AA2C0 = 0;
+    return 0;
+}
 
 INCLUDE_ASM("asm/main/nonmatchings/game_8001781C", func_8001D878);
 
@@ -1879,12 +1899,25 @@ s32 func_8001E59C(Sprite *sprite, s32 image) {
     return 0;
 }
 
-void func_8001E638(Unk1E638 *arg0, s32 arg1, s32 *arg2) {
-    *arg2 = arg0->unk_8;
-    func_8001E664(&arg0->unk_4, arg1 & 0xFFFF);
+void func_8001E638(Unk1E638 *arg0, s32 arg1, Fixed *arg2, s32 *arg3) {
+    arg2->full = arg0->unk_8;
+    func_8001E664(&arg0->unk_4, arg1 & 0xFFFF, arg2, arg3);
 }
 
-INCLUDE_ASM("asm/main/nonmatchings/game_8001781C", func_8001E664);
+void func_8001E664(Fixed *width, s32 flags, Fixed *pos, s32 *y) {
+    s32 x;
+    s32 hi;
+    s32 w;
+
+    x = pos->u.lo << 16;
+    hi = pos->u.hi << 16;
+    w = (width->u.lo - 1) << 16;
+    if (flags & 0x10) {
+        x = w - x;
+    }
+    *y = hi;
+    pos->full = x;
+}
 
 void func_8001E698(Sprite *arg0, s32 arg1) {
     arg0->unk_44 = arg1;
@@ -1949,7 +1982,14 @@ void func_8001E7C8(Sprite *arg0) {
     p->unk_40 = arg0->unk_40;
 }
 
-INCLUDE_ASM("asm/main/nonmatchings/game_8001781C", func_8001E878);
+void func_8001E878(void) {
+    D_800AA248.unk_0 = *D_800AA248.unk_20->unk_5C++;
+    if (D_800AA248.unk_0 == 0) {
+        D_800AA248.unk_7A = 1;
+    } else {
+        D_800AA248.unk_7A = 0;
+    }
+}
 
 INCLUDE_ASM("asm/main/nonmatchings/game_8001781C", func_8001E8C0);
 
@@ -3012,7 +3052,13 @@ u16 func_80023C58(s16 arg0, Unk22D58 *ai) {
 INCLUDE_ASM("asm/main/nonmatchings/game_8001781C", func_80023C58);
 #endif
 
-INCLUDE_ASM("asm/main/nonmatchings/game_8001781C", func_80023CB8);
+u16 func_80023CB8(void) {
+    if (D_800AA268->unk_18.full - D_801F9ACC <= 0x2FFFFF) {
+        return 1;
+    }
+    D_800AA268->unk_10 = 0xFFFE8000;
+    return 0;
+}
 
 void func_80023CFC(Unk22D58 *ai) {
     Monster *target;
@@ -4099,7 +4145,17 @@ void func_80028140(s32 arg0, Monster *arg1, s32 arg2) {
     arg1->unk_CE = 0;
 }
 
+/* 78 %: the four stores come out in another order (the original stores the first word between the two halfwords); source order and other orders tried */
+#ifdef NON_MATCHING
+void func_80028160(void) {
+    D_801D3D64.unk_26 = 0;
+    D_801F9A30 = 0;
+    D_801D3D64.unk_28 = 0;
+    D_801F9ACC = 0;
+}
+#else
 INCLUDE_ASM("asm/main/nonmatchings/game_8001781C", func_80028160);
+#endif
 
 INCLUDE_ASM("asm/main/nonmatchings/game_8001781C", func_80028184);
 

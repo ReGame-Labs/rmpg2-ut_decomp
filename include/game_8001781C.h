@@ -63,7 +63,8 @@ typedef struct Sprite {
     s8 unk_4D;
     u8 pad_4E[0x2];
     struct Sprite *unk_50;
-    u8 pad_54[0xC];
+    u8 pad_54[0x8];
+    s32 *unk_5C;            /* the animation script's read pointer */
     s32 unk_60;
     u8 pad_64[0x4];
     struct Sprite *unk_68;
@@ -375,7 +376,7 @@ typedef struct UnkFA738 {
 
 typedef struct Unk1E638 {
     u8 pad_0[0x4];
-    s32 unk_4;
+    Fixed unk_4;
     s32 unk_8;
 } Unk1E638;
 
