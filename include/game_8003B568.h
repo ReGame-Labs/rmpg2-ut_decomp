@@ -8,7 +8,7 @@
 
 typedef struct UnkStructB1 {  /* provisional: a 0x58-byte record of the table at D_801FA9BC */
     UnkStruct4 *unk_00;
-    u8 pad_04[0x2];
+    s16 unk_04;
     u16 unk_06;
     u16 unk_08;
     s16 unk_0A;
@@ -16,17 +16,29 @@ typedef struct UnkStructB1 {  /* provisional: a 0x58-byte record of the table at
     UnkStruct1 *unk_14;
     u8 pad_18[0x2];
     u16 unk_1A;
-    u8 pad_1C[0x18];
-    s32 unk_34;
-    u8 pad_38[0x8];
+    u8 pad_1C[0x14];
+    s32 unk_30;     /* y acceleration, 16.16 */
+    s32 unk_34;     /* x acceleration, 16.16 */
+    u8 pad_38[0x6];
+    u16 unk_3E;
     UnkStruct4 *unk_40;
     u8 pad_44[0x14];
 } UnkStructB1;
 
-typedef struct UnkStructB2 {  /* provisional: a 0x30-byte record of the table at D_801D3824 (D_801D8738 of them) */
+typedef struct UnkStructB3 {  /* provisional: what a 0x30-byte record's unk_10 points to (a kind at 6) */
     u8 pad_00[0x4];
     u16 unk_04;
-    u8 pad_06[0x16];
+    u16 unk_06;
+    s32 unk_08;
+    s32 unk_0C;
+} UnkStructB3;
+
+typedef struct UnkStructB2 {  /* provisional: a 0x30-byte record of the table at D_801D3824 (D_801D8738 of them) */
+    s32 unk_00;
+    u16 unk_04;
+    u8 pad_06[0xA];
+    UnkStructB3 *unk_10;
+    u8 pad_14[0x8];
     u16 unk_1C;
     u8 pad_1E[0x12];
 } UnkStructB2;
@@ -72,11 +84,26 @@ void func_8003C894(void **arg0);
 void func_8003C8D4(UnkStructB1 *arg0);
 void func_8003C934(UnkStructB1 *);
 void func_8003C9E8(UnkStructB1 *arg0);
+typedef struct UnkStructB4 {  /* provisional: 8-byte records of D_8007DDD4 (an animation and a value per step) */
+    void *unk_00;
+    u16 unk_04;
+} UnkStructB4;
+extern UnkStructB4 D_8007DDD4[];
+void func_80054374(u16, UnkStruct1 *);
+extern s16 D_801F9ACA;
+extern void (*D_8007DDB4[8])(void);
+s32 func_8003B9C8(UnkStruct4 *, UnkStruct7 *);
 void func_8003CA28(UnkStructB1 *arg0);
-void func_8003CA70(void);
+void func_8003CA70(UnkStructB1 *);
 void func_8003CADC(UnkStruct1 *arg0);
 void func_8003CB30(UnkStruct1 *arg0);
 void func_8003CCA8(void);
 void func_8003CCC0(void *);
+void func_8003CB68(s16, UnkStruct1 *);
+void func_8003CEA0(s32, s32);
+extern s32 D_800830BC[];
+u16 func_8003C858(UnkStructB3 *, s32, s32);
+u16 func_8003CC84(UnkStructB3 *, s32);
+void func_8003C2D4(u16, UnkStructB2 *);
 
 #endif /* GAME_8003B568_H */

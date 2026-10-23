@@ -45,7 +45,63 @@ void func_8003B9A0(UnkStructB1 *p) {
     D_801E29B0 = 0;
 }
 
+/* 83 %: an object's hit box against a monster's; the original computes -w + x with negu in place (here x - w), loads the object's y and flags before the box, and loads the monster's four edges in another order */
+#ifdef NON_MATCHING
+s32 func_8003B9C8(UnkStruct4 *obj, UnkStruct7 *m) {
+    UnkStruct16 *box;
+    s16 x;
+    u16 y;
+    s32 flip;
+    u16 w;
+    s16 a;
+    s16 left;
+    s16 right;
+    s16 top;
+    s16 bottom;
+    s16 m_right;
+    s16 m_left;
+    s16 m_top;
+    s16 m_bottom;
+
+    x = (s16) obj->unk_14.h.hi;
+    box = obj->unk_34;
+    if (x < D_801F9ACA) {
+        x += (D_801D8864 + 1) >> 16;
+    }
+    y = obj->unk_18.h.hi;
+    flip = obj->unk_22 & 0x10;
+    a = box->unk_10 + x;
+    if (flip) {
+        a = (u16) -box->unk_10 + x;
+    }
+    left = a;
+    w = box->unk_14;
+    top = box->unk_12 + y;
+    if (flip) {
+        w = -w;
+    }
+    right = w + x;
+    bottom = box->unk_16 + y;
+    if (flip) {
+        left = right;
+        right = a;
+    }
+    m_bottom = m->unk_11E;
+    m_right = m->unk_11C;
+    m_left = m->unk_118;
+    m_top = m->unk_11A;
+    if (left < m_right && m_left < right && top < m_bottom && m_top < bottom) {
+        return 1;
+    }
+    return 0;
+}
+#else
 INCLUDE_ASM("asm/main/nonmatchings/game_8003B568", func_8003B9C8);
+#endif
+
+
+
+
 
 INCLUDE_ASM("asm/main/nonmatchings/game_8003B568", func_8003BAB0);
 
@@ -62,7 +118,7 @@ void func_8003BD48(UnkStructB1 *b) {
         if (D_801FAC84 != 0) {
             limit = D_801FAC84;
             obj = D_800AA268.obj;
-            x = obj->unk_16;
+            x = obj->unk_14.h.hi;
             if (obj->unk_22 & 0x10) {
                 d = (u16) D_801F9AB0 - x + 0x31;
             } else {
@@ -75,7 +131,7 @@ void func_8003BD48(UnkStructB1 *b) {
             if (D_801FA98C != 0) {
                 limit = D_801FA98C;
                 obj = D_800AA268.obj;
-                x = obj->unk_16;
+                x = obj->unk_14.h.hi;
                 if (obj->unk_22 & 0x10) {
                     d = (u16) D_801FA990 - x + 0x31;
                 } else {
@@ -92,7 +148,27 @@ void func_8003BD48(UnkStructB1 *b) {
 INCLUDE_ASM("asm/main/nonmatchings/game_8003B568", func_8003BD48);
 #endif
 
-INCLUDE_ASM("asm/main/nonmatchings/game_8003B568", func_8003BE34);
+s32 func_8003BE34(UnkStructB1 *rec) {
+    D_800AA248.unk_20->unk_10 += rec->unk_30;
+    D_800AA248.unk_20->unk_18.w += D_800AA248.unk_20->unk_10;
+    D_800AA248.unk_20->unk_0C += rec->unk_34;
+    D_800AA248.unk_20->unk_14.w += D_800AA248.unk_20->unk_0C;
+    D_800AA248.unk_20->unk_14.w &= D_801D8864;
+    if (rec->unk_3E != 0) {
+        if (D_800AA248.unk_20->unk_6C & 0x80) {
+            D_800AA248.unk_78 = 1;
+            return 1;
+        }
+        D_800AA248.unk_78 = 0;
+        return 0;
+    }
+    if (!(D_800AA248.unk_20->unk_6C & 0x80)) {
+        rec->unk_3E = 1;
+    }
+    D_800AA248.unk_78 = 0;
+    return 0;
+}
+
 
 #ifdef NON_MATCHING
 /* 98.8 %: the first test's second range check masks `st - 0xD` to 16 bits (andi) in the original; the same
@@ -156,7 +232,23 @@ void func_8003C0C8(void) {
 void func_8003C0E0(void) {
 }
 
-INCLUDE_ASM("asm/main/nonmatchings/game_8003B568", func_8003C0E8);
+void func_8003C0E8(void) {
+    s32 i;
+
+    i = func_8001EB10(0x1F, 0);
+    D_8007DDB4[i & 7]();
+}
+
+
+
+
+
+
+
+
+
+
+
 
 void func_8003C130(void) {
     UnkStructB2 *p = D_801D3824;
@@ -176,7 +268,28 @@ void func_8003C130(void) {
 
 INCLUDE_ASM("asm/main/nonmatchings/game_8003B568", func_8003C1C0);
 
-INCLUDE_ASM("asm/main/nonmatchings/game_8003B568", func_8003C2D4);
+void func_8003C2D4(u16 k, UnkStructB2 *rec) {
+    s32 *t;
+
+    if (rec->unk_10->unk_06 >= 5) {
+        rec->unk_04 = 2;
+        if ((u16) (k - 1) < 0x4A) {
+            t = (s32 *) ((k << 2) + (u32) D_800830BC);
+            func_8003CEA0(*t, rec->unk_00);
+        }
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
 
 void func_8003C344(void) {
     UnkStructB2 *p = D_801D3824;
@@ -198,7 +311,34 @@ void func_8003C674(void) {
 
 INCLUDE_ASM("asm/main/nonmatchings/game_8003B568", func_8003C67C);
 
+/* 78.7 %: an object's 'idle' test; the original keeps the result in v0 with the two zero stores in the branches' delay slots and the last test as a branch, where every form tried becomes a set-on-compare (xori/sltu) or uses another register */
+#ifdef NON_MATCHING
+u16 func_8003C858(UnkStructB3 *p, s32 arg1, s32 arg2) {
+    u16 r = 0;
+
+    if (p->unk_08 == 0) {
+        r = 0;
+        if (p->unk_0C == 0) {
+            r = 1;
+            if (p->unk_04 == 3) {
+                r = 0;
+            }
+        }
+    }
+    return r;
+}
+#else
 INCLUDE_ASM("asm/main/nonmatchings/game_8003B568", func_8003C858);
+#endif
+
+
+
+
+
+
+
+
+
 
 void func_8003C894(void **arg0) {
     void *temp_a0;
@@ -226,14 +366,37 @@ block_4:
     func_8003CCC0(arg0);
 }
 
-INCLUDE_ASM("asm/main/nonmatchings/game_8003B568", func_8003C934);
+void func_8003C934(UnkStructB1 *rec) {
+    UnkStruct4 *saved;
+    UnkStructB4 *step;
+    u16 k;
+
+    saved = D_800AA248.unk_20;
+    rec->unk_04 = 8;
+    D_800AA248.unk_20 = rec->unk_00;
+    func_8003C9E8(rec);
+    step = D_8007DDD4;
+    k = rec->unk_1A;
+    if (k >= 14) {
+        k = 2;
+    }
+    if (k != 0) {
+        step += k;
+        if (rec->unk_14 != NULL) {
+            func_80054374(step->unk_04, rec->unk_14);
+        }
+        func_8001E698(D_800AA248.unk_20, step->unk_00);
+    }
+    D_800AA268.obj = saved;
+}
+
 
 void func_8003C9E8(UnkStructB1 *arg0) {
     if (arg0->unk_1A == 0xA) {
         func_8003CA28(arg0);
         return;
     }
-    func_8003CA70();
+    func_8003CA70(arg0);
 }
 
 void func_8003CA28(UnkStructB1 *arg0) {
@@ -245,7 +408,27 @@ void func_8003CA28(UnkStructB1 *arg0) {
     }
 }
 
-INCLUDE_ASM("asm/main/nonmatchings/game_8003B568", func_8003CA70);
+void func_8003CA70(UnkStructB1 *rec) {
+    UnkStruct1 *a;
+    s32 kind;
+
+    a = rec->unk_14;
+    if (a != NULL) {
+        kind = rec->unk_06;
+        if (kind >= 0x31) {
+            if (kind < 0x34) {
+                func_8003CB68(0x1E0, a);
+            } else if (kind < 0x4A) {
+                if (kind >= 0x48) {
+                    func_8003CB30(a);
+                }
+            }
+        }
+    }
+}
+
+
+
 
 void func_8003CADC(UnkStruct1 *arg0) {
     s16 var_v1;
@@ -267,14 +450,109 @@ void func_8003CB30(UnkStruct1 *arg0) {
     arg0->unk_56 = 3;
 }
 
-INCLUDE_ASM("asm/main/nonmatchings/game_8003B568", func_8003CB68);
+void func_8003CB68(s16 n, UnkStruct1 *a) {
+    s16 v;
 
-INCLUDE_ASM("asm/main/nonmatchings/game_8003B568", func_8003CBE0);
+    v = n;
+    func_8001F724(3);
+    if (a->unk_186 != 0) {
+        v = n << 1;
+        a->unk_186 = 0;
+        if ((u16) v > 0x5A0) {
+            v = 0x5A0;
+        }
+    }
+    a->unk_142 = v;
+    a->unk_56 = 2;
+    func_8005DD48(a);
+}
 
-INCLUDE_ASM("asm/main/nonmatchings/game_8003B568", func_8003CC84);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+s32 func_8003CBE0(UnkStructB1 *rec, UnkStruct1 *a) {
+    s32 kind;
+
+    if (a == NULL) {
+        goto fail;
+    }
+    switch (a->unk_00) {
+    case 1:
+        kind = 4;
+        break;
+    case 2:
+        kind = 5;
+        break;
+    case 3:
+        kind = 6;
+        break;
+    case 4:
+        kind = 1;
+        break;
+    case 5:
+        kind = 2;
+        break;
+    case 6:
+        kind = 3;
+        break;
+    case 7:
+        kind = 7;
+        break;
+    default:
+        goto fail;
+    }
+    if (kind != rec->unk_06) {
+fail:
+        return 0;
+    }
+    rec->unk_1A = 0xB;
+    a->unk_146 = 0x5A;
+    a->unk_56 = 7;
+    return 1;
+}
+
+
+
+
+
+
+
+u16 func_8003CC84(UnkStructB3 *p, s32 hit) {
+    if (hit == 0) {
+        return 0;
+    }
+    return (u16) (p->unk_06 - 0x40) < 3;
+}
+
+
 
 void func_8003CCA8(void) {
     D_801E1C80 += 0x258;
 }
 
-INCLUDE_ASM("asm/main/nonmatchings/game_8003B568", func_8003CCC0);
+void func_8003CCC0(void *arg0) {
+    UnkStructB2 *rec = arg0;
+
+    if (rec >= D_801D3824 && rec < D_801D3824 + 28) {
+        rec->unk_10->unk_0C = 0;
+        memset(rec, 0, sizeof(UnkStructB2));
+    }
+}
+

@@ -11,10 +11,14 @@
 struct UnkStruct4;
 
 typedef struct GameState {
-    u8 pad_00[0x20];
+    u8 pad_00[0x18];
+    s32 unk_18;     /* D_800AA260: the argument of the current actor's handler (func_8002C0F8) */
+    u8 pad_1C[0x4];
     struct UnkStruct4 *unk_20;  /* D_800AA268 */
     u8 pad_24[0x18];
     struct UnkStructD110 *unk_3C;  /* the record func_8001D110 handed out last */
+    u8 pad_40[0x38];
+    s16 unk_78;     /* set when the current object is gone (func_8003BE34) */
 } GameState;
 
 extern GameState D_800AA248;
@@ -239,7 +243,10 @@ typedef struct UnkStructPair {  /* provisional: s16 pairs: D_801D8804 (func_8003
 
 typedef struct UnkStructD110 {  /* provisional: the record func_8001D110 hands out (a sprite request: an animation and a position) */
     s32 unk_00;
-    u8 pad_04[0xE];
+    u16 unk_04;
+    u8 pad_06[0x6];
+    s32 unk_0C;
+    u8 pad_10[0x2];
     u16 unk_12;
     u8 pad_14[0x2];
     u16 unk_16;
@@ -337,12 +344,14 @@ struct UnkStruct1 {  /* provisional: fields as the code reaches them */
     u16 unk_8A;
     u8 pad_8C[0x4];
     s32 unk_90;
-    s32 unk_94;
+    s16 unk_94;     /* claimed (func_8002F01C) */
+    u8 pad_96[0x2];
     UnkStruct2 unk_98[2];
     s16 unk_140;
     u16 unk_142;
     s16 unk_144;
-    u8 pad_146[0x40];
+    s16 unk_146;
+    u8 pad_148[0x3E];
     u16 unk_186;
     u8 pad_188[0x2];
     s16 unk_18A;
@@ -360,11 +369,10 @@ struct UnkStruct4 {  /* provisional: what the game state's unk_20 (D_800AA268) p
     u8 pad_00[0x4];
     u16 unk_04;
     u8 pad_06[0x6];
-    s32 unk_0C;
-    s32 unk_10;
-    u16 unk_14;
-    u16 unk_16;
-    Fix1616 unk_18;
+    s32 unk_0C;     /* x velocity, 16.16 */
+    s32 unk_10;     /* y velocity, 16.16 */
+    Fix1616 unk_14; /* x, 16.16 */
+    Fix1616 unk_18; /* y, 16.16 */
     u16 unk_1C;
     u8 pad_1E[0x4];
     u16 unk_22;
@@ -390,6 +398,7 @@ struct UnkStruct6 {  /* provisional */
     u16 unk_02;
     u8 pad_04[0x14];
     UnkStruct3 *unk_18;
+    u16 unk_1C;     /* the kind of its animation tables (func_8002DAAC) */
 };
 
 typedef UnkStruct4 UnkStruct13;   /* the records UnkStruct12 points at are the same kind as the current object's */
@@ -437,7 +446,7 @@ typedef struct UnkStruct9 {  /* provisional: the second argument of the func_800
 } UnkStruct9;
 
 typedef struct UnkStruct7 {  /* provisional: the 0x220-byte records at D_801E0B78 */
-    u8 pad_00[0x2];
+    s16 unk_00;     /* its own index */
     s16 unk_02;
     s16 unk_04;
     u8 pad_06[0x2];
@@ -450,10 +459,20 @@ typedef struct UnkStruct7 {  /* provisional: the 0x220-byte records at D_801E0B7
     u16 unk_32;
     u8 pad_34[0x24];
     u16 unk_58;
-    s16 unk_5A;
-    u8 pad_5C[0x3C];
+    s16 unk_5A;     /* the action */
+    s16 unk_5C;
+    u8 pad_5E[0x3A];
     UnkStruct4 *unk_98;
-    u8 pad_9C[0x114];
+    u8 pad_9C[0x7C];
+    u16 unk_118;    /* its hit box: left, top, right, bottom */
+    u16 unk_11A;
+    s16 unk_11C;
+    u16 unk_11E;
+    u8 pad_120[0x8];
+    s16 unk_128;
+    u8 pad_12A[0x12];
+    s16 unk_13C;
+    u8 pad_13E[0x72];
     u16 unk_1B0;
     u16 unk_1B2;
     u16 unk_1B4;
@@ -470,7 +489,7 @@ typedef struct UnkStruct8 {  /* provisional: func_80030268's third argument */
 
 s32 * func_80025C08(void *);
 s32 *func_8002A330(void);
-s32 func_8002BF70(void *);
+s32 func_8002BF70(UnkStruct1 *);
 void func_8002E278(s32, UnkStruct1 *);
 s32 func_8004F7A4(void *);
 void func_8002BFE4(s32 arg0, UnkStruct1 *arg1);
@@ -485,7 +504,8 @@ void func_80030B5C(UnkStruct1 *);
 void func_8002C25C(UnkStruct1 *arg0);
 void func_8002F084();
 void func_8002C3C4(UnkStruct1 *arg0);
-void func_8002C6A0();
+void func_8002D9F8(UnkStruct1 *);
+void func_8002C6A0();   /* old-style: called without its argument */
 void func_8002C738(UnkStruct1 *arg0);
 void func_8001E698(void *, void *);
 void func_8001F724(s32);
@@ -760,12 +780,15 @@ void func_80030A70(s32, UnkStruct12 *);
 void func_8002F65C(UnkStruct1 *, s32, UnkStruct2 *);
 void func_80032008(s16, s32, UnkStruct9 *);
 void func_80030C7C(UnkStruct2 *);
+void func_80030B00(s32, UnkStruct2 *);
+extern void (*D_8007CFD0[])(UnkStruct1 *);
+extern s32 *D_80011D98[];
 void func_8003DB74(UnkStruct9 *);
 void func_80031FD4(s32, UnkStruct9 *);
 void func_80030834(UnkStruct1 *, s32);
 void func_8002E9A4(UnkStruct1 *);
 void func_8002BE30(UnkStruct7 *);
-void func_80031154(s32, UnkStruct1 *);
+void func_80031154();   /* called with one and with two arguments: no prototype in the original */
 extern u16 D_8007CFE8[];
 extern UnkStructPair D_8007CE08[];
 extern UnkStructPair D_8007CE34[];
@@ -777,12 +800,13 @@ void func_80034418(UnkStruct1 *);
 void func_8002F898(UnkStruct6 *, UnkStruct2 *);
 UnkStruct2 *func_8002ED30(u16, void *);   /* called with an actor and with one of its records */
 u16 func_8002F558(UnkStruct1 *);
-void func_8002DBF4(u16, s32, s32, UnkStruct1 *);
+void func_8002DBF4(u16, s32, UnkStruct1 *, UnkStruct2 *);
 void func_80025848(UnkStruct2 *);
 void func_80024964(s32, UnkStruct4 *);
 extern u8 D_8001236C[];
 extern u8 D_80012394[];
-extern UnkStructPair D_801D8804[13];
+extern u8 D_8001236C_alt[];   /* another name for D_8001236C (config/aliases.ld) */
+extern UnkStructPair D_801D8804[14];
 extern UnkStruct1 D_801D3DC8[];
 extern u16 D_801E29A4;
 extern s16 D_801FA734;
@@ -801,6 +825,8 @@ s32 func_8001A3AC(void);
 UnkStructD110 *func_8001D110(void);
 UnkStruct4 *func_8001DCB4(void);
 void func_8002CBF4(UnkStruct7 *);
+void func_8002EBD8(UnkStruct1 *);
+extern u8 D_80011E48[];
 extern s32 D_80011E68[];
 extern s32 D_80011ED0[];
 extern s32 D_80011ED8[];
@@ -815,4 +841,89 @@ extern u16 D_801D8866;
 void func_8002CA8C(void);
 extern s32 D_80011E10[];
 extern s32 D_80011E90[];
+typedef struct UnkStructFrame {  /* provisional: what D_801FAC80 points to (the frame's drawing state: the sky's two
+                                   * gradient quads' colour bytes at 0x74..0xB2) */
+    u8 pad_00[0x74];
+    u8 unk_74;
+    u8 unk_75;
+    u8 unk_76;
+    u8 pad_77[0x5];
+    u8 unk_7C;
+    u8 unk_7D;
+    u8 unk_7E;
+    u8 pad_7F[0x5];
+    u8 unk_84;
+    u8 unk_85;
+    u8 unk_86;
+    u8 pad_87[0x5];
+    u8 unk_8C;
+    u8 unk_8D;
+    u8 unk_8E;
+    u8 pad_8F[0x9];
+    u8 unk_98;
+    u8 unk_99;
+    u8 unk_9A;
+    u8 pad_9B[0x5];
+    u8 unk_A0;
+    u8 unk_A1;
+    u8 unk_A2;
+    u8 pad_A3[0x5];
+    u8 unk_A8;
+    u8 unk_A9;
+    u8 unk_AA;
+    u8 pad_AB[0x5];
+    u8 unk_B0;
+    u8 unk_B1;
+    u8 unk_B2;
+} UnkStructFrame;
+
+extern UnkStructFrame *D_801FAC80;
+extern u8 D_8007CAFC[];
+extern s32 D_8007CD40[];
+extern s16 D_801F9A38;
+extern s16 D_801FA960;
+extern s32 D_801FA9A4;
+extern s32 D_801FB41C;
+typedef struct UnkStruct16 {  /* provisional: what an object's unk_34 points to (per-slot offsets, u16 pairs at 0x10, 0x18, 0x20) */
+    u8 pad_00[0x10];
+    u16 unk_10;
+    u16 unk_12;
+    u16 unk_14;
+    u16 unk_16;
+    u16 unk_18;
+    u16 unk_1A;
+    u8 pad_1C[0x4];
+    u16 unk_20;
+    u16 unk_22;
+} UnkStruct16;
+void func_8002FA20(s32, UnkStruct1 *);   /* its second argument is the record (the views to be unified) */
+typedef struct UnkStruct17 {  /* provisional: a building's part (what a building's record at 0x18 points to; func_8004F65C) */
+    u8 pad_00[0x8];
+    u16 unk_08;     /* hit points? zero: destroyed */
+    u8 pad_0A[0x4];
+    s16 unk_0E;     /* bottom y */
+    s16 unk_10;     /* set when hit */
+    u8 pad_12[0xA];
+    s16 unk_1C;
+    s16 unk_1E;     /* top y */
+} UnkStruct17;
+typedef struct UnkStruct18 {  /* provisional: what func_80025C08(D_80084028) returns (two counts and two lists) */
+    u16 unk_00;
+    u16 unk_02;
+    s32 unk_04;
+    s32 unk_08;
+    u8 unk_0C[0xC];
+    u8 unk_18[0xC];
+} UnkStruct18;
+
+typedef struct UnkStruct19 {  /* provisional: an object and the animation to start on it (func_80030D14) */
+    UnkStruct4 *unk_00;
+    void *unk_04;
+} UnkStruct19;
+
+extern u8 D_80084028[];
+extern s32 D_801E1E34[2];
+void func_8003197C(void *, s32, s32 *);
+void func_80053C50(s32, UnkStruct7 *);
+void func_8002BAEC(UnkStruct7 *);
 #endif /* GAME_8002A330_H */
