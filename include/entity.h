@@ -59,7 +59,9 @@ typedef struct Body {
     /* 0x78 */ u32 unk_78;      /* a colour, 0x808080 = neutral */
     /* 0x7C */ u8 unk_7C[0x4];
     /* 0x80 */ s16 unk_80;
-    /* 0x82 */ u8 unk_82[0xA];
+    /* 0x82 */ u8 unk_82[0x2];
+    /* 0x84 */ s32 unk_84;
+    /* 0x88 */ u8 unk_88[0x4];
     /* 0x8C */ u16 unk_8C;
     /* 0x8E */ u8 unk_8E[0x2];
     /* 0x90 */ struct Entity *unk_90;        /* the Entity this body belongs to */
@@ -206,7 +208,14 @@ typedef struct Entity {
     /* 0x1CC */ u16 unk_1CC;
     /* 0x1CE */ u8 unk_1CE[0x6];
     /* 0x1D4 */ struct EntityLink *unk_1D4;
-    /* 0x1D8 */ u8 unk_1D8[0x48];
+    /* 0x1D8 */ u8 unk_1D8[0x28];
+    /* 0x200 */ s32 unk_200;
+    /* 0x204 */ u8 unk_204[0x4];
+    /* 0x208 */ s32 unk_208;
+    /* 0x20C */ s32 unk_20C;
+    /* 0x210 */ s32 unk_210;
+    /* 0x214 */ s32 unk_214;
+    /* 0x218 */ u8 unk_218[0x8];
 } Entity;
 
 /* The game's global state block at 0x800AA248: splat split its fields into D_800AA248, D_800AA250, D_800AA25C,

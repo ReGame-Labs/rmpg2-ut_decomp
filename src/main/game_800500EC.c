@@ -933,13 +933,32 @@ void func_80052E94(void) {
 
 INCLUDE_ASM("asm/main/nonmatchings/game_800500EC", func_80052E9C);
 
-INCLUDE_ASM("asm/main/nonmatchings/game_800500EC", func_800531C0);
+void func_800531C0(Entity *e) {
+    D_800AA248.unk_20->unk_0C = 0;
+    D_800AA248.unk_20->unk_10 = 0;
+    D_800AA248.unk_20->unk_84 = 0;
+    D_800AA248.unk_20->unk_84 = 0;
+    e->unk_100 = 0;
+    e->unk_104 = 0;
+}
 
 INCLUDE_ASM("asm/main/nonmatchings/game_800500EC", func_80053204);
 
 INCLUDE_ASM("asm/main/nonmatchings/game_800500EC", func_800535E4);
 
+#ifdef NON_MATCHING
+/* 60 %: the same stores; the original keeps the two zero stores first, here the scheduler moves them after the constants */
+void func_80053804(s32 unused, Entity *e) {
+    e->unk_208 = 0;
+    e->unk_210 = 0;
+    e->unk_20C = 0xFFF60000;
+    e->unk_214 = 0x4000;
+    e->unk_05A = 0x58;
+    e->unk_200 = 0;
+}
+#else
 INCLUDE_ASM("asm/main/nonmatchings/game_800500EC", func_80053804);
+#endif
 
 extern u16 D_8007BE0C[];
 
@@ -1507,13 +1526,48 @@ INCLUDE_ASM("asm/main/nonmatchings/game_800500EC", func_80055CA8);
 
 INCLUDE_ASM("asm/main/nonmatchings/game_800500EC", func_80055FBC);
 
-INCLUDE_ASM("asm/main/nonmatchings/game_800500EC", func_80056050);
+void func_80056050(Entity *e, Unk54728 *city) {
+    u16 target;
+
+    target = city->unk_1E;
+    e->unk_1B0 = 1;
+    e->unk_1B2 = target;
+    D_800AA248.unk_08 = 1;
+    e->unk_05A = 6;
+    D_800AA248.unk_14 = 6;
+    e->unk_168 = 3;
+    D_800AA248.unk_20->unk_0C = 0;
+    D_800AA248.unk_20->unk_10 = 0;
+    e->unk_05C = 0;
+}
 
 INCLUDE_ASM("asm/main/nonmatchings/game_800500EC", func_800560A8);
 
-INCLUDE_ASM("asm/main/nonmatchings/game_800500EC", func_80056134);
+void func_80056134(Entity *e, Unk54728 *city) {
+    u16 target;
 
-INCLUDE_ASM("asm/main/nonmatchings/game_800500EC", func_8005618C);
+    target = city->unk_1E;
+    e->unk_1B0 = 2;
+    e->unk_1B2 = target;
+    D_800AA248.unk_08 = 2;
+    e->unk_05A = 6;
+    D_800AA248.unk_14 = 6;
+    e->unk_168 = 7;
+    D_800AA248.unk_20->unk_0C = 0;
+    D_800AA248.unk_20->unk_10 = 0;
+    e->unk_05C = 0;
+}
+
+void func_8004E8A8(void);
+
+void func_8005618C(Entity *e, Unk54728 *city) {
+    D_800AA248.unk_20->unk_18.w = 0xE10000;
+    D_800AA248.unk_14 = 0;
+    e->unk_05A = 0;
+    e->unk_1B2 = 0;
+    e->unk_1B0 = 0;
+    func_8004E8A8();
+}
 
 INCLUDE_ASM("asm/main/nonmatchings/game_800500EC", func_800561CC);
 
@@ -1553,7 +1607,15 @@ INCLUDE_ASM("asm/main/nonmatchings/game_800500EC", func_80056598);
 
 INCLUDE_ASM("asm/main/nonmatchings/game_800500EC", func_80056708);
 
-INCLUDE_ASM("asm/main/nonmatchings/game_800500EC", func_800567E8);
+void func_800567E8(Entity *e, Unk54728 *city) {
+    D_800AA248.unk_20->unk_18.h.i = city->unk_74;
+    e->unk_1B2 = city->unk_1E;
+    D_800AA248.unk_08 = 3;
+    e->unk_1B0 = 3;
+    D_800AA248.unk_14 = 0x19;
+    e->unk_05A = 0x19;
+    func_8005478C(e);
+}
 
 INCLUDE_ASM("asm/main/nonmatchings/game_800500EC", func_80056840);
 
@@ -1599,7 +1661,18 @@ s32 func_80056C18(Entity *e, Unk54728 *u) {
 
 INCLUDE_ASM("asm/main/nonmatchings/game_800500EC", func_80056CCC);
 
-INCLUDE_ASM("asm/main/nonmatchings/game_800500EC", func_80056E2C);
+void func_80056E2C(Entity *e, Unk54728 *city) {
+    u16 n;
+
+    n = e->unk_1B0;
+    D_800AA248.unk_08 = n;
+    if ((u32) (n - 1) < 2) {
+        D_800AA248.unk_14 = 0x12;
+        e->unk_05A = 0x12;
+    } else {
+        func_80056E78(e);
+    }
+}
 
 void func_80056E78(Entity *e) {
     D_800AA25C = 2;
