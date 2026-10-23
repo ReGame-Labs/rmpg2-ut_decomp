@@ -57,25 +57,44 @@ void func_8004AF1C();
 extern u8 D_8007F634[];
 extern s16 D_801D8724;
 extern Throw D_801E1CC4[];             /* 21 slots */
-/* A throw in flight (three records at D_801F9A54): the throwing object, the thrown one and its speed. */
+/* A thrown object (three records at D_801F9A54): the thrower's object and the thrown one, where it starts, where it
+ * is put back on a second pass (state 7) or a third, its speed and what it plays when it lands. Its first 0x10 bytes
+ * are laid out like a Throw (func_8004B540 hands one to func_8004B660). */
 typedef struct {
     /* 0x00 */ GameObject *obj;
-    /* 0x04 */ u16 unk_04;
-    /* 0x06 */ u16 unk_06;
-    /* 0x08 */ u16 unk_08;
-    /* 0x0A */ u16 unk_0A;
-    /* 0x0C */ u16 unk_0C;
-    /* 0x0E */ u16 unk_0E;
+    /* 0x04 */ s16 x0;                 /* the start, relative to the camera */
+    /* 0x06 */ u16 x_alt;              /* the x of the second pass */
+    /* 0x08 */ u16 y0;
+    /* 0x0A */ u16 y_alt;              /* the y of the second pass */
+    /* 0x0C */ u16 y_back;             /* the y of the other passes */
+    /* 0x0E */ u16 armed;
     /* 0x10 */ GameObject *thrown;
     /* 0x14 */ s32 speed;
     /* 0x18 */ void *land_anim;        /* the animation started when the thrown object lands */
 } ThrowRec;
 
+/* A throw record's initial values (three entries at D_8007F644), copied field by field by func_8004B204. */
+typedef struct {
+    /* 0x00 */ u16 x_alt;
+    /* 0x02 */ u16 y_alt;
+    /* 0x04 */ u16 y_back;
+    /* 0x06 */ u8 pad_06[0x02];
+    /* 0x08 */ s32 speed;
+    /* 0x0C */ void *land_anim;
+    /* 0x10 */ s16 x0;
+    /* 0x12 */ u16 y0;
+} ThrowInit;
+
+extern ThrowInit D_8007F644[];
+extern s16 D_801FA960;
+extern s32 D_80096240[];               /* two animations, chosen by D_801FA960 (below 75 or not) */
+extern s32 D_80096258[];
+void func_8001E698(GameObject *obj, void *anim);
+u16 func_8004B660(Throw *t, GameObject *target, s16 range, u16 mode);
+
 extern ThrowRec D_801F9A54[];          /* 3 records */
-extern s32 D_801F9AC8;                 /* the camera's x, 16.16 */
-extern u16 D_801F9ACA;                 /* its integer half */
-extern s32 D_801D8864;                 /* the level's width, 16.16 */
-extern u16 D_801D8866;                 /* its integer half */
+extern Fixed16 D_801F9AC8;             /* the camera's x */
+extern Fixed16 D_801D8864;             /* the level's width: positions wrap at it */
 extern u16 D_801D8740;
 extern u16 D_801D8710;
 extern u16 D_8007A696;
@@ -185,10 +204,10 @@ void func_800477F0(void) {
             m->unk_022 = 0;
         }
         obj = D_800AA248.cur_obj;
-        d = (u16) obj->pos_x.p.i - D_801F9ACA;
+        d = (u16) obj->pos_x.p.i - (u16) D_801F9AC8.p.i;
         dx = d;
         if (d < -0x1F3) {
-            dx = D_801D8866 + d;
+            dx = (u16) D_801D8864.p.i + d;
         }
         if (obj->unk_20.f.flags & 0x10) {
             yoff = 0;
@@ -722,13 +741,150 @@ void func_8004B1C8(void) {
     }
 }
 
-INCLUDE_ASM("asm/main/nonmatchings/game_8004750C", func_8004B204);
+void func_8004B204(void) {
+    GameObject *saved = D_800AA248.cur_obj;
+    ObjectDef *def;
+    s32 *anim;
+    ThrowRec *rec;
+    ThrowInit *ini;
+    s32 x;
+    u16 n;
 
+    D_800AA248.new_def = func_8001D110();
+    def = D_800AA248.new_def;
+    if (D_801FA960 >= 0x4B) {
+        def->anim = anim = D_80096258;
+    } else {
+        def->anim = anim = D_80096240;
+    }
+    n = 3;
+    rec = D_801F9A54;
+    ini = D_8007F644;
+    def->id = anim[0];
+    do {
+        rec->x_alt = ini->x_alt;
+        rec->y_alt = ini->y_alt;
+        rec->y_back = ini->y_back;
+        rec->speed = ini->speed;
+        rec->land_anim = ini->land_anim;
+        rec->x0 = ini->x0;
+        rec->y0 = ini->y0;
+        x = D_801F9AC8.v + (rec->x0 << 16);
+        def->pos_x.v = x;
+        if (x <= 0) {
+            def->pos_x.v = x + D_801D8864.v;
+        }
+        def->pos_y.p.i = rec->y0;
+        def->flags = 0x4000;
+        D_800AA248.cur_obj = func_8001DCB4();
+        if (D_800AA248.cur_obj == NULL) {
+            D_801E2A54 = 0xB;
+            D_801D8710 = 0;
+            D_800AA248.cur_obj = saved;
+            return;
+        }
+        rec->obj = D_800AA248.cur_obj;
+        rec++;
+        ini++;
+        D_800AA248.cur_obj->vel_x.v = 0xC0000;
+    } while (--n != 0);
+    D_801D8710 = 3;
+    D_800AA248.cur_obj = saved;
+}
+
+#ifdef NON_MATCHING
+/* 85%: the original hoists the high halves of the camera's x and the level width out of the loop into s7 and s8 (loop.c's choice); everything else matches */
+void func_8004B3D0(void) {
+    u16 s = 7;
+    ThrowRec *rec;
+    GameObject *obj;
+    u16 n;
+    u16 x;
+    u16 y;
+
+    if (D_801E2A54 != 4) {
+        s = 8;
+    }
+    rec = D_801F9A54;
+    n = D_801D8710;
+    D_801E2A54 = s;
+    do {
+        rec->armed = 0;
+        obj = rec->obj;
+        if (D_801E2A54 == 7) {
+            if (D_801FA960 >= 0x4B) {
+                func_8001E698(obj, D_80096258);
+            } else {
+                func_8001E698(obj, D_80096240);
+            }
+            x = rec->x_alt;
+            y = rec->y_alt;
+        } else {
+            if (D_801FA960 >= 0x4B) {
+                func_8001E698(obj, D_80096258);
+            } else {
+                func_8001E698(obj, D_80096240);
+            }
+            x = rec->x0;
+            y = rec->y_back;
+        }
+        rec++;
+        obj->pos_y.p.i = y;
+        obj->pos_x.v = (D_801F9AC8.v + (x << 16)) & D_801D8864.v;
+        obj->unk_20.f.flags ^= 0x10;
+        obj->vel_x.v = -obj->vel_x.v;
+    } while (--n != 0);
+}
+#else
 INCLUDE_ASM("asm/main/nonmatchings/game_8004750C", func_8004B3D0);
+#endif
 
+#ifdef NON_MATCHING
+/* 98%: the original zero-extends the mode again in the call's delay slot (andi a3) and loads the argument 100 before the jal */
+void func_8004B540(void) {
+    ThrowRec *rec = D_801F9A54;
+    u16 n = D_801D8710;
+    GameObject *obj;
+    u16 mode;
+    u16 s;
+
+    do {
+        obj = rec->obj;
+        rec++;
+        obj->pos_x.v = (obj->vel_x.v + obj->pos_x.v) & D_801D8864.v;
+    } while (--n != 0);
+    func_8004B990();
+    mode = 2;
+    if (D_801E1C8C == 2) {
+        mode = 1;
+    }
+    rec = D_801F9A54;
+    if (func_8004B660((Throw *) rec, D_801F9A54[0].obj, 100, mode) == 0) {
+        if (D_801E1C8C == 3) {
+            func_8004B80C();
+        }
+    } else {
+        n = D_801D8710;
+        do {
+            obj = rec->obj;
+            rec++;
+            obj->pos_y.p.i += 0x250;
+        } while (--n != 0);
+        s = 1;
+        if (D_801E2A54 == 8) {
+            s = 9;
+        }
+        D_801E2A54 = s;
+        if (s == 9) {
+            func_8004B754();
+        }
+    }
+}
+#else
 INCLUDE_ASM("asm/main/nonmatchings/game_8004750C", func_8004B540);
+#endif
 
-u16 func_8004B660(Throw *t, GameObject *target, s16 range, s32 mode) {
+u16 func_8004B660(Throw *t, GameObject *target, s16 range, u16 mode) {
     u16 armed = t->armed;
 
     if (target->unk_6C & 0x80) {
@@ -742,14 +898,14 @@ u16 func_8004B660(Throw *t, GameObject *target, s16 range, s32 mode) {
 }
 
 u16 func_8004B6C4(GameObject *obj, s16 range, s32 mode) {
-    s32 x = D_801F9AC8;
+    s32 x = D_801F9AC8.v;
     s32 dx = range << 16;
 
     mode &= 0xFFFF;
     if (mode != 1) {
         dx += 0x1800000;
         x += dx;
-        x &= D_801D8864;
+        x &= D_801D8864.v;
         if (obj->pos_x.v >= x) {
             D_800AA2C0 = 1;
         } else {
@@ -758,7 +914,7 @@ u16 func_8004B6C4(GameObject *obj, s16 range, s32 mode) {
     } else {
         x -= dx;
         if (x <= 0) {
-            x += D_801D8864;
+            x += D_801D8864.v;
         }
         if (x >= obj->pos_x.v) {
             D_800AA2C0 = mode;
@@ -806,10 +962,10 @@ void func_8004B80C(void) {
 
     if (rec->thrown == NULL) {
         x = rec->obj->pos_x.v;
-        if (x < D_801F9AC8) {
-            x += D_801D8864;
+        if (x < D_801F9AC8.v) {
+            x += D_801D8864.v;
         }
-        if (x >= D_801F9AC8 + 0x820000 && x <= D_801F9AC8 + (D_801D8864 >> 1)) {
+        if (x >= D_801F9AC8.v + 0x820000 && x <= D_801F9AC8.v + (D_801D8864.v >> 1)) {
             n = D_801D8710;
             if (D_8007A696 & 8) {
                 func_80062E24(0x6D);
@@ -850,7 +1006,7 @@ void func_8004B990(void) {
     obj = rec->thrown;
     if (obj != NULL) {
         do {
-            obj->pos_x.v = (obj->pos_x.v + obj->vel_x.v) & D_801D8864;
+            obj->pos_x.v = (obj->pos_x.v + obj->vel_x.v) & D_801D8864.v;
             vy = obj->vel_y.v + obj->unk_88;
             if (vy > 0xD0000) {
                 vy = 0xD0000;
