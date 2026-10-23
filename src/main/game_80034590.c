@@ -192,6 +192,10 @@ extern s32 D_801D3D98[];
 extern EffectDef *D_8007D448[];
 extern u8 D_8008A59C[];
 extern u8 D_8008A620[];
+extern EffectDef D_8008A7E4;
+extern EffectDef D_8008A828;
+extern u8 D_800959D4[];
+extern u8 D_8009594C[];
 
 void func_80034590(Npc *npc) {
     npc->unk_8 = 2;
@@ -1089,7 +1093,28 @@ void func_80037078(Player *player, NpcS *npc) {
 
 INCLUDE_ASM("asm/main/nonmatchings/game_80034590", func_8003712C);
 
+/* 82.46%: the two rectangle tests and their shared call are right; the saved registers are assigned in another order (the record in s1, the player in s5 in the original) and the first test keeps x sign-extended in s0 */
+#ifdef NON_MATCHING
+u16 func_800372DC(s16 x, s16 y, Player *player, NpcS *npc, s32 arg4) {
+    func_80037960(npc, arg4);
+    if ((x >= npc->unk_3E || x >= (s16)(npc->unk_3E - 4)) && (x <= npc->unk_40 || x <= (s16)(npc->unk_40 + 4)) &&
+        (y >= npc->unk_44 || y >= (s16)(npc->unk_44 - 4)) && (y <= npc->unk_42 || y <= (s16)(npc->unk_42 + 4))) {
+        return func_8003761C(x, y, player, npc);
+    }
+    if ((x >= npc->unk_46 || x >= (s16)(npc->unk_46 - 4)) && (x <= npc->unk_48 || x <= (s16)(npc->unk_48 + 4)) &&
+        (y >= npc->unk_4C || y >= (s16)(npc->unk_4C - 4)) && (y <= npc->unk_4A || y <= (s16)(npc->unk_4A + 4))) {
+        if (player != NULL) {
+            player->unk_24++;
+            func_80054374(0x28, player);
+            func_800634D4(player, 4);
+        }
+        return func_8003761C(x, y, player, npc);
+    }
+    return 0;
+}
+#else
 INCLUDE_ASM("asm/main/nonmatchings/game_80034590", func_800372DC);
+#endif
 
 u16 func_800374FC(s16 x, s16 y, Npc *npc, Mover *arg3) {
     MoverTarget *target = D_800AA248.unk_20->unk_94;
@@ -1841,7 +1866,38 @@ s32 func_80039C98(s32 x, s32 left, s32 right) {
     return 0;
 }
 
-INCLUDE_ASM("asm/main/nonmatchings/game_80034590", func_80039D04);
+void func_80039D04(NpcS *npc) {
+    s32 x;
+    Player *player;
+    s32 px;
+    s32 d;
+
+    x = D_800AA248.unk_20->unk_14;
+    if (--npc->unk_1C == -1) {
+        player = func_80039B60(x);
+        if (player != NULL) {
+            px = player->unk_68->unk_14;
+            d = abs(x - px);
+            if (d < (D_801D8864[0] + 1) / 2) {
+                if ((x < px && (D_800AA248.unk_20->unk_22 & 0x10)) || (px < x && !(D_800AA248.unk_20->unk_22 & 0x10))) {
+                    goto turn;
+                }
+            }
+            if (d > (D_801D8864[0] + 1) / 2 &&
+                ((px < x && (D_800AA268->unk_22 & 0x10)) || (x < px && !(D_800AA268->unk_22 & 0x10)))) {
+            turn:
+                npc->unk_1C = 0x3C;
+                func_8003EB5C(D_8009594C, D_800AA248.unk_20);
+                npc->unk_24 = 0;
+            } else if (func_80039C40(x, 0, 0) == 0) {
+                npc->unk_8 = 0xF;
+            } else {
+                npc->unk_8 = 0x11;
+                npc->unk_1C = 0;
+            }
+        }
+    }
+}
 
 INCLUDE_ASM("asm/main/nonmatchings/game_80034590", func_80039EC4);
 
@@ -1905,7 +1961,47 @@ void func_8003A218(NpcS *npc) {
 INCLUDE_ASM("asm/main/nonmatchings/game_80034590", func_8003A218);
 #endif
 
-INCLUDE_ASM("asm/main/nonmatchings/game_80034590", func_8003A328);
+void func_8003A328(NpcS *npc, s32 arg1) {
+    Mover *mover;
+    EffectDef *def;
+    Effect *effect;
+
+    mover = D_800AA248.unk_20;
+    if ((u16)npc->unk_1A >= arg1) {
+        func_8001F724(5);
+        func_80029118(6, 8);
+        if (npc->unk_6 == 0x14) {
+            def = &D_8008A7E4;
+        } else if (npc->unk_6 == 0x15) {
+            def = &D_8008A828;
+        } else {
+            def = &D_8008A7A4;
+        }
+        effect = func_8001D110();
+        D_800AA248.unk_3C = effect;
+        effect->unk_12 = ((u16 *)&D_800AA248.unk_20->unk_14)[1];
+        effect->unk_16 = ((u16 *)&D_800AA248.unk_20->unk_18)[1] - 0x19;
+        effect->unk_28 = def;
+        effect->unk_20 = (u16)D_800AA248.unk_20->unk_80 + 1;
+        effect->unk_0 = def->unk_0;
+        func_8001DCB4();
+        npc->unk_1C = 3;
+        npc->unk_8 = 4;
+    } else {
+        func_8001F724(0x60);
+        npc->unk_8 = 0xC;
+        npc->unk_1C = 6;
+        npc->unk_1A++;
+        func_8003EB5C(D_800959D4, D_800AA248.unk_20);
+        if (D_800AA248.unk_20->unk_22 & 0x10) {
+            npc->unk_34 = 0x70000;
+        } else {
+            npc->unk_34 = -0x70000;
+        }
+        D_800AA268->unk_C = 0;
+    }
+    D_800AA268 = mover;
+}
 
 void func_8003A4A0(Npc *npc) {
     u16 n;
