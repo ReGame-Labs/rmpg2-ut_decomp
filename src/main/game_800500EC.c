@@ -53,7 +53,7 @@ void func_80056598(void);
 void func_80056F38(Entity *, Unk54728 *);
 s32 func_800571D0(Entity *, Unk54728Sub18 *);
 void func_800578E0(Entity *, Unk54728 *);
-u16 func_80057AD8(Entity *, Unk54728 *, s32);
+u16 func_80057AD8(Entity *, Unk54728 *, u16);
 void func_800580F8(void);
 void func_800558AC(Entity *, Unk54728 *);
 void func_80055600(Entity *, Unk54728 *);
@@ -785,7 +785,29 @@ s32 func_80052A0C(Entity *a, Entity *b) {
 INCLUDE_ASM("asm/main/nonmatchings/game_800500EC", func_80052A0C);
 #endif
 
+#ifdef NON_MATCHING
+/* 94.5 %: the second test loads the constant before the score (the first test loads them the other way round) */
+s32 func_80052A68(Entity *e) {
+    s32 *score;
+    s32 dir;
+
+    score = &D_801D3D98[D_801FA8A0[e->unk_000 - 1]];
+    if (e->unk_100 < 0) {
+        dir = 0x8000;
+        if (*score > 0x640000) {
+            dir = -0x8000;
+        }
+        return dir;
+    }
+    dir = -0x8000;
+    if (*score < 0x12C0000) {
+        dir = 0x8000;
+    }
+    return dir;
+}
+#else
 INCLUDE_ASM("asm/main/nonmatchings/game_800500EC", func_80052A68);
+#endif
 
 void func_80052ADC(Entity *e) {
     u16 state;
@@ -919,7 +941,11 @@ INCLUDE_ASM("asm/main/nonmatchings/game_800500EC", func_800535E4);
 
 INCLUDE_ASM("asm/main/nonmatchings/game_800500EC", func_80053804);
 
-INCLUDE_ASM("asm/main/nonmatchings/game_800500EC", func_8005382C);
+extern u16 D_8007BE0C[];
+
+void func_8005382C(u16 kind) {
+    D_800AA268.p->unk_8C = D_8007BE0C[kind];
+}
 
 INCLUDE_ASM("asm/main/nonmatchings/game_800500EC", func_80053854);
 
@@ -934,7 +960,21 @@ u16 func_80053AC4(s16 a, s16 b, s16 c, s16 d, Entity *e) {
 
 INCLUDE_ASM("asm/main/nonmatchings/game_800500EC", func_80053B30);
 
-INCLUDE_ASM("asm/main/nonmatchings/game_800500EC", func_80053BE8);
+extern s32 D_801D8864;
+extern s16 D_801F9ACA;
+
+u16 func_80053BE8(s16 x, Entity *e) {
+    s16 v;
+
+    v = x;
+    if (x < D_801F9ACA) {
+        v = x + ((D_801D8864 + 1) >> 16);
+    }
+    if (v < e->unk_108) {
+        return 0;
+    }
+    return v <= e->unk_10C;
+}
 
 INCLUDE_ASM("asm/main/nonmatchings/game_800500EC", func_80053C50);
 
@@ -1081,7 +1121,31 @@ INCLUDE_ASM("asm/main/nonmatchings/game_800500EC", func_8005453C);
 
 INCLUDE_ASM("asm/main/nonmatchings/game_800500EC", func_80054608);
 
+#ifdef NON_MATCHING
+/* 89 %: the count is loaded into its own register at once, and i steps as ++i != n (addiu/move/andi) in the original */
+extern s16 D_801E29A4;
+
+Unk54728 *func_80054728(u16 n) {
+    Unk54728 *city;
+    u16 i;
+    u16 count;
+
+    if (n == 0 || D_801E29A4 == 0) {
+        return NULL;
+    }
+    count = D_801E29A4;
+    city = D_801D3DC8;
+    for (i = 1; i != n; i++) {
+        city++;
+        if (--count == 0) {
+            break;
+        }
+    }
+    return city;
+}
+#else
 INCLUDE_ASM("asm/main/nonmatchings/game_800500EC", func_80054728);
+#endif
 
 void func_8005478C(Entity *e) {
     Unk54728 *obj;
@@ -1710,7 +1774,20 @@ INCLUDE_ASM("asm/main/nonmatchings/game_800500EC", func_800578E0);
 
 INCLUDE_ASM("asm/main/nonmatchings/game_800500EC", func_80057A08);
 
-INCLUDE_ASM("asm/main/nonmatchings/game_800500EC", func_80057AD8);
+extern Unk54728 D_801D48D0;
+
+u16 func_80057AD8(Entity *e, Unk54728 *city, u16 which) {
+    if (!(D_800AA2DC & 4)) {
+        return 0;
+    }
+    if (city == &D_801D3DC8[0] && (which & 1)) {
+        return 1;
+    }
+    if (city == &D_801D48D0 && (which & 2)) {
+        return 1;
+    }
+    return 0;
+}
 
 void func_80057B40(void) {
     func_8001E878();

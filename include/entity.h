@@ -59,7 +59,9 @@ typedef struct Body {
     /* 0x78 */ u32 unk_78;      /* a colour, 0x808080 = neutral */
     /* 0x7C */ u8 unk_7C[0x4];
     /* 0x80 */ s16 unk_80;
-    /* 0x82 */ u8 unk_82[0xE];
+    /* 0x82 */ u8 unk_82[0xA];
+    /* 0x8C */ u16 unk_8C;
+    /* 0x8E */ u8 unk_8E[0x2];
     /* 0x90 */ struct Entity *unk_90;        /* the Entity this body belongs to */
 } Body;
 
@@ -165,9 +167,9 @@ typedef struct Entity {
     /* 0x0F6 */ u8 unk_0F6[0xA];
     /* 0x100 */ s32 unk_100;
     /* 0x104 */ s32 unk_104;
-    /* 0x108 */ u8 unk_108[2];
+    /* 0x108 */ s16 unk_108;
     /* 0x10A */ s16 unk_10A;
-    /* 0x10C */ u8 unk_10C[2];
+    /* 0x10C */ s16 unk_10C;
     /* 0x10E */ s16 unk_10E;
     /* 0x110 */ u8 unk_110[0x10];
     /* 0x120 */ Half32 unk_120;
