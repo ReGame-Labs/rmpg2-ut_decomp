@@ -36,6 +36,9 @@ void *memset(void *s, s32 c, u32 n);
 s32 abs(s32 n);
 
 /* This unit. */
+void func_80035260();                /* called without the record it takes: no prototype in the original */
+void func_8003518C(Npc *npc);
+void func_80035330(Npc *npc);
 void func_800345F8(Npc *npc);
 void func_80034B68(s32 speed);
 void func_800346FC(Npc *npc);
@@ -435,7 +438,28 @@ void func_80035040(void) {
     }
 }
 
-INCLUDE_ASM("asm/main/nonmatchings/game_80034590", func_800350C0);
+void func_800350C0(Npc *npc) {
+    Mover *mover;
+    u16 action;
+
+    mover = npc->unk_0;
+    D_800AA268 = mover;
+    mover->unk_18 = 0x320000;
+    action = npc->unk_8;
+    if (action == 0x64) {
+        func_80035260();
+    } else if (action == 3) {
+        func_800352A0(npc);
+    } else if (action == 4) {
+        func_80035330(npc);
+    } else if (action == 1) {
+        func_8003518C(npc);
+    } else if (func_8003BE34(npc) == 1) {
+        npc->unk_8 = 0x64;
+        npc->unk_1C = 0x2EE;
+        func_800242A8();
+    }
+}
 
 void func_8003518C(Npc *npc) {
     u16 n = npc->unk_1C;
@@ -1029,7 +1053,22 @@ u16 func_80037574(s16 x, s16 y, Mover *mover) {
     return 0;
 }
 
-INCLUDE_ASM("asm/main/nonmatchings/game_80034590", func_8003761C);
+u16 func_8003761C(s16 x, s16 y, Player *player, NpcS *npc) {
+    if (player == NULL) {
+        return 0;
+    }
+    player->unk_24++;
+    func_80054374(0x28, player);
+    func_800634D4(player, 4);
+    npc->unk_8 = 3;
+    npc->unk_60 = player;
+    npc->unk_54 = D_800AA248.unk_20->unk_22;
+    npc->unk_5C = x;
+    npc->unk_5E = y;
+    D_800AA248.unk_20->unk_98 = npc;
+    npc->unk_1A += 0xA;
+    return 1;
+}
 
 void func_800376D8(void) {
 }
@@ -1115,7 +1154,14 @@ void func_80037CF4(NpcS *npc) {
     func_8003EB5C(D_8008A398, D_800AA248.unk_20);
 }
 
-INCLUDE_ASM("asm/main/nonmatchings/game_80034590", func_80037D78);
+void func_80037D78(NpcS *npc) {
+    D_800AA248.unk_20->unk_14 += D_800AA248.unk_20->unk_C;
+    D_800AA248.unk_20->unk_10 += 0x6000;
+    D_800AA248.unk_20->unk_18 += D_800AA248.unk_20->unk_10;
+    if (D_800AA248.unk_20->unk_10 >= 0 && D_800AA248.unk_20->unk_18 > 0xE10000) {
+        func_80037E1C(npc);
+    }
+}
 
 void func_80037E1C(NpcS *npc) {
     func_8001F724(5);

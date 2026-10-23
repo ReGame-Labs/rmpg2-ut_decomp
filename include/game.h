@@ -46,6 +46,7 @@ typedef struct Mover {
     /* 0x8C */ u8 unk_8C[0x4];
     /* 0x90 */ struct MoverLink *unk_90;
     /* 0x94 */ struct MoverTarget *unk_94;  /* game_80034590: func_800374FC */
+    /* 0x98 */ void *unk_98;    /* the record that grabbed it (game_80034590: func_8003761C) */
 } Mover;
 
 /* A frame's metrics: pairs of halfwords from 0x10 on, picked by an actor's state (game_8003CD08: func_8003CE24,
