@@ -196,6 +196,8 @@ extern EffectDef D_8008A7E4;
 extern EffectDef D_8008A828;
 extern u8 D_800959D4[];
 extern u8 D_8009594C[];
+extern u8 D_80095800[];
+extern u8 D_800957A4[];
 
 void func_80034590(Npc *npc) {
     npc->unk_8 = 2;
@@ -2110,7 +2112,64 @@ void func_8003ABE8(NpcS *npc) {
     }
 }
 
+/* 99.86%: one register pair swapped: the right-edge test loads D_801F9AC8 into v1 and the constant into v0 in the original, the other way round here */
+#ifdef NON_MATCHING
+void func_8003AC74(NpcS *npc) {
+    s32 x;
+    u16 t;
+    u16 n;
+
+    npc->unk_4++;
+    t = npc->unk_14;
+    if (t < 0x20) {
+        D_800AA268->unk_10 = 0x2000;
+        npc->unk_14++;
+    } else if (t < 0x28) {
+        D_800AA268->unk_10 = 0;
+        npc->unk_14++;
+    } else if (t < 0x48) {
+        D_800AA268->unk_10 = -0x2000;
+        npc->unk_14++;
+    } else if (t < 0x50) {
+        D_800AA268->unk_10 = 0;
+        npc->unk_14++;
+    } else {
+        npc->unk_14 = 0;
+    }
+    if (npc->unk_C != 0) {
+        x = D_800AA268->unk_14;
+        if (func_80039C40(x, 0x50000, 0x50000) != 0) {
+            n = npc->unk_24;
+            if (n < 2 && npc->unk_4 >= 0x10) {
+                if (n == 0) {
+                    func_8001F7CC(0x64, 0x50);
+                    func_8004A9B0(0, 5, 0x15, 0, 0);
+                    func_8004A9B0(0, 5, 0x16, 0, 0);
+                } else {
+                    func_8001F7CC(0x64, 0x50);
+                    func_8004A9B0(0, 6, 0x15, 0, 0);
+                    func_8004A9B0(0, 6, 0x16, 0, 0);
+                }
+                npc->unk_4 = 0;
+            }
+        }
+        if (func_80039C40(x, 0x320000, 0x320000) != 0) {
+            if (x < D_801F9AC8[0]) {
+                x += D_801D8864[0] + 1;
+            }
+            if (x < D_801F9AC8[0] + 0xBE0000 && (D_800AA268->unk_22 & 0x10)) {
+                func_8003EB5C(D_80095800, D_800AA268);
+                npc->unk_C = 0;
+            } else if (D_801F9AC8[0] + 0xD20000 < x && !(D_800AA268->unk_22 & 0x10)) {
+                func_8003EB5C(D_800957A4, D_800AA268);
+                npc->unk_C = 0;
+            }
+        }
+    }
+}
+#else
 INCLUDE_ASM("asm/main/nonmatchings/game_80034590", func_8003AC74);
+#endif
 
 void func_8003AEA0(NpcS *npc) {
     if (func_80039C40(D_800AA248.unk_20->unk_14, 0x460000, 0x460000) == 0) {
