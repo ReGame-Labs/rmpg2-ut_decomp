@@ -20,6 +20,10 @@ extern u16 D_801D8740;
 extern u32 D_801F9ACC;
 extern s16 D_8007A68A;
 void func_8004F7F4(Body *, Entity *, Entity *, Body *);
+void func_80051A08(Entity *);
+void func_800526A4(Entity *);
+void func_80052880(Entity *, Unk800AA248 *);
+void func_80056CCC(Entity *, Unk800AA248 *);
 
 void func_80050BBC(void);
 void func_80050E58(Entity *);
@@ -416,7 +420,24 @@ void func_800517C0(Entity *e) {
     }
 }
 
-INCLUDE_ASM("asm/main/nonmatchings/game_800500EC", func_8005180C);
+void func_8005180C(Entity *e) {
+    if (e->unk_16C != NULL) {
+        func_8001E4B0(e->unk_16C);
+        e->unk_16C = NULL;
+    }
+    e->unk_1B0 = 0;
+    e->unk_1B2 = 0;
+    if (e->unk_18E != 0) {
+        e->unk_104 = 0xC000;
+    } else {
+        e->unk_104 = 0x4000;
+    }
+    if (D_800AA268.p->unk_10 > 0) {
+        func_8005189C(e);
+    } else {
+        func_80051A08(e);
+    }
+}
 
 INCLUDE_ASM("asm/main/nonmatchings/game_800500EC", func_8005189C);
 
@@ -429,7 +450,7 @@ void func_8005199C(Entity *e) {
     }
 }
 
-void func_80051A08(void) {
+void func_80051A08(Entity *e) {
     if (D_800AA268.p->unk_10 <= 0 && D_800AA268.p->unk_18.w <= (s32) D_801F9ACC) {
         D_800AA268.p->unk_10 = 0;
     }
@@ -444,7 +465,41 @@ void func_80051A48(Entity *e) {
 
 INCLUDE_ASM("asm/main/nonmatchings/game_800500EC", func_80051A80);
 
-INCLUDE_ASM("asm/main/nonmatchings/game_800500EC", func_80051B38);
+void func_80051B38(Entity *e) {
+    s32 vy;
+
+    vy = D_800AA248.unk_20->unk_10;
+    if (vy > 0) {
+        if (e->unk_008 != 0) {
+            if (D_800AA248.unk_14 == 0x4E || (func_80056598(), D_800AA248.unk_14 == 2)) {
+                if (D_800AA248.unk_20->unk_18.h.i < 0xE1) {
+                    func_8005199C(e);
+                    return;
+                }
+                D_800AA248.unk_20->unk_18.h.i = 0xE1;
+                func_800376D8(e);
+                if (e->unk_05A != 0x53) {
+                    func_8003EF64(e);
+                    func_80046F68(e);
+                    func_8004D488(e);
+                    if (D_801D8740 < 2 || D_801F9ACC == 0 || D_801F9ACC > 0xFFE00000) {
+                        func_80051A80(e);
+                        return;
+                    }
+                    func_80052798(e);
+                    return;
+                }
+                goto state_done;
+            }
+            if (D_800AA248.unk_14 != 0x2C) {
+            state_done:
+                func_800531C0(e);
+            }
+        }
+    } else if (vy != 0 && e->unk_104 == 0) {
+        e->unk_104 = 0xA000;
+    }
+}
 
 #ifdef NON_MATCHING
 /* 84.3%: the two state checks after func_80056AC8/func_80056840 are laid out differently (the original falls through to func_80051B38 from the second) */
@@ -598,7 +653,48 @@ void func_800524AC(void) {
 
 INCLUDE_ASM("asm/main/nonmatchings/game_800500EC", func_800524B4);
 
+#ifdef NON_MATCHING
+/* 94.5 %: the branches of the speed choice jump past the reload of unk_0CC at the join (the original reloads it); the bodies are the same */
+
+void func_80052520(Entity *e) {
+    s32 vx;
+    u16 kind;
+
+    vx = 0;
+    D_800AA248.unk_24 = 0;
+    if (D_801D3DC2 >= 3) {
+        func_80052880(e, &D_800AA248);
+        return;
+    }
+    D_800AA248.unk_24 = e->unk_0CC;
+    kind = e->unk_0CC;
+    if (kind >= 2) {
+        if (kind < 5) {
+            vx = 0x8000;
+        } else if (kind != 5) {
+            vx = -0x8000;
+        }
+    }
+    e->unk_100 = vx;
+    e->unk_104 = 0x4000;
+    e->unk_1B0 = 0;
+    e->unk_1B2 = 0;
+    if ((u32) (e->unk_0CC - 4) < 3) {
+        func_80056CCC(e, &D_800AA248);
+        if (e->unk_05A != 0x2C) {
+            func_800531C0(e);
+            return;
+        }
+    }
+    if (D_800AA268.p->unk_10 > 0) {
+        func_800526A4(e);
+    } else {
+        func_80051A08(e);
+    }
+}
+#else
 INCLUDE_ASM("asm/main/nonmatchings/game_800500EC", func_80052520);
+#endif
 
 void func_8005262C(Entity *e) {
     s16 state;
@@ -670,7 +766,24 @@ void func_80052798(Entity *e) {
 
 INCLUDE_ASM("asm/main/nonmatchings/game_800500EC", func_80052880);
 
+#ifdef NON_MATCHING
+/* 89.6 %: register choice only; the original reuses a0/a1 (the dead parameters) for the score table's base and the element addresses */
+s32 func_80052A0C(Entity *a, Entity *b) {
+    s32 dir;
+    u8 *slot;
+    s32 *score;
+
+    slot = D_801FA8A0;
+    dir = -0x8000;
+    score = D_801D3D98;
+    if (score[slot[a->unk_000 - 1]] < score[slot[b->unk_000 - 1]]) {
+        dir = 0x8000;
+    }
+    return dir;
+}
+#else
 INCLUDE_ASM("asm/main/nonmatchings/game_800500EC", func_80052A0C);
+#endif
 
 INCLUDE_ASM("asm/main/nonmatchings/game_800500EC", func_80052A68);
 
@@ -899,7 +1012,38 @@ INCLUDE_ASM("asm/main/nonmatchings/game_800500EC", func_8005417C);
 
 INCLUDE_ASM("asm/main/nonmatchings/game_800500EC", func_8005421C);
 
-INCLUDE_ASM("asm/main/nonmatchings/game_800500EC", func_80054374);
+void func_80054374(s32 points, Entity *e) {
+    s32 old;
+    s32 score;
+    s32 next;
+    s32 step;
+    s32 n;
+
+    n = 0;
+    if (e->unk_008 != 0) {
+        step = 50000;
+        next = step;
+        old = e->unk_038;
+        e->unk_038 += points;
+        score = e->unk_038;
+        for (;;) {
+            if (score < next) {
+                return;
+            }
+            n++;
+            if (old < next) {
+                e->unk_004++;
+                func_8001F724(0x71);
+                return;
+            }
+            next += step;
+            if (n == 2) {
+                step += 25000;
+                n = 0;
+            }
+        }
+    }
+}
 
 void func_800543FC(void) {
     Entity *e;
@@ -1052,7 +1196,16 @@ void func_80054BA4(Entity *e) {
 INCLUDE_ASM("asm/main/nonmatchings/game_800500EC", func_80054BA4);
 #endif
 
-INCLUDE_ASM("asm/main/nonmatchings/game_800500EC", func_80054CF8);
+void func_80054CF8(Entity *e, Unk54728 *city) {
+    Unk54728 *u;
+    u16 kind;
+
+    u = city;
+    kind = u->unk_08;
+    if (u == D_801D3DC8 || (func_80054D74(kind, e, city - 1), D_800AA250 != 3)) {
+        func_80054D74(kind, e, u + 1);
+    }
+}
 
 void func_80054D74(u16 kind, Entity *e, Unk54728 *u) {
     u16 next;
