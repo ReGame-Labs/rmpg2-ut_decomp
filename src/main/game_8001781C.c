@@ -4,6 +4,15 @@
 #include "game_8001781C.h"
 
 /* decls:begin */
+void func_80017758(void);
+extern s16 D_801F9A44[];
+extern s16 D_801F9ADC;
+extern s16 D_801F9ABC;
+extern u16 D_800AA2C8;
+void func_80017C04(void);
+u16 func_8001828C(void);
+void func_8001B858(void);
+extern u32 D_801FA894;
 extern s16 D_8007A692;
 extern u16 D_8007A696;
 extern s16 D_8007A698;
@@ -57,7 +66,7 @@ extern s32 D_801D8754;
 extern Sprite *D_801D8764;
 extern u16 D_801D87A0;
 extern s16 D_801D87FC;
-extern s8 D_801D8800[];
+extern u8 D_801D8800[];
 extern s16 D_801D8848;
 extern s16 D_801D8854;
 extern s16 D_801E0D4C;
@@ -287,7 +296,7 @@ u16 func_8002A308(void);
 extern u16 D_801E1C90[];
 extern u16 D_801E1C98[];
 extern u8 D_800AA900[][0x22];
-extern u8 D_800AFB78[];
+extern u16 D_800AFB78[];
 s32 func_80018DBC(void *, u16, s16, s16);
 u16 func_80023474(Unk22D58 *);
 void func_80024418(s16 *, s16 *, Unk22D58 *);
@@ -482,7 +491,56 @@ void func_8001F61C(u8 *, s16, s16, s32, s32, s32 *, s32, s32);
 u16 func_80025C54(void *);
 /* decls:end */
 
+/* 85 %: GCC 2.8.1 emits a call to __main at the start of any function named main (the target defines no init section); the original has none. The rest of the body is in place; whether the original was built with a compiler configured otherwise is open */
+#ifdef NON_MATCHING
+void main(void) {
+    func_80017758();
+    func_80018CB0();
+    func_80017A40();
+    D_801D8750 = 0xFFFF;
+    D_801F9A44[0] = 0;
+    D_801F9A44[1] = 0;
+    D_801F9A44[2] = 0;
+    D_801F9A44[3] = 1;
+    D_801F9A44[4] = 1;
+    D_801F9A44[5] = 1;
+    D_801F9A44[6] = 1;
+    D_801F9ADC = 0;
+    D_801F9ABC = 0;
+    for (;;) {
+        func_80017964();
+        func_80018D10(1);
+        for (;;) {
+            func_80018CD0();
+            if (D_800AA2C8 == 0) {
+                D_800AA2C8++;
+                func_80017C04();
+                if (D_801F9A34 > 0) {
+                    D_801F9A34--;
+                }
+                if (func_8001828C() == 1) {
+                    break;
+                }
+                func_8001B7F4();
+                if (D_801D3D64.unk_62 == 0) {
+                    func_8001B858();
+                }
+            }
+            if (D_800AA2E0 != 0) {
+                D_800AA2C8 = 0;
+                D_800AA2E8 = 0;
+                D_800AA2E0 = 0;
+            }
+            func_8001EA78();
+            func_8001DF98();
+            func_8001D8E8();
+            func_80018CF0();
+        }
+    }
+}
+#else
 INCLUDE_ASM("asm/main/nonmatchings/game_8001781C", main);
+#endif
 
 void func_80017964(void) {
     D_801D36FC = 0x110;
@@ -708,7 +766,7 @@ void func_80019268(void) {
     } while (i < 3);
 }
 
-u8 *func_800192A0(void) {
+u16 *func_800192A0(void) {
     s16 i;
     s16 k;
     s16 total;
@@ -768,7 +826,19 @@ u16 func_80019920(u16 bits, u16 which) {
     return result;
 }
 
-INCLUDE_ASM("asm/main/nonmatchings/game_8001781C", func_80019984);
+void func_80019984(s32 arg0) {
+    u16 bits;
+
+    D_801FA894 = D_801E0D7C;
+    D_801E0D7C = 0;
+    func_800192A0();
+    bits = func_80019920(D_800AFB78[2], ((arg0 & 0xFFFF) && (D_801D3DC6 == 0)) ? D_801D8800[2] : 0);
+    D_801E0D7C |= bits << 20;
+    bits = func_80019920(D_800AFB78[1], ((arg0 & 0xFFFF) && (D_801D3DC6 == 0)) ? D_801D8800[1] : 0);
+    D_801E0D7C |= bits << 10;
+    bits = func_80019920(D_800AFB78[0], ((arg0 & 0xFFFF) && (D_801D3DC6 == 0)) ? D_801D8800[0] : 0);
+    D_801E0D7C |= bits;
+}
 
 void func_80019ABC(s32 arg0) {
     SetDispMask(arg0 & 0xFFFF);
