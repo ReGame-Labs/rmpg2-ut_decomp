@@ -59,7 +59,11 @@ typedef struct Body {
     /* 0x78 */ u32 unk_78;      /* a colour, 0x808080 = neutral */
     /* 0x7C */ u8 unk_7C[0x4];
     /* 0x80 */ s16 unk_80;
-    /* 0x82 */ u8 unk_82[0xE];
+    /* 0x82 */ u8 unk_82[0x2];
+    /* 0x84 */ s32 unk_84;
+    /* 0x88 */ u8 unk_88[0x4];
+    /* 0x8C */ u16 unk_8C;
+    /* 0x8E */ u8 unk_8E[0x2];
     /* 0x90 */ struct Entity *unk_90;        /* the Entity this body belongs to */
 } Body;
 
@@ -109,7 +113,9 @@ typedef struct Unk54728 {
     /* 0x24 */ s16 unk_24;
     /* 0x26 */ u8 unk_26[0x2];
     /* 0x28 */ s16 unk_28;
-    /* 0x2A */ u8 unk_2A[0x2E];
+    /* 0x2A */ u8 unk_2A[0x8];
+    /* 0x32 */ u16 unk_32;
+    /* 0x34 */ u8 unk_34[0x24];
     /* 0x58 */ u16 unk_58;
     /* 0x5A */ u8 unk_5A[0x1A];
     /* 0x74 */ u16 unk_74;
@@ -137,7 +143,8 @@ typedef struct Entity {
     /* 0x02A */ u8 unk_02A[0xA];
     /* 0x034 */ s32 unk_034;
     /* 0x038 */ s32 unk_038;
-    /* 0x03C */ u8 unk_03C[0xA];
+    /* 0x03C */ u8 unk_03C[0x8];
+    /* 0x044 */ s16 unk_044;
     /* 0x046 */ s16 unk_046;
     /* 0x048 */ u8 unk_048[0x10];
     /* 0x058 */ u16 unk_058;
@@ -165,15 +172,17 @@ typedef struct Entity {
     /* 0x0F6 */ u8 unk_0F6[0xA];
     /* 0x100 */ s32 unk_100;
     /* 0x104 */ s32 unk_104;
-    /* 0x108 */ u8 unk_108[2];
+    /* 0x108 */ s16 unk_108;
     /* 0x10A */ s16 unk_10A;
-    /* 0x10C */ u8 unk_10C[2];
+    /* 0x10C */ s16 unk_10C;
     /* 0x10E */ s16 unk_10E;
     /* 0x110 */ u8 unk_110[0x10];
     /* 0x120 */ Half32 unk_120;
     /* 0x124 */ u8 unk_124[2];
     /* 0x126 */ s16 unk_126;
-    /* 0x128 */ u8 unk_128[0x16];
+    /* 0x128 */ u8 unk_128[0x2];
+    /* 0x12A */ u16 unk_12A;
+    /* 0x12C */ u8 unk_12C[0x12];
     /* 0x13E */ u16 unk_13E;
     /* 0x140 */ u8 unk_140[0x24];
     /* 0x164 */ s16 unk_164;
@@ -188,21 +197,30 @@ typedef struct Entity {
     /* 0x186 */ u8 unk_186[0x2];
     /* 0x188 */ u16 unk_188;
     /* 0x18A */ u16 unk_18A;
-    /* 0x18C */ u8 unk_18C[2];
+    /* 0x18C */ s16 unk_18C;
     /* 0x18E */ u16 unk_18E;
     /* 0x190 */ u8 unk_190[0x20];
     /* 0x1B0 */ u16 unk_1B0;
     /* 0x1B2 */ u16 unk_1B2;
     /* 0x1B4 */ s16 unk_1B4;
-    /* 0x1B6 */ u8 unk_1B6[0xA];
+    /* 0x1B6 */ u8 unk_1B6[0x8];
+    /* 0x1BE */ s16 unk_1BE;
     /* 0x1C0 */ s32 unk_1C0;
-    /* 0x1C4 */ u8 unk_1C4[0x4];
+    /* 0x1C4 */ u8 unk_1C4[0x2];
+    /* 0x1C6 */ s16 unk_1C6;
     /* 0x1C8 */ s16 unk_1C8;
     /* 0x1CA */ u8 unk_1CA[0x2];
     /* 0x1CC */ u16 unk_1CC;
     /* 0x1CE */ u8 unk_1CE[0x6];
     /* 0x1D4 */ struct EntityLink *unk_1D4;
-    /* 0x1D8 */ u8 unk_1D8[0x48];
+    /* 0x1D8 */ u8 unk_1D8[0x28];
+    /* 0x200 */ s32 unk_200;
+    /* 0x204 */ u8 unk_204[0x4];
+    /* 0x208 */ s32 unk_208;
+    /* 0x20C */ s32 unk_20C;
+    /* 0x210 */ s32 unk_210;
+    /* 0x214 */ s32 unk_214;
+    /* 0x218 */ u8 unk_218[0x8];
 } Entity;
 
 /* The game's global state block at 0x800AA248: splat split its fields into D_800AA248, D_800AA250, D_800AA25C,
