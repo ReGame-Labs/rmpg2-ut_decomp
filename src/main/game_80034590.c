@@ -16,6 +16,7 @@ s32 func_8001EA78(void);
 void func_8001F7CC(s32 a, s32 b);
 void func_8004A9B0(s32 a, s32 b, s32 c, s32 d, s32 e);
 void func_8001BB68(Mover *mover);
+Mover *func_8001EB9C(s32 a, s32 b, s32 c, s32 d, s32 color);
 void func_8001BB88(Mover *mover);
 s16 func_8001EB10(s32 arg0, s32 arg1);
 void func_8001F724(s32 sound);
@@ -70,6 +71,7 @@ void func_800382A8(NpcS *npc);
 void func_80038A2C(NpcS *npc);
 void func_80038920(NpcS *npc);
 Player *func_80039B60(s32 x);
+s32 func_80039B04(Player *player, s32 x);
 void func_80034988(Npc *npc);
 void func_80034C54(Mover *mover);
 void func_80034D28(Npc *npc);
@@ -155,6 +157,9 @@ extern u8 D_8008AA10[];
 extern u8 D_8008A374[];
 extern u8 D_80095EF0[];
 extern u8 D_8009585C[];
+extern u8 D_800958E0[];
+extern Effect *D_800AA284;     /* D_800AA248.unk_3C by its own name */
+extern Mover *D_800AA268;      /* D_800AA248.unk_20 by its own name (func_80038920 reads it so) */
 extern u8 D_80095E24[];
 extern u8 D_80095E68[];
 extern u8 D_80095EAC[];
@@ -778,7 +783,33 @@ void func_800363E4(void) {
     D_801E2A50 = n;
 }
 
+#ifdef NON_MATCHING
+/* 95.59 %: the scheduler loads unk_22 before the unk_40 store in the original (here after); the statements and types are right */
+void func_80036440(Npc *npc, s32 depth) {
+    Mover *mover;
+    Effect *effect;
+    s32 d;
+
+    mover = func_8001EB9C(0, 0, 0, 0, 0xFFFFFF);
+    mover->unk_40 = -0x3E7;
+    d = depth - 1;
+    mover->unk_80 = d;
+    mover->unk_22 = (mover->unk_22 & ~0x20) | 0x400;
+    mover->unk_6C |= 0x2000;
+    npc->unk_70 = mover;
+    func_8001BB68(mover);
+    effect = func_8001D110();
+    effect->unk_0 = 0x4F000986;
+    effect->unk_20 = d;
+    D_800AA284 = effect;
+    mover = func_8001DCB4();
+    mover->unk_22 |= 0x400;
+    npc->unk_74 = mover;
+    func_8001BB68(mover);
+}
+#else
 INCLUDE_ASM("asm/main/nonmatchings/game_80034590", func_80036440);
+#endif
 
 INCLUDE_ASM("asm/main/nonmatchings/game_80034590", func_80036504);
 
@@ -1247,7 +1278,39 @@ void func_80038838(NpcS *npc) {
     func_8003831C();
 }
 
+#ifdef NON_MATCHING
+/* 95.60 %: register choices only: the table entries' addresses are built in a0 in the original (v1/v0 here) */
+void func_80038920(NpcS *npc) {
+    u16 which;
+    u8 *anim;
+
+    if (func_80038C1C() != 0) {
+        return;
+    }
+    if (func_80039220(&which, npc) == 0) {
+        if (npc->unk_C != 0) {
+            func_8003EB5C(*(D_8007DA68 + (npc->unk_2E & 3)), D_800AA268);
+        }
+    } else {
+        anim = *(*(D_8007DA78 + (npc->unk_2C & 3)) + which);
+        if (anim != (u8 *)D_800AA268->unk_48) {
+            func_8003EB5C(anim, D_800AA268);
+            return;
+        }
+        if (npc->unk_4E != 0) {
+            if (npc->unk_64 != NULL) {
+                func_80038528(npc);
+                return;
+            }
+            npc->unk_8 = 0x32;
+            npc->unk_20 = 0;
+            npc->unk_4 = 0;
+        }
+    }
+}
+#else
 INCLUDE_ASM("asm/main/nonmatchings/game_80034590", func_80038920);
+#endif
 
 void func_80038A2C(NpcS *npc) {
     u16 move = npc->unk_2A;
@@ -1274,7 +1337,40 @@ void func_80038A2C(NpcS *npc) {
     func_80038920(npc);
 }
 
+#ifdef NON_MATCHING
+/* 96.62 %: register choices only, as func_80038920: the table entry's address is built in v1 in the original */
+void func_80038AE8(NpcS *npc) {
+    Player *player;
+
+    player = npc->unk_64;
+    if ((player == NULL || player->unk_CC == 0 || player->unk_CC == 5 || player->unk_CC == 1) && npc->unk_2A == 4) {
+        if (npc->unk_C != 0) {
+            func_8003EB5C(D_8007DA68[npc->unk_2E & 3], D_800AA268);
+        }
+        return;
+    }
+    if (npc->unk_C == 0) {
+        return;
+    }
+    if (D_800AA268->unk_C == 0) {
+        npc->unk_C = 0;
+        if (player != NULL && player->unk_CC != 0 && player->unk_CC != 5 && player->unk_CC != 1) {
+            npc->unk_8 = 0x32;
+            func_80038528(npc);
+            return;
+        }
+        if (npc->unk_1C == 0) {
+            func_80038A2C(npc);
+            return;
+        }
+        npc->unk_1C--;
+    }
+    D_800AA248.unk_20->unk_C = 0;
+    func_8003EB5C(D_8007DA68[npc->unk_2E & 3], D_800AA248.unk_20);
+}
+#else
 INCLUDE_ASM("asm/main/nonmatchings/game_80034590", func_80038AE8);
+#endif
 
 INCLUDE_ASM("asm/main/nonmatchings/game_80034590", func_80038C1C);
 
@@ -1433,7 +1529,34 @@ stop:
     npc->unk_24 = 0;
 }
 
+#ifdef NON_MATCHING
+/* 99.78 %: the velocity lands in v1 here; the original reuses the flag test's v0 */
+void func_8003A218(NpcS *npc) {
+    Player *player;
+    s32 v;
+
+    npc->unk_1C--;
+    player = func_80039B60(D_800AA248.unk_20->unk_14);
+    if (player != NULL && func_80039B04(player, D_800AA248.unk_20->unk_14) <= 0x77FFFF && npc->unk_1C > 0) {
+        func_8003EB5C(D_800958E0, D_800AA248.unk_20);
+        v = 0x20000;
+        if (!(D_800AA248.unk_20->unk_22 & 0x10)) {
+            v = -0x20000;
+        }
+        npc->unk_34 = v;
+        D_800AA248.unk_20->unk_C = 0;
+        return;
+    }
+    npc->unk_8 = 2;
+    npc->unk_1C = 0x14;
+    func_8003EB5C(D_8009585C, D_800AA248.unk_20);
+    npc->unk_34 = 0;
+    D_800AA248.unk_20->unk_C = 0;
+    npc->unk_24 = 0;
+}
+#else
 INCLUDE_ASM("asm/main/nonmatchings/game_80034590", func_8003A218);
+#endif
 
 INCLUDE_ASM("asm/main/nonmatchings/game_80034590", func_8003A328);
 
