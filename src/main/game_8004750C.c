@@ -1015,7 +1015,45 @@ u16 func_80048F60(Monster *m, s16 b, Throw *t) {
     return 0;
 }
 
-INCLUDE_ASM("asm/main/nonmatchings/game_8004750C", func_800490D4);
+extern s32 D_80091730[];
+extern s32 D_800916E4[];
+
+void func_800490D4(Throw *t) {
+    GameObject *saved = D_800AA248.cur_obj;
+    Monster *m;
+    s32 vy;
+    s16 hit;
+    u16 i;
+
+    if (t->unk_0A == 1) {
+        saved->pos_x.v = (saved->pos_x.v + saved->vel_x.v) & D_801D8864.v;
+        vy = D_800AA248.cur_obj->vel_y.v + 0x4000;
+        if (vy <= -0x90000) {
+            vy = -0x90000;
+        }
+        D_800AA248.cur_obj->vel_y.v = vy;
+        D_800AA248.cur_obj->pos_y.v += vy;
+        if (D_800AA248.cur_obj->vel_y.v >= 0 && D_800AA248.cur_obj->pos_y.p.i >= 0xD9) {
+            t->unk_0A = 0x10;
+            D_800AA248.cur_obj->script_pc = (s32) D_80091730;
+        } else {
+            i = 7;
+            do {
+                m = &D_801E0B78[i];
+                if ((m->unk_058 & 1) && m->unk_140 == 0) {
+                    hit = func_80053854(D_800AA248.cur_obj->pos_x.p.i, D_800AA248.cur_obj->pos_y.p.i, m);
+                    if (hit != 0) {
+                        func_80053C50(0x34000, m);
+                        t->unk_0A = 0x10;
+                        D_800AA248.cur_obj->script_pc = (s32) D_800916E4;
+                        break;
+                    }
+                }
+            } while (--i != 0);
+        }
+    }
+    D_800AA268 = saved;
+}
 
 void func_8004928C(void) {
     if (D_800AA248.cur_obj->vel_y.v <= -0x10000) {
@@ -1066,7 +1104,39 @@ void func_80049304(Throw *t) {
     } while (--i != 0);
 }
 
-INCLUDE_ASM("asm/main/nonmatchings/game_8004750C", func_800494B4);
+extern s32 D_80091AD0[];
+
+void func_800494B4(Throw *t) {
+    Monster *m;
+    s16 hit;
+    u16 i;
+
+    if (t->unk_0A != 1) {
+        return;
+    }
+    D_800AA248.cur_obj->pos_x.v = (D_800AA248.cur_obj->pos_x.v + D_800AA248.cur_obj->vel_x.v) & D_801D8864.v;
+    D_800AA248.cur_obj->vel_y.v += 0x2000;
+    D_800AA248.cur_obj->pos_y.v += D_800AA248.cur_obj->vel_y.v;
+    if (D_800AA248.cur_obj->vel_y.v >= 0 && D_800AA248.cur_obj->pos_y.p.i >= 0xD9) {
+        t->unk_0A = 0x10;
+        func_8001E698(D_800AA248.cur_obj, D_80091AD0);
+        return;
+    }
+    i = 7;
+    do {
+        m = &D_801E0B78[i];
+        if ((m->unk_058 & 1) && m->unk_140 == 0) {
+            hit = func_80053854(D_800AA248.cur_obj->pos_x.p.i, D_800AA248.cur_obj->pos_y.p.i, m);
+            if (hit != 0) {
+                func_80053C50(0x58000, m);
+                func_8004A93C(m);
+                t->unk_0A = 0x10;
+                func_8001E698(D_800AA248.cur_obj, D_80091AD0);
+                return;
+            }
+        }
+    } while (--i != 0);
+}
 
 #ifdef NON_MATCHING
 /* 99.3 %: register names only: the original keeps the object in a2, the x found in a0 and the counter in a1 (here a1, a2, a0) */
@@ -1133,13 +1203,92 @@ void func_80049650(Throw *t) {
 INCLUDE_ASM("asm/main/nonmatchings/game_8004750C", func_80049650);
 #endif
 
-INCLUDE_ASM("asm/main/nonmatchings/game_8004750C", func_80049850);
+extern s32 D_80091A20[];
+extern s32 D_800919D4[];
 
-INCLUDE_ASM("asm/main/nonmatchings/game_8004750C", func_800499F4);
+void func_80049850(Throw *t) {
+    Monster *m;
+    s32 vy;
+    s16 hit;
+    u16 i;
+
+    if (t->unk_0A != 1) {
+        return;
+    }
+    D_800AA248.cur_obj->pos_x.v = (D_800AA248.cur_obj->vel_x.v + D_800AA248.cur_obj->pos_x.v) & D_801D8864.v;
+    vy = D_800AA248.cur_obj->vel_y.v + 0x4000;
+    if (vy >= -8) {
+        vy = -9;
+    }
+    D_800AA248.cur_obj->vel_y.v = vy;
+    D_800AA248.cur_obj->pos_y.v += vy;
+    if (D_800AA248.cur_obj->vel_y.v >= 0 && D_800AA248.cur_obj->pos_y.p.i >= 0xD9) {
+        t->unk_0A = 0x10;
+        D_800AA248.cur_obj->script_pc = (s32) D_80091A20;
+        return;
+    }
+    i = 7;
+    do {
+        m = &D_801E0B78[i];
+        if ((m->unk_058 & 1) && m->unk_140 == 0) {
+            hit = func_80053854(D_800AA248.cur_obj->pos_x.p.i, D_800AA248.cur_obj->pos_y.p.i, m);
+            if (hit != 0) {
+                func_80053C50(0x48000, m);
+                t->unk_0A = 0x10;
+                D_800AA248.cur_obj->script_pc = (s32) D_800919D4;
+                return;
+            }
+        }
+    } while (--i != 0);
+}
+
+extern s32 D_80091820[];
+void func_80049D90(Throw *t);
+void func_8004A90C(Monster *m);
+u16 func_80053AC4(s16 x, s16 y, s32 a, s32 b, Monster *m);
+
+void func_800499F4(Throw *t) {
+    Monster *m;
+    u16 i;
+
+    if (t->unk_0A != 1) {
+        return;
+    }
+    if (D_800AA248.cur_obj->unk_08 == 0) {
+        func_80049D90(t);
+        if (D_800AA248.cur_obj->pos_y.p.i >= 0xD9) {
+            D_800AA248.cur_obj->vel_y.v = 0;
+            D_800AA248.cur_obj->unk_08 = 0xE6;
+            D_800AA248.cur_obj->unk_80 = 0x1005;
+        }
+        return;
+    }
+    if (D_800AA248.cur_obj->unk_08 == 1) {
+        t->unk_0A = 0x10;
+        D_800AA248.cur_obj->script_pc = (s32) D_80091820;
+        func_8001F724(5);
+        return;
+    }
+    if (--D_800AA248.cur_obj->unk_08 < 0xD8) {
+        i = 7;
+        do {
+            m = &D_801E0B78[i];
+            if ((m->unk_058 & 1) && m->obj->pos_y.p.i >= 0xE1 &&
+                func_80053AC4(D_800AA248.cur_obj->pos_x.p.i, D_800AA248.cur_obj->pos_y.p.i, 5, 0x37, m) != 0) {
+                func_80053C50(0x58000, m);
+                func_8004A90C(m);
+                t->unk_0A = 0x10;
+                D_800AA248.cur_obj->script_pc = (s32) D_80091820;
+                func_8001F724(5);
+                return;
+            }
+        } while (--i != 0);
+    }
+}
 
 INCLUDE_ASM("asm/main/nonmatchings/game_8004750C", func_80049B9C);
 
-void func_80049D90(void) {
+void func_80049D90(Throw *t) {
     s32 vel;
 
     vel = D_800AA248.cur_obj->pos_x.v + D_800AA248.cur_obj->vel_x.v;
