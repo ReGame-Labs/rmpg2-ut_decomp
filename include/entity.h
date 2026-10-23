@@ -143,7 +143,8 @@ typedef struct Entity {
     /* 0x02A */ u8 unk_02A[0xA];
     /* 0x034 */ s32 unk_034;
     /* 0x038 */ s32 unk_038;
-    /* 0x03C */ u8 unk_03C[0xA];
+    /* 0x03C */ u8 unk_03C[0x8];
+    /* 0x044 */ s16 unk_044;
     /* 0x046 */ s16 unk_046;
     /* 0x048 */ u8 unk_048[0x10];
     /* 0x058 */ u16 unk_058;
@@ -202,7 +203,8 @@ typedef struct Entity {
     /* 0x1B0 */ u16 unk_1B0;
     /* 0x1B2 */ u16 unk_1B2;
     /* 0x1B4 */ s16 unk_1B4;
-    /* 0x1B6 */ u8 unk_1B6[0xA];
+    /* 0x1B6 */ u8 unk_1B6[0x8];
+    /* 0x1BE */ s16 unk_1BE;
     /* 0x1C0 */ s32 unk_1C0;
     /* 0x1C4 */ u8 unk_1C4[0x2];
     /* 0x1C6 */ s16 unk_1C6;

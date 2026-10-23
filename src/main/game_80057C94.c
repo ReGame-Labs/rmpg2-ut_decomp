@@ -290,7 +290,13 @@ INCLUDE_ASM("asm/main/nonmatchings/game_80057C94", func_80057F98);
 
 INCLUDE_ASM("asm/main/nonmatchings/game_80057C94", func_800580F8);
 
-INCLUDE_ASM("asm/main/nonmatchings/game_80057C94", func_80058214);
+extern s32 D_800845D0[];
+
+void func_80058214(Entity *e) {
+    e->unk_1C8 = 0;
+    e->unk_05E = 0;
+    func_80057B94(e, D_800845D0);
+}
 
 void func_80058240(Entity *e) {
     func_80057B94(e, D_80084598);
@@ -447,7 +453,12 @@ void func_80058550(Entity *e) {
 
 INCLUDE_ASM("asm/main/nonmatchings/game_80057C94", func_800585C0);
 
-INCLUDE_ASM("asm/main/nonmatchings/game_80057C94", func_80058680);
+extern s32 D_800847E4[];
+
+void func_80058680(Entity *e, u16 arg1) {
+    e->unk_05A = 0x16;
+    func_80057B94(e, D_800847E4);
+}
 
 void func_800586AC(Entity *e) {
     u16 kind;
@@ -631,7 +642,15 @@ void func_80058E90(Entity *e) {
     func_80057B94(e, D_80084BD4);
 }
 
-INCLUDE_ASM("asm/main/nonmatchings/game_80057C94", func_80058EB4);
+extern s32 D_80084BF0[];
+
+void func_80058EB4(Entity *e) {
+    e->unk_1C8 = 0;
+    e->unk_05E = 0;
+    e->unk_1CC = 0;
+    e->unk_044 = 0;
+    func_80057B94(e, D_80084BF0);
+}
 
 void func_80058EE8(Entity *e) {
     func_80057B94(e, D_80084C28);
@@ -691,7 +710,13 @@ void func_800590A0(Entity *e) {
     func_80057B94(e, D_80084D78);
 }
 
-INCLUDE_ASM("asm/main/nonmatchings/game_80057C94", func_800590C4);
+extern s32 D_80084544[];
+
+void func_800590C4(Entity *e) {
+    e->unk_1BE = 0;
+    e->unk_05A = 2;
+    func_80057B94(e, D_80084544);
+}
 
 void func_800590F4(Entity *e) {
     func_80057B94(e, D_80084D94);
@@ -862,17 +887,47 @@ void func_800595C0(Entity *e) {
     func_80057B94(e, D_800850DC);
 }
 
-INCLUDE_ASM("asm/main/nonmatchings/game_80057C94", func_800595E4);
+extern s32 D_80085018[];
 
-INCLUDE_ASM("asm/main/nonmatchings/game_80057C94", func_80059610);
+void func_800595E4(Entity *e) {
+    e->unk_184 = 1;
+    func_80057B94(e, D_80085018);
+}
 
-INCLUDE_ASM("asm/main/nonmatchings/game_80057C94", func_8005963C);
+extern s32 D_80085034[];
 
-INCLUDE_ASM("asm/main/nonmatchings/game_80057C94", func_80059668);
+void func_80059610(Entity *e) {
+    e->unk_184 = 1;
+    func_80057B94(e, D_80085034);
+}
 
-INCLUDE_ASM("asm/main/nonmatchings/game_80057C94", func_80059694);
+extern s32 D_80085050[];
 
-INCLUDE_ASM("asm/main/nonmatchings/game_80057C94", func_800596C0);
+void func_8005963C(Entity *e) {
+    e->unk_184 = 1;
+    func_80057B94(e, D_80085050);
+}
+
+extern s32 D_8008506C[];
+
+void func_80059668(Entity *e) {
+    e->unk_184 = 1;
+    func_80057B94(e, D_8008506C);
+}
+
+extern s32 D_80085088[];
+
+void func_80059694(Entity *e) {
+    e->unk_184 = 1;
+    func_80057B94(e, D_80085088);
+}
+
+extern s32 D_800850A4[];
+
+void func_800596C0(Entity *e) {
+    e->unk_184 = 1;
+    func_80057B94(e, D_800850A4);
+}
 
 void func_800596EC(Entity *e) {
     func_80057B94(e, D_80085114);
