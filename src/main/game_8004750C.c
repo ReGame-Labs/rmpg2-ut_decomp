@@ -31,6 +31,12 @@ extern s16 D_801D3D8A;
 extern s32 D_80091B60[];
 extern s32 D_8008C810[];
 extern s32 D_8008C828[];
+void func_8004A93C(Monster *m);
+u16 func_80053BE8(s16 x, Monster *m);
+extern s32 D_80091788[];
+extern s32 D_800917D0[];
+extern s32 D_8009192C[];
+extern s32 D_800918C4[];
 extern s32 D_8008C804;
 extern u16 D_801D8850;
 
@@ -1023,7 +1029,42 @@ void func_800492C8(void) {
     }
 }
 
-INCLUDE_ASM("asm/main/nonmatchings/game_8004750C", func_80049304);
+void func_80049304(Throw *t) {
+    Monster *m;
+    s32 vy;
+    s16 hit;
+    u16 i;
+
+    if (t->unk_0A != 1) {
+        return;
+    }
+    D_800AA248.cur_obj->pos_x.v = (D_800AA248.cur_obj->pos_x.v + D_800AA248.cur_obj->vel_x.v) & D_801D8864.v;
+    vy = D_800AA248.cur_obj->vel_y.v + 0x4000;
+    if (vy <= -0x90000) {
+        vy = -0x90000;
+    }
+    D_800AA248.cur_obj->vel_y.v = vy;
+    D_800AA248.cur_obj->pos_y.v += vy;
+    if (D_800AA248.cur_obj->vel_y.v >= 0 && D_800AA248.cur_obj->pos_y.p.i >= 0xD9) {
+        t->unk_0A = 0x10;
+        D_800AA248.cur_obj->script_pc = (s32) D_8009192C;
+        return;
+    }
+    i = 7;
+    do {
+        m = &D_801E0B78[i];
+        if ((m->unk_058 & 1) && m->unk_140 == 0) {
+            hit = func_80053854(D_800AA248.cur_obj->pos_x.p.i, D_800AA248.cur_obj->pos_y.p.i, m);
+            if (hit != 0) {
+                func_80053C50(0x58000, m);
+                func_8004A93C(m);
+                t->unk_0A = 0x10;
+                D_800AA248.cur_obj->script_pc = (s32) D_800918C4;
+                return;
+            }
+        }
+    } while (--i != 0);
+}
 
 INCLUDE_ASM("asm/main/nonmatchings/game_8004750C", func_800494B4);
 
@@ -1331,7 +1372,63 @@ u16 func_8004A51C(u16 kind, s16 b, Throw *t) {
     return 0;
 }
 
+#ifdef NON_MATCHING
+/* 70 %: the logic is right; the layout is not: the original keeps the landing and the hit blocks inline before their jumps to the sound, here they are placed after the loop */
+void func_8004A698(Throw *t) {
+    GameObject *saved = D_800AA248.cur_obj;
+    Monster *m;
+    s32 vy;
+    s16 hit;
+    u16 i;
+
+    if (t->unk_0A == 1) {
+        if (!(saved->unk_6C & 0x80)) {
+            saved->pos_x.v = (saved->pos_x.v + saved->vel_x.v) & D_801D8864.v;
+            vy = D_800AA248.cur_obj->vel_y.v - 0x18000;
+            if (vy < -0x30000) {
+                vy = -0x30000;
+            }
+            D_800AA248.cur_obj->vel_y.v = vy;
+            D_800AA248.cur_obj->pos_y.v -= vy;
+            if (D_800AA248.cur_obj->pos_y.p.i >= 0xD9) {
+                t->unk_0A = 0x10;
+                D_800AA248.cur_obj->script_pc = (s32) D_80091788;
+                D_800AA248.cur_obj->unk_20.f.flags |= 0x800;
+            } else {
+                i = 7;
+                do {
+                    m = &D_801E0B78[i];
+                    if ((m->unk_058 & 1) && m->unk_140 == 0) {
+                        hit = func_80053854(D_800AA248.cur_obj->pos_x.p.i, D_800AA248.cur_obj->pos_y.p.i, m);
+                        if (hit != 0) {
+                            func_80053C50(0x58000, m);
+                            t->unk_0A = 0x10;
+                            func_8004A93C(m);
+                            D_800AA248.cur_obj->script_pc = (s32) D_800917D0;
+                            D_800AA248.cur_obj->unk_20.f.flags |= 0x800;
+                            goto sound;
+                        }
+                        if (D_800AA248.cur_obj->vel_x.v != 0 && func_80053BE8(D_800AA248.cur_obj->pos_x.p.i, m) != 0) {
+                            D_800AA248.cur_obj->vel_x.v >>= 1;
+                        }
+                    }
+                } while (--i != 0);
+                goto end;
+            }
+        } else {
+            func_8004AE2C();
+        }
+sound:
+        if (!(D_800AA248.cur_obj->unk_6C & 0x80)) {
+            func_8001F7CC(0x28, 5);
+        }
+    }
+end:
+    D_800AA268 = saved;
+}
+#else
 INCLUDE_ASM("asm/main/nonmatchings/game_8004750C", func_8004A698);
+#endif
 
 void func_8004A90C(Monster *m) {
     m->action = 0x20;
