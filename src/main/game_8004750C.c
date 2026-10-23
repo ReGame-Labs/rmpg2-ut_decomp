@@ -25,6 +25,12 @@ typedef struct {
 extern ThrowSpeed D_8007F2A4[];
 int abs(int);
 extern GameObject *D_800AA268;     /* D_800AA248.cur_obj, as a scalar: some functions name it so */
+void func_8004AE2C(void);
+u16 func_80053854(s16 x, s16 y, Monster *m);
+extern s16 D_801D3D8A;
+extern s32 D_80091B60[];
+extern s32 D_8008C810[];
+extern s32 D_8008C828[];
 extern s32 D_8008C804;
 extern u16 D_801D8850;
 
@@ -116,7 +122,6 @@ extern s16 D_801E28D0;
 extern s16 D_801E28F0;
 extern s32 D_801FA7D8;
 extern s16 D_801E0D4C;
-
 
 INCLUDE_ASM("asm/main/nonmatchings/game_8004750C", func_8004750C);
 
@@ -1111,12 +1116,51 @@ void func_80049D90(void) {
     D_800AA248.cur_obj->pos_y.v = vel;
 }
 
-INCLUDE_ASM("asm/main/nonmatchings/game_8004750C", func_80049E10);
+void func_80049E10(Throw *t) {
+    GameObject *saved = D_800AA268;
+    Monster *m;
+    s32 vx;
+    u16 i;
 
-void func_8004AE2C(void);
-u16 func_80053854(s16 x, s16 y, Monster *m);
-extern s16 D_801D3D8A;
-extern s32 D_80091B60[];
+    if (t->unk_0A == 1) {
+        if (saved->unk_6C & 0x80) {
+            func_8004AE2C();
+        } else {
+            vx = saved->vel_x.v;
+            if (vx <= 0) {
+                if (D_801D3D8A < 0) {
+                    vx += D_801D3D8A;
+                }
+            } else if (D_801D3D8A > 0) {
+                vx += D_801D3D8A;
+            }
+            vx += D_800AA248.cur_obj->pos_x.v;
+            D_800AA248.cur_obj->pos_x.v = vx & D_801D8864.v;
+            D_800AA248.cur_obj->pos_y.v -= D_800AA248.cur_obj->vel_y.v;
+            if (D_800AA248.cur_obj->vel_y.v <= 0 && D_800AA248.cur_obj->pos_y.p.i >= 0xD9) {
+                t->unk_0A = 0x10;
+                D_800AA248.cur_obj->script_pc = (s32) D_8008C810;
+            } else {
+                i = 7;
+                do {
+                    m = &D_801E0B78[i];
+                    if ((m->unk_058 & 1) && !(m->obj->unk_6C & 0x80) && m->unk_140 == 0 &&
+                        func_80053854(D_800AA248.cur_obj->pos_x.p.i, D_800AA248.cur_obj->pos_y.p.i, m) != 0) {
+                        if (t->unk_08 == 0x12) {
+                            func_80053C50(0x1C000, m);
+                        } else {
+                            func_80053C50(0x18000, m);
+                        }
+                        t->unk_0A = 0x10;
+                        D_800AA248.cur_obj->script_pc = (s32) D_8008C828;
+                        break;
+                    }
+                } while (--i != 0);
+            }
+        }
+    }
+    D_800AA268 = saved;
+}
 
 void func_8004A044(Throw *t) {
     GameObject *obj;
@@ -1155,9 +1199,6 @@ void func_8004A044(Throw *t) {
         }
     } while (--i != 0);
 }
-
-extern s32 D_8008C810[];
-extern s32 D_8008C828[];
 
 void func_8004A1F8(Throw *t) {
     GameObject *saved = D_800AA268;
@@ -1245,7 +1286,50 @@ s32 func_8004A468(Monster *m) {
     return r;
 }
 
-INCLUDE_ASM("asm/main/nonmatchings/game_8004750C", func_8004A51C);
+extern s32 D_80091B48[];
+extern ThrowSpeed D_8007F3BC[];
+
+u16 func_8004A51C(u16 kind, s16 b, Throw *t) {
+    GameObject *saved = D_800AA248.cur_obj;
+    ObjectDef *def;
+    GameObject *cur;
+    SpriteFrame *fr;
+    s16 dx;
+    s16 dy;
+    s16 x;
+
+    def = func_8001D110();
+    D_800AA248.new_def = def;
+    cur = D_800AA248.cur_obj;
+    fr = cur->frame;
+    dx = fr->unk_20 - fr->unk_08;
+    x = dx;
+    dy = fr->unk_22 - fr->unk_0A;
+    if (cur->unk_20.f.flags & 0x10) {
+        x = -dx;
+        def->unk_04 |= 0x10;
+    }
+    def->pos_x.p.i = D_800AA248.cur_obj->pos_x.p.i + x;
+    def->pos_y.p.i = D_800AA248.cur_obj->pos_y.p.i + dy;
+    def->flags = 0x1005;
+    def->anim = D_80091B48;
+    def->id = 0x4F0000D6;
+    def->unk_0C = 0x725;
+    D_800AA248.cur_obj = func_8001DCB4();
+    if (D_800AA248.cur_obj == NULL) {
+        D_800AA248.cur_obj = saved;
+        return 1;
+    }
+    t->obj = D_800AA248.cur_obj;
+    t->unk_08 = b;
+    t->unk_0A = 1;
+    D_800AA248.cur_obj->unk_94.p = t;
+    D_800AA248.cur_obj->vel_y.v = D_8007F3BC[kind].vy;
+    D_800AA248.cur_obj->vel_x.v = (saved->unk_20.f.flags & 0x10) ? -D_8007F3BC[kind].vx : D_8007F3BC[kind].vx;
+    D_800AA248.cur_obj->unk_8C = 0x18;
+    D_800AA248.cur_obj = saved;
+    return 0;
+}
 
 INCLUDE_ASM("asm/main/nonmatchings/game_8004750C", func_8004A698);
 
