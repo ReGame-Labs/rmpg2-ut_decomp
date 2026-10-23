@@ -77,6 +77,12 @@ extern u8 D_8008E5F4[];
 extern u8 D_8008E608[];
 extern u8 D_8008D6C0[];
 extern u8 D_8008E6AC[];
+/* The same empty table under the other names the original gave it, one per range class of func_8004A468 (the
+ * link put them at one address: config/aliases.ld). */
+extern u8 D_8008E6AC_1[];
+extern u8 D_8008E6AC_2[];
+extern u8 D_8008E6AC_3[];
+extern u8 D_8008E6AC_4[];
 
 void func_80043118(void) {
     func_8003EB5C(D_80096D44, D_800AA248.unk_20);
@@ -412,83 +418,62 @@ void func_80043BE0(void) {
     func_8003EB5C(D_8008E6AC, D_800AA248.unk_20);
 }
 
-/* 51.89%: the original keeps the five identical case bodies apart, so each case named a different
- * symbol that the link put at the same address (empty tables of a placeholder monster, as the data has
- * them); with one name GCC cross-jumps the bodies into one. Needs symbol aliases in the link. */
-#ifdef NON_MATCHING
 void func_80043C0C(void) {
     switch (func_8004A468()) {
     case 0:
         func_8003EB5C(D_8008E6AC, D_800AA248.unk_20);
         break;
     case 1: case 2:
-        func_8003EB5C(D_8008E6AC, D_800AA248.unk_20);
+        func_8003EB5C(D_8008E6AC_1, D_800AA248.unk_20);
         break;
     case 3: case 4:
-        func_8003EB5C(D_8008E6AC, D_800AA248.unk_20);
+        func_8003EB5C(D_8008E6AC_2, D_800AA248.unk_20);
         break;
     case 5: case 6:
-        func_8003EB5C(D_8008E6AC, D_800AA248.unk_20);
+        func_8003EB5C(D_8008E6AC_3, D_800AA248.unk_20);
         break;
     default:
-        func_8003EB5C(D_8008E6AC, D_800AA248.unk_20);
+        func_8003EB5C(D_8008E6AC_4, D_800AA248.unk_20);
         break;
     }
 }
-#else
-INCLUDE_ASM("asm/main/nonmatchings/game_80043118", func_80043C0C);
-#endif
 
-/* 51.89%: the original keeps the five identical case bodies apart, so each case named a different
- * symbol that the link put at the same address (empty tables of a placeholder monster, as the data has
- * them); with one name GCC cross-jumps the bodies into one. Needs symbol aliases in the link. */
-#ifdef NON_MATCHING
 void func_80043CC0(void) {
     switch (func_8004A468()) {
     case 0:
         func_8003EB5C(D_8008E6AC, D_800AA248.unk_20);
         break;
     case 1: case 2:
-        func_8003EB5C(D_8008E6AC, D_800AA248.unk_20);
+        func_8003EB5C(D_8008E6AC_1, D_800AA248.unk_20);
         break;
     case 3: case 4:
-        func_8003EB5C(D_8008E6AC, D_800AA248.unk_20);
+        func_8003EB5C(D_8008E6AC_2, D_800AA248.unk_20);
         break;
     case 5: case 6:
-        func_8003EB5C(D_8008E6AC, D_800AA248.unk_20);
+        func_8003EB5C(D_8008E6AC_3, D_800AA248.unk_20);
         break;
     default:
-        func_8003EB5C(D_8008E6AC, D_800AA248.unk_20);
+        func_8003EB5C(D_8008E6AC_4, D_800AA248.unk_20);
         break;
     }
 }
-#else
-INCLUDE_ASM("asm/main/nonmatchings/game_80043118", func_80043CC0);
-#endif
 
-/* 51.89%: the original keeps the five identical case bodies apart, so each case named a different
- * symbol that the link put at the same address (empty tables of a placeholder monster, as the data has
- * them); with one name GCC cross-jumps the bodies into one. Needs symbol aliases in the link. */
-#ifdef NON_MATCHING
 void func_80043D74(void) {
     switch (func_8004A468()) {
     case 0:
         func_8003EB5C(D_8008E6AC, D_800AA248.unk_20);
         break;
     case 1: case 2:
-        func_8003EB5C(D_8008E6AC, D_800AA248.unk_20);
+        func_8003EB5C(D_8008E6AC_1, D_800AA248.unk_20);
         break;
     case 3: case 4:
-        func_8003EB5C(D_8008E6AC, D_800AA248.unk_20);
+        func_8003EB5C(D_8008E6AC_2, D_800AA248.unk_20);
         break;
     case 5: case 6:
-        func_8003EB5C(D_8008E6AC, D_800AA248.unk_20);
+        func_8003EB5C(D_8008E6AC_3, D_800AA248.unk_20);
         break;
     default:
-        func_8003EB5C(D_8008E6AC, D_800AA248.unk_20);
+        func_8003EB5C(D_8008E6AC_4, D_800AA248.unk_20);
         break;
     }
 }
-#else
-INCLUDE_ASM("asm/main/nonmatchings/game_80043118", func_80043D74);
-#endif
