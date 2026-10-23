@@ -453,9 +453,9 @@ void func_8004F1CC(void) {
     def->anim = anim;
     def->unk_1C = 0;
     def->id = *anim;
-    def->x = obj->pos_x.p.i + 0x46;
+    def->pos_x.p.i = obj->pos_x.p.i + 0x46;
     def->flags = 0x101;
-    def->y = obj->pos_y.p.i - 0xA;
+    def->pos_y.p.i = obj->pos_y.p.i - 0xA;
     o = func_8001DCB4();
     o->unk_70 = 0x540;
     if (D_801E289C == 6 && D_801FA8A6 != 0) {
@@ -548,8 +548,8 @@ void func_8004F47C(void) {
     if (obj == NULL) {
         def = func_8001D110();
         D_800AA248.new_def = def;
-        def->x = m->x;
-        def->y = m->y;
+        def->pos_x.p.i = m->x;
+        def->pos_y.p.i = m->y;
         def->id = 0x4F00000C;
         def->flags = saved->unk_80 + 1;
         D_800AA248.cur_obj = func_8001DCB4();
@@ -638,19 +638,19 @@ void func_8004F7F4(GameObject *obj, Monster *m1, Monster *m2, GameObject *cur) {
     if (x >= (s16) D_801D8866) {
         x -= D_801D8866;
     }
-    def->x = x;
+    def->pos_x.p.i = x;
     cur->pos_x.p.i = x;
     obj->pos_x.p.i = x;
     def->flags = 0x5500;
     def->anim = D_8009556C;
     def->id = 0x0100005E;
-    def->y = cur->pos_y.p.i;
+    def->pos_y.p.i = cur->pos_y.p.i;
     D_800AA284 = (GameObject *) def;
     o = func_8001DCB4();
     o->unk_70 = 0x743;
     m2->unk_0DC = 0;
     m1->unk_0DC = 0;
-    o->unk_94 = m1;
+    o->unk_94.monster = m1;
     o->owner.monster = m2;
 }
 #else
@@ -661,7 +661,7 @@ INCLUDE_ASM("asm/main/nonmatchings/game_8004E574", func_8004F7F4);
 /* 85%: the chain that picks unk_056 (1, 2, 5 or 0) and the order of the two monster loads */
 void func_8004F910(void) {
     GameObject *obj = D_800AA248.cur_obj;
-    Monster *other = obj->unk_94;
+    Monster *other = obj->unk_94.monster;
     Monster *m = obj->owner.monster;
     u16 v;
     s16 result;
@@ -802,8 +802,8 @@ void func_8004FC2C(void) {
     def = func_8001D110();
     D_800AA248.new_def = def;
     def->flags = 0x1100;
-    def->x = x;
-    def->y = y;
+    def->pos_x.p.i = x;
+    def->pos_y.p.i = y;
     def->id = 0x4F0000C2;
     def->anim = D_80095628;
     obj = func_8001DCB4();
@@ -839,8 +839,8 @@ void func_8004FD44(void) {
     def = func_8001D110();
     D_800AA248.new_def = def;
     def->flags = 0x1100;
-    def->x = x;
-    def->y = y;
+    def->pos_x.p.i = x;
+    def->pos_y.p.i = y;
     def->id = 0x4F0000C2;
     def->anim = D_80095628;
     obj = func_8001DCB4();
@@ -889,8 +889,8 @@ void func_8004FE28(void) {
     def = func_8001D110();
     D_800AA248.new_def = def;
     def->flags = 0x1100;
-    def->y = y;
-    def->x = x;
+    def->pos_y.p.i = y;
+    def->pos_x.p.i = x;
     def->anim = D_80095678;
     obj = func_8001DCB4();
     D_800AA248.cur_obj = obj;

@@ -4,13 +4,27 @@
 #include "common.h"
 #include "gameobject.h"
 #include "psyq/libc2.h"
+#include "game_80043E28.h"           /* Attacker: the attack command func_80047554 drives one */
 
 /* A thrown object's bookkeeping (func_8004B660). */
 typedef struct {
     /* 0x00 */ GameObject *obj;
-    /* 0x04 */ u8 unk_04[0x0A];
+    /* 0x04 */ u8 unk_04[0x04];
+    /* 0x08 */ u16 unk_08;
+    /* 0x0A */ u16 unk_0A;
+    /* 0x0C */ u8 unk_0C[0x02];
     /* 0x0E */ u16 armed;
 } Throw;
+
+/* A throw's speed, per attack kind (the table D_8007F2A4, 31 entries). */
+typedef struct {
+    /* 0x00 */ s32 vx;
+    /* 0x04 */ s32 vy;
+} ThrowSpeed;
+
+extern ThrowSpeed D_8007F2A4[];
+extern s32 D_8008C804;
+extern u16 D_801D8850;
 
 void func_8001E4B0(GameObject *obj);                        /* free an object */
 void func_8001F724(s32 sound);
@@ -20,14 +34,19 @@ s32 func_80025DF8(s32 player);
 void func_80029118(s32, s32);
 void func_80053C50(s32, Monster *m);
 void func_8006353C(s32);
-u16 func_8004A9B0(Monster *m, u16 a, s32 kind, s16 b, s16 c);
+u16 func_8004A9B0(Monster *m, s32 a, s32 kind, s16 b, s16 c);
 s32 func_8001EB10(s32 range, s32 x);
 void func_8004B204(void);
+void func_8003EB5C(void *anim, GameObject *obj);
+extern s32 D_8008A7A4;
+void func_8004B540(void);
+void func_8004B754(void);
+void func_8004B990(void);
 void func_8004B3D0(void);
 void func_8004AEA4(void *slot);
 void func_8004AD18(Throw *slot);
 ObjectDef *func_8001D110(void);
-u16 func_80047F64(u16, u16, s32);
+u16 func_80047F64(u16 kind, u16 b, Throw *t);
 u16 func_80047DEC(u16 a, u16 b, s16 dx, s16 dy, s32 e);
 u16 func_80047EA0(u16 a, u16 b, s32 c);
 u16 func_8004B6C4(GameObject *obj, s16 range, s32 mode);
@@ -36,15 +55,40 @@ void func_8004AF80(void);
 void func_8004AF1C();
 
 extern u8 D_8007F634[];
-extern s16 D_801D8850;
 extern s16 D_801D8724;
 extern Throw D_801E1CC4[];             /* 21 slots */
-extern u8 D_801F9A54[];                /* 3 records of 0x1C bytes */
+/* A throw in flight (three records at D_801F9A54): the throwing object, the thrown one and its speed. */
+typedef struct {
+    /* 0x00 */ GameObject *obj;
+    /* 0x04 */ u16 unk_04;
+    /* 0x06 */ u16 unk_06;
+    /* 0x08 */ u16 unk_08;
+    /* 0x0A */ u16 unk_0A;
+    /* 0x0C */ u16 unk_0C;
+    /* 0x0E */ u16 unk_0E;
+    /* 0x10 */ GameObject *thrown;
+    /* 0x14 */ s32 speed;
+    /* 0x18 */ void *land_anim;        /* the animation started when the thrown object lands */
+} ThrowRec;
+
+extern ThrowRec D_801F9A54[];          /* 3 records */
+extern s32 D_801F9AC8;                 /* the camera's x, 16.16 */
+extern u16 D_801F9ACA;                 /* its integer half */
+extern s32 D_801D8864;                 /* the level's width, 16.16 */
+extern u16 D_801D8866;                 /* its integer half */
+extern u16 D_801D8740;
+extern u16 D_801D8710;
+extern u16 D_8007A696;
+extern u16 D_8007F28C[];
+extern u16 D_8007F298[];
+extern s32 D_80096150;
+void func_80062E24(s32);
+GameObject *func_8001DCB4(void);
 extern u16 D_801E2A4C;
-extern s16 D_801E2A54;
+extern u16 D_801E2A54;
 extern u16 D_801E1C8C;
-extern s16 D_801E1C80;
-extern s16 D_801E0D60;
+extern u16 D_801E1C80;
+extern u16 D_801E0D60;
 extern s16 D_801E28D0;
 extern s16 D_801E28F0;
 extern s32 D_801FA7D8;
@@ -103,7 +147,64 @@ void func_80047780(void) {
     D_800AA248.cur_obj = saved;
 }
 
-INCLUDE_ASM("asm/main/nonmatchings/game_8004750C", func_800477F0);
+void func_800477F0(void) {
+    GameObject *saved = D_800AA248.cur_obj;
+    GameObject *obj;
+    Monster *m;
+    u16 *p;
+    s32 id;
+    u16 variant;
+    u16 sound;
+    s16 d;
+    s16 dx;
+    s16 yoff;
+    s16 xoff;
+
+    if (!(saved->unk_6C & 0x80)) {
+        m = saved->owner.monster;
+        if (m->unk_022 >= 5) {
+            m->unk_022 = 0;
+        }
+        obj = D_800AA248.cur_obj;
+        d = (u16) obj->pos_x.p.i - D_801F9ACA;
+        dx = d;
+        if (d < -0x1F3) {
+            dx = D_801D8866 + d;
+        }
+        if (obj->unk_20.f.flags & 0x10) {
+            yoff = 0;
+            if (dx >= 0xC9) {
+                yoff = -8;
+                xoff = -0x10;
+                id = D_8007F28C[m->unk_022];
+            } else {
+                xoff = -0x12;
+                id = D_8007F298[m->unk_022];
+            }
+        } else {
+            yoff = -8;
+            if (dx < 0xC8) {
+                xoff = -0x10;
+                id = D_8007F28C[m->unk_022];
+            } else {
+                yoff = 0;
+                xoff = -0x12;
+                id = D_8007F298[m->unk_022];
+            }
+        }
+        p = D_800AA248.cur_obj->arg.h;
+        variant = *p++;
+        sound = *p++;
+        if (p != NULL) {
+            func_8001F7CC(sound, variant);
+        }
+        if (id != 0) {
+            func_8004A9B0(0, id, 9, yoff, xoff);
+            m->unk_022++;
+        }
+    }
+    D_800AA248.cur_obj = saved;
+}
 
 void func_8004799C(void) {
     GameObject *saved = D_800AA248.cur_obj;
@@ -254,8 +355,8 @@ u16 func_80047DEC(u16 a, u16 b, s16 dx, s16 dy, s32 e) {
     if (!(D_800AA248.cur_obj->unk_20.f.flags & 0x10)) {
         x = -dx;
     }
-    def->x = x + (u16) D_800AA248.cur_obj->pos_x.p.i;
-    def->y = dy + (u16) D_800AA248.cur_obj->pos_y.p.i;
+    def->pos_x.p.i = x + (u16) D_800AA248.cur_obj->pos_x.p.i;
+    def->pos_y.p.i = dy + (u16) D_800AA248.cur_obj->pos_y.p.i;
     return func_80047F64(a, b, e);
 }
 
@@ -276,8 +377,8 @@ u16 func_80047EA0(u16 a, u16 b, s32 c) {
     if (cur->unk_20.f.flags & 0x10) {
         x = -dx;
     }
-    def->x = x + (u16) cur->pos_x.p.i;
-    def->y = dy + (u16) D_800AA248.cur_obj->pos_y.p.i;
+    def->pos_x.p.i = x + (u16) cur->pos_x.p.i;
+    def->pos_y.p.i = dy + (u16) D_800AA248.cur_obj->pos_y.p.i;
     return func_80047F64(a, b, c);
 }
 
@@ -436,7 +537,7 @@ void func_8004AC84(void) {
 INCLUDE_ASM("asm/main/nonmatchings/game_8004750C", func_8004AD18);
 
 void func_8004AE2C(void) {
-    void *other = D_800AA248.cur_obj->unk_94;
+    void *other = D_800AA248.cur_obj->unk_94.p;
 
     func_8001E4B0(D_800AA248.cur_obj);
     if (other != NULL) {
@@ -480,20 +581,62 @@ s16 arg0;
 }
 
 void func_8004AF80(void) {
-    u8 *rec;
+    ThrowRec *rec;
     u16 n;
 
     rec = D_801F9A54;
     n = 3;
     do {
-        memset(rec, 0, 0x1C);
-        rec += 0x1C;
+        memset(rec, 0, sizeof(ThrowRec));
+        rec++;
     } while (--n != 0);
 }
 
 INCLUDE_ASM("asm/main/nonmatchings/game_8004750C", func_8004AFD4);
 
-INCLUDE_ASM("asm/main/nonmatchings/game_8004750C", func_8004B038);
+void func_8004B038(void) {
+    u16 t = D_801E1C80;
+
+    if (t == 0) {
+        if (D_801E2A54 == 0xB) {
+            return;
+        }
+reset:
+        func_8004AFD4();
+        return;
+    }
+    if (D_801D8740 != 0) {
+        t--;
+        D_801E1C80 = t;
+        switch (t) {
+        case 0x537:
+            if (!(D_8007A696 & 8)) {
+                func_8001F7CC(0x8C, 0x6D);
+                D_8007A696 |= 8;
+            }
+            break;
+        case 0x4B0:
+            D_801E2A54 = 3;
+            D_801E1C8C = 1;
+            break;
+        case 0x258:
+            D_801E2A54 = 4;
+            D_801E1C8C = 2;
+            break;
+        case 0:
+            D_801E2A54 = 5;
+            D_801E1C8C = 3;
+            break;
+        }
+        if (D_801E2A54 >= 2) {
+            if (D_801E2A54 < 6) {
+                func_8004B17C();
+            } else {
+                goto reset;
+            }
+        }
+    }
+}
 
 void func_8004B17C(void) {
     if (D_801E1C8C == 1) {
