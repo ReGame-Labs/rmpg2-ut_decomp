@@ -232,7 +232,30 @@ void func_8002C0AC(s32 arg0, UnkStruct1 *arg1) {
     arg1->unk_16 = 0;
 }
 
-INCLUDE_ASM("asm/main/nonmatchings/game_8002A330", func_8002C0F8);
+void func_8002C0F8(s32 n, UnkStruct1 *a) {
+    void (**handler)(UnkStruct1 *);
+    s32 saved;
+
+    if (a->unk_16 < a->unk_00) {
+        handler = D_8007CFD0;
+        if (a->unk_76 != 1) {
+            a->unk_14 = 9;
+            return;
+        }
+        handler += a->unk_76;
+        saved = D_800AA248.unk_18;
+        D_800AA248.unk_18 = n;
+        (*handler)(a);
+        D_800AA248.unk_18 = saved;
+        return;
+    }
+    a->unk_14 = 0xE;
+    a->unk_30 = 0;
+    a->unk_16 = 0;
+}
+
+
+
 
 void func_8002C19C(UnkStruct1 *arg0) {
     if ((u16) arg0->unk_2A < 0x18U) {
@@ -352,7 +375,34 @@ void func_8002C430(UnkStruct1 *arg0) {
 
 INCLUDE_ASM("asm/main/nonmatchings/game_8002A330", func_8002C4B8);
 
-INCLUDE_ASM("asm/main/nonmatchings/game_8002A330", func_8002C6A0);
+/* An old-style definition: its callers pass the actor they already hold in a0 without naming it. */
+void func_8002C6A0(a)
+UnkStruct1 *a;
+{
+    UnkStruct4 *obj;
+    UnkStruct4 *spr;
+
+    obj = a->unk_84;
+    D_800AA268.obj = obj;
+    if (obj != NULL) {
+        func_8001E698(obj, D_80011E48);
+        func_8002CBF4((UnkStruct7 *) a);
+        a->unk_84 = NULL;
+    }
+    func_8002EBD8(a);
+    spr = a->unk_98[0].unk_00;
+    spr->unk_80 = 0x20A;
+    if (D_801E1E40 != 0) {
+        if (D_801E1E40 == 1) {
+            D_801FA890 = 0xB4;
+        } else {
+            D_801E1E40--;
+        }
+        func_8001E698(spr, a->unk_60);
+    }
+}
+
+
 
 void func_8002C738(UnkStruct1 *arg0) {
     arg0->unk_14 = 0x10;

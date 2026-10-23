@@ -11,7 +11,9 @@
 struct UnkStruct4;
 
 typedef struct GameState {
-    u8 pad_00[0x20];
+    u8 pad_00[0x18];
+    s32 unk_18;     /* D_800AA260: the argument of the current actor's handler (func_8002C0F8) */
+    u8 pad_1C[0x4];
     struct UnkStruct4 *unk_20;  /* D_800AA268 */
     u8 pad_24[0x18];
     struct UnkStructD110 *unk_3C;  /* the record func_8001D110 handed out last */
@@ -503,7 +505,7 @@ void func_8002C25C(UnkStruct1 *arg0);
 void func_8002F084();
 void func_8002C3C4(UnkStruct1 *arg0);
 void func_8002D9F8(UnkStruct1 *);
-void func_8002C6A0();
+void func_8002C6A0();   /* old-style: called without its argument */
 void func_8002C738(UnkStruct1 *arg0);
 void func_8001E698(void *, void *);
 void func_8001F724(s32);
@@ -779,6 +781,7 @@ void func_8002F65C(UnkStruct1 *, s32, UnkStruct2 *);
 void func_80032008(s16, s32, UnkStruct9 *);
 void func_80030C7C(UnkStruct2 *);
 void func_80030B00(s32, UnkStruct2 *);
+extern void (*D_8007CFD0[])(UnkStruct1 *);
 extern s32 *D_80011D98[];
 void func_8003DB74(UnkStruct9 *);
 void func_80031FD4(s32, UnkStruct9 *);
@@ -822,6 +825,8 @@ s32 func_8001A3AC(void);
 UnkStructD110 *func_8001D110(void);
 UnkStruct4 *func_8001DCB4(void);
 void func_8002CBF4(UnkStruct7 *);
+void func_8002EBD8(UnkStruct1 *);
+extern u8 D_80011E48[];
 extern s32 D_80011E68[];
 extern s32 D_80011ED0[];
 extern s32 D_80011ED8[];
