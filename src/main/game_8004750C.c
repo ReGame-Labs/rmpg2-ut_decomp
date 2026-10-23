@@ -9,9 +9,9 @@
 /* A thrown object's bookkeeping (func_8004B660). */
 typedef struct {
     /* 0x00 */ GameObject *obj;
-    /* 0x04 */ u8 unk_04[0x04];
-    /* 0x08 */ u16 unk_08;
-    /* 0x0A */ u16 unk_0A;
+    /* 0x04 */ GameObject *thrower;    /* the current object when the throw was made (func_8004A9B0) */
+    /* 0x08 */ u16 unk_08;             /* the kind: func_8004AD18 dispatches on it */
+    /* 0x0A */ u16 unk_0A;             /* the state: 1 in flight, 0x10 done */
     /* 0x0C */ u8 unk_0C[0x02];
     /* 0x0E */ u16 armed;
 } Throw;
@@ -67,7 +67,7 @@ s32 func_80025DF8(s32 player);
 void func_80029118(s32, s32);
 void func_80053C50(s32, Monster *m);
 void func_8006353C(s32);
-u16 func_8004A9B0(Monster *m, s32 a, s32 kind, s16 b, s16 c);
+u16 func_8004A9B0();
 s32 func_8001EB10(s32 range, s32 x);
 s16 func_8003FCD8(s16 x0, s16 x1);              /* a horizontal distance */
 extern s32 D_800916D8[];
@@ -82,8 +82,8 @@ void func_8004AEA4(void *slot);
 void func_8004AD18(Throw *slot);
 ObjectDef *func_8001D110(void);
 u16 func_80047F64(u16 kind, u16 b, Throw *t);
-u16 func_80047DEC(u16 a, u16 b, s16 dx, s16 dy, s32 e);
-u16 func_80047EA0(u16 a, u16 b, s32 c);
+u16 func_80047DEC(u16 a, u16 b, s16 dx, s16 dy, Throw *t);
+u16 func_80047EA0(u16 a, u16 b, Throw *t);
 u16 func_8004B6C4(GameObject *obj, s16 range, s32 mode);
 void func_8004EFAC(void);
 void func_8004AF80(void);
@@ -148,7 +148,13 @@ extern s16 D_801E28F0;
 extern s32 D_801FA7D8;
 extern s16 D_801E0D4C;
 
-INCLUDE_ASM("asm/main/nonmatchings/game_8004750C", func_8004750C);
+extern void (*D_8007F228[])(void);
+
+void func_8004750C(void) {
+    s32 i = func_8001EB10(0xE, 2);
+
+    D_8007F228[i & 0xF]();
+}
 
 void func_80047554(void *anim, Attacker *at) {
     GameObject *saved = D_800AA248.cur_obj;
@@ -443,7 +449,7 @@ void func_80047DCC(void) {
     D_800AA248.cur_obj->script_pc = *D_800AA248.cur_obj->arg.w;
 }
 
-u16 func_80047DEC(u16 a, u16 b, s16 dx, s16 dy, s32 e) {
+u16 func_80047DEC(u16 a, u16 b, s16 dx, s16 dy, Throw *t) {
     ObjectDef *def;
     s16 x = dx;
 
@@ -454,10 +460,10 @@ u16 func_80047DEC(u16 a, u16 b, s16 dx, s16 dy, s32 e) {
     }
     def->pos_x.p.i = x + (u16) D_800AA248.cur_obj->pos_x.p.i;
     def->pos_y.p.i = dy + (u16) D_800AA248.cur_obj->pos_y.p.i;
-    return func_80047F64(a, b, e);
+    return func_80047F64(a, b, t);
 }
 
-u16 func_80047EA0(u16 a, u16 b, s32 c) {
+u16 func_80047EA0(u16 a, u16 b, Throw *t) {
     ObjectDef *def = func_8001D110();
     GameObject *cur;
     SpriteFrame *fr;
@@ -476,7 +482,7 @@ u16 func_80047EA0(u16 a, u16 b, s32 c) {
     }
     def->pos_x.p.i = x + (u16) cur->pos_x.p.i;
     def->pos_y.p.i = dy + (u16) D_800AA248.cur_obj->pos_y.p.i;
-    return func_80047F64(a, b, c);
+    return func_80047F64(a, b, t);
 }
 
 u16 func_80047F64(u16 kind, u16 b, Throw *t) {
@@ -508,7 +514,7 @@ u16 func_80047F64(u16 kind, u16 b, Throw *t) {
 }
 
 extern s32 D_80091B54[];
-u16 func_80048070(u16 kind, s16 b, Throw *t) {
+u16 func_80048070(u16 kind, u16 b, Throw *t) {
     GameObject *saved = D_800AA248.cur_obj;
     ObjectDef *def;
     GameObject *cur;
@@ -553,7 +559,7 @@ u16 func_80048070(u16 kind, s16 b, Throw *t) {
     return 0;
 }
 
-u16 func_800481FC(u16 kind, s16 b, Throw *t) {
+u16 func_800481FC(u16 kind, u16 b, Throw *t) {
     GameObject *saved = D_800AA248.cur_obj;
     ObjectDef *def;
     GameObject *cur;
@@ -716,7 +722,7 @@ u16 func_80048558(u16 b, Throw *t) {
 /* 93 %: the original copies the state block's address into a second saved register after the facing test (move s0,s2) and uses both; here one register holds it throughout, so the frame has one saved register less */
 extern s32 D_8009186C[];
 
-u16 func_8004874C(s16 b, Throw *t) {
+u16 func_8004874C(u16 b, Throw *t) {
     GameObject *saved = D_800AA248.cur_obj;
     ObjectDef *def;
     GameObject *cur;
@@ -771,7 +777,7 @@ INCLUDE_ASM("asm/main/nonmatchings/game_8004750C", func_8004874C);
 extern s32 D_80091B24[];
 extern u16 D_801E28A8;
 
-u16 func_800488B8(s16 b, Throw *t) {
+u16 func_800488B8(u16 b, Throw *t) {
     GameObject *saved = D_800AA248.cur_obj;
     ObjectDef *def;
 
@@ -854,7 +860,7 @@ u16 func_800489C0(u16 b, Throw *t) {
     return 0;
 }
 
-u16 func_80048B98(s16 b, Throw *t) {
+u16 func_80048B98(u16 b, Throw *t) {
     GameObject *saved = D_800AA248.cur_obj;
     ObjectDef *def;
     GameObject *cur;
@@ -918,7 +924,7 @@ u16 func_80048B98(s16 b, Throw *t) {
 
 extern s32 D_8009177C[];
 
-u16 func_80048D4C(s16 b, Throw *t) {
+u16 func_80048D4C(u16 b, Throw *t) {
     GameObject *saved = D_800AA248.cur_obj;
     ObjectDef *def;
     SpriteFrame *fr;
@@ -954,7 +960,7 @@ u16 func_80048D4C(s16 b, Throw *t) {
 
 extern s32 D_80091A70[];
 
-u16 func_80048E6C(s16 b, Throw *t) {
+u16 func_80048E6C(u16 b, Throw *t) {
     GameObject *saved = D_800AA248.cur_obj;
     ObjectDef *def;
     SpriteFrame *fr;
@@ -988,7 +994,7 @@ u16 func_80048E6C(s16 b, Throw *t) {
 extern s32 D_80091ABC[];
 extern s32 D_80091A7C[];
 
-u16 func_80048F60(Monster *m, s16 b, Throw *t) {
+u16 func_80048F60(Monster *m, u16 b, Throw *t) {
     GameObject *saved = D_800AA248.cur_obj;
     ObjectDef *def;
     GameObject *cur;
@@ -1539,7 +1545,7 @@ s32 func_8004A468(Monster *m) {
 extern s32 D_80091B48[];
 extern ThrowSpeed D_8007F3BC[];
 
-u16 func_8004A51C(u16 kind, s16 b, Throw *t) {
+u16 func_8004A51C(u16 kind, u16 b, Throw *t) {
     GameObject *saved = D_800AA248.cur_obj;
     ObjectDef *def;
     GameObject *cur;
@@ -1674,7 +1680,99 @@ void func_8004A93C(Monster *m) {
 INCLUDE_ASM("asm/main/nonmatchings/game_8004750C", func_8004A93C);
 #endif
 
-INCLUDE_ASM("asm/main/nonmatchings/game_8004750C", func_8004A9B0);
+u16 func_80039358(Monster *m, u16 a, u16 kind, Throw *t);
+u16 func_8003A5A0(u16 a, u16 kind, Throw *t, s32 alt);
+
+u16 func_8004A9B0(m, a, kind, b, c)
+    Monster *m;
+    u16 a;
+    u16 kind;
+    u16 b;
+    u16 c;
+{
+    GameObject *saved = D_800AA268;
+    Throw *t;
+    u16 n;
+    u16 i;
+    u16 r;
+
+    n = D_801D8724;
+    if (D_801D8724 >= 0x15) {
+        return 1;
+    }
+    t = D_801E1CC4;
+    i = 1;
+    D_801D8724 = n + 1;
+    if (t->obj != NULL) {
+        do {
+            if (++i >= 0x15) {
+                return 1;
+            }
+            t++;
+        } while (t->obj != NULL);
+    }
+    func_8004AEA4(t);
+    t->thrower = D_800AA268;
+    r = 1;
+    switch (kind) {
+    case 1:
+        r = func_80047EA0(a, kind, t);
+        break;
+    case 2:
+        r = func_80048B98(kind, t);
+        break;
+    case 8:
+        r = func_80048384(kind, t);
+        break;
+    case 11:
+        r = func_80048558(kind, t);
+        break;
+    case 12:
+        r = func_800489C0(kind, t);
+        break;
+    case 3:
+        r = func_80048D4C(kind, t);
+        break;
+    case 4:
+        r = func_80048E6C(kind, t);
+        break;
+    case 5:
+        r = func_80048F60(m, kind, t);
+        break;
+    case 6:
+        r = func_8004A51C(a, kind, t);
+        break;
+    case 7:
+        r = func_80039358(m, a, kind, t);
+        break;
+    case 9:
+        r = func_80047DEC(a, kind, b, c, t);
+        break;
+    case 21:
+        r = func_8003A5A0(a, kind, t, 0);
+        break;
+    case 22:
+        r = func_8003A5A0(a, kind, t, 1);
+        break;
+    case 18:
+        r = func_800481FC(a, kind, t);
+        break;
+    case 17:
+        r = func_80048070(a, kind, t);
+        break;
+    case 23:
+        r = func_8004874C(kind, t);
+        break;
+    case 19:
+        r = func_800488B8(kind, t);
+        break;
+    }
+    if (r == 1) {
+        D_801D8724--;
+    }
+    D_800AA268 = saved;
+    return r;
+}
 
 void func_8004AC84(void) {
     GameObject *saved = D_800AA248.cur_obj;
