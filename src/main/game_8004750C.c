@@ -36,6 +36,8 @@ void func_80053C50(s32, Monster *m);
 void func_8006353C(s32);
 u16 func_8004A9B0(Monster *m, s32 a, s32 kind, s16 b, s16 c);
 s32 func_8001EB10(s32 range, s32 x);
+s16 func_8003FCD8(s16 x0, s16 x1);              /* a horizontal distance */
+extern s32 D_800916D8[];
 void func_8004B204(void);
 void func_8003EB5C(void *anim, GameObject *obj);
 extern s32 D_8008A7A4[];                 /* an animation: its first word is the sprite id */
@@ -462,7 +464,67 @@ INCLUDE_ASM("asm/main/nonmatchings/game_8004750C", func_80048070);
 
 INCLUDE_ASM("asm/main/nonmatchings/game_8004750C", func_800481FC);
 
+#ifdef NON_MATCHING
+/* 87%: the original stores the new object's x right after computing it, before the constant fields; here the scheduler puts the constants first */
+u16 func_80048384(u16 b, Throw *t) {
+    GameObject *saved = D_800AA248.cur_obj;
+    ObjectDef *def;
+    GameObject *cur;
+    SpriteFrame *fr;
+    s16 dy;
+    s16 dx;
+    s16 x;
+    s16 d;
+    u16 left = 0;
+    s32 vx;
+
+    D_800AA248.new_def = func_8001D110();
+    def = D_800AA248.new_def;
+    cur = D_800AA248.cur_obj;
+    fr = cur->frame;
+    dy = fr->unk_12 - fr->unk_0A - 5;
+    dx = fr->unk_10 - fr->unk_08 - 5;
+    x = dx;
+    if (cur->unk_20.f.flags & 0x10) {
+        x = -dx;
+    } else {
+        left = 1;
+    }
+    def->pos_x.p.i = (u16) D_800AA248.cur_obj->pos_x.p.i + x;
+    def->flags = 0x1005;
+    def->unk_0C = 0x721;
+    def->id = 0x4F0000D8;
+    def->anim = D_800916D8;
+    def->pos_y.p.i = (u16) D_800AA248.cur_obj->pos_y.p.i + dy;
+    D_800AA248.cur_obj = func_8001DCB4();
+    if (D_800AA248.cur_obj == NULL) {
+        D_800AA248.cur_obj = saved;
+        return 1;
+    }
+    t->obj = D_800AA248.cur_obj;
+    t->unk_08 = b;
+    t->unk_0A = 1;
+    D_800AA248.cur_obj->unk_94.p = t;
+    D_800AA248.cur_obj->vel_y.v = -(((func_8001EB10(0x7F, 1) & 3) + 0xE) << 15);
+    if (saved->unk_68 != NULL) {
+        d = func_8003FCD8(saved->pos_x.p.i, saved->unk_68->unk_68->pos_x.p.i);
+        if (d < 0) {
+            d = -d;
+        }
+        vx = ((d >> 5) << 15) + 0x4000;
+    } else {
+        vx = ((func_8001EB10(0x7F, 1) & 7) + 2) << 15;
+    }
+    if (left) {
+        vx = -vx;
+    }
+    D_800AA248.cur_obj->vel_x.v = vx;
+    D_800AA248.cur_obj = saved;
+    return 0;
+}
+#else
 INCLUDE_ASM("asm/main/nonmatchings/game_8004750C", func_80048384);
+#endif
 
 INCLUDE_ASM("asm/main/nonmatchings/game_8004750C", func_80048558);
 
