@@ -24,6 +24,7 @@ void func_80051A08(Entity *);
 void func_800526A4(Entity *);
 void func_80052880(Entity *, Unk800AA248 *);
 void func_80056CCC(Entity *, Unk800AA248 *);
+void func_80056E78(Entity *);
 
 void func_80050BBC(void);
 void func_80050E58(Entity *);
@@ -153,9 +154,41 @@ void func_800504B4(Entity *e) {
     func_800556AC(e, e);
 }
 
-INCLUDE_ASM("asm/main/nonmatchings/game_800500EC", func_80050520);
+void func_80050520(Entity *e) {
+    D_800AA248.unk_20->unk_0C = 0;
+    e->unk_104 = 0;
+    D_800AA248.unk_20->unk_10 = e->unk_1C0 <= 0x6FFFFF ? 0x20000 : 0xC0000;
+    if (e->unk_168 == 7) {
+        func_80054E1C(e);
+    } else {
+        func_80055014(e);
+    }
+}
 
-INCLUDE_ASM("asm/main/nonmatchings/game_800500EC", func_8005059C);
+void func_8005059C(Entity *e) {
+    s32 kind;
+
+    D_800AA248.unk_24 = e->unk_0CC;
+    D_800AA248.unk_20->unk_10 = 0;
+    D_800AA248.unk_20->unk_0C = 0;
+    e->unk_104 = 0;
+    e->unk_100 = 0;
+    if (e->unk_168 == 7) {
+        kind = e->unk_0CC;
+        if (kind < 5) {
+            if (kind >= 2) {
+                e->unk_05A = 0xC;
+            }
+        }
+    } else {
+        kind = e->unk_0CC;
+        if (kind < 9) {
+            if (kind >= 6) {
+                e->unk_05A = 0xC;
+            }
+        }
+    }
+}
 
 void func_8005061C(void) {
 }
@@ -981,6 +1014,8 @@ INCLUDE_ASM("asm/main/nonmatchings/game_800500EC", func_80053B30);
 
 extern s32 D_801D8864;
 extern s16 D_801F9ACA;
+extern s16 D_801D8866;
+extern s32 D_800AA258;
 
 u16 func_80053BE8(s16 x, Entity *e) {
     s16 v;
@@ -1067,7 +1102,29 @@ INCLUDE_ASM("asm/main/nonmatchings/game_800500EC", func_8005404C);
 
 INCLUDE_ASM("asm/main/nonmatchings/game_800500EC", func_800540D0);
 
-INCLUDE_ASM("asm/main/nonmatchings/game_800500EC", func_8005417C);
+u16 func_8001EA78(void);
+extern s32 D_8009547C;
+
+void func_8005417C(Entity *e) {
+    Body *b;
+    Unk800AA248Node *node;
+    u16 y;
+
+    b = D_800AA248.unk_20;
+    func_8001F724((func_8001EA78() & 1) + 0x1B);
+    func_8001F724(0x14);
+    node = func_8001D110();
+    D_800AA248.unk_3C = node;
+    node->unk_0C = 0x742;
+    node->unk_20 = 0x4000;
+    node->unk_10.h.i = e->unk_120.h.lo;
+    y = e->unk_120.h.hi;
+    node->unk_00 = 0x4F000060;
+    node->unk_28 = &D_8009547C;
+    node->unk_14.h.i = y;
+    func_8001DCB4();
+    D_800AA248.unk_20 = b;
+}
 
 INCLUDE_ASM("asm/main/nonmatchings/game_800500EC", func_8005421C);
 
@@ -1421,7 +1478,16 @@ void func_800553B0(Entity *e) {
     }
 }
 
-INCLUDE_ASM("asm/main/nonmatchings/game_800500EC", func_80055454);
+void func_80055454(Entity *e, Unk54728 *city) {
+    D_800AA248.unk_40 = 1;
+    if (!(D_800AA2DC & 0x38) && !func_80057AD8(e, city, 1)) {
+        if (D_800AA248.unk_24 == 1 || D_800AA248.unk_24 == 8) {
+            func_80055600(e, city);
+        } else {
+            func_800554F8(e, city);
+        }
+    }
+}
 
 void func_800554F8(Entity *e, Unk54728 *u) {
     if (!(D_800AA2DC & 0x38) && !func_80057AD8(e, u, 1)) {
@@ -1524,7 +1590,27 @@ INCLUDE_ASM("asm/main/nonmatchings/game_800500EC", func_80055B68);
 
 INCLUDE_ASM("asm/main/nonmatchings/game_800500EC", func_80055CA8);
 
-INCLUDE_ASM("asm/main/nonmatchings/game_800500EC", func_80055FBC);
+void func_80055FBC(Entity *e, Unk54728 *city) {
+    u16 target;
+    u16 state;
+
+    target = city->unk_1E;
+    e->unk_1B0 = 1;
+    e->unk_1B2 = target;
+    D_800AA248.unk_08 = 1;
+    state = e->unk_05A;
+    if (state == 0x11 || state == 2 || state == 0x4E || state == 0x2C) {
+        e->unk_05A = 6;
+        D_800AA248.unk_14 = 6;
+        e->unk_168 = 3;
+        D_800AA248.unk_20->unk_0C = 0;
+        D_800AA248.unk_20->unk_10 = 0;
+        e->unk_05C = 0;
+    } else {
+        D_800AA248.unk_14 = 0xD;
+        e->unk_05A = 0xD;
+    }
+}
 
 void func_80056050(Entity *e, Unk54728 *city) {
     u16 target;
@@ -1569,9 +1655,57 @@ void func_8005618C(Entity *e, Unk54728 *city) {
     func_8004E8A8();
 }
 
-INCLUDE_ASM("asm/main/nonmatchings/game_800500EC", func_800561CC);
+#ifdef NON_MATCHING
+/* 88 %: the screen-wrap sum: the original adds (x + 1) + width with the width loaded signed, here it is reassociated and loaded unsigned */
+u16 func_800561CC(s16 x, Unk54728 *city) {
+    s16 left;
+    s32 cx;
+    s16 px;
 
+    left = (s16) city->unk_04;
+    cx = left;
+    px = x;
+    if (left < D_801F9ACA) {
+        cx = cx + 1 + D_801D8866;
+    }
+    if (x < D_801F9ACA) {
+        px = x + 1 + D_801D8866;
+    }
+    if ((u16) (cx - px + 0x12) >= 0x2D || (u16) city->unk_24 != 0) {
+        return 0;
+    }
+    D_800AA258 = 0xE0;
+    return 1;
+}
+#else
+INCLUDE_ASM("asm/main/nonmatchings/game_800500EC", func_800561CC);
+#endif
+
+#ifdef NON_MATCHING
+/* 88 %: as func_800561CC (its twin for the other end) */
+u16 func_80056258(s16 x, Unk54728 *city) {
+    s16 left;
+    s32 cx;
+    s16 px;
+
+    left = (s16) city->unk_0E;
+    cx = left;
+    px = x;
+    if (left < D_801F9ACA) {
+        cx = cx + 1 + D_801D8866;
+    }
+    if (x < D_801F9ACA) {
+        px = x + 1 + D_801D8866;
+    }
+    if ((u16) (cx - px + 0x12) >= 0x2D || (u16) city->unk_28 != 0) {
+        return 0;
+    }
+    D_800AA258 = 0xE0;
+    return 1;
+}
+#else
 INCLUDE_ASM("asm/main/nonmatchings/game_800500EC", func_80056258);
+#endif
 
 INCLUDE_ASM("asm/main/nonmatchings/game_800500EC", func_800562E4);
 
