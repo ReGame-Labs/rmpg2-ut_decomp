@@ -7,3 +7,8 @@
 
 /* func_8002C32C (game_8002A330): the animation for an actor of kind 2 and for the others, one table at 0x8001236C. */
 D_8001236C_alt = D_8001236C;
+/* func_80043C0C, func_80043CC0, func_80043D74 (game_80043118): one name per range class of func_8004A468. */
+D_8008E6AC_1 = D_8008E6AC;
+D_8008E6AC_2 = D_8008E6AC;
+D_8008E6AC_3 = D_8008E6AC;
+D_8008E6AC_4 = D_8008E6AC;

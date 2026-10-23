@@ -38,7 +38,9 @@ typedef struct Mover {
     /* 0x68 */ u16 unk_68;      /* an animation index (game_80034590: func_80034C54) */
     /* 0x6A */ u16 unk_6A;      /* game_80034590: func_80034CB8 */
     /* 0x6C */ u16 unk_6C;      /* flags; 0x80 */
-    /* 0x6E */ u8 unk_6E[0x12];
+    /* 0x6E */ u8 unk_6E[0x2];
+    /* 0x70 */ u16 unk_70;      /* an id (game_80034590: func_80034E48) */
+    /* 0x72 */ u8 unk_72[0xE];
     /* 0x80 */ s16 unk_80;
     /* 0x82 */ u8 unk_82[0x2];
     /* 0x84 */ s32 unk_84;
@@ -46,6 +48,7 @@ typedef struct Mover {
     /* 0x8C */ u8 unk_8C[0x4];
     /* 0x90 */ struct MoverLink *unk_90;
     /* 0x94 */ struct MoverTarget *unk_94;  /* game_80034590: func_800374FC */
+    /* 0x98 */ void *unk_98;    /* the record that grabbed it (game_80034590: func_8003761C) */
 } Mover;
 
 /* A frame's metrics: pairs of halfwords from 0x10 on, picked by an actor's state (game_8003CD08: func_8003CE24,
@@ -141,7 +144,8 @@ typedef void (*AiHandler)(Ai *ai);
 /* A player's monster as the game drives it (game_8003CD08: the actor files call into it); large and mostly
  * unknown. */
 typedef struct Player {
-    /* 0x000 */ u8 unk_0[0x24];
+    /* 0x000 */ u16 unk_0;       /* the player's number, 1-based (game_80034590: func_80039958) */
+    /* 0x002 */ u8 unk_2[0x22];
     /* 0x024 */ u16 unk_24;
     /* 0x026 */ u16 unk_26;
     /* 0x028 */ u16 unk_28;
