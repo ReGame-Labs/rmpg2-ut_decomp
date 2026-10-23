@@ -19,7 +19,50 @@ void func_8002A354(s32 arg0) {
 
 INCLUDE_ASM("asm/main/nonmatchings/game_8002A330", func_8002A3A4);
 
+/* 98.55 %: the sky gradient's colour bytes; the original materializes the colour table's address before the frame pointer's (the two lui/la swapped), every statement order tried keeps the pointer first */
+#ifdef NON_MATCHING
+void func_8002A4E8(void) {
+    UnkStructFrame *frame;
+    s32 colour;
+
+    D_801FB41C = 0x808080;
+    colour = D_8007CD40[D_801FA960 - 100];
+    D_801FA9A4 = colour;
+    if (colour == 0) {
+        D_801F9A38 = 0;
+        return;
+    }
+    D_801F9A38 = 1;
+    D_801FAC80->unk_74 = D_8007CAFC[0xC];
+    D_801FAC80->unk_75 = D_8007CAFC[0x10];
+    D_801FAC80->unk_76 = D_8007CAFC[0x14];
+    D_801FAC80->unk_7C = D_801FAC80->unk_74;
+    D_801FAC80->unk_7D = D_801FAC80->unk_75;
+    D_801FAC80->unk_7E = D_801FAC80->unk_76;
+    D_801FAC80->unk_84 = D_8007CAFC[0];
+    D_801FAC80->unk_85 = D_8007CAFC[4];
+    D_801FAC80->unk_86 = D_8007CAFC[8];
+    D_801FAC80->unk_8C = D_801FAC80->unk_84;
+    D_801FAC80->unk_8D = D_801FAC80->unk_85;
+    D_801FAC80->unk_8E = D_801FAC80->unk_86;
+    D_801FAC80->unk_98 = D_8007CAFC[0x18];
+    D_801FAC80->unk_99 = D_8007CAFC[0x1C];
+    D_801FAC80->unk_9A = D_8007CAFC[0x20];
+    D_801FAC80->unk_A0 = D_801FAC80->unk_98;
+    D_801FAC80->unk_A1 = D_801FAC80->unk_99;
+    D_801FAC80->unk_A2 = D_801FAC80->unk_9A;
+    D_801FAC80->unk_A8 = D_801FAC80->unk_74;
+    D_801FAC80->unk_A9 = D_801FAC80->unk_75;
+    D_801FAC80->unk_AA = D_801FAC80->unk_76;
+    D_801FAC80->unk_B0 = D_801FAC80->unk_7C;
+    D_801FAC80->unk_B1 = D_801FAC80->unk_7D;
+    D_801FAC80->unk_B2 = D_801FAC80->unk_7E;
+    D_801FA9A4 = (D_801FAC80->unk_98 << 16) | (D_801FAC80->unk_99 << 8) | D_801FAC80->unk_9A;
+}
+#else
 INCLUDE_ASM("asm/main/nonmatchings/game_8002A330", func_8002A4E8);
+#endif
+
 
 INCLUDE_ASM("asm/main/nonmatchings/game_8002A330", func_8002A72C);
 
@@ -597,7 +640,84 @@ s32 func_8002DB3C(u16 which, u16 n, UnkStruct5 *rec) {
 INCLUDE_ASM("asm/main/nonmatchings/game_8002A330", func_8002DB3C);
 #endif
 
+/* 82 %: the sprite request for a record's slot; the original keeps n (a1) in s3 and needs one saved register less (no s8), and its u16 n compares unsigned; the u16, s16 and int parameter forms each add a copy or a sign extension */
+#ifdef NON_MATCHING
+void func_8002DBF4(u16 which, s32 n, UnkStruct1 *a, UnkStruct2 *rec) {
+    UnkStruct4 *saved;
+    UnkStruct4 *obj;
+    UnkStructD110 *req;
+    UnkStruct16 *ofs;
+    UnkStruct12 *slot;
+    u16 r;
+    u16 m;
+    u16 dx;
+    u16 dy;
+    s32 anim;
+
+    saved = D_800AA248.unk_20;
+    if (rec->unk_08->unk_70 != rec) {
+        m = n;
+        r = func_8002DB3C(which, m, (UnkStruct5 *) rec);
+        if (r != 1) {
+            if (r == 3) {
+                if (m >= 5) {
+                    func_8002E5F4(which, (UnkStruct5 *) rec);
+                }
+                anim = (s32) func_8002DAAC(which, m, (UnkStruct5 *) rec);
+                if (anim != 0) {
+                    D_800AA248.unk_3C = func_8001D110();
+                    req = D_800AA248.unk_3C;
+                    req->unk_00 = anim;
+                    req->unk_0C = 0x715;
+                    ofs = rec->unk_00->unk_34;
+                    if (which == 1) {
+                        dx = ofs->unk_10;
+                        dy = ofs->unk_12;
+                        slot = &((UnkStruct5 *) rec)->unk_0C;
+                    } else if (which == 2) {
+                        req->unk_04 |= 0x10;
+                        dx = ofs->unk_20;
+                        dy = ofs->unk_22;
+                        slot = &((UnkStruct5 *) rec)->unk_24;
+                    } else {
+                        dx = ofs->unk_18;
+                        dy = ofs->unk_1A;
+                        slot = &((UnkStruct5 *) rec)->unk_3C;
+                    }
+                    req->unk_12 = rec->unk_00->unk_16 + dx;
+                    req->unk_16 = rec->unk_00->unk_18.h.hi + dy;
+                    req->unk_20 = rec->unk_00->unk_80 + 7;
+                    obj = func_8001DCB4();
+                    D_800AA268.obj = obj;
+                    if (obj != NULL) {
+                        if ((u16) n < 2) {
+                            slot->unk_10 = obj;
+                            slot->unk_16 = n;
+                        } else {
+                            slot->unk_00 = obj;
+                            slot->unk_06 = n;
+                        }
+                    }
+                    func_80030698(m, a, rec);
+                    func_8002FA20((s32) a, (UnkStruct1 *) rec);
+                }
+            } else if (r == 2) {
+                func_8002DE08(which, m, (s32) a, (UnkStruct5 *) rec);
+                func_80030698(m, a, rec);
+                func_8002FA20((s32) a, (UnkStruct1 *) rec);
+            }
+        }
+    }
+    D_800AA268.obj = saved;
+}
+#else
 INCLUDE_ASM("asm/main/nonmatchings/game_8002A330", func_8002DBF4);
+#endif
+
+
+
+
+
 
 void func_8002DE08(u16 which, s16 n, s32 arg2, UnkStruct5 *rec) {
     UnkStruct4 *saved = D_800AA268.obj;

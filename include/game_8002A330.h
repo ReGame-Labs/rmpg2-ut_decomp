@@ -239,7 +239,10 @@ typedef struct UnkStructPair {  /* provisional: s16 pairs: D_801D8804 (func_8003
 
 typedef struct UnkStructD110 {  /* provisional: the record func_8001D110 hands out (a sprite request: an animation and a position) */
     s32 unk_00;
-    u8 pad_04[0xE];
+    u16 unk_04;
+    u8 pad_06[0x6];
+    s32 unk_0C;
+    u8 pad_10[0x2];
     u16 unk_12;
     u8 pad_14[0x2];
     u16 unk_16;
@@ -765,7 +768,7 @@ void func_80031FD4(s32, UnkStruct9 *);
 void func_80030834(UnkStruct1 *, s32);
 void func_8002E9A4(UnkStruct1 *);
 void func_8002BE30(UnkStruct7 *);
-void func_80031154(s32, UnkStruct1 *);
+void func_80031154();   /* called with one and with two arguments: no prototype in the original */
 extern u16 D_8007CFE8[];
 extern UnkStructPair D_8007CE08[];
 extern UnkStructPair D_8007CE34[];
@@ -777,7 +780,7 @@ void func_80034418(UnkStruct1 *);
 void func_8002F898(UnkStruct6 *, UnkStruct2 *);
 UnkStruct2 *func_8002ED30(u16, void *);   /* called with an actor and with one of its records */
 u16 func_8002F558(UnkStruct1 *);
-void func_8002DBF4(u16, s32, s32, UnkStruct1 *);
+void func_8002DBF4(u16, s32, UnkStruct1 *, UnkStruct2 *);
 void func_80025848(UnkStruct2 *);
 void func_80024964(s32, UnkStruct4 *);
 extern u8 D_8001236C[];
@@ -815,4 +818,59 @@ extern u16 D_801D8866;
 void func_8002CA8C(void);
 extern s32 D_80011E10[];
 extern s32 D_80011E90[];
+typedef struct UnkStructFrame {  /* provisional: what D_801FAC80 points to (the frame's drawing state: the sky's two
+                                   * gradient quads' colour bytes at 0x74..0xB2) */
+    u8 pad_00[0x74];
+    u8 unk_74;
+    u8 unk_75;
+    u8 unk_76;
+    u8 pad_77[0x5];
+    u8 unk_7C;
+    u8 unk_7D;
+    u8 unk_7E;
+    u8 pad_7F[0x5];
+    u8 unk_84;
+    u8 unk_85;
+    u8 unk_86;
+    u8 pad_87[0x5];
+    u8 unk_8C;
+    u8 unk_8D;
+    u8 unk_8E;
+    u8 pad_8F[0x9];
+    u8 unk_98;
+    u8 unk_99;
+    u8 unk_9A;
+    u8 pad_9B[0x5];
+    u8 unk_A0;
+    u8 unk_A1;
+    u8 unk_A2;
+    u8 pad_A3[0x5];
+    u8 unk_A8;
+    u8 unk_A9;
+    u8 unk_AA;
+    u8 pad_AB[0x5];
+    u8 unk_B0;
+    u8 unk_B1;
+    u8 unk_B2;
+} UnkStructFrame;
+
+extern UnkStructFrame *D_801FAC80;
+extern u8 D_8007CAFC[];
+extern s32 D_8007CD40[];
+extern s16 D_801F9A38;
+extern s16 D_801FA960;
+extern s32 D_801FA9A4;
+extern s32 D_801FB41C;
+typedef struct UnkStruct16 {  /* provisional: what an object's unk_34 points to (per-slot offsets, u16 pairs at 0x10, 0x18, 0x20) */
+    u8 pad_00[0x10];
+    u16 unk_10;
+    u16 unk_12;
+    u8 pad_14[0x4];
+    u16 unk_18;
+    u16 unk_1A;
+    u8 pad_1C[0x4];
+    u16 unk_20;
+    u16 unk_22;
+} UnkStruct16;
+void func_8002FA20(s32, UnkStruct1 *);   /* its second argument is the record (the views to be unified) */
 #endif /* GAME_8002A330_H */
