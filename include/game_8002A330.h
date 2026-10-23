@@ -340,7 +340,8 @@ struct UnkStruct1 {  /* provisional: fields as the code reaches them */
     u16 unk_8A;
     u8 pad_8C[0x4];
     s32 unk_90;
-    s32 unk_94;
+    s16 unk_94;     /* claimed (func_8002F01C) */
+    u8 pad_96[0x2];
     UnkStruct2 unk_98[2];
     s16 unk_140;
     u16 unk_142;
@@ -478,7 +479,7 @@ typedef struct UnkStruct8 {  /* provisional: func_80030268's third argument */
 
 s32 * func_80025C08(void *);
 s32 *func_8002A330(void);
-s32 func_8002BF70(void *);
+s32 func_8002BF70(UnkStruct1 *);
 void func_8002E278(s32, UnkStruct1 *);
 s32 func_8004F7A4(void *);
 void func_8002BFE4(s32 arg0, UnkStruct1 *arg1);
@@ -493,6 +494,7 @@ void func_80030B5C(UnkStruct1 *);
 void func_8002C25C(UnkStruct1 *arg0);
 void func_8002F084();
 void func_8002C3C4(UnkStruct1 *arg0);
+void func_8002D9F8(UnkStruct1 *);
 void func_8002C6A0();
 void func_8002C738(UnkStruct1 *arg0);
 void func_8001E698(void *, void *);
@@ -790,6 +792,7 @@ void func_80025848(UnkStruct2 *);
 void func_80024964(s32, UnkStruct4 *);
 extern u8 D_8001236C[];
 extern u8 D_80012394[];
+extern u8 D_8001236C_alt[];   /* another name for D_8001236C (config/aliases.ld) */
 extern UnkStructPair D_801D8804[14];
 extern UnkStruct1 D_801D3DC8[];
 extern u16 D_801E29A4;
