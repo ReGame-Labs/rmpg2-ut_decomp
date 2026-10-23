@@ -418,6 +418,8 @@ extern Anim D_80097374;
 extern Anim D_800973DC;
 extern Anim D_80097640;
 extern Anim D_80097950;
+extern Anim D_80097DF0;
+extern Anim D_8008B9C8;
 extern Anim D_80097C90;
 extern Anim D_8008B358;
 extern Anim D_8008B458;
@@ -832,9 +834,17 @@ INCLUDE_ASM("asm/main/nonmatchings/game_8001781C", func_8001A554);
 
 INCLUDE_ASM("asm/main/nonmatchings/game_8001781C", func_8001A784);
 
-INCLUDE_ASM("asm/main/nonmatchings/game_8001781C", func_8001A820);
+s32 func_8001A820(s32 index, s32 id) {
+    UnkFA738 *e = &D_801FA738[index & 0xFFFF];
 
-INCLUDE_ASM("asm/main/nonmatchings/game_8001781C", func_8001A848);
+    return (u16) e->unk_4 == (u16) id;
+}
+
+s32 func_8001A848(s32 index, s32 id) {
+    UnkFA738 *e = &D_801FA7EC[index & 0xFFFF];
+
+    return (u16) e->unk_4 == (u16) id;
+}
 
 INCLUDE_ASM("asm/main/nonmatchings/game_8001781C", func_8001A870);
 
@@ -844,7 +854,43 @@ INCLUDE_ASM("asm/main/nonmatchings/game_8001781C", func_8001AB30);
 
 INCLUDE_ASM("asm/main/nonmatchings/game_8001781C", func_8001AC18);
 
+/* 89 %: the loop invariants (id << 16, id | 0x8000, the table base) are set up in another order and the second loop keeps -1 and 0x8000 in saved registers */
+#ifdef NON_MATCHING
+void func_8001AD1C(Unk1AD1C *bank, s32 addr, s16 id) {
+    u32 i;
+    s32 slot;
+    s16 id2;
+
+    i = 0;
+    if (bank->unk_4 != 0) {
+        id2 = id | 0x8000;
+        do {
+            slot = func_80019B08(addr, 0x100, 0x100, id);
+            if (slot == -1) {
+                func_8001B5E8(5);
+            }
+            addr += 0x10000;
+            D_801D876C[slot * 2] = id2;
+            D_801D876C[slot * 2 + 1] = id2;
+            i++;
+        } while (i < bank->unk_4);
+    }
+    i = 0;
+    if (bank->unk_8 != 0) {
+        do {
+            slot = func_80019DAC(addr, 0x100, 0x100, id);
+            if (slot == -1) {
+                func_8001B5E8(6);
+            }
+            addr += 0x8000;
+            D_801D876C[slot] = id;
+            i++;
+        } while (i < bank->unk_8);
+    }
+}
+#else
 INCLUDE_ASM("asm/main/nonmatchings/game_8001781C", func_8001AD1C);
+#endif
 
 INCLUDE_ASM("asm/main/nonmatchings/game_8001781C", func_8001AE70);
 
@@ -869,7 +915,23 @@ void func_8001B098(Sprite *arg0) {
     }
 }
 
+/* 83 %: the original copies the argument (move a2,a0) and walks two pointers from it, the first loop load ordered before the second */
+#ifdef NON_MATCHING
+void func_8001B0D8(s32 *p, s32 flags) {
+    s32 *q;
+
+    if (p[1] != 0) {
+        q = p + 1;
+        do {
+            D_801D8868[*p] = *q | flags;
+            q += 2;
+            p += 2;
+        } while (*q != 0);
+    }
+}
+#else
 INCLUDE_ASM("asm/main/nonmatchings/game_8001781C", func_8001B0D8);
+#endif
 
 Glyph *func_8001B128(u32 arg0) {
     u32 index;
@@ -1013,7 +1075,7 @@ void func_8001BBB0(void) {
             temp_v0 = func_8001D110();
             D_800AA284 = temp_v0;
             temp_v0->unk_0 = 0x0A0041C8;
-            temp_v0->unk_10 = 0x930000;
+            temp_v0->unk_10.full = 0x930000;
             temp_v0->unk_14.full = 0x1E0000;
             temp_v0->unk_20 = 0x14;
             temp_v0->unk_6 |= 0x20;
@@ -2011,7 +2073,20 @@ INCLUDE_ASM("asm/main/nonmatchings/game_8001781C", func_800214D8);
 
 INCLUDE_ASM("asm/main/nonmatchings/game_8001781C", func_800215C0);
 
-INCLUDE_ASM("asm/main/nonmatchings/game_8001781C", func_80021644);
+void func_80021644(Unk22D58 *ai) {
+    if (ai->unk_C != 0) {
+        ai->unk_1C = 0x5A;
+        ai->unk_8 = 0x64;
+        func_800242A8();
+        func_8002423C(ai);
+        ai->unk_A = 0;
+        if (ai->unk_6 == 0x11) {
+            func_8003EB5C(&D_80097DF0, D_800AA268);
+        } else {
+            func_8003EB5C(&D_8008B9C8, D_800AA268);
+        }
+    }
+}
 
 INCLUDE_ASM("asm/main/nonmatchings/game_8001781C", func_800216C8);
 
@@ -2642,7 +2717,30 @@ void func_800242A8(void) {
 
 INCLUDE_ASM("asm/main/nonmatchings/game_8001781C", func_800242D8);
 
+/* 93 %: the second block loads the sprite's x into a temporary and copies it (lh v0; move v1,v0) and leaves the branch delay slot empty; the C loads it straight into its variable */
+#ifdef NON_MATCHING
+s16 func_8002439C(Unk22D58 *ai) {
+    s16 x;
+    s32 mx;
+    s32 d;
+
+    x = ai->unk_26;
+    if (x < D_801F9ACA) {
+        x += D_801D8866;
+    }
+    mx = D_800AA268->unk_14.s.hi;
+    if (mx < D_801F9ACA) {
+        mx += D_801D8866;
+    }
+    d = (s16) (mx - x);
+    if (d < 0) {
+        d = -d;
+    }
+    return d < 0x60;
+}
+#else
 INCLUDE_ASM("asm/main/nonmatchings/game_8001781C", func_8002439C);
+#endif
 
 INCLUDE_ASM("asm/main/nonmatchings/game_8001781C", func_80024418);
 
@@ -3662,7 +3760,43 @@ void func_80029B54(void) {
     memset(&D_801E2894, 0, 8);
 }
 
+/* 93 %: the distance's sign extension and the abs land in other registers (sll/sra into a0 before the negu) */
+#ifdef NON_MATCHING
+u16 func_80029B80(void) {
+    u16 count;
+    s32 result;
+    s16 best;
+    s16 dist;
+    s16 d;
+    s16 cx;
+    Unk1D3DC8 *building;
+
+    count = D_801E29A4;
+    result = 0;
+    best = 0x270F;
+    cx = (D_801F9ACA + 0xC8) & D_801D8866;
+    if (count != 0) {
+        building = D_801D3DC8;
+        do {
+            if (building->unk_14 < 9) {
+                dist = func_8003FCD8((building->unk_4 + building->unk_E) >> 1, cx);
+                d = dist;
+                if (dist < 0) {
+                    d = -d;
+                }
+                if (best >= d) {
+                    best = d;
+                    result = dist < 1;
+                }
+            }
+            building++;
+        } while (--count != 0);
+    }
+    return result;
+}
+#else
 INCLUDE_ASM("asm/main/nonmatchings/game_8001781C", func_80029B80);
+#endif
 
 void func_80029C6C(Monster *arg0) {
     Sprite *sprite;

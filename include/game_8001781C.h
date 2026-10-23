@@ -378,7 +378,8 @@ typedef struct Unk22D58 {
     u8 pad_1E[0x4];
     s16 unk_22;
     s16 unk_24;
-    u8 pad_26[0x4];
+    s16 unk_26;
+    u8 pad_28[0x2];
     s16 unk_2A;
     u8 pad_2C[0x4];
     s32 unk_30;
