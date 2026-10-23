@@ -187,6 +187,8 @@ extern u8 D_8008A4F4[];
 extern EffectDef D_800960E0;
 extern s32 D_801E1E14;
 extern u8 D_800956C4[];
+extern u8 D_801FA8A0[];
+extern s32 D_801D3D98[];
 
 void func_80034590(Npc *npc) {
     npc->unk_8 = 2;
@@ -1670,7 +1672,33 @@ void func_800398D4(npc)
     D_800AA248.unk_20 = mover;
 }
 
-INCLUDE_ASM("asm/main/nonmatchings/game_80034590", func_80039958);
+u16 func_80039958(NpcS *npc) {
+    s32 speed;
+    s32 *edge;
+    s16 x;
+
+    if (npc->unk_64 != NULL) {
+        speed = D_800AA268->unk_C;
+        edge = &D_801D3D98[D_801FA8A0[npc->unk_64->unk_0 - 1]];
+        if (speed >= 0) {
+            if (*edge > 0x16C0000) {
+                speed = 0;
+            }
+        } else if (*edge <= 0x1FFFFF) {
+            speed = 0;
+        }
+        if (speed == 0) {
+            return 1;
+        }
+    }
+    if (D_801FA98C == 0 || (x = ((s16 *)&D_800AA268->unk_14)[1], x < D_801FA98C - 0x10) || D_801FA990 + 0x10 < x) {
+        return 0;
+    }
+    if (D_800AA268->unk_C <= 0) {
+        return x >= D_801FA990;
+    }
+    return x <= D_801FA990;
+}
 
 void func_80039A58(NpcS *npc) {
     if (npc->unk_1C == 0) {

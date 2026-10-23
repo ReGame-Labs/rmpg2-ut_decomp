@@ -142,7 +142,8 @@ typedef void (*AiHandler)(Ai *ai);
 /* A player's monster as the game drives it (game_8003CD08: the actor files call into it); large and mostly
  * unknown. */
 typedef struct Player {
-    /* 0x000 */ u8 unk_0[0x24];
+    /* 0x000 */ u16 unk_0;       /* the player's number, 1-based (game_80034590: func_80039958) */
+    /* 0x002 */ u8 unk_2[0x22];
     /* 0x024 */ u16 unk_24;
     /* 0x026 */ u16 unk_26;
     /* 0x028 */ u16 unk_28;
