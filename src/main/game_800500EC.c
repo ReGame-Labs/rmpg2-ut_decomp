@@ -301,7 +301,24 @@ void func_80050DAC(Entity *e) {
     func_800531C0(e);
 }
 
-INCLUDE_ASM("asm/main/nonmatchings/game_800500EC", func_80050DD8);
+void func_80050DD8(Entity *e) {
+    u16 n;
+
+    D_800AA248.unk_24 = e->unk_0CC;
+    if (e->unk_0CC == 0) {
+        func_800531C0(e);
+        return;
+    }
+    n = e->unk_1B0;
+    D_800AA248.unk_08 = n;
+    if (n == 0 || e->unk_1B0 == 3) {
+        e->unk_05A = 0;
+        func_800501B0(e);
+    } else {
+        e->unk_05A = 6;
+        func_8005086C(e);
+    }
+}
 
 void func_80050E58(Entity *e) {
     u16 n;
@@ -1098,7 +1115,26 @@ void func_80053FDC(void) {
     }
 }
 
-INCLUDE_ASM("asm/main/nonmatchings/game_800500EC", func_8005404C);
+extern s32 D_800123BC;
+
+void func_8005404C(Entity *e) {
+    Body *b;
+    Unk800AA248Node *node;
+    u16 y;
+
+    b = D_800AA248.unk_20;
+    node = func_8001D110();
+    D_800AA248.unk_3C = node;
+    node->unk_0C = 0x743;
+    node->unk_20 = 0x4000;
+    node->unk_10.h.i = e->unk_120.h.lo;
+    y = e->unk_120.h.hi;
+    node->unk_00 = 0x4F000052;
+    node->unk_28 = &D_800123BC;
+    node->unk_14.h.i = y;
+    func_8001DCB4();
+    D_800AA248.unk_20 = b;
+}
 
 INCLUDE_ASM("asm/main/nonmatchings/game_800500EC", func_800540D0);
 
@@ -1627,7 +1663,27 @@ void func_80056050(Entity *e, Unk54728 *city) {
     e->unk_05C = 0;
 }
 
-INCLUDE_ASM("asm/main/nonmatchings/game_800500EC", func_800560A8);
+void func_800560A8(Entity *e, Unk54728 *city) {
+    u16 target;
+    u16 state;
+
+    target = city->unk_1E;
+    e->unk_1B0 = 2;
+    e->unk_1B2 = target;
+    D_800AA248.unk_08 = 2;
+    D_800AA248.unk_20->unk_0C = 0;
+    D_800AA248.unk_20->unk_10 = 0;
+    state = e->unk_05A;
+    if (state == 0x11 || state == 2 || state == 0x4E || state == 0x2C) {
+        e->unk_05A = 6;
+        D_800AA25C = 6;
+        e->unk_168 = 7;
+        e->unk_05C = 0;
+    } else {
+        D_800AA248.unk_14 = 0xD;
+        e->unk_05A = 0xD;
+    }
+}
 
 void func_80056134(Entity *e, Unk54728 *city) {
     u16 target;
@@ -1711,7 +1767,33 @@ INCLUDE_ASM("asm/main/nonmatchings/game_800500EC", func_800562E4);
 
 INCLUDE_ASM("asm/main/nonmatchings/game_800500EC", func_80056378);
 
-INCLUDE_ASM("asm/main/nonmatchings/game_800500EC", func_8005640C);
+void func_8005640C(Entity *e, Unk54728 *city) {
+    u16 n;
+    s16 h;
+    Unk800AA248 *g;
+
+    g = &D_800AA248;
+    n = e->unk_1B0;
+    g->unk_08 = n;
+    if ((s16) city->unk_74 + 0x34 >= g->unk_10) {
+        h = e->unk_1C6;
+        if (h < 0x30) {
+            if (n == 1) {
+                goto stand;
+            }
+        clear:
+            e->unk_104 = 0;
+            g->unk_20->unk_10 = 0;
+            return;
+        }
+        if (h >= 0x159 && n != 2) {
+            goto clear;
+        }
+    stand:
+        g->unk_14 = 0x10;
+            e->unk_05A = 0x10;
+    }
+}
 
 void func_80056488(Entity *e) {
     D_800AA268.p->unk_16 = func_80054728(e->unk_1B2)->unk_04 + 0x28;
@@ -1771,7 +1853,36 @@ s32 func_80056990(Entity *e, Unk54728 *u) {
     return 0;
 }
 
-INCLUDE_ASM("asm/main/nonmatchings/game_800500EC", func_80056A44);
+extern s16 D_8007FD04[];
+extern s16 D_8007FD24[];
+extern s16 D_8007FD44[];
+
+u16 func_80056A44(Entity *e, Unk54728 *city) {
+    s16 *limit;
+    u16 kind;
+    u16 i;
+
+    kind = city->unk_08;
+    i = 0;
+    switch (kind) {
+    case 0x300:
+        limit = D_8007FD04;
+        break;
+    case 0x200:
+        limit = D_8007FD24;
+        break;
+    default:
+        limit = D_8007FD44;
+        break;
+    }
+    while (++i < 15) {
+        if (D_800AA258 >= *limit) {
+            break;
+        }
+        limit++;
+    }
+    return i;
+}
 
 INCLUDE_ASM("asm/main/nonmatchings/game_800500EC", func_80056AC8);
 
@@ -1817,7 +1928,27 @@ void func_80056E78(Entity *e) {
     e->unk_1B4 = 0;
 }
 
-INCLUDE_ASM("asm/main/nonmatchings/game_800500EC", func_80056EB8);
+void func_80056EB8(Entity *e, Unk54728 *city) {
+    u16 n;
+
+    if (city->unk_14 == 4) {
+        if (city->unk_82 != 0) {
+            return;
+        }
+        goto fall;
+    }
+    n = e->unk_1B0;
+    D_800AA248.unk_08 = n;
+    if (n == 3) {
+        D_800AA248.unk_14 = 0x2C;
+        e->unk_05A = 0x2C;
+        return;
+    }
+    if (city->unk_14 >= 0xB) {
+    fall:
+        func_80056E78(e);
+    }
+}
 
 INCLUDE_ASM("asm/main/nonmatchings/game_800500EC", func_80056F38);
 

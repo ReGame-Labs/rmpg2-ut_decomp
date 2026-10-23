@@ -202,7 +202,8 @@ typedef struct Entity {
     /* 0x1B4 */ s16 unk_1B4;
     /* 0x1B6 */ u8 unk_1B6[0xA];
     /* 0x1C0 */ s32 unk_1C0;
-    /* 0x1C4 */ u8 unk_1C4[0x4];
+    /* 0x1C4 */ u8 unk_1C4[0x2];
+    /* 0x1C6 */ s16 unk_1C6;
     /* 0x1C8 */ s16 unk_1C8;
     /* 0x1CA */ u8 unk_1CA[0x2];
     /* 0x1CC */ u16 unk_1CC;
