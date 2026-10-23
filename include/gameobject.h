@@ -24,7 +24,8 @@ struct Attacker;
  * Fields from game_80043E28 and game_8004E574; the size is not known. */
 typedef struct GameObject {
     /* 0x00 */ s32 unk_00;             /* the sprite/animation id it was created from */
-    /* 0x04 */ u8 unk_04[0x08];
+    /* 0x04 */ u8 unk_04[0x04];
+    /* 0x08 */ s32 unk_08;
     /* 0x0C */ Fixed16 vel_x;
     /* 0x10 */ Fixed16 vel_y;
     /* 0x14 */ Fixed16 pos_x;
