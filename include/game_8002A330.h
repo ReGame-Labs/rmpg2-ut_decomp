@@ -396,6 +396,7 @@ struct UnkStruct6 {  /* provisional */
     u16 unk_02;
     u8 pad_04[0x14];
     UnkStruct3 *unk_18;
+    u16 unk_1C;     /* the kind of its animation tables (func_8002DAAC) */
 };
 
 typedef UnkStruct4 UnkStruct13;   /* the records UnkStruct12 points at are the same kind as the current object's */
@@ -777,6 +778,8 @@ void func_80030A70(s32, UnkStruct12 *);
 void func_8002F65C(UnkStruct1 *, s32, UnkStruct2 *);
 void func_80032008(s16, s32, UnkStruct9 *);
 void func_80030C7C(UnkStruct2 *);
+void func_80030B00(s32, UnkStruct2 *);
+extern s32 *D_80011D98[];
 void func_8003DB74(UnkStruct9 *);
 void func_80031FD4(s32, UnkStruct9 *);
 void func_80030834(UnkStruct1 *, s32);

@@ -662,7 +662,29 @@ INCLUDE_ASM("asm/main/nonmatchings/game_8002A330", func_8002D844);
 
 INCLUDE_ASM("asm/main/nonmatchings/game_8002A330", func_8002D9F8);
 
-INCLUDE_ASM("asm/main/nonmatchings/game_8002A330", func_8002DAAC);
+void *func_8002DAAC(u16 which, u16 n, UnkStruct5 *rec) {
+    s32 **p;
+    s32 *t;
+    s32 r;
+    u16 k;
+
+    r = 0;
+    if (n < 7) {
+        k = rec->unk_08->unk_1C;
+        if (k != 0) {
+            p = D_80011D98;
+            if (k < 3) {
+                p += k - 1;
+                t = *p;
+                t += func_8001EB10(0x20, 0) & 1;
+                r = t[n * 2];
+            }
+        }
+    }
+    return (void *) r;
+}
+
+
 
 #ifdef NON_MATCHING
 /* 92 %: the original lays the `v == 0` and `v == n` outcomes out of line after an inlined `return result` for the 2;
@@ -1676,7 +1698,18 @@ void func_80030A70(s32 arg0, UnkStruct12 *arg1) {
     }
 }
 
-INCLUDE_ASM("asm/main/nonmatchings/game_8002A330", func_80030B00);
+void func_80030B00(s32 vy, UnkStruct2 *rec) {
+    UnkStruct4 *obj;
+
+    obj = rec->unk_00;
+    if (obj != NULL) {
+        obj->unk_10 = vy;
+        func_80030A70(vy, &((UnkStruct5 *) rec)->unk_0C);
+        func_80030A70(vy, &((UnkStruct5 *) rec)->unk_24);
+        func_80030A70(vy, &((UnkStruct5 *) rec)->unk_3C);
+    }
+}
+
 
 #ifdef NON_MATCHING
 /* 95 %: the original computes the first record's address in two steps (unk_98, then + 0x54), as a loop
@@ -1725,7 +1758,18 @@ void func_80030BAC(UnkStruct12 *arg0) {
     }
 }
 
-INCLUDE_ASM("asm/main/nonmatchings/game_8002A330", func_80030C7C);
+void func_80030C7C(UnkStruct2 *rec) {
+    UnkStruct4 *obj;
+
+    obj = rec->unk_00;
+    if (obj != NULL) {
+        obj->unk_18.w += obj->unk_10;
+        func_80030BAC(&((UnkStruct5 *) rec)->unk_0C);
+        func_80030BAC(&((UnkStruct5 *) rec)->unk_24);
+        func_80030BAC(&((UnkStruct5 *) rec)->unk_3C);
+    }
+}
+
 
 s32 func_80030CD4(UnkStruct17 *part) {
     s32 r;
@@ -2106,7 +2150,14 @@ INCLUDE_ASM("asm/main/nonmatchings/game_8002A330", func_80032350);
 
 INCLUDE_ASM("asm/main/nonmatchings/game_8002A330", func_80032530);
 
-INCLUDE_ASM("asm/main/nonmatchings/game_8002A330", func_80032630);
+void func_80032630(s32 handlers, UnkStruct9 *r) {
+    void (**h)(UnkStruct9 *);
+
+    h = (void (**)(UnkStruct9 *)) handlers;
+    h += r->unk_0A;
+    (*h)(r);
+}
+
 
 void func_80032668(s32 arg0) {
     func_80031CB4(D_8007D280, arg0);
