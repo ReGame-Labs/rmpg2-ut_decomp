@@ -36,10 +36,18 @@ void *memset(void *s, s32 c, u32 n);
 s32 abs(s32 n);
 
 void func_80029D1C(void);
+s32 func_8003B9C8(Mover *mover, Player *player);
+void func_8005E0E8(Player *player);
 void func_8004BBC8(Npc *npc);
 void func_80020DDC(Npc *npc);
 
 /* This unit. */
+u16 func_80036FD0(s16 x, s16 y, Mover *mover);
+u16 func_80036C30(Player *player, Npc *npc, Mover *mover, s32 reach);
+void func_800383F4(NpcS *npc);
+void func_80038494(NpcS *npc);
+void func_800384E8(NpcS *npc);
+void func_80038AE8(NpcS *npc);
 void func_80036818(Npc *npc);
 void func_80037A88(NpcS *npc);
 void func_80037F20(NpcS *npc);
@@ -1096,7 +1104,69 @@ void func_800369F8(Npc *npc) {
     D_801D8730 = 0;
 }
 
+/* 99.61%: the live count and the constant 1 swap saved registers (s4 and s3 in the original) */
+#ifdef NON_MATCHING
+void func_80036A20(Player *player) {
+    u16 n;
+    Npc *npc;
+    Mover *mover;
+    u16 kind;
+
+    n = D_801D8730;
+    npc = D_801FAC9C;
+    if (n == 0) {
+        return;
+    }
+    do {
+        kind = npc->unk_6;
+        mover = npc->unk_0;
+        if (kind == 0x31 || kind == 0x13 || kind == 0x14 || (kind == 0x15 && npc->unk_8 != 0x63)) {
+            if (func_8003B9C8(mover, player) != 0) {
+                func_80037078(player, (NpcS *)npc);
+                return;
+            }
+        } else if (!(mover->unk_6C & 0x80) && (npc->unk_8 == 0x32 || npc->unk_8 == 2 || npc->unk_8 == 0x1E)) {
+            switch (npc->unk_6) {
+            case 0x3E:
+            case 0x3F:
+                if (npc->unk_8 != 0x1E && (u16)player->unk_5A != 4) {
+                    if (func_80036C30(player, npc, mover, 0x1E) != 1) {
+                        break;
+                    }
+                    if (npc->unk_8 == 0x1E) {
+                        func_8005E0E8(player);
+                        func_80053D68(8, player);
+                        if (((s16 *)&player->unk_68->unk_18)[1] == 0xE1) {
+                            player->unk_5A = 8;
+                        }
+                    }
+                    return;
+                }
+                /* fallthrough */
+            case 3:
+            case 0xF:
+            case 0x3B:
+            case 0x3C:
+            case 0x42:
+                if (func_80036FD0((s16)player->unk_120, (s16)player->unk_122, mover) == 1) {
+                    func_80037078(player, (NpcS *)npc);
+                    return;
+                }
+                break;
+            case 0x11:
+            case 0x12:
+                if (func_80036C30(player, npc, mover, 0x14) == 1) {
+                    return;
+                }
+                break;
+            }
+        }
+        npc++;
+    } while (--n != 0);
+}
+#else
 INCLUDE_ASM("asm/main/nonmatchings/game_80034590", func_80036A20);
+#endif
 
 INCLUDE_ASM("asm/main/nonmatchings/game_80034590", func_80036C30);
 
@@ -1455,7 +1525,28 @@ void func_8003831C(void) {
     func_8004CFC0();
 }
 
-INCLUDE_ASM("asm/main/nonmatchings/game_80034590", func_80038348);
+void func_80038348(NpcS *npc) {
+    D_800AA268 = npc->unk_0;
+    func_80020D20();
+    switch (npc->unk_8) {
+    case 1:
+    case 0x3B:
+        func_800383F4(npc);
+        break;
+    case 3:
+        func_80038494(npc);
+        break;
+    case 4:
+        func_80038800(npc);
+        break;
+    case 2:
+        func_80038AE8(npc);
+        break;
+    case 0x32:
+        func_800384E8(npc);
+        break;
+    }
+}
 
 void func_800383F4(NpcS *npc) {
     if (npc->unk_1C == 0) {
