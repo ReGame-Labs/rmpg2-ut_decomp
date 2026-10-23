@@ -451,7 +451,40 @@ void func_80058550(Entity *e) {
     func_80057B94(e, D_80084774);
 }
 
+#ifdef NON_MATCHING
+/* 96.5 %: the original keeps n unmasked from the lhu and masks it only for the n != 0 test; a u16 local is masked at the load here */
+
+void func_800585C0(Entity *e) {
+    s32 *script;
+    u16 n;
+    u16 state;
+
+    n = e->unk_1B0;
+    e->unk_164 = 0;
+    if ((u32) (n - 1) < 2) {
+        script = D_800847C8;
+    } else {
+        state = e->unk_05C;
+        if (state == 2 || state == 0x4E) {
+            func_80058680(e, n);
+            return;
+        }
+        if (n != 0 || e->unk_0CC != 5) {
+            script = D_80084790;
+        } else {
+            e->unk_164 = 1;
+            script = D_800847AC;
+        }
+    }
+    D_800AA248.unk_20->unk_0C = 0;
+    D_800AA248.unk_20->unk_10 = 0;
+    e->unk_104 = 0;
+    e->unk_100 = 0;
+    func_80057B94(e, script);
+}
+#else
 INCLUDE_ASM("asm/main/nonmatchings/game_80057C94", func_800585C0);
+#endif
 
 extern s32 D_800847E4[];
 
@@ -576,7 +609,37 @@ void func_80058BCC(Entity *e) {
     func_80057B94(e, D_80084A14);
 }
 
+#ifdef NON_MATCHING
+/* 90.8 %: the -0x30000 constant is computed once before the tests in the original (a1), here inside the push block */
+extern s32 D_80084A30[];
+
+void func_80058BF0(Entity *e) {
+    s32 vx;
+    u16 n;
+
+    n = e->unk_1B0;
+    if (n != 0) {
+        if (n == 1) {
+            vx = -0x20000;
+        } else if (n == 2) {
+            vx = 0x20000;
+        } else {
+            goto done;
+        }
+        e->unk_100 = vx;
+        D_800AA268.p->unk_10 = -0x30000;
+        e->unk_104 = 0x4000;
+    }
+done:
+    e->unk_1B0 = 0;
+    e->unk_1B2 = 0;
+    e->unk_1B4 = 0;
+    e->unk_100 = 0;
+    func_80057B94(e, D_80084A30);
+}
+#else
 INCLUDE_ASM("asm/main/nonmatchings/game_80057C94", func_80058BF0);
+#endif
 
 void func_80058C6C(Entity *e) {
     func_80057B94(e, D_80084A84);
@@ -1175,7 +1238,37 @@ void func_8005D034(s32 x, s32 y, s32 flags) {
     func_8001DCB4();
 }
 
+#ifdef NON_MATCHING
+/* 75.6 %: the final test is a store-flag xor here, a branch in the original; the two limits swap a1/a2 */
+extern u16 D_801D37BC;
+extern u16 D_801FA98C;
+extern u16 D_801FA990;
+
+u16 func_8005D0D8(Entity *e) {
+    s16 x;
+    u16 want;
+
+    if (e->unk_18E != 0 || e->unk_1B0 != 0 || D_801D37BC != 0 || D_801FA98C == 0
+        || (x = e->unk_068->unk_16) < D_801FA98C || D_801FA990 < x) {
+        return 0;
+    }
+    want = 7;
+    if (x - D_801FA98C < 0x21) {
+        goto check;
+    }
+    want = 3;
+    if (D_801FA990 - x < 0x21) {
+    check:
+        if (e->unk_168 != want) {
+            return 1;
+        }
+        return 0;
+    }
+    return 1;
+}
+#else
 INCLUDE_ASM("asm/main/nonmatchings/game_80057C94", func_8005D0D8);
+#endif
 
 INCLUDE_RODATA("asm/main/nonmatchings/game_80057C94", D_800115B0);
 

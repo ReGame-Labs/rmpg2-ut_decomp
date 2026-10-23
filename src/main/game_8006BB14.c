@@ -17,6 +17,7 @@ void func_800707BC(void);
 void func_8006ECD8(void);
 void func_80070414(void);
 void func_80070444(void);
+void func_800700A8(void);
 void func_8006ED5C(void);
 void func_8006E4BC(s32);
 u16 func_8007050C(void);
@@ -48,7 +49,6 @@ extern s32 D_80087110;
 extern s16 D_8008718C;
 extern s16 D_801FD9C0;
 extern s32 D_801FDEA0;
-extern s32 D_801FDF20;
 extern s32 D_801FDF24;
 
 INCLUDE_ASM("asm/main/nonmatchings/game_8006BB14", func_8006BB14);
@@ -240,7 +240,7 @@ void func_8006EBA4(s32 arg0) {
 
 INCLUDE_ASM("asm/main/nonmatchings/game_8006BB14", func_8006EBDC);
 
-s32 func_8006EC08(void) {
+SoundDriver *func_8006EC08(void) {
     return D_801FDF20;
 }
 
@@ -254,7 +254,12 @@ s32 func_8006EC58(void) {
     return D_80087110 != 0;
 }
 
-INCLUDE_ASM("asm/main/nonmatchings/game_8006BB14", func_8006EC68);
+s32 func_8006EC68(s32 n) {
+    if (n < 0 || n >= func_8006E4F4()) {
+        return 0;
+    }
+    return D_801FDF20->unk_0C->unk_20[n].unk_0C != 0;
+}
 
 void func_8006ECD8(void) {
     func_800707BC();
@@ -286,7 +291,19 @@ void func_8006ED5C(void) {
     }
 }
 
-INCLUDE_ASM("asm/main/nonmatchings/game_8006BB14", func_8006EDAC);
+extern SoundHooks *D_80087130;
+extern SoundHooks *D_80087134;
+
+void func_8006EDAC(void) {
+    if (D_80087110 != 0) {
+        func_800700A8();
+        func_80070444();
+        D_80087130->unk_04(D_801FDF20);
+        D_80087134->unk_04(D_801FDF20);
+        func_8006ED5C();
+        D_80087110 = 0;
+    }
+}
 
 INCLUDE_ASM("asm/main/nonmatchings/game_8006BB14", func_8006EE30);
 
@@ -294,13 +311,26 @@ INCLUDE_ASM("asm/main/nonmatchings/game_8006BB14", func_8006F0D8);
 
 INCLUDE_ASM("asm/main/nonmatchings/game_8006BB14", func_8006F634);
 
-INCLUDE_ASM("asm/main/nonmatchings/game_8006BB14", func_8006F8F8);
+u8 *func_80076C8C(s32, s32 *);
+
+void func_8006F8F8(SoundChannel *ch, SoundTrack *track) {
+    s32 seq;
+
+    ch->unk_4C = track->unk_00->unk_10;
+    ch->unk_1A = track->unk_00->unk_0E;
+    seq = track->unk_08;
+    ch->unk_30 = seq;
+    ch->unk_34 = func_80076C8C(seq, &ch->unk_08);
+    ch->unk_38 = track->unk_04;
+}
 
 INCLUDE_ASM("asm/main/nonmatchings/game_8006BB14", func_8006F96C);
 
 INCLUDE_ASM("asm/main/nonmatchings/game_8006BB14", func_8006FC6C);
 
-INCLUDE_ASM("asm/main/nonmatchings/game_8006BB14", func_8006FC8C);
+void func_8006FC8C(s32 n, s32 arg1) {
+    func_8006F96C(&D_801FDF20->unk_0C->unk_20[n], n, 0, 0, arg1);
+}
 
 INCLUDE_ASM("asm/main/nonmatchings/game_8006BB14", func_8006FCD4);
 

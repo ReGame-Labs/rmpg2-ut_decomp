@@ -110,13 +110,35 @@ INCLUDE_ASM("asm/main/nonmatchings/game_80076C8C", func_800779E8);
 
 INCLUDE_ASM("asm/main/nonmatchings/game_80076C8C", func_80077B2C);
 
-INCLUDE_ASM("asm/main/nonmatchings/game_80076C8C", func_80077DC4);
+s16 func_8007050C(void);
+s32 func_80070588(s16, s16, s16);
+
+void func_80077DC4(SoundChannel *ch) {
+    u8 *p;
+
+    p = ch->unk_34;
+    ch->unk_16 = p[1] | (p[2] << 8);
+    ch->unk_1C = func_80070588(func_8007050C(), ch->unk_14, ch->unk_16);
+}
 
 INCLUDE_ASM("asm/main/nonmatchings/game_80076C8C", func_80077E20);
 
 INCLUDE_ASM("asm/main/nonmatchings/game_80076C8C", func_80077EBC);
 
-INCLUDE_ASM("asm/main/nonmatchings/game_80076C8C", func_80077F2C);
+u8 *func_80076C8C(s32, s32 *);
+
+void func_80077F2C(SoundChannel *ch) {
+    s32 *sp;
+    s32 seq;
+
+    sp = ch->unk_40;
+    ch->unk_40 = sp - 1;
+    seq = sp[-1];
+    ch->unk_34 = (u8 *) seq;
+    ch->unk_34 = func_80076C8C(seq, &ch->unk_08);
+    ch->unk_08 = 0;
+    ch->unk_00 |= 0x40;
+}
 
 INCLUDE_ASM("asm/main/nonmatchings/game_80076C8C", func_80077F84);
 
