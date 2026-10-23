@@ -74,7 +74,20 @@ INCLUDE_ASM("asm/main/nonmatchings/game_8006BB14", func_8006BD60);
 
 INCLUDE_ASM("asm/main/nonmatchings/game_8006BB14", func_8006BED0);
 
-INCLUDE_ASM("asm/main/nonmatchings/game_8006BB14", func_8006BF08);
+extern s32 D_800870FC;
+extern u16 D_801FDB58[];
+
+void func_8006BF08(u16 *src) {
+    s32 i;
+    u16 *dst;
+
+    for (i = 0, dst = D_801FDB58; i < 0x80; i++) {
+        *dst = *src;
+        src++;
+        dst++;
+    }
+    D_800870FC = 1;
+}
 
 INCLUDE_ASM("asm/main/nonmatchings/game_8006BB14", func_8006BF44);
 
@@ -160,7 +173,39 @@ INCLUDE_ASM("asm/main/nonmatchings/game_8006BB14", func_8006D18C);
 
 INCLUDE_ASM("asm/main/nonmatchings/game_8006BB14", func_8006D6E4);
 
-INCLUDE_ASM("asm/main/nonmatchings/game_8006BB14", func_8006DBC0);
+extern u8 D_801FDA10;
+extern u8 D_801FDA14;
+extern SoundNote *D_801FDA18;
+extern SoundNote *D_801FDA78;
+extern s32 D_801FDA7C;
+void func_8006DF68(SoundNote *);
+
+void func_8006DBC0(SoundChannel *ch) {
+    u8 n;
+
+    if (ch->unk_34[1] == 0) {
+        n = ch->unk_11;
+        ch->unk_00.w |= 0x80;
+        D_801FDA10 = n;
+        if (n != 0) {
+            D_801FDA18 = D_801FDA78;
+            D_801FDA14 = D_801FDA7C;
+            while (D_801FDA14-- != 0) {
+                if ((D_801FDA18->unk_00.w & 3) == 1 && D_801FDA18->unk_00.b[3] == ch->unk_00.b[1]
+                    && D_801FDA18->unk_07 != 0) {
+                    D_801FDA18->unk_07 = 0;
+                    func_8006DF68(D_801FDA18);
+                    if (--D_801FDA10 == 0) {
+                        return;
+                    }
+                }
+                D_801FDA18++;
+            }
+        }
+    } else {
+        ch->unk_00.w &= ~0x80;
+    }
+}
 
 void func_8006DD10(SoundChannel *ch) {
     u8 v;
@@ -187,7 +232,24 @@ INCLUDE_ASM("asm/main/nonmatchings/game_8006BB14", func_8006E014);
 
 INCLUDE_ASM("asm/main/nonmatchings/game_8006BB14", func_8006E244);
 
-INCLUDE_ASM("asm/main/nonmatchings/game_8006BB14", func_8006E3B8);
+extern s32 D_801FDA64;
+extern SoundNote *D_801FDA68;
+
+void func_8006E3B8(SoundChannel *ch) {
+    D_801FDA68 = D_801FDA78;
+    D_801FDA64 = D_801FDA7C;
+    while (--D_801FDA64 != -1) {
+        if ((D_801FDA68->unk_00.w & 3) == 1 && D_801FDA68->unk_05 == ch->unk_34[1]
+            && D_801FDA68->unk_00.b[3] == ch->unk_00.b[1]) {
+            if (ch->unk_00.w & 0x80) {
+                func_8006DF68(D_801FDA68);
+            } else {
+                D_801FDA68->unk_07 = 1;
+            }
+        }
+        D_801FDA68++;
+    }
+}
 
 void func_8006E4BC(s32 arg0) {
     if (D_801FDEA8 != NULL) {
@@ -326,7 +388,11 @@ void func_8006F8F8(SoundChannel *ch, SoundTrack *track) {
 
 INCLUDE_ASM("asm/main/nonmatchings/game_8006BB14", func_8006F96C);
 
-INCLUDE_ASM("asm/main/nonmatchings/game_8006BB14", func_8006FC6C);
+void func_80078A40(s32 n, s32 arg1);
+
+void func_8006FC6C(s32 n) {
+    func_80078A40(n, 0);
+}
 
 void func_8006FC8C(s32 n, s32 arg1) {
     func_8006F96C(&D_801FDF20->unk_0C->unk_20[n], n, 0, 0, arg1);
@@ -417,9 +483,18 @@ void func_800707BC(void) {
     }
 }
 
-INCLUDE_ASM("asm/main/nonmatchings/game_8006BB14", func_80070868);
+extern u8 D_800170A4[];
+extern s32 (*D_801FDF2C)(s32, u8 *);
 
-INCLUDE_ASM("asm/main/nonmatchings/game_8006BB14", func_80070898);
+s32 func_80070868(s32 arg0) {
+    return D_801FDF2C(arg0, D_800170A4);
+}
+
+extern s32 (*D_801FDF30)(s32, s32, s32, s32);
+
+s32 func_80070898(s32 arg0, s32 arg1, s32 arg2) {
+    return D_801FDF30(arg0, arg1, 1, arg2);
+}
 
 void func_800708C4(void) {
     D_801FDF34();
