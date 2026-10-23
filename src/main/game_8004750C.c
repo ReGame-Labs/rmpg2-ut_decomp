@@ -624,7 +624,63 @@ u16 func_80048384(u16 b, Throw *t) {
     return 0;
 }
 
-INCLUDE_ASM("asm/main/nonmatchings/game_8004750C", func_80048558);
+extern s32 D_80091878[];
+
+u16 func_80048558(u16 b, Throw *t) {
+    GameObject *saved = D_800AA248.cur_obj;
+    ObjectDef *def;
+    GameObject *cur;
+    GameObject *obj;
+    SpriteFrame *fr;
+    s16 dy;
+    s16 dx;
+    s16 x;
+    u16 left = 0;
+    s32 vx;
+
+    D_800AA248.new_def = func_8001D110();
+    def = D_800AA248.new_def;
+    cur = D_800AA248.cur_obj;
+    fr = cur->frame;
+    dy = fr->unk_12 - fr->unk_0A - 5;
+    dx = fr->unk_10 - fr->unk_08 - 5;
+    x = dx;
+    if (cur->unk_20.f.flags & 0x10) {
+        x = -dx;
+    } else {
+        left = 1;
+    }
+    def->pos_x.p.i = (u16) D_800AA248.cur_obj->pos_x.p.i + x;
+    def->pos_y.p.i = (u16) D_800AA248.cur_obj->pos_y.p.i + dy;
+    def->flags = 0x1005;
+    def->unk_0C = 0x730;
+    def->id = 0x4F0000EA;
+    def->anim = D_80091878;
+    obj = func_8001DCB4();
+    D_800AA248.cur_obj = obj;
+    if (obj == NULL) {
+        D_800AA248.cur_obj = saved;
+        return 1;
+    }
+    obj->unk_20.f.flags |= saved->unk_20.f.flags & 0x10;
+    t->obj = D_800AA248.cur_obj;
+    t->unk_08 = b;
+    t->unk_0A = 1;
+    D_800AA248.cur_obj->unk_94.p = t;
+    D_800AA248.cur_obj->vel_y.v = -(((func_8001EB10(0x7F, 1) & 3) + 0xC) << 15);
+    if (saved->unk_68 != NULL) {
+        vx = abs(func_8003FCD8(saved->unk_68->unk_68->pos_x.p.i, saved->pos_x.p.i));
+        vx = ((vx >> 5) << 15) + 0x8000;
+    } else {
+        vx = ((func_8001EB10(0x7F, 1) & 7) + 5) << 15;
+    }
+    if (left) {
+        vx = -vx;
+    }
+    D_800AA248.cur_obj->vel_x.v = vx;
+    D_800AA248.cur_obj = saved;
+    return 0;
+}
 
 #ifdef NON_MATCHING
 /* 93 %: the original copies the state block's address into a second saved register after the facing test (move s0,s2) and uses both; here one register holds it throughout, so the frame has one saved register less */
@@ -713,7 +769,60 @@ u16 func_800488B8(s16 b, Throw *t) {
     return 0;
 }
 
-INCLUDE_ASM("asm/main/nonmatchings/game_8004750C", func_800489C0);
+extern s32 D_8009198C[];
+
+u16 func_800489C0(u16 b, Throw *t) {
+    GameObject *saved = D_800AA248.cur_obj;
+    ObjectDef *def;
+    GameObject *cur;
+    SpriteFrame *fr;
+    s16 dy;
+    s16 dx;
+    s16 x;
+    u16 left = 0;
+    s32 vx;
+
+    D_800AA248.new_def = func_8001D110();
+    def = D_800AA248.new_def;
+    cur = D_800AA248.cur_obj;
+    fr = cur->frame;
+    dy = fr->unk_12 - fr->unk_0A - 5;
+    dx = fr->unk_10 - fr->unk_08 - 5;
+    x = dx;
+    if (cur->unk_20.f.flags & 0x10) {
+        x = -dx;
+    } else {
+        left = 1;
+    }
+    def->pos_x.p.i = (u16) D_800AA248.cur_obj->pos_x.p.i + x;
+    def->pos_y.p.i = (u16) D_800AA248.cur_obj->pos_y.p.i + dy;
+    def->flags = 0x1005;
+    def->unk_0C = 0x731;
+    def->id = 0x4F0000EE;
+    def->anim = D_8009198C;
+    D_800AA248.cur_obj = func_8001DCB4();
+    if (D_800AA248.cur_obj == NULL) {
+        D_800AA248.cur_obj = saved;
+        return 1;
+    }
+    t->obj = D_800AA248.cur_obj;
+    t->unk_08 = b;
+    t->unk_0A = 1;
+    D_800AA248.cur_obj->unk_94.p = t;
+    D_800AA248.cur_obj->vel_y.v = -(((func_8001EB10(0x7F, 1) & 3) + 0xE) << 15);
+    if (saved->unk_68 != NULL) {
+        vx = abs(func_8003FCD8(saved->unk_68->unk_68->pos_x.p.i, saved->pos_x.p.i));
+        vx = ((vx >> 5) << 15) + 0x8000;
+    } else {
+        vx = ((func_8001EB10(0x7F, 1) & 3) + 5) << 15;
+    }
+    if (left) {
+        vx = -vx;
+    }
+    D_800AA248.cur_obj->vel_x.v = vx;
+    D_800AA248.cur_obj = saved;
+    return 0;
+}
 
 u16 func_80048B98(s16 b, Throw *t) {
     GameObject *saved = D_800AA248.cur_obj;
@@ -913,7 +1022,70 @@ INCLUDE_ASM("asm/main/nonmatchings/game_8004750C", func_80049304);
 
 INCLUDE_ASM("asm/main/nonmatchings/game_8004750C", func_800494B4);
 
+#ifdef NON_MATCHING
+/* 99.3 %: register names only: the original keeps the object in a2, the x found in a0 and the counter in a1 (here a1, a2, a0) */
+/* A pair per throw kind (D_8007F39C): the vertical speed it gets back when it lands, and the height it lands at. */
+typedef struct {
+    /* 0x00 */ s32 unk_0;
+    /* 0x04 */ s32 unk_4;
+} ThrowLanding;
+
+extern ThrowLanding D_8007F39C[];
+extern s32 D_801F9ACC;
+extern s32 D_80095678[];
+
+void func_80049650(Throw *t) {
+    GameObject *cur;
+    ThrowLanding *l;
+    Monster *m;
+    GameObject *o;
+    s32 v;
+    u16 x;
+    u16 i;
+
+    if (t->unk_0A == 0x10) {
+        return;
+    }
+    v = D_800AA248.cur_obj->vel_x.v + D_800AA248.cur_obj->pos_x.v;
+    v &= D_801D8864.v;
+    D_800AA248.cur_obj->pos_x.v = v;
+    v = D_800AA248.cur_obj->unk_88 + D_800AA248.cur_obj->vel_y.v;
+    D_800AA248.cur_obj->vel_y.v = v;
+    D_800AA248.cur_obj->pos_y.v += v;
+    cur = D_800AA248.cur_obj;
+    if (cur->unk_88 <= 0) {
+        if (cur->pos_y.v > D_8007F39C[cur->unk_08].unk_4) {
+            return;
+        }
+        x = 0;
+        i = 7;
+        cur->unk_88 = D_8007F39C[cur->unk_08].unk_0;
+        do {
+            m = &D_801E0B78[i];
+            if (m->unk_058 & 1) {
+                o = m->obj;
+                if (x == 0 || (D_800AA248.cur_obj->unk_08 & 1)) {
+                    x = o->pos_x.p.i;
+                }
+            }
+        } while (--i != 0);
+        if (x != 0) {
+            D_800AA268->pos_x.p.i = x;
+        }
+        D_800AA268->unk_20.f.flags |= 0x20;
+    } else if (D_801F9ACC + cur->pos_y.v > 0xD8FFFF) {
+        cur->pos_y.v = 0xCF0000;
+        D_800AA248.cur_obj->unk_20.f.flags &= ~0x20;
+        func_8001E698(D_800AA248.cur_obj, D_80095678);
+        t->unk_0A = 0x10;
+        D_800AA248.cur_obj->vel_x.v = 0;
+        D_800AA248.cur_obj->vel_y.v = 0;
+        D_800AA248.cur_obj->unk_88 = 0;
+    }
+}
+#else
 INCLUDE_ASM("asm/main/nonmatchings/game_8004750C", func_80049650);
+#endif
 
 INCLUDE_ASM("asm/main/nonmatchings/game_8004750C", func_80049850);
 
