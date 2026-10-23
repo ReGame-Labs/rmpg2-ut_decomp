@@ -176,7 +176,28 @@ void func_8003C130(void) {
 
 INCLUDE_ASM("asm/main/nonmatchings/game_8003B568", func_8003C1C0);
 
-INCLUDE_ASM("asm/main/nonmatchings/game_8003B568", func_8003C2D4);
+void func_8003C2D4(u16 k, UnkStructB2 *rec) {
+    s32 *t;
+
+    if (rec->unk_10->unk_06 >= 5) {
+        rec->unk_04 = 2;
+        if ((u16) (k - 1) < 0x4A) {
+            t = (s32 *) ((k << 2) + (u32) D_800830BC);
+            func_8003CEA0(*t, rec->unk_00);
+        }
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
 
 void func_8003C344(void) {
     UnkStructB2 *p = D_801D3824;
@@ -198,7 +219,34 @@ void func_8003C674(void) {
 
 INCLUDE_ASM("asm/main/nonmatchings/game_8003B568", func_8003C67C);
 
+/* 78.7 %: an object's 'idle' test; the original keeps the result in v0 with the two zero stores in the branches' delay slots and the last test as a branch, where every form tried becomes a set-on-compare (xori/sltu) or uses another register */
+#ifdef NON_MATCHING
+u16 func_8003C858(UnkStructB3 *p, s32 arg1, s32 arg2) {
+    u16 r = 0;
+
+    if (p->unk_08 == 0) {
+        r = 0;
+        if (p->unk_0C == 0) {
+            r = 1;
+            if (p->unk_04 == 3) {
+                r = 0;
+            }
+        }
+    }
+    return r;
+}
+#else
 INCLUDE_ASM("asm/main/nonmatchings/game_8003B568", func_8003C858);
+#endif
+
+
+
+
+
+
+
+
+
 
 void func_8003C894(void **arg0) {
     void *temp_a0;
@@ -233,7 +281,7 @@ void func_8003C9E8(UnkStructB1 *arg0) {
         func_8003CA28(arg0);
         return;
     }
-    func_8003CA70();
+    func_8003CA70(arg0);
 }
 
 void func_8003CA28(UnkStructB1 *arg0) {
@@ -245,7 +293,27 @@ void func_8003CA28(UnkStructB1 *arg0) {
     }
 }
 
-INCLUDE_ASM("asm/main/nonmatchings/game_8003B568", func_8003CA70);
+void func_8003CA70(UnkStructB1 *rec) {
+    UnkStruct1 *a;
+    s32 kind;
+
+    a = rec->unk_14;
+    if (a != NULL) {
+        kind = rec->unk_06;
+        if (kind >= 0x31) {
+            if (kind < 0x34) {
+                func_8003CB68(0x1E0, a);
+            } else if (kind < 0x4A) {
+                if (kind >= 0x48) {
+                    func_8003CB30(a);
+                }
+            }
+        }
+    }
+}
+
+
+
 
 void func_8003CADC(UnkStruct1 *arg0) {
     s16 var_v1;
@@ -267,14 +335,64 @@ void func_8003CB30(UnkStruct1 *arg0) {
     arg0->unk_56 = 3;
 }
 
-INCLUDE_ASM("asm/main/nonmatchings/game_8003B568", func_8003CB68);
+void func_8003CB68(s16 n, UnkStruct1 *a) {
+    s16 v;
+
+    v = n;
+    func_8001F724(3);
+    if (a->unk_186 != 0) {
+        v = n << 1;
+        a->unk_186 = 0;
+        if ((u16) v > 0x5A0) {
+            v = 0x5A0;
+        }
+    }
+    a->unk_142 = v;
+    a->unk_56 = 2;
+    func_8005DD48(a);
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 INCLUDE_ASM("asm/main/nonmatchings/game_8003B568", func_8003CBE0);
 
-INCLUDE_ASM("asm/main/nonmatchings/game_8003B568", func_8003CC84);
+u16 func_8003CC84(UnkStructB3 *p, s32 hit) {
+    if (hit == 0) {
+        return 0;
+    }
+    return (u16) (p->unk_06 - 0x40) < 3;
+}
+
+
 
 void func_8003CCA8(void) {
     D_801E1C80 += 0x258;
 }
 
-INCLUDE_ASM("asm/main/nonmatchings/game_8003B568", func_8003CCC0);
+void func_8003CCC0(void *arg0) {
+    UnkStructB2 *rec = arg0;
+
+    if (rec >= D_801D3824 && rec < D_801D3824 + 28) {
+        rec->unk_10->unk_0C = 0;
+        memset(rec, 0, sizeof(UnkStructB2));
+    }
+}
+

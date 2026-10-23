@@ -1087,7 +1087,39 @@ INCLUDE_ASM("asm/main/nonmatchings/game_8002A330", func_8002F100);
 
 INCLUDE_ASM("asm/main/nonmatchings/game_8002A330", func_8002F474);
 
+/* 97.3 %: a random 1-3 per building kind; the original masks the final value with andi 0xffff (a u16 it does not know is small), every typing of the temporary drops or moves the mask */
+#ifdef NON_MATCHING
+u16 func_8002F558(UnkStruct1 *a) {
+    s32 r;
+
+    r = func_8001EB10(0x8000, 0);
+    if (a->unk_02 == 2) {
+        return (r & 1) + 1;
+    }
+    r &= 3;
+    if (r == 0) {
+        return 3;
+    }
+    return r;
+}
+#else
 INCLUDE_ASM("asm/main/nonmatchings/game_8002A330", func_8002F558);
+#endif
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 void func_8002F5B0(s32 arg0, UnkStruct1 *arg1) {
     s32 temp_a0;
@@ -1305,7 +1337,19 @@ void func_800303DC(UnkStruct1 *a, UnkStruct4 *obj) {
     }
 }
 
-INCLUDE_ASM("asm/main/nonmatchings/game_8002A330", func_8003044C);
+void func_8003044C(void) {
+    UnkStructPair *p;
+    u16 n;
+
+    p = D_801D8804;
+    n = 14;
+    do {
+        p->unk_00 = 0;
+        p->unk_02 = 0;
+        p++;
+    } while (--n != 0);
+}
+
 
 INCLUDE_ASM("asm/main/nonmatchings/game_8002A330", func_8003047C);
 
@@ -1527,7 +1571,21 @@ void func_80030BAC(UnkStruct12 *arg0) {
 
 INCLUDE_ASM("asm/main/nonmatchings/game_8002A330", func_80030C7C);
 
-INCLUDE_ASM("asm/main/nonmatchings/game_8002A330", func_80030CD4);
+s32 func_80030CD4(UnkStruct17 *part) {
+    s32 r;
+    if (part->unk_08 == 0) {
+        func_80030D14();
+        r = 0;
+    } else {
+        part->unk_10 = 1;
+        r = 1;
+    }
+    return r;
+}
+
+
+
+
 
 INCLUDE_ASM("asm/main/nonmatchings/game_8002A330", func_80030D14);
 

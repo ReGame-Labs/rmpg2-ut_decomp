@@ -785,7 +785,7 @@ void func_80025848(UnkStruct2 *);
 void func_80024964(s32, UnkStruct4 *);
 extern u8 D_8001236C[];
 extern u8 D_80012394[];
-extern UnkStructPair D_801D8804[13];
+extern UnkStructPair D_801D8804[14];
 extern UnkStruct1 D_801D3DC8[];
 extern u16 D_801E29A4;
 extern s16 D_801FA734;
@@ -873,4 +873,14 @@ typedef struct UnkStruct16 {  /* provisional: what an object's unk_34 points to 
     u16 unk_22;
 } UnkStruct16;
 void func_8002FA20(s32, UnkStruct1 *);   /* its second argument is the record (the views to be unified) */
+typedef struct UnkStruct17 {  /* provisional: a building's part (what a building's record at 0x18 points to; func_8004F65C) */
+    u8 pad_00[0x8];
+    u16 unk_08;     /* hit points? zero: destroyed */
+    u8 pad_0A[0x4];
+    s16 unk_0E;     /* bottom y */
+    s16 unk_10;     /* set when hit */
+    u8 pad_12[0xA];
+    s16 unk_1C;
+    s16 unk_1E;     /* top y */
+} UnkStruct17;
 #endif /* GAME_8002A330_H */
