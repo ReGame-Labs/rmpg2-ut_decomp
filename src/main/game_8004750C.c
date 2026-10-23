@@ -37,6 +37,11 @@ extern s32 D_80091788[];
 extern s32 D_800917D0[];
 extern s32 D_8009192C[];
 extern s32 D_800918C4[];
+extern s32 D_80091AD0[];
+extern s32 D_80091820[];
+void func_80049D90(Throw *t);
+void func_8004A90C(Monster *m);
+u16 func_80053AC4(s16 x, s16 y, s32 a, s32 b, Monster *m);
 extern s32 D_8008C804;
 extern u16 D_801D8850;
 
@@ -1104,8 +1109,6 @@ void func_80049304(Throw *t) {
     } while (--i != 0);
 }
 
-extern s32 D_80091AD0[];
-
 void func_800494B4(Throw *t) {
     Monster *m;
     s16 hit;
@@ -1242,11 +1245,6 @@ void func_80049850(Throw *t) {
     } while (--i != 0);
 }
 
-extern s32 D_80091820[];
-void func_80049D90(Throw *t);
-void func_8004A90C(Monster *m);
-u16 func_80053AC4(s16 x, s16 y, s32 a, s32 b, Monster *m);
-
 void func_800499F4(Throw *t) {
     Monster *m;
     u16 i;
@@ -1286,7 +1284,55 @@ void func_800499F4(Throw *t) {
     }
 }
 
+#ifdef NON_MATCHING
+/* 99.7 %: register names only: the original keeps the object in a0 and the camera's x in a1, here the other way round */
+void func_80049B9C(Throw *t) {
+    Monster *m;
+    GameObject *o;
+    s32 d;
+    u16 i;
+
+    if (t->unk_0A != 1) {
+        return;
+    }
+    func_80049D90(t);
+    if (D_800AA248.cur_obj->pos_y.p.i >= 0xD9) {
+        D_800AA248.cur_obj->unk_08++;
+        if (D_800AA248.cur_obj->unk_08 == 4) {
+            t->unk_0A = 0x10;
+            D_800AA248.cur_obj->script_pc = (s32) D_80091AD0;
+            func_8001F724(5);
+            return;
+        }
+        D_800AA248.cur_obj->vel_y.v = (D_800AA248.cur_obj->vel_y.v >> 2) - D_800AA248.cur_obj->vel_y.v;
+        o = D_800AA248.cur_obj;
+        if (o->vel_x.v == 0) {
+            if (o->pos_x.v > D_801F9AC8.v) {
+                d = o->pos_x.v - D_801F9AC8.v;
+            } else {
+                d = D_801D8864.v + 1;
+                d -= D_801F9AC8.v;
+            }
+            o->vel_x.v = (d <= 0xC80000) ? 0x20000 : -0x20000;
+        }
+    }
+    i = 7;
+    do {
+        m = &D_801E0B78[i];
+        if ((m->unk_058 & 1) && m->unk_140 == 0 &&
+            func_80053AC4(D_800AA248.cur_obj->pos_x.p.i, D_800AA248.cur_obj->pos_y.p.i, 3, 3, m) != 0) {
+            func_80053C50(0x58000, m);
+            func_8004A93C(m);
+            t->unk_0A = 0x10;
+            D_800AA248.cur_obj->script_pc = (s32) D_80091AD0;
+            func_8001F724(5);
+            return;
+        }
+    } while (--i != 0);
+}
+#else
 INCLUDE_ASM("asm/main/nonmatchings/game_8004750C", func_80049B9C);
+#endif
 
 void func_80049D90(Throw *t) {
     s32 vel;
