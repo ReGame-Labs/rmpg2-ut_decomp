@@ -4,6 +4,14 @@
 #include "game_8001781C.h"
 
 /* decls:begin */
+void func_80063084(s32, s32);
+extern s32 D_8007B100[];
+extern u8 D_801F998C[];
+extern u8 *D_801F9AD8;
+extern u16 D_8007BFEC[];
+extern u16 D_8007BFD4[];
+extern u16 D_8007BFBC[];
+void func_80024C08(void *);
 void func_8001C02C(void);
 void func_8001C83C(void);
 extern s16 D_801CA464;
@@ -418,10 +426,11 @@ extern Anim D_80093FAC;
 u16 func_80023C58(s16 arg0, Unk22D58 *ai);
 u16 func_80023AC0(Unk22D58 *ai);
 s32 func_80026D54(Monster *);
-s32 func_80026D90(void *);
-s32 func_80027348(void);
+s32 func_80026D90(Monster *);
+s32 func_80027348();   /* (Monster *): the callers that pass nothing still have it in a0 */
 void func_80026C4C(Monster *arg0);
-s32 func_800272FC(void);
+s32 func_800272FC();   /* (Monster *), as func_80027348 */
+s32 func_800272B0();
 void func_800580F8(void *);
 void func_80026F98(Monster *arg0);
 void func_80020AF4(s32);
@@ -2054,7 +2063,17 @@ s32 func_8001EA78(void) {
     return temp_lo;
 }
 
+/* 84 %: the original's divu keeps the assembler's divide-by-zero check (bnez/break 7); the C, whose divisor is known non-zero on that path, gets none */
+#ifdef NON_MATCHING
+s32 func_8001EAC4(s32 range) {
+    if (range == 0) {
+        return 0;
+    }
+    return func_8001EA78() % (u32) range + 1;
+}
+#else
 INCLUDE_ASM("asm/main/nonmatchings/game_8001781C", func_8001EAC4);
+#endif
 
 s32 func_8001EB10(s32 arg0, s32 arg1) {
     return arg1 + func_8001EAC4(arg0 - arg1);
@@ -2297,7 +2316,20 @@ void func_8001F7CC(s32 arg0, s32 arg1) {
     func_80062DEC(arg1 & 0xFFFF, arg0 & 0xFFFF, 0);
 }
 
+/* 97 %: the table base and the index swap registers (base in v1, index in v0 in the original) */
+#ifdef NON_MATCHING
+void func_8001F7F8(s32 id) {
+    s32 word;
+
+    if ((id & 0xFFFF) != D_801D8750) {
+        word = D_8007B100[(id & 0x7FFF) - 1];
+        D_801D8750 = id;
+        func_80063084(word, id);
+    }
+}
+#else
 INCLUDE_ASM("asm/main/nonmatchings/game_8001781C", func_8001F7F8);
+#endif
 
 INCLUDE_ASM("asm/main/nonmatchings/game_8001781C", func_8001F848);
 
@@ -2883,7 +2915,12 @@ INCLUDE_ASM("asm/main/nonmatchings/game_8001781C", func_80023114);
 
 INCLUDE_ASM("asm/main/nonmatchings/game_8001781C", func_800231E4);
 
-INCLUDE_ASM("asm/main/nonmatchings/game_8001781C", func_8002326C);
+u16 func_8002326C(s16 x) {
+    if (D_800AA268->unk_22 & 0x10) {
+        return x <= 0;
+    }
+    return x >= 0;
+}
 
 void func_800232AC(s32 arg0) {
     s32 var_a0;
@@ -3368,7 +3405,17 @@ void func_80024AEC(void) {
     func_8003044C();
 }
 
-INCLUDE_ASM("asm/main/nonmatchings/game_8001781C", func_80024BB4);
+void func_80024BB4(void) {
+    u8 *p;
+    u16 i;
+
+    p = D_801F998C;
+    D_801F9AD8 = p;
+    i = 5;
+    do {
+        func_80024C08(p);
+    } while (--i != 0);
+}
 
 void func_80024C08(void *arg0) {
     memset(arg0, 0, 0x20);
@@ -3902,7 +3949,19 @@ s32 func_80026D54(Monster *monster) {
     return 0;
 }
 
-INCLUDE_ASM("asm/main/nonmatchings/game_8001781C", func_80026D90);
+s32 func_80026D90(Monster *monster) {
+    if (D_801D36FC == 0x240) {
+        return 1;
+    }
+    switch (monster->unk_5A) {
+    case 0:
+    case 1:
+    case 5:
+    case 6:
+        return 0;
+    }
+    return 1;
+}
 
 void (*func_80026DE4(void *arg0))(void *) {
     D_800AA248.unk_38 = ((Monster *) arg0)->unk_58;
@@ -3966,11 +4025,38 @@ INCLUDE_ASM("asm/main/nonmatchings/game_8001781C", func_80026F98);
 
 INCLUDE_ASM("asm/main/nonmatchings/game_8001781C", func_8002703C);
 
-INCLUDE_ASM("asm/main/nonmatchings/game_8001781C", func_800272B0);
+s32 func_800272B0(Monster *monster) {
+    u16 *p;
 
-INCLUDE_ASM("asm/main/nonmatchings/game_8001781C", func_800272FC);
+    for (p = D_8007BFBC; *p != 0xFFFF; p++) {
+        if (*p == monster->unk_5A) {
+            return 0;
+        }
+    }
+    return 1;
+}
 
-INCLUDE_ASM("asm/main/nonmatchings/game_8001781C", func_80027348);
+s32 func_800272FC(Monster *monster) {
+    u16 *p;
+
+    for (p = D_8007BFD4; *p != 0xFFFF; p++) {
+        if (*p == monster->unk_5A) {
+            return 0;
+        }
+    }
+    return 1;
+}
+
+s32 func_80027348(Monster *monster) {
+    u16 *p;
+
+    for (p = D_8007BFEC; *p != 0xFFFF; p++) {
+        if (*p == monster->unk_5A) {
+            return 0;
+        }
+    }
+    return 1;
+}
 
 void func_80027394(void) {
     s32 i;
