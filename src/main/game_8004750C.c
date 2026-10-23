@@ -921,12 +921,12 @@ INCLUDE_ASM("asm/main/nonmatchings/game_8004750C", func_800499F4);
 
 INCLUDE_ASM("asm/main/nonmatchings/game_8004750C", func_80049B9C);
 
-#ifdef NON_MATCHING
-/* 97.5 %: register allocation of the wrap statement: the original gives the current object v0 and ties the sum to the velocity's register (v1); here the object gets v1 (as in func_800475F4 and func_80044F08) */
 void func_80049D90(void) {
     s32 vel;
 
-    D_800AA248.cur_obj->pos_x.v = (D_800AA248.cur_obj->pos_x.v + D_800AA248.cur_obj->vel_x.v) & D_801D8864.v;
+    vel = D_800AA248.cur_obj->pos_x.v + D_800AA248.cur_obj->vel_x.v;
+    vel &= D_801D8864.v;
+    D_800AA248.cur_obj->pos_x.v = vel;
     vel = D_800AA248.cur_obj->vel_y.v + 0x4000;
     if (vel > 0x9FFFF) {
         vel = 0xA0000;
@@ -938,9 +938,6 @@ void func_80049D90(void) {
     }
     D_800AA248.cur_obj->pos_y.v = vel;
 }
-#else
-INCLUDE_ASM("asm/main/nonmatchings/game_8004750C", func_80049D90);
-#endif
 
 INCLUDE_ASM("asm/main/nonmatchings/game_8004750C", func_80049E10);
 
@@ -987,7 +984,62 @@ void func_8004A044(Throw *t) {
     } while (--i != 0);
 }
 
-INCLUDE_ASM("asm/main/nonmatchings/game_8004750C", func_8004A1F8);
+extern s32 D_8008C810[];
+extern s32 D_8008C828[];
+
+void func_8004A1F8(Throw *t) {
+    GameObject *saved = D_800AA268;
+    Monster *m;
+    s32 vx;
+    u16 i;
+
+    if (t->unk_0A == 1) {
+        if (saved->unk_6C & 0x80) {
+            func_8004AE2C();
+        } else {
+            vx = saved->vel_x.v;
+            if (vx <= 0) {
+                if (D_801D3D8A < 0) {
+                    vx += D_801D3D8A;
+                }
+            } else if (D_801D3D8A > 0) {
+                vx += D_801D3D8A;
+            }
+            vx += D_800AA248.cur_obj->pos_x.v;
+            D_800AA248.cur_obj->pos_x.v = vx & D_801D8864.v;
+            D_800AA248.cur_obj->pos_y.v += D_800AA248.cur_obj->vel_y.v;
+            if (D_800AA248.cur_obj->pos_y.p.i >= 0xD9) {
+                t->unk_0A = 0x10;
+                D_800AA248.cur_obj->script_pc = (s32) D_8008C810;
+            } else if (--D_800AA248.cur_obj->unk_8C == 0) {
+                func_8004AE2C();
+            } else {
+                i = 7;
+                do {
+                    m = &D_801E0B78[i];
+                    if ((m->unk_058 & 1) && !(m->obj->unk_6C & 0x80) && m->unk_140 == 0) {
+                        if (func_80053854(D_800AA248.cur_obj->pos_x.p.i, D_800AA248.cur_obj->pos_y.p.i, m) != 0) {
+                            func_80053C50(0xA000, m);
+                            t->unk_0A = 0x10;
+                            func_8001E698(D_800AA248.cur_obj, D_8008C828);
+                            break;
+                        }
+                        vx = D_800AA248.cur_obj->pos_x.v + (D_800AA248.cur_obj->vel_x.v >> 1);
+                        vx &= D_801D8864.v;
+                        if (func_80053854(vx >> 16, D_800AA248.cur_obj->pos_y.p.i, m) != 0) {
+                            D_800AA248.cur_obj->pos_x.v = vx;
+                            func_80053C50(0xA000, m);
+                            t->unk_0A = 0x10;
+                            func_8001E698(D_800AA248.cur_obj, D_8008C828);
+                            break;
+                        }
+                    }
+                } while (--i != 0);
+            }
+        }
+    }
+    D_800AA268 = saved;
+}
 
 s32 func_8004A468(Monster *m) {
     Monster *target = m->target;

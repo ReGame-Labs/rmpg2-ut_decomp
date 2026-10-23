@@ -67,7 +67,8 @@ typedef struct GameObject {
     /* 0x82 */ u8 unk_82[0x02];
     /* 0x84 */ s32 unk_84;             /* a horizontal acceleration, 16.16 */
     /* 0x88 */ s32 unk_88;
-    /* 0x8C */ u8 unk_8C[0x04];
+    /* 0x8C */ u16 unk_8C;             /* a lifetime in frames (game_8004750C) */
+    /* 0x8E */ u8 unk_8E[0x02];
     /* 0x90 */ union {                 /* what drives this object */
                    void *p;
                    struct Monster *monster;
