@@ -113,7 +113,9 @@ typedef struct Unk54728 {
     /* 0x24 */ s16 unk_24;
     /* 0x26 */ u8 unk_26[0x2];
     /* 0x28 */ s16 unk_28;
-    /* 0x2A */ u8 unk_2A[0x2E];
+    /* 0x2A */ u8 unk_2A[0x8];
+    /* 0x32 */ u16 unk_32;
+    /* 0x34 */ u8 unk_34[0x24];
     /* 0x58 */ u16 unk_58;
     /* 0x5A */ u8 unk_5A[0x1A];
     /* 0x74 */ u16 unk_74;

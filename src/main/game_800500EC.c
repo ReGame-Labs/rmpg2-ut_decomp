@@ -14,6 +14,12 @@ void func_8004FC00(s32, Entity *);
 void func_800634D4(Entity *, s32);
 
 extern s32 D_800AA250;
+extern s16 D_801F9ACA;
+extern s32 D_8009547C;
+u16 func_8001EA78(void);
+extern s32 D_801D8864;
+extern s16 D_801D8866;
+extern s32 D_800AA258;
 extern s32 D_800AA25C;
 extern s32 D_800AA2DC;
 extern u16 D_801D8740;
@@ -513,7 +519,26 @@ void func_80051A48(Entity *e) {
     func_80051C9C(e);
 }
 
-INCLUDE_ASM("asm/main/nonmatchings/game_800500EC", func_80051A80);
+void func_80051A80(Entity *e) {
+    if (D_800AA248.unk_20->unk_10 >= 0) {
+        if ((u16) func_80031714(e) == 1) {
+            e->unk_05A = 0x35;
+            D_800AA248.unk_20->unk_18.h.i = 0xED;
+            func_800531C0(e);
+        } else {
+            D_800AA248.unk_14 = e->unk_05A;
+            if (e->unk_05A != 0x4E) {
+                e->unk_05A = 0x19;
+                D_800AA248.unk_14 = 0x19;
+                func_800531C0(e);
+            } else {
+                e->unk_05A = 0x4D;
+                D_800AA248.unk_14 = 0x4D;
+                func_800531C0(e);
+            }
+        }
+    }
+}
 
 void func_80051B38(Entity *e) {
     s32 vy;
@@ -1027,12 +1052,35 @@ u16 func_80053AC4(s16 a, s16 b, s16 c, s16 d, Entity *e) {
     return func_80053B30(a, b, c, d, e);
 }
 
-INCLUDE_ASM("asm/main/nonmatchings/game_800500EC", func_80053B30);
+#ifdef NON_MATCHING
+/* 93 %: the fifth argument and the x copy swap t0/t1, and the first bound's subtraction is scheduled before the second load */
+s32 func_80053B30(s16 x, s16 y, s16 dx, s16 dy, Entity *e) {
+    s16 px;
+    s16 lo_x;
+    s16 lo_y;
+    s16 hi_x;
+    s16 hi_y;
 
-extern s32 D_801D8864;
-extern s16 D_801F9ACA;
-extern s16 D_801D8866;
-extern s32 D_800AA258;
+    px = x;
+    if (x < D_801F9ACA) {
+        px = x + ((D_801D8864 + 1) >> 16);
+    }
+    lo_x = e->unk_108 - dx;
+    lo_y = e->unk_10A - dy;
+    if (px < lo_x || y < lo_y) {
+        return 0;
+    }
+    hi_x = e->unk_10C + dx;
+    hi_y = e->unk_10E + dy;
+    if (hi_x < px || hi_y < y) {
+        return 0;
+    }
+    return 1;
+}
+#else
+INCLUDE_ASM("asm/main/nonmatchings/game_800500EC", func_80053B30);
+#endif
+
 
 u16 func_80053BE8(s16 x, Entity *e) {
     s16 v;
@@ -1136,10 +1184,29 @@ void func_8005404C(Entity *e) {
     D_800AA248.unk_20 = b;
 }
 
-INCLUDE_ASM("asm/main/nonmatchings/game_800500EC", func_800540D0);
+extern s32 D_800954A4;
 
-u16 func_8001EA78(void);
-extern s32 D_8009547C;
+void func_800540D0(Entity *e) {
+    Body *b;
+    Unk800AA248Node *node;
+    u16 y;
+
+    b = D_800AA248.unk_20;
+    func_8001F724((func_8001EA78() & 3) + 0x17);
+    func_8001F724((func_8001EA78() & 1) + 0x15);
+    node = func_8001D110();
+    D_800AA248.unk_3C = node;
+    node->unk_0C = 0x741;
+    node->unk_20 = 0x4000;
+    node->unk_10.h.i = e->unk_120.h.lo;
+    y = e->unk_120.h.hi;
+    node->unk_00 = 0x4F000066;
+    node->unk_28 = &D_800954A4;
+    node->unk_14.h.i = y;
+    func_8001DCB4();
+    D_800AA248.unk_20 = b;
+}
+
 
 void func_8005417C(Entity *e) {
     Body *b;
@@ -1620,7 +1687,23 @@ void func_80055948(Entity *e, Unk54728 *u) {
 
 INCLUDE_ASM("asm/main/nonmatchings/game_800500EC", func_80055970);
 
-INCLUDE_ASM("asm/main/nonmatchings/game_800500EC", func_80055AB8);
+u16 func_800562E4(s16, Unk54728 *);
+void func_80055B68(Entity *, Unk54728 *);
+
+void func_80055AB8(Entity *e, Unk54728 *city, Unk54728 *start) {
+    if (func_800562E4(D_800AA248.unk_0C, city) == 0) {
+        func_80055B68(e, start);
+        return;
+    }
+    if (func_800576DC(e, city, e->unk_1B2) == 1) {
+        e->unk_104 = 0;
+        D_800AA248.unk_20->unk_10 = 0;
+        return;
+    }
+    func_80055FBC(e, city);
+    e->unk_05A = 0xD;
+    D_800AA248.unk_14 = 0xD;
+}
 
 INCLUDE_ASM("asm/main/nonmatchings/game_800500EC", func_80055B68);
 
@@ -2110,7 +2193,39 @@ void func_800578E0(Entity *e, Unk54728 *city) {
 INCLUDE_ASM("asm/main/nonmatchings/game_800500EC", func_800578E0);
 #endif
 
+#ifdef NON_MATCHING
+/* 86 %: the failing height test returns 0 by branching to the shared exit; here the success block is branched to instead */
+Body **func_80031420(u16, Unk54728 *);
+
+u16 func_80057A08(Entity *e) {
+    Unk54728 *city;
+    Body *top;
+
+    if (e->unk_1B0 == 0 || e->unk_1B2 == 0) {
+        return 0;
+    }
+    city = func_80054728(e->unk_1B2);
+    if (city == NULL) {
+        return 0;
+    }
+    if (city->unk_14 != 4) {
+        return 0;
+    }
+    if (e->unk_1B0 != 3) {
+        if ((u16) e->unk_1B4 == 0) {
+            return 0;
+        }
+        top = *func_80031420(e->unk_1B4, city);
+        if (e->unk_068->unk_18.h.i >= top->unk_18.h.i) {
+            return 0;
+        }
+    }
+    city->unk_32 = e->unk_000;
+    return 1;
+}
+#else
 INCLUDE_ASM("asm/main/nonmatchings/game_800500EC", func_80057A08);
+#endif
 
 extern Unk54728 D_801D48D0;
 
