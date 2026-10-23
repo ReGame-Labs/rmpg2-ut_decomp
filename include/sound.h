@@ -113,6 +113,23 @@ typedef struct SoundNote {
     /* 0x08 */ u8 unk_08[0xC];
 } SoundNote;
 
+/* An entry of the event queue D_80087100 points to (func_8006C084 appends them). */
+typedef struct SoundEvent {
+    /* 0x00 */ s16 unk_00;
+    /* 0x02 */ s16 unk_02;
+    /* 0x04 */ s8 unk_04;
+    /* 0x05 */ u8 unk_05;
+    /* 0x06 */ u8 unk_06[0x2];
+    /* 0x08 */ s32 unk_08;
+    /* 0x0C */ s32 unk_0C;
+} SoundEvent;
+
+typedef struct SoundEventQueue {
+    /* 0x00 */ s32 unk_00;          /* the number of events */
+    /* 0x04 */ s32 unk_04;          /* which notes are queued: 1 kind 1, 2 kind 0 */
+    /* 0x08 */ SoundEvent unk_08[0x20];
+} SoundEventQueue;
+
 void func_8006F96C(SoundSlot *slot, s32 n, s32 arg2, s32 arg3, s32 arg4);
 
 /* A 12-byte record of the table at D_801FDA90 (the sound bank's entries?): a value at 4 and a slot at 8. */

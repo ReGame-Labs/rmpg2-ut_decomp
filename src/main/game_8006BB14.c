@@ -22,7 +22,7 @@ void func_8006ED5C(void);
 void func_8006E4BC(s32);
 u16 func_8007050C(void);
 
-extern s32 D_80087100;
+extern SoundEventQueue *D_80087100;
 extern s32 D_80087104;
 extern s32 D_80087118;
 extern s32 D_8008711C;
@@ -97,7 +97,24 @@ void func_8006BF70(void) {
 
 INCLUDE_ASM("asm/main/nonmatchings/game_8006BB14", func_8006BF80);
 
-INCLUDE_ASM("asm/main/nonmatchings/game_8006BB14", func_8006C084);
+void func_8006C084(SoundNote *note, s16 arg1, s16 arg2, s8 arg3, u8 arg4, s32 arg5, s32 arg6) {
+    u8 kind;
+
+    if (D_80087100 != NULL) {
+        kind = note->unk_00.b[3];
+        if ((kind == 1 && (D_80087100->unk_04 & 1)) || (kind == 0 && (D_80087100->unk_04 & 2))) {
+            if (D_80087100->unk_00 < 0x20) {
+                D_80087100->unk_08[D_80087100->unk_00].unk_00 = arg1;
+                D_80087100->unk_08[D_80087100->unk_00].unk_02 = arg2;
+                D_80087100->unk_08[D_80087100->unk_00].unk_04 = arg3;
+                D_80087100->unk_08[D_80087100->unk_00].unk_05 = arg4;
+                D_80087100->unk_08[D_80087100->unk_00].unk_08 = arg5;
+                D_80087100->unk_08[D_80087100->unk_00].unk_0C = arg6;
+                D_80087100->unk_00++;
+            }
+        }
+    }
+}
 
 INCLUDE_ASM("asm/main/nonmatchings/game_8006BB14", func_8006C19C);
 
@@ -400,7 +417,11 @@ void func_8006FC8C(s32 n, s32 arg1) {
 
 INCLUDE_ASM("asm/main/nonmatchings/game_8006BB14", func_8006FCD4);
 
-INCLUDE_ASM("asm/main/nonmatchings/game_8006BB14", func_8006FEB4);
+void func_8006FCD4(s32, s32, s32);
+
+void func_8006FEB4(s32 arg0) {
+    func_8006FCD4(arg0, 0, 0);
+}
 
 INCLUDE_ASM("asm/main/nonmatchings/game_8006BB14", func_8006FED8);
 
@@ -412,7 +433,27 @@ INCLUDE_ASM("asm/main/nonmatchings/game_8006BB14", func_800700CC);
 
 INCLUDE_ASM("asm/main/nonmatchings/game_8006BB14", func_80070298);
 
-INCLUDE_ASM("asm/main/nonmatchings/game_8006BB14", func_80070324);
+s32 func_8006E530(void);
+void func_8006E59C(void);
+s32 func_8006EB08(s32, s32);
+extern s32 D_801FDEB8;
+
+s32 func_80070324(s32 first, s32 count, s32 dst) {
+    s32 done;
+
+    done = 0;
+    if (D_801FDEB8 != 0) {
+        if (func_8006E530() == 0 || count == 0) {
+            return 0;
+        }
+        while (--count != -1) {
+            done += func_8006EB08(first, dst + done);
+            first++;
+        }
+        func_8006E59C();
+    }
+    return done;
+}
 
 INCLUDE_ASM("asm/main/nonmatchings/game_8006BB14", func_800703D8);
 
