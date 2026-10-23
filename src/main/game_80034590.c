@@ -14,7 +14,7 @@ void func_8004BFE0(void);
 void func_80053D68(s32 n, Player *player);
 s32 func_8001EA78(void);
 void func_8001F7CC(s32 a, s32 b);
-void func_8004A9B0(s32 a, s32 b, s32 c, s32 d, s32 e);
+u16 func_8004A9B0(void *a, s32 b, s32 c, s32 d, s32 e);
 void func_8001BB68(Mover *mover);
 Mover *func_8001EB9C(s32 a, s32 b, s32 c, s32 d, s32 color);
 void func_8001BB88(Mover *mover);
@@ -185,6 +185,8 @@ extern u8 D_8008A968[];
 extern u8 D_8008A914[];
 extern u8 D_8008A4F4[];
 extern EffectDef D_800960E0;
+extern s32 D_801E1E14;
+extern u8 D_800956C4[];
 
 void func_80034590(Npc *npc) {
     npc->unk_8 = 2;
@@ -1609,7 +1611,32 @@ u16 func_80039220(u16 *out, NpcS *npc) {
     return func_80038F3C(out, npc);
 }
 
-INCLUDE_ASM("asm/main/nonmatchings/game_80034590", func_80039290);
+void func_80039290(void) {
+    Npc *npc;
+    u16 *info;
+    u16 sound;
+    u16 arg;
+    u16 which;
+
+    npc = (Npc *)D_800AA268->unk_90;
+    if (npc->unk_2A == 0 || npc->unk_2A == 4) {
+        goto count;
+    }
+    info = D_800AA268->unk_5C;
+    sound = *info++;
+    arg = info[0];
+    which = info[1];
+    if (sound != 0) {
+        func_8001F7CC(arg, sound);
+    }
+    if (func_8004A9B0(npc, which, 7, 0, 0) == 1) {
+count:
+        D_801E1E14++;
+    } else {
+        npc->unk_2A = 4;
+        npc->unk_1C = 4;
+    }
+}
 
 INCLUDE_ASM("asm/main/nonmatchings/game_80034590", func_80039358);
 
@@ -1845,7 +1872,33 @@ void func_8003AA7C(NpcS *npc) {
     ((s16 *)&D_800AA248.unk_20->unk_18)[1] = 0x3C;
 }
 
+/* 93.12%: the original keeps the facing test as two arms joined by a jump, and rebuilds the address of D_800AA248 after the join (in s0); here the arms collapse into one conditional set and the address stays in one saved register throughout */
+#ifdef NON_MATCHING
+void func_8003AAF8(NpcS *npc) {
+    s32 offset;
+
+    if (npc->unk_1C == 0) {
+        D_800AA248.unk_20->unk_80 = 0x50;
+        if (D_800AA248.unk_20->unk_22 & 0x10) {
+            offset = 0x1CC0000;
+        } else {
+            offset = -0x3C0000;
+        }
+        ((s16 *)&D_800AA248.unk_20->unk_14)[1] = ((D_801F9AC8[0] + offset) & D_801D8864[0]) >> 16;
+        ((s16 *)&D_800AA248.unk_20->unk_18)[1] = 0x46;
+        npc->unk_8 = 0x63;
+        npc->unk_1C = (func_8001EA78() & 0x3F) + 0x78;
+        func_8003EB5C(D_800956C4, D_800AA248.unk_20);
+        npc->unk_14 = 0;
+        npc->unk_C = 1;
+    } else {
+        npc->unk_1C--;
+        ((s16 *)&D_800AA268->unk_18)[1] = 0x258;
+    }
+}
+#else
 INCLUDE_ASM("asm/main/nonmatchings/game_80034590", func_8003AAF8);
+#endif
 
 void func_8003ABE8(NpcS *npc) {
     if (D_800AA248.unk_20->unk_22 & 0x10) {
