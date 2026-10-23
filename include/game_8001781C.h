@@ -169,18 +169,19 @@ typedef struct Monster {
     s16 unk_D4;
     u8 pad_D6[0x2];
     s32 unk_D8;
-    u8 pad_DC[0x2];
+    s16 unk_DC;
     s16 unk_DE;
     u8 pad_E0[0x24];
     s32 unk_104;
     u8 pad_108[0x1E];
-    s16 unk_126;
+    u16 unk_126;
     u16 unk_128;
     u8 pad_12A[0x2];
     u16 unk_12C;
     u8 pad_12E[0x10];
     s16 unk_13E;
-    u8 pad_140[0x12];
+    u16 unk_140;
+    u8 pad_142[0x10];
     s16 unk_152;
     u8 pad_154[0x14];
     u16 unk_168;
@@ -224,9 +225,22 @@ typedef struct Unk801D3D64 {
 
 /* A 0x14-byte record of the 1024-entry table at 0x801C542C. */
 typedef struct Unk1C542C {
-    s16 unk_0;
-    u8 pad_2[0x12];
+    s16 unk_0;              /* -1 when free */
+    u8 pad_2[0x2];
+    s32 unk_4;              /* the VRAM position: x in 0x80 steps (bank) and 0x10 steps (column) */
+    s32 unk_8;              /* the VRAM y: bit 8 picks the lower half, bits 5-7 the row */
+    s32 unk_C;              /* width */
+    s32 unk_10;             /* height */
 } Unk1C542C;
+
+/* A 0x10-byte record of the table at 0x801F9AE4 (func_8001B350): a use count and the slot it holds. */
+typedef struct Unk1F9AE4 {
+    u8 pad_0[0x4];
+    s16 unk_4;
+    u8 pad_6[0x2];
+    s32 unk_8;
+    s32 unk_C;
+} Unk1F9AE4;
 
 /* The 13 blocks of 0x584 bytes at 0x801D3DC8: a 0x98-byte head and 15 items of 0x54 bytes. */
 typedef struct Unk1D3DC8Part {
@@ -358,6 +372,12 @@ typedef struct Unk1AD1C {
     u32 unk_4;
     u32 unk_8;
 } Unk1AD1C;
+
+/* The level flags at 0x8007BD78 (cleared as 0x94 bytes). */
+typedef struct Unk7BD78 {
+    s32 unk_0;
+    u8 pad_4[0x90];
+} Unk7BD78;
 
 /* An animation (the tables in .data from 0x8008AE40 on); opaque here. */
 typedef struct Anim Anim;
