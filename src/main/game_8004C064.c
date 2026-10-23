@@ -6,6 +6,10 @@
 #include "gameobject.h"
 #include "game_8004C064.h"
 
+/* The current object as a scalar: the same word as D_800AA248.cur_obj, which some functions read on its own
+ * (func_8004C738). */
+extern GameObject *D_800AA268;
+
 s32 func_8001EB10(s32 range, s32 arg1);                     /* a random number */
 void func_8001E4B0(GameObject *obj);                        /* free an object */
 void func_8001F724(s32 sound);
@@ -210,26 +214,19 @@ void func_8004C458(void) {
     D_800AA248.cur_obj->script_pc = *D_800AA248.cur_obj->arg.w;
 }
 
-#ifdef NON_MATCHING
-/* 81%: the original rereads the operand and the object after the first store; the C keeps them */
 void func_8004C478(void) {
     GameObject *obj = D_800AA248.cur_obj;
     s32 *arg = obj->arg.w;
 
     obj->unk_48 = *arg;
-    obj->script_pc = *arg;
+    D_800AA248.cur_obj->script_pc = *arg;
 }
-#else
-INCLUDE_ASM("asm/main/nonmatchings/game_8004C064", func_8004C478);
-#endif
 
-#ifdef NON_MATCHING
-/* 96%: the operands are loaded before the action test in the original */
 void func_8004C4AC(void) {
-    GameObject *obj = D_800AA248.cur_obj;
+    GameObject *obj = D_800AA268;
     s32 *arg = obj->arg.w;
-    s32 first = arg[0];
-    s32 second = arg[1];
+    s32 first = *arg++;
+    s32 second = *arg;
 
     if (obj->owner.monster->action == 0x4E) {
         obj->unk_48 = second;
@@ -239,9 +236,6 @@ void func_8004C4AC(void) {
     obj->unk_48 = first;
     obj->script_pc = first;
 }
-#else
-INCLUDE_ASM("asm/main/nonmatchings/game_8004C064", func_8004C4AC);
-#endif
 
 void func_8004C4EC(void) {
     GameObject *obj = D_800AA248.cur_obj;
@@ -345,23 +339,18 @@ void func_8004C718(void) {
     m->unk_170 = m->action;
 }
 
-#ifdef NON_MATCHING
-/* 53%: the order of the loads of the monster, the operand and the action */
 void func_8004C738(void) {
-    GameObject *obj = D_800AA248.cur_obj;
+    GameObject *obj = D_800AA268;
     Monster *m = obj->owner.monster;
     u16 *arg = obj->arg.h;
+    u16 action;
 
     m->unk_05C = m->action;
+    action = *arg;
     m->unk_0D8 = 0;
-    m->action = *arg;
+    m->action = action;
 }
-#else
-INCLUDE_ASM("asm/main/nonmatchings/game_8004C064", func_8004C738);
-#endif
 
-#ifdef NON_MATCHING
-/* 72%: the object is reread from D_800AA248 after each store in the original */
 void func_8004C768(void) {
     GameObject *obj = D_800AA248.cur_obj;
     Monster *m = obj->owner.monster;
@@ -369,18 +358,15 @@ void func_8004C768(void) {
     if (m->unk_0CC == 1 && obj->pos_y.p.i >= 0xDC) {
         obj->pos_y.p.i = 0xE1;
         m->action = 0x4D;
-        obj->vel_x.v = 0;
-        obj->vel_y.v = 0;
-        obj->unk_84 = 0;
-        obj->unk_88 = 0;
+        D_800AA248.cur_obj->vel_x.v = 0;
+        D_800AA248.cur_obj->vel_y.v = 0;
+        D_800AA248.cur_obj->unk_84 = 0;
+        D_800AA248.cur_obj->unk_88 = 0;
         m->unk_100 = 0;
         m->unk_104 = 0;
-        obj->script_pc = *obj->arg.w;
+        D_800AA248.cur_obj->script_pc = *D_800AA248.cur_obj->arg.w;
     }
 }
-#else
-INCLUDE_ASM("asm/main/nonmatchings/game_8004C064", func_8004C768);
-#endif
 
 void func_8004C80C(void) {
     D_800AA248.cur_obj->vel_y.v = 0xFFFF4000;
@@ -466,31 +452,30 @@ clamp:
 INCLUDE_ASM("asm/main/nonmatchings/game_8004C064", func_8004C83C);
 #endif
 
-#ifdef NON_MATCHING
-/* 78%: the first half rereads the object from D_800AA248 after stores, the jump at the end keeps it in a register */
 void func_8004CA70(void) {
     Monster *m = D_800AA248.cur_obj->owner.monster;
     GameObject *obj;
     s32 pc;
+    s32 vel;
 
     if (m->action != 0x20) {
         m->action = 2;
     }
-    if ((m->unk_0C8 & 4) && m->unk_1AA < 2) {
-        m->unk_1AA = 2;
-        if (D_800AA248.cur_obj->vel_y.v >= 0) {
-            D_800AA248.cur_obj->vel_y.v = 0;
+    if (m->unk_0C8 & 4) {
+        vel = D_800AA248.cur_obj->vel_y.v;
+        if (m->unk_1AA < 2) {
+            m->unk_1AA = 2;
+            if (vel >= 0) {
+                D_800AA248.cur_obj->vel_y.v = 0;
+            }
+            return;
         }
-    } else {
-        obj = D_800AA248.cur_obj;
-        pc = *obj->arg.w;
-        obj->unk_48 = pc;
-        obj->script_pc = pc;
     }
+    obj = D_800AA268;
+    pc = *obj->arg.w;
+    obj->unk_48 = pc;
+    obj->script_pc = pc;
 }
-#else
-INCLUDE_ASM("asm/main/nonmatchings/game_8004C064", func_8004CA70);
-#endif
 
 void func_8004CB08(void) {
     Monster *m = D_800AA248.cur_obj->owner.monster;
@@ -540,8 +525,6 @@ void func_8004CBFC(void) {
     D_800AA248.cur_obj->vel_y.v = 0;
 }
 
-#ifdef NON_MATCHING
-/* 96%: register names (the level state's address in a0) */
 void func_8004CC0C(void) {
     Monster *m = D_800AA248.cur_obj->owner.monster;
     s32 *arg;
@@ -549,15 +532,10 @@ void func_8004CC0C(void) {
     m->action = 1;
     m->unk_168 = 7;
     arg = D_800AA248.cur_obj->arg.w;
-    D_800AA248.cur_obj->unk_48 = arg[0];
-    D_800AA248.cur_obj->script_pc = arg[1];
+    D_800AA248.cur_obj->unk_48 = *arg++;
+    D_800AA248.cur_obj->script_pc = *arg;
 }
-#else
-INCLUDE_ASM("asm/main/nonmatchings/game_8004C064", func_8004CC0C);
-#endif
 
-#ifdef NON_MATCHING
-/* 96%: as func_8004CC0C */
 void func_8004CC5C(void) {
     Monster *m = D_800AA248.cur_obj->owner.monster;
     s32 *arg;
@@ -565,12 +543,9 @@ void func_8004CC5C(void) {
     m->action = 1;
     m->unk_168 = 3;
     arg = D_800AA248.cur_obj->arg.w;
-    D_800AA248.cur_obj->unk_48 = arg[0];
-    D_800AA248.cur_obj->script_pc = arg[1];
+    D_800AA248.cur_obj->unk_48 = *arg++;
+    D_800AA248.cur_obj->script_pc = *arg;
 }
-#else
-INCLUDE_ASM("asm/main/nonmatchings/game_8004C064", func_8004CC5C);
-#endif
 
 void func_8004CCAC(void) {
     Monster *m = D_800AA248.cur_obj->owner.monster;
@@ -1315,18 +1290,13 @@ void func_8004E264(void) {
     }
 }
 
-#ifdef NON_MATCHING
-/* 95%: register names (the object in v1, the operands in v0) */
 void func_8004E2A0(void) {
-    GameObject *obj = D_800AA248.cur_obj;
+    GameObject *obj = D_800AA268;
     s32 *arg = obj->arg.w;
 
-    obj->vel_y.v = arg[0];
-    obj->owner.monster->unk_104 = arg[1];
+    obj->vel_y.v = *arg++;
+    obj->owner.monster->unk_104 = *arg;
 }
-#else
-INCLUDE_ASM("asm/main/nonmatchings/game_8004C064", func_8004E2A0);
-#endif
 
 void func_8004E2D0(void) {
     Monster *m = D_800AA248.cur_obj->owner.monster;

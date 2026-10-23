@@ -72,7 +72,10 @@ typedef struct GameObject {
                    struct Monster *monster;
                    struct Attacker *attacker;
                } owner;
-    /* 0x94 */ struct Monster *unk_94; /* a second monster (the other side of a grab) */
+    /* 0x94 */ union {                 /* a second monster (the other side of a grab), or a thrown object's slot */
+                   struct Monster *monster;
+                   void *p;
+               } unk_94;
     /* 0x98 */ u8 unk_98[0x04];
     /* 0x9C */ s32 unk_9C;
 } GameObject;
@@ -84,6 +87,9 @@ typedef struct SpriteFrame {
     /* 0x06 */ u16 unk_06;             /* height */
     /* 0x08 */ u16 unk_08;             /* x offset */
     /* 0x0A */ u16 unk_0A;             /* y offset */
+    /* 0x0C */ u8 unk_0C[0x04];
+    /* 0x10 */ u16 unk_10;             /* a second point: x (game_8004750C, the throw's origin) */
+    /* 0x12 */ u16 unk_12;             /* y */
 } SpriteFrame;
 
 /* What func_8001D110 hands out to describe an object to create; func_8001DCB4 creates it from
@@ -92,10 +98,8 @@ typedef struct {
     /* 0x00 */ s32 id;                 /* the sprite/animation id */
     /* 0x04 */ u8 unk_04[0x08];
     /* 0x0C */ s32 unk_0C;
-    /* 0x10 */ u8 unk_10[0x02];
-    /* 0x12 */ s16 x;
-    /* 0x14 */ u8 unk_14[0x02];
-    /* 0x16 */ s16 y;
+    /* 0x10 */ Fixed16 pos_x;          /* written whole from an object's position, or its integer half alone */
+    /* 0x14 */ Fixed16 pos_y;
     /* 0x18 */ u8 unk_18[0x04];
     /* 0x1C */ s32 unk_1C;
     /* 0x20 */ s32 flags;
@@ -113,9 +117,14 @@ typedef struct Monster {
     /* 0x008 */ Fixed16 unk_008;
     /* 0x00C */ u8 unk_00C[0x04];
     /* 0x010 */ s32 unk_010;           /* a vertical speed, 16.16 */
-    /* 0x014 */ u8 unk_014[0x14];
+    /* 0x014 */ struct Monster *target;  /* the monster this one is attacking (game_8004750C) */
+    /* 0x018 */ u8 unk_018[0x04];
+    /* 0x01C */ u16 unk_01C;           /* a countdown set from a random draw (game_8004750C) */
+    /* 0x01E */ u8 unk_01E[0x04];
+    /* 0x022 */ u16 unk_022;           /* the step of a throw sequence, 0..4 (game_8004750C) */
+    /* 0x024 */ u8 unk_024[0x04];
     /* 0x028 */ u16 unk_028;
-    /* 0x02A */ s16 unk_02A;
+    /* 0x02A */ u16 unk_02A;           /* the kind of throw in progress, 0 none (game_8004750C) */
     /* 0x02C */ u8 unk_02C[0x10];
     /* 0x03C */ u16 unk_03C;
     /* 0x03E */ u16 unk_03E;
@@ -249,6 +258,6 @@ typedef struct {
 extern LevelFlags D_8007BD78;
 extern u8 D_801FA8A0[];                /* the player of each monster id (1-based), 0 for none */
 extern s32 D_800AA2DC;
-extern s16 D_800AA2C0;
+extern u16 D_800AA2C0;             /* 1 when a hit landed this frame */
 
 #endif /* GAMEOBJECT_H */
