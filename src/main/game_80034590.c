@@ -20,7 +20,7 @@ Mover *func_8001EB9C(s32 a, s32 b, s32 c, s32 d, s32 color);
 void func_8001BB88(Mover *mover);
 s16 func_8001EB10(s32 arg0, s32 arg1);
 void func_8001F724(s32 sound);
-void func_80020D20(void *npc);
+void func_80020D20();                /* called with the record and without it: no prototype in the original */
 void func_800242A8(void);
 s32 func_80025DF8(s32 n);
 void func_8003EB5C(u8 *anim, Mover *mover);
@@ -2247,4 +2247,53 @@ void func_8003B294(NpcS *npc) {
     }
 }
 
+/* 98.32%: the original rebuilds the address of D_800AA248 into s1 once the countdown reaches zero (the earlier one ends there) and keeps the facing speed in v0; here the first address lives on and the speed lands in v1 */
+#ifdef NON_MATCHING
+void func_8003B3C8(NpcS *npc) {
+    s32 speed;
+
+    D_800AA248.unk_20 = npc->unk_0;
+    func_80020D20();
+    func_8003AC74(npc);
+    switch (npc->unk_8) {
+    case 1:
+    case 0x3B:
+        npc->unk_8 = 2;
+        npc->unk_1C = 0x14;
+        break;
+    case 3:
+        func_8003A328(npc, 0);
+        break;
+    case 4:
+        func_80038800(npc);
+        break;
+    case 2:
+        speed = -0x70000;
+        if (!(D_800AA248.unk_20->unk_22 & 0x10)) {
+            speed = 0x70000;
+        }
+        npc->unk_34 = speed;
+        D_800AA248.unk_20->unk_C = 0;
+        if (--npc->unk_1C == 0) {
+            if (!(D_800AA248.unk_20->unk_22 & 0x10)) {
+                if (func_80039C98(D_800AA248.unk_20->unk_14, 0xC80000, -0xA0000) != 0) {
+                    goto hit;
+                }
+                if (!(D_800AA248.unk_20->unk_22 & 0x10)) {
+                    goto done;
+                }
+            }
+            if (func_80039C98(D_800AA268->unk_14, -0xA0000, 0xC80000) != 0) {
+            hit:
+                func_8001F7CC(0x32, 1);
+                func_8004A9B0(npc, 0, 5, 0, 0);
+            }
+        done:
+            npc->unk_1C = 5;
+        }
+        break;
+    }
+}
+#else
 INCLUDE_ASM("asm/main/nonmatchings/game_80034590", func_8003B3C8);
+#endif
