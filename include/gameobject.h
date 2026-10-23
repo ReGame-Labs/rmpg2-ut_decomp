@@ -118,7 +118,7 @@ typedef struct Monster {
     /* 0x000 */ u16 id;                /* 1..7 */
     /* 0x002 */ u8 unk_002[0x02];
     /* 0x004 */ s16 unk_004;
-    /* 0x006 */ u8 unk_006[0x02];
+    /* 0x006 */ u16 unk_006;           /* the monster kind: 0x15 has its own thrown objects (game_8004750C) */
     /* 0x008 */ Fixed16 unk_008;
     /* 0x00C */ u8 unk_00C[0x04];
     /* 0x010 */ s32 unk_010;           /* a vertical speed, 16.16 */
