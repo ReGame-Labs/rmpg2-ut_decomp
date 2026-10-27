@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 # The project's checks, one entry point (tests/README.md): the scripts parse and the Python compiles, the workaround
-# census (tools/hacks.py), the toolchain smoke test, and with the disc the byte-identical build. Exits non-zero on
-# the first failure. CI runs the same steps (.github/workflows/ci.yml; scripts/ci_local.sh runs them in Docker).
+# census (tools/hacks.py), the toolchain smoke test and unit_diff's comparison, and with the disc the byte-identical
+# build. Exits non-zero on the first failure. CI runs the same steps (.github/workflows/ci.yml; scripts/ci_local.sh
+# runs them in Docker).
 # Usage: scripts/test.sh [--check] [--no-build]
 #   --check     the build from scratch (scripts/build.sh --check) instead of the incremental one
 #   --no-build  the disc-free checks only
@@ -24,7 +25,7 @@ PY="$ROOT/tools/venv/bin/python"
 
 echo "=== scripts parse, Python compiles"
 bash -n scripts/*.sh tools/*.sh
-"$PY" -m py_compile configure.py diff_settings.py tools/*.py
+"$PY" -m py_compile configure.py diff_settings.py tools/*.py tests/*.py
 
 echo "=== census: the matching workarounds (tools/hacks.py)"
 "$PY" tools/hacks.py --check
@@ -32,8 +33,10 @@ echo "=== census: the matching workarounds (tools/hacks.py)"
 if [[ -x tools/binutils/bin/mipsel-linux-gnu-as && -x tools/gcc/2.8.1/cc1 ]]; then
     echo "=== toolchain smoke test (scripts/check_toolchain.sh)"
     scripts/check_toolchain.sh
+    echo "=== unit_diff's comparison (tests/unit_diff_test.py)"
+    "$PY" tests/unit_diff_test.py
 else
-    echo "=== toolchain smoke test: skipped (scripts/setup.sh first)"
+    echo "=== toolchain smoke test, unit_diff's comparison: skipped (scripts/setup.sh first)"
 fi
 
 if [[ $BUILD -eq 1 ]]; then
