@@ -449,7 +449,7 @@ void func_8005A964(Monster *);
 extern u8 D_800105A8[];
 extern s16 D_800AA300[11][8][8];
 void func_8001F61C(u8 *, s16, s16, s32, s32, s32 *, s32, s32);
-u16 func_80025C54(void *);
+u16 main_check_bonus_round(void *);
 extern void (*D_8007BE20[])(Monster *);
 void func_80023E30(Npc *);
 void main_set_frame(s32, s32, GameObject *);
@@ -4628,7 +4628,7 @@ u16 func_800249B8(s32 arg0) {
 
     result = arg0;
     if (D_801D8728 == 0) {
-        if (func_80025C54(NULL) == 1) {
+        if (main_check_bonus_round(NULL) == 1) {
             result = 0x200;
         } else if (D_801FA984[0] != 0 && D_801FA984[1] != 0 && D_801FA984[2] != 0 && D_801FA960 < 0x4B) {
             D_801E1CAC = 0x4B;
@@ -5222,7 +5222,41 @@ void *func_80025C08(void *list) {
     return table[index];
 }
 
-INCLUDE_ASM("asm/main/nonmatchings/main", func_80025C54);
+u16 main_check_bonus_round(void *arg0) {
+    s16 level = D_801FA960 % 25;
+    switch (level) {
+    case 4:
+        D_800AA2DC |= 1 << (D_801D8740 - 1);
+        break;
+    case 9:
+        D_800AA2DC |= 1 << (D_801D8740 + 2);
+        break;
+    case 14:
+        D_800AA2DC |= 1 << (D_801D8740 + 8);
+        break;
+    case 19:
+        if (D_801D8740 >= 2) {
+            D_800AA2DC |= 1 << (D_801D8740 + 5);
+        } else {
+            D_800AA2DC |= 1 << (D_801D8740 - 1);
+        }
+        break;
+    case 23:
+        if (D_801D8740 >= 2) {
+            D_800AA2DC |= 1 << (D_801D8740 + 11);
+        } else {
+            D_800AA2DC |= 1 << (D_801D8740 + 8);
+        }
+        break;
+    }
+    if (D_800AA2DC != 0) {
+        D_801D8728 = D_801D8740;
+        D_801FA964 = func_8005F208();
+        D_801D3780 = 99;
+        return 1;
+    }
+    return 0;
+}
 
 s32 func_80025DF8(s32 id) {
     s32 i;
@@ -6069,7 +6103,87 @@ void func_80028508(void) {
 
 INCLUDE_ASM("asm/main/nonmatchings/main", func_80028524);
 
+#ifdef NON_MATCHING
+/* 96.69%: 96.7 %: each case's load of m1->obj sits before the second call's li a0 (the original has li a0 first, so
+ * its three tails cross-jump from the load); then x1/x2 get a3/a2 instead of t1/t0 */
+extern s16 D_801D8844;
+extern s16 D_801FA724;
+extern s16 D_801FA728;
+extern s16 D_801FA9A8;
+s16 func_80028ADC(s32, s32);
+
+void func_800288B0(s32 *vel2, s32 *vel1) {
+    Monster *m1;
+    Monster *m2;
+    GameObject *o1;
+    GameObject *o2;
+    s32 left;
+    s32 width;
+    u16 x1;
+    u16 x2;
+    s32 result;
+    u16 cam;
+
+    switch (D_801D8844) {
+    case 1:
+        m1 = &D_801E0B78[func_80025DF8(1)];
+        o1 = m1->obj;
+        m2 = &D_801E0B78[func_80025DF8(2)];
+        break;
+    case 2:
+        m1 = &D_801E0B78[func_80025DF8(1)];
+        o1 = m1->obj;
+        m2 = &D_801E0B78[func_80025DF8(3)];
+        break;
+    default:
+        m1 = &D_801E0B78[func_80025DF8(2)];
+        o1 = m1->obj;
+        m2 = &D_801E0B78[func_80025DF8(3)];
+        break;
+    }
+    o2 = m2->obj;
+    if (o2 == NULL) {
+        o2 = o1;
+    }
+    if (o1 == NULL) {
+        o1 = o2;
+    }
+    x1 = o1->pos_x.s.hi;
+    x2 = o2->pos_x.s.hi;
+    width = (s16) D_801D8866 + 1;
+    cam = D_801F9ACA;
+    left = (s16) D_801D8866 - 399;
+    if (D_801F9ACA >= left) {
+        if ((s16) x1 <= left) {
+            x1 += width;
+        }
+        if ((s16) x2 <= left) {
+            x2 += width;
+        }
+    }
+    x1 -= cam;
+    x2 -= cam;
+    if (m1->action == 0x37 || m1->action == 0x26 || (u16) m1->unk_1C8 != 0 || m1->id == 0) {
+        result = (s16) x2;
+        *vel2 = o2->vel_x.w;
+        *vel1 = 0;
+    } else {
+        *vel1 = o1->vel_x.w;
+        if ((u16) m2->unk_1C8 != 0 || m2->action == 0x37 || m2->action == 0x26 || m2->id == 0) {
+            *vel2 = 0;
+            result = (s16) x1;
+        } else {
+            *vel2 = o2->vel_x.w;
+            D_801FA724 = x2;
+            D_801FA728 = x1;
+            result = func_80028ADC((s16) x2, (s16) x1);
+        }
+    }
+    D_801FA9A8 = result;
+}
+#else
 INCLUDE_ASM("asm/main/nonmatchings/main", func_800288B0);
+#endif
 
 /* 91.3 %: the result is computed from a copy of the larger value (move v0,a2) in the original; the C computes it in place */
 #ifdef NON_MATCHING
