@@ -39,9 +39,9 @@ extern u8 D_8008A4A0[];
 extern u8 D_8008A4B8[];
 extern u8 D_8008A4C4[];
 void func_8003C1C0(u16, UnkStructB2 *);
-void func_8003C674();                  /* empty; func_8003C3B0 passes it two arguments */
+void func_8003C674();                  /* empty; pickup_hide_items passes it two arguments */
 BuildingPart *func_8003C67C(Building *u, UnkStructB2 *rec);
-void func_8003CE24();                  /* actor.c: (Actor *, ObjectDef *); func_8003C3B0 passes it a third argument */
+void func_8003CE24();                  /* actor.c: (Actor *, ObjectDef *); pickup_hide_items passes it a third argument */
 void func_8003C8D4(Pickup *arg0);
 void func_8003C934(Pickup *);
 void func_8003C9E8(Pickup *arg0);
@@ -591,7 +591,7 @@ void func_8003C344(void) {
     D_801F9988 = 0;
 }
 
-void func_8003C3B0(void) {
+void pickup_hide_items(void) {
     SpawnItem *list;
     SpawnItem *item;
     UnkStructB2 *rec;
