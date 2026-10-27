@@ -6329,7 +6329,170 @@ void main_reset_camera_y(void) {
     D_801F9ACC.w = 0;
 }
 
+#ifdef NON_MATCHING
+/* 98.40%: 98.4 %: flags and the D_801D3D64 pointer swap s0/s1; d = vel2 loads vel2 straight into d where the
+ * original loads it into v0 and copies it */
+extern u16 D_801D3700;
+extern s32 D_8007BD7C;
+extern s32 D_801D3D90;
+extern s16 D_801FA724;
+extern s16 D_801FA728;
+extern s16 D_801FA9A8;
+void func_80028B1C(void);
+void func_800288B0(s32 *vel2, s32 *vel1);
+void func_80029D5C(s32, s32);
+
+void func_80028184(void) {
+    s32 flags;
+    s32 vel2;
+    s32 vel1;
+    s32 speed;
+    s32 x;
+    s32 d;
+    s32 cam;
+    Unk1D3D64 *scroll;
+
+    flags = func_8005E4E4();
+    if (flags == 1 || D_801D8740 == 0 || D_801D3700 != 0 || D_801E1CB0 != 0
+        || (scroll = &D_801D3D64)->unk_24 != 0) {
+        main_reset_camera_y();
+        return;
+    }
+    if (flags & 2) {
+        func_80029D5C(flags, D_8007BD7C);
+        return;
+    }
+    func_80028B1C();
+    func_800288B0(&vel2, &vel1);
+    x = D_801FA9A8;
+    speed = scroll->unk_26 << 16;
+    if (speed != 0) {
+        if (speed > 0) {
+            d = vel2;
+            if (vel1 >= d) {
+                d = vel1;
+            }
+            if (x >= 0xD3) {
+                d += 0x10000;
+                if (d < speed) {
+                    d = speed;
+                }
+            } else if (x >= 0xBF) {
+                goto clamp_right;
+            } else {
+                goto stop;
+            }
+        } else {
+            d = vel2;
+            if (vel1 <= d) {
+                d = vel1;
+            }
+            if (x < 0xBE) {
+                d -= 0x10000;
+                if (d > speed) {
+                    d = speed;
+                }
+            } else if (x < 0xD3) {
+                goto clamp_left;
+            } else {
+                goto stop;
+            }
+        }
+    } else {
+        if (D_801D8740 < 2) {
+            if (x > 0x12C) {
+                goto right;
+            }
+            if (x < 0x64) {
+                goto left;
+            }
+            goto stop;
+        }
+        if (x > 0xF0) {
+            if (vel2 >= 0) {
+                x = D_801FA724;
+                if (x >= 0x12C) {
+                    goto right;
+                }
+            }
+            if (vel1 < 0) {
+                goto stop;
+            }
+            x = D_801FA728;
+            if (x < 0x12C) {
+                goto stop;
+            }
+        right:
+            d = vel2;
+            if (vel1 >= d) {
+                d = vel1;
+            }
+            D_801D3D90 = d;
+            if (x > 0x12C) {
+                d += 0x10000;
+            } else if (x < 0xDD) {
+                d = 0x10000;
+            } else {
+            clamp_right:
+                if (d < 0x10000) {
+                    d = 0x10000;
+                }
+            }
+        } else if (x < 0xA0) {
+            if (vel2 <= 0) {
+                x = D_801FA724;
+                if (x < 0x65) {
+                    goto left;
+                }
+            }
+            if (vel1 > 0) {
+                goto stop;
+            }
+            x = D_801FA728;
+            if (x >= 0x65) {
+                goto stop;
+            }
+        left:
+            d = vel2;
+            if (vel1 <= d) {
+                d = vel1;
+            }
+            D_801D3D90 = d;
+            if (x < 0x64) {
+                d -= 0x10000;
+            } else if (x >= 0xB4) {
+                d = -0x10000;
+            } else {
+            clamp_left:
+                if (d > -0x10000) {
+                    d = -0x10000;
+                }
+            }
+        } else {
+        stop:
+            scroll->unk_26 = 0;
+            scroll->unk_2C = 0;
+            goto done;
+        }
+    }
+    if (!(flags & 4)) {
+        cam = D_801F9AC8.w;
+        if (d < 0) {
+            d = -d & 0xFFFF0000;
+            d = -d;
+        } else {
+            d &= 0xFFFF0000;
+        }
+        cam += d;
+        D_801D3D8A = d >> 16;
+        D_801F9AC8.w = cam & D_801D8864.w;
+    }
+done:
+    main_update_camera_y();
+}
+#else
 INCLUDE_ASM("asm/main/nonmatchings/main", func_80028184);
+#endif
 
 void main_start_scroll_down(void) {
     s32 var_v1;
