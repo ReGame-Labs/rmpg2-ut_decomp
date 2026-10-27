@@ -458,6 +458,9 @@ monster_find_wall = 0x80056CCC; // type:func  (e) a building wall within 0x14 of
 monster_find_floor = 0x80056F38; // type:func  (e, city) climb_floor from its height and the building's floor table
 
 // monster_anim (src/main/monster_anim.c), the monsters' animation scripts and the box tests against buildings, pickups and characters
+monster_anim_update_projectile = 0x8005A2F4; // type:func  (e, k) monster 5's projectile e->extra[k], D_80084278 its state bits - 1 flying, 2 hit a building, 4 the flying frames to start, else its throw frames
+monster_anim_update_bomb = 0x8005A964; // type:func  (e) monster 7's bomb e->extra[0] - dropped or thrown, bounces three times, explodes on the buildings and characters near
+monster_anim_update_special = 0x8005AE28; // type:func  (e) action 0x63 in D_8007BE20 - the monster's special move by id, 1 and 2 charge through soldiers, monsters and buildings for 300 frames
 monster_anim_find_buildings = 0x8005B8C8; // type:func  (x, y, flags, half_w, half_h) the mask of the standing buildings whose box overlaps, flags 0x10 numbers them from the last
 monster_anim_test_box = 0x8005BC20; // type:func  (x, y, half_w, half_h, obj, how) 1 when the box overlaps the object's, how 1 its frame's box, 2 its size on one side by the facing, 4 a quarter of its width either side
 

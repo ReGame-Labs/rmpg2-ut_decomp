@@ -96,6 +96,7 @@ typedef struct GameObject {
     /* 0x50 */ union {                  /* by kind */
                    struct GameObject *obj;  /* a link */
                    s32 cam_start;           /* OVERATTR's camera: its start point, y << 16 | x (func_8009AE40) */
+                   s32 count;               /* a monster's bomb (kind 0x73A): its bounces */
                } unk_50;
     /* 0x54 */ union {
                    s32 w;
@@ -250,7 +251,7 @@ typedef struct Monster {
     /* 0x11C */ s16 hit_right;
     /* 0x11E */ u16 hit_bottom;
     /* 0x120 */ Fixed pos;                     /* its position: s.lo x, s.hi y */
-    /* 0x124 */ u8 unk_124[0x02];
+    /* 0x124 */ u16 unk_124;
     /* 0x126 */ u16 unk_126;
     /* 0x128 */ u16 unk_128;
     /* 0x12A */ u16 unk_12A;
