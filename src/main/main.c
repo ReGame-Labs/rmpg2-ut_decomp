@@ -5041,9 +5041,11 @@ void func_800242A8(void) {
 }
 
 #ifdef NON_MATCHING
-/* 92.55%: 92.6 %: with -fno-cse-skip-blocks this C gives the original's reload of pos_x in the last branch, so the
- * original's CFG stopped cse there (an if/else for x does, 97.1 %, but then x and dx share a register); x and dx
- * also swap v1/a1 */
+/* 97.14%: 97.1 %: abs() and an if/else for x give the original's reload of pos_x in the last branch, but then x and
+ * dx share v1 (the original keeps dx in a1 and copies it, as with x = dx before an if; that form keeps pos_x in a
+ * register through cse's skipped block) */
+s32 abs(s32);
+
 void func_800242D8(Npc *npc) {
     GameObject *obj;
     s16 dx;
@@ -5051,9 +5053,10 @@ void func_800242D8(Npc *npc) {
 
     obj = D_800AA268.p;
     dx = obj->pos_x.s.hi - D_801F9ACA;
-    x = dx;
-    if ((dx >= 0 ? dx : -dx) >= 0x2BC) {
+    if (abs(dx) >= 0x2BC) {
         x = D_801D8866 + dx;
+    } else {
+        x = dx;
     }
     if (obj->flags & 0x10) {
         if (x > 0x258) {
@@ -5069,8 +5072,12 @@ void func_800242D8(Npc *npc) {
 INCLUDE_ASM("asm/main/nonmatchings/main", func_800242D8);
 #endif
 
-/* 93 %: the second block loads the sprite's x into a temporary and copies it (lh v0; move v1,v0) and leaves the branch delay slot empty; the C loads it straight into its variable */
 #ifdef NON_MATCHING
+/* 96.45%: 96.5 %: the distance is abs() (GCC's builtin); the sprite's x still loads straight into its s32 variable
+ * where the original loads it into a temporary and copies it (lh v0; move v1,v0); as an s16 it loads twice (lh,
+ * lhu) */
+s32 abs(s32);
+
 s16 func_8002439C(Npc *npc) {
     s16 x;
     s32 mx;
@@ -5084,10 +5091,7 @@ s16 func_8002439C(Npc *npc) {
     if (mx < D_801F9ACA) {
         mx += D_801D8866;
     }
-    d = (s16) (mx - x);
-    if (d < 0) {
-        d = -d;
-    }
+    d = abs((s16) (mx - x));
     return d < 0x60;
 }
 #else
@@ -5095,10 +5099,13 @@ INCLUDE_ASM("asm/main/nonmatchings/main", func_8002439C);
 #endif
 
 #ifdef NON_MATCHING
-/* 80.55%: the two loads of unk_26 merge into one lh (the original loads it lhu for x and again lh for the
- * difference); the absolute values live in a2, the original's in v0 */
+/* 85.97%: 86.0 %: abs() (GCC's builtin: bgez, nop, negu) and an s32 x (its lhu apart from the lh of the
+ * difference) give the original's shape; sched1 still loads D_801D8866 after npc->unk_26 where the original loads it
+ * before, so half takes npc's a2 instead of t1 */
+s32 abs(s32);
+
 void main_unwrap_target_x(s16 *px, s16 *pcur, Npc *npc) {
-    u16 x;
+    s32 x;
     s16 cur;
     u16 half;
     s16 d;
@@ -5106,19 +5113,9 @@ void main_unwrap_target_x(s16 *px, s16 *pcur, Npc *npc) {
     x = (u16) npc->unk_26;
     cur = D_800AA268.p->pos_x.s.hi;
     half = D_801D8866;
-    {
-        s32 t = npc->unk_26 - cur;
-        if (t < 0) {
-            t = -t;
-        }
-        d = t;
-    }
+    d = abs(npc->unk_26 - cur);
     if (d >= (s16) half >> 1) {
-        s32 t = D_801F9ACA - cur;
-        if (t < 0) {
-            t = -t;
-        }
-        d = t;
+        d = abs(D_801F9ACA - cur);
         if (d >= (s16) half >> 1) {
             x += half;
         } else {
@@ -5266,14 +5263,13 @@ void main_wrap_layer_x(GameObject *obj, s32 left, s32 right) {
 INCLUDE_ASM("asm/main/nonmatchings/main", main_wrap_layer_x);
 #endif
 
-#ifdef NON_MATCHING
-/* 89.70%: loop.c hoists 0x510 but not 0x500 (the original keeps both in s3/s2), and the sentinel is copied into s1
- * instead of built there; one call with the bounds in locals hoists both but loses the per-case a0 */
 void main_scroll_layers(void) {
     GameObject *obj;
+    GameObject *head;
 
     if (D_801D3D8A != 0) {
-        for (obj = D_801E29A8.next; obj != &D_801E29A8; obj = obj->next) {
+        head = &D_801E29A8;
+        for (obj = head->next; obj != head; obj = obj->next) {
             switch (obj->kind) {
                 case 0x520:
                     main_wrap_layer_x(obj, -0x4000, 0x4000);
@@ -5288,9 +5284,6 @@ void main_scroll_layers(void) {
         }
     }
 }
-#else
-INCLUDE_ASM("asm/main/nonmatchings/main", main_scroll_layers);
-#endif
 
 void func_80024954(void) {
 }
