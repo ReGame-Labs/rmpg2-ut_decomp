@@ -383,7 +383,7 @@ typedef struct GameState {
     /* 0x24 */ s32 dir;                        /* a monster's direction, copied before its handlers run (D_800AA26C);
                                                 * scratch: main_count_monsters's count */
     /* 0x28 */ union {
-                   s32 n;                   /* a counter (func_8003C3B0: the items left in the building) */
+                   s32 n;                   /* a counter (pickup_hide_items: the items left in the building) */
                    s32 *p;                  /* a write pointer into a word list (main_step_anim) */
                } unk_28;
     /* 0x2C */ s32 unk_2C;

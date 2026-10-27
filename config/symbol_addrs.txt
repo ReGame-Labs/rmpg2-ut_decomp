@@ -440,6 +440,7 @@ pickup_spawn_all = 0x8003B6E0; // type:func  () from the level's spawn list D_80
 pickup_clear = 0x8003B9A0; // type:func  (r)
 pickup_test_touch = 0x8003B9C8; // type:func  (obj, m) 1 when the object's box meets the monster's
 pickup_collect = 0x8003BAB0; // type:func  (m) hands every pickup the monster touches to it
+pickup_hide_items = 0x8003C3B0; // type:func  () hides up to 28 items of the spawn list D_800830AC (random start) in the building parts func_8003C67C picks, records D_801D3824
 
 // npc (src/main/npc.c), the per-kind handlers of the pickups (D_801FA9BC) and of the non-player characters (D_801FAC9C)
 npc_create_throw = 0x80039358; // type:func  (m, kind 1..3, throw kind, t) a falling throw from the frame's third point, speeds D_8007DAC8
