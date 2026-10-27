@@ -86,7 +86,8 @@ typedef struct GameObject {
     /* 0x4D */ s8 unk_4D;
     /* 0x4E */ u8 unk_4E[0x02];
     /* 0x50 */ struct GameObject *unk_50;
-    /* 0x54 */ u8 unk_54[0x08];
+    /* 0x54 */ s32 unk_54;
+    /* 0x58 */ u8 unk_58[0x04];
     /* 0x5C */ union {                  /* the operands of the script command being run */
                    void *p;
                    u16 *h;

@@ -39,7 +39,7 @@ void func_8002DBF4(s32, s32, Monster *, BuildingItem *);
 BuildingItem *func_8002ED30(s32, BuildingItem *);
 u16 func_8002F558(Building *);
 void func_8003089C(s32, Monster *);
-u16 func_8004F7A4(Building *, s16);
+u16 func_8004F7A4(Building *u);         /* defined with a u8 * and an s32 result in game_8004E574 */
 s32 func_8005BC20(s16, s16, s32, s32, GameObject *, s32);
 void func_80053C50(s32, Monster *);
 u16 func_8005D198(void);                /* defined as s32 in game_8005D198.c; the callers here mask a u16 */
@@ -66,11 +66,16 @@ void func_80058734();
 void func_8005883C();
 void func_80058984();
 void func_8004EF28(void);
+s32 *func_8001B660(void *id);
 s16 func_8005B8C8(s16 x, s16 y, s32 kind, s32 half_w, s32 half_h);
 void func_8005CAA4(GameObject *b, Monster *e);
 void func_8005CC54(GameObject *b, Monster *e);
 void func_8005CEC4(GameObject *b, Monster *skip);
+void func_8005BB04(Monster *e, s16 want, s16 max, Building *u);
 extern s16 D_8008427A;                   /* toggled every call of func_80059F24 */
+extern u16 D_801E28C8;
+extern u8 D_50003440[];                 /* sprite ids the code takes by address */
+extern u8 D_5000339C[];
 
 /* The animation scripts (seven words each; game_80057C94's .data). */
 extern s32 D_8008434C[];
@@ -275,7 +280,38 @@ void func_80057F28(Monster *e) {
     func_80057BD4(kind, e, script);
 }
 
-INCLUDE_ASM("asm/main/nonmatchings/game_80057C94", func_80057F98);
+s32 func_80057F98(u16 kind, Monster *e) {
+    Monster *m;
+    GameObject *obj;
+    u16 i;
+    u16 d;
+
+    if ((kind == 3 || kind == 7) && D_801E28C8 >= 2 && D_800AA248.cur_obj->pos_y.s.hi >= 0xE0) {
+        i = 7;
+        do {
+            if (i != e->id) {
+                m = &D_801E0B78[i];
+                if ((m->unk_058 & 1) && m->unk_0DC != 0 && m->unk_1B0 == 0) {
+                    obj = m->obj;
+                    if (obj->pos_y.s.hi >= 0xE0 && (obj->flags & 0x10) != (D_800AA248.cur_obj->flags & 0x10)) {
+                        if (D_800AA248.cur_obj->flags & 0x10) {
+                            d = obj->pos_x.u.hi - D_800AA248.cur_obj->pos_x.u.hi + 0x38;
+                            if (d < 0x41 && m->action != 4) {
+                                return 1;
+                            }
+                        } else {
+                            d = obj->pos_x.u.hi - D_800AA248.cur_obj->pos_x.u.hi + 8;
+                            if (d < 0x41 && m->action != 4) {
+                                return 1;
+                            }
+                        }
+                    }
+                }
+            }
+        } while (--i != 0);
+    }
+    return 0;
+}
 
 INCLUDE_ASM("asm/main/nonmatchings/game_80057C94", func_800580F8);
 
@@ -594,9 +630,10 @@ void func_80058BCC(Monster *e) {
     func_80057B94(e, D_80084A14);
 }
 
+extern s32 D_80084A30[];
+
 #ifdef NON_MATCHING
 /* 90.8 %: the -0x30000 constant is computed once before the tests in the original (a1), here inside the push block */
-extern s32 D_80084A30[];
 
 void func_80058BF0(Monster *e) {
     s32 vx;
@@ -799,27 +836,24 @@ void func_80059180(Monster *e) {
     func_80057B94(e, D_80084DCC);
 }
 
-#ifdef NON_MATCHING
-/* 91.5%: the branch layout after the direction range check */
 void func_800591F8(Monster *e, s32 *table) {
     u16 dir;
 
     dir = e->unk_1B0;
-    if (dir != 3) {
-        if (((dir - 1) & 0xFFFF) < 2) {
-            func_80059270(e);
-            return;
-        }
-        if (D_800AA268.p->pos_y.s.hi != 0xE1) {
-            func_80057B94(e, D_80084E20);
-            return;
-        }
+    if (dir == 3) {
+        func_80059294(e);
+        return;
     }
-    func_80059294(e);
+    if (dir == 1 || dir == 2) {
+        func_80059270(e);
+        return;
+    }
+    if (D_800AA268.p->pos_y.s.hi == 0xE1) {
+        func_80059294(e);
+        return;
+    }
+    func_80057B94(e, D_80084E20);
 }
-#else
-INCLUDE_ASM("asm/main/nonmatchings/game_80057C94", func_800591F8);
-#endif
 
 void func_80059270(Monster *e) {
     func_80057B94(e, D_80084E3C);
@@ -981,28 +1015,58 @@ void func_800596EC(Monster *e) {
     func_80057B94(e, (s32 *) D_80085114);
 }
 
-INCLUDE_ASM("asm/main/nonmatchings/game_80057C94", func_80059710);
+void func_80059710(Monster *e, s16 want, s16 max) {
+    Building *u;
+    BuildingItem *item;
+    s16 idx;
+    s16 last;
+    s16 i;
+    u16 part;
+
+    if (D_800AA2DC != 0) {
+        return;
+    }
+    idx = 0;
+    last = -1;
+    i = 0;
+    do {
+        u = D_801D3DC8;
+        if ((s16)D_801E29A4 >= 2) {
+            do {
+                idx = func_8001EB10((s16)D_801E29A4, 0) - 1;
+            } while (idx == last);
+            u = &D_801D3DC8[idx];
+        }
+        if (u->unk_058 == 0 && func_8004F7A4(u) == 1) {
+            if (u->unk_014 < 4) {
+                item = &u->items[func_8001EB10(u->unk_000 - 2, 0)];
+                part = func_8002F558(u);
+                if (func_8002ED30(part, item)->unk_06 < 5) {
+                    func_8002DBF4(part, 6, e, item);
+                    func_8003089C(5, e);
+                    e->unk_188++;
+                }
+            }
+        }
+        last = idx;
+        i++;
+    } while ((s32)e->unk_188 < want && i < max);
+}
 
 INCLUDE_ASM("asm/main/nonmatchings/game_80057C94", func_800598F4);
 
-#ifdef NON_MATCHING
-/* 97.2%: the state block's base lands in a2 instead of a1 */
 void func_80059B00(void) {
     Monster *e;
-    s32 v;
 
     e = D_800AA248.cur_obj->owner.monster;
     if (e->unk_168 == 7) {
-        v = 0xFFFA0000;
+        e->unk_100 = -0x58000;
+        D_800AA248.cur_obj->vel_x.w = -0x58000;
     } else {
-        v = 0x50000;
+        e->unk_100 = 0x58000;
+        D_800AA248.cur_obj->vel_x.w = 0x58000;
     }
-    e->unk_100 = v | 0x8000;
-    D_800AA248.cur_obj->vel_x.w = v | 0x8000;
 }
-#else
-INCLUDE_ASM("asm/main/nonmatchings/game_80057C94", func_80059B00);
-#endif
 
 void func_80059B40(void) {
     Monster *e;
@@ -1159,7 +1223,54 @@ void func_8005A0F0(void) {
     D_800AA248.cur_obj = saved;
 }
 
-INCLUDE_ASM("asm/main/nonmatchings/game_80057C94", func_8005A154);
+void func_8005A154(void) {
+    GameObject *self;
+    Monster *e;
+    s32 *anim;
+    ObjectDef *def;
+    GameObject *obj;
+    s32 dx;
+    s32 dy;
+
+    self = D_800AA248.cur_obj;
+    e = self->owner.monster;
+    if (e->unk_0B4[0] != 0) {
+        return;
+    }
+    anim = func_8001B660(D_50003440);
+    def = func_8001D110();
+    def->flags = 0x1006;
+    def->id = *anim;
+    obj = func_8001DCB4();
+    if (D_800AA248.cur_obj->unk_48 == (s32)D_5000339C) {
+        obj->flags = e->obj->flags | 0x10;
+        dx = -0x280000;
+        if (D_800AA248.cur_obj->flags & 0x10) {
+            dx = 0x280000;
+            obj->flags = e->obj->flags & ~0x10;
+        }
+        dy = -0x260000;
+    } else {
+        dx = 0x220000;
+        if (D_800AA248.cur_obj->flags & 0x10) {
+            dx = -0x220000;
+        }
+        dy = -0x1E0000;
+        obj->flags = e->obj->flags;
+    }
+    if (e->obj->vel_x.w != 0) {
+        obj->vel_x.s.hi = (s16)e->obj->vel_x.u.hi >> 2;
+    }
+    obj->pos_x.w = e->obj->pos_x.w + dx;
+    obj->pos_y.w = e->obj->pos_y.w + dy;
+    obj->kind = 0x73A;
+    obj->unk_4D = 2;
+    obj->unk_74 = 2;
+    obj->unk_48 = (s32)anim;
+    obj->unk_54 = 0;
+    e->unk_0B4[0] = (s32)obj;
+    D_800AA268.p = self;
+}
 
 INCLUDE_ASM("asm/main/nonmatchings/game_80057C94", func_8005A2F4);
 

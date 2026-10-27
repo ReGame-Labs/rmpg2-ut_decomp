@@ -644,21 +644,17 @@ void func_80035464(UnkStructB1 *npc) {
     func_800242A8();
 }
 
-/* 99.30%: the mover loaded for the speed store lands in a0 instead of reusing the state block's base register (v1); the instructions match */
-#ifdef NON_MATCHING
 void func_800354A4(npc)
     UnkStructB1 *npc;
 {
-    s32 speed;
-
     npc->unk_3E = 0;
     D_800AA248.cur_obj->pos_x.w = D_801F9AC8.w - 0x19A0000;
     D_800AA248.cur_obj->pos_y.w = 0x320000;
-    speed = -0x50000;
     if (!(D_800AA248.cur_obj->flags & 0x10)) {
-        speed = 0x50000;
+        D_800AA248.cur_obj->vel_x.w = 0x50000;
+    } else {
+        D_800AA248.cur_obj->vel_x.w = -0x50000;
     }
-    D_800AA248.cur_obj->vel_x.w = speed;
     npc->unk_08 = 2;
     if (npc->unk_06 == 0x15) {
         func_8003EB5C(D_8008AA40, D_800AA268.p);
@@ -666,9 +662,6 @@ void func_800354A4(npc)
         func_8003EB5C(D_8008AA34, D_800AA268.p);
     }
 }
-#else
-INCLUDE_ASM("asm/main/nonmatchings/game_80034590", func_800354A4);
-#endif
 
 void func_80035550(UnkStructB1 *npc) {
     u16 n = npc->unk_1C;
