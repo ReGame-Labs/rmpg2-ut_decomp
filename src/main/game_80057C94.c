@@ -44,7 +44,7 @@ s32 func_8005BC20(s16, s16, s32, s32, GameObject *, s32);
 void func_80053C50(s32, Monster *);
 u16 func_8005D198(void);                /* defined as s32 in game_8005D198.c; the callers here mask a u16 */
 void func_80054374(s32, Monster *);
-void func_800346FC(UnkStructB1 *);      /* game_80034590 declares it with an Npc: the records share their head */
+void func_800346FC(UnkStructB1 *r);
 extern Building D_801D3844[];
 extern s32 D_80016A30;
 extern s32 D_80084F54[];
@@ -1265,7 +1265,7 @@ u16 func_8005C1F8(GameObject *b, Monster *e) {
     s16 x;
 
     n = D_801D8730;
-    npc = (NpcS *)D_801FAC9C;
+    npc = D_801FAC9C;
     if (n == 0 || func_8005D198() == 0) {
         return 0;
     }
@@ -1339,7 +1339,7 @@ void func_8005C578(GameObject *b, Monster *e) {
     u16 x;
 
     n = D_801D8730;
-    npc = (NpcS *)D_801FAC9C;
+    npc = D_801FAC9C;
     if (n == 0 || func_8005D198() == 0) {
         return;
     }
@@ -1455,7 +1455,7 @@ void func_8005CAA4(GameObject *b, Monster *e) {
     s32 action;
 
     n = D_801D8730;
-    npc = (NpcS *)D_801FAC9C;
+    npc = D_801FAC9C;
     if (n == 0 || func_8005D198() == 0) {
         return;
     }
