@@ -133,7 +133,7 @@ void func_800385F4(NpcS *npc);
 void func_80038754(NpcS *npc);
 void func_80038800(NpcS *npc);
 void func_80038838(NpcS *npc);
-u16 func_80038C1C(void);
+u16 func_80038C1C();                 /* called without the record it reads: no prototype in the original */
 u16 func_80038F3C(u16 *out, NpcS *npc);
 u16 func_800391F8(u16 *out, NpcS *npc);
 u16 func_80039220(u16 *out, NpcS *npc);
@@ -176,6 +176,7 @@ extern void (*D_8007D5A4[])(void);  /* per kind */
 extern u8 *D_8007D45C[];
 extern u8 *D_8007DA68[];
 extern u8 *D_8007DA78[][4];
+extern u8 *D_8007DAB8[];
 extern u8 D_8008A47C[];
 extern u8 D_8008AA10[];
 extern u8 D_8008A374[];
@@ -1928,9 +1929,83 @@ void func_80038AE8(NpcS *npc) {
 INCLUDE_ASM("asm/main/nonmatchings/game_80034590", func_80038AE8);
 #endif
 
-INCLUDE_ASM("asm/main/nonmatchings/game_80034590", func_80038C1C);
+u16 func_80038C1C(npc)
+    NpcS *npc;
+{
+    s16 x;
+    s16 mx;
+    u16 i;
+    Monster *m;
 
-INCLUDE_ASM("asm/main/nonmatchings/game_80034590", func_80038DA8);
+    x = D_800AA268.p->pos_x.s.hi;
+    if (D_801F9ACA >= x && abs(x - D_801F9ACA) >= 200) {
+        x += D_801D8866;
+    }
+    i = 7;
+    do {
+        m = &D_801E0B78[i];
+        if (m->unk_058 & 1) {
+            mx = m->obj->pos_x.s.hi;
+            if (D_801F9AC8.s.hi >= mx && abs(mx - D_801F9AC8.s.hi) >= 200) {
+                mx += D_801D8864.u.hi;
+            }
+            if (D_800AA248.cur_obj->flags & 0x10) {
+                x += 0x30;
+                if (x > mx) {
+                    return 0;
+                }
+            } else {
+                x -= 0x30;
+                if (x < mx) {
+                    return 0;
+                }
+            }
+        }
+    } while (--i != 0);
+    npc->unk_4 = 0;
+    func_8003EB5C(*(D_8007DAB8 + (npc->unk_2E & 3)), D_800AA268.p);
+    return 1;
+}
+
+u16 func_80038DA8(NpcS *npc) {
+    s16 x;
+    s16 mx;
+    u16 i;
+    Monster *m;
+
+    if (D_800AA268.p->unk_6C & 0x80) {
+        return 0;
+    }
+    x = D_800AA268.p->pos_x.s.hi;
+    if (D_801F9ACA >= x && abs(x - D_801F9ACA) >= 200) {
+        x += D_801D8866;
+    }
+    i = 7;
+    do {
+        m = &D_801E0B78[i];
+        if (m->unk_058 & 1) {
+            mx = m->obj->pos_x.s.hi;
+            if (D_801F9AC8.s.hi >= mx && abs(mx - D_801F9AC8.s.hi) >= 200) {
+                mx += D_801D8864.u.hi;
+            }
+            if (D_800AA248.cur_obj->flags & 0x10) {
+                x += 0x30;
+                if (x < mx) {
+                    continue;
+                }
+            } else {
+                x -= 0x30;
+                if (x > mx) {
+                    continue;
+                }
+            }
+            if (abs(x - mx) < 0x146) {
+                return 1;
+            }
+        }
+    } while (--i != 0);
+    return 0;
+}
 
 INCLUDE_ASM("asm/main/nonmatchings/game_80034590", func_80038F3C);
 

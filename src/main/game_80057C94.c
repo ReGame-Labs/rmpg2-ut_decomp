@@ -76,6 +76,8 @@ extern s16 D_8008427A;                   /* toggled every call of func_80059F24 
 extern u16 D_801E28C8;
 extern u8 D_50003440[];                 /* sprite ids the code takes by address */
 extern u8 D_5000339C[];
+extern Anim D_80011A80;
+extern Anim D_80011B54;
 
 /* The animation scripts (seven words each; game_80057C94's .data). */
 extern s32 D_8008434C[];
@@ -1053,7 +1055,62 @@ void func_80059710(Monster *e, s16 want, s16 max) {
     } while ((s32)e->unk_188 < want && i < max);
 }
 
+#ifdef NON_MATCHING
+/* 96.1 %: the original copies the building pointer into a0 at the top of each iteration and reads unk_058 through it for the == 0 test; the saved registers of the building and the counter are swapped */
+s32 func_800598F4(Monster *e) {
+    Building *u;
+    GameObject *b;
+    s16 left;
+    s16 right;
+    s32 w;
+    s16 i;
+    s16 k;
+
+    if (D_800AA2DC != 0) {
+        return 0;
+    }
+    left = e->unk_118;
+    right = e->unk_11C;
+    b = e->obj;
+    w = (D_801D8864.w + 1) >> 16;
+    if (w < right) {
+        left -= w;
+        right -= w;
+    }
+    i = 0;
+    do {
+        u = &D_801D3DC8[i];
+        if (u->unk_014 < 4) {
+            if ((e->unk_168 == 3 && left < (s16)u->unk_004 && (s16)u->unk_004 < right)
+                || (e->unk_168 == 7 && left < u->unk_00E && u->unk_00E < right)) {
+                k = 0;
+                if (u->unk_058 != 2 && u->unk_058 != 3) {
+                    u->unk_010 = u->unk_012;
+                    if (u->unk_058 == 0) {
+                        func_8002E278(e, u);
+                    }
+                } else {
+                    do {
+                        func_8002CFAC(e, u);
+                        k++;
+                    } while (k < 10);
+                }
+                func_80029118(8, 8);
+                if (e->unk_168 == 3) {
+                    b->pos_x.u.hi = (u->unk_004 - 0x23) & D_801D8864.u.lo;
+                } else {
+                    b->pos_x.u.hi = (u->unk_00E + 0x19) & D_801D8864.u.lo;
+                }
+                return 1;
+            }
+        }
+        i++;
+    } while (i < (s16)D_801E29A4);
+    return 0;
+}
+#else
 INCLUDE_ASM("asm/main/nonmatchings/game_80057C94", func_800598F4);
+#endif
 
 void func_80059B00(void) {
     Monster *e;
@@ -1274,7 +1331,55 @@ void func_8005A154(void) {
 
 INCLUDE_ASM("asm/main/nonmatchings/game_80057C94", func_8005A2F4);
 
-INCLUDE_ASM("asm/main/nonmatchings/game_80057C94", func_8005A7C4);
+void func_8005A7C4(void) {
+    GameObject *self;
+    Monster *e;
+    ObjectDef *def;
+    GameObject *obj;
+    GameObject *body;
+    Anim *anim;
+
+    self = D_800AA248.cur_obj;
+    func_8001F724(0x4A);
+    e = D_800AA248.cur_obj->owner.monster;
+    if (e->unk_0B4[0] != 0) {
+        return;
+    }
+    anim = &D_80011B54;
+    def = func_8001D110();
+    def->flags = 0x1006;
+    def->id = anim->id;
+    obj = func_8001DCB4();
+    body = e->obj;
+    if (body->unk_48 != (s32)&D_80011A80) {
+        if (D_800AA248.cur_obj->flags & 0x10) {
+            obj->pos_x.w = body->pos_x.w - 0x260000;
+            obj->vel_x.w = -0x18000;
+        } else {
+            obj->pos_x.w = body->pos_x.w + 0x260000;
+            obj->vel_x.w = 0x18000;
+        }
+        obj->pos_y.w = e->obj->pos_y.w - 0x380000;
+        obj->vel_y.w = -0x30000;
+    } else {
+        if (D_800AA248.cur_obj->flags & 0x10) {
+            obj->pos_x.w = body->pos_x.w + 0x60000;
+        } else {
+            obj->pos_x.w = body->pos_x.w - 0x60000;
+        }
+        obj->vel_x.w = 0;
+        obj->pos_y.w = e->obj->pos_y.w - 0x320000;
+        obj->vel_y.w = -0x50000;
+    }
+    obj->flags = e->obj->flags;
+    obj->kind = 0x73A;
+    obj->unk_74 = 2;
+    obj->unk_48 = (s32)anim;
+    obj->unk_50 = NULL;
+    obj->unk_54 = 0;
+    e->unk_0B4[0] = (s32)obj;
+    D_800AA268.p = self;
+}
 
 INCLUDE_ASM("asm/main/nonmatchings/game_80057C94", func_8005A964);
 
