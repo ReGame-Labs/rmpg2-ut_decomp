@@ -9,13 +9,12 @@
  * at +0x20 is the object pointer that the rest of the code reaches as the scalar D_800AA268: the two forms give
  * different code, so each function keeps the form the original used). This unit's view of it; include/game.h has
  * another unit's (GameGlobals), to be unified. */
-struct UnkStruct4;
 
 typedef struct GameState {
     u8 pad_00[0x18];
     s32 unk_18;     /* D_800AA260: the argument of the current actor's handler (func_8002C0F8) */
     u8 pad_1C[0x4];
-    struct UnkStruct4 *unk_20;  /* D_800AA268 */
+    struct GameObject *unk_20;  /* D_800AA268 */
     u8 pad_24[0x18];
     struct UnkStructD110 *unk_3C;  /* the record func_8001D110 handed out last */
     u8 pad_40[0x38];
@@ -26,7 +25,7 @@ extern GameState D_800AA248;
 
 /* A struct member in the original, not a scalar: GCC 2.8 keeps its stores ordered with struct-field accesses only
  * then (docs/MATCHING.md "Structs, globals and aliasing"; func_8002C75C, func_8002D144 of game_8002A330). */
-extern struct { struct UnkStruct4 *obj; } D_800AA268;
+extern struct { struct GameObject *obj; } D_800AA268;
 
 /* Declarations of src/main/game_8002A330.c: provisional types from the code's own use; refined as functions match. */
 
@@ -261,12 +260,11 @@ typedef struct UnkStructFEA4 {  /* provisional: func_8002FEA4's and func_800305C
 typedef struct UnkStruct1 UnkStruct1;
 typedef struct UnkStruct2 UnkStruct2;
 typedef struct UnkStruct3 UnkStruct3;
-typedef struct UnkStruct4 UnkStruct4;
 typedef struct UnkStruct5 UnkStruct5;
 typedef struct UnkStruct6 UnkStruct6;
 
 struct UnkStruct2 {  /* provisional: fields as the code reaches them */
-    UnkStruct4 *unk_00;
+    GameObject *unk_00;
     u16 unk_04;
     u16 unk_06;
     UnkStruct1 *unk_08;
@@ -357,34 +355,6 @@ struct UnkStruct3 {  /* provisional: fields as the code reaches them */
     u16 unk_0A;
 };
 
-struct UnkStruct4 {  /* provisional: what the game state's unk_20 (D_800AA268) points to; the records UnkStruct12 points at too */
-    u8 pad_00[0x4];
-    u16 unk_04;
-    u8 pad_06[0x6];
-    s32 unk_0C;     /* x velocity, 16.16 */
-    s32 unk_10;     /* y velocity, 16.16 */
-    Fixed unk_14; /* x, 16.16 */
-    Fixed unk_18; /* y, 16.16 */
-    u16 unk_1C;
-    u8 pad_1E[0x4];
-    u16 unk_22;
-    u8 pad_24[0x10];
-    void *unk_34;
-    u8 pad_38[0xC];
-    s32 unk_44;
-    u8 pad_48[0x14];
-    s32 *unk_5C;
-    u8 pad_60[0xC];
-    u16 unk_6C;      /* flags; 0x80 */
-    u8 pad_6E[0x2];
-    s16 unk_70;
-    u8 pad_72[0xE];
-    u16 unk_80;
-    u8 pad_82[0xE];
-    UnkStruct2 *unk_90;
-    s32 unk_94;
-};
-
 struct UnkStruct6 {  /* provisional */
     u8 pad_00[0x2];
     u16 unk_02;
@@ -393,20 +363,18 @@ struct UnkStruct6 {  /* provisional */
     u16 unk_1C;     /* the kind of its animation tables (func_8002DAAC) */
 };
 
-typedef UnkStruct4 UnkStruct13;   /* the records UnkStruct12 points at are the same kind as the current object's */
-
 typedef struct UnkStruct14 {  /* provisional */
-    UnkStruct13 *unk_00;
+    GameObject *unk_00;
     u16 unk_04;
 } UnkStruct14;
 
 typedef struct UnkStruct12 {  /* provisional: 0x18 bytes, three of them in UnkStruct5 */
-    UnkStruct13 *unk_00;
+    GameObject *unk_00;
     u16 unk_04;
     u16 unk_06;
-    UnkStruct13 **unk_08;
+    GameObject **unk_08;
     UnkStruct14 *unk_0C;
-    UnkStruct13 *unk_10;
+    GameObject *unk_10;
     u8 pad_14[0x2];
     s16 unk_16;
 } UnkStruct12;
@@ -454,7 +422,7 @@ typedef struct UnkStruct7 {  /* provisional: the 0x220-byte records at D_801E0B7
     s16 unk_5A;     /* the action */
     s16 unk_5C;
     u8 pad_5E[0x3A];
-    UnkStruct4 *unk_98;
+    GameObject *unk_98;
     u8 pad_9C[0x7C];
     u16 unk_118;    /* its hit box: left, top, right, bottom */
     u16 unk_11A;
@@ -759,7 +727,7 @@ void func_8003E788(UnkStruct9 *);
 extern s32 D_800AA260;
 extern s32 D_800AA2DC;
 void func_8002F688();
-void func_8002FB38(void *, UnkStruct4 *);
+void func_8002FB38(void *, GameObject *);
 void func_8002E348(s32, UnkStruct2 *);
 void func_80030D14();   /* called with one and with two arguments: no prototype in the original */
 void func_8002B878();
@@ -794,7 +762,7 @@ UnkStruct2 *func_8002ED30(u16, void *);   /* called with an actor and with one o
 u16 func_8002F558(UnkStruct1 *);
 void func_8002DBF4(u16, s32, UnkStruct1 *, UnkStruct2 *);
 void func_80025848(UnkStruct2 *);
-void func_80024964(s32, UnkStruct4 *);
+void func_80024964(s32, GameObject *);
 extern u8 D_8001236C[];
 extern u8 D_80012394[];
 extern u8 D_8001236C_alt[];   /* another name for D_8001236C (config/aliases.ld) */
@@ -803,7 +771,7 @@ extern UnkStruct1 D_801D3DC8[];
 extern u16 D_801E29A4;
 extern s16 D_801FA734;
 extern u16 D_8007CFF8[];   /* a u16 table after a header word (func_8003089C) */
-void func_800303DC(UnkStruct1 *, UnkStruct4 *);
+void func_800303DC(UnkStruct1 *, GameObject *);
 void func_80030D74(void);
 void func_8002CFAC(UnkStruct1 *, UnkStruct7 *);
 UnkStruct2 *func_8002CD24(u16, UnkStruct1 *, UnkStruct2 *);
@@ -815,7 +783,7 @@ extern void *D_8007D008[];
 extern void *D_8007D060[];
 s32 func_8001A3AC(void);
 UnkStructD110 *func_8001D110(void);
-UnkStruct4 *func_8001DCB4(void);
+GameObject *func_8001DCB4(void);
 void func_8002CBF4(UnkStruct7 *);
 void func_8002EBD8(UnkStruct1 *);
 extern u8 D_80011E48[];
@@ -824,7 +792,7 @@ extern s32 D_80011ED0[];
 extern s32 D_80011ED8[];
 extern s32 D_80012068[];
 extern s16 D_8007A690;
-void func_800305C8(s32 *, s16, UnkStruct4 *, UnkStructFEA4 *);
+void func_800305C8(s32 *, s16, GameObject *, UnkStructFEA4 *);
 void func_8002DE08(u16, s16, s32, UnkStruct5 *);
 void *func_8002DAAC(u16, u16, UnkStruct5 *);
 void func_80030754(UnkStruct12 *, s16, s32, UnkStruct5 *);
@@ -876,18 +844,6 @@ extern s16 D_801F9A38;
 extern s16 D_801FA960;
 extern s32 D_801FA9A4;
 extern s32 D_801FB41C;
-typedef struct UnkStruct16 {  /* provisional: what an object's unk_34 points to (per-slot offsets, u16 pairs at 0x10, 0x18, 0x20) */
-    u8 pad_00[0x10];
-    u16 unk_10;
-    u16 unk_12;
-    u16 unk_14;
-    u16 unk_16;
-    u16 unk_18;
-    u16 unk_1A;
-    u8 pad_1C[0x4];
-    u16 unk_20;
-    u16 unk_22;
-} UnkStruct16;
 void func_8002FA20(s32, UnkStruct1 *);   /* its second argument is the record (the views to be unified) */
 typedef struct UnkStruct17 {  /* provisional: a building's part (what a building's record at 0x18 points to; func_8004F65C) */
     u8 pad_00[0x8];
@@ -909,7 +865,7 @@ typedef struct UnkStruct18 {  /* provisional: what func_80025C08(D_80084028) ret
 } UnkStruct18;
 
 typedef struct UnkStruct19 {  /* provisional: an object and the animation to start on it (func_80030D14) */
-    UnkStruct4 *unk_00;
+    GameObject *unk_00;
     void *unk_04;
 } UnkStruct19;
 

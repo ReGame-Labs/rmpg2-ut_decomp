@@ -134,7 +134,7 @@ UnkStruct7 *func_8002BA30(s32 arg0) {
 
 void func_8002BA70(s32 n) {
     UnkStruct7 *m;
-    UnkStruct4 *saved;
+    GameObject *saved;
 
     m = &D_801E0B78[(u16) n];
     saved = D_800AA248.unk_20;
@@ -379,8 +379,8 @@ INCLUDE_ASM("asm/main/nonmatchings/game_8002A330", func_8002C4B8);
 void func_8002C6A0(a)
 UnkStruct1 *a;
 {
-    UnkStruct4 *obj;
-    UnkStruct4 *spr;
+    GameObject *obj;
+    GameObject *spr;
 
     obj = a->unk_84;
     D_800AA268.obj = obj;
@@ -410,7 +410,7 @@ void func_8002C738(UnkStruct1 *arg0) {
 }
 
 void func_8002C75C(UnkStruct1 *arg0) {
-    UnkStruct4 *temp_s1;
+    GameObject *temp_s1;
 
     temp_s1 = arg0->unk_98[0].unk_00;
     D_800AA248.unk_20 = temp_s1;
@@ -467,10 +467,10 @@ void func_8002C858(UnkStruct1 *arg0) {
 INCLUDE_ASM("asm/main/nonmatchings/game_8002A330", func_8002C8B4);
 
 void func_8002CA8C(void) {
-    UnkStruct4 *saved = D_800AA248.unk_20;
-    UnkStruct1 *owner = saved->unk_90->unk_08;
+    GameObject *saved = D_800AA248.unk_20;
+    UnkStruct1 *owner = saved->owner.item->unk_08;
     UnkStructD110 *r;
-    UnkStruct4 *spr;
+    GameObject *spr;
     s32 *anim;
 
     D_800AA248.unk_3C = func_8001D110();
@@ -478,12 +478,12 @@ void func_8002CA8C(void) {
     r = D_800AA248.unk_3C;
     r->unk_28 = anim;
     r->unk_00 = D_80011E10[0];
-    r->unk_12 = saved->unk_14.u.hi;
-    r->unk_16 = saved->unk_18.u.hi;
+    r->unk_12 = saved->pos_x.u.hi;
+    r->unk_16 = saved->pos_y.u.hi;
     r->unk_20 = saved->unk_80 - 1;
     spr = func_8001DCB4();
     owner->unk_84 = spr;
-    spr->unk_90 = (UnkStruct2 *) owner;  /* the owner: to be unified */
+    spr->owner.item = (UnkStruct2 *) owner;  /* the owner: to be unified */
     spr->unk_70 = 0x749;
     if (func_8001A3AC() < 0x23) {
         D_800AA248.unk_20 = saved;
@@ -492,27 +492,27 @@ void func_8002CA8C(void) {
     if (D_8007A690 == 1) {
         anim = D_80011E90;
     } else {
-        r->unk_12 = spr->unk_14.u.hi + 0x14;
+        r->unk_12 = spr->pos_x.u.hi + 0x14;
         anim = D_80011E68;
-        r->unk_16 = spr->unk_18.u.hi - 0x32;
+        r->unk_16 = spr->pos_y.u.hi - 0x32;
     }
     r->unk_28 = anim;
     r->unk_00 = *anim;
     r->unk_20 += 5;
     spr = func_8001DCB4();
     spr->unk_70 = 0x749;
-    spr->unk_90 = (UnkStruct2 *) owner;
+    spr->owner.item = (UnkStruct2 *) owner;
     if (D_8007A690 != 1) {
-        spr->unk_22 |= 0x400;
+        spr->flags |= 0x400;
     }
     D_800AA268.obj = saved;
 }
 
 void func_8002CBF4(UnkStruct7 *m) {
-    UnkStruct4 *saved = D_800AA248.unk_20;
-    UnkStruct4 *body;
+    GameObject *saved = D_800AA248.unk_20;
+    GameObject *body;
     UnkStructD110 *r;
-    UnkStruct4 *spr;
+    GameObject *spr;
     s32 *anim;
 
     if (func_8001A3AC() >= 0x46) {
@@ -528,14 +528,14 @@ void func_8002CBF4(UnkStruct7 *m) {
         }
         r->unk_28 = anim;
         r->unk_00 = *anim;
-        r->unk_12 = body->unk_14.u.hi;
-        r->unk_16 = body->unk_18.u.hi;
+        r->unk_12 = body->pos_x.u.hi;
+        r->unk_16 = body->pos_y.u.hi;
         r->unk_20 = body->unk_80 + 5;
         spr = func_8001DCB4();
         if (m->unk_58 != 3 && D_8007A690 != 1) {
-            spr->unk_22 |= 0x400;
-            spr->unk_14.u.hi += 0x14;
-            spr->unk_18.u.hi -= 0x32;
+            spr->flags |= 0x400;
+            spr->pos_x.u.hi += 0x14;
+            spr->pos_y.u.hi -= 0x32;
         }
         D_800AA268.obj = saved;
     }
@@ -545,7 +545,7 @@ void func_8002CBF4(UnkStruct7 *m) {
 /* 98.2 %: the original reloads r->unk_06 for the argument of func_8003089C where this reuses the compare's
  * load, and keeps rec in s1 and r in s2 (swapped here). */
 UnkStruct2 *func_8002CD24(u16 idx, UnkStruct1 *a, UnkStruct2 *rec) {
-    UnkStruct13 *q = NULL;
+    GameObject *q = NULL;
     UnkStruct5 *r;
     u16 k;
     u16 arg;
@@ -565,7 +565,7 @@ UnkStruct2 *func_8002CD24(u16 idx, UnkStruct1 *a, UnkStruct2 *rec) {
         func_8003089C(arg, a);
         q = r->unk_0C.unk_00;
         if (q != NULL) {
-            if (q->unk_1C != 3 || q->unk_04 < 0xC) {
+            if (q->unk_1C.u.lo != 3 || q->prev < 0xC) {
                 func_8002CE40((UnkStruct2 *) q, a);
             } else {
                 q = NULL;
@@ -621,7 +621,7 @@ done:
 }
 
 void func_8002D0C0(s32 arg0, UnkStruct1 *arg1) {
-    UnkStruct4 *temp_s2;
+    GameObject *temp_s2;
 
     temp_s2 = D_800AA248.unk_20;
     if (arg1->unk_78 == 0) {
@@ -787,10 +787,10 @@ INCLUDE_ASM("asm/main/nonmatchings/game_8002A330", func_8002DB3C);
 /* 82 %: the sprite request for a record's slot; the original keeps n (a1) in s3 and needs one saved register less (no s8), and its u16 n compares unsigned; the u16, s16 and int parameter forms each add a copy or a sign extension */
 #ifdef NON_MATCHING
 void func_8002DBF4(u16 which, s32 n, UnkStruct1 *a, UnkStruct2 *rec) {
-    UnkStruct4 *saved;
-    UnkStruct4 *obj;
+    GameObject *saved;
+    GameObject *obj;
     UnkStructD110 *req;
-    UnkStruct16 *ofs;
+    SpriteFrame *ofs;
     UnkStruct12 *slot;
     u16 r;
     u16 m;
@@ -813,7 +813,7 @@ void func_8002DBF4(u16 which, s32 n, UnkStruct1 *a, UnkStruct2 *rec) {
                     req = D_800AA248.unk_3C;
                     req->unk_00 = anim;
                     req->unk_0C = 0x715;
-                    ofs = rec->unk_00->unk_34;
+                    ofs = rec->unk_00->frame;
                     if (which == 1) {
                         dx = ofs->unk_10;
                         dy = ofs->unk_12;
@@ -828,8 +828,8 @@ void func_8002DBF4(u16 which, s32 n, UnkStruct1 *a, UnkStruct2 *rec) {
                         dy = ofs->unk_1A;
                         slot = &((UnkStruct5 *) rec)->unk_3C;
                     }
-                    req->unk_12 = rec->unk_00->unk_14.u.hi + dx;
-                    req->unk_16 = rec->unk_00->unk_18.u.hi + dy;
+                    req->unk_12 = rec->unk_00->pos_x.u.hi + dx;
+                    req->unk_16 = rec->unk_00->pos_y.u.hi + dy;
                     req->unk_20 = rec->unk_00->unk_80 + 7;
                     obj = func_8001DCB4();
                     D_800AA268.obj = obj;
@@ -864,10 +864,10 @@ INCLUDE_ASM("asm/main/nonmatchings/game_8002A330", func_8002DBF4);
 
 
 void func_8002DE08(u16 which, s16 n, s32 arg2, UnkStruct5 *rec) {
-    UnkStruct4 *saved = D_800AA268.obj;
+    GameObject *saved = D_800AA268.obj;
     void *t;
     UnkStruct12 *g;
-    UnkStruct4 *obj;
+    GameObject *obj;
 
     t = func_8002DAAC(which, n, rec);
     if (t != NULL) {
@@ -894,7 +894,7 @@ void func_8002DE08(u16 which, s16 n, s32 arg2, UnkStruct5 *rec) {
                     func_8002E5F4(which, rec);
                 }
             }
-            func_80020BA0(t, obj->unk_22, obj);
+            func_80020BA0(t, obj->flags, obj);
             func_80030754(g, n, arg2, rec);
             if ((u16) n < 2) {
                 g->unk_16 = n;
@@ -915,7 +915,7 @@ void func_8002DF64(s32 arg0, UnkStruct1 *arg1) {
 }
 
 void func_8002DFA8(s32 arg0, UnkStruct1 *arg1) {
-    UnkStruct4 *temp_s2;
+    GameObject *temp_s2;
     u16 temp_v1;
     u16 temp_v1_2;
     u16 var_s0;
@@ -980,7 +980,7 @@ void func_8002E0C8(s32 n, UnkStruct1 *a) {
 
 
 void func_8002E148(s32 arg0, UnkStruct1 *a) {
-    UnkStruct4 *saved = D_800AA268.obj;
+    GameObject *saved = D_800AA268.obj;
     u16 count;
     u16 left;
     UnkStruct2 *rec;
@@ -1021,7 +1021,7 @@ void func_8002E148(s32 arg0, UnkStruct1 *a) {
 }
 
 void func_8002E278(s32 arg0, UnkStruct1 *a) {
-    UnkStruct4 *saved = D_800AA268.obj;
+    GameObject *saved = D_800AA268.obj;
     UnkStruct2 *rec = a->unk_98;
 
     if (a->unk_16 == 0) {
@@ -1066,8 +1066,8 @@ INCLUDE_ASM("asm/main/nonmatchings/game_8002A330", func_8002E658);
 INCLUDE_ASM("asm/main/nonmatchings/game_8002A330", func_8002E854);
 
 void func_8002E9A4(UnkStruct1 *arg0) {
-    UnkStruct4 *temp_a0;
-    UnkStruct4 *temp_s1;
+    GameObject *temp_a0;
+    GameObject *temp_s1;
 
     temp_a0 = arg0->unk_98[0].unk_00;
     temp_s1 = D_800AA248.unk_20;
@@ -1082,7 +1082,7 @@ void func_8002E9F8(UnkStruct1 *a) {
     UnkStruct2 *rec = &a->unk_98[1];
     u16 *p = a->unk_3A;
     u16 k = a->unk_36;
-    UnkStruct4 *saved = D_800AA268.obj;
+    GameObject *saved = D_800AA268.obj;
     u16 v;
     s32 n;
     UnkStructPair *tbl;
@@ -1184,8 +1184,8 @@ void func_8002ED90(UnkStruct1 *arg0) {
 void func_8002EE14(s16 dy, UnkStruct5 *s) {
     UnkStruct1 *b = s->unk_00;
     UnkStruct12 *g;
-    UnkStruct13 *r;
-    UnkStruct13 **pp;
+    GameObject *r;
+    GameObject **pp;
     UnkStruct14 *q;
 
     if (b != NULL) {
@@ -1193,70 +1193,70 @@ void func_8002EE14(s16 dy, UnkStruct5 *s) {
         r = s->unk_0C.unk_00;
         g = &s->unk_0C;
         if (r != NULL) {
-            r->unk_18.u.hi += dy;
+            r->pos_y.u.hi += dy;
         }
         r = g->unk_10;
         if (r != NULL) {
-            r->unk_18.u.hi += dy;
+            r->pos_y.u.hi += dy;
         }
         pp = g->unk_08;
         if (pp != NULL) {
             r = *pp;
             if (r != NULL) {
-                r->unk_18.u.hi += dy;
+                r->pos_y.u.hi += dy;
             }
         }
         q = g->unk_0C;
         if (q != NULL) {
             r = q->unk_00;
             if (r != NULL) {
-                r->unk_18.u.hi += dy;
+                r->pos_y.u.hi += dy;
             }
         }
         r = s->unk_24.unk_00;
         g = &s->unk_24;
         if (r != NULL) {
-            r->unk_18.u.hi += dy;
+            r->pos_y.u.hi += dy;
         }
         r = g->unk_10;
         if (r != NULL) {
-            r->unk_18.u.hi += dy;
+            r->pos_y.u.hi += dy;
         }
         pp = g->unk_08;
         if (pp != NULL) {
             r = *pp;
             if (r != NULL) {
-                r->unk_18.u.hi += dy;
+                r->pos_y.u.hi += dy;
             }
         }
         q = g->unk_0C;
         if (q != NULL) {
             r = q->unk_00;
             if (r != NULL) {
-                r->unk_18.u.hi += dy;
+                r->pos_y.u.hi += dy;
             }
         }
         r = s->unk_3C.unk_00;
         g = &s->unk_3C;
         if (r != NULL) {
-            r->unk_18.u.hi += dy;
+            r->pos_y.u.hi += dy;
         }
         r = g->unk_10;
         if (r != NULL) {
-            r->unk_18.u.hi += dy;
+            r->pos_y.u.hi += dy;
         }
         pp = g->unk_08;
         if (pp != NULL) {
             r = *pp;
             if (r != NULL) {
-                r->unk_18.u.hi += dy;
+                r->pos_y.u.hi += dy;
             }
         }
         q = g->unk_0C;
         if (q != NULL) {
             r = q->unk_00;
             if (r != NULL) {
-                r->unk_18.u.hi += dy;
+                r->pos_y.u.hi += dy;
             }
         }
     }
@@ -1355,8 +1355,8 @@ void func_8002F65C(UnkStruct1 *arg0, s32 arg1, UnkStruct2 *arg2) {
 INCLUDE_ASM("asm/main/nonmatchings/game_8002A330", func_8002F688);
 
 void func_8002F898(UnkStruct6 *arg0, UnkStruct2 *rec) {
-    UnkStruct4 *saved = D_800AA248.unk_20;
-    UnkStruct4 *obj;
+    GameObject *saved = D_800AA248.unk_20;
+    GameObject *obj;
     UnkStruct3 *r;
     u8 *anim;
 
@@ -1393,7 +1393,7 @@ void func_8002F898(UnkStruct6 *arg0, UnkStruct2 *rec) {
 void func_8002F9BC(void) {
     UnkStruct2 *temp_s0;
 
-    temp_s0 = D_800AA248.unk_20->unk_90;
+    temp_s0 = D_800AA248.unk_20->owner.item;
     func_8001E4B0(D_800AA248.unk_20);
     func_80025B7C(temp_s0);
 }
@@ -1414,8 +1414,8 @@ void func_8002FA20(s32 arg0, UnkStruct1 *arg1) {
 }
 
 void func_8002FAA4(s32 arg0, UnkStruct2 *arg1) {
-    UnkStruct4 *temp_a1;
-    UnkStruct4 *temp_s1;
+    GameObject *temp_a1;
+    GameObject *temp_s1;
 
     temp_s1 = D_800AA248.unk_20;
     if (arg1->unk_06 == 0) {
@@ -1431,8 +1431,8 @@ void func_8002FAA4(s32 arg0, UnkStruct2 *arg1) {
     D_800AA248.unk_20 = temp_s1;
 }
 
-void func_8002FB38(void *arg0, UnkStruct4 *arg1) {
-    if (arg1->unk_34 != arg0) {
+void func_8002FB38(void *arg0, GameObject *arg1) {
+    if (arg1->frame != arg0) {
         func_80020BA0(arg0, 0x8002, arg1);
     }
 }
@@ -1463,9 +1463,9 @@ void func_8002FD24(UnkStruct1 *arg0, UnkStruct1 *arg1) {
 INCLUDE_ASM("asm/main/nonmatchings/game_8002A330", func_8002FDC0);
 
 void func_8002FEA4(UnkStructFEA4 *a) {
-    UnkStruct4 *saved = D_800AA248.unk_20;
+    GameObject *saved = D_800AA248.unk_20;
     UnkStructD110 *r;
-    UnkStruct4 *spr;
+    GameObject *spr;
     s16 x;
 
     if (func_8001A3AC() >= 0x23) {
@@ -1479,7 +1479,7 @@ void func_8002FEA4(UnkStructFEA4 *a) {
         D_800AA248.unk_3C = r;
         spr = func_8001DCB4();
         if (spr != NULL) {
-            spr->unk_90 = (UnkStruct2 *) a;  /* the owner: to be unified */
+            spr->owner.item = (UnkStruct2 *) a;  /* the owner: to be unified */
         }
         D_800AA248.unk_20 = saved;
     }
@@ -1545,7 +1545,7 @@ void func_800302AC(u16 kind, UnkStruct7 *m) {
 
 INCLUDE_ASM("asm/main/nonmatchings/game_8002A330", func_80030338);
 
-void func_800303DC(UnkStruct1 *a, UnkStruct4 *obj) {
+void func_800303DC(UnkStruct1 *a, GameObject *obj) {
     UnkStructPair *p;
     u16 n;
     s16 d;
@@ -1581,8 +1581,8 @@ void func_8003044C(void) {
 
 INCLUDE_ASM("asm/main/nonmatchings/game_8002A330", func_8003047C);
 
-void func_800305C8(s32 *anim, s16 y, UnkStruct4 *body, UnkStructFEA4 *rec) {
-    UnkStruct4 *saved = D_800AA268.obj;
+void func_800305C8(s32 *anim, s16 y, GameObject *body, UnkStructFEA4 *rec) {
+    GameObject *saved = D_800AA268.obj;
     UnkStructD110 *r;
     s32 x;
 
@@ -1670,30 +1670,30 @@ void func_8003089C(u16 i, UnkStruct1 *a) {
 }
 
 void func_800308EC(s16 arg0, UnkStruct12 *arg1) {
-    UnkStruct13 **temp_v0;
-    UnkStruct13 *obj;
+    GameObject **temp_v0;
+    GameObject *obj;
     UnkStruct14 *temp_d;
 
     obj = arg1->unk_00;
     if (obj != NULL) {
-        obj->unk_14.u.hi = (u16) (obj->unk_14.u.hi + arg0);
+        obj->pos_x.u.hi = (u16) (obj->pos_x.u.hi + arg0);
     }
     obj = arg1->unk_10;
     if (obj != NULL) {
-        obj->unk_14.u.hi = (u16) (obj->unk_14.u.hi + arg0);
+        obj->pos_x.u.hi = (u16) (obj->pos_x.u.hi + arg0);
     }
     temp_v0 = arg1->unk_08;
     if (temp_v0 != NULL) {
         obj = *temp_v0;
         if (obj != NULL) {
-            obj->unk_14.u.hi = (u16) (obj->unk_14.u.hi + arg0);
+            obj->pos_x.u.hi = (u16) (obj->pos_x.u.hi + arg0);
         }
     }
     temp_d = arg1->unk_0C;
     if ((temp_d != NULL) && (temp_d->unk_04 < 0xBU)) {
         obj = temp_d->unk_00;
         if (obj != NULL) {
-            obj->unk_14.u.hi = (u16) (obj->unk_14.u.hi + arg0);
+            obj->pos_x.u.hi = (u16) (obj->pos_x.u.hi + arg0);
         }
     }
 }
@@ -1720,40 +1720,40 @@ void func_800309AC(s16 arg0, UnkStruct5 *arg1) {
 }
 
 void func_80030A70(s32 arg0, UnkStruct12 *arg1) {
-    UnkStruct13 **temp_v0;
-    UnkStruct13 *obj;
+    GameObject **temp_v0;
+    GameObject *obj;
     UnkStruct14 *temp_d;
 
     obj = arg1->unk_00;
     if (obj != NULL) {
-        obj->unk_10 = arg0;
+        obj->vel_y.w = arg0;
     }
     obj = arg1->unk_10;
     if (obj != NULL) {
-        obj->unk_10 = arg0;
+        obj->vel_y.w = arg0;
     }
     temp_v0 = arg1->unk_08;
     if (temp_v0 != NULL) {
         obj = *temp_v0;
         if (obj != NULL) {
-            obj->unk_10 = arg0;
+            obj->vel_y.w = arg0;
         }
     }
     temp_d = arg1->unk_0C;
     if ((temp_d != NULL) && (temp_d->unk_04 < 0xBU)) {
         obj = temp_d->unk_00;
         if (obj != NULL) {
-            obj->unk_10 = arg0;
+            obj->vel_y.w = arg0;
         }
     }
 }
 
 void func_80030B00(s32 vy, UnkStruct2 *rec) {
-    UnkStruct4 *obj;
+    GameObject *obj;
 
     obj = rec->unk_00;
     if (obj != NULL) {
-        obj->unk_10 = vy;
+        obj->vel_y.w = vy;
         func_80030A70(vy, &((UnkStruct5 *) rec)->unk_0C);
         func_80030A70(vy, &((UnkStruct5 *) rec)->unk_24);
         func_80030A70(vy, &((UnkStruct5 *) rec)->unk_3C);
@@ -1780,40 +1780,40 @@ INCLUDE_ASM("asm/main/nonmatchings/game_8002A330", func_80030B5C);
 #endif
 
 void func_80030BAC(UnkStruct12 *arg0) {
-    UnkStruct13 **temp_v0;
-    UnkStruct13 *obj;
+    GameObject **temp_v0;
+    GameObject *obj;
     UnkStruct14 *temp_d;
 
     obj = arg0->unk_00;
     if (obj != NULL) {
-        obj->unk_18.w = obj->unk_18.w + obj->unk_10;
+        obj->pos_y.w = obj->pos_y.w + obj->vel_y.w;
     }
     obj = arg0->unk_10;
     if (obj != NULL) {
-        obj->unk_18.w = obj->unk_18.w + obj->unk_10;
+        obj->pos_y.w = obj->pos_y.w + obj->vel_y.w;
     }
     temp_v0 = arg0->unk_08;
     if (temp_v0 != NULL) {
         obj = *temp_v0;
         if (obj != NULL) {
-            obj->unk_18.w = obj->unk_18.w + obj->unk_10;
+            obj->pos_y.w = obj->pos_y.w + obj->vel_y.w;
         }
     }
     temp_d = arg0->unk_0C;
     if ((temp_d != NULL) && (temp_d->unk_04 < 0xBU)) {
         obj = temp_d->unk_00;
         if (obj != NULL) {
-            obj->unk_18.w = obj->unk_18.w + obj->unk_10;
+            obj->pos_y.w = obj->pos_y.w + obj->vel_y.w;
         }
     }
 }
 
 void func_80030C7C(UnkStruct2 *rec) {
-    UnkStruct4 *obj;
+    GameObject *obj;
 
     obj = rec->unk_00;
     if (obj != NULL) {
-        obj->unk_18.w += obj->unk_10;
+        obj->pos_y.w += obj->vel_y.w;
         func_80030BAC(&((UnkStruct5 *) rec)->unk_0C);
         func_80030BAC(&((UnkStruct5 *) rec)->unk_24);
         func_80030BAC(&((UnkStruct5 *) rec)->unk_3C);
@@ -1838,8 +1838,8 @@ s32 func_80030CD4(UnkStruct17 *part) {
 
 
 void func_80030D14(UnkStruct19 *p) {
-    UnkStruct4 *saved;
-    UnkStruct4 *obj;
+    GameObject *saved;
+    GameObject *obj;
 
     saved = D_800AA248.unk_20;
     if (p != NULL) {
@@ -1860,7 +1860,7 @@ void func_80030D74(void) {
     u16 n = D_801E29A4;
     s16 count = 0;
     UnkStruct1 *p;
-    UnkStruct4 *o;
+    GameObject *o;
 
     if (n != 0) {
         p = D_801D3DC8;
@@ -1888,8 +1888,8 @@ void func_80030FA4(void) {
     UnkStruct2 *temp_s0;
     UnkStruct1 *temp_s1;
 
-    temp_s0 = D_800AA248.unk_20->unk_90;
-    temp_s2 = D_800AA248.unk_20->unk_94;
+    temp_s0 = D_800AA248.unk_20->owner.item;
+    temp_s2 = D_800AA248.unk_20->unk_94.p;
     temp_s1 = temp_s0->unk_08;
     if ((temp_s2 != 0) && (temp_s1 != NULL)) {
         if (((u16) temp_s1->unk_14) < 9U) {
@@ -1924,7 +1924,7 @@ void func_80031224(void) {
     UnkStruct1 *temp_v0;
 
     func_8001F724(5);
-    temp_v0 = func_8003D1F8((D_800AA248.unk_20->unk_90)->unk_10);
+    temp_v0 = func_8003D1F8((D_800AA248.unk_20->owner.item)->unk_10);
     if (((u16) temp_v0->unk_14) < 3U) {
         temp_v0->unk_14 = 0xCU;
     }
@@ -2024,7 +2024,7 @@ void func_80031A68(void) {
 
 void func_80031AC8(void) {
     if ((D_801D37BC == 0) && (D_801D37C0 == 0)) {
-        D_800AA248.unk_20->unk_44 = *D_800AA248.unk_20->unk_5C;
+        D_800AA248.unk_20->script_pc = *D_800AA248.unk_20->arg.w;
     }
 }
 
@@ -2153,7 +2153,7 @@ void func_80032064(s32 arg0, UnkStruct9 *arg1) {
     arg1->unk_36 = 0;
     if (arg1->unk_0C == 1) {
         arg1->unk_0C = 0;
-        if (D_800AA248.unk_20->unk_18.w <= 0x5F0000) {
+        if (D_800AA248.unk_20->pos_y.w <= 0x5F0000) {
             var_v1 = 0x30000;
             arg1->unk_0A = 0xB;
             var_v0 = 0x3C;
@@ -2164,7 +2164,7 @@ void func_80032064(s32 arg0, UnkStruct9 *arg1) {
         }
         arg1->unk_08 = var_v0;
         arg1->unk_24 = 1;
-        D_800AA248.unk_20->unk_10 = var_v1;
+        D_800AA248.unk_20->vel_y.w = var_v1;
         func_8003E788(arg1);
         D_800AA248.unk_20->unk_80 = 0x353;
         func_80032630(arg0, arg1);
@@ -2187,10 +2187,10 @@ void func_800322E8(s32 arg0, UnkStruct9 *arg1) {
         arg1->unk_0A = 0xF;
         arg1->unk_08 = 0x46;
         arg1->unk_0C = 0;
-        if (D_800AA248.unk_20->unk_22 & 0x10) {
-            D_800AA248.unk_20->unk_0C = 0x28000;
+        if (D_800AA248.unk_20->flags & 0x10) {
+            D_800AA248.unk_20->vel_x.w = 0x28000;
         } else {
-            D_800AA248.unk_20->unk_0C = 0xFFFD8000;
+            D_800AA248.unk_20->vel_x.w = 0xFFFD8000;
         }
         func_80032630(arg0, arg1);
     }
@@ -2221,11 +2221,11 @@ void func_80032690(s32 n, UnkStruct9 *r) {
         r->unk_08 = 0x46;
         r->unk_0C = 0;
         v = -0x8000;
-        if (D_800AA248.unk_20->unk_22 & 0x10) {
+        if (D_800AA248.unk_20->flags & 0x10) {
             v = 0x8000;
         }
-        D_800AA248.unk_20->unk_0C = v;
-        D_800AA248.unk_20->unk_18.u.hi += 5;
+        D_800AA248.unk_20->vel_x.w = v;
+        D_800AA248.unk_20->pos_y.u.hi += 5;
         func_80032630(n, r);
     }
 }
@@ -2896,11 +2896,11 @@ void func_80034360(void) {
 }
 
 void func_8003438C(void) {
-    (D_800AA248.unk_20->unk_90)->unk_36 = 1;
+    (D_800AA248.unk_20->owner.item)->unk_36 = 1;
 }
 
 void func_800343A8(void) {
-    (D_800AA248.unk_20->unk_90)->unk_36 = 0;
+    (D_800AA248.unk_20->owner.item)->unk_36 = 0;
 }
 
 void func_800343C0(void) {

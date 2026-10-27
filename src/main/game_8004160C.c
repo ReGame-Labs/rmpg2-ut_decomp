@@ -3,13 +3,13 @@
 #include "common.h"
 #include "game_80034590.h"
 
-void func_8003EB5C(u8 *table, Mover *mover);
+void func_8003EB5C(u8 *table, GameObject *mover);
 u16 func_8004A468(void);
 s16 func_8003DC3C(Ai *ai);
 void func_8003DB74(Ai *ai);
 void func_8003DAA0(Ai *ai);
 void func_8003E788(Ai *ai, s32 arg1);
-u16 func_8003E79C(Mover *mover, s32 arg1);
+u16 func_8003E79C(GameObject *mover, s32 arg1);
 u16 func_8004B6C4(s32 arg0, s32 arg1, s32 arg2);
 void func_8004E99C(s16 arg0, s16 arg1);
 
@@ -314,7 +314,7 @@ void func_80041B2C(const AiHandler *handlers, Ai *ai) {
     ai->unk_36 = 0;
     if (ai->unk_C == 1) {
         ai->unk_C = 0;
-        if (D_800AA248.unk_20->unk_18 <= 0x5F0000) {
+        if (D_800AA248.unk_20->pos_y.w <= 0x5F0000) {
             speed = 0x30000;
             ai->unk_A = 0xC;
             ai->unk_8 = 0x3C;
@@ -327,7 +327,7 @@ void func_80041B2C(const AiHandler *handlers, Ai *ai) {
         if ((u16)(ai->unk_6 - 0x17) < 2) {
             speed = 0x1E000;
         }
-        D_800AA248.unk_20->unk_10 = speed;
+        D_800AA248.unk_20->vel_y.w = speed;
         func_8003E788(ai, speed);
         D_800AA248.unk_20->unk_80 = 0x353;
         func_80041A70(handlers, ai);
@@ -342,27 +342,27 @@ void func_80041C0C(const AiHandler *handlers, Ai *ai) {
 
     if (ai->unk_24 != 0) {
         ai->unk_24 = 0;
-        D_800AA248.unk_20->unk_18 += 0x1C0000;
+        D_800AA248.unk_20->pos_y.w += 0x1C0000;
     }
     limit = 0xD90000;
     if (D_801FA960 >= 0x64) {
         limit = 0xE00000;
     }
-    D_800AA248.unk_20->unk_18 += D_800AA248.unk_20->unk_10;
-    if (D_800AA248.unk_20->unk_18 >= limit) {
+    D_800AA248.unk_20->pos_y.w += D_800AA248.unk_20->vel_y.w;
+    if (D_800AA248.unk_20->pos_y.w >= limit) {
         if (ai->unk_28 != NULL && ai->unk_28->unk_8 != NULL) {
-            D_800AA248.unk_20->unk_18 = limit;
-            D_800AA248.unk_20->unk_80 = ((s16 *)&D_800AA248.unk_20->unk_18)[1] + 0xF23;
-            D_800AA248.unk_20->unk_10 = 0;
+            D_800AA248.unk_20->pos_y.w = limit;
+            D_800AA248.unk_20->unk_80 = ((s16 *)&D_800AA248.unk_20->pos_y.w)[1] + 0xF23;
+            D_800AA248.unk_20->vel_y.w = 0;
             ai->unk_C = 0;
             if (ai->unk_28->unk_8->unk_14 == 4) {
                 ai->unk_A = 0x15;
                 ai->unk_8 = 0x46;
-                if (D_800AA248.unk_20->unk_22 & 0x10) {
-                    D_800AA248.unk_20->unk_C = 0xC000;
+                if (D_800AA248.unk_20->flags & 0x10) {
+                    D_800AA248.unk_20->vel_x.w = 0xC000;
                     D_800AA248.unk_20->unk_84 = 0x400;
                 } else {
-                    D_800AA248.unk_20->unk_C = -0xC000;
+                    D_800AA248.unk_20->vel_x.w = -0xC000;
                     D_800AA248.unk_20->unk_84 = -0x400;
                 }
             } else {
@@ -398,11 +398,11 @@ void func_80041DE4(const AiHandler *handlers, Ai *ai) {
     ai->unk_8 = 0x46;
     if ((u16)(ai->unk_6 - 0x17) >= 2) {
         vel = 0x20000;
-        if (!(D_800AA248.unk_20->unk_22 & 0x10)) {
+        if (!(D_800AA248.unk_20->flags & 0x10)) {
             vel = -0x30000;
         }
         vel |= 0x8000;
-        D_800AA248.unk_20->unk_C = vel;
+        D_800AA248.unk_20->vel_x.w = vel;
     }
     func_80041A70(handlers, ai);
 }
@@ -419,18 +419,18 @@ void func_80041E54(const AiHandler *handlers, Ai *ai) {
 
     D_800AA248.unk_4C = 0;
     accel = D_800AA248.unk_20->unk_84;
-    vel = D_800AA248.unk_20->unk_C;
+    vel = D_800AA248.unk_20->vel_x.w;
     if (accel != 0) {
         vel += accel;
         if (vel < -0x28000) {
             vel = -0x28000;
         }
-        D_800AA248.unk_20->unk_C = vel;
+        D_800AA248.unk_20->vel_x.w = vel;
     }
-    D_800AA248.unk_20->unk_14 = (vel + D_800AA248.unk_20->unk_14) & D_801D8864;
+    D_800AA248.unk_20->pos_x.w = (vel + D_800AA248.unk_20->pos_x.w) & D_801D8864;
     if (D_800AA248.unk_20->unk_6C & 0x80) {
         kind = 1;
-        if (D_800AA248.unk_20->unk_22 & 0x10) {
+        if (D_800AA248.unk_20->flags & 0x10) {
             kind = 2;
         }
         if (func_8004B6C4(ai->unk_0, 0x64, kind) == 1) {
@@ -439,8 +439,8 @@ void func_80041E54(const AiHandler *handlers, Ai *ai) {
     } else {
         if (ai->unk_38 == 0) {
             if (func_8003E79C(D_800AA248.unk_20, vel) == 1) {
-                D_800AA248.unk_20->unk_22 ^= 0x10;
-                D_800AA248.unk_20->unk_C = -D_800AA248.unk_20->unk_C;
+                D_800AA248.unk_20->flags ^= 0x10;
+                D_800AA248.unk_20->vel_x.w = -D_800AA248.unk_20->vel_x.w;
                 D_800AA248.unk_20->unk_84 = -D_800AA248.unk_20->unk_84;
                 ai->unk_38 = 0xB4;
                 return;
@@ -449,8 +449,8 @@ void func_80041E54(const AiHandler *handlers, Ai *ai) {
             ai->unk_38--;
         }
         if (D_800AA248.unk_4C != 0) {
-            D_800AA248.unk_20->unk_C = 0;
-            D_800AA248.unk_20->unk_10 = 0;
+            D_800AA248.unk_20->vel_x.w = 0;
+            D_800AA248.unk_20->vel_y.w = 0;
             D_800AA248.unk_20->unk_88 = 0;
             ai->unk_8 = 5;
         }
@@ -465,16 +465,16 @@ INCLUDE_ASM("asm/main/nonmatchings/game_8004160C", func_80041E54);
 void func_80042008(const AiHandler *handlers, Ai *ai) {
     s32 vel;
 
-    D_800AA248.unk_20->unk_14 = (D_800AA248.unk_20->unk_14 - D_800AA248.unk_20->unk_C) & D_801D8864;
-    vel = D_800AA248.unk_20->unk_10 + D_800AA248.unk_20->unk_88;
+    D_800AA248.unk_20->pos_x.w = (D_800AA248.unk_20->pos_x.w - D_800AA248.unk_20->vel_x.w) & D_801D8864;
+    vel = D_800AA248.unk_20->vel_y.w + D_800AA248.unk_20->unk_88;
     if (vel > 0x60000) {
         vel = 0x60000;
     }
-    D_800AA248.unk_20->unk_10 = vel;
-    D_800AA248.unk_20->unk_18 += vel;
-    if (((s16 *)&D_800AA248.unk_20->unk_18)[1] >= 0xD9) {
-        D_800AA248.unk_20->unk_C = 0;
-        D_800AA248.unk_20->unk_10 = 0;
+    D_800AA248.unk_20->vel_y.w = vel;
+    D_800AA248.unk_20->pos_y.w += vel;
+    if (((s16 *)&D_800AA248.unk_20->pos_y.w)[1] >= 0xD9) {
+        D_800AA248.unk_20->vel_x.w = 0;
+        D_800AA248.unk_20->vel_y.w = 0;
         D_800AA248.unk_20->unk_88 = 0;
         ai->unk_8 = 0x4E;
         return;
@@ -529,7 +529,7 @@ void func_80042210(Ai *ai) {
 /* 89.8%: the far/near s16 copies: the original keeps the target x in a1 without a second load */
 #ifdef NON_MATCHING
 void func_80042238(Ai *ai) {
-    Mover *target;
+    GameObject *target;
     s16 tx;
     s16 x;
     s16 far;
@@ -542,8 +542,8 @@ void func_80042238(Ai *ai) {
             ai->unk_14 = NULL;
             return;
         }
-        tx = ((s16 *)&target->unk_14)[1];
-        x = ((s16 *)&D_800AA248.unk_20->unk_14)[1];
+        tx = ((s16 *)&target->pos_x.w)[1];
+        x = ((s16 *)&D_800AA248.unk_20->pos_x.w)[1];
         near = x;
         dist = tx - x;
         if (dist < 0) {
@@ -557,8 +557,8 @@ void func_80042238(Ai *ai) {
                 near += (D_801D8864 + 1) >> 16;
             }
         }
-        if ((far < near - 0xE && (D_800AA248.unk_20->unk_22 & 0x10)) ||
-            (near < far && !(D_800AA248.unk_20->unk_22 & 0x10))) {
+        if ((far < near - 0xE && (D_800AA248.unk_20->flags & 0x10)) ||
+            (near < far && !(D_800AA248.unk_20->flags & 0x10))) {
             func_8004E99C(near, tx);
         }
     }

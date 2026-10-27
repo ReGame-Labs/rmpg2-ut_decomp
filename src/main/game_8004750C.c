@@ -167,7 +167,7 @@ void func_80047554(void *anim, Attacker *at) {
     hb = at->hit_by;
     D_800AA248.cur_obj = obj;
     vx = 0x48000;
-    if (hb->obj->unk_20.f.flags & 0x10) {
+    if (hb->obj->flags & 0x10) {
         vx = -0x48000;
     }
     obj->vel_x.w = vx;
@@ -274,7 +274,7 @@ void func_800477F0(void) {
         if (d < -0x1F3) {
             dx = (u16) D_801D8864.s.hi + d;
         }
-        if (obj->unk_20.f.flags & 0x10) {
+        if (obj->flags & 0x10) {
             yoff = 0;
             if (dx >= 0xC9) {
                 yoff = -8;
@@ -455,7 +455,7 @@ u16 func_80047DEC(u16 a, u16 b, s16 dx, s16 dy, Throw *t) {
 
     def = func_8001D110();
     D_800AA248.new_def = def;
-    if (!(D_800AA248.cur_obj->unk_20.f.flags & 0x10)) {
+    if (!(D_800AA248.cur_obj->flags & 0x10)) {
         x = -dx;
     }
     def->pos_x.s.hi = x + (u16) D_800AA248.cur_obj->pos_x.s.hi;
@@ -474,10 +474,10 @@ u16 func_80047EA0(u16 a, u16 b, Throw *t) {
     D_800AA248.new_def = def;
     cur = D_800AA248.cur_obj;
     fr = cur->frame;
-    dx = fr->unk_10 - fr->unk_08;
+    dx = fr->unk_10 - fr->origin.u.lo;
     x = dx;
-    dy = fr->unk_12 - fr->unk_0A;
-    if (cur->unk_20.f.flags & 0x10) {
+    dy = fr->unk_12 - fr->origin.u.hi;
+    if (cur->flags & 0x10) {
         x = -dx;
     }
     def->pos_x.s.hi = x + (u16) cur->pos_x.s.hi;
@@ -508,7 +508,7 @@ u16 func_80047F64(u16 kind, u16 b, Throw *t) {
         kind = 0x1E;
     }
     D_800AA248.cur_obj->vel_y.w = D_8007F2A4[kind].vy;
-    D_800AA248.cur_obj->vel_x.w = (saved->unk_20.f.flags & 0x10) ? D_8007F2A4[kind].vx : -D_8007F2A4[kind].vx;
+    D_800AA248.cur_obj->vel_x.w = (saved->flags & 0x10) ? D_8007F2A4[kind].vx : -D_8007F2A4[kind].vx;
     D_800AA248.cur_obj = saved;
     return 0;
 }
@@ -527,10 +527,10 @@ u16 func_80048070(u16 kind, u16 b, Throw *t) {
     D_800AA248.new_def = def;
     cur = D_800AA248.cur_obj;
     fr = cur->frame;
-    dx = fr->unk_20 - fr->unk_08;
+    dx = fr->unk_20 - fr->origin.u.lo;
     x = dx;
-    dy = fr->unk_22 - fr->unk_0A;
-    if (cur->unk_20.f.flags & 0x10) {
+    dy = fr->unk_22 - fr->origin.u.hi;
+    if (cur->flags & 0x10) {
         x = -dx;
         def->unk_04 |= 0x10;
     }
@@ -550,7 +550,7 @@ u16 func_80048070(u16 kind, u16 b, Throw *t) {
     t->unk_0A = 1;
     D_800AA248.cur_obj->unk_94.p = t;
     D_800AA248.cur_obj->vel_y.w = D_8007F2A4[kind].vy;
-    if (saved->unk_20.f.flags & 0x10) {
+    if (saved->flags & 0x10) {
         D_800AA248.cur_obj->vel_x.w = -D_8007F2A4[kind].vx;
     } else {
         D_800AA248.cur_obj->vel_x.w = D_8007F2A4[kind].vx;
@@ -573,10 +573,10 @@ u16 func_800481FC(u16 kind, u16 b, Throw *t) {
     def = D_800AA248.new_def;
     cur = D_800AA248.cur_obj;
     fr = cur->frame;
-    dy = fr->unk_22 - fr->unk_0A;
-    dx = fr->unk_20 - fr->unk_08;
+    dy = fr->unk_22 - fr->origin.u.hi;
+    dx = fr->unk_20 - fr->origin.u.lo;
     x = dx;
-    if (cur->unk_20.f.flags & 0x10) {
+    if (cur->flags & 0x10) {
         x = -dx;
         def->unk_04 |= 0x10;
     } else {
@@ -599,7 +599,7 @@ u16 func_800481FC(u16 kind, u16 b, Throw *t) {
     D_800AA248.cur_obj->unk_94.p = t;
     D_800AA248.cur_obj->vel_y.w = D_8007F2A4[kind].vy;
     vx = D_8007F2A4[kind].vx;
-    if (D_800AA248.cur_obj->unk_20.f.flags & 0x10) {
+    if (D_800AA248.cur_obj->flags & 0x10) {
         vx = -vx;
     }
     D_800AA248.cur_obj->vel_x.w = vx;
@@ -622,10 +622,10 @@ u16 func_80048384(u16 b, Throw *t) {
     def = D_800AA248.new_def;
     cur = D_800AA248.cur_obj;
     fr = cur->frame;
-    dy = fr->unk_12 - fr->unk_0A - 5;
-    dx = fr->unk_10 - fr->unk_08 - 5;
+    dy = fr->unk_12 - fr->origin.u.hi - 5;
+    dx = fr->unk_10 - fr->origin.u.lo - 5;
     x = dx;
-    if (cur->unk_20.f.flags & 0x10) {
+    if (cur->flags & 0x10) {
         x = -dx;
     } else {
         left = 1;
@@ -646,8 +646,8 @@ u16 func_80048384(u16 b, Throw *t) {
     t->unk_0A = 1;
     D_800AA248.cur_obj->unk_94.p = t;
     D_800AA248.cur_obj->vel_y.w = -(((func_8001EB10(0x7F, 1) & 3) + 0xE) << 15);
-    if (saved->unk_68 != NULL) {
-        vx = abs(func_8003FCD8(saved->pos_x.s.hi, saved->unk_68->unk_68->pos_x.s.hi));
+    if (saved->unk_68.monster != NULL) {
+        vx = abs(func_8003FCD8(saved->pos_x.s.hi, saved->unk_68.monster->obj->pos_x.s.hi));
         vx = ((vx >> 5) << 15) + 0x4000;
     } else {
         vx = ((func_8001EB10(0x7F, 1) & 7) + 2) << 15;
@@ -678,10 +678,10 @@ u16 func_80048558(u16 b, Throw *t) {
     def = D_800AA248.new_def;
     cur = D_800AA248.cur_obj;
     fr = cur->frame;
-    dy = fr->unk_12 - fr->unk_0A - 5;
-    dx = fr->unk_10 - fr->unk_08 - 5;
+    dy = fr->unk_12 - fr->origin.u.hi - 5;
+    dx = fr->unk_10 - fr->origin.u.lo - 5;
     x = dx;
-    if (cur->unk_20.f.flags & 0x10) {
+    if (cur->flags & 0x10) {
         x = -dx;
     } else {
         left = 1;
@@ -698,14 +698,14 @@ u16 func_80048558(u16 b, Throw *t) {
         D_800AA248.cur_obj = saved;
         return 1;
     }
-    obj->unk_20.f.flags |= saved->unk_20.f.flags & 0x10;
+    obj->flags |= saved->flags & 0x10;
     t->obj = D_800AA248.cur_obj;
     t->unk_08 = b;
     t->unk_0A = 1;
     D_800AA248.cur_obj->unk_94.p = t;
     D_800AA248.cur_obj->vel_y.w = -(((func_8001EB10(0x7F, 1) & 3) + 0xC) << 15);
-    if (saved->unk_68 != NULL) {
-        vx = abs(func_8003FCD8(saved->unk_68->unk_68->pos_x.s.hi, saved->pos_x.s.hi));
+    if (saved->unk_68.monster != NULL) {
+        vx = abs(func_8003FCD8(saved->unk_68.monster->obj->pos_x.s.hi, saved->pos_x.s.hi));
         vx = ((vx >> 5) << 15) + 0x8000;
     } else {
         vx = ((func_8001EB10(0x7F, 1) & 7) + 5) << 15;
@@ -737,10 +737,10 @@ u16 func_8004874C(u16 b, Throw *t) {
     D_800AA248.new_def = def;
     cur = D_800AA248.cur_obj;
     fr = cur->frame;
-    dx = fr->unk_10 - fr->unk_08 - 5;
+    dx = fr->unk_10 - fr->origin.u.lo - 5;
     x = dx;
-    dy = fr->unk_12 - fr->unk_0A - 5;
-    if (cur->unk_20.f.flags & 0x10) {
+    dy = fr->unk_12 - fr->origin.u.hi - 5;
+    if (cur->flags & 0x10) {
         x = -dx;
     }
     def->pos_x.s.hi = cur->pos_x.s.hi + x;
@@ -755,12 +755,12 @@ u16 func_8004874C(u16 b, Throw *t) {
         D_800AA248.cur_obj = saved;
         return 1;
     }
-    obj->unk_20.f.flags |= saved->unk_20.f.flags & 0x10;
+    obj->flags |= saved->flags & 0x10;
     t->obj = D_800AA248.cur_obj;
     t->unk_08 = b;
     t->unk_0A = 1;
     D_800AA248.cur_obj->unk_94.p = t;
-    if (saved->unk_20.f.flags & 0x10) {
+    if (saved->flags & 0x10) {
         vx = 0x70000;
     } else {
         vx = -0x70000;
@@ -800,7 +800,7 @@ u16 func_800488B8(u16 b, Throw *t) {
     D_801E28A8 = (D_801E28A8 + 1) & 3;
     D_800AA248.cur_obj->vel_x.w = 0;
     D_800AA248.cur_obj->unk_88 = -0x2000;
-    D_800AA248.cur_obj->unk_08 = D_801E28A8;
+    D_800AA248.cur_obj->unk_08.w = D_801E28A8;
     D_800AA248.cur_obj = saved;
     return 0;
 }
@@ -822,10 +822,10 @@ u16 func_800489C0(u16 b, Throw *t) {
     def = D_800AA248.new_def;
     cur = D_800AA248.cur_obj;
     fr = cur->frame;
-    dy = fr->unk_12 - fr->unk_0A - 5;
-    dx = fr->unk_10 - fr->unk_08 - 5;
+    dy = fr->unk_12 - fr->origin.u.hi - 5;
+    dx = fr->unk_10 - fr->origin.u.lo - 5;
     x = dx;
-    if (cur->unk_20.f.flags & 0x10) {
+    if (cur->flags & 0x10) {
         x = -dx;
     } else {
         left = 1;
@@ -846,8 +846,8 @@ u16 func_800489C0(u16 b, Throw *t) {
     t->unk_0A = 1;
     D_800AA248.cur_obj->unk_94.p = t;
     D_800AA248.cur_obj->vel_y.w = -(((func_8001EB10(0x7F, 1) & 3) + 0xE) << 15);
-    if (saved->unk_68 != NULL) {
-        vx = abs(func_8003FCD8(saved->unk_68->unk_68->pos_x.s.hi, saved->pos_x.s.hi));
+    if (saved->unk_68.monster != NULL) {
+        vx = abs(func_8003FCD8(saved->unk_68.monster->obj->pos_x.s.hi, saved->pos_x.s.hi));
         vx = ((vx >> 5) << 15) + 0x8000;
     } else {
         vx = ((func_8001EB10(0x7F, 1) & 3) + 5) << 15;
@@ -879,10 +879,10 @@ u16 func_80048B98(u16 b, Throw *t) {
     D_800AA248.new_def = def;
     cur = D_800AA248.cur_obj;
     fr = cur->frame;
-    dx = fr->unk_10 - fr->unk_08 - 5;
+    dx = fr->unk_10 - fr->origin.u.lo - 5;
     x = dx;
-    dy = fr->unk_12 - fr->unk_0A - 5;
-    if (cur->unk_20.f.flags & 0x10) {
+    dy = fr->unk_12 - fr->origin.u.hi - 5;
+    if (cur->flags & 0x10) {
         x = -dx;
     }
     def->pos_x.s.hi = cur->pos_x.s.hi + x;
@@ -900,8 +900,8 @@ u16 func_80048B98(u16 b, Throw *t) {
     t->unk_08 = b;
     t->unk_0A = 1;
     D_800AA248.cur_obj->unk_94.p = t;
-    if (saved->unk_68 != NULL) {
-        target = saved->unk_68->unk_68;
+    if (saved->unk_68.monster != NULL) {
+        target = saved->unk_68.monster->obj;
         if (target != NULL) {
             vy = -0x90000;
             if (D_800AA248.cur_obj->pos_y.s.hi < target->pos_y.s.hi) {
@@ -933,13 +933,13 @@ u16 func_80048D4C(u16 b, Throw *t) {
 
     def = func_8001D110();
     D_800AA248.new_def = def;
-    if (D_800AA248.cur_obj->unk_20.f.flags & 0x10) {
+    if (D_800AA248.cur_obj->flags & 0x10) {
         def->unk_04 |= 0x10;
     }
     def->id = 0x4F0000DA;
     fr = D_800AA248.cur_obj->frame;
-    dx = fr->unk_10 - fr->unk_08;
-    dy = fr->unk_12 - fr->unk_0A;
+    dx = fr->unk_10 - fr->origin.u.lo;
+    dy = fr->unk_12 - fr->origin.u.hi;
     def->pos_x.s.hi = D_800AA248.cur_obj->pos_x.s.hi + dx;
     def->pos_y.s.hi = D_800AA248.cur_obj->pos_y.s.hi + dy;
     def->unk_0C = 0x722;
@@ -971,8 +971,8 @@ u16 func_80048E6C(u16 b, Throw *t) {
     D_800AA248.new_def = def;
     def->id = 0x4F0000E6;
     fr = D_800AA248.cur_obj->frame;
-    dx = fr->unk_10 - fr->unk_08;
-    dy = fr->unk_12 - fr->unk_0A;
+    dx = fr->unk_10 - fr->origin.u.lo;
+    dy = fr->unk_12 - fr->origin.u.hi;
     def->pos_x.s.hi = D_800AA248.cur_obj->pos_x.s.hi + dx;
     def->pos_y.s.hi = D_800AA248.cur_obj->pos_y.s.hi + dy;
     def->unk_0C = 0x723;
@@ -1007,10 +1007,10 @@ u16 func_80048F60(Monster *m, u16 b, Throw *t) {
     cur = D_800AA248.cur_obj;
     def = D_800AA248.new_def;
     fr = cur->frame;
-    dx = fr->unk_20 - fr->unk_08;
+    dx = fr->unk_20 - fr->origin.u.lo;
     x = dx;
-    dy = fr->unk_22 - fr->unk_0A;
-    if (cur->unk_20.f.flags & 0x10) {
+    dy = fr->unk_22 - fr->origin.u.hi;
+    if (cur->flags & 0x10) {
         x = -dx;
         def->unk_04 |= 0x10;
     }
@@ -1193,17 +1193,17 @@ void func_80049650(Throw *t) {
     D_800AA248.cur_obj->pos_y.w += v;
     cur = D_800AA248.cur_obj;
     if (cur->unk_88 <= 0) {
-        if (cur->pos_y.w > D_8007F39C[cur->unk_08].unk_4) {
+        if (cur->pos_y.w > D_8007F39C[cur->unk_08.w].unk_4) {
             return;
         }
         x = 0;
         i = 7;
-        cur->unk_88 = D_8007F39C[cur->unk_08].unk_0;
+        cur->unk_88 = D_8007F39C[cur->unk_08.w].unk_0;
         do {
             m = &D_801E0B78[i];
             if (m->unk_058 & 1) {
                 o = m->obj;
-                if (x == 0 || (D_800AA248.cur_obj->unk_08 & 1)) {
+                if (x == 0 || (D_800AA248.cur_obj->unk_08.w & 1)) {
                     x = o->pos_x.s.hi;
                 }
             }
@@ -1211,10 +1211,10 @@ void func_80049650(Throw *t) {
         if (x != 0) {
             D_800AA268->pos_x.s.hi = x;
         }
-        D_800AA268->unk_20.f.flags |= 0x20;
+        D_800AA268->flags |= 0x20;
     } else if (D_801F9ACC + cur->pos_y.w > 0xD8FFFF) {
         cur->pos_y.w = 0xCF0000;
-        D_800AA248.cur_obj->unk_20.f.flags &= ~0x20;
+        D_800AA248.cur_obj->flags &= ~0x20;
         func_8001E698(D_800AA248.cur_obj, D_80095678);
         t->unk_0A = 0x10;
         D_800AA248.cur_obj->vel_x.w = 0;
@@ -1272,22 +1272,22 @@ void func_800499F4(Throw *t) {
     if (t->unk_0A != 1) {
         return;
     }
-    if (D_800AA248.cur_obj->unk_08 == 0) {
+    if (D_800AA248.cur_obj->unk_08.w == 0) {
         func_80049D90(t);
         if (D_800AA248.cur_obj->pos_y.s.hi >= 0xD9) {
             D_800AA248.cur_obj->vel_y.w = 0;
-            D_800AA248.cur_obj->unk_08 = 0xE6;
+            D_800AA248.cur_obj->unk_08.w = 0xE6;
             D_800AA248.cur_obj->unk_80 = 0x1005;
         }
         return;
     }
-    if (D_800AA248.cur_obj->unk_08 == 1) {
+    if (D_800AA248.cur_obj->unk_08.w == 1) {
         t->unk_0A = 0x10;
         D_800AA248.cur_obj->script_pc = (s32) D_80091820;
         func_8001F724(5);
         return;
     }
-    if (--D_800AA248.cur_obj->unk_08 < 0xD8) {
+    if (--D_800AA248.cur_obj->unk_08.w < 0xD8) {
         i = 7;
         do {
             m = &D_801E0B78[i];
@@ -1317,8 +1317,8 @@ void func_80049B9C(Throw *t) {
     }
     func_80049D90(t);
     if (D_800AA248.cur_obj->pos_y.s.hi >= 0xD9) {
-        D_800AA248.cur_obj->unk_08++;
-        if (D_800AA248.cur_obj->unk_08 == 4) {
+        D_800AA248.cur_obj->unk_08.w++;
+        if (D_800AA248.cur_obj->unk_08.w == 4) {
             t->unk_0A = 0x10;
             D_800AA248.cur_obj->script_pc = (s32) D_80091AD0;
             func_8001F724(5);
@@ -1558,10 +1558,10 @@ u16 func_8004A51C(u16 kind, u16 b, Throw *t) {
     D_800AA248.new_def = def;
     cur = D_800AA248.cur_obj;
     fr = cur->frame;
-    dx = fr->unk_20 - fr->unk_08;
+    dx = fr->unk_20 - fr->origin.u.lo;
     x = dx;
-    dy = fr->unk_22 - fr->unk_0A;
-    if (cur->unk_20.f.flags & 0x10) {
+    dy = fr->unk_22 - fr->origin.u.hi;
+    if (cur->flags & 0x10) {
         x = -dx;
         def->unk_04 |= 0x10;
     }
@@ -1581,7 +1581,7 @@ u16 func_8004A51C(u16 kind, u16 b, Throw *t) {
     t->unk_0A = 1;
     D_800AA248.cur_obj->unk_94.p = t;
     D_800AA248.cur_obj->vel_y.w = D_8007F3BC[kind].vy;
-    D_800AA248.cur_obj->vel_x.w = (saved->unk_20.f.flags & 0x10) ? -D_8007F3BC[kind].vx : D_8007F3BC[kind].vx;
+    D_800AA248.cur_obj->vel_x.w = (saved->flags & 0x10) ? -D_8007F3BC[kind].vx : D_8007F3BC[kind].vx;
     D_800AA248.cur_obj->unk_8C = 0x18;
     D_800AA248.cur_obj = saved;
     return 0;
@@ -1608,7 +1608,7 @@ void func_8004A698(Throw *t) {
             if (D_800AA248.cur_obj->pos_y.s.hi >= 0xD9) {
                 t->unk_0A = 0x10;
                 D_800AA248.cur_obj->script_pc = (s32) D_80091788;
-                D_800AA248.cur_obj->unk_20.f.flags |= 0x800;
+                D_800AA248.cur_obj->flags |= 0x800;
             } else {
                 i = 7;
                 do {
@@ -1620,7 +1620,7 @@ void func_8004A698(Throw *t) {
                             t->unk_0A = 0x10;
                             func_8004A93C(m);
                             D_800AA248.cur_obj->script_pc = (s32) D_800917D0;
-                            D_800AA248.cur_obj->unk_20.f.flags |= 0x800;
+                            D_800AA248.cur_obj->flags |= 0x800;
                             goto sound;
                         }
                         if (D_800AA248.cur_obj->vel_x.w != 0 && func_80053BE8(D_800AA248.cur_obj->pos_x.s.hi, m) != 0) {
@@ -2064,7 +2064,7 @@ void func_8004B3D0(void) {
         rec++;
         obj->pos_y.s.hi = y;
         obj->pos_x.w = (D_801F9AC8.w + (x << 16)) & D_801D8864.w;
-        obj->unk_20.f.flags ^= 0x10;
+        obj->flags ^= 0x10;
         obj->vel_x.w = -obj->vel_x.w;
     } while (--n != 0);
 }

@@ -298,9 +298,9 @@ INCLUDE_ASM("asm/main/nonmatchings/game_80043E28", func_80044240);
 
 void func_800443AC(s32 vel) {
     if (func_8001EB10(0x190, 0) & 1) {
-        D_800AA248.cur_obj->unk_20.f.flags |= 0x10;
+        D_800AA248.cur_obj->flags |= 0x10;
     } else {
-        D_800AA248.cur_obj->unk_20.f.flags &= ~0x10;
+        D_800AA248.cur_obj->flags &= ~0x10;
     }
     func_80034B68(vel);
 }
@@ -439,7 +439,7 @@ void func_800447F0(Attacker *a) {
     s32 accel;
     s32 vel;
 
-    if (a->hit_by->obj->unk_20.f.flags & 0x10) {
+    if (a->hit_by->obj->flags & 0x10) {
         accel = 0x10000;
         vel = 0xFFF90000;
     } else {
@@ -990,7 +990,7 @@ void func_80045A2C(Attacker *a) {
 
 void func_80045A74(void) {
     D_800AA248.cur_obj->vel_x.w = -D_800AA248.cur_obj->vel_x.w;
-    D_800AA248.cur_obj->unk_20.f.flags ^= 0x10;
+    D_800AA248.cur_obj->flags ^= 0x10;
 }
 
 u16 func_80045AB0(void) {
@@ -1553,7 +1553,7 @@ void func_80046F60(void) {
 
 #ifdef NON_MATCHING
 /* 84%: the search is the while condition (right shape); the original keeps a second pointer to unk_20 as a giv and hoists the constant 1 before the loop */
-void func_80046F68(GameObject *obj) {
+void func_80046F68(Monster *m) {
     Attacker *a;
     u16 n;
     s32 dx;
@@ -1565,9 +1565,9 @@ void func_80046F68(GameObject *obj) {
     n = 4;
     saved = D_800AA248.cur_obj;
     if (D_801E1C84 != 0) {
-        x = obj->unk_68->pos_x.s.hi;
+        x = m->obj->pos_x.s.hi;
         while ((o = a->obj) == NULL || a->type == 0 || (o->unk_6C & 0x80) ||
-               (dx = o->pos_x.s.hi - x, dx < 0 ? -dx : dx) > ((s16) o->width >> 1) - 1) {
+               (dx = o->pos_x.s.hi - x, dx < 0 ? -dx : dx) > ((s16) o->size.u.lo >> 1) - 1) {
             a++;
             if (--n == 0) {
                 goto end;

@@ -26,7 +26,7 @@ typedef struct ActorPair {
     /* 0x24 */ Actor *unk_24;
 } ActorPair;
 
-void func_8001E698(Mover *mover, Anim *anim);
+void func_8001E698(GameObject *mover, Anim *anim);
 s32 func_8001EB10(s32 arg0, s32 arg1);
 void func_8001F724(s32 arg0);
 void func_8003C894(Actor *actor);
@@ -83,16 +83,16 @@ void func_800415E0(Actor *actor);
 void func_8003D4AC(Ai *ai);
 void func_8003FEE4(Actor *actor);
 void func_80041344(u16 arg0, Actor *actor);
-void func_80024964(s32 arg0, Mover *mover);
-void func_8001E2F8(Mover *mover);
-void func_8001E39C(Mover *mover);
+void func_80024964(s32 arg0, GameObject *mover);
+void func_8001E2F8(GameObject *mover);
+void func_8001E39C(GameObject *mover);
 void func_80053C50(s32 arg0, Player *player);
 void func_80061068(s32 arg0, s16 arg1, s16 arg2);
-void func_8001E4B0(Mover *mover);
+void func_8001E4B0(GameObject *mover);
 void func_8003F150(void);
-void func_80030338(Mover *mover);
+void func_80030338(GameObject *mover);
 Effect *func_8001D110(void);
-Mover *func_8001DCB4(void);       /* spawns D_800AA248.unk_3C */
+GameObject *func_8001DCB4(void);       /* spawns D_800AA248.unk_3C */
 void func_8004003C(s32 arg0, MoverLink *link);
 s16 func_80053AC4(s16 x, s16 y, s32 w, s32 h, Player *player);
 void func_8003CCC0(MoverLink *link);
@@ -114,7 +114,7 @@ typedef struct ActorSlot {
 } ActorSlot;
 void func_800413BC(u16 arg0, Actor *actor);
 void func_8003E6A4(Ai *ai);
-u16 func_8003EB5C(Anim *anim, Mover *mover);
+u16 func_8003EB5C(Anim *anim, GameObject *mover);
 void func_8003EC40(Actor *actor);
 void func_8003F74C(Player *player, Actor *actor);
 s16 func_8003FCD8(s32 arg0, s32 arg1);
@@ -140,7 +140,7 @@ extern Player D_801E0B78[];
  * GCC 2.8 keeps its stores ordered with struct-field loads only then (docs/MATCHING.md "Structs, globals and
  * aliasing"; func_80040CB8 stores it before reading the actor's fields). */
 typedef struct MoverRef {
-    Mover *p;
+    GameObject *p;
 } MoverRef;
 extern MoverRef D_800AA268;
 extern s16 D_801D8728;
@@ -203,8 +203,8 @@ void func_8003CDAC(u8 *arg0) {
 }
 
 void func_8003CE24(Actor *actor, Effect *effect) {
-    Mover *mover;
-    MoverFrame *frame;
+    GameObject *mover;
+    SpriteFrame *frame;
     u8 *p;
 
     if (actor->unk_4 == 1) {
@@ -212,50 +212,50 @@ void func_8003CE24(Actor *actor, Effect *effect) {
     } else {
         p = (u8 *)actor - 0x24;
     }
-    mover = *(Mover **)p;
-    frame = mover->unk_34;
+    mover = *(GameObject **)p;
+    frame = mover->frame;
     switch (actor->unk_4) {
     case 2:
-        effect->unk_12 = ((u16 *)&mover->unk_14)[1] + frame->unk_1C;
-        effect->unk_16 = ((u16 *)&mover->unk_18)[1] + frame->unk_1E;
+        effect->unk_12 = ((u16 *)&mover->pos_x.w)[1] + frame->unk_1C;
+        effect->unk_16 = ((u16 *)&mover->pos_y.w)[1] + frame->unk_1E;
         break;
     default:
-        effect->unk_12 = ((u16 *)&mover->unk_14)[1] + frame->unk_14;
-        effect->unk_16 = ((u16 *)&mover->unk_18)[1] + frame->unk_16;
+        effect->unk_12 = ((u16 *)&mover->pos_x.w)[1] + frame->unk_14;
+        effect->unk_16 = ((u16 *)&mover->pos_y.w)[1] + frame->unk_16;
         break;
     }
 }
 
-void func_8003CEA0(Anim *anim, Mover *mover) {
+void func_8003CEA0(Anim *anim, GameObject *mover) {
     Actor *actor;
-    Mover *o;
+    GameObject *o;
 
     if (mover->unk_48 != anim) {
         if (*(u16 *)&mover->unk_80 == 0) {
-            mover->unk_80 = ((AnimFrame *)func_8003D1F8(mover->unk_90->unk_10))->unk_8 - 1;
+            mover->unk_80 = ((AnimFrame *)func_8003D1F8(mover->owner.link->unk_10))->unk_8 - 1;
         }
         func_80024964(0, mover);
         func_8001E698(mover, anim);
-        actor = mover->unk_90->unk_10;
+        actor = mover->owner.link->unk_10;
         if (actor->unk_4 == 1) {
-            o = *(Mover **)((u8 *)actor - 0xC);
-            ((u16 *)&mover->unk_14)[1] = ((u16 *)&o->unk_14)[1] + o->unk_34->unk_10;
-            ((u16 *)&mover->unk_18)[1] = ((u16 *)&o->unk_18)[1] + o->unk_34->unk_12;
+            o = *(GameObject **)((u8 *)actor - 0xC);
+            ((u16 *)&mover->pos_x.w)[1] = ((u16 *)&o->pos_x.w)[1] + o->frame->unk_10;
+            ((u16 *)&mover->pos_y.w)[1] = ((u16 *)&o->pos_y.w)[1] + o->frame->unk_12;
         } else if (actor->unk_4 == 2) {
-            o = *(Mover **)((u8 *)actor - 0x24);
-            ((u16 *)&mover->unk_14)[1] = ((u16 *)&o->unk_14)[1] + o->unk_34->unk_20;
-            ((u16 *)&mover->unk_18)[1] = ((u16 *)&o->unk_18)[1] + o->unk_34->unk_22;
+            o = *(GameObject **)((u8 *)actor - 0x24);
+            ((u16 *)&mover->pos_x.w)[1] = ((u16 *)&o->pos_x.w)[1] + o->frame->unk_20;
+            ((u16 *)&mover->pos_y.w)[1] = ((u16 *)&o->pos_y.w)[1] + o->frame->unk_22;
         } else {
-            o = *(Mover **)((u8 *)actor - 0x3C);
-            ((u16 *)&mover->unk_14)[1] = ((u16 *)&o->unk_14)[1] + o->unk_34->unk_18;
-            ((u16 *)&mover->unk_18)[1] = ((u16 *)&o->unk_18)[1] + o->unk_34->unk_1A;
+            o = *(GameObject **)((u8 *)actor - 0x3C);
+            ((u16 *)&mover->pos_x.w)[1] = ((u16 *)&o->pos_x.w)[1] + o->frame->unk_18;
+            ((u16 *)&mover->pos_y.w)[1] = ((u16 *)&o->pos_y.w)[1] + o->frame->unk_1A;
         }
     }
 }
 
 void func_8003CFEC(void) {
-    Mover *mover = D_800AA268.p;
-    u16 *info = mover->unk_5C;
+    GameObject *mover = D_800AA268.p;
+    u16 *info = mover->arg.h;
 
     if (!(mover->unk_6C & 0x80) && D_801D36FC != 0x220) {
         func_8001F724(*info);
@@ -298,22 +298,22 @@ void func_8003D11C(Ai *ai) {
     }
 }
 
-void func_8003D158(Mover *mover) {
+void func_8003D158(GameObject *mover) {
     s32 v;
 
-    v = mover->unk_C;
+    v = mover->vel_x.w;
     if (v != 0) {
         if (abs(v) <= 0x20000) {
-            mover->unk_C = v + mover->unk_84;
+            mover->vel_x.w = v + mover->unk_84;
         }
-        mover->unk_14 += mover->unk_C;
+        mover->pos_x.w += mover->vel_x.w;
     }
-    v = mover->unk_10;
+    v = mover->vel_y.w;
     if (v != 0) {
         if (abs(v) <= 0x30000) {
-            mover->unk_10 = v + mover->unk_88;
+            mover->vel_y.w = v + mover->unk_88;
         }
-        mover->unk_18 += mover->unk_10;
+        mover->pos_y.w += mover->vel_y.w;
     }
 }
 
@@ -430,7 +430,7 @@ void func_8003D4AC(Ai *ai) {
     ai->unk_8 = 6;
     D_800AA248.unk_20->unk_80 = 0xF00;
     if (ai->unk_10->unk_4 == 2) {
-        D_800AA248.unk_20->unk_22 |= 0x10;
+        D_800AA248.unk_20->flags |= 0x10;
     }
     func_8003D58C(&D_80094350);
 }
@@ -464,7 +464,7 @@ void func_8003D58C(Anim *anim) {
 }
 
 void func_8003D5C8(void) {
-    func_8003CCC0(D_800AA248.unk_20->unk_90);
+    func_8003CCC0(D_800AA248.unk_20->owner.link);
     func_8001E4B0(D_800AA248.unk_20);
 }
 
@@ -720,7 +720,7 @@ INCLUDE_ASM("asm/main/nonmatchings/game_8003CD08", func_8003E630);
 
 void func_8003E6A4(Ai *ai) {
     AiOrder *order;
-    Mover *mover;
+    GameObject *mover;
     u16 kind;
 
     order = ai->unk_10;
@@ -741,10 +741,10 @@ void func_8003E6A4(Ai *ai) {
     ai->unk_14 = NULL;
     ai->unk_38 = 0;
     ai->unk_C = 0;
-    ((s16 *)&mover->unk_14)[1] = -0x190;
-    ((s16 *)&mover->unk_18)[1] = -0x190;
-    mover->unk_C = 0;
-    mover->unk_10 = 0;
+    ((s16 *)&mover->pos_x.w)[1] = -0x190;
+    ((s16 *)&mover->pos_y.w)[1] = -0x190;
+    mover->vel_x.w = 0;
+    mover->vel_y.w = 0;
     ai->unk_8 = 1;
     if (func_8005F208() == 3) {
         ai->unk_18 = 0;
@@ -769,7 +769,7 @@ s32 func_8003E79C(void) {
     s16 x;
 
     if (D_801D37B8 != 0) {
-        x = ((s16 *)&D_800AA248.unk_20->unk_14)[1];
+        x = ((s16 *)&D_800AA248.unk_20->pos_x.w)[1];
         if (x >= D_801D37B8 && x <= D_801D87B4) {
             D_800AA248.unk_4C = 0;
             D_800AA248.unk_78 = 1;
@@ -850,20 +850,20 @@ void func_8003EB14(void) {
 }
 
 void func_8003EB40(void) {
-    D_800AA248.unk_20->unk_90->unk_C = 1;
+    D_800AA248.unk_20->owner.link->unk_C = 1;
 }
 
-u16 func_8003EB5C(Anim *anim, Mover *mover) {
+u16 func_8003EB5C(Anim *anim, GameObject *mover) {
     if (anim == mover->unk_48) {
         D_800AA248.unk_7A = 1;
-        mover->unk_22 |= 0x800;
+        mover->flags |= 0x800;
     } else {
         mover->unk_48 = anim;
-        mover->unk_44 = anim;
+        mover->script_pc = anim;
         mover->unk_4C = 0;
         mover->unk_4D = 0;
         mover->unk_64 = 0;
-        mover->unk_22 |= 0x800;
+        mover->flags |= 0x800;
         D_800AA248.unk_7A = 0;
     }
     return D_800AA248.unk_7A;
@@ -871,7 +871,7 @@ u16 func_8003EB5C(Anim *anim, Mover *mover) {
 
 void func_8003EBC0(void) {
     Actor *actor;
-    Mover *saved;
+    GameObject *saved;
     u16 n;
 
     actor = D_801E1E48;
@@ -976,10 +976,10 @@ void func_8003ED4C(void) {
         effect->unk_20 = (s16)y + 0xF23;
         D_800AA248.unk_20 = func_8001DCB4();
         actor->unk_0 = D_800AA248.unk_20;
-        D_800AA248.unk_20->unk_90 = (MoverLink *)actor;
+        D_800AA248.unk_20->owner.actor = actor;
         p++;
-        actor->unk_38 = ((u16 *)&D_800AA248.unk_20->unk_14)[1];
-        D_800AA248.unk_20->unk_22 |= *p;
+        actor->unk_38 = ((u16 *)&D_800AA248.unk_20->pos_x.w)[1];
+        D_800AA248.unk_20->flags |= *p;
         actor->unk_20 = def->unk_8;
         actor->unk_24 = def->unk_C;
         p++;
@@ -989,7 +989,7 @@ void func_8003ED4C(void) {
             link = func_8002F01C();
             actor->unk_34 = link;
             if (link != NULL) {
-                ((u16 *)&D_800AA248.unk_20->unk_14)[1] += link->unk_4;
+                ((u16 *)&D_800AA248.unk_20->pos_x.w)[1] += link->unk_4;
             }
         }
         actor++;
@@ -1001,8 +1001,8 @@ void func_8003EF40(Actor *actor) {
 }
 
 void func_8003EF64(Player *player) {
-    Mover *saved;
-    Mover *mover;
+    GameObject *saved;
+    GameObject *mover;
     Actor *actor = D_801E1E48;
     s16 px;
     s16 d;
@@ -1012,19 +1012,19 @@ void func_8003EF64(Player *player) {
     saved = D_800AA268.p;
     if (n != 0) {
         mover = player->unk_68;
-        px = ((s16 *)&mover->unk_14)[1];
+        px = ((s16 *)&mover->pos_x.w)[1];
         do {
             mover = actor->unk_0;
             if (!(mover->unk_6C & 0x80) && actor->unk_12 == 0 && actor->unk_4 != 0x55 && actor->unk_4 != 0x54 &&
                 actor->unk_4 != 0x56 && actor->unk_4 != 0x8E && actor->unk_6 != 0 && actor->unk_6 != 0xB &&
                 actor->unk_6 != 0xE && actor->unk_6 != 1 && actor->unk_6 != 5 && actor->unk_6 != 6 &&
                 actor->unk_6 != 7 && actor->unk_6 != 3) {
-                d = abs(((s16 *)&mover->unk_14)[1] - px);
-                if (d <= (((s16)mover->unk_30) >> 1) - 1) {
+                d = abs(((s16 *)&mover->pos_x.w)[1] - px);
+                if (d <= (((s16)mover->size.u.lo) >> 1) - 1) {
                     if (actor->unk_6 != 0xA) {
                         D_800AA268.p = mover;
                         func_8004155C(7, actor);
-                    } else if (((s16 *)&mover->unk_18)[1] == 0xE2) {
+                    } else if (((s16 *)&mover->pos_y.w)[1] == 0xE2) {
                         func_80054374(0x28, player);
                         func_800634D4(player, 4);
                         player->unk_24++;
@@ -1040,7 +1040,7 @@ void func_8003EF64(Player *player) {
 }
 
 void func_8003F114(void) {
-    Mover *saved = D_800AA248.unk_20;
+    GameObject *saved = D_800AA248.unk_20;
 
     func_8003F150();
     D_800AA248.unk_20 = saved;
@@ -1050,7 +1050,7 @@ INCLUDE_ASM("asm/main/nonmatchings/game_8003CD08", func_8003F150);
 
 s32 func_8003F378(Player *player) {
     Actor *actor = D_801E1E48;
-    Mover *mover;
+    GameObject *mover;
     u16 n = D_801E28A4;
     s16 x;
     s16 y;
@@ -1060,11 +1060,11 @@ s32 func_8003F378(Player *player) {
             if (actor->unk_6 == 0xE) {
                 mover = actor->unk_0;
                 if (!(mover->unk_6C & 0x80)) {
-                    x = (((u16 *)&mover->unk_14)[1] - mover->unk_1C) + (((s16)mover->unk_30) >> 1);
-                    y = (((u16 *)&mover->unk_18)[1] - mover->unk_1E) + (((s16)mover->unk_32) >> 1);
+                    x = (((u16 *)&mover->pos_x.w)[1] - mover->unk_1C.u.lo) + (((s16)mover->size.u.lo) >> 1);
+                    y = (((u16 *)&mover->pos_y.w)[1] - mover->unk_1C.u.hi) + (((s16)mover->size.u.hi) >> 1);
                     actor->unk_3A = x;
                     actor->unk_3C = y;
-                    if (func_80053AC4(x, y, ((s16)mover->unk_30) >> 1, ((s16)mover->unk_32) >> 1, player) != 0) {
+                    if (func_80053AC4(x, y, ((s16)mover->size.u.lo) >> 1, ((s16)mover->size.u.hi) >> 1, player) != 0) {
                         actor->unk_28 = 1;
                         actor->unk_2C = player;
                         player->unk_18A = 1;
@@ -1122,14 +1122,14 @@ s32 func_8003FC30(Player *player, Actor *actor) {
     return 1;
 }
 
-void func_8003FC70(s16 *dx, s16 *dy, Mover *from, Mover *to) {
+void func_8003FC70(s16 *dx, s16 *dy, GameObject *from, GameObject *to) {
     if (from == NULL || to == NULL) {
         *dx = 0xA;
         *dy = 0xC;
         return;
     }
-    *dy = ((u16 *)&to->unk_18)[1] - ((u16 *)&from->unk_18)[1];
-    *dx = func_8003FCD8(((s16 *)&to->unk_14)[1], ((s16 *)&from->unk_14)[1]);
+    *dy = ((u16 *)&to->pos_y.w)[1] - ((u16 *)&from->pos_y.w)[1];
+    *dx = func_8003FCD8(((s16 *)&to->pos_x.w)[1], ((s16 *)&from->pos_x.w)[1]);
 }
 
 s16 func_8003FCD8(s32 arg0, s32 arg1) {
@@ -1160,27 +1160,27 @@ void func_8003FD30(Actor *actor) {
     v = actor->unk_10;
     actor->unk_10 = 0;
     if (v == 1) {
-        if (D_800AA268.p->unk_22 & 0x10) {
+        if (D_800AA268.p->flags & 0x10) {
             func_8003FE40(actor);
         } else {
             func_8003FE70(actor);
         }
     } else if (v >= 2) {
-        if (D_800AA268.p->unk_22 & 0x10) {
+        if (D_800AA268.p->flags & 0x10) {
             func_8003FE70(actor);
         } else {
             func_8003FE40(actor);
         }
     } else if (D_800AA248.unk_0 < 0) {
         actor->unk_10 = 2;
-        if (D_800AA248.unk_20->unk_22 & 0x10) {
+        if (D_800AA248.unk_20->flags & 0x10) {
             func_8003FE40(actor);
         } else {
             func_8003FE70(actor);
         }
     } else {
         actor->unk_10 = 1;
-        if (!(D_800AA248.unk_20->unk_22 & 0x10)) {
+        if (!(D_800AA248.unk_20->flags & 0x10)) {
             func_8003FE40(actor);
         } else {
             func_8003FE70(actor);
@@ -1220,20 +1220,20 @@ void func_8003FEE4(Actor *actor) {
 }
 
 void func_8003FF0C(s32 vel, s32 kind, Actor *actor) {
-    if (!(D_800AA248.unk_20->unk_22 & 0x10)) {
+    if (!(D_800AA248.unk_20->flags & 0x10)) {
         vel = -vel;
     }
-    D_800AA248.unk_20->unk_C = vel;
+    D_800AA248.unk_20->vel_x.w = vel;
     func_8004155C(kind, actor);
 }
 
 void func_8003FF54(void) {
-    Actor *actor = (Actor *)D_800AA248.unk_20->unk_90;
+    Actor *actor = D_800AA248.unk_20->owner.actor;
 
     if (*(u16 *)&actor->unk_8 != 0) {
         goto stop;
     }
-    func_8004003C(D_800AA248.unk_20->unk_22, (MoverLink *)actor);
+    func_8004003C(D_800AA248.unk_20->flags, (MoverLink *)actor);
     if (D_800AA248.unk_C != 0) {
         if (actor->unk_4 != 0x2F && abs(D_800AA248.unk_0) < 0x41) {
             goto turn;
@@ -1268,7 +1268,7 @@ void func_8004003C(s32 arg0, MoverLink *arg1) {
     best_dx = 9999;
     D_800AA248.unk_4 = 0;
     D_800AA248.unk_C = 0;
-    *(Player **)&D_800AA248.unk_20->unk_68 = NULL;
+    *(Player **)&D_800AA248.unk_20->unk_68.u.lo = NULL;
     do {
         player = &D_801E0B78[i];
         if (player->unk_58 & 1) {
@@ -1276,16 +1276,16 @@ void func_8004003C(s32 arg0, MoverLink *arg1) {
             reach = player->unk_1DE;
             func_8003FC70(&dx, &dy, player->unk_68, D_800AA248.unk_20);
             if (dx >= 0) {
-                if (!(D_800AA248.unk_20->unk_22 & 0x10)) {
+                if (!(D_800AA248.unk_20->flags & 0x10)) {
                     D_800AA248.unk_4 = 1;
                 }
-            } else if (D_800AA248.unk_20->unk_22 & 0x10) {
+            } else if (D_800AA248.unk_20->flags & 0x10) {
                 D_800AA248.unk_4 = 1;
             }
             if (reach != 0 && abs(dx) <= best) {
                 best = reach;
                 best_dx = dx;
-                *(Player **)&D_800AA248.unk_20->unk_68 = player;
+                *(Player **)&D_800AA248.unk_20->unk_68.u.lo = player;
             }
         }
     } while (--i != 0);
@@ -1293,38 +1293,38 @@ void func_8004003C(s32 arg0, MoverLink *arg1) {
 }
 
 void func_800401AC(void) {
-    func_8004003C(D_800AA248.unk_20->unk_22, D_800AA248.unk_20->unk_90);
+    func_8004003C(D_800AA248.unk_20->flags, D_800AA248.unk_20->owner.link);
     if (D_800AA248.unk_0 > 0) {
-        D_800AA248.unk_20->unk_22 &= ~0x10;
+        D_800AA248.unk_20->flags &= ~0x10;
     } else {
-        D_800AA248.unk_20->unk_22 |= 0x10;
+        D_800AA248.unk_20->flags |= 0x10;
     }
 }
 
 void func_8004022C(void) {
     Anim **p;
 
-    p = (Anim **)D_800AA248.unk_20->unk_5C;
-    func_8004003C(D_800AA248.unk_20->unk_22 ^ 0x10, D_800AA248.unk_20->unk_90);
+    p = (Anim **)D_800AA248.unk_20->arg.h;
+    func_8004003C(D_800AA248.unk_20->flags ^ 0x10, D_800AA248.unk_20->owner.link);
     if (D_800AA248.unk_C != 0) {
-        D_800AA248.unk_20->unk_44 = *p;
+        D_800AA248.unk_20->script_pc = *p;
     }
 }
 
 void func_80040294(void) {
     Anim **p;
 
-    p = (Anim **)D_800AA248.unk_20->unk_5C;
-    func_8004003C(D_800AA248.unk_20->unk_22 ^ 0x10, D_800AA248.unk_20->unk_90);
+    p = (Anim **)D_800AA248.unk_20->arg.h;
+    func_8004003C(D_800AA248.unk_20->flags ^ 0x10, D_800AA248.unk_20->owner.link);
     if (abs(D_800AA248.unk_0) < 0x4B) {
-        D_800AA248.unk_20->unk_44 = *p;
+        D_800AA248.unk_20->script_pc = *p;
     }
 }
 
 void func_80040314(Player *player) {
-    Mover *saved;
+    GameObject *saved;
     Effect *effect;
-    Mover *mover;
+    GameObject *mover;
 
     saved = D_800AA248.unk_20;
     effect = func_8001D110();
@@ -1332,16 +1332,16 @@ void func_80040314(Player *player) {
     effect->unk_28 = &D_8009556C;
     effect->unk_0 = D_8009556C.unk_0;
     mover = player->unk_68;
-    effect->unk_12 = ((u16 *)&mover->unk_14)[1];
-    effect->unk_16 = ((u16 *)&mover->unk_18)[1] | 0xC000;
+    effect->unk_12 = ((u16 *)&mover->pos_x.w)[1];
+    effect->unk_16 = ((u16 *)&mover->pos_y.w)[1] | 0xC000;
     effect->unk_20 = *(u16 *)&mover->unk_80 - 1;
     D_800AA248.unk_20 = func_8001DCB4();
-    D_800AA248.unk_20->unk_90 = (MoverLink *)player;
+    D_800AA248.unk_20->owner.link = (MoverLink *)player;
     D_800AA248.unk_20 = saved;
 }
 
 void func_800403B4(Actor *actor) {
-    Mover *saved;
+    GameObject *saved;
 
     saved = D_800AA248.unk_20;
     D_800AA248.unk_20 = actor->unk_0;
@@ -1354,17 +1354,17 @@ void func_800403B4(Actor *actor) {
 INCLUDE_ASM("asm/main/nonmatchings/game_8003CD08", func_80040418);
 
 void func_800405D8(Actor *actor) {
-    Mover *mover;
+    GameObject *mover;
 
     mover = actor->unk_0;
     D_800AA248.unk_20 = mover;
     if (actor->unk_28 != 0) {
-        mover->unk_10 = -0xA0000;
-        D_800AA248.unk_20->unk_18 += -0x80000;
+        mover->vel_y.w = -0xA0000;
+        D_800AA248.unk_20->pos_y.w += -0x80000;
         func_8004155C(5, actor);
         func_80040B94(actor);
     } else {
-        mover->unk_14 = (mover->unk_C + mover->unk_14) & D_801D8864;
+        mover->pos_x.w = (mover->vel_x.w + mover->pos_x.w) & D_801D8864;
     }
 }
 
@@ -1372,13 +1372,13 @@ void func_80040668(void) {
 }
 
 void func_80040670(Actor *actor) {
-    Mover *mover;
+    GameObject *mover;
 
     mover = actor->unk_0;
     D_800AA248.unk_20 = mover;
     if (actor->unk_28 != 0) {
-        mover->unk_10 = -0xA0000;
-        D_800AA248.unk_20->unk_18 += -0x80000;
+        mover->vel_y.w = -0xA0000;
+        D_800AA248.unk_20->pos_y.w += -0x80000;
         func_8004155C(5, actor);
         func_80040B94(actor);
     }
@@ -1390,34 +1390,34 @@ void func_80040670(Actor *actor) {
 }
 
 void func_80040704(Actor *actor) {
-    Mover *mover;
+    GameObject *mover;
     s32 v;
 
     mover = actor->unk_0;
     D_800AA248.unk_20 = mover;
     if (actor->unk_28 != 0) {
-        mover->unk_10 = -0xA0000;
-        D_800AA248.unk_20->unk_18 += -0x80000;
+        mover->vel_y.w = -0xA0000;
+        D_800AA248.unk_20->pos_y.w += -0x80000;
         func_8004155C(5, actor);
         func_80040B94(actor);
-        D_800AA248.unk_20->unk_C = 0;
+        D_800AA248.unk_20->vel_x.w = 0;
         return;
     }
-    v = mover->unk_C;
+    v = mover->vel_x.w;
     if ((u16)func_8003E79C() == 1) {
         v = -v;
-        D_800AA248.unk_20->unk_C = v;
-        if (D_800AA248.unk_20->unk_22 & 0x10) {
-            D_800AA248.unk_20->unk_22 &= ~0x10;
+        D_800AA248.unk_20->vel_x.w = v;
+        if (D_800AA248.unk_20->flags & 0x10) {
+            D_800AA248.unk_20->flags &= ~0x10;
         } else {
-            D_800AA248.unk_20->unk_22 |= 0x10;
+            D_800AA248.unk_20->flags |= 0x10;
         }
     } else if (D_800AA248.unk_4C != 0) {
         func_8004155C(0x10, actor);
         return;
     }
-    v += D_800AA268.p->unk_14;
-    D_800AA268.p->unk_14 = v & D_801D8864;
+    v += D_800AA268.p->pos_x.w;
+    D_800AA268.p->pos_x.w = v & D_801D8864;
 }
 
 void func_80040824(Actor *actor) {
@@ -1450,29 +1450,29 @@ void func_8004089C(Actor *actor) {
 }
 
 void func_80040900(Actor *actor) {
-    Mover *mover;
+    GameObject *mover;
 
     mover = actor->unk_0;
     D_800AA248.unk_20 = mover;
-    mover->unk_18 = 0x02000000;
+    mover->pos_y.w = 0x02000000;
     func_800415B4();
 }
 
 #ifdef NON_MATCHING
 /* 97.05 %: register names only (the mover in v0, the sum in a1) */
 void func_80040930(Actor *actor) {
-    Mover *mover;
+    GameObject *mover;
     s32 v;
 
     mover = actor->unk_0;
     D_800AA248.unk_20 = mover;
-    v = (mover->unk_C + mover->unk_14) & D_801D8864;
-    mover->unk_14 = v;
-    v = D_800AA248.unk_20->unk_10 + 0x6500;
-    D_800AA248.unk_20->unk_10 = v;
-    D_800AA248.unk_20->unk_18 += v;
-    if (v > 0 && D_800AA248.unk_20->unk_18 > 0xA5C100) {
-        D_800AA248.unk_20->unk_18 = 0x2000000;
+    v = (mover->vel_x.w + mover->pos_x.w) & D_801D8864;
+    mover->pos_x.w = v;
+    v = D_800AA248.unk_20->vel_y.w + 0x6500;
+    D_800AA248.unk_20->vel_y.w = v;
+    D_800AA248.unk_20->pos_y.w += v;
+    if (v > 0 && D_800AA248.unk_20->pos_y.w > 0xA5C100) {
+        D_800AA248.unk_20->pos_y.w = 0x2000000;
         func_800415B4();
     }
 }
@@ -1483,17 +1483,17 @@ INCLUDE_ASM("asm/main/nonmatchings/game_8003CD08", func_80040930);
 #ifdef NON_MATCHING
 /* 96.48 %: register names only, as func_80040930 */
 void func_800409CC(Actor *actor) {
-    Mover *mover;
+    GameObject *mover;
     s32 v;
 
     mover = actor->unk_0;
     D_800AA248.unk_20 = mover;
-    mover->unk_14 = (mover->unk_14 + mover->unk_C) & D_801D8864;
-    v = D_800AA248.unk_20->unk_10 + 0x6500;
-    D_800AA248.unk_20->unk_10 = v;
-    D_800AA248.unk_20->unk_18 += v;
-    if (v > 0 && D_800AA248.unk_20->unk_18 > 0xE0FFFF) {
-        D_800AA248.unk_20->unk_18 = 0xE10000;
+    mover->pos_x.w = (mover->pos_x.w + mover->vel_x.w) & D_801D8864;
+    v = D_800AA248.unk_20->vel_y.w + 0x6500;
+    D_800AA248.unk_20->vel_y.w = v;
+    D_800AA248.unk_20->pos_y.w += v;
+    if (v > 0 && D_800AA248.unk_20->pos_y.w > 0xE0FFFF) {
+        D_800AA248.unk_20->pos_y.w = 0xE10000;
         func_8004155C(7, actor);
         actor->unk_28 = 0;
     }
@@ -1503,12 +1503,12 @@ INCLUDE_ASM("asm/main/nonmatchings/game_8003CD08", func_800409CC);
 #endif
 
 void func_80040A7C(Actor *actor) {
-    Mover *mover;
+    GameObject *mover;
 
     mover = actor->unk_0;
     D_800AA248.unk_20 = mover;
     if (actor->unk_28 != 0) {
-        mover->unk_18 = 0x02000000;
+        mover->pos_y.w = 0x02000000;
         func_800415B4();
     }
 }
@@ -1517,19 +1517,19 @@ void func_80040AB8(Actor *actor) {
     D_800AA248.unk_20 = actor->unk_0;
     if (actor->unk_28 != 0) {
         actor->unk_28 = 0;
-        D_800AA248.unk_20->unk_18 = 0x2000000;
+        D_800AA248.unk_20->pos_y.w = 0x2000000;
         func_800415B4();
     }
 }
 
 void func_80040B00(Actor *actor) {
-    Mover *mover;
+    GameObject *mover;
 
     mover = actor->unk_0;
     D_800AA248.unk_20 = mover;
     if (actor->unk_28 != 0) {
-        mover->unk_10 = -0xA0000;
-        D_800AA248.unk_20->unk_18 += -0x80000;
+        mover->vel_y.w = -0xA0000;
+        D_800AA248.unk_20->pos_y.w += -0x80000;
         func_8004155C(5, actor);
         func_80040B94(actor);
     } else if ((s16)actor->unk_12 != 0 && (s16)actor->unk_12 == -1) {
@@ -1610,7 +1610,7 @@ INCLUDE_ASM("asm/main/nonmatchings/game_8003CD08", func_80040CB8);
 /* 98.59 %: the deltas frame->unk_8 - x and frame->unk_A - y land in s0/s1 (x's and y's registers) in the
  * original, in temporaries here. */
 void func_80040D68(Actor *actor) {
-    Mover *saved;
+    GameObject *saved;
     AnimFrame *frame;
     s32 x;
     s32 y;
@@ -1623,14 +1623,14 @@ void func_80040D68(Actor *actor) {
             actor->unk_30 = 0x3C;
             func_80041344(actor->unk_32, actor);
             if (actor->unk_32 >= 4) {
-                x = ((u16 *)&D_800AA248.unk_20->unk_1C)[0];
-                y = ((u16 *)&D_800AA248.unk_20->unk_1C)[1];
+                x = ((u16 *)&D_800AA248.unk_20->unk_1C.u.lo)[0];
+                y = ((u16 *)&D_800AA248.unk_20->unk_1C.u.lo)[1];
                 func_8004155C(2, actor);
                 frame = func_8001A784(*(s32 *)D_800AA248.unk_20->unk_48);
                 x = frame->unk_8 - x;
-                ((u16 *)&D_800AA248.unk_20->unk_14)[1] += x;
+                ((u16 *)&D_800AA248.unk_20->pos_x.w)[1] += x;
                 y = frame->unk_A - y;
-                ((u16 *)&D_800AA248.unk_20->unk_18)[1] += y;
+                ((u16 *)&D_800AA248.unk_20->pos_y.w)[1] += y;
             }
         }
     }
@@ -1645,8 +1645,8 @@ INCLUDE_ASM("asm/main/nonmatchings/game_8003CD08", func_80040D68);
 #endif
 
 void func_80040EA0(Actor *actor) {
-    Mover *mover;
-    Mover *saved;
+    GameObject *mover;
+    GameObject *saved;
 
     mover = actor->unk_0;
     saved = D_800AA248.unk_20;
@@ -1660,7 +1660,7 @@ void func_80040EA0(Actor *actor) {
     } else {
         actor->unk_16 = 1;
     }
-    D_800AA248.unk_20->unk_14 = D_801D8864 & (D_800AA248.unk_20->unk_C + D_800AA248.unk_20->unk_14);
+    D_800AA248.unk_20->pos_x.w = D_801D8864 & (D_800AA248.unk_20->vel_x.w + D_800AA248.unk_20->pos_x.w);
     if (actor->unk_30 == 0) {
         if (actor->unk_28 != 0) {
             actor->unk_30 = 0x3C;
@@ -1674,8 +1674,8 @@ void func_80040EA0(Actor *actor) {
 }
 
 void func_80040F84(Actor *actor) {
-    Mover *saved;
-    Mover *mover;
+    GameObject *saved;
+    GameObject *mover;
 
     mover = actor->unk_0;
     saved = D_800AA248.unk_20;
@@ -1690,7 +1690,7 @@ void func_80040F84(Actor *actor) {
     } else {
         actor->unk_16 = 1;
     }
-    D_800AA248.unk_20->unk_14 = D_801D8864 & (D_800AA248.unk_20->unk_C + D_800AA248.unk_20->unk_14);
+    D_800AA248.unk_20->pos_x.w = D_801D8864 & (D_800AA248.unk_20->vel_x.w + D_800AA248.unk_20->pos_x.w);
     if (actor->unk_30 == 0) {
         if (actor->unk_28 != 0) {
             actor->unk_30 = 0x3C;
@@ -1709,8 +1709,8 @@ void func_80040F84(Actor *actor) {
 }
 
 void func_800410AC(Actor *actor) {
-    Mover *mover;
-    Mover *saved;
+    GameObject *mover;
+    GameObject *saved;
 
     mover = actor->unk_0;
     saved = D_800AA248.unk_20;
@@ -1724,7 +1724,7 @@ void func_800410AC(Actor *actor) {
     } else {
         actor->unk_16 = 1;
     }
-    D_800AA248.unk_20->unk_14 = D_801D8864 & (D_800AA248.unk_20->unk_C + D_800AA248.unk_20->unk_14);
+    D_800AA248.unk_20->pos_x.w = D_801D8864 & (D_800AA248.unk_20->vel_x.w + D_800AA248.unk_20->pos_x.w);
     if (actor->unk_30 == 0) {
         if (actor->unk_28 != 0) {
             actor->unk_32++;
@@ -1746,8 +1746,8 @@ void func_800410AC(Actor *actor) {
 #ifdef NON_MATCHING
 /* 95.34 %: register names only: the original holds &D_800AA248 in a0 (so reorg hoists its lui into the first branch's delay slot) and the velocity sum in a1; here a1 and a0 */
 void func_800411E8(Actor *actor) {
-    Mover *saved;
-    Mover *mover;
+    GameObject *saved;
+    GameObject *mover;
     s32 d;
     s16 target;
     s16 x;
@@ -1763,17 +1763,17 @@ void func_800411E8(Actor *actor) {
             func_8004155C(2, actor);
         }
     } else {
-        d = D_800AA248.unk_20->unk_84 + D_800AA248.unk_20->unk_C;
-        D_800AA248.unk_20->unk_C = d;
-        D_800AA248.unk_20->unk_14 += d;
+        d = D_800AA248.unk_20->unk_84 + D_800AA248.unk_20->vel_x.w;
+        D_800AA248.unk_20->vel_x.w = d;
+        D_800AA248.unk_20->pos_x.w += d;
         mover = D_800AA248.unk_20;
         target = actor->unk_38;
-        x = ((s16 *)&mover->unk_14)[1];
+        x = ((s16 *)&mover->pos_x.w)[1];
         if (abs(x - target) < 0x32) {
-            if (mover->unk_C != 0) {
+            if (mover->vel_x.w != 0) {
                 mover->unk_84 = 0;
             } else {
-                mover->unk_C = 0x3500;
+                mover->vel_x.w = 0x3500;
             }
         } else {
             v = 0x300;
@@ -1827,7 +1827,7 @@ void func_80041434(void) {
 }
 
 void func_8004143C(Actor *actor) {
-    Mover *mover;
+    GameObject *mover;
     s32 v;
 
     if (actor->unk_4 != 0x8E) {
@@ -1836,10 +1836,10 @@ void func_8004143C(Actor *actor) {
     mover = actor->unk_0;
     D_800AA248.unk_20 = mover;
     if (!(mover->unk_6C & 0x80)) {
-        mover->unk_14 = (mover->unk_C + mover->unk_14) & D_801D8864;
-        v = D_800AA248.unk_20->unk_10 + 0x4000;
-        D_800AA248.unk_20->unk_18 += v;
-        if (v >= 0 && ((s16 *)&D_800AA248.unk_20->unk_18)[1] >= 0xDC) {
+        mover->pos_x.w = (mover->vel_x.w + mover->pos_x.w) & D_801D8864;
+        v = D_800AA248.unk_20->vel_y.w + 0x4000;
+        D_800AA248.unk_20->pos_y.w += v;
+        if (v >= 0 && ((s16 *)&D_800AA248.unk_20->pos_y.w)[1] >= 0xDC) {
             func_8001F7CC(0xBE, 0x6F);
             v -= v >> 4;
             if (v < 0x20000) {
@@ -1847,8 +1847,8 @@ void func_8004143C(Actor *actor) {
             }
             v = -v;
         }
-        D_800AA248.unk_20->unk_10 = v;
-        if (func_8003712C(((s16 *)&D_800AA248.unk_20->unk_14)[1], ((s16 *)&D_800AA248.unk_20->unk_18)[1],
+        D_800AA248.unk_20->vel_y.w = v;
+        if (func_8003712C(((s16 *)&D_800AA248.unk_20->pos_x.w)[1], ((s16 *)&D_800AA248.unk_20->pos_y.w)[1],
                           actor->unk_2C) != 1) {
             return;
         }
@@ -1875,7 +1875,7 @@ Anim *func_80041598(Actor *actor) {
 }
 
 void func_800415B4(void) {
-    D_800AA248.unk_20->unk_90->unk_4 = 0;
+    D_800AA248.unk_20->owner.link->unk_4 = 0;
     func_8004CFC0();
 }
 

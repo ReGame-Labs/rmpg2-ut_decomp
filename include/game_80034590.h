@@ -11,66 +11,10 @@
 typedef struct Anim Anim;
 typedef struct AiOrder AiOrder;   /* animation data in the tables linked after the libraries; not read yet */
 
-typedef struct Mover {
-    /* 0x00 */ u8 unk_0[0xC];
-    /* 0x0C */ s32 unk_C;       /* a velocity, 16.16 */
-    /* 0x10 */ s32 unk_10;      /* a velocity, 16.16 */
-    /* 0x14 */ s32 unk_14;      /* a position, 16.16, wrapped with D_801D8864 */
-    /* 0x18 */ s32 unk_18;      /* a position, 16.16 */
-    /* 0x1C */ u16 unk_1C;      /* game_8003CD08: func_80040D68 */
-    /* 0x1E */ u16 unk_1E;
-    /* 0x20 */ u16 unk_20;
-    /* 0x22 */ u16 unk_22;      /* flags; 0x10: facing */
-    /* 0x24 */ u8 unk_24[0xC];
-    /* 0x30 */ u16 unk_30;      /* a width: halved as a reach (game_8003CD08: func_8003EF64) */
-    /* 0x32 */ u16 unk_32;      /* a height (game_8003CD08: func_8003F378) */
-    /* 0x34 */ struct MoverFrame *unk_34;  /* the current frame's metrics (game_8003CD08: func_8003CE24) */
-    /* 0x38 */ u8 unk_38[0x8];
-    /* 0x40 */ s32 unk_40;      /* game_80034590: func_80036440 */
-    /* 0x44 */ Anim *unk_44;
-    /* 0x48 */ Anim *unk_48;    /* the current animation (func_8003EB5C) */
-    /* 0x4C */ s8 unk_4C;
-    /* 0x4D */ s8 unk_4D;
-    /* 0x4E */ u8 unk_4E[0xE];
-    /* 0x5C */ u16 *unk_5C;     /* three halfwords the record reads (game_80034590: func_80039890, func_8003A520) */
-    /* 0x60 */ u8 unk_60[0x4];
-    /* 0x64 */ s32 unk_64;
-    /* 0x68 */ u16 unk_68;      /* an animation index (game_80034590: func_80034C54) */
-    /* 0x6A */ u16 unk_6A;      /* game_80034590: func_80034CB8 */
-    /* 0x6C */ u16 unk_6C;      /* flags; 0x80 */
-    /* 0x6E */ u8 unk_6E[0x2];
-    /* 0x70 */ u16 unk_70;      /* an id (game_80034590: func_80034E48) */
-    /* 0x72 */ u8 unk_72[0xE];
-    /* 0x80 */ s16 unk_80;
-    /* 0x82 */ u8 unk_82[0x2];
-    /* 0x84 */ s32 unk_84;
-    /* 0x88 */ s32 unk_88;
-    /* 0x8C */ u8 unk_8C[0x4];
-    /* 0x90 */ struct MoverLink *unk_90;
-    /* 0x94 */ struct MoverTarget *unk_94;  /* game_80034590: func_800374FC */
-    /* 0x98 */ void *unk_98;    /* the record that grabbed it (game_80034590: func_8003761C) */
-} Mover;
-
-/* A frame's metrics: pairs of halfwords from 0x10 on, picked by an actor's state (game_8003CD08: func_8003CE24,
- * func_8003CEA0). */
-typedef struct MoverFrame {
-    /* 0x00 */ u8 unk_0[0x10];
-    /* 0x10 */ u16 unk_10;
-    /* 0x12 */ u16 unk_12;
-    /* 0x14 */ u16 unk_14;
-    /* 0x16 */ u16 unk_16;
-    /* 0x18 */ u16 unk_18;
-    /* 0x1A */ u16 unk_1A;
-    /* 0x1C */ u16 unk_1C;
-    /* 0x1E */ u16 unk_1E;
-    /* 0x20 */ u16 unk_20;
-    /* 0x22 */ u16 unk_22;
-} MoverFrame;
-
 /* What a mover's unk_94 points at: a record holding another mover (game_80034590). */
 typedef struct MoverTarget {
     /* 0x00 */ u8 unk_0[0x4];
-    /* 0x04 */ Mover *unk_4;
+    /* 0x04 */ GameObject *unk_4;
 } MoverTarget;
 
 typedef struct MoverLink {
@@ -85,7 +29,7 @@ typedef struct MoverLink {
 /* The state of a monster's behaviour, driven by a table of state handlers (game_8004160C: func_80041A70 calls
  * handlers[unk_A](handlers, ai)). */
 typedef struct Ai {
-    /* 0x00 */ Mover *unk_0;    /* the monster's mover */
+    /* 0x00 */ GameObject *unk_0;    /* the monster's mover */
     /* 0x04 */ u16 unk_4;       /* the player slot last targeted (game_8003CD08: func_8003E630) */
     /* 0x06 */ u16 unk_6;       /* a kind; 0x17 and 0x18 are special */
     /* 0x08 */ s16 unk_8;       /* the current action */
@@ -135,7 +79,7 @@ typedef struct AiLinkInfo {
 
 typedef struct AiTarget {
     /* 0x00 */ u8 unk_0[0x68];
-    /* 0x68 */ Mover *unk_68;
+    /* 0x68 */ GameObject *unk_68;
 } AiTarget;
 
 /* A state handler; the first argument is the table it was called from. */
@@ -154,7 +98,7 @@ typedef struct Player {
     /* 0x05A */ s16 unk_5A;
     /* 0x05C */ u16 unk_5C;      /* game_8003CD08: func_8003FB5C */
     /* 0x05E */ u8 unk_5E[0xA];
-    /* 0x068 */ Mover *unk_68;     /* the player's monster's mover (game_80034590: func_80039B60) */
+    /* 0x068 */ GameObject *unk_68;     /* the player's monster's mover (game_80034590: func_80039B60) */
     /* 0x06C */ u8 unk_6C[0x60];
     /* 0x0CC */ u16 unk_CC;      /* game_80034590: func_80038528 */
     /* 0x0CE */ u8 unk_CE[0x52];
@@ -175,14 +119,14 @@ typedef struct Player {
     /* 0x1E0 */ u8 unk_1E0[0x24];
     /* 0x204 */ u16 unk_204;
     /* 0x206 */ u8 unk_206[0x12];
-    /* 0x218 */ Mover *unk_218;    /* game_8003CD08: func_80040F84 */
+    /* 0x218 */ GameObject *unk_218;    /* game_8003CD08: func_80040F84 */
     /* 0x21C */ u8 unk_21C[0x4];
 } Player;                   /* 0x220: D_801E0B78 holds three, one per player slot */
 
 /* A thing on screen with a mover and an animation set, driven by a state (unk_4) and a kind (unk_6): the
  * actors of game_8003CD08. */
 typedef struct Actor {
-    /* 0x00 */ Mover *unk_0;
+    /* 0x00 */ GameObject *unk_0;
     /* 0x04 */ u16 unk_4;       /* the state; 2 and 6 are tested, 11 is a bound */
     /* 0x06 */ s16 unk_6;       /* the kind: the index into unk_24 */
     /* 0x08 */ s16 unk_8;
@@ -223,7 +167,7 @@ typedef struct GameGlobals {
     /* 0x08 */ u8 unk_8[0x4];
     /* 0x0C */ s32 unk_C;       /* game_8003CD08: func_8004022C */
     /* 0x10 */ u8 unk_10[0x10];
-    /* 0x20 */ Mover *unk_20;   /* the monster being moved */
+    /* 0x20 */ GameObject *unk_20;   /* the monster being moved */
     /* 0x24 */ u8 unk_24[0x18];
     /* 0x3C */ struct Effect *unk_3C;  /* the effect being set up (game_80034590: what func_8001D110 returns) */
     /* 0x40 */ u8 unk_40[0xC];
@@ -248,7 +192,7 @@ typedef struct NpcTarget {
 } NpcTarget;
 
 typedef struct Npc {
-    /* 0x00 */ Mover *unk_0;
+    /* 0x00 */ GameObject *unk_0;
     /* 0x04 */ u16 unk_4;
     /* 0x06 */ u16 unk_6;       /* the kind */
     /* 0x08 */ u16 unk_8;       /* the action */
@@ -272,7 +216,7 @@ typedef struct Npc {
     /* 0x34 */ s32 unk_34;
     /* 0x38 */ u8 unk_38[0x6];
     /* 0x3E */ s16 unk_3E;
-    /* 0x40 */ Mover *unk_40;
+    /* 0x40 */ GameObject *unk_40;
     /* 0x44 */ u16 unk_44;      /* the mover's flags when it was set up */
     /* 0x46 */ s16 unk_46;
     /* 0x48 */ s16 unk_48;
@@ -287,13 +231,13 @@ typedef struct Npc {
     /* 0x60 */ Player *unk_60;
     /* 0x64 */ Player *unk_64;
     /* 0x68 */ u8 unk_68[0x8];
-    /* 0x70 */ Mover *unk_70;
-    /* 0x74 */ Mover *unk_74;
+    /* 0x70 */ GameObject *unk_70;
+    /* 0x74 */ GameObject *unk_74;
 } Npc;                      /* 0x78 */
 
 /* The same record as the later functions declare it: signed counters. */
 typedef struct NpcS {
-    /* 0x00 */ Mover *unk_0;
+    /* 0x00 */ GameObject *unk_0;
     /* 0x04 */ u16 unk_4;
     /* 0x06 */ u16 unk_6;
     /* 0x08 */ u16 unk_8;

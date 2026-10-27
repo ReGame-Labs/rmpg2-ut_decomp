@@ -12,86 +12,28 @@
  * sprite objects). Field names are offsets until their meaning is known; the types are the ones the code's loads and
  * stores imply. */
 
-/* The image a sprite draws (reached through Sprite.unk_34). */
-typedef struct SpriteImage {
-    s32 unk_0;
-    s32 unk_4;
-    Fixed unk_8;
-    s32 unk_C;
-} SpriteImage;
-
-
-/* A sprite object: linked (unk_68), its position at unk_14/unk_18 (16.16), with flags at unk_22 and unk_6C. */
-typedef struct Sprite {
-    struct Sprite *unk_0;
-    struct Sprite *unk_4;
-    s16 unk_8;
-    s16 unk_A;
-    s32 unk_C;
-    s32 unk_10;
-    Fixed unk_14;
-    Fixed unk_18;
-    Fixed unk_1C;
-    u16 unk_20;
-    u16 unk_22;
-    s16 unk_24;
-    s16 unk_26;
-    Fixed unk_28;
-    s32 unk_2C;
-    Fixed unk_30;
-    SpriteImage *unk_34;
-    s32 unk_38;
-    u16 unk_3C;
-    u8 pad_3E[0x2];
-    struct Sprite *unk_40;
-    s32 unk_44;
-    s32 unk_48;
-    s8 unk_4C;
-    s8 unk_4D;
-    u8 pad_4E[0x2];
-    struct Sprite *unk_50;
-    u8 pad_54[0x8];
-    s32 *unk_5C;            /* the animation script's read pointer */
-    s32 unk_60;
-    u8 pad_64[0x4];
-    struct Sprite *unk_68;
-    u16 unk_6C;
-    u16 unk_6E;
-    u16 unk_70;
-    u8 pad_72[0x2];
-    u16 unk_74;
-    u8 pad_76[0x2];
-    s32 unk_78;
-    s32 unk_7C;
-    u16 unk_80;
-    u16 unk_82;
-    u8 pad_84[0x8];
-    u8 unk_8C[0x4];
-    void *unk_90;
-    u8 pad_94[0x38];
-} Sprite;
 
 /* Three slots of freed resources (SpriteSlots.unk_C, unk_24, unk_3C ... released through func_8001E4B0). */
 typedef struct SpriteSlots {
-    Sprite *unk_0;
+    GameObject *unk_0;
     u8 pad_4[0x8];
-    Sprite *unk_C;
+    GameObject *unk_C;
     u8 pad_10[0x4];
     struct Unk22D58 *unk_14;
     s32 unk_18;
-    Sprite *unk_1C;
+    GameObject *unk_1C;
     u8 pad_20[0x4];
-    Sprite *unk_24;
+    GameObject *unk_24;
     u8 pad_28[0x4];
     struct Unk22D58 *unk_2C;
     s32 unk_30;
-    Sprite *unk_34;
+    GameObject *unk_34;
     u8 pad_38[0x4];
-    Sprite *unk_3C;
+    GameObject *unk_3C;
     u8 pad_40[0x4];
     struct Unk22D58 *unk_44;
     s32 unk_48;
-    Sprite *unk_4C;
+    GameObject *unk_4C;
 } SpriteSlots;
 
 /* The game's state block at 0x800AA248 (the current sprite at unk_20, 0x800AA268). */
@@ -104,7 +46,7 @@ typedef struct GameState {
     s32 unk_14;
     s32 unk_18;
     struct Unk1D110 *unk_1C;
-    Sprite *unk_20;
+    GameObject *unk_20;
     s32 unk_24;
     s32 *unk_28;
     s32 unk_2C;
@@ -144,7 +86,7 @@ typedef struct Monster {
     u16 unk_5A;
     u16 unk_5C;
     u8 pad_5E[0xA];
-    Sprite *unk_68;
+    GameObject *unk_68;
     u8 pad_6C[0x48];
     s32 unk_B4[2];
     u8 pad_BC[0xC];
@@ -255,7 +197,7 @@ typedef struct Unk1D3DC8Part {
 } Unk1D3DC8Part;
 
 typedef struct Unk1D3DC8Item {
-    Sprite *unk_0;
+    GameObject *unk_0;
     s16 unk_4;
     u8 pad_6[0x2];
     struct Unk1D3DC8 *unk_8;
@@ -372,7 +314,7 @@ typedef struct Unk1E638 {
 
 /* The sprite func_800299C4 drives (the "press start" banner?) at 0x801E2894: the sprite, a frame counter, a state. */
 typedef struct Unk1E2894 {
-    Sprite *unk_0;
+    GameObject *unk_0;
     u16 unk_4;
     s16 unk_6;
 } Unk1E2894;
@@ -397,7 +339,7 @@ typedef struct Anim Anim;
 /* A monster's behaviour state (the handlers func_80022490 ... func_80023080 run on the current sprite,
  * D_800AA268): its kind at unk_6, the state index at unk_A, "the state is new" at unk_C. */
 typedef struct Unk22D58 {
-    Sprite *unk_0;
+    GameObject *unk_0;
     u8 pad_4[0x2];
     u16 unk_6;
     s16 unk_8;

@@ -3,7 +3,7 @@
 #include "common.h"
 #include "game_80034590.h"
 
-void func_8003EB5C(u8 *table, Mover *mover);
+void func_8003EB5C(u8 *table, GameObject *mover);
 u16 func_8004A468(void);
 
 extern u8 D_80096D44[];
