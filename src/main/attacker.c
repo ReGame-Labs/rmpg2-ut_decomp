@@ -1569,9 +1569,6 @@ void func_80046F68(Monster *m) {
     D_800AA268.p = saved;
 }
 
-#ifdef NON_MATCHING
-/* 93.31%: the original loads the width before the x distance and makes the half width after it, and keeps the
- * second half size in v0 with half + 4 in a1 */
 void func_80047028(Monster *m) {
     Attacker *a = D_801FA8A8;
     GameObject *saved;
@@ -1579,14 +1576,9 @@ void func_80047028(Monster *m) {
     u16 n;
     s16 x;
     s16 d;
-    s32 t;
-    s32 half;
-    u16 w;
-    s32 e;
-    s32 half2;
-    s32 t2;
     s16 px;
     s16 py;
+    u16 w;
 
     saved = D_800AA268.p;
     n = 4;
@@ -1601,36 +1593,14 @@ void func_80047028(Monster *m) {
                     x += (D_801D8864.w + 1) >> 1;
                 }
                 w = obj->size.u.lo;
-                t = x - px;
-                if (t < 0) {
-                    t = -t;
+                d = abs(x - px);
+                if (d > ((s16)w >> 1) && abs(d - 4) > ((s16)w >> 1)) {
+                    goto next;
                 }
-                d = t;
-                half = (s16)w >> 1;
-                if (half < d) {
-                    e = d - 4;
-                    if (e < 0) {
-                        e = -e;
-                    }
-                    if (half < e) {
-                        goto next;
-                    }
-                }
-                half2 = (s16)obj->size.u.hi >> 1;
-                t2 = (s16)(obj->pos_y.u.hi - half2) - py;
-                if (t2 < 0) {
-                    t2 = -t2;
-                }
-                d = t2;
-                half2 += 4;
-                if (half2 < d) {
-                    e = d - 4;
-                    if (e < 0) {
-                        e = -e;
-                    }
-                    if (half2 < e) {
-                        goto next;
-                    }
+                x = obj->pos_y.u.hi;
+                d = abs((s16)(x - ((s16)obj->size.u.hi >> 1)) - py);
+                if (d > ((s16)obj->size.u.hi >> 1) + 4 && abs(d - 4) > ((s16)obj->size.u.hi >> 1) + 4) {
+                    goto next;
                 }
                 a->unk_22 = 1;
                 a->hit_by = m;
@@ -1642,8 +1612,104 @@ void func_80047028(Monster *m) {
     }
     D_800AA268.p = saved;
 }
-#else
-INCLUDE_ASM("asm/main/nonmatchings/attacker", func_80047028);
-#endif
 
-INCLUDE_ASM("asm/main/nonmatchings/attacker", func_8004718C);
+void func_8004718C(Monster *m) {
+    Attacker *a = D_801FA8A8;
+    GameObject *saved;
+    GameObject *obj;
+    u16 n;
+    s16 x;
+    s16 d;
+    s16 px;
+    s16 py;
+    u16 w;
+    s16 half;
+
+    saved = D_800AA248.cur_obj;
+    if (D_801E1C84 != 0) {
+        n = 4;
+        px = m->pos.s.lo;
+        py = m->pos.s.hi;
+        do {
+            obj = a->obj;
+            if (a->type != 0 && !(obj->unk_6C & 0x80)) {
+                switch (a->type) {
+                case 6:
+                    if (a->state != 6 && a->state != 7) {
+                        break;
+                    }
+                    /* fallthrough */
+                case 2:
+                case 3:
+                case 4:
+                case 5:
+                case 7:
+                case 10:
+                case 11:
+                case 12:
+                box:
+                    x = obj->pos_x.s.hi;
+                    if (x < D_801F9AC8.s.hi) {
+                        x += (D_801D8864.w + 1) >> 16;
+                    }
+                    w = obj->size.u.lo;
+                    half = (s16)w >> 1;
+                    d = abs(x - px);
+                    if (d > half && abs(d - 4) > half) {
+                        break;
+                    }
+                    x = obj->pos_y.u.hi;
+                    d = abs((s16)(x - ((s16)obj->size.u.hi >> 1)) - py);
+                    if (d > ((s16)obj->size.u.hi >> 1) + 4 && abs(d - 4) > ((s16)obj->size.u.hi >> 1) + 4) {
+                        break;
+                    }
+                    if (a->type == 6) {
+                        if (a->state != 6 && a->state != 7) {
+                            D_800AA248.cur_obj = saved;
+                            return;
+                        }
+                    } else if ((a->type == 11 || a->type == 2) && a->state != 3) {
+                        a->state = 0xA;
+                        D_800AA248.cur_obj = saved;
+                        return;
+                    }
+                    m->meter.w += 0x58000;
+                    if (m->meter.w > 0x440000) {
+                        m->meter.w = 0x440000;
+                    }
+                    func_80053D68(8, m);
+                    m->action = 8;
+                    a->state = 4;
+                    D_800AA248.cur_obj = saved;
+                    return;
+                case 8:
+                case 9:
+                    if (a->state == 0x17 || a->state == 0x19 || a->state == 0x1F) {
+                        goto box;
+                    }
+                    x = obj->pos_x.s.hi;
+                    if (x < D_801F9AC8.s.hi) {
+                        x += (D_801D8864.w + 1) >> 16;
+                    }
+                    w = obj->size.u.lo;
+                    half = (s16)w >> 1;
+                    d = abs(x - px);
+                    if (d > half && abs(d - 4) > half) {
+                        break;
+                    }
+                    x = obj->pos_y.u.hi;
+                    d = abs((s16)(x - ((s16)obj->size.u.hi >> 1)) - py);
+                    if (d > ((s16)obj->size.u.hi >> 1) - 4 && abs(d - 4) > ((s16)obj->size.u.hi >> 1) - 4) {
+                        break;
+                    }
+                    a->unk_18 = 1;
+                    a->hit_by = m;
+                    D_800AA248.cur_obj = saved;
+                    return;
+                }
+            }
+            a++;
+        } while (--n != 0);
+    }
+    D_800AA268.p = saved;
+}

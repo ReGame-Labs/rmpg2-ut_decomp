@@ -444,8 +444,8 @@ extern u16 *D_8007A7C0[];
 extern u8 D_801E2154[];
 extern u16 D_801FB188;
 void func_8002A1AC(Monster *, s16);
-void func_8005A2F4(Monster *, s32);
-void func_8005A964(Monster *);
+void monster_anim_update_projectile(Monster *, s32);
+void monster_anim_update_bomb(Monster *);
 extern u8 D_800105A8[];
 extern s16 D_800AA300[11][8][8];
 void func_8001F61C(u8 *, s16, s16, s32, s32, s32 *, s32, s32);
@@ -5255,10 +5255,10 @@ void func_800267CC(Monster *monster) {
         if (monster->extra[i] != NULL) {
             switch (monster->id) {
             case 5:
-                func_8005A2F4(monster, i);
+                monster_anim_update_projectile(monster, i);
                 break;
             case 7:
-                func_8005A964(monster);
+                monster_anim_update_bomb(monster);
                 break;
             }
         }
