@@ -10,6 +10,7 @@ void func_8001BB68(GameObject *);
 void func_8001BB88(GameObject *);
 ObjectDef *func_8001D110(void);
 GameObject *func_8001DCB4(void);
+void func_8001E4B0(GameObject *);
 void func_8001E450(s32);
 GameObject *func_8001EB9C(s32, s32, s32, s32, s32);
 void func_8001ED54(TextMessage *);
@@ -21,20 +22,29 @@ void func_8005E124(Monster *, s32);
 void func_8005E19C(Monster *, s32);
 void func_8005E2D8(void);
 void func_8005EE54(void);
+void func_8005F12C(void);
+void func_8005F33C(s32, s32);
+void func_8005F9FC(void);
 void func_8006036C(s32 *, s32, s32, s32, s32, u8 *);
 void func_800603FC(s32 *, s32, s32, s32, s32);
 void func_80060A7C(s32, u32, s32);
+void func_80060D44(Monster *);
+void func_80062E44(void);
 
 extern Anim D_80016A84;
 extern s32 D_8007BD7C;
+extern s32 D_8007BD8C;                  /* D_8007BD78.unk_08[3] by its own name */
+extern s32 D_80084304[];                /* the slot icons' animations, by Monster.unk_056 */
 extern s32 D_8008427C[];                /* the portrait animations, by monster id - 1 */
 extern s32 D_800842B4[];
+extern s32 D_800842DC[];
 extern TextMessage D_80089604;
 extern TextMessage D_80089624;
 extern TextMessage D_80089644;
 extern u8 D_80089678[];
 extern u8 D_8008969C[];
 extern u8 D_800896C0[];
+extern u16 D_801FB464;
 extern s16 D_801FB468;
 extern s16 D_801FB46C;
 extern TextMessage D_801FB470;           /* the message func_8006036C builds */

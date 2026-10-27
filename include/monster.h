@@ -11,6 +11,17 @@ typedef struct FramePoint {
     u16 y;
 } FramePoint;
 
+/* A motion preset (D_8007FBAC, by direction): the Monster words it is copied into. */
+typedef struct MonsterMotion {
+    s32 unk_1A0;
+    s32 unk_1A4;
+    s32 unk_100;
+    s32 unk_104;
+    s32 unk_198;
+    s32 unk_19C;
+} MonsterMotion;
+
+s32 abs(s32);                           /* GCC's builtin: inlined */
 s32 func_8001B660(s32);
 ObjectDef *func_8001D110(void);
 void *func_8001DCB4(void);
@@ -21,7 +32,10 @@ s32 func_8001EA78(void);
 void func_8001F724(u16);
 s32 func_80025DF8(s32);
 void func_80029118(s16, u16);
+void func_8002CFAC(Monster *, Building *);
+void func_8002D144(Monster *, Building *);
 void func_8002BE30(Monster *);
+s16 func_8003FCD8(s32, s32);             /* a horizontal distance */
 void func_80031280(Monster *, Building *);
 GameObject **func_80031420(u16, Building *);
 s32 func_80031714(Monster *);
@@ -48,7 +62,7 @@ void func_8004F470(Monster *, Monster *);
 void func_8004F65C(void);
 void func_8004F7F4(GameObject *, Monster *, Monster *, GameObject *);
 void func_8004FC00(s32, Monster *);
-void func_80050BBC(void);
+void func_80050BBC();
 void func_80050E58(Monster *);
 void func_800510E8(Monster *);
 void func_80051330(Monster *, Monster *);
@@ -103,13 +117,13 @@ void func_8005640C(Monster *, Building *);
 void func_800564C0(Monster *, Building *);
 void func_80056510(Monster *, Building *);
 void func_80056528(Monster *);
-void func_80056598(void);
+u16 func_80056598();
 u16 func_80056840(Monster *);
 s32 func_80056990(Monster *, Building *);
 u16 func_80056A44(Monster *, Building *);
 s32 func_80056C18(Monster *, Building *);
 u16 func_80056AC8(Monster *);
-void func_80056CCC(Monster *);
+u16 func_80056CCC(Monster *);
 void func_80056E2C(Monster *, Building *);
 void func_80056E78(Monster *);
 void func_80056EB8(Monster *, Building *);
@@ -139,6 +153,7 @@ extern u16 D_8007BE0C[];
 extern s32 D_8007FB24[];                /* climbing speeds by direction: monster 7's (two sets) */
 extern s32 D_8007FB6C[];
 extern s32 *D_8007FB90[];               /* climbing speeds by direction, per monster id - 1 */
+extern MonsterMotion D_8007FBAC[];      /* by Monster.dir */
 extern s16 D_8007FD04[];
 extern s16 D_8007FD24[];
 extern s16 D_8007FD44[];

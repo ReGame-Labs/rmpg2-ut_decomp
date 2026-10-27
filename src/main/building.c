@@ -805,7 +805,7 @@ void func_8002CBF4(Monster *m) {
     s32 *anim;
 
     if (func_8001A3AC() >= 0x46) {
-        body = m->unk_098;
+        body = m->unk_098[0];
         r = func_8001D110();
         D_800AA248.new_def = r;
         if (m->unk_058 == 3) {
