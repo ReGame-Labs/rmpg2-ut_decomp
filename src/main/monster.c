@@ -1621,13 +1621,14 @@ void func_80054608(u16 kind, Monster *e, Building *u) {
 }
 
 #ifdef NON_MATCHING
-/* 80.6 %: the original tests the count signed (lh) and loads it again unsigned (lhu) into its own register, and i steps as ++i != n (addiu/move/andi) */
+/* 89.00%: 89 %: the count loads into v0 and moves to a2 (the original loads it into a2 at once), and i steps as ++i
+ * != n (addiu/move/andi) */
 Building *monster_get_building(u16 n) {
     Building *city;
     u16 i;
     u16 count;
 
-    if (n == 0 || (s16) D_801E29A4 == 0) {
+    if (n == 0 || *(s16 *) &D_801E29A4 == 0 /* the original tests it as an s16: other units read it u16 */) {
         return NULL;
     }
     count = D_801E29A4;
