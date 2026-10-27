@@ -1343,7 +1343,8 @@ INCLUDE_ASM("asm/main/nonmatchings/npc", func_8003712C);
 #endif
 
 #ifdef NON_MATCHING
-/* 99.85 %: the control flow and the saved registers are right; the first rectangle's x tests load the field into v1 (a0 in the original) */
+/* 99.85%: 99.85 %: the first rectangle's lhu temporaries (global, they cross the beqz) take v1 first in global-
+ * alloc; the original's a0 needs v1 excluded: a v1 conflict or a v1 preference of the lower-priority s16 x (88) */
 u16 func_800372DC(s16 x, s16 y, Monster *player, Npc *npc, s32 arg4) {
     func_80037960(npc, arg4);
     if ((x >= npc->unk_3E || x >= (s16)(npc->unk_3E - 4)) && (x <= npc->unk_40 || x <= (s16)(npc->unk_40 + 4)) &&
@@ -3049,8 +3050,9 @@ void func_8003ABE8(Npc *npc) {
     }
 }
 
-/* 99.86%: one register pair swapped: the right-edge test loads D_801F9AC8 into v1 and the constant into v0 in the original, the other way round here */
 #ifdef NON_MATCHING
+/* 99.85%: 99.85 %: the original ties the sum to the constant (op 2), so the tie with the reloaded D_801F9AC8 (op 1)
+ * failed: that load was not a block-local pseudo dying once */
 void func_8003AC74(Npc *npc) {
     s32 x;
     u16 t;

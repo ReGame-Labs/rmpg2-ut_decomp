@@ -2727,8 +2727,9 @@ void func_80020CE4(s32 arg0, s32 arg1) {
 }
 
 #ifdef NON_MATCHING
-/* 99.36%: the three adds take their operands in the other order (addu a1,v0,a1: the velocity first, the
- * result in the register of the record's value) */
+/* 99.36%: 99.36 %: expand_binop swaps (vel + v) into (v + vel) whenever the target is v or vel is still a MEM; the
+ * original's (plus vel v) in v's register needs vel in a register and a target other than v (combine then folding
+ * the copy) */
 s32 func_80020D20(Npc *npc) {
     s32 v;
 
@@ -4343,8 +4344,9 @@ void func_800242A8(void) {
 }
 
 #ifdef NON_MATCHING
-/* 92.55%: the C keeps the first read of pos_x in a register to the end (cse follows the jumps) where the original
- * reads it again in the last branch; the registers of x follow from it */
+/* 92.55%: 92.6 %: with -fno-cse-skip-blocks this C gives the original's reload of pos_x in the last branch, so the
+ * original's CFG stopped cse there (an if/else for x does, 97.1 %, but then x and dx share a register); x and dx
+ * also swap v1/a1 */
 void func_800242D8(Npc *npc) {
     GameObject *obj;
     s16 dx;

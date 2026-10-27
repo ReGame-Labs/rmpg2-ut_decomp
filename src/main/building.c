@@ -1867,8 +1867,10 @@ void func_8002E348(Monster *arg0, BuildingItem *rec) {
     }
 }
 
-/* 94.2 %: per part, the original fills the delay slot of the zero test from the else block (li v1,5 there, its store's 5 in v1), this one from the then block */
 #ifdef NON_MATCHING
+/* 94.22%: 94.2 %: the original's li v1,5 in the zero test's delay slot is the else block's constant, so either
+ * reorg predicted the branch taken (mostly_true_jump gives EQ not taken) or the 5 was a pseudo set before the
+ * branch (global, hence v1) */
 void func_8002E440(Monster *arg0, BuildingItem *rec) {
     BuildingPart *part;
     u16 n;
@@ -3215,8 +3217,9 @@ void func_80030D14(UnkStruct19 *p) {
 
 
 
-/* 98.6 %: the loop's pointer register is &p->items[0] in the original (negative offsets for unk_070 and state), &p->state here; count and n swap a1/a2 */
 #ifdef NON_MATCHING
+/* 98.63%: 98.63 %: combine_givs keeps the first giv of bl->giv, the last one found (the state access, +20); the
+ * original kept the items[0].obj access (+152), so it was found last, or the state access was not a giv */
 void building_count_standing(void) {
     u16 n = D_801E29A4;
     s16 count = 0;
