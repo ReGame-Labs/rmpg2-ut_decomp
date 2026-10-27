@@ -1564,13 +1564,15 @@ void func_800531C0(Monster *e) {
 }
 
 #ifdef NON_MATCHING
-/* 93.60%: 93.6 %: the bump and the direction switch match; the position tail is func_800535E4's: the original
- * reloads the camera x (D_801F9AC8) for the clamped values and the second bound, here it stays in a register */
+/* 96.30%: 96.3 %: everything but the camera clamp matches (the if/else adds give both ternary shapes, b declared
+ * before a gives the bump's registers); the clamp is func_800535E4's: the original keeps only the %hi of D_801F9AC8
+ * and reloads the camera x for the clamped values and the second bound, where cse here reuses the first compare's
+ * sum (6 instructions short) */
 void func_80053204(Monster *e) {
     GameObject *shadow;
     Monster *m;
-    GameObject *a;
     GameObject *b;
+    GameObject *a;
     s32 v;
     s32 d;
 
@@ -1647,7 +1649,11 @@ void func_80053204(Monster *e) {
         break;
     }
     v = D_800AA268.p->pos_x.w;
-    v += D_801D3780 != 0 ? 0x40000 : D_800AA268.p->vel_x.w;
+    if (D_801D3780 != 0) {
+        v += 0x40000;
+    } else {
+        v += D_800AA268.p->vel_x.w;
+    }
     if (v <= D_801F9AC8.w) {
         v += D_801D8864.w;
     }
@@ -1662,7 +1668,11 @@ void func_80053204(Monster *e) {
     D_800AA248.cur_obj->pos_x.w = v;
     shadow->pos_x.w = v;
     v = D_800AA248.cur_obj->pos_y.w;
-    v += D_801D3780 != 0 ? 0x18000 : D_800AA248.cur_obj->vel_y.w;
+    if (D_801D3780 != 0) {
+        v += 0x18000;
+    } else {
+        v += D_800AA248.cur_obj->vel_y.w;
+    }
     if (D_801D3780 == 0) {
         if (v < -0x370000) {
             v = -0x370000;
@@ -1679,8 +1689,12 @@ INCLUDE_ASM("asm/main/nonmatchings/monster", func_80053204);
 #endif
 
 #ifdef NON_MATCHING
-/* 84.95%: 85 %: the original keeps the camera x of the wrap test for the first clamp's compare but reloads it for
- * the clamped values (ours reuses it), and stores unk_20C/unk_208 before the abs branches (ours in the delay slot) */
+/* 92.33%: 92.3 %: abs() gives the original's in-place negates with the stores before the branches; the if/else adds
+ * give both ternary shapes (jump.c turns the one-insn 0x40000 arm into the delay-slot set, the lui/ori 0x18000 arm
+ * stays a branch). Left: the step pseudo takes v0 where the original has v1; the camera clamp: the original keeps
+ * only the %hi of D_801F9AC8 (a0) and reloads the camera x for the clamped values and the second bound (its first
+ * compare reuses the value loaded for the wrap test), where cse here reuses the compare's sum and keeps the camera
+ * x in a0 */
 void func_800535E4(Monster *e) {
     GameObject *shadow;
     s32 v;
@@ -1693,35 +1707,33 @@ void func_800535E4(Monster *e) {
     e->unk_218 = 0;
     v += step;
     e->unk_20C = v;
-    if (v < 0) {
-        v = -v;
-    }
-    if (step < 0) {
-        step = -step;
-    }
+    v = abs(v);
+    step = abs(step);
     if (step >= v) {
         e->unk_214 = 0;
     }
-    D_800AA248.cur_obj->vel_x.w = e->unk_20C;
+    v = e->unk_20C;
+    D_800AA248.cur_obj->vel_x.w = v;
     v = e->unk_208;
     step = e->unk_210;
     v += step;
     e->unk_208 = v;
-    if (v < 0) {
-        v = -v;
-    }
-    if (step < 0) {
-        step = -step;
-    }
+    v = abs(v);
+    step = abs(step);
     if (step >= v) {
         e->unk_210 = 0;
     }
-    D_800AA248.cur_obj->vel_y.w = e->unk_208;
+    v = e->unk_208;
+    D_800AA248.cur_obj->vel_y.w = v;
     if ((e->unk_210 | e->unk_214) == 0) {
         e->action = 0x50;
     }
     v = D_800AA248.cur_obj->pos_x.w;
-    v += D_801D3780 != 0 ? 0x40000 : D_800AA248.cur_obj->vel_x.w;
+    if (D_801D3780 != 0) {
+        v += 0x40000;
+    } else {
+        v += D_800AA248.cur_obj->vel_x.w;
+    }
     if (v <= D_801F9AC8.w) {
         v += D_801D8864.w;
     }
@@ -1736,7 +1748,11 @@ void func_800535E4(Monster *e) {
     D_800AA248.cur_obj->pos_x.w = v;
     shadow->pos_x.w = v;
     v = D_800AA248.cur_obj->pos_y.w;
-    v += D_801D3780 == 0 ? D_800AA248.cur_obj->vel_y.w : 0x18000;
+    if (D_801D3780 != 0) {
+        v += 0x18000;
+    } else {
+        v += D_800AA248.cur_obj->vel_y.w;
+    }
     if (D_801D3780 == 0) {
         if (v < -0x370000) {
             v = -0x370000;
