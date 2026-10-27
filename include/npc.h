@@ -3,7 +3,7 @@
 
 #include "common.h"
 #include "game.h"
-#include "monster_anim.h"
+#include "pickup.h"     /* the Pickup records of the first part of npc.c */
 
 /* Types of npc.c, actor.c, ai.c and game_80043118.c. */
 
@@ -81,7 +81,7 @@ typedef struct ActorLink {
 
 
 /* npc.c handles two record sets: the first part of the file (func_80034590 .. func_800360D8) the 0x58-byte
- * Pickup records of D_801FA9BC (include/monster_anim.h), the rest (from func_80036298) the 0x78-byte Npc records of
+ * Pickup records of D_801FA9BC (include/pickup.h), the rest (from func_80036298) the 0x78-byte Npc records of
  * D_801FAC9C. */
 
 /* The records of D_801FAC9C: 0x78 bytes each, six (D_801D8730 counts them), made from the spawn list D_8007DA48 by
