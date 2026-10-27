@@ -41,12 +41,11 @@ executable or from an overlay (the overlays call `CdRead2`, the `St*` streaming 
 `strcmp`), or is followed by static code that is (`SetDrawEnv`, `DrawOTag2`, `MemCardReadData`,
 `MemCardWriteData`, `MemCardUnformat`, `PadInfoAct`, `_spu_FsetPCR`, `CD_set_test_parmnum`).
 
-**Four pieces of the game's own code sit between the library objects** (`game_80063A88`, `game_8006BB14`,
-`game_80076C8C`, `game_80078A40` in `config/main.yaml`: 27,292 bytes, 147 functions): the game's SPU setup and its
-sound driver, which call `SpuSetKey`, `SpuSetVoiceAttr` and the rest of libspu and hold the `SPSX` string. No
-signature of any version matches them. The linker pulled them from the game's own library in the same passes as
-the Psy-Q objects, which is why they are interleaved; they belong to the game's code and will be split into files
-with the rest.
+**Four pieces of the game's own code sit between the library objects** (`wess_spu`, `wess`, `wess_seq`,
+`wess_trigger` in `config/main.yaml`: 27,292 bytes, 147 functions): the game's sound driver, WESS (the
+Williams/Midway sound system), which calls `SpuSetKey`, `SpuSetVoiceAttr` and the rest of libspu and holds the
+`SPSX` string. No signature of any version matches them. The linker pulled them from the game's own library in the
+same passes as the Psy-Q objects, which is why they are interleaved; they belong to the game's code.
 
 **Version: Psy-Q 4.3.** Every object is consistent with 4.3; six are consistent with 4.3 only (libcd's
 `CDREAD.OBJ`, libpad's `PADPORTM`, `PADMAIN`, `PADSEQM` and `PADIF`, libmcrd's `LIBMCRD.OBJ`) and three more with
@@ -155,13 +154,13 @@ with the cases out of order or without the constants) change nothing: of the 7 t
 
 ### The sound driver: GCC 2.7.2
 
-The four pieces of the game's own code that sit between the Psy-Q objects (`game_80063A88`, `game_8006BB14`,
-`game_80076C8C`, `game_80078A40`: the sound driver, `docs/DISC_LAYOUT.md` "The files") were built with **GCC 2.7.2**,
+The four pieces of the game's own code that sit between the Psy-Q objects (`wess_spu`, `wess`, `wess_seq`,
+`wess_trigger`: the sound driver, `docs/DISC_LAYOUT.md` "The files") were built with **GCC 2.7.2**,
 not 2.8.1: their stores to globals go through the assembler's macro form (`sh $v1, sym`, which assembles to a
 `lui $at` pair), a form 2.8.x never emits because it splits every address itself, and over the experiment's drafts
-2.7.2 matches 72 of their functions where 2.8.1 matches 32 (`game_8006BB14`: 47 against 16, mean 89.5 % against
+2.7.2 matches 72 of their functions where 2.8.1 matches 32 (`wess`: 47 against 16, mean 89.5 % against
 73.4 %). `configure.py`'s `CC_OVERRIDES` names them; `tools/cc_psx.sh` pairs 2.7.2 with ASPSX 2.56. The
-controllers' vibration in `game_800633EC`, just before them, is 2.8.1: all 12 of its functions match with it.
+controllers' vibration in `vibrate`, just before them, is 2.8.1: all 12 of its functions match with it.
 
 ### Division: the assembler's checks
 
