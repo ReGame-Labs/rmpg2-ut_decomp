@@ -273,7 +273,8 @@ typedef struct Monster {
     /* 0x16A */ u8 unk_16A[0x02];
     /* 0x16C */ GameObject *unk_16C;
     /* 0x170 */ u16 unk_170;
-    /* 0x172 */ u8 unk_172[0x0A];
+    /* 0x172 */ u8 unk_172[0x08];
+    /* 0x17A */ u16 unk_17A;
     /* 0x17C */ s32 unk_17C;
     /* 0x180 */ struct Monster *attacker;      /* the monster that hit it last (func_8005421C) */
     /* 0x184 */ u16 unk_184;
@@ -449,7 +450,7 @@ typedef struct Ai {
                    } s;
                } unk_28;
     /* 0x2C */ u8 unk_2C[0x02];
-    /* 0x2E */ s16 unk_2E;
+    /* 0x2E */ u16 unk_2E;
     /* 0x30 */ Fixed unk_30;
     /* 0x34 */ Fixed unk_34;
     /* 0x38 */ u16 unk_38;                     /* a countdown */
