@@ -12,7 +12,7 @@
 #include "psyq/libgpu.h"
 #include "psyq/libspu.h"
 
-void func_8002958C(void);
+void main_count_monsters(void);
 ObjectDef *func_8001D110(void);
 void func_8001DCB4(void);
 void func_800415B4(void);
@@ -25,7 +25,7 @@ s32 func_80063F30(void);
 void func_800700CC(u8);
 void func_80063DF8(s32);
 void func_8006FC6C(void);
-void func_8006FC8C(s32, s32 *);
+void wess_start_sequence_with(s32, s32 *);
 void func_8006FEB4(s32);
 void func_800700A8(void);
 void func_8006BBA0(s32, s32);
@@ -36,6 +36,37 @@ s32 func_8006C8F8(s32);
 s16 func_8006EC18(void);
 s32 cdload_load_bank(s32, s32, s32, s32, s32, s32, s32);
 
+
+/* The VLC image format (cdload_unpack method 5): a header of code tables, then the bit stream. Each table holds the
+ * code lengths and bases of 13 literal codes (an index into the table's 8-byte pixel pairs) and 3 run codes (a run of
+ * zero pairs); the decoder copies the chosen table into the scratchpad. */
+typedef struct {
+    u16 len[13];
+} VlcLens;
+typedef struct {
+    u16 len[3];
+} VlcRunLens;
+typedef struct {
+    s32 base[13];
+} VlcBases;
+typedef struct {
+    s32 base[3];
+} VlcRunBases;
+
+typedef struct {
+    s32 values;             /* the pixel pairs, from the end of the tables */
+    u16 depth;              /* bits per pixel: 8 takes cdload_unpack_vlc8 */
+    VlcLens lens;
+    VlcRunLens run_lens;
+    VlcBases bases;
+    VlcRunBases run_bases;
+} VlcTable;                 /* 0x68 */
+
+typedef struct {
+    u16 rows;               /* rows written per code */
+    u16 count;
+    VlcTable tables[1];     /* [count], picked by the stream's first 6 bits */
+} VlcHeader;
 
 /* The loaded file: its index, its data (the read buffer) and the read position (the fopen/fread emulation). */
 extern s32 D_801FB4AC;
@@ -53,12 +84,22 @@ extern SoundBankHeader D_801C49C0;
 extern s32 D_801FB4A8;
 extern s32 D_801FB4B8;
 
-extern s32 D_80085264[];
 extern u16 D_801D8728;   /* not in game.h: read unsigned here and in main.c, signed in actor.c */
 
-extern u8 D_80085274[];
-extern s32 D_80085278;
-extern s32 D_8008527C;
+/* The city file tables (in the .data before this file's), indexed by the city byte: the first is the identity from
+ * 0x54, the three others five files each. */
+extern u8 D_800851CC[];
+extern u8 D_8008524C[];
+extern u8 D_80085254[];
+extern u8 D_8008525C[];
+
+/* The city file table per D_801D8728. */
+u8 *D_80085264[] = { D_800851CC, D_8008524C, D_80085254, D_8008525C };
+/* The overlays' file indices: OVERATTR.BIN, OVERMOVE.BIN. */
+u8 D_80085274[] = { 0x52, 0x53 };
+/* The loaded overlay and city table, -1 for none. */
+s32 D_80085278 = -1;
+s32 D_8008527C = -1;
 extern u8 *D_80016AC8;
 extern u8 *D_80016ACC;
 
@@ -71,15 +112,14 @@ extern s32 D_801E28EC;
 extern s32 D_801E0D48;
 extern s32 D_801F991C;
 extern s32 D_801FB4C0;
-extern u8 *D_80085300;
 
 
-s32 func_8006EE30(s32);
+s32 wess_module_size(s32);
 void func_8006F0D8(s32, void *, s32);
-s32 func_8006E804(SoundDriver *, s32);
-void func_8006E8B4(void *, s32, s32, void *, s32);
+s32 wess_sequence_header(SoundDriver *, s32);
+void wess_load_sequence_table(void *, s32, s32, void *, s32);
 SoundDriver *func_8006EC08(void);
-s32 func_8006E4F4(void);
+s32 wess_sequence_count(void);
 s32 func_80070298(s32, s32);
 s32 func_80070324(s32, s32, void *);
 void *cdload_alloc(s32 size);
@@ -96,17 +136,16 @@ s32 cdload_unpack_rle8(u8 *src, u8 *dst);
 s32 cdload_unpack_rle16(u8 *src, u8 *dst);
 s32 cdload_unpack_rle6(u8 *src, u8 *dst);
 s32 cdload_unpack_rle4(u8 *src, u8 *dst);
-void func_800621F8(u8 *bits, u8 *table, u32 dims);
-extern s16 D_80085304[];
+void cdload_unpack_vlc(VlcHeader *hdr, u32 *bits, u32 dims, u8 *dst);
 
 /* Lists the players of the monsters in D_801FB49C, sorted, 99 for none. */
-void func_80060F3C(void) {
+void cdload_sort_players(void) {
     s32 m;
     s32 i;
     s32 j;
     s32 n;
 
-    func_8002958C();
+    main_count_monsters();
     D_801FB49C[0] = D_801FB49C[1] = D_801FB49C[2] = 99;
     n = 0;
     for (m = 0; m < 7; m++) {
@@ -173,7 +212,7 @@ void func_80061158(void) {
     D_800AA268.p->owner.monster->meter.u.hi = 0;
 }
 
-s32 func_80061170(s32 index) {
+s32 cdload_file_size(s32 index) {
     return D_80089DA0[index];
 }
 
@@ -350,7 +389,7 @@ s32 cdload_city_file_index(s32 which) {
     s32 pair;
     s32 file;
 
-    offset = D_80085264[D_801D8728];
+    offset = (s32)D_80085264[D_801D8728];   /* the index is added to the address as an integer */
     if (D_801D8728 != 0) {
         p = (u8 *)((u16) D_801FA964 + offset);   /* unsigned here (lhu), as D_801FA960 below */
     } else {
@@ -463,12 +502,10 @@ void cdload_load_city_table(s32 index) {
 }
 
 /* Unpacks a packed file into dst by the method in the low nibble of its byte 3; returns the unpacked size. */
-/* 85.7%: dst is kept in a3 in the original (a1 here: something keeps a1 live, maybe a used second parameter), which
- * moves every case's argument setup */
-#ifdef NON_MATCHING
 s32 cdload_unpack(u8 *dst, s32 arg1, u8 *src) {
     s32 size;
-    u32 dims;
+    s32 w;
+    s32 h;
 
     switch ((*(s32 *)src >> 24) & 0xF) {
     case 0:
@@ -484,15 +521,15 @@ s32 cdload_unpack(u8 *dst, s32 arg1, u8 *src) {
     case 4:
         return cdload_unpack_rle4(src, dst);
     case 5:
-        func_800621F8(src + ((s32 *)src)[1], src + 12, ((u32 *)src)[2]);
-        dims = ((u32 *)src)[2];
-        return ((dims & 0xFFFF) + 3 & ~3) * ((dims >> 16) + 1 & ~1);
+        cdload_unpack_vlc((VlcHeader *)(src + ((s32 *)src)[1]), (u32 *)(src + 12), ((u32 *)src)[2], dst);
+        w = ((u32 *)src)[2] & 0xFFFF;
+        h = ((u32 *)src)[2] >> 16;
+        w = (w + 3) & ~3;
+        h = (h + 1) & ~1;
+        return w * h;
     }
     return 0;
 }
-#else
-INCLUDE_ASM("asm/main/nonmatchings/cdload", cdload_unpack);
-#endif
 
 s32 cdload_unpack_rle8(u8 *src, u8 *dst) {
     s8 *in;
@@ -522,7 +559,117 @@ s32 cdload_unpack_rle8(u8 *src, u8 *dst) {
     return out - dst;
 }
 
-INCLUDE_ASM("asm/main/nonmatchings/cdload", cdload_unpack_rle16);
+/* Unpacks a halfword RLE stream: a halfword without bit 15 is copied; one with it is a run of the colour in bits 9-14
+ * (spread over both 5-bit fields' top bits), its length in bytes in bits 0-8. The runs are written 32 halfwords per loop,
+ * entered through a computed goto (the table, a static, is in .data). */
+/* Unpacks a halfword RLE stream: a halfword without bit 15 is copied; one with it is a run of the colour in bits 9-14
+ * (spread over both 5-bit fields' top bits), its length in bytes in bits 0-8. The runs are written 32 halfwords per loop,
+ * entered through a computed goto (the table, a static, is in .data). */
+s32 cdload_unpack_rle16(u8 *src, u8 *dst) {
+    static void *runs[32] = {
+        &&run1, &&run2, &&run3, &&run4, &&run5, &&run6, &&run7, &&run8,
+        &&run9, &&run10, &&run11, &&run12, &&run13, &&run14, &&run15, &&run16,
+        &&run17, &&run18, &&run19, &&run20, &&run21, &&run22, &&run23, &&run24,
+        &&run25, &&run26, &&run27, &&run28, &&run29, &&run30, &&run31, &&run32,
+    };
+    u16 *in;
+    u16 *end;
+    u16 *out;
+    u16 code;
+    s32 loops;
+    s32 len;
+    s32 n;
+    s16 c;
+
+    in = (u16 *)src;
+    end = (u16 *)(src + (*(u32 *)src & 0xFFFFFF));
+    out = (u16 *)dst;
+    in += 2;
+    while (in < end) {
+        code = *in++;
+        if (code & 0x8000) {
+            len = (s16)(code & 0x1FF);
+            c = code & 0x7E00;
+            code = (c >> 1) | (c >> 9);
+            loops = len >> 6;
+            n = len & 0x3F;
+            if (n == 0) {
+                n = 0x40;
+                loops--;
+            }
+            goto *runs[(n >> 1) - 1];
+            do {
+            run32:
+                *out++ = code;
+            run31:
+                *out++ = code;
+            run30:
+                *out++ = code;
+            run29:
+                *out++ = code;
+            run28:
+                *out++ = code;
+            run27:
+                *out++ = code;
+            run26:
+                *out++ = code;
+            run25:
+                *out++ = code;
+            run24:
+                *out++ = code;
+            run23:
+                *out++ = code;
+            run22:
+                *out++ = code;
+            run21:
+                *out++ = code;
+            run20:
+                *out++ = code;
+            run19:
+                *out++ = code;
+            run18:
+                *out++ = code;
+            run17:
+                *out++ = code;
+            run16:
+                *out++ = code;
+            run15:
+                *out++ = code;
+            run14:
+                *out++ = code;
+            run13:
+                *out++ = code;
+            run12:
+                *out++ = code;
+            run11:
+                *out++ = code;
+            run10:
+                *out++ = code;
+            run9:
+                *out++ = code;
+            run8:
+                *out++ = code;
+            run7:
+                *out++ = code;
+            run6:
+                *out++ = code;
+            run5:
+                *out++ = code;
+            run4:
+                *out++ = code;
+            run3:
+                *out++ = code;
+            run2:
+                *out++ = code;
+            run1:
+                *out++ = code;
+            } while (--loops != -1);
+        } else {
+                *out++ = code;
+        }
+    }
+    return (u8 *)out - dst;
+}
 
 /* Takes the next 6-bit symbol of the stream: four per three bytes, most significant first. */
 #define CDLOAD_GET6(x)                          \
@@ -656,9 +803,138 @@ s32 cdload_unpack_rle4(u8 *src, u8 *dst) {
     return dst - start;
 }
 
-INCLUDE_ASM("asm/main/nonmatchings/cdload", func_800621F8);
+INCLUDE_ASM("asm/main/nonmatchings/cdload", cdload_unpack_vlc);
 
-INCLUDE_ASM("asm/main/nonmatchings/cdload", func_80062868);
+#ifdef NON_MATCHING
+/* 91.67%: 91.7%: the register allocation differs (n in a2, k in t2, in in a1; the original has n in a1, k in a2 and
+ * moves in to t3), and the loop's li 4 lands in the bgtz delay slot */
+void cdload_unpack_vlc8(VlcHeader *hdr, u32 *in, u32 dims, u8 *dst) {
+    VlcTable *t;
+    u32 cur;
+    u32 next;
+    s32 left;
+
+    s32 x;
+
+    s32 k;
+    u8 *values;
+    u8 *row2;
+    s32 *e;
+    s32 w;
+    s32 words;
+    s32 count;
+    s32 col;
+    s32 skip;
+    s32 rows;
+    VlcLens *lens;
+    VlcRunLens *run_lens;
+    VlcBases *bases;
+    VlcRunBases *run_bases;
+
+    cur = *in++;
+    next = *in++;
+    left = 26;
+    run_lens = (VlcRunLens *)0x1F80001A;
+    bases = (VlcBases *)0x1F800020;
+    run_bases = (VlcRunBases *)0x1F800054;
+    lens = (VlcLens *)0x1F800000;
+    rows = hdr->rows;
+    t = &hdr->tables[cur >> 26];
+    cur <<= 6;
+    *lens = t->lens;
+    values = (u8 *)&hdr->tables[hdr->count] + t->values;
+    *bases = t->bases;
+    w = dims & 0xFFFF;
+    *run_lens = t->run_lens;
+    *run_bases = t->run_bases;
+    count = (w / 4) * (((s32)dims >> 16) / rows);
+    words = w / 4;
+    col = 0;
+    skip = (rows - 1) * w;
+    do {
+            {
+                s32 n;
+            n = 4;
+            x = 0;
+            if (left < n) {
+                x = cur >> (32 - n);
+                cur = next;
+                next = *in++;
+                n -= left;
+                left = 32;
+            }
+            x |= cur >> (32 - n);
+            left -= n;
+            cur <<= n;
+            }
+        if (x >= 13) {
+            k = x - 13;
+            {
+                s32 n;
+            n = run_lens->len[k];
+            x = 0;
+            if (left < n) {
+                x = cur >> (32 - n);
+                cur = next;
+                next = *in++;
+                n -= left;
+                left = 32;
+            }
+            x |= cur >> (32 - n);
+            left -= n;
+            cur <<= n;
+            }
+            x += run_bases->base[k];
+            count = count - 1 - x;
+            for (; x >= 0; x--) {
+                row2 = dst + w;
+                *(s32 *)dst = 0;
+                dst += 4;
+                col++;
+                *(s32 *)row2 = 0;
+                if (col == words) {
+                    dst += skip;
+                    col = 0;
+                }
+            }
+        } else {
+            k = x;
+            {
+                s32 n;
+            n = lens->len[k];
+            x = 0;
+            if (left < n) {
+                n -= left;
+                left = 32;
+                x = cur >> (32 - lens->len[k]);
+                cur = next;
+                next = *in++;
+            }
+            x |= cur >> (32 - n);
+            left -= n;
+            cur <<= n;
+            }
+            row2 = dst + w;
+            e = (s32 *)(values + (x + bases->base[k]) * 8);
+            col++;
+            *(s32 *)dst = e[0];
+            dst += 4;
+            *(s32 *)row2 = e[1];
+            if (col == words) {
+                dst += skip;
+                col = 0;
+            }
+            count--;
+        }
+    } while (count > 0);
+}
+#else
+INCLUDE_ASM("asm/main/nonmatchings/cdload", cdload_unpack_vlc8);
+#endif
+
+/* The bump allocator's arena and its next free byte. */
+extern u8 D_800AA94C[0x5208];
+u8 *D_80085300 = D_800AA94C;
 
 void *cdload_alloc(s32 size) {
     u8 *p;
@@ -668,7 +944,7 @@ void *cdload_alloc(s32 size) {
     return p;
 }
 
-void func_80062C30(void) {
+void cdload_init_sound(void) {
     SoundInit io;
     s32 size;
     s32 bank_size;
@@ -687,13 +963,13 @@ void func_80062C30(void) {
     io.unk_28 = 1;
     io.unk_24 = 1;
     func_800706C0(&io);
-    size = func_8006EE30(0x4F);
+    size = wess_module_size(0x4F);
     func_8006F0D8(0x4F, cdload_alloc(size), size);
-    bank_size = func_8006E804(func_8006EC08(), 0x50);
+    bank_size = wess_sequence_header(func_8006EC08(), 0x50);
     buf = cdload_alloc(bank_size);
-    func_8006E8B4(func_8006EC08(), 0x50, 0, buf, bank_size);
-    seqs = cdload_alloc(func_80070298(0, func_8006E4F4()));
-    func_80070324(0, func_8006E4F4(), seqs);
+    wess_load_sequence_table(func_8006EC08(), 0x50, 0, buf, bank_size);
+    seqs = cdload_alloc(func_80070298(0, wess_sequence_count()));
+    func_80070324(0, wess_sequence_count(), seqs);
     D_801FB4C0 = 0x1010;
     cdload_reset_xa();
     func_80062EB0();
@@ -717,7 +993,7 @@ void func_80062DEC(s32 arg0, s32 arg1) {
 
     param[0] = 1;
     ((s8 *)param)[4] = arg1 / 2;
-    func_8006FC8C(arg0, param);
+    wess_start_sequence_with(arg0, param);
 }
 
 void func_80062E24(s32 arg0) {
@@ -774,6 +1050,9 @@ s32 cdload_load_bank(s32 index, s32 spuAddr, s32 arg2, s32 arg3, s32 arg4, s32 a
     cdload_close(handle);
     return addr - spuAddr;
 }
+
+/* The bank file per bank number. */
+s16 D_80085304[] = { 0x51 };
 
 s32 cdload_load_bank_by_number(s32 index, s32 spuAddr) {
     return cdload_load_bank(D_80085304[index], spuAddr, 0, 0, 0, 500, 0);

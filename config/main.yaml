@@ -83,7 +83,7 @@ segments:
       - [0x1B40, .rodata, throw]               # 0x80011340 jtbl_80011340 (func_8004A9B0): parity flips
       - [0x1BFC, .rodata, game_8004C064]       # 0x800113FC jtbl_800113FC (func_8004C5CC): parity flips
       - [0x1CE0, .rodata, game_8004E574]       # 0x800114E0 jtbl_800114E0 (func_80050044) and the monster names: parity flips
-      - [0x1D34, .rodata, monster]             # 0x80011534 jtbl_80011534 (func_800524B4): parity flips; jtbl_80011574 (func_80053204)
+      - [0x1D34, .rodata, monster]             # 0x80011534 jtbl_80011534 (monster_start_jump): parity flips; jtbl_80011574 (func_80053204)
       - [0x1D94, .rodata, monster_anim]        # 0x80011594 jtbl_80011594 (func_8005AE28); the data-only objects between this file and the previous one lie in .data only
       - [0x1DD8, .rodata, bonus]               # 0x800115D8 jtbl_800115D8 (func_80060BA8): parity flips
       - [0x1E9C, rodata, rodata_8001169C]     # 0x8001169C const tables and strings of data-only objects (used from .data and from code all over); linked after bonus
@@ -103,10 +103,10 @@ segments:
       - [0x37D0C, c, throw]                   # 0x8004750C parity flip between func_8004718C and func_8004A9B0; .data 0x8007F228-0x8007F3BC is used by func_8004750C-func_8004A51C in order: placed at its first user (weak)
       - [0x3C864, c, game_8004C064]           # 0x8004C064 parity flip between func_8004AD18 and func_8004C5CC; func_8004AD18-func_8004BBC8 are tied by calls and D_8007F634, func_8004C064 uses the next piece D_8007F680 (weak: anywhere in func_8004BFE0-func_8004C0E0)
       - [0x3ED74, c, game_8004E574]           # 0x8004E574 parity flip between func_8004C83C and func_80050044; .data 0x8007F710-0x8007F878 is used by func_8004E574-func_8004E764 after a run of untied functions (weak: anywhere in func_8004DDFC-func_8004E574)
-      - [0x408EC, c, monster]                 # 0x800500EC parity flip between func_80050044 and func_800524B4; .data 0x8007F8FC-0x8007FBAC, the last of the first .data run, is used by func_800500EC-func_80050BBC (weak: func_80050044 may belong here)
+      - [0x408EC, c, monster]                 # 0x800500EC parity flip between func_80050044 and monster_start_jump; .data 0x8007F8FC-0x8007FBAC, the last of the first .data run, is used by monster_dispatch_action-func_80050BBC (weak: func_80050044 may belong here)
       - [0x48494, c, monster_anim]            # 0x80057C94 the data-only objects at 0x8007FC84-0x8008434C are linked between the file of func_80050BBC and the file of func_80057C94 (its .data starts at 0x8008434C, used by func_80057C94-func_8005B8A4): a boundary exists in between; placed at the first user (weak position)
       - [0x4D998, c, bonus]                   # 0x8005D198 parity flip between func_8005AE28 and func_80060BA8; func_8005AE28-func_8005D0D8 are tied by calls, func_8005D364-func_8005FB14 by the config tables D_8008427C-D_8008433C (weak position: func_8005D198-func_8005D364)
-      - [0x5173C, c, cdload]                  # 0x80060F3C the CD file reader and the overlay loader (docs/DISC_LAYOUT.md): func_80060F3C-func_80061158 use D_801FB49C next to its other state, func_80061170 the file sizes; its .data 0x80085264-0x80085328 follows func_8005B8A4's in link order; func_800619A4-func_80062868 and func_80062C10-func_800632E8 (the stream reader with the second sector buffer) may be files of their own (no evidence)
+      - [0x5173C, c, cdload]                  # 0x80060F3C the CD file reader and the overlay loader (docs/DISC_LAYOUT.md): cdload_sort_players-func_80061158 use D_801FB49C next to its other state, cdload_file_size the file sizes; its .data 0x80085264-0x80085328 follows func_8005B8A4's in link order; func_800619A4-cdload_unpack_vlc8 and func_80062C10-func_800632E8 (the stream reader with the second sector buffer) may be files of their own (no evidence)
       - [0x53BEC, c, vibrate]                 # 0x800633EC the controllers' vibration: func_800633EC-func_80063A2C call each other and share D_801FB4C4; .data 0x80085308 (func_800634D4, func_8006353C) follows cdload's last (D_80085304, func_8006301C); .rodata 0x80016AD0 is its local array's initializer. GCC 2.8.1 like its neighbours before it: all 12 match with it, the 2.7.2 drafts score lower; the 2.7.2 code starts with the next game object (wess_spu)
       - [0x54278, asm, psyq/libapi/c57]         # 0x80063A78 InitHeap; the InitHeap stub crt0 calls, placed between game objects
       - [0x54288, c, wess_spu]                # 0x80063A88 the sound driver's SPU layer: SpuInit, the reverb, the master and CD volumes and their fades, linked after the first library object; .data 0x800853C0-0x800853F4
@@ -247,10 +247,10 @@ segments:
       - [0x6FA28, data, throw]                # 0x8007F228 D_8007F228 (func_8004750C) to D_8007F634 (func_8004AEE0, func_8004B754)
       - [0x6FE80, data, game_8004C064]        # 0x8007F680 D_8007F680 (func_8004C064)
       - [0x6FF10, data, game_8004E574]        # 0x8007F710 D_8007F710 (func_8004E574) to D_8007F878 (func_8004E6F0); D_8007F8E0 (used by func_800264D4) may be a data-only object
-      - [0x700FC, data, monster]              # 0x8007F8FC D_8007F8FC (func_800500EC) to D_8007FBAC (func_80050BBC): the end of the first .data run
+      - [0x700FC, data, monster]              # 0x8007F8FC D_8007F8FC (monster_dispatch_action) to D_8007FBAC (func_80050BBC): the end of the first .data run
       - [0x70484, data, data_8007FC84]        # 0x8007FC84 data-only objects: the screens' tables (500-byte records and 16-byte descriptors, used from code all over) and the config tables D_8008427C-D_8008433C (bonus)
       - [0x74B4C, data, monster_anim]         # 0x8008434C D_8008434C (func_80057D4C) to D_80085168 (func_8005B880), then unreferenced pieces to cdload's first
-      - [0x75A64, data, cdload]               # 0x80085264 D_80085264 (func_800615FC), the loaded-overlay state, jtbl_80085280 (func_80061B4C), D_80085300 (func_80062C10), D_80085304 (func_8006301C)
+      - [0x75A64, .data, cdload]              # 0x80085264 D_80085264 (func_800615FC), the loaded-overlay state, jtbl_80085280 (func_80061B4C), D_80085300 (func_80062C10), D_80085304 (func_8006301C); defined in C for the static label table of the computed goto (docs/MATCHING.md "Small data and data in C")
       - [0x75B08, data, vibrate]              # 0x80085308 D_80085308 (func_800634D4, func_8006353C: the vibration presets), D_80085328 (func_800635F4)
       - [0x75BC0, data, wess_spu]             # 0x800853C0 D_800853C0-D_800853F0 (the SPU setup's state)
       - [0x75BF4, data, data_800853F4]        # 0x800853F4 the Psy-Q libraries' .data in link order (libcd first, libcard last), with the sound driver's among them

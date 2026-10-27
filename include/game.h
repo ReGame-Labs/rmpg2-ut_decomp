@@ -78,17 +78,17 @@ typedef struct GameObject {
     /* 0x3E */ u8 unk_3E[0x02];
     /* 0x40 */ union {
                    struct GameObject *obj;  /* a link (main.c's list from D_801D8584) */
-                   s32 w;                   /* a value; a box's width (func_8001EB9C: the status bars, OVERATTR's
+                   s32 w;                   /* a value; a box's width (main_create_box: the status bars, OVERATTR's
                                              * volume bars) */
                } unk_40;
     /* 0x44 */ union {                  /* by kind */
                    s32 pc;                  /* the animation script's next command (an address) */
-                   s32 height;              /* a box's height (func_8001EB9C; the results bars, func_800991EC) */
+                   s32 height;              /* a box's height (main_create_box; the results bars, func_800991EC) */
                    s32 v;                   /* a value (OVERATTR's logo: a y, with unk_40.w its x) */
                } script;
     /* 0x48 */ s32 anim;                /* the current animation (an address: the script restarts there) */
     /* 0x4C */ u8 unk_4C;
-    /* 0x4D */ s8 unk_4D;
+    /* 0x4D */ u8 unk_4D;                /* frames left on the animation command (every reader loads it with lbu) */
     /* 0x4E */ u8 unk_4E[0x02];
     /* 0x50 */ union {                  /* by kind */
                    struct GameObject *obj;  /* a link */
@@ -120,7 +120,7 @@ typedef struct GameObject {
                } unk_68;
     /* 0x6C */ u16 unk_6C;              /* 0x80: gone */
     /* 0x6E */ u16 unk_6E;
-    /* 0x70 */ u16 kind;                /* the id func_8001E450 and func_8001EC74 select objects by (0x790 + a
+    /* 0x70 */ u16 kind;                /* the id main_free_kind and func_8001EC74 select objects by (0x790 + a
                                          * monster's slot for the status sprites) */
     /* 0x72 */ u16 unk_72;
     /* 0x74 */ u16 unk_74;
@@ -163,7 +163,7 @@ typedef struct Monster {
     /* 0x00C */ Fixed health_shown;            /* eased towards health by 1/16 a frame; health_bar shows it */
     /* 0x010 */ Fixed meter;                   /* a second meter, 0..0x44 (16.16): a projectile's hit raises it
                                                 * (func_8004C0E0); full, monster 5 gets its extra sprites */
-    /* 0x014 */ Fixed meter_shown;             /* eased towards meter by 1/16 a frame (func_8005DBC4); meter_bar
+    /* 0x014 */ Fixed meter_shown;             /* eased towards meter by 1/16 a frame (bonus_update_bars); meter_bar
                                                 * shows it */
     /* 0x018 */ u8 unk_018[0x02];
     /* 0x01A */ u16 unk_01A;
@@ -195,15 +195,15 @@ typedef struct Monster {
     /* 0x066 */ u8 unk_066[0x02];
     /* 0x068 */ GameObject *obj;               /* its body */
     /* 0x06C */ GameObject *meter_bar;         /* status bars: boxes whose width (unk_40.w) is the value shown, */
-    /* 0x070 */ GameObject *health_bar;        /* at most 0x44 (func_8005D20C, func_8005DBC4) */
-    /* 0x074 */ u8 unk_074[0x0C];
+    /* 0x070 */ GameObject *health_bar;        /* at most 0x44 (bonus_create_bars, bonus_update_bars) */
+    /* 0x074 */ GameObject *unk_074;               /* its portrait in the status panel (bonus_update_lives) */
+    /* 0x078 */ GameObject *unk_078[2];            /* the lives' digit sprites */
     /* 0x080 */ GameObject *unk_080[6];        /* the score's digit sprites */
     /* 0x098 */ GameObject *unk_098;
     /* 0x09C */ u8 unk_09C[0x08];
     /* 0x0A4 */ GameObject *bars[3];           /* the results bars, one per tally (OVERATTR, func_8009951C) */
     /* 0x0B0 */ u8 unk_0B0[0x04];
-    /* 0x0B4 */ GameObject *extra[2];          /* sprites of its own (monster 5's, 7's: kind 0x73A), NULL for none */
-    /* 0x0BC */ u8 unk_0BC[0x0C];
+    /* 0x0B4 */ GameObject *extra[5];          /* its own sprites (5's, 7's: kind 0x73A; 2-4 func_8002A1AC), or NULL */
     /* 0x0C8 */ u16 buttons;                   /* the pad's buttons held, pad bits >> 4 (func_800273F4) */
     /* 0x0CA */ u8 unk_0CA[0x02];
     /* 0x0CC */ u16 dir;                       /* the d-pad direction, 0 none (D_8007C124[pad bits & 0xF]); an index
@@ -233,7 +233,7 @@ typedef struct Monster {
     /* 0x0FE */ u8 unk_0FE[0x02];
     /* 0x100 */ s32 unk_100;                   /* a horizontal speed, 16.16 */
     /* 0x104 */ s32 unk_104;                   /* a vertical acceleration, 16.16 */
-    /* 0x108 */ s16 box_x0;                    /* two boxes, (x0, y0)-(x1, y1): func_80053854 says which one a */
+    /* 0x108 */ s16 box_x0;                    /* two boxes, (x0, y0)-(x1, y1): monster_test_boxes says which one a */
     /* 0x10A */ s16 box_y0;                    /* point is in */
     /* 0x10C */ s16 box_x1;
     /* 0x10E */ s16 box_y1;
@@ -265,7 +265,8 @@ typedef struct Monster {
     /* 0x148 */ u8 unk_148[0x08];
     /* 0x150 */ s16 unk_150;
     /* 0x152 */ s16 unk_152;
-    /* 0x154 */ u8 unk_154[0x10];
+    /* 0x154 */ u8 unk_154[0x0C];
+    /* 0x160 */ GameObject *unk_160;               /* an object it is carried by: monster_follow_holder places it there */
     /* 0x164 */ s16 unk_164;
     /* 0x166 */ u16 unk_166;
     /* 0x168 */ u16 unk_168;
@@ -275,7 +276,7 @@ typedef struct Monster {
     /* 0x172 */ u8 unk_172[0x02];
     /* 0x174 */ s32 unk_174;
     /* 0x178 */ u16 unk_178;
-    /* 0x17A */ u8 unk_17A[0x02];
+    /* 0x17A */ u16 unk_17A;
     /* 0x17C */ s32 unk_17C;
     /* 0x180 */ struct Monster *attacker;      /* the monster that hit it last (func_8005421C) */
     /* 0x184 */ u16 unk_184;
@@ -289,7 +290,7 @@ typedef struct Monster {
     /* 0x1AC */ u16 unk_1AC;
     /* 0x1AE */ u16 unk_1AE;
     /* 0x1B0 */ u16 climb_side;                /* 0: not on a building; 1, 2: the side it climbs; 3 (func_80054D74) */
-    /* 0x1B2 */ u16 climb_building;            /* the building, 1-based (func_80054728) */
+    /* 0x1B2 */ u16 climb_building;            /* the building, 1-based (monster_get_building) */
     /* 0x1B4 */ u16 climb_floor;               /* the building's item it is at */
     /* 0x1B6 */ u8 unk_1B6[0x06];
     /* 0x1BC */ u16 unk_1BC;
@@ -359,10 +360,13 @@ typedef struct GameState {
     /* 0x0C */ s32 unk_0C;                     /* D_800AA254; scratch: monster.c's probe x, func_8004003C's "a
                                                 * player is in play", func_800297B4's count */
     /* 0x10 */ s32 unk_10;                     /* D_800AA258; scratch: monster.c's probe y, func_800297B4's count */
-    /* 0x14 */ s32 action;                     /* the monster's action, clamped, before the dispatch (func_800500EC;
+    /* 0x14 */ s32 action;                     /* the monster's action, clamped, before the dispatch (monster_dispatch_action;
                                                 * D_800AA25C) */
     /* 0x18 */ s32 unk_18;                     /* the argument of the current actor's handler (D_800AA260) */
-    /* 0x1C */ ObjectDef *unk_1C;
+    /* 0x1C */ union {
+                   ObjectDef *def;
+                   s32 n;                   /* a count (main_count_monsters) */
+               } unk_1C;
     /* 0x20 */ GameObject *cur_obj;            /* the object being updated (D_800AA268) */
     /* 0x24 */ s32 unk_24;                     /* D_800AA26C */
     /* 0x28 */ s32 unk_28;                     /* a counter (func_8003C3B0: the items left in the building) */
@@ -448,7 +452,7 @@ typedef struct Ai {
                    } s;
                } unk_28;
     /* 0x2C */ u8 unk_2C[0x02];
-    /* 0x2E */ s16 unk_2E;
+    /* 0x2E */ u16 unk_2E;
     /* 0x30 */ Fixed unk_30;
     /* 0x34 */ Fixed unk_34;
     /* 0x38 */ u16 unk_38;                     /* a countdown */
@@ -690,7 +694,7 @@ typedef struct TextMessage {
     /* 0x0A */ u16 y;
     /* 0x0C */ s32 unk_0C;
     /* 0x10 */ void (*layout)(void);       /* func_8001EDE4: centred */
-    /* 0x14 */ s32 kind;                   /* the kind of the objects that show it (func_8001E450 frees them) */
+    /* 0x14 */ s32 kind;                   /* the kind of the objects that show it (main_free_kind frees them) */
     /* 0x18 */ u8 text[1];                 /* as long as the message */
 } TextMessage;
 
@@ -714,7 +718,7 @@ extern s16 D_801F9944;
 extern s16 D_801F9ADC;
 extern s16 D_801FA964;
 extern u16 D_801FA968;
-extern s16 D_801FA984[3];                /* per player: playing */
+extern s16 D_801FA984[4];                /* per player: playing (the save copies a fourth word, menu_write_save) */
 extern u8 D_800937E8[];
 extern u8 D_800938AC[];
 extern u8 D_80095678[];
@@ -723,6 +727,7 @@ extern Fixed D_801F9AC8;                 /* the camera's x: the screen's left ed
 extern s16 D_8007A68A;
 extern u16 D_8007A696;
 extern u16 D_8007A7D4;
+extern s16 D_8007C976;                   /* the weather, drawn by func_8002A3A4: 1 rain (it slows climbing, monster_update_climb), 2 another */
 extern s32 D_8007AD4C[];
 extern s32 *D_80085114[];
 extern Anim D_8008A7A4;

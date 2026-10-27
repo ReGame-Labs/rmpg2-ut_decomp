@@ -496,7 +496,8 @@ void func_80042210(Ai *ai) {
 }
 
 #ifdef NON_MATCHING
-/* 94.5%: func_8004E99C takes no arguments. What differs: far = tx reloads the halfword here (the original copies tx, move v1,a1), and the original sign-extends near before far at the join */
+/* 98.12%: 98.1%: far = tx reloads the halfword (lhu) where the original copies tx in the delay slot of the distance
+ * test (move v1,a1); func_8004E99C takes no arguments */
 void func_80042238(Ai *ai) {
     GameObject *target;
     s16 tx;
@@ -526,8 +527,8 @@ void func_80042238(Ai *ai) {
                 near += (D_801D8864.w + 1) >> 16;
             }
         }
-        if ((far < near - 0xE && (D_800AA248.cur_obj->flags & 0x10)) ||
-            (near < far && !(D_800AA248.cur_obj->flags & 0x10))) {
+        if ((near - 0xE > far && (D_800AA268.p->flags & 0x10)) ||
+            (near < far && !(D_800AA268.p->flags & 0x10))) {
             func_8004E99C();
         }
     }

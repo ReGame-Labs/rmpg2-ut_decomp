@@ -275,7 +275,7 @@ void func_80031A3C(void);
 void func_80031B10(void);
 void func_80031444(void);
 void func_8001E7A0(void);
-void func_80020BA0();
+void main_set_frame();
 void func_80031A68(void);
 void func_80031AC8(void);
 void func_80031CB4(void *, Ai *);
@@ -583,9 +583,9 @@ extern s32 D_8007CDEC[7];   /* the body sprite of each monster id (building_spaw
 extern Anim D_80096560;
 s32 func_8001E2B8(GameObject *);
 void func_8002A1AC(Monster *, s32);
-void func_8005D20C(Monster *);
+void bonus_create_bars(Monster *);
 void func_8005D364(Monster *);
-void func_8005D644(Monster *);
+void bonus_create_score(Monster *);
 void func_8005E124(Monster *, s32);
 void func_8005F33C(s32, u8);
 extern Anim D_80011D48;   /* func_8002E658's sprite at a part's point */
@@ -595,8 +595,8 @@ extern Anim D_800168B8;
 extern Anim D_800168D8;
 extern Anim D_80016964;
 extern Anim D_80016A78;
-extern GameObject *D_801FB448;   /* a box (func_8001EB9C) whose width func_8002F100 sets from Building.unk_010 */
-GameObject *func_8001EB9C(s32 x, s32 y, s32 w, s32 h, s32 colour);
+extern GameObject *D_801FB448;   /* a box (main_create_box) whose width func_8002F100 sets from Building.unk_010 */
+GameObject *main_create_box(s32 x, s32 y, s32 w, s32 h, s32 colour);
 void func_80029118(s16, u16);
 extern Anim D_80011F58;
 extern Anim D_80011F90;

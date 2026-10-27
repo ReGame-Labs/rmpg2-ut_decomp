@@ -110,11 +110,11 @@ void func_8002AC34(GameObject *obj) {
 
     if (D_8007C976 == 0) {
         if (D_801FB198 > 0x12430) {
-            func_80020BA0(0x4F00097E, obj->flags, obj);
+            main_set_frame(0x4F00097E, obj->flags, obj);
             obj->pos_x.s.hi = (D_801FB198 - 0x12430) / 58 + 0xF0;
             obj->pos_y.s.hi = 0x82 - (D_801FB198 - 0x12430) / 78;
         } else if (D_801FB198 > 0x2A30 && D_801FB198 < 0xA8C0) {
-            func_80020BA0(0x4F000980, obj->flags, obj);
+            main_set_frame(0x4F000980, obj->flags, obj);
             d = (0xA8C0 - D_801FB198) / 54 + 0x81;
             obj->pos_x.s.hi = 0x122;
             obj->flags |= 0x400;
@@ -266,13 +266,13 @@ void building_update_cloud(s32 i) {
         if (obj->pos_y.s.hi >= 0xD8) {
             obj->pos_y.s.hi = 0xDD;
             if ((u32) obj->script.pc < 4) {
-                func_80020BA0(((s32 *) obj->unk_40.w)[obj->script.pc], obj->flags, obj);
+                main_set_frame(((s32 *) obj->unk_40.w)[obj->script.pc], obj->flags, obj);
                 obj->script.pc++;
             } else {
                 if ((func_8001EA78() & 0xFF) < 0x80) {
-                    func_80020BA0(0x4F000966, obj->flags, obj);
+                    main_set_frame(0x4F000966, obj->flags, obj);
                 } else {
-                    func_80020BA0(0x4F000968, obj->flags, obj);
+                    main_set_frame(0x4F000968, obj->flags, obj);
                 }
                 obj->script.pc = 0;
                 obj->pos_x.s.hi = (((D_801F9ACA - 400) & mask) + func_8001EA78() % 800) & mask;
@@ -325,14 +325,14 @@ void building_update_raindrop(s32 i) {
     if (obj->pos_y.s.hi >= 0xD8) {
         obj->pos_y.s.hi = 0xDD;
         if ((u32) obj->script.pc < 6) {
-            func_80020BA0(0x4F00097C, obj->flags, obj);
+            main_set_frame(0x4F00097C, obj->flags, obj);
             obj->script.pc++;
             return;
         }
         if ((func_8001EA78() & 0xFF) < 0x80) {
-            func_80020BA0(0x4F00097A, obj->flags, obj);
+            main_set_frame(0x4F00097A, obj->flags, obj);
         } else {
-            func_80020BA0(0x4F00401A, obj->flags, obj);
+            main_set_frame(0x4F00401A, obj->flags, obj);
         }
         obj->script.pc = 0;
         obj->pos_x.s.hi = (((D_801F9ACA - 100) & mask) + func_8001EA78() % 600) & mask;
@@ -519,9 +519,9 @@ void building_spawn_monster(Monster *m) {
         func_8002A1AC(m, m->unk_01A & 0xF);
     }
     if (D_800AA2DC == 0) {
-        func_8005D20C(m);
+        bonus_create_bars(m);
         func_8005D364(m);
-        func_8005D644(m);
+        bonus_create_score(m);
         func_8005E124(m, 0x7A0);
         return;
     }
@@ -535,7 +535,7 @@ void building_spawn_monster(Monster *m) {
         func_8005D364(m);
         break;
     case 4:
-        func_8005D20C(m);
+        bonus_create_bars(m);
         func_8005D364(m);
         break;
     }
@@ -1582,7 +1582,7 @@ BuildingItem *rec;
                     func_8002E5F4(which, rec);
                 }
             }
-            func_80020BA0(t, obj->flags, obj);
+            main_set_frame(t, obj->flags, obj);
             func_80030754(g, n, arg2, rec);
             if ((u16) n < 2) {
                 g->unk_16 = n;
@@ -2280,7 +2280,7 @@ void func_8002F100(Building *b) {
         }
     } else {
         def = func_8001D110();
-        box = func_8001EB9C(0, 0, 0x96, 5, 0xFF00);
+        box = main_create_box(0, 0, 0x96, 5, 0xFF00);
         box->pos_x.s.hi = 0x73;
         box->pos_y.s.hi = 0xD7;
         box->priority = 0x7000;
@@ -2506,7 +2506,7 @@ void func_8002FAA4(Monster *arg0, BuildingItem *arg1) {
 
 void func_8002FB38(void *arg0, GameObject *arg1) {
     if (arg1->frame != arg0) {
-        func_80020BA0(arg0, 0x8002, arg1);
+        main_set_frame(arg0, 0x8002, arg1);
     }
 }
 
@@ -3513,7 +3513,7 @@ void func_80031A3C(void) {
 
 void func_80031A68(void) {
     if ((D_801D37BC == 0) && (D_801D37C0 == 0) && (D_801D857C != 0)) {
-        func_80020BA0(D_801D857C, 0x8002, D_800AA248.cur_obj);
+        main_set_frame(D_801D857C, 0x8002, D_800AA248.cur_obj);
         D_801D857C = 0;
         func_8001E7A0();
     }

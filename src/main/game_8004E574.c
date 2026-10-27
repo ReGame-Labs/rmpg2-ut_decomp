@@ -12,7 +12,7 @@ void func_8001F7CC(s32 sound, s32 variant);                 /* play a sound */
 ObjectDef *func_8001D110(void);                             /* a fresh definition to fill in */
 GameObject *func_8001DCB4(void);                            /* create the object of D_800AA248.new_def */
 void func_8001E4B0(GameObject *obj);                        /* free an object */
-void func_80020BA0(s32, u16 flags, GameObject *obj);
+void main_set_frame(s32, u16 flags, GameObject *obj);
 void func_8002CE74(u16, Monster *m, void *);
 void func_8002CFAC(Monster *m, Building *b);
 void func_8002D0C0(Monster *m, Building *b);
@@ -21,11 +21,11 @@ void func_80030E04(Monster *m, void *, void *);
 void func_80031280(Monster *m, Building *b);
 void func_8004CFE8(void);
 s32 func_8004D150(u16 *, Monster *m, void *);
-void func_800524B4(Monster *m);
+void monster_start_jump(Monster *m);
 void func_80053C50(s32, Monster *m);
 void func_8005404C(Monster *m);
 u16 func_8005453C(s16 x, s16 y, Monster *m);
-Building *func_80054728(u16);
+Building *monster_get_building(u16);
 void func_80056488(Monster *m);
 void func_800564D8(Monster *m);
 void func_80056560(Monster *m);
@@ -170,7 +170,7 @@ void func_8004E8B8(void) {
         D_800AA248.cur_obj->flags &= ~0x10;
     }
     y = D_800AA248.cur_obj->pos_y.s.hi;
-    bld = func_80054728(m->climb_building);
+    bld = monster_get_building(m->climb_building);
     if (bld != NULL) {
         kind = *(u16 *) ((u8 *) bld + 8);
         if (kind != 0x300) {
@@ -322,7 +322,7 @@ void func_8004ED8C(void) {
                     func_8002CFAC(m, b);
                     m->unk_18A = 1;
                     if ((u32) (b->unk_058 - 2) >= 2) {
-                        func_800524B4(m);
+                        monster_start_jump(m);
                     }
                 }
                 func_8005404C(m);
@@ -521,7 +521,7 @@ void func_8004F47C(void) {
         m->unk_16C = D_800AA248.cur_obj;
     }
     D_800AA248.cur_obj->priority = saved->priority + 1;
-    func_80020BA0(*arg, D_800AA248.cur_obj->flags, D_800AA248.cur_obj);
+    main_set_frame(*arg, D_800AA248.cur_obj->flags, D_800AA248.cur_obj);
     D_800AA248.cur_obj = saved;
 }
 
@@ -532,7 +532,7 @@ void func_8004F65C(void) {
     s16 y;
 
     if ((u32) (m->unk_0EA - 1) >= 2 && m->climb_side != 0 && m->climb_side != 3 && m->climb_building != 0) {
-        bld = func_80054728(m->climb_building);
+        bld = monster_get_building(m->climb_building);
         if (bld != NULL) {
             part = *(u8 **) ((u8 *) bld + 0x18);
             if (part != NULL && *(s16 *) (part + 0x1C) == m->climb_side) {
@@ -579,18 +579,21 @@ s32 func_8004F7A4(u8 *list) {
 }
 
 #ifdef NON_MATCHING
-/* 93.7%: the original loads x1 once (lh) and keeps a copy in a1 to add to; here the compare reloads it */
+/* 96.33%: 96.3%: one load of the x and a copy as in the original, but the copy, x2 and the definition take a3/a1/a2
+ * for the original's a1/a2/a3, and one nop more */
 void func_8004F7F4(GameObject *obj, Monster *m1, Monster *m2, GameObject *cur) {
     ObjectDef *def;
     GameObject *o;
     s16 x1;
     u16 x2;
     s16 x;
+    s32 t;
 
     def = func_8001D110();
-    x1 = cur->pos_x.s.hi;
+    t = cur->pos_x.s.hi;
+    x1 = t;
     x2 = obj->pos_x.s.hi;
-    if (x1 <= D_801F9ACA) {
+    if (t <= D_801F9ACA) {
         x1 += D_801D8866;
     }
     if ((s16) x2 <= D_801F9ACA) {
@@ -730,15 +733,14 @@ void func_8004FC00(s32 n, Monster *m) {
     }
 }
 
-#ifdef NON_MATCHING
-/* 97.6%: the layout is the original's; the sign-extended x goes to a temporary (v1) in the original and the facing bit is copied into s3 after the test, here both are computed in place */
 void func_8004FC2C(void) {
     GameObject *saved = D_800AA248.cur_obj;
     Monster *m = saved->owner.monster;
     s32 x = (u16) saved->pos_x.s.hi;
+    s32 sx;
     u16 side = m->climb_side;
     u16 y = saved->pos_y.s.hi;
-    s32 flip;
+    s16 flip;
     ObjectDef *def;
     GameObject *obj;
 
@@ -754,12 +756,12 @@ void func_8004FC2C(void) {
         flip = 0;
         break;
     default:
-        x = (s16) x;
+        sx = (s16) x;
         flip = saved->flags & 0x10;
         if (flip == 0) {
-            x += 0x21;
+            x = sx + 0x21;
         } else {
-            x -= 0x21;
+            x = sx - 0x21;
         }
         y -= 0x2A;
         break;
@@ -777,9 +779,6 @@ void func_8004FC2C(void) {
     D_800AA248.cur_obj->unk_9C = m->id;
     D_800AA248.cur_obj = saved;
 }
-#else
-INCLUDE_ASM("asm/main/nonmatchings/game_8004E574", func_8004FC2C);
-#endif
 
 void func_8004FD44(void) {
     GameObject *saved = D_800AA248.cur_obj;
@@ -813,8 +812,6 @@ void func_8004FD44(void) {
     D_800AA248.cur_obj = saved;
 }
 
-#ifdef NON_MATCHING
-/* 94.6%, one instruction longer: the default case's -0x1E is loaded in the flags load's delay in the original and the sum is dx + x (addu s1,a0,s1); here the constant waits for the branch's delay slot */
 void func_8004FE28(void) {
     GameObject *saved = D_800AA248.cur_obj;
     Monster *m = saved->owner.monster;
@@ -822,7 +819,7 @@ void func_8004FE28(void) {
     u16 side = m->climb_side;
     s32 dx;
     s32 y;
-    s32 flip;
+    s16 flip;
     s32 x;
     ObjectDef *def;
     GameObject *obj;
@@ -840,11 +837,11 @@ void func_8004FE28(void) {
         break;
     default:
         y = top + 0x21;
+        flip = saved->flags & 0x10;
         dx = -0x1E;
-        if (!(saved->flags & 0x10)) {
+        if (flip == 0) {
             dx = 0x1E;
         }
-        flip = saved->flags & 0x10;
         break;
     }
     x = dx + (u16) D_800AA248.cur_obj->pos_x.s.hi;
@@ -860,9 +857,6 @@ void func_8004FE28(void) {
     D_800AA248.cur_obj->unk_9C = m->id;
     D_800AA248.cur_obj = saved;
 }
-#else
-INCLUDE_ASM("asm/main/nonmatchings/game_8004E574", func_8004FE28);
-#endif
 
 void func_8004FF3C(void) {
     GameObject *saved = D_800AA248.cur_obj;
@@ -878,7 +872,7 @@ void func_8004FF3C(void) {
         if (ea != 4) {
             if (ea != 3) {
                 if (ea != side) {
-                    bld = func_80054728(m->climb_building);
+                    bld = monster_get_building(m->climb_building);
                     if (bld != NULL) {
                         m->unk_0FA = m->pos.s.lo;
                         m->unk_0FC = m->pos.s.hi;
