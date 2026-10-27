@@ -1308,25 +1308,25 @@ void bonus_update_awards(void) {
         box->unk_6C |= 0x20;
         D_8007BD78.unk_20 = 0;
         D_8007BD78.flags |= 0x800;
-        func_8006036C(D_8007AD4C, 0x78, 0x46, 0x44, 0x7D0, D_800115B0);
+        func_8006036C(D_8007AD4C, 0x78, 0x46, 0x44, 0x7D0, "BONUS AWARDS!!");
         D_8007BD78.unk_54 = 0x7D0;
         func_80060A7C(0x7D0, 0x404040, 1);
     }
     if (!(D_8007BD78.flags & 0x4000) && D_8007BD78.unk_20 > 0x3C) {
         D_8007BD78.flags |= 0x24000;
-        func_8006036C(D_8007AD4C, 0x6E, 0x69, 0x47, 0x7D1, D_800115C0);
+        func_8006036C(D_8007AD4C, 0x6E, 0x69, 0x47, 0x7D1, "LIFE");
         D_8007BD78.unk_58[2] = 0x7D1;
         func_80060A7C(0x7D1, 0x404040, 1);
     }
     if (!(D_8007BD78.flags & 0x1000) && D_8007BD78.unk_20 > 0x78) {
         D_8007BD78.flags |= 0x41000;
-        func_8006036C(D_8007AD4C, 0x6E, 0x82, 0x47, 0x7D2, D_800115C8);
+        func_8006036C(D_8007AD4C, 0x6E, 0x82, 0x47, 0x7D2, "HEALTH");
         D_8007BD78.unk_58[0] = 0x7D2;
         func_80060A7C(0x7D2, 0x404040, 1);
     }
     if (!(D_8007BD78.flags & 0x2000) && D_8007BD78.unk_20 > 0xB4) {
         D_8007BD78.flags |= 0x82000;
-        func_8006036C(D_8007AD4C, 0x6E, 0x9B, 0x47, 0x7D3, D_800115D0);
+        func_8006036C(D_8007AD4C, 0x6E, 0x9B, 0x47, 0x7D3, "POWER");
         D_8007BD78.unk_58[1] = 0x7D3;
         func_80060A7C(0x7D3, 0x404040, 1);
     }

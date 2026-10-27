@@ -85,7 +85,7 @@ typedef struct GameObject {
                } unk_40;
     /* 0x44 */ union {                  /* by kind */
                    s32 pc;                  /* the animation script's next command (an address) */
-                   s32 height;              /* a box's height (main_create_box; the results bars, func_800991EC) */
+                   s32 height;              /* a box's height (main_create_box; the results bars, tour_update_results) */
                    s32 v;                   /* a value (OVERATTR's logo: a y, with unk_40.w its x) */
                } script;
     /* 0x48 */ s32 anim;                /* the current animation (an address: the script restarts there) */
@@ -94,7 +94,7 @@ typedef struct GameObject {
     /* 0x4E */ u8 unk_4E[0x02];
     /* 0x50 */ union {                  /* by kind */
                    struct GameObject *obj;  /* a link */
-                   s32 cam_start;           /* OVERATTR's camera: its start point, y << 16 | x (func_8009AE40) */
+                   s32 cam_start;           /* OVERATTR's camera: its start point, y << 16 | x (tour_update_map) */
                    s32 count;               /* a monster's bomb (kind 0x73A): its bounces */
                } unk_50;
     /* 0x54 */ union {
@@ -111,7 +111,7 @@ typedef struct GameObject {
     /* 0x60 */ s32 unk_60;
     /* 0x64 */ union {                  /* by kind */
                    s32 w;
-                   s32 count;               /* a results bar: the tally shown so far (func_800991EC) */
+                   s32 count;               /* a results bar: the tally shown so far (tour_update_results) */
                } unk_64;
     /* 0x68 */ union {                  /* a monster's body: its monster; an effect: two halfwords */
                    struct Monster *monster;
@@ -204,7 +204,7 @@ typedef struct Monster {
     /* 0x078 */ GameObject *lives_digits[2];   /* the digit sprites of lives */
     /* 0x080 */ GameObject *score_digits[6];   /* the digit sprites of score (bonus_create_score) */
     /* 0x098 */ GameObject *icons[3];          /* the status icons (bonus.c), [0] its body sprite too (func_8002CBF4) */
-    /* 0x0A4 */ GameObject *bars[3];           /* the results bars, one per tally (OVERATTR, func_8009951C) */
+    /* 0x0A4 */ GameObject *bars[3];           /* the results bars, one per tally (OVERATTR, tour_create_bars) */
     /* 0x0B0 */ u8 unk_0B0[0x04];
     /* 0x0B4 */ GameObject *extra[5];          /* its own sprites (5's, 7's: kind 0x73A; 2-4 func_8002A1AC), or NULL */
     /* 0x0C8 */ u16 buttons;                   /* the pad's buttons held, pad bits >> 4 (func_800273F4); & 0xF: the

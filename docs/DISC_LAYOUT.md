@@ -13,7 +13,7 @@ bit-identical from `extracted/`. The data track holds 355 files (351 MB), no dee
 | Directory | Files | Size | Contents |
 |---|---|---|---|
 | `/` | `SYSTEM.CNF`, `SLUS_007.42`, `CDPAD1-4.DAT` | 559 KB + 4 × 8.6 MB | The boot file (`BOOT = cdrom:\SLUS_007.42;1`, `TCB = 4`, `EVENT = 10`, `STACK = 801ffffc`), the executable, four padding files dated 1996 |
-| `OVERLAYS/` | `OVERATTR.BIN` (72,220 B), `OVERMOVE.BIN` (74,652 B) | 143 KB | The two code overlays: the attract mode and memory-card screens (holds the save header `BASLUS-00742`), and the movie player (libpress) |
+| `OVERLAYS/` | `OVERATTR.BIN` (72,220 B), `OVERMOVE.BIN` (74,652 B) | 143 KB | The two code overlays: the attract mode, the tour screens between cities and the memory-card screens (holds the save header `BASLUS-00742`), and the movie player (libpress) |
 | `MISC/` | 24 | 95 MB | `FILE00.IXA` (92.5 MB, interleaved XA audio: the music), the monsters' `.SPB` sprite banks (`NEWRAT`, `NEWGRGE`, ... two per monster) and `.BIN` tables (`GEORGE.BIN`, `LIZZY.BIN`, ...), `GENERAL.SPT`, `SCORES.CMB` |
 | `MISC2/` | 26 | 4.3 MB | Front end: `TITLE.CMB`, `MENU.CMB`, `INTRO.CMB`, `LEGAL.CMB`, the world maps (`*MAP.SPT`), `SELECT.SPB`, `JAIL.SPB`, the victory banks (`*VICTRY.SPB`), `BIGFONT.BIN`, `TEXT.BIN`, `WARNING.SPT` |
 | `MOVIE/`, `SOUND/` | 18 + 14 | 120 MB + 34 MB | `.XAS` streams: the opening and news movies, the monsters' cutscenes, the publisher logos; `SOUND/MAIN.LCD` (450 KB), `RAMPAGE.WMD`, `RAMPAGE.WSD` (the sound bank) |
@@ -76,8 +76,8 @@ file whose code does not tell yet keeps the address of its first function (`game
 | `game_8004C064` | `0x8004C064`–`0x8004E574` | `0x800113FC`–`0x800114E0` | `0x8007F680`–`0x8007F710` | commands of the monsters' animation scripts, and the hit reactions (the handlers by projectile kind `D_8007F680`, monster against monster); 79 functions |
 | `game_8004E574` | `0x8004E574`–`0x800500EC` | `0x800114E0`–`0x80011534` | `0x8007F710`–`0x8007F8FC` | commands of the monsters' animation scripts; 58 functions |
 | `monster` | `0x800500EC`–`0x80057C94` | `0x80011534`–`0x80011594` | `0x8007F8FC`–`0x8007FC84` | the monsters' actions (the dispatcher on `Monster.action`), hits, score and climbing; the last file whose `.data` precedes the screens' tables |
-| `monster_anim` | `0x80057C94`–`0x8005D198` | `0x80011594`–`0x800115D8` | `0x8008434C`–`0x80085264` | the monsters' animation scripts and the functions that start them per action; the first file whose `.data` follows the screens' tables: 150 small tables (the scripts), one per function |
-| `bonus` | `0x8005D198`–`0x80060F3C` | `0x800115D8`–`0x8001169C` |  | the bonus rounds ("READY!", "SET!", "GO!") and the players' status panels; 38 functions; uses the config tables `D_8008427C`–`D_8008433C` |
+| `monster_anim` | `0x80057C94`–`0x8005D198` | `0x80011594`–`0x800115B0` | `0x8008434C`–`0x80085264` | the monsters' animation scripts and the functions that start them per action; the first file whose `.data` follows the screens' tables: 150 small tables (the scripts), one per function |
+| `bonus` | `0x8005D198`–`0x80060F3C` | `0x800115B0`–`0x8001169C` |  | the bonus rounds ("READY!", "SET!", "GO!") and the players' status panels; 38 functions; uses the config tables `D_8008427C`–`D_8008433C` |
 | `cdload` | `0x80060F3C`–`0x800633EC` | `0x80016A90`–`0x80016AC8` | `0x80085264`–`0x80085308` | the CD file reader and the overlay loader (`cdload_read_file`, `cdload_load_overlay`); `func_800619A4`–`func_80062868` and the stream reader `func_80062C10`–`func_800632E8` may be files of their own |
 | `vibrate` | `0x800633EC`–`0x80063A78` | `0x80016AD0`–`0x80016ADC` | `0x80085308`–`0x800853C0` | the controllers' vibration (the `PadSetAct` buffers' motor bytes), before the `InitHeap` stub |
 | `wess_spu` | `0x80063A88`–`0x80063FA8` |  | `0x800853C0`–`0x800853F4` | the sound driver WESS, its SPU layer: the setup, the reverb, the master and CD volumes and their fades; between the first two library objects |
@@ -109,14 +109,15 @@ placed by the linker in an order of its own.
 
 ## Overlays
 
-`OVERLAYS/OVERATTR.BIN` (72,220 bytes: the attract mode, the credits and the memory-card screens; it holds the save
-header `BASLUS-00742`) and `OVERLAYS/OVERMOVE.BIN` (74,652 bytes: the movie player, with libpress) are headerless
-images that both load at **`0x80097EA4`**, right after `.data`, into the region `0x80097EA4`–`0x800AA240`. The
-executable loads one at a time: it reads the file into a buffer (the pointer at `D_801E1C78`) through the file table
-below and copies it to the region (`cdload_load_overlay`: `0` for `OVERATTR.BIN`, `1` for `OVERMOVE.BIN`, from the
-index table `D_80085274` = `{0x52, 0x53}`; `D_80085278` remembers which one is loaded). A second loader
-(`cdload_load_city_table`) puts a city's `.BIN` table (`RACKS*/`, `BONUS/`: 1–3 KB of data, not code) in the same
-region. The load address is a constant in `.rodata` (`0x80016AC8` and `0x80016ACC`, one per loader).
+`OVERLAYS/OVERATTR.BIN` (72,220 bytes: the attract mode, the tour screens between cities, the credits and the
+memory-card screens; it holds the save header `BASLUS-00742`) and `OVERLAYS/OVERMOVE.BIN` (74,652 bytes: the movie
+player, with libpress) are headerless images that both load at **`0x80097EA4`**, right after `.data`, into the region
+`0x80097EA4`–`0x800AA240`. The executable loads one at a time: it reads the file into a buffer (the pointer at
+`D_801E1C78`) through the file table below and copies it to the region (`cdload_load_overlay`: `0` for
+`OVERATTR.BIN`, `1` for `OVERMOVE.BIN`, from the index table `D_80085274` = `{0x52, 0x53}`; `D_80085278` remembers
+which one is loaded). A second loader (`cdload_load_city_table`) puts a city's `.BIN` table (`RACKS*/`, `BONUS/`: 1–3
+KB of data, not code) in the same region. The load address is a constant in `.rodata` (`0x80016AC8` and `0x80016ACC`,
+one per loader).
 
 Evidence for the address: with it, `OVERMOVE.BIN` ends exactly at the start of `.bss` (`0x800AA240`); the
 executable's `.data` holds 1,670 pointers into `0x80097EA8`–`0x80098AD0`, which are `OVERATTR.BIN`'s strings
@@ -140,7 +141,7 @@ executable resolve to the executable's own definitions; splat gets the executabl
 
 | Overlay | `.rodata` | `.text` | `.data` and `.bss` |
 |---|---|---|---|
-| `OVERATTR.BIN` | `0x80097EA4`–`0x80098730`: the save header, the credits' and the memory-card screens' strings, nine jump tables | `0x80098730`–`0x800A3360`: 108 functions in three files (`card` the memory-card file, `overattr_80099118` the screens around a city and the results, `menu` the credits, the menus and the memory-card screens), each object's `.rodata` and `.text` 8-aligned (`config/overattr.yaml`); a data-only word at `0x80097EA4` first | `0x800A3360`–`0x800A92A4` `.data`, then zeros to the file's end `0x800A98C0`: its `.bss`, inside the file. The file table says 72,244 bytes, 24 more than the file: the loader copies that much, so the image in memory extends 24 bytes past the file's last word |
+| `OVERATTR.BIN` | `0x80097EA4`–`0x80098730`: the save header, the credits' and the memory-card screens' strings, nine jump tables | `0x80098730`–`0x800A3360`: 108 functions in three files (`card` the memory-card file, `tour` the screens between cities: the results, the choice of a monster, the tour map, the day and time, `menu` the credits, the menus and the memory-card screens), each object's `.rodata` and `.text` 8-aligned (`config/overattr.yaml`); a data-only word at `0x80097EA4` first | `0x800A3360`–`0x800A92A4` `.data`, then zeros to the file's end `0x800A98C0`: its `.bss`, inside the file. The file table says 72,244 bytes, 24 more than the file: the loader copies that much, so the image in memory extends 24 bytes past the file's last word |
 | `OVERMOVE.BIN` | `0x80097EA4`–`0x80097EF8`: libpress's strings (`MDEC_rest`, `MDEC_in_sync`, ...) | `0x80097EF8`–`0x800AA0EC`: libpress first (`psyq/libpress/vlc`: `DecDCTvlc`; `psyq/libpress/libpress`: `DecDCTReset`, `DecDCTin`, `DecDCTout`, `DecDCToutCallback` and its static helpers; `psyq/libpress/vlctbl`: the VLC decoding tables, 70 KB of data in `.text`, `0x8009870C`–`0x800A9890`), then the game's movie player (`overmove`, 9 functions from `0x800A9890`) | `0x800AA0EC`–`0x800AA240`: the movie table and the player's state |
 
 No other library code is in the overlays: `OVERATTR.BIN` calls the executable's `MemCard*`, `strchr`, `strcmp` and
