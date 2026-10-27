@@ -1040,7 +1040,7 @@ void func_800490D4(Throw *t) {
             i = 7;
             do {
                 m = &D_801E0B78[i];
-                if ((m->unk_058 & 1) && m->unk_140 == 0) {
+                if ((m->unk_058 & 1) && m->icon_timers[0] == 0) {
                     hit = monster_test_boxes(D_800AA248.cur_obj->pos_x.s.hi, D_800AA248.cur_obj->pos_y.s.hi, m);
                     if (hit != 0) {
                         func_80053C50(0x34000, m);
@@ -1091,7 +1091,7 @@ void func_80049304(Throw *t) {
     i = 7;
     do {
         m = &D_801E0B78[i];
-        if ((m->unk_058 & 1) && m->unk_140 == 0) {
+        if ((m->unk_058 & 1) && m->icon_timers[0] == 0) {
             hit = monster_test_boxes(D_800AA248.cur_obj->pos_x.s.hi, D_800AA248.cur_obj->pos_y.s.hi, m);
             if (hit != 0) {
                 func_80053C50(0x58000, m);
@@ -1123,7 +1123,7 @@ void func_800494B4(Throw *t) {
     i = 7;
     do {
         m = &D_801E0B78[i];
-        if ((m->unk_058 & 1) && m->unk_140 == 0) {
+        if ((m->unk_058 & 1) && m->icon_timers[0] == 0) {
             hit = monster_test_boxes(D_800AA248.cur_obj->pos_x.s.hi, D_800AA248.cur_obj->pos_y.s.hi, m);
             if (hit != 0) {
                 func_80053C50(0x58000, m);
@@ -1225,7 +1225,7 @@ void func_80049850(Throw *t) {
     i = 7;
     do {
         m = &D_801E0B78[i];
-        if ((m->unk_058 & 1) && m->unk_140 == 0) {
+        if ((m->unk_058 & 1) && m->icon_timers[0] == 0) {
             hit = monster_test_boxes(D_800AA248.cur_obj->pos_x.s.hi, D_800AA248.cur_obj->pos_y.s.hi, m);
             if (hit != 0) {
                 func_80053C50(0x48000, m);
@@ -1311,7 +1311,7 @@ void func_80049B9C(Throw *t) {
     i = 7;
     do {
         m = &D_801E0B78[i];
-        if ((m->unk_058 & 1) && m->unk_140 == 0 &&
+        if ((m->unk_058 & 1) && m->icon_timers[0] == 0 &&
             func_80053AC4(D_800AA248.cur_obj->pos_x.s.hi, D_800AA248.cur_obj->pos_y.s.hi, 3, 3, m) != 0) {
             func_80053C50(0x58000, m);
             func_8004A93C(m);
@@ -1372,7 +1372,7 @@ void func_80049E10(Throw *t) {
                 i = 7;
                 do {
                     m = &D_801E0B78[i];
-                    if ((m->unk_058 & 1) && !(m->obj->unk_6C & 0x80) && m->unk_140 == 0 &&
+                    if ((m->unk_058 & 1) && !(m->obj->unk_6C & 0x80) && m->icon_timers[0] == 0 &&
                         monster_test_boxes(D_800AA248.cur_obj->pos_x.s.hi, D_800AA248.cur_obj->pos_y.s.hi, m) != 0) {
                         if (t->kind == 0x12) {
                             func_80053C50(0x1C000, m);
@@ -1418,7 +1418,7 @@ void func_8004A044(Throw *t) {
     i = 7;
     do {
         m = &D_801E0B78[i];
-        if ((m->unk_058 & 1) && !(m->obj->unk_6C & 0x80) && m->unk_140 == 0 &&
+        if ((m->unk_058 & 1) && !(m->obj->unk_6C & 0x80) && m->icon_timers[0] == 0 &&
             monster_test_boxes(D_800AA248.cur_obj->pos_x.s.hi, D_800AA248.cur_obj->pos_y.s.hi, m) != 0) {
             func_80053C50(0x28000, m);
             t->state = 0x10;
@@ -1458,7 +1458,7 @@ void func_8004A1F8(Throw *t) {
                 i = 7;
                 do {
                     m = &D_801E0B78[i];
-                    if ((m->unk_058 & 1) && !(m->obj->unk_6C & 0x80) && m->unk_140 == 0) {
+                    if ((m->unk_058 & 1) && !(m->obj->unk_6C & 0x80) && m->icon_timers[0] == 0) {
                         if (monster_test_boxes(D_800AA248.cur_obj->pos_x.s.hi, D_800AA248.cur_obj->pos_y.s.hi, m) != 0) {
                             func_80053C50(0xA000, m);
                             t->state = 0x10;
@@ -1585,7 +1585,7 @@ void func_8004A698(Throw *t) {
                 i = 7;
                 do {
                     m = &D_801E0B78[i];
-                    if ((m->unk_058 & 1) && m->unk_140 == 0) {
+                    if ((m->unk_058 & 1) && m->icon_timers[0] == 0) {
                         hit = monster_test_boxes(D_800AA248.cur_obj->pos_x.s.hi, D_800AA248.cur_obj->pos_y.s.hi, m);
                         if (hit != 0) {
                             func_80053C50(0x58000, m);

@@ -145,7 +145,7 @@ void func_8004E83C(void) {
 
     if (D_801D36FC != 0x240) {
         m = D_800AA248.cur_obj->owner.monster;
-        if (m->health.w <= 0x190000 && m->unk_004 == 0 && m->unk_0F6 == 0) {
+        if (m->health.w <= 0x190000 && m->lives == 0 && m->unk_0F6 == 0) {
             m->unk_0F6 = 1;
             m->action = 0x1E;
         }
@@ -446,7 +446,7 @@ void func_8004F300(void) {
 void func_8004F33C(void) {
     GameObject *obj = D_800AA248.cur_obj;
 
-    obj->unk_4D = func_8001EB10(0x12C, 0x1E);
+    obj->frames_left = func_8001EB10(0x12C, 0x1E);
 }
 
 void func_8004F370(void) {
@@ -638,24 +638,24 @@ void func_8004F910(void) {
             other->unk_03E += m->unk_03E;
             m->unk_03E = 0;
         }
-        if (m->unk_140 != 0) {
-            other->unk_140 += m->unk_140;
-            m->unk_140 = 0;
+        if (m->icon_timers[0] != 0) {
+            other->icon_timers[0] += m->icon_timers[0];
+            m->icon_timers[0] = 0;
         }
-        if (m->unk_142 != 0) {
-            other->unk_142 += m->unk_142;
-            m->unk_142 = 0;
+        if (m->icon_timers[1] != 0) {
+            other->icon_timers[1] += m->icon_timers[1];
+            m->icon_timers[1] = 0;
         }
-        if (other->unk_142 > other->unk_140) {
-            other->unk_056 = 2;
-        } else if (other->unk_142 < other->unk_140) {
-            other->unk_056 = 1;
-        } else if (other->unk_142 != 0) {
-            other->unk_056 = 2;
+        if (other->icon_timers[1] > other->icon_timers[0]) {
+            other->icon_kind = 2;
+        } else if (other->icon_timers[1] < other->icon_timers[0]) {
+            other->icon_kind = 1;
+        } else if (other->icon_timers[1] != 0) {
+            other->icon_kind = 2;
         } else if (other->unk_03C == 0) {
-            other->unk_056 = 0;
+            other->icon_kind = 0;
         } else {
-            other->unk_056 = 5;
+            other->icon_kind = 5;
         }
         other->action = 0x43;
         m->action = 0x1E;
@@ -701,7 +701,7 @@ void func_8004FB10(void) {
 }
 
 void func_8004FB70(void) {
-    D_800AA248.cur_obj->owner.monster->unk_13E = 0x1A4;
+    D_800AA248.cur_obj->owner.monster->idle_timer = 0x1A4;
 }
 
 void func_8004FB8C(void) {

@@ -277,7 +277,7 @@ void func_8003D11C(Ai *ai) {
     if (k < 0x3B) {
         if (k >= 0x36) {
             if (ai->unk_0E != 0) {
-                ai->unk_18 = 0x28;
+                ai->timer = 0x28;
                 ai->unk_0E = 0;
             }
         }
@@ -506,9 +506,9 @@ void func_8003D71C(Ai *ai) {
     func_80029D1C();
     target = ai->target;
     D_800AA248.cur_obj->unk_68.monster = target;
-    delay = ai->unk_2E;
+    delay = ai->delay;
     if (delay != 0) {
-        ai->unk_2E = delay - 1;
+        ai->delay = delay - 1;
         return;
     }
     switch (ai->action) {
@@ -696,21 +696,21 @@ void func_8003DD70(Ai *ai) {
     SpriteFrame *frame;
     s32 n;
 
-    n = (u16)ai->unk_18 - 1;
+    n = (u16)ai->timer - 1;
     if (n > 0) {
-        ai->unk_18 = n;
+        ai->timer = n;
         D_800AA248.cur_obj->pos_x.w = D_801F9AC8.w + 0xFE440000;
         D_800AA248.cur_obj->pos_y.w = 0x02000000;
         return;
     }
     link = func_8003E1C8(&order, ai);
     if (link == NULL) {
-        ai->unk_18 = 0xF0;
+        ai->timer = 0xF0;
         return;
     }
     ai->state = 1;
     ai->action = 2;
-    if (link->unk_6 >= 2 || link->unk_4 == 0) {
+    if (link->unk_6 >= 2 || link->open == 0) {
         func_8003DAA0(ai);
         return;
     }
@@ -719,9 +719,9 @@ void func_8003DD70(Ai *ai) {
     order->unk_8 = (s32)ai;
     info = link->unk_8;
     ai->unk_1C.order = (AiOrder *)info;
-    obj = link->unk_0;
+    obj = link->obj;
     frame = obj->frame;
-    D_800AA248.cur_obj->priority = info->unk_8 + 0x10;
+    D_800AA248.cur_obj->priority = info->priority + 0x10;
     if (order->unk_4 == 2) {
         D_800AA248.cur_obj->flags |= 0x10;
         D_800AA248.cur_obj->pos_x.s.hi = obj->pos_x.s.hi + frame->unk_1C + 0xE;
@@ -797,7 +797,7 @@ void func_8003DFD4(void) {
         def->unk_0C = 0x781;
         ai->state = 0;
         if (D_801D36FC != 0x120) {
-            ai->unk_18 = func_8001EB10(0x64, 0x32) + 0x96;
+            ai->timer = func_8001EB10(0x64, 0x32) + 0x96;
         }
         ai->kind = *init;
         init++;
@@ -811,14 +811,14 @@ void func_8003DFD4(void) {
         y += 0x12C;
         D_800AA248.cur_obj->pos_y.s.hi = y;
         if (func_8005F208() == 3) {
-            ai->unk_18 = 0;
-            ai->unk_2E = 0;
+            ai->timer = 0;
+            ai->delay = 0;
         } else {
-            ai->unk_2E = y;
+            ai->delay = y;
         }
         if (ai->kind == 0) {
-            ai->unk_2E = 0x7FFF;
-            ai->unk_18 = 0x7FFF;
+            ai->delay = 0x7FFF;
+            ai->timer = 0x7FFF;
         }
         ai++;
     } while (--n != 0);
@@ -896,11 +896,11 @@ void func_8003E6A4(Ai *ai) {
     mover->vel_y.w = 0;
     ai->action = 1;
     if (func_8005F208() == 3) {
-        ai->unk_18 = 0;
-        ai->unk_2E = 0;
+        ai->timer = 0;
+        ai->delay = 0;
         return;
     }
-    ai->unk_18 = func_8001EB10(0x258, 0x168);
+    ai->timer = func_8001EB10(0x258, 0x168);
 }
 
 void func_8003E764(Ai *ai) {
@@ -1007,7 +1007,7 @@ u16 func_8003EB5C(Anim *anim, GameObject *mover) {
         mover->anim = (s32) anim;
         mover->script.pc = (s32) anim;
         mover->unk_4C = 0;
-        mover->unk_4D = 0;
+        mover->frames_left = 0;
         mover->unk_64.w = 0;
         mover->flags |= 0x800;
         D_800AA248.unk_7A = 0;

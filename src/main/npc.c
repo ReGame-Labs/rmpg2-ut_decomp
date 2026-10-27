@@ -1276,7 +1276,7 @@ void func_80037078(Monster *player, Npc *npc) {
     npc->unk_54 = D_800AA248.cur_obj->flags;
     npc->unk_5C = player->pos.u.lo;
     npc->unk_5E = player->pos.u.hi;
-    if (player->unk_142 != 0) {
+    if (player->icon_timers[1] != 0) {
         npc->unk_1A += 0xA;
     }
     player->unk_18A = 1;
@@ -2516,7 +2516,7 @@ void func_80039D04(Npc *npc) {
             turn:
                 npc->unk_1C = 0x3C;
                 func_8003EB5C(D_8009594C, D_800AA248.cur_obj);
-                npc->unk_24 = 0;
+                npc->aim = 0;
             } else if (func_80039C40(x, 0, 0) == 0) {
                 npc->action = 0xF;
             } else {
@@ -2552,7 +2552,7 @@ void npc_update_aim(Npc *npc) {
                 dy /= dx;
             }
             if (dy < 0x4000) {
-                switch (npc->unk_24) {
+                switch (npc->aim) {
                 case 0:
                     anim = 0;
                     dir = 0;
@@ -2597,7 +2597,7 @@ void npc_update_aim(Npc *npc) {
                     break;
                 }
             }
-            if (dir == npc->unk_24) {
+            if (dir == npc->aim) {
                 npc->action = 0x12;
                 npc->unk_1C = 1;
                 return;
@@ -2605,7 +2605,7 @@ void npc_update_aim(Npc *npc) {
             func_8003EB5C(D_8007DB04[anim], D_800AA268.p);
             npc->action = 2;
             npc->unk_1C = 0x1E;
-            npc->unk_24 = dir;
+            npc->aim = dir;
         }
     }
 }
@@ -2638,7 +2638,7 @@ stop:
     func_8003EB5C(D_8009585C, D_800AA248.cur_obj);
     npc->unk_34 = 0;
     D_800AA248.cur_obj->vel_x.w = 0;
-    npc->unk_24 = 0;
+    npc->aim = 0;
 }
 
 void func_8003A218(Npc *npc) {
@@ -2662,7 +2662,7 @@ void func_8003A218(Npc *npc) {
     func_8003EB5C(D_8009585C, D_800AA248.cur_obj);
     npc->unk_34 = 0;
     D_800AA248.cur_obj->vel_x.w = 0;
-    npc->unk_24 = 0;
+    npc->aim = 0;
 }
 
 void func_8003A328(Npc *npc, s32 arg1) {
@@ -2743,7 +2743,7 @@ INCLUDE_ASM("asm/main/nonmatchings/npc", func_8003A744);
 
 void func_8003A904(Npc *npc) {
     npc->unk_2A = 1;
-    switch (npc->unk_24) {
+    switch (npc->aim) {
     case 0:
         func_8003EB5C(D_80095B18, D_800AA248.cur_obj);
         break;
@@ -2866,7 +2866,7 @@ void func_8003AC74(Npc *npc) {
     if (npc->unk_0C != 0) {
         x = D_800AA268.p->pos_x.w;
         if (func_80039C40(x, 0x50000, 0x50000) != 0) {
-            n = npc->unk_24;
+            n = npc->aim;
             if (n < 2 && npc->unk_04 >= 0x10) {
                 if (n == 0) {
                     func_8001F7CC(0x64, 0x50);
@@ -2919,7 +2919,7 @@ extern u8 D_800956F4[];
 extern u8 D_80095720[];
 
 void func_8003AF40(Npc *npc) {
-    switch (npc->unk_24) {
+    switch (npc->aim) {
     case 0:
         if (D_800AA248.cur_obj->flags & 0x10) {
             func_8003EB5C(D_80095720, D_800AA248.cur_obj);
@@ -2931,7 +2931,7 @@ void func_8003AF40(Npc *npc) {
             D_800AA248.cur_obj->vel_x.w = -0x12000;
         }
         npc->unk_1C = 0x78;
-        npc->unk_24 = 1;
+        npc->aim = 1;
         break;
     case 1:
         npc->unk_1C--;
@@ -2940,7 +2940,7 @@ void func_8003AF40(Npc *npc) {
             D_800AA248.cur_obj->pos_y.w = 0xAA0000;
         }
         if (npc->unk_1C == 0) {
-            npc->unk_24 = 2;
+            npc->aim = 2;
             npc->unk_34 = 0;
         }
         break;
@@ -2951,7 +2951,7 @@ void func_8003AF40(Npc *npc) {
             D_800AA248.cur_obj->pos_y.w = 0x500000;
             npc->unk_1C = func_8001EA78() & 7;
             npc->action = 2;
-            npc->unk_24 = 0;
+            npc->aim = 0;
         }
         break;
     case 3:
@@ -2960,7 +2960,7 @@ void func_8003AF40(Npc *npc) {
             D_800AA268.p->vel_x.w = 0;
             npc->action = 2;
             npc->unk_1C = 1;
-            npc->unk_24 = 0;
+            npc->aim = 0;
         }
         if (func_80039C98(D_800AA248.cur_obj->pos_x.w, 0x320000, 0x320000) != 0) {
             npc->unk_34 = 0;
@@ -2990,11 +2990,11 @@ void func_8003B1D0(Npc *npc) {
         if (npc->unk_1C == 0) {
             if (func_80039C98(D_800AA248.cur_obj->pos_x.w, 0x460000, 0x460000) != 0) {
                 npc->action = 0x16;
-                npc->unk_24 = 0;
+                npc->aim = 0;
                 return;
             }
             npc->action = 0x16;
-            npc->unk_24 = 3;
+            npc->aim = 3;
             npc->unk_1C = 0x14;
         }
     }

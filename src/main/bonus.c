@@ -89,7 +89,7 @@ void bonus_create_lives(Monster *e) {
     def->unk_06 |= 0x20;
     D_800AA248.cur_obj = func_8001DCB4();
     D_800AA248.cur_obj->kind = e->id + 0x798;
-    e->unk_074 = D_800AA248.cur_obj;
+    e->portrait = D_800AA248.cur_obj;
     def->pos_x.s.hi = (D_801FA8A0[e->id - 1] - 2) * 0x78 + 0xE6;
     def->id = D_80084298[e->id - 1];
     def->pos_y.s.hi = y;
@@ -98,7 +98,7 @@ void bonus_create_lives(Monster *e) {
     D_800AA248.cur_obj = func_8001DCB4();
     D_800AA248.cur_obj->kind = e->id + 0x7A8;
     D_800AA248.cur_obj->unk_74 = frame;
-    v = e->unk_004;
+    v = e->lives;
     x = (D_801FA8A0[e->id - 1] - 2) * 0x78 + 0xF1;
     for (i = 0; i < 2; i++) {
         def->pos_x.s.hi = x;
@@ -110,7 +110,7 @@ void bonus_create_lives(Monster *e) {
         D_800AA248.cur_obj = func_8001DCB4();
         D_800AA248.cur_obj->kind = e->id + 0x7A8;
         v /= 10;
-        e->unk_078[i] = D_800AA248.cur_obj;
+        e->lives_digits[i] = D_800AA248.cur_obj;
     }
     D_800AA268.p = saved;
 }
@@ -138,7 +138,7 @@ void bonus_create_score(Monster *e) {
     D_800AA248.cur_obj = func_8001DCB4();
     dx = x + 0xF1;
     D_800AA248.cur_obj->kind = e->id + 0x7A0;
-    v = e->unk_038;
+    v = e->score;
     for (i = 0; i < 6; i++) {
         def->pos_x.s.hi = dx;
         dx -= 8;
@@ -149,7 +149,7 @@ void bonus_create_score(Monster *e) {
         D_800AA248.cur_obj = func_8001DCB4();
         D_800AA248.cur_obj->kind = e->id + 0x7A0;
         v /= 10;
-        e->unk_080[i] = D_800AA248.cur_obj;
+        e->score_digits[i] = D_800AA248.cur_obj;
     }
     D_800AA268.p = saved;
 }
@@ -162,17 +162,17 @@ void bonus_update_score(Monster *e) {
 
     saved = D_800AA268.p;
     if (e->id != 0) {
-        if (e->unk_038 != e->unk_034) {
+        if (e->score != e->score_shown) {
             func_8005E19C(e, 0x7A0);
             if (D_800AA2DC == 0 || (!(D_8007BD78.flags & 0x10) && (D_800AA2DC & 1))) {
                 func_8005E124(e, 0x7A8);
                 func_8005E124(e, 0x798);
             }
         }
-        v = e->unk_038;
-        e->unk_034 = v;
+        v = e->score;
+        e->score_shown = v;
         for (i = 0; i < 6; i++) {
-            digit = e->unk_080[i];
+            digit = e->score_digits[i];
             if (digit != NULL) {
                 main_set_frame(D_800842B4[v % 10], digit->flags, digit);
                 v /= 10;
@@ -195,9 +195,9 @@ Monster *bonus_find_most_lives(Monster *skip) {
         for (i = 0; i < 7; i++) {
             e = &D_801E0B78[i];
             if (skip != e && e->id != 0) {
-                v = e->unk_004;
+                v = e->lives;
                 if (v > 0 && best < v && (v != 1 || e->health.w > 0x10FFFF)) {
-                    best = e->unk_004;
+                    best = e->lives;
                     found = e;
                 }
             }
@@ -218,7 +218,7 @@ void bonus_update_lives(Monster *e) {
     if (id == 0) {
         return;
     }
-    face = e->unk_074;
+    face = e->portrait;
     if (e->unk_1CC == 1) {
         if (bonus_find_most_lives(e) != NULL) {
             func_8005E124(e, 0x7A0);
@@ -238,17 +238,17 @@ void bonus_update_lives(Monster *e) {
             main_set_frame(D_8008427C[e->id - 1], face->flags, face);
         }
     }
-    if (e->unk_004 != e->unk_002) {
+    if (e->lives != e->lives_shown) {
         func_8005E124(e, 0x7A0);
         func_8005E19C(e, 0x798);
         func_8005E19C(e, 0x7A8);
     }
-    v = e->unk_004;
-    e->unk_002 = v;
+    v = e->lives;
+    e->lives_shown = v;
     if (v >= 0) {
         for (i = 0; i < 2; i++) {
-            if (e->unk_078[i] != NULL) {
-                face = e->unk_078[i];
+            if (e->lives_digits[i] != NULL) {
+                face = e->lives_digits[i];
                 main_set_frame(D_800842B4[v % 10], face->flags, face);
                 v /= 10;
             }
@@ -310,36 +310,36 @@ void bonus_add_icon(Monster *e) {
     saved = D_800AA268.p;
     x = (D_801FA8A0[e->id - 1] - 2) * 0x78 + 0x96;
     for (i = 0; i < 3; i++) {
-        obj = e->unk_098[i];
+        obj = e->icons[i];
         if (obj != NULL) {
-            if (e->unk_056 == obj->unk_64.w) {
+            if (e->icon_kind == obj->unk_64.w) {
                 return;
             }
             x = obj->size.u.lo + 4 + x;
         }
     }
     for (i = 0; i < 3; i++) {
-        if (e->unk_098[i] == NULL) {
+        if (e->icons[i] == NULL) {
             D_800AA248.new_def = func_8001D110();
             def = D_800AA248.new_def;
-            def->id = D_80084304[e->unk_056];
+            def->id = D_80084304[e->icon_kind];
             def->pos_y.s.hi = 0x40;
             def->unk_06 |= 0x20;
             def->flags = 0x4FF;
             D_800AA248.cur_obj = func_8001DCB4();
             D_800AA248.cur_obj->kind = e->id + 0x790;
-            e->unk_098[i] = D_800AA248.cur_obj;
-            D_800AA248.cur_obj->unk_64.w = e->unk_056;
+            e->icons[i] = D_800AA248.cur_obj;
+            D_800AA248.cur_obj->unk_64.w = e->icon_kind;
             D_800AA248.cur_obj->pos_x.s.hi = x + D_800AA248.cur_obj->size.s.lo / 2;
-            switch (e->unk_056) {
+            switch (e->icon_kind) {
             case 1:
-                D_800AA248.cur_obj->unk_68.h = &e->unk_140;
+                D_800AA248.cur_obj->unk_68.h = &e->icon_timers[0];
                 break;
             case 2:
-                D_800AA248.cur_obj->unk_68.h = &e->unk_142;
+                D_800AA248.cur_obj->unk_68.h = &e->icon_timers[1];
                 break;
             default:
-                D_800AA248.cur_obj->unk_68.h = (u16 *) &e->unk_144;
+                D_800AA248.cur_obj->unk_68.h = &e->icon_timers[2];
                 break;
             }
             break;
@@ -363,7 +363,7 @@ void bonus_update_icons(Monster *e) {
     }
     x = (D_801FA8A0[e->id - 1] - 2) * 0x78 + 0x96;
     for (; i < 3; i++) {
-        obj = e->unk_098[i];
+        obj = e->icons[i];
         if (obj != NULL) {
             half = (s16) obj->size.u.lo / 2;
             if (obj->pos_x.s.hi - half == x) {
@@ -374,18 +374,18 @@ void bonus_update_icons(Monster *e) {
         }
     }
     for (i = 0; i < 3; i++) {
-        obj = e->unk_098[i];
+        obj = e->icons[i];
         if (used[i] == 0 && obj != NULL) {
             obj->pos_x.s.hi--;
         }
     }
     for (i = 0; i < 3; i++) {
-        obj = e->unk_098[i];
+        obj = e->icons[i];
         if (obj != NULL) {
             v = *obj->unk_68.h;
             if (v == 0) {
                 func_8001E4B0(obj);
-                e->unk_098[i] = NULL;
+                e->icons[i] = NULL;
             } else if (v < 0x40) {
                 if ((v & 0xF) < 7) {
                     func_8001BB88(obj);
@@ -572,16 +572,16 @@ void bonus_start_round(void) {
     case 4:
         D_8007BD78.flags |= 0x480;
         if (D_801D8740 == 1) {
-            D_8007BD78.unk_08[3] = 0x2D;
+            D_8007BD78.round_timer = 0x2D;
         } else {
-            D_8007BD78.unk_08[3] = 0x3C;
+            D_8007BD78.round_timer = 0x3C;
         }
         bonus_create_counter(4, 4);
         break;
     case 8:
     case 0x10:
     case 0x20:
-        D_8007BD78.unk_08[3] = 0x14;
+        D_8007BD78.round_timer = 0x14;
         D_8007BD78.flags |= 0x5C0;
         bonus_create_counter(4, 4);
         func_8005F12C();
@@ -589,7 +589,7 @@ void bonus_start_round(void) {
     case 0x40:
     case 0x80:
     case 0x100:
-        D_8007BD78.unk_08[3] = 0x3C;
+        D_8007BD78.round_timer = 0x3C;
         D_8007BD78.flags |= 0x4C0;
         bonus_create_counter(4, 4);
         break;
@@ -609,7 +609,7 @@ void bonus_start_round(void) {
     case 0x4000:
         saved = D_8007A68A;
         D_8007A68A = 1;
-        D_8007BD78.unk_08[3] = 0x2D;
+        D_8007BD78.round_timer = 0x2D;
         D_801FB464 = saved;
         D_8007BD78.flags |= 0xC0;
         bonus_create_counter(4, 4);
@@ -696,7 +696,7 @@ void bonus_create_counter(s32 kind, s32 n) {
         D_800AA268.p->kind = n + 0x7B0;
     } else {
         x = 0x64;
-        v = D_8007BD78.unk_08[3];
+        v = D_8007BD78.round_timer;
         count = 2;
         y = 0xAA;
     }
@@ -713,7 +713,7 @@ void bonus_create_counter(s32 kind, s32 n) {
         def->flags = n < 4 ? 0x500 : 0x7000;
         D_800AA248.cur_obj = func_8001DCB4();
         D_800AA248.cur_obj->kind = n + 0x7B0;
-        D_8007BD78.unk_24[n - 1][i] = D_800AA248.cur_obj;
+        D_8007BD78.digits[n - 1][i] = D_800AA248.cur_obj;
         v /= 10;
         if (n < 4) {
             x -= 8;
@@ -739,7 +739,7 @@ void func_8005F9FC(void) {
         e = &D_801E0B78[func_80025DF8(D_801FB49C[i])];
         e->unk_0F0 = 0;
         e->unk_17C = e->health.w;
-        e->unk_002 = e->unk_004;
+        e->lives_shown = e->lives;
     }
 }
 
@@ -883,10 +883,10 @@ void bonus_give_awards(s32 player, s32 awards) {
     }
     i = 0;
     if (awards & 1) {
-        m->unk_004++;
-        m->unk_002++;
+        m->lives++;
+        m->lives_shown++;
         for (i = 0; i < 6; i++) {
-            if (D_8007BD78.unk_7C[i] == 0) {
+            if (D_8007BD78.lives_icons[i] == 0) {
                 break;
             }
         }
@@ -899,12 +899,12 @@ void bonus_give_awards(s32 player, s32 awards) {
         D_800AA248.cur_obj = func_8001DCB4();
         D_800AA248.cur_obj->kind = kind;
         D_800AA248.cur_obj->unk_74 = frame;
-        D_8007BD78.unk_7C[i] = kind;
+        D_8007BD78.lives_icons[i] = kind;
         func_80060A7C(kind, 0, 1);
         if (awards & 2) {
             i++;
-            m->unk_004++;
-            m->unk_002++;
+            m->lives++;
+            m->lives_shown++;
             def->pos_x.s.hi = i * 0x11 + 0xDC;
             def->pos_y.s.hi = 0x6C;
             def->flags = 0x7001;
@@ -913,12 +913,12 @@ void bonus_give_awards(s32 player, s32 awards) {
             D_800AA248.cur_obj = func_8001DCB4();
             D_800AA248.cur_obj->kind = kind;
             D_800AA248.cur_obj->unk_74 = frame;
-            D_8007BD78.unk_7C[i] = kind;
+            D_8007BD78.lives_icons[i] = kind;
             func_80060A7C(kind, 0, 1);
         }
     }
     for (i = 0; i < 3; i++) {
-        if (D_8007BD78.unk_64[i] == 0) {
+        if (D_8007BD78.health_icons[i] == 0) {
             break;
         }
     }
@@ -935,11 +935,11 @@ void bonus_give_awards(s32 player, s32 awards) {
         D_800AA248.cur_obj = func_8001DCB4();
         D_800AA248.cur_obj->kind = kind;
         D_800AA248.cur_obj->unk_74 = frame;
-        D_8007BD78.unk_64[i] = kind;
+        D_8007BD78.health_icons[i] = kind;
         func_80060A7C(kind, 0, 1);
     }
     for (i = 0; i < 3; i++) {
-        if (D_8007BD78.unk_70[i] == 0) {
+        if (D_8007BD78.meter_icons[i] == 0) {
             break;
         }
     }
@@ -954,7 +954,7 @@ void bonus_give_awards(s32 player, s32 awards) {
         D_800AA248.cur_obj = func_8001DCB4();
         D_800AA248.cur_obj->kind = kind;
         D_800AA248.cur_obj->unk_74 = frame;
-        D_8007BD78.unk_70[i] = kind;
+        D_8007BD78.meter_icons[i] = kind;
         func_80060A7C(kind, 0, 1);
     }
 }

@@ -96,7 +96,7 @@ extern SoundCmd *D_80087130[];
 /* What a track points to (SoundTrack.unk_00): the channel's settings, copied in by wess_init_channel unless the
  * caller's SoundTrackOpts overrides them. */
 typedef struct SoundTrackHeader {
-    /* 0x00 */ u8 unk_00;           /* the channel's class (its byte 3) */
+    /* 0x00 */ u8 class;            /* the channel's class (its byte 3) */
     /* 0x01 */ u8 unk_01;           /* -> SoundChannel.unk_0C */
     /* 0x02 */ s16 unk_02;          /* -> unk_04 */
     /* 0x04 */ s16 unk_04;          /* -> unk_06 */
@@ -106,8 +106,8 @@ typedef struct SoundTrackHeader {
     /* 0x09 */ u8 unk_09;           /* -> unk_0F */
     /* 0x0A */ s16 unk_0A;          /* -> unk_14 */
     /* 0x0C */ s16 unk_0C;          /* -> unk_16 */
-    /* 0x0E */ u16 unk_0E;          /* -> unk_18, the number of labels */
-    /* 0x10 */ s32 unk_10;
+    /* 0x0E */ u16 label_count;     /* -> unk_18 */
+    /* 0x10 */ s32 data_size;       /* the sequence data's size */
 } SoundTrackHeader;
 
 /* A caller's overrides of a track's settings (wess_init_channel): a mask, then the values its bits select. */
@@ -195,8 +195,8 @@ typedef struct SoundPatchmap {
     /* 0x01 */ u8 unk_01[0x5];
     /* 0x06 */ u8 unk_06;           /* the lowest note it plays */
     /* 0x07 */ u8 unk_07;           /* the highest note */
-    /* 0x08 */ s8 unk_08;           /* the pitch bend's range down, in semitones (wess_pitch_mod) */
-    /* 0x09 */ s8 unk_09;           /* and up */
+    /* 0x08 */ s8 bend_down;        /* the pitch bend's range down, in semitones (wess_pitch_mod) */
+    /* 0x09 */ s8 bend_up;          /* and up */
     /* 0x0A */ s16 unk_0A;          /* its sample (SoundEntry) */
     /* 0x0C */ u16 unk_0C;
     /* 0x0E */ u16 unk_0E;          /* the release: bit 5 linear/exponential, bits 0-4 the rate */

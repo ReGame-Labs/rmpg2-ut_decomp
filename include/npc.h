@@ -26,15 +26,15 @@ struct AiOrder {
 };
 
 typedef struct AiLink {
-    /* 0x00 */ GameObject *unk_0;
-    /* 0x04 */ u16 unk_4;
+    /* 0x00 */ GameObject *obj;
+    /* 0x04 */ u16 open;
     /* 0x06 */ u16 unk_6;
     /* 0x08 */ struct AiLinkInfo *unk_8;
 } AiLink;
 
 typedef struct AiLinkInfo {
     /* 0x00 */ u8 unk_0[0x8];
-    /* 0x08 */ u16 unk_8;
+    /* 0x08 */ u16 priority;    /* the current object's priority becomes it + 0x10 */
     /* 0x0A */ u8 unk_A[0xA];
     /* 0x14 */ u16 unk_14;
 } AiLinkInfo;
@@ -104,9 +104,10 @@ typedef struct Npc {
     /* 0x1E */ s16 unk_1E;
     /* 0x20 */ u16 unk_20;
     /* 0x22 */ u16 unk_22;
-    /* 0x24 */ u16 unk_24;
+    /* 0x24 */ u16 aim;                    /* the slope band, 0..2 (D_8007DB04 holds the animations [old][new]); 3 in
+                                            * func_80020EDC's tables */
     /* 0x26 */ s16 unk_26;
-    /* 0x28 */ s16 unk_28;
+    /* 0x28 */ s16 target_y;               /* the y it flies to (func_80023B20) */
     /* 0x2A */ u16 unk_2A;
     /* 0x2C */ u16 unk_2C;
     /* 0x2E */ u16 unk_2E;

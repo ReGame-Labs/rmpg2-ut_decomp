@@ -293,10 +293,10 @@ s32 pickup_test_touch(GameObject *obj, Monster *m) {
         l = right;
         r = left;
     }
-    m_bottom = m->unk_11E;
-    m_right = m->unk_11C;
-    m_left = m->unk_118;
-    m_top = m->unk_11A;
+    m_bottom = m->hit_bottom;
+    m_right = m->hit_right;
+    m_left = m->hit_left;
+    m_top = m->hit_top;
     if (l < m_right && m_left < r && top < m_bottom && m_top < bottom) {
         return 1;
     }
@@ -330,7 +330,7 @@ void pickup_collect(Monster *e) {
                 r->unk_44 = D_800AA248.cur_obj->flags;
                 r->unk_4E = e->pos.u.lo;
                 r->unk_50 = e->pos.u.hi;
-                if (e->unk_142 != 0) {
+                if (e->icon_timers[1] != 0) {
                     r->unk_1A += 10;
                 }
                 e->unk_18A = 1;
@@ -355,7 +355,7 @@ void pickup_collect(Monster *e) {
                 r->unk_44 = D_800AA248.cur_obj->flags;
                 r->unk_4E = e->pos.u.lo;
                 r->unk_50 = e->pos.u.hi;
-                if (e->unk_142 != 0) {
+                if (e->icon_timers[1] != 0) {
                     r->unk_1A += 10;
                 }
                 e->unk_18A = 1;
@@ -866,15 +866,15 @@ void func_8003CADC(Monster *arg0) {
         var_v1 = 0x528;
         arg0->unk_186 = 0U;
     }
-    arg0->unk_140 = var_v1;
-    arg0->unk_056 = 1;
+    arg0->icon_timers[0] = var_v1;
+    arg0->icon_kind = 1;
     bonus_add_icon(arg0);
 }
 
 void func_8003CB30(Monster *arg0) {
     func_8001F724(3);
-    arg0->unk_144 = 0x294;
-    arg0->unk_056 = 3;
+    arg0->icon_timers[2] = 0x294;
+    arg0->icon_kind = 3;
 }
 
 void func_8003CB68(s16 n, Monster *a) {
@@ -889,8 +889,8 @@ void func_8003CB68(s16 n, Monster *a) {
             v = 0x5A0;
         }
     }
-    a->unk_142 = v;
-    a->unk_056 = 2;
+    a->icon_timers[1] = v;
+    a->icon_kind = 2;
     bonus_add_icon(a);
 }
 
@@ -951,7 +951,7 @@ fail:
     }
     rec->unk_1A = 0xB;
     a->unk_146 = 0x5A;
-    a->unk_056 = 7;
+    a->icon_kind = 7;
     return 1;
 }
 

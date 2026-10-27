@@ -489,7 +489,7 @@ extern Anim D_8008AE08;
 extern Anim D_8008AE08_alt;   /* the same table (config/aliases.ld) */
 extern Anim D_80097DC0;
 extern Anim D_8008B9E4;
-/* The handler tables of func_80020EDC: by Npc.unk_24 & 3, then by state & 0x1F. */
+/* The handler tables of func_80020EDC: by Npc.aim & 3, then by state & 0x1F. */
 extern void (**D_8007B2C0[4])(Npc *);
 extern NpcStep *D_8007B660[];
 extern NpcStep *D_8007B980[];
@@ -2201,7 +2201,7 @@ void func_8001E664(Fixed *width, s32 flags, Fixed *pos, s32 *y) {
 void func_8001E698(GameObject *arg0, s32 arg1) {
     arg0->script.pc = arg1;
     arg0->anim = arg1;
-    arg0->unk_4D = 0;
+    arg0->frames_left = 0;
     arg0->flags = (u16) (arg0->flags | 0x800);
     func_8001E6CC(arg0);
 }
@@ -2805,7 +2805,7 @@ void func_80020EDC(Npc *npc) {
         D_800AA248.cur_obj = saved;
     }
     func_80024508(npc);
-    D_8007B2C0[npc->unk_24 & 3][npc->state & 0x1F](npc);
+    D_8007B2C0[npc->aim & 3][npc->state & 0x1F](npc);
 }
 
 void func_80020FC8(Npc *npc) {
@@ -2871,7 +2871,7 @@ void func_800211F4(Npc *npc) {
             return;
         }
         func_80024138(npc);
-        if (npc->unk_24 != 3) {
+        if (npc->aim != 3) {
             npc->start = func_8001EB10(7, 0) & 1;
         } else {
             npc->start = 1;
@@ -3582,7 +3582,7 @@ void func_80022EC0(Npc *npc) {
     func_80024418(&x, &y, npc);
     dx = x - y;
     x = y;
-    y = npc->unk_28;
+    y = npc->target_y;
     y -= D_800AA268.p->pos_y.s.hi;
     if (dx > 0) {
         D_800AA268.p->flags &= 0xFFEF;
@@ -3717,7 +3717,7 @@ void func_800232D8(Npc *npc) {
             func_800377B4(npc);
             target = npc->unk_10;
             if ((target == NULL) || !(target->unk_058 & 1) || (target->action == 0x37)) {
-                npc->unk_28 = 0x64;
+                npc->target_y = 0x64;
                 npc->unk_26 = (D_801F9ACA + 0xC8) & D_801D8866;
                 return;
             }
@@ -3727,7 +3727,7 @@ void func_800232D8(Npc *npc) {
         if (y >= 0xE1) {
             y = 0x64;
         }
-        npc->unk_28 = y;
+        npc->target_y = y;
         x = sprite->pos_x.u.hi;
         if (sprite->flags & 0x10) {
             npc->unk_26 = x - 1;
@@ -3749,7 +3749,7 @@ void func_800233E0(Npc *npc) {
             func_800377B4(npc);
             return;
         }
-        npc->unk_28 = (s16) (temp_v1->pos_y.u.hi - 0x1E);
+        npc->target_y = (s16) (temp_v1->pos_y.u.hi - 0x1E);
         npc->unk_3C = (u16) temp_v1->flags;
         if (temp_v1->flags & 0x10) {
             var_v0 = temp_v1->pos_x.u.hi - 1;
@@ -3802,7 +3802,7 @@ u16 func_80023AC0(Npc *npc) {
     s32 dist;
     s32 step;
 
-    delta = npc->unk_28 - D_800AA268.p->pos_y.u.hi;
+    delta = npc->target_y - D_800AA268.p->pos_y.u.hi;
     dist = (delta >= 0) ? delta : -delta;
     if (dist < 0xB) {
         D_800AA268.p->vel_y.w = 0;
@@ -3824,7 +3824,7 @@ u16 func_80023B20(Npc *npc) {
     s32 dist;
     s32 step;
 
-    delta = npc->unk_28 - 0x6C;
+    delta = npc->target_y - 0x6C;
     delta -= D_800AA268.p->pos_y.u.hi;
     dist = (delta >= 0) ? delta : -delta;
     if (dist < 0xB) {
@@ -4047,7 +4047,7 @@ u16 func_80024138(Npc *npc) {
             }
             goto loop;
         }
-        npc->unk_24 = k;
+        npc->aim = k;
         bit = 1;
         if (k != 0) {
             bit = 4;
@@ -4058,7 +4058,7 @@ u16 func_80024138(Npc *npc) {
         D_801E2A50 = used | bit;
         return k;
     }
-    npc->unk_24 = 3;
+    npc->aim = 3;
     return 3;
 }
 #else
@@ -4069,7 +4069,7 @@ void func_8002423C(Npc *npc) {
     s16 temp_v1;
     s32 var_a0;
 
-    temp_v1 = npc->unk_24;
+    temp_v1 = npc->aim;
     if (temp_v1 != 3) {
         var_a0 = 1;
         if (temp_v1 != 0) {
@@ -4416,9 +4416,9 @@ void func_80024C2C(void) {
         } else {
             tile = 0xCD;
         }
-        rec->unk_006 = tile;
-        rec->unk_004 = e->unk_10;
-        rec->unk_00E = e->unk_10 + (s16) (def->unk_04 - 9);
+        rec->bottom = tile;
+        rec->left = e->unk_10;
+        rec->right = e->unk_10 + (s16) (def->unk_04 - 9);
         if (def->unk_00.w != 4) {
             rec->unk_05C = def->unk_08;
             rec->unk_060 = def->unk_0C;
@@ -4461,8 +4461,8 @@ void func_8002503C(Building *building, GameObject *obj) {
     }
     def->id = *(s32 *) def->anim;
     def->unk_1C = 0;
-    def->pos_x.s.hi = building->unk_004 + 0x2F;
-    def->pos_y.s.hi = building->unk_006 - 0x3A;
+    def->pos_x.s.hi = building->left + 0x2F;
+    def->pos_y.s.hi = building->bottom - 0x3A;
     def->flags = obj->priority + 1;
     sprite = func_8001DCB4();
     sprite->kind = 0x728;
@@ -4485,8 +4485,8 @@ void func_80025124(Building *rec) {
     rec->kind = def->unk_00.u.lo;
     request = func_8001D110();
     request->unk_0C = 0x728;
-    request->pos_y.u.hi = rec->unk_006;
-    request->pos_x.u.hi = rec->unk_004;
+    request->pos_y.u.hi = rec->bottom;
+    request->pos_x.u.hi = rec->left;
     kind = rec->unk_008;
     item = &rec->items[0];
     if (def->unk_08 != 0) {
@@ -4502,13 +4502,13 @@ void func_80025124(Building *rec) {
         rec->unk_00A = 0;
         rec->unk_070 = item;
         if (def == &D_800135E8) {
-            rec->unk_074 = sprite->pos_y.u.hi - 0x5C;
+            rec->top = sprite->pos_y.u.hi - 0x5C;
             sprite->kind = 0x72A;
             rec->unk_058 = 2;
             rec->unk_012 = 2;
             func_8002503C(rec, sprite);
         } else if (def == &D_8001687C) {
-            rec->unk_074 = sprite->pos_y.u.hi - 0x3E;
+            rec->top = sprite->pos_y.u.hi - 0x3E;
             sprite->kind = 0x72A;
             rec->unk_058 = 3;
             rec->unk_012 = 0x7D;
@@ -4518,9 +4518,9 @@ void func_80025124(Building *rec) {
                 u16 y = sprite->pos_y.u.hi;
 
                 rec->unk_058 = 0;
-                rec->unk_074 = y - 0x1F;
+                rec->top = y - 0x1F;
             } else {
-                rec->unk_074 = sprite->pos_y.u.hi - 0x3E;
+                rec->top = sprite->pos_y.u.hi - 0x3E;
             }
         }
         func_800252CC(rec);
@@ -5123,14 +5123,14 @@ void func_800273F4(Monster *monster, s32 arg1) {
                 }
                 buttons = script[2];
                 if (buttons != 0) {
-                    monster->unk_13E = 0x1A4;
+                    monster->idle_timer = 0x1A4;
                 }
                 held = monster->buttons;
                 monster->buttons = buttons;
                 func_8002808C(buttons, held, monster);
                 dir = script[1];
                 if (dir != 0) {
-                    monster->unk_13E = 0x1A4;
+                    monster->idle_timer = 0x1A4;
                 }
                 prevDir = monster->dir;
                 monster->dir = dir;
@@ -5157,14 +5157,14 @@ void func_800273F4(Monster *monster, s32 arg1) {
     bits = raw & 0x3FF;
     buttons = bits >> 4;
     if (buttons != 0) {
-        monster->unk_13E = 0x1A4;
+        monster->idle_timer = 0x1A4;
     }
     held = monster->buttons;
     monster->buttons = buttons;
     func_8002808C(buttons, held, monster);
     dir = D_8007C124[bits & 0xF];
     if (dir != 0) {
-        monster->unk_13E = 0x1A4;
+        monster->idle_timer = 0x1A4;
     }
     prevDir = monster->dir;
     monster->dir = dir;
@@ -5408,7 +5408,7 @@ void main_count_monsters(void) {
     D_800AA248.unk_10 = 0;
     D_800AA248.action = 0;
     D_800AA248.unk_1C.n = 0;
-    D_800AA248.unk_24 = 0;
+    D_800AA248.dir = 0;
     D_800AA248.unk_08 = 7;
     do {
         m = &D_801E0B78[D_800AA248.unk_08];
@@ -5418,7 +5418,7 @@ void main_count_monsters(void) {
                     D_800AA248.unk_10++;
                     continue;
                 }
-                D_800AA248.unk_24++;
+                D_800AA248.dir++;
             }
             D_800AA248.unk_0C++;
             if (m->unk_01C != 0 || m->action == 0x1F) {
@@ -5436,10 +5436,10 @@ void main_count_monsters(void) {
     D_801E1CB0 = D_800AA248.unk_10;
     D_801E1E44 = D_800AA248.action;
     D_801F9AD4 = D_800AA248.unk_1C.n;
-    D_801E29C4 = D_800AA248.unk_24;
+    D_801E29C4 = D_800AA248.dir;
     while (i < D_801D8740) {
         m = &D_801E0B78[func_80025DF8(D_801FB49C[i])];
-        if (m->unk_004 != 0 || m->health.s.hi != 0) {
+        if (m->lives != 0 || m->health.s.hi != 0) {
             result = D_801D8740;
             break;
         }
@@ -5483,7 +5483,7 @@ void func_8002987C(Monster *monster) {
         return;
     }
     found = 0;
-    if ((monster->unk_126 != 0x19) && !(monster->obj->unk_6C & 0x80) && (monster->unk_140 == 0)) {
+    if ((monster->unk_126 != 0x19) && !(monster->obj->unk_6C & 0x80) && (monster->icon_timers[0] == 0)) {
         for (p = D_8007C1D4; *p != 0xFFFF; p++) {
             if (*p == action) {
                 found = 1;
@@ -5574,7 +5574,7 @@ u16 func_80029B80(void) {
         building = D_801D3DC8;
         do {
             if (building->state < 9) {
-                dist = func_8003FCD8((building->unk_004 + building->unk_00E) >> 1, cx);
+                dist = func_8003FCD8((building->left + building->right) >> 1, cx);
                 d = dist;
                 if (dist < 0) {
                     d = -d;

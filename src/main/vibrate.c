@@ -37,7 +37,7 @@ void func_800634D4(Monster *monster, u32 preset) {
     s32 level = D_80085308[preset].level;
     s32 time = D_80085308[preset].time;
 
-    if (monster->unk_142 != 0 && preset < 4) {
+    if (monster->icon_timers[1] != 0 && preset < 4) {
         level *= 2;
         if (level > 0x40) {
             level = 0x40;

@@ -80,6 +80,7 @@ typedef struct GameObject {
                    struct GameObject *obj;  /* a link (main.c's list from D_801D8584) */
                    s32 w;                   /* a value; a box's width (main_create_box: the status bars, OVERATTR's
                                              * volume bars) */
+                   s32 *ids;                /* the frames a cloud strip cycles (building.c, the sky) */
                } unk_40;
     /* 0x44 */ union {                  /* by kind */
                    s32 pc;                  /* the animation script's next command (an address) */
@@ -88,7 +89,7 @@ typedef struct GameObject {
                } script;
     /* 0x48 */ s32 anim;                /* the current animation (an address: the script restarts there) */
     /* 0x4C */ u8 unk_4C;
-    /* 0x4D */ u8 unk_4D;                /* frames left on the animation command (every reader loads it with lbu) */
+    /* 0x4D */ u8 frames_left;           /* frames left on the animation command (every reader loads it with lbu) */
     /* 0x4E */ u8 unk_4E[0x02];
     /* 0x50 */ union {                  /* by kind */
                    struct GameObject *obj;  /* a link */
@@ -157,8 +158,8 @@ typedef struct GameObject {
 /* A monster, a player's or the computer's: 0x220 bytes, in the array D_801E0B78 (by its number). */
 typedef struct Monster {
     /* 0x000 */ u16 id;                        /* its number, 1..7 (a player's is 1-based) */
-    /* 0x002 */ s16 unk_002;
-    /* 0x004 */ s16 unk_004;
+    /* 0x002 */ s16 lives_shown;                 /* the lives the panel shows (bonus_update_lives) */
+    /* 0x004 */ s16 lives;                       /* its lives left; the score earns more (bonus_find_most_lives) */
     /* 0x006 */ u16 kind;                      /* the monster kind: 0x15 has its own thrown objects */
     /* 0x008 */ Fixed health;                  /* 0..0x44 (16.16): zero, it is out; a continue refills it */
     /* 0x00C */ Fixed health_shown;            /* eased towards health by 1/16 a frame; health_bar shows it */
@@ -178,15 +179,15 @@ typedef struct Monster {
     /* 0x028 */ u16 unk_028;
     /* 0x02A */ u16 unk_02A;                   /* the kind of throw in progress, 0 none */
     /* 0x02C */ u8 unk_02C[0x08];
-    /* 0x034 */ s32 unk_034;
-    /* 0x038 */ s32 unk_038;
+    /* 0x034 */ s32 score_shown;               /* the score the panel shows (bonus_update_score) */
+    /* 0x038 */ s32 score;
     /* 0x03C */ u16 unk_03C;
     /* 0x03E */ u16 unk_03E;
     /* 0x040 */ s32 unk_040;
     /* 0x044 */ s16 unk_044;
     /* 0x046 */ u16 unk_046;
     /* 0x048 */ u8 unk_048[0x0E];
-    /* 0x056 */ u16 unk_056;
+    /* 0x056 */ u16 icon_kind;               /* the icon its status panel shows (bonus.c): 1, 2 by icon_timers, 5 (func_8004F910) */
     /* 0x058 */ u16 unk_058;                   /* flags; 1: in play */
     /* 0x05A */ u16 action;                    /* the state the script dispatcher runs */
     /* 0x05C */ u16 unk_05C;
@@ -197,14 +198,15 @@ typedef struct Monster {
     /* 0x068 */ GameObject *obj;               /* its body */
     /* 0x06C */ GameObject *meter_bar;         /* status bars: boxes whose width (unk_40.w) is the value shown, */
     /* 0x070 */ GameObject *health_bar;        /* at most 0x44 (bonus_create_bars, bonus_update_bars) */
-    /* 0x074 */ GameObject *unk_074;               /* its portrait in the status panel (bonus_update_lives) */
-    /* 0x078 */ GameObject *unk_078[2];            /* the lives' digit sprites */
-    /* 0x080 */ GameObject *unk_080[6];        /* the score's digit sprites */
-    /* 0x098 */ GameObject *unk_098[3];
+    /* 0x074 */ GameObject *portrait;          /* its portrait in the status panel, animated by id (bonus_update_lives) */
+    /* 0x078 */ GameObject *lives_digits[2];   /* the digit sprites of lives */
+    /* 0x080 */ GameObject *score_digits[6];   /* the digit sprites of score (bonus_create_score) */
+    /* 0x098 */ GameObject *icons[3];          /* the status icons (bonus.c), [0] its body sprite too (func_8002CBF4) */
     /* 0x0A4 */ GameObject *bars[3];           /* the results bars, one per tally (OVERATTR, func_8009951C) */
     /* 0x0B0 */ u8 unk_0B0[0x04];
     /* 0x0B4 */ GameObject *extra[5];          /* its own sprites (5's, 7's: kind 0x73A; 2-4 func_8002A1AC), or NULL */
-    /* 0x0C8 */ u16 buttons;                   /* the pad's buttons held, pad bits >> 4 (func_800273F4) */
+    /* 0x0C8 */ u16 buttons;                   /* the pad's buttons held, pad bits >> 4 (func_800273F4); & 0xF: the
+                                                * direction bits, the index into the action's handler table (func_80027FD0) */
     /* 0x0CA */ u8 unk_0CA[0x02];
     /* 0x0CC */ u16 dir;                       /* the d-pad direction, 0 none (D_8007C124[pad bits & 0xF]); an index
                                                 * into the per-file speed tables */
@@ -241,10 +243,10 @@ typedef struct Monster {
     /* 0x112 */ u16 box2_y0;
     /* 0x114 */ s16 box2_x1;
     /* 0x116 */ u16 box2_y1;
-    /* 0x118 */ u16 unk_118;                   /* the hit box: left, top, right, bottom */
-    /* 0x11A */ u16 unk_11A;
-    /* 0x11C */ s16 unk_11C;
-    /* 0x11E */ u16 unk_11E;
+    /* 0x118 */ u16 hit_left;                  /* the hit box the pickups and the projectiles test */
+    /* 0x11A */ u16 hit_top;
+    /* 0x11C */ s16 hit_right;
+    /* 0x11E */ u16 hit_bottom;
     /* 0x120 */ Fixed pos;                     /* its position: s.lo x, s.hi y */
     /* 0x124 */ u8 unk_124[0x02];
     /* 0x126 */ u16 unk_126;
@@ -257,16 +259,15 @@ typedef struct Monster {
     /* 0x138 */ u16 unk_138;
     /* 0x13A */ u8 unk_13A[0x02];
     /* 0x13C */ u16 unk_13C;
-    /* 0x13E */ u16 unk_13E;
-    /* 0x140 */ u16 unk_140;
-    /* 0x142 */ u16 unk_142;                   /* nonzero: the vibration presets 0-3 run twice as strong and long */
-    /* 0x144 */ s16 unk_144;
+    /* 0x13E */ u16 idle_timer;                /* frames to its next idle animation (0x1A4) */
+    /* 0x140 */ u16 icon_timers[3];            /* the frames left on each status icon (bonus.c shows them); [1] nonzero: the
+                                                * vibration presets 0-3 run twice as strong and long */
     /* 0x146 */ s16 unk_146;
     /* 0x148 */ u8 unk_148[0x08];
     /* 0x150 */ s16 unk_150;
     /* 0x152 */ u16 unk_152;
     /* 0x154 */ u8 unk_154[0x0C];
-    /* 0x160 */ GameObject *unk_160;               /* an object it is carried by: monster_follow_holder places it there */
+    /* 0x160 */ GameObject *holder;            /* an object it is carried by: monster_follow_holder places it there */
     /* 0x164 */ s16 unk_164;
     /* 0x166 */ u16 unk_166;
     /* 0x168 */ u16 unk_168;
@@ -276,7 +277,7 @@ typedef struct Monster {
     /* 0x172 */ u8 unk_172[0x02];
     /* 0x174 */ s32 unk_174;
     /* 0x178 */ u16 unk_178;
-    /* 0x17A */ u16 unk_17A;
+    /* 0x17A */ u16 idle_alt;                  /* toggled when idle_timer runs out: picks the other idle animation */
     /* 0x17C */ s32 unk_17C;
     /* 0x180 */ struct Monster *attacker;      /* the monster that hit it last (func_8005421C) */
     /* 0x184 */ u16 unk_184;
@@ -317,7 +318,7 @@ typedef struct Monster {
     /* 0x1E8 */ u8 unk_1E8[0x10];
     /* 0x1F8 */ s32 unk_1F8;
     /* 0x1FC */ GameObject *unk_1FC;
-    /* 0x200 */ struct Monster *unk_200;     /* a monster it bounces off (func_80053204) */
+    /* 0x200 */ struct Monster *bump_target;   /* a monster it bounces off (func_80053204) */
     /* 0x204 */ u16 unk_204;
     /* 0x206 */ u8 unk_206[0x02];
     /* 0x208 */ s32 unk_208;
@@ -373,7 +374,8 @@ typedef struct GameState {
                    s32 n;                   /* a count (main_count_monsters) */
                } unk_1C;
     /* 0x20 */ GameObject *cur_obj;            /* the object being updated (D_800AA268) */
-    /* 0x24 */ s32 unk_24;                     /* D_800AA26C */
+    /* 0x24 */ s32 dir;                        /* a monster's direction, copied before its handlers run (D_800AA26C);
+                                                * scratch: main_count_monsters's count */
     /* 0x28 */ s32 unk_28;                     /* a counter (func_8003C3B0: the items left in the building) */
     /* 0x2C */ s32 unk_2C;
     /* 0x30 */ s32 *unk_30;
@@ -445,7 +447,7 @@ typedef struct Ai {
                    struct Actor *actor;
                } unk_10;
     /* 0x14 */ struct Monster *target;         /* the monster it goes for */
-    /* 0x18 */ s16 unk_18;
+    /* 0x18 */ s16 timer;                      /* a countdown */
     /* 0x1A */ u16 unk_1A;
     /* 0x1C */ union {
                    struct AiOrder *order;
@@ -464,7 +466,7 @@ typedef struct Ai {
                    } s;
                } unk_28;
     /* 0x2C */ u8 unk_2C[0x02];
-    /* 0x2E */ u16 unk_2E;
+    /* 0x2E */ u16 delay;                      /* a countdown before it acts */
     /* 0x30 */ Fixed unk_30;
     /* 0x34 */ Fixed unk_34;
     /* 0x38 */ u16 unk_38;                     /* a countdown */
@@ -548,12 +550,12 @@ typedef struct Building {
     /* 0x000 */ u16 unk_000;                   /* the item count */
     /* 0x002 */ u16 kind;                      /* its definition's (BuildingDef.unk_00): 2 or 3, the roof's x offset
                                                 * 0x28 or 0x3C */
-    /* 0x004 */ u16 unk_004;                   /* x */
-    /* 0x006 */ u16 unk_006;
+    /* 0x004 */ u16 left;                      /* its box: the left wall's x, */
+    /* 0x006 */ u16 bottom;                    /* the ground's y (top and right below) */
     /* 0x008 */ u16 unk_008;
     /* 0x00A */ s16 unk_00A;
     /* 0x00C */ s16 unk_00C;
-    /* 0x00E */ s16 unk_00E;
+    /* 0x00E */ s16 right;                     /* the right wall's x */
     /* 0x010 */ u16 unk_010;
     /* 0x012 */ u16 unk_012;
     /* 0x014 */ u16 state;                     /* 0, 2-5, 7, 8, 9 and up: falling, 0xD, 0xF, 0x10: gone */
@@ -562,9 +564,9 @@ typedef struct Building {
     /* 0x01C */ u16 unk_01C;
     /* 0x01E */ u16 unk_01E;                   /* its index + 1 */
     /* 0x020 */ BuildingDef *def;              /* the definition it was made from */
-    /* 0x024 */ s16 unk_024;
-    /* 0x026 */ s16 unk_026;
-    /* 0x028 */ s16 unk_028;
+    /* 0x024 */ s16 left_side;                 /* who holds the left side: 0 free, else an index + 1 (func_8002D2CC */
+    /* 0x026 */ s16 unk_026;                   /* compares the three with its argument); below 0 closed */
+    /* 0x028 */ s16 right_side;                /* who holds the right side */
     /* 0x02A */ u16 unk_02A;
     /* 0x02C */ u16 unk_02C;
     /* 0x02E */ u16 unk_02E;
@@ -582,7 +584,7 @@ typedef struct Building {
     /* 0x068 */ SpriteFrame **frames;          /* from the definition: the items' frames, by item kind - 2 */
     /* 0x06C */ s32 unk_06C;
     /* 0x070 */ struct BuildingItem *unk_070;
-    /* 0x074 */ u16 unk_074;
+    /* 0x074 */ u16 top;                       /* the roof's y */
     /* 0x076 */ u16 unk_076;
     /* 0x078 */ u16 unk_078;
     /* 0x07A */ u16 unk_07A;
@@ -607,15 +609,16 @@ extern u16 D_801E29A4;
 typedef struct LevelFlags {
     /* 0x00 */ s32 flags;                      /* 0x20, 0x40 */
     /* 0x04 */ s32 unk_04;
-    /* 0x08 */ s32 unk_08[4];                  /* per player (D_801FA8A0[monster id - 1] - 1) */
+    /* 0x08 */ s32 unk_08[3];                  /* per player (D_801FA8A0[monster id - 1] - 1): the bonus round's tally */
+    /* 0x14 */ s32 round_timer;                /* the bonus round's time left in seconds, 0x14..0x3C by round (D_8007BD8C) */
     /* 0x18 */ u16 unk_18[4];                  /* per player - 1: frames counted towards a second (func_8005F5B8) */
     /* 0x20 */ u8 unk_20[0x04];
-    /* 0x24 */ GameObject *unk_24[4][3];       /* per player - 1: digit sprites (bonus_create_counter) */
+    /* 0x24 */ GameObject *digits[4][3];       /* per player - 1: digit sprites (bonus_create_counter) */
     /* 0x54 */ s32 unk_54;
     /* 0x58 */ u8 unk_58[0x0C];
-    /* 0x64 */ s32 unk_64[3];                  /* the award icons shown (bonus_give_awards), by kind: health, */
-    /* 0x70 */ s32 unk_70[3];                  /* meter, */
-    /* 0x7C */ s32 unk_7C[6];                  /* extra lives */
+    /* 0x64 */ s32 health_icons[3];            /* the award icons shown (bonus_give_awards), by kind: health, */
+    /* 0x70 */ s32 meter_icons[3];             /* meter, */
+    /* 0x7C */ s32 lives_icons[6];             /* extra lives */
 } LevelFlags;
 
 extern LevelFlags D_8007BD78;

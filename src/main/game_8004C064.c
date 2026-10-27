@@ -157,7 +157,7 @@ u16 func_8004C308(s32 pc, s32 arg1) {
     D_800AA248.cur_obj->anim = pc;
     D_800AA248.cur_obj->script.pc = pc;
     D_800AA248.cur_obj->unk_4C = 0;
-    D_800AA248.cur_obj->unk_4D = 0;
+    D_800AA248.cur_obj->frames_left = 0;
     D_800AA248.cur_obj->unk_64.w = 0;
     func_800635F4(arg1, pc);
     D_800AA248.cur_obj->flags |= 0x800;
@@ -587,7 +587,7 @@ void func_8004CDEC(void) {
     Monster *m = D_800AA248.cur_obj->owner.monster;
     s16 x;
 
-    m->unk_13E = 0x1A4;
+    m->idle_timer = 0x1A4;
     m->action = 0;
     D_800AA248.cur_obj->pos_y.s.hi = 0xE1;
     D_800AA248.cur_obj->pos_x.s.hi &= D_801D8866;
@@ -914,10 +914,10 @@ u16 func_8004D6F8(Monster *m, Ai **out) {
                 }
                 top = o->pos_y.u.hi - f->origin.u.hi;
                 bottom = top + f->size.u.hi;
-                m_bottom = m->unk_11E;
-                m_right = m->unk_11C;
-                m_left = m->unk_118;
-                m_top = m->unk_11A;
+                m_bottom = m->hit_bottom;
+                m_right = m->hit_right;
+                m_left = m->hit_left;
+                m_top = m->hit_top;
                 if (left < m_right && m_left < right && top < m_bottom && m_top < bottom) {
                     m->unk_18A = 1;
                     *out = p;
@@ -1178,7 +1178,7 @@ void func_8004DDFC(void) {
                                         other->unk_0E4 = 0;
                                         other->unk_0E6 = 0;
                                     }
-                                    if (m->unk_142 == 0) {
+                                    if (m->icon_timers[1] == 0) {
                                         kind = other->unk_0E4;
                                         if (kind == 0) {
                                             act = 0x3A;
@@ -1206,7 +1206,7 @@ void func_8004DDFC(void) {
                                 other->unk_0E4 = 0;
                                 other->unk_0E6 = 0;
                             }
-                            if (m->unk_142 == 0) {
+                            if (m->icon_timers[1] == 0) {
                                 kind = other->unk_0E4;
                                 if (kind == 0) {
                                     func_8004DC7C(m, other);

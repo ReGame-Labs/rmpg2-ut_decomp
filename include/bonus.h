@@ -35,11 +35,11 @@ void func_80062E44(void);
 
 extern Anim D_80016A84;
 extern s32 D_8007BD7C;
-extern s32 D_8007BD8C;                  /* D_8007BD78.unk_08[3] by its own name */
+extern s32 D_8007BD8C;                  /* D_8007BD78.round_timer by its own name */
 extern s32 D_80084314[];                /* the finishing animations, by place */
 extern s32 D_80084328[];                /* the race's place boundaries (x) */
 extern u32 D_8008433C[];                /* the score round's place boundaries */
-extern s32 D_80084304[];                /* the slot icons' animations, by Monster.unk_056 */
+extern s32 D_80084304[];                /* the slot icons' animations, by Monster.icon_kind */
 extern s32 D_80084298[];                /* the lives counter's animations, by monster id - 1 */
 extern s32 D_8008427C[];                /* the portrait animations, by monster id - 1 */
 extern s32 D_800842B4[];
