@@ -53,12 +53,22 @@ extern SoundBankHeader D_801C49C0;
 extern s32 D_801FB4A8;
 extern s32 D_801FB4B8;
 
-extern s32 D_80085264[];
 extern u16 D_801D8728;   /* not in game.h: read unsigned here and in main.c, signed in actor.c */
 
-extern u8 D_80085274[];
-extern s32 D_80085278;
-extern s32 D_8008527C;
+/* The city file tables (in the .data before this file's), indexed by the city byte: the first is the identity from
+ * 0x54, the three others five files each. */
+extern u8 D_800851CC[];
+extern u8 D_8008524C[];
+extern u8 D_80085254[];
+extern u8 D_8008525C[];
+
+/* The city file table per D_801D8728. */
+u8 *D_80085264[] = { D_800851CC, D_8008524C, D_80085254, D_8008525C };
+/* The overlays' file indices: OVERATTR.BIN, OVERMOVE.BIN. */
+u8 D_80085274[] = { 0x52, 0x53 };
+/* The loaded overlay and city table, -1 for none. */
+s32 D_80085278 = -1;
+s32 D_8008527C = -1;
 extern u8 *D_80016AC8;
 extern u8 *D_80016ACC;
 
@@ -71,7 +81,6 @@ extern s32 D_801E28EC;
 extern s32 D_801E0D48;
 extern s32 D_801F991C;
 extern s32 D_801FB4C0;
-extern u8 *D_80085300;
 
 
 s32 func_8006EE30(s32);
@@ -97,7 +106,6 @@ s32 cdload_unpack_rle16(u8 *src, u8 *dst);
 s32 cdload_unpack_rle6(u8 *src, u8 *dst);
 s32 cdload_unpack_rle4(u8 *src, u8 *dst);
 void func_800621F8(u8 *bits, u8 *table, u32 dims);
-extern s16 D_80085304[];
 
 /* Lists the players of the monsters in D_801FB49C, sorted, 99 for none. */
 void func_80060F3C(void) {
@@ -350,7 +358,7 @@ s32 cdload_city_file_index(s32 which) {
     s32 pair;
     s32 file;
 
-    offset = D_80085264[D_801D8728];
+    offset = (s32)D_80085264[D_801D8728];   /* the index is added to the address as an integer */
     if (D_801D8728 != 0) {
         p = (u8 *)((u16) D_801FA964 + offset);   /* unsigned here (lhu), as D_801FA960 below */
     } else {
@@ -522,7 +530,117 @@ s32 cdload_unpack_rle8(u8 *src, u8 *dst) {
     return out - dst;
 }
 
-INCLUDE_ASM("asm/main/nonmatchings/cdload", cdload_unpack_rle16);
+/* Unpacks a halfword RLE stream: a halfword without bit 15 is copied; one with it is a run of the colour in bits 9-14
+ * (spread over both 5-bit fields' top bits), its length in bytes in bits 0-8. The runs are written 32 halfwords per loop,
+ * entered through a computed goto (the table, a static, is in .data). */
+/* Unpacks a halfword RLE stream: a halfword without bit 15 is copied; one with it is a run of the colour in bits 9-14
+ * (spread over both 5-bit fields' top bits), its length in bytes in bits 0-8. The runs are written 32 halfwords per loop,
+ * entered through a computed goto (the table, a static, is in .data). */
+s32 cdload_unpack_rle16(u8 *src, u8 *dst) {
+    static void *runs[32] = {
+        &&run1, &&run2, &&run3, &&run4, &&run5, &&run6, &&run7, &&run8,
+        &&run9, &&run10, &&run11, &&run12, &&run13, &&run14, &&run15, &&run16,
+        &&run17, &&run18, &&run19, &&run20, &&run21, &&run22, &&run23, &&run24,
+        &&run25, &&run26, &&run27, &&run28, &&run29, &&run30, &&run31, &&run32,
+    };
+    u16 *in;
+    u16 *end;
+    u16 *out;
+    u16 code;
+    s32 loops;
+    s32 len;
+    s32 n;
+    s16 c;
+
+    in = (u16 *)src;
+    end = (u16 *)(src + (*(u32 *)src & 0xFFFFFF));
+    out = (u16 *)dst;
+    in += 2;
+    while (in < end) {
+        code = *in++;
+        if (code & 0x8000) {
+            len = (s16)(code & 0x1FF);
+            c = code & 0x7E00;
+            code = (c >> 1) | (c >> 9);
+            loops = len >> 6;
+            n = len & 0x3F;
+            if (n == 0) {
+                n = 0x40;
+                loops--;
+            }
+            goto *runs[(n >> 1) - 1];
+            do {
+            run32:
+                *out++ = code;
+            run31:
+                *out++ = code;
+            run30:
+                *out++ = code;
+            run29:
+                *out++ = code;
+            run28:
+                *out++ = code;
+            run27:
+                *out++ = code;
+            run26:
+                *out++ = code;
+            run25:
+                *out++ = code;
+            run24:
+                *out++ = code;
+            run23:
+                *out++ = code;
+            run22:
+                *out++ = code;
+            run21:
+                *out++ = code;
+            run20:
+                *out++ = code;
+            run19:
+                *out++ = code;
+            run18:
+                *out++ = code;
+            run17:
+                *out++ = code;
+            run16:
+                *out++ = code;
+            run15:
+                *out++ = code;
+            run14:
+                *out++ = code;
+            run13:
+                *out++ = code;
+            run12:
+                *out++ = code;
+            run11:
+                *out++ = code;
+            run10:
+                *out++ = code;
+            run9:
+                *out++ = code;
+            run8:
+                *out++ = code;
+            run7:
+                *out++ = code;
+            run6:
+                *out++ = code;
+            run5:
+                *out++ = code;
+            run4:
+                *out++ = code;
+            run3:
+                *out++ = code;
+            run2:
+                *out++ = code;
+            run1:
+                *out++ = code;
+            } while (--loops != -1);
+        } else {
+                *out++ = code;
+        }
+    }
+    return (u8 *)out - dst;
+}
 
 /* Takes the next 6-bit symbol of the stream: four per three bytes, most significant first. */
 #define CDLOAD_GET6(x)                          \
@@ -660,6 +778,10 @@ INCLUDE_ASM("asm/main/nonmatchings/cdload", func_800621F8);
 
 INCLUDE_ASM("asm/main/nonmatchings/cdload", func_80062868);
 
+/* The bump allocator's arena and its next free byte. */
+extern u8 D_800AA94C[0x5208];
+u8 *D_80085300 = D_800AA94C;
+
 void *cdload_alloc(s32 size) {
     u8 *p;
 
@@ -774,6 +896,9 @@ s32 cdload_load_bank(s32 index, s32 spuAddr, s32 arg2, s32 arg3, s32 arg4, s32 a
     cdload_close(handle);
     return addr - spuAddr;
 }
+
+/* The bank file per bank number. */
+s16 D_80085304[] = { 0x51 };
 
 s32 cdload_load_bank_by_number(s32 index, s32 spuAddr) {
     return cdload_load_bank(D_80085304[index], spuAddr, 0, 0, 0, 500, 0);

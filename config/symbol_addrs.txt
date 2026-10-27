@@ -402,6 +402,11 @@ cdload_reset_xa = 0x80063064; // type:func  () the XA player's state
 cdload_stop_xa = 0x800630E8; // type:func  (mode) pauses the drive and restores the ready callback, mode 1 waits and resets
 cdload_on_xa_ready = 0x800632CC; // type:func  (status) the data-ready callback while a track plays
 cdload_play_xa = 0x800632E8; // type:func  (track) XA file track >> 4, channel track & 15
+// The city file tables D_80085264 points to (cdload_city_file_index), in the .data before cdload's own
+D_800851CC = 0x800851CC;
+D_8008524C = 0x8008524C;
+D_80085254 = 0x80085254;
+D_8008525C = 0x8008525C;
 // Constants spimdisasm would pair into symbols (lui + addiu): left as numbers so the C, which has no symbol there,
 // compares equal. cdload_wait_read_sync counts from 0x800000.
 D_7FFFFF = 0x007FFFFF; // ignore:true

@@ -250,7 +250,7 @@ segments:
       - [0x700FC, data, monster]              # 0x8007F8FC D_8007F8FC (func_800500EC) to D_8007FBAC (func_80050BBC): the end of the first .data run
       - [0x70484, data, data_8007FC84]        # 0x8007FC84 data-only objects: the screens' tables (500-byte records and 16-byte descriptors, used from code all over) and the config tables D_8008427C-D_8008433C (bonus)
       - [0x74B4C, data, monster_anim]         # 0x8008434C D_8008434C (func_80057D4C) to D_80085168 (func_8005B880), then unreferenced pieces to cdload's first
-      - [0x75A64, data, cdload]               # 0x80085264 D_80085264 (func_800615FC), the loaded-overlay state, jtbl_80085280 (func_80061B4C), D_80085300 (func_80062C10), D_80085304 (func_8006301C)
+      - [0x75A64, .data, cdload]              # 0x80085264 D_80085264 (func_800615FC), the loaded-overlay state, jtbl_80085280 (func_80061B4C), D_80085300 (func_80062C10), D_80085304 (func_8006301C); defined in C for the static label table of the computed goto (docs/MATCHING.md "Small data and data in C")
       - [0x75B08, data, vibrate]              # 0x80085308 D_80085308 (func_800634D4, func_8006353C: the vibration presets), D_80085328 (func_800635F4)
       - [0x75BC0, data, wess_spu]             # 0x800853C0 D_800853C0-D_800853F0 (the SPU setup's state)
       - [0x75BF4, data, data_800853F4]        # 0x800853F4 the Psy-Q libraries' .data in link order (libcd first, libcard last), with the sound driver's among them
