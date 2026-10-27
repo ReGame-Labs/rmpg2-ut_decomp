@@ -51,6 +51,8 @@ typedef struct SpriteFrame {
     /* 0x1E */ u16 unk_1E;
     /* 0x20 */ u16 unk_20;              /* a third point: x (a spawn origin) */
     /* 0x22 */ u16 unk_22;              /* y */
+    /* 0x24 */ s16 unk_24;              /* a fourth point: x (where an Npc's second object sits, main_place_attached) */
+    /* 0x26 */ s16 unk_26;              /* y */
 } SpriteFrame;
 
 /* A sprite object of the level, 0xCC bytes: a monster's body, a vehicle, a projectile, an effect, a building's
@@ -227,7 +229,7 @@ typedef struct Monster {
     /* 0x0EA */ u16 unk_0EA;
     /* 0x0EC */ u16 unk_0EC;
     /* 0x0EE */ s16 unk_0EE;
-    /* 0x0F0 */ s32 unk_0F0;                   /* a change to its health, applied once (func_80029510) */
+    /* 0x0F0 */ s32 unk_0F0;                   /* a change to its health, applied once (main_apply_health) */
     /* 0x0F4 */ s16 front_x;                   /* its front: pos_x plus or minus half its width, by its facing */
     /* 0x0F6 */ u16 unk_0F6;
     /* 0x0F8 */ u8 unk_0F8[0x02];
@@ -487,15 +489,15 @@ extern Ai D_801D85C8[];
 extern u16 D_801D870C;
 
 /* A thrown object's slot: 0x10 bytes, 21 in D_801E1CC4 (D_801D8724 in use), filled by func_8004A9B0 and run by
- * func_8004AD18 by its kind; npc.c makes and runs some kinds too (func_80039358, func_8003956C, func_8003A5A0,
- * func_8003A744). */
+ * func_8004AD18 by its kind; npc.c makes and runs some kinds too (npc_create_throw, npc_update_throw, npc_create_shot,
+ * npc_update_shot). */
 typedef struct Throw {
     /* 0x00 */ GameObject *obj;
     /* 0x04 */ GameObject *thrower;            /* the current object when the throw was made (func_8004A9B0) */
     /* 0x08 */ u16 kind;                       /* func_8004AD18 dispatches on it */
     /* 0x0A */ u16 state;                      /* 1 in flight, 0x10 done */
     /* 0x0C */ s32 unk_0C;                     /* npc.c's kinds: added to the object's vel_y each frame, 16.16
-                                                * (func_80039358 sets it, func_8003956C) */
+                                                * (npc_create_throw sets it, npc_update_throw) */
 } Throw;
 
 extern Throw D_801E1CC4[];
@@ -513,15 +515,16 @@ typedef struct BuildingDef {
     /* 0x14 */ SpriteFrame **frames;          /* its items' frames (Building.frames) */
     /* 0x18 */ s32 unk_18;
     /* 0x1C */ void *unk_1C;                   /* what func_8002F688 shows on the item it destroys (func_8002FB38) */
+    /* 0x20 */ s32 unk_20[0];                  /* its items' sprite ids, bottom up, 0-terminated (func_80024E08) */
 } BuildingDef;
 
 /* What Building.unk_018 points to. */
 typedef struct BuildingBlock {
     /* 0x00 */ GameObject *unk_00;             /* moved with the building */
-    /* 0x04 */ u8 unk_04[0x04];
+    /* 0x04 */ s32 unk_04;
     /* 0x08 */ u16 unk_08;                     /* hit points? zero: destroyed */
     /* 0x0A */ u16 unk_0A;                     /* the item it belongs to (BuildingItem.unk_04) */
-    /* 0x0C */ u8 unk_0C[0x02];
+    /* 0x0C */ s16 unk_0C;
     /* 0x0E */ s16 unk_0E;                     /* the bottom y */
     /* 0x10 */ s16 unk_10;                     /* set when hit */
     /* 0x12 */ u8 unk_12[0x0A];
@@ -529,7 +532,7 @@ typedef struct BuildingBlock {
     /* 0x1E */ s16 unk_1E;                     /* the top y */
 } BuildingBlock;
 
-/* One of a building item's three parts; a behaviour slot takes one free part (Ai.unk_10.part, func_8003E1C8). */
+/* One of a building item's three parts; a behaviour slot takes one free part (Ai.unk_10.part, actor_pick_building_part). */
 typedef struct BuildingPart {
     /* 0x00 */ GameObject *unk_00;
     /* 0x04 */ u16 unk_04;                     /* its side: 1 left, 2 right, else the middle (func_8003E59C) */
@@ -621,11 +624,11 @@ typedef struct LevelFlags {
     /* 0x04 */ s32 unk_04;
     /* 0x08 */ s32 unk_08[3];                  /* per player (D_801FA8A0[monster id - 1] - 1): the bonus round's tally */
     /* 0x14 */ s32 round_timer;                /* the bonus round's time left in seconds, 0x14..0x3C by round (D_8007BD8C) */
-    /* 0x18 */ u16 unk_18[4];                  /* per player - 1: frames counted towards a second (func_8005F5B8) */
-    /* 0x20 */ u8 unk_20[0x04];
+    /* 0x18 */ u16 unk_18[4];                  /* per player - 1: frames counted towards a second (bonus_update_counters) */
+    /* 0x20 */ u32 unk_20;                     /* frames since the awards screen opened (bonus_update_awards) */
     /* 0x24 */ GameObject *digits[4][3];       /* per player - 1: digit sprites (bonus_create_counter) */
     /* 0x54 */ s32 unk_54;
-    /* 0x58 */ u8 unk_58[0x0C];
+    /* 0x58 */ s32 unk_58[3];                  /* the award messages sliding in (kinds 0x7D2, 0x7D3, 0x7D1; bonus_update_awards) */
     /* 0x64 */ s32 health_icons[3];            /* the award icons shown (bonus_give_awards), by kind: health, */
     /* 0x70 */ s32 meter_icons[3];             /* meter, */
     /* 0x7C */ s32 lives_icons[6];             /* extra lives */

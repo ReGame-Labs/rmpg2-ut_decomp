@@ -29,7 +29,7 @@ void func_8005417C(Monster *m);
 void func_80054374(s32, Monster *m);
 Building *monster_get_building(u16);
 void func_8005E0E8(Monster *m);
-s32 func_8005F208();                                        /* called with 0, 1 or 2 arguments */
+s32 bonus_get_round_kind();                                        /* called with 0, 1 or 2 arguments */
 void func_800634D4(Monster *, u32);
 void func_800635F4(s32, s32);
 
@@ -266,7 +266,7 @@ void func_8004C5CC(void) {
     GameObject *obj;
     s32 pc;
 
-    if (D_800AA2DC != 0 && func_8005F208() == 4 && m != NULL && m->health.w <= 0x40000) {
+    if (D_800AA2DC != 0 && bonus_get_round_kind() == 4 && m != NULL && m->health.w <= 0x40000) {
         m->health.s.hi = 0;
         if (m->climb_side != 0) {
             m->action = 0x1D;
@@ -789,7 +789,7 @@ void func_8004D38C(Monster *m) {
         o->vel_y.w = 0xFFFA8000;
         o->vel_x.w = vel;
         o->unk_88 = 0x4000;
-        if (D_800AA2DC != 0 && func_8005F208(D_800AA2DC, vel) == 3) {
+        if (D_800AA2DC != 0 && bonus_get_round_kind(D_800AA2DC, vel) == 3) {
             D_8007BD78.unk_08[D_801FA8A0[m->id - 1] - 1] += 1;
             D_8007BD78.flags |= 0x20;
         }
@@ -802,7 +802,7 @@ void func_8004D488(Monster *m) {
     if (func_8004D530(m, &p) == 1) {
         p->action = 0x4E;
         p->unk_0C = 0;
-        if (D_800AA2DC != 0 && func_8005F208(D_800AA2DC) == 3) {
+        if (D_800AA2DC != 0 && bonus_get_round_kind(D_800AA2DC) == 3) {
             D_8007BD78.unk_08[D_801FA8A0[m->id - 1] - 1] += 3;
             D_8007BD78.flags |= 0x20;
         }

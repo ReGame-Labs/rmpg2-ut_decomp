@@ -84,7 +84,7 @@ void func_80052E70(Monster *);
 void func_800531C0(Monster *);
 void func_8005382C(u16);
 u16 monster_test_hit_box(Monster *, Monster *);
-s32 func_80053B30(s16, s16, s16, s16, Monster *);
+s32 monster_test_point(s16, s16, s16, s16, Monster *);
 void func_80053C50(s32, Monster *);
 void func_800540D0(Monster *);
 void func_80053D68(s32, Monster *);
