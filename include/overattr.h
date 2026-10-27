@@ -82,7 +82,7 @@ extern s16 D_801F9A4C;
 extern s16 D_801F9A4E;
 extern s16 D_801F9A50;
 extern s16 D_801FA88C;
-extern GameObject *D_800A9270;          /* the logo object that drops in */
+extern GameObject *D_800A9270[3];       /* the three monsters of the selection screen (func_8009A238); [0] drops in */
 extern s32 D_800A9218;                 /* 1 once it has landed */
 extern s32 D_800A9240;                 /* its speed, bouncing to rest */
 extern s32 D_800A9238;                 /* frames to the next bounce */
@@ -344,6 +344,42 @@ s32 card_calc_checksum(CardSave *save);
 void card_init_save(CardSave *save);
 s16 card_ascii_to_sjis(u8 c);
 void card_string_to_sjis(s16 *dst, u8 *src);
+
+/* The monster selection screen (func_8009A238). */
+void func_800180E4(void);               /* the SELECT button alone */
+void func_8009F9E0(void);               /* the SELECT and BACK buttons */
+extern s32 D_800A3450[3];               /* the three monsters offered (0-based numbers), a player's own replaced */
+extern s32 D_800A436C[];                /* per monster: the selection cursor's sprite */
+extern s32 D_800A43A4[];                /* its animation */
+extern s32 D_800A43C0[];                /* its unk_74 */
+extern s32 D_800A4388[];                /* per monster: its picture */
+extern s16 D_800A40EC[];                /* per player slot: the cursor's x */
+extern s16 D_800A40F4[];                /* and y */
+extern OverattrPlacement D_800A3954[6];
+extern s32 D_800A9208;                  /* the player slot choosing */
+extern s16 D_800A9248;
+extern s32 D_800A356C[];                /* per city: the time of day it starts at (func_80099B54) */
+extern s32 D_800A9210;                  /* 1 while the previous monster slides out */
+void func_8001D084(void);
+void func_8001D17C(void);
+void func_8001E758(void);
+void func_8002497C(void);
+
+/* The tour map (func_8009A708): the cities in groups of 25, each group a map of its own. */
+void func_8001F6B4(void);
+s32 func_8001EA78(void);                /* a random number */
+extern s16 D_800A3760[];                /* per city: its x, y on the map */
+extern OverattrPlacement D_800A39B4[16];  /* the maps' pictures */
+extern OverattrPlacement D_800A3AB4[16];
+extern OverattrPlacement D_800A3BB4[16];
+extern OverattrPlacement D_800A3CB4[16];
+extern OverattrPlacement D_800A3DB4[16];
+extern OverattrPlacement D_800A3EB4[16];
+extern OverattrPlacement D_800A3FB4[16];
+extern OverattrPlacement D_800A40B4[2];  /* the current city's marker, a visited city's dot */
+extern s32 D_800A43DC[];                /* per monster: its icon's sprite */
+extern s32 D_800A43F8[];                /* its animation */
+extern s32 D_800A4414[];                /* its unk_74 */
 
 /* overattr_80099118.c */
 GameObject *func_80099138(OverattrPlacement *p);

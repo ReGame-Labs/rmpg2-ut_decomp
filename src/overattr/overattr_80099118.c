@@ -261,11 +261,493 @@ s32 func_80099AF0(s32 *slot) {
     return 0;
 }
 
-INCLUDE_ASM("asm/overattr/nonmatchings/overattr_80099118", func_80099B54);
+s32 func_80099B54(void) {
+    GameObject *obj;
+    s16 i;
+    s32 slot;
 
-INCLUDE_ASM("asm/overattr/nonmatchings/overattr_80099118", func_8009A238);
+    if (D_800A9248 < 0) {
+        return ++D_800A9248 != 0;
+    }
+    if (++D_800A9248 > 0x4B0) {
+        D_800A9248 = 0x32;
+        /* `&` rather than `&&`: the original evaluates the last two tests together (sltiu, sltiu, and) */
+        if (D_801FA984[0] == 0 && D_801FA984[1] == 0 & D_801FA984[2] == 0) {
+            D_800AA2EC = 0x45;
+            func_8001ED54(&D_800897FC);
+            D_800A6F39 = 3;
+        }
+    }
+    if (D_800A6F39 != 0) {
+        /* back to the attract mode */
+        if (--D_800A6F39 != 0) {
+            return 1;
+        }
+        for (i = 0; i < 7; i++) {
+            D_801FA8A0[i] = 0;
+        }
+        for (i = 0; i < 3; i++) {
+            D_800A8FD4[i].unk_04 = i;
+            D_800A8FD4[i].unk_06 = 0;
+            D_800A8FD4[i].unk_08 = 0xB;
+        }
+        func_8001D17C();
+        func_8001E758();
+        func_8002497C();
+        D_8007A7D4 |= 1;
+        func_8001D084();
+        D_801CA464 = 0;
+        D_801E0D64 = 0;
+        D_801D36FC = 0x130;
+        D_801CA45C = 4;
+        D_801D3780 = 2;
+        for (i = 0; i < 0x28; i++) {
+            D_801E28F4[i] = NULL;
+        }
+        func_80017B24();
+        func_8001A420();
+        func_8001A474();
+        func_8001AC18(0xA, 0x1C);
+        func_8001AA4C(0xB, 0x1D);
+        func_8001F760();
+        return 1;
+    }
+    obj = D_801E28F4[0];
+    D_800A6F39 = 0;
+    D_800A9250 = D_800A9220;
+    D_800A9220 = D_801E0D7C & 0x3FFFFFFF;
+    if (D_801F9944 != 0) {
+        D_801F9944--;
+    }
+    if ((D_800A9220 & 0x04010040) && D_801F9944 == 0 && D_801FA984[0] == 0 &&
+        D_801FA984[1] == 0 & D_801FA984[2] == 0) {
+        D_800AA2EC = 0x45;
+        func_8001ED54(&D_800897FC);
+        func_8001F724(3);
+        D_800A6F39 = 2;
+    }
+    func_80019268();
+    if ((D_800A9220 & 0x401004) && D_801F9944 == 0) {
+        if (func_80099A94((s32 *)&obj->arg) != 0) {
+            func_8001F724(0x4E);
+            obj->unk_60++;
+            obj->anim = D_800A43A4[D_800A3450[(s32)obj->arg.p]];
+            obj->frames_left = 0;
+            obj->unk_74 = D_800A43C0[D_800A3450[(s32)obj->arg.p]];
+            func_800999F8((s32)obj->arg.p);
+            D_800A9218 = 0;
+            D_800A9240 = 0xA;
+            D_800A9238 = 2;
+            D_800A9248 = 0x32;
+        }
+        D_801F9944 = 0xB;
+    } else if ((D_800A9220 & 0x802008) && D_801F9944 == 0) {
+        if (func_80099AF0((s32 *)&obj->arg) != 0) {
+            func_8001F724(0x4E);
+            obj->unk_60++;
+            obj->anim = D_800A43A4[D_800A3450[(s32)obj->arg.p]];
+            obj->frames_left = 0;
+            obj->unk_74 = D_800A43C0[D_800A3450[(s32)obj->arg.p]];
+            func_800999F8((s32)obj->arg.p);
+            D_800A9218 = 0;
+            D_800A9240 = 0xA;
+            D_800A9238 = 2;
+            D_800A9248 = 0x32;
+        }
+        D_801F9944 = 0xB;
+    } else if ((D_800A9220 & 0x01004010) && D_800A9248 > 0x32 && D_801F9944 == 0) {
+        func_8001F724(3);
+        D_801E289C = D_800A3450[(s32)obj->arg.p];
+        switch ((u32)obj->arg.p) {
+        case 0:
+            D_801FA960 = 0x32;
+            break;
+        case 1:
+            D_801FA960 = 0;
+            break;
+        case 2:
+            D_801FA960 = 0x19;
+            break;
+        }
+        D_800A9248 = -5;
+        D_801FB198 = D_800A356C[D_801FA960];
+        return 1;
+    }
+    if (obj->unk_60 == 0) {
+        obj->pos_x.s.hi = D_800A40EC[(s32)obj->arg.p];
+        obj->pos_y.s.hi = D_800A40F4[(s32)obj->arg.p];
+    } else {
+        obj->pos_x.s.hi = 0x1F4;
+        obj->unk_60 = 0;
+    }
+    menu_animate(obj, 0xFF);
+    slot = (s32)obj->arg.p;
+    obj = D_800A9270[slot];
+    D_800A9208 = slot;
+    if (slot != D_800A9228) {
+        D_800A9210 = 1;
+    }
+    if (D_800A9218 != 0) {
+        if (D_800A9240 == 0) {
+            return 1;
+        }
+        if (--D_800A9238 == -1) {
+            if (D_800A9240 > 0) {
+                D_800A9240 = -(D_800A9240 + -1);
+            } else {
+                D_800A9240 = -(D_800A9240 + 1);
+            }
+            D_800A9238 = 2;
+        }
+        obj->pos_y.s.hi -= D_800A9240;
+    } else {
+        obj->pos_y.s.hi -= D_800A9240;
+        if (obj->pos_y.s.hi < 0xC8) {
+            D_800A9218 = 1;
+            D_800A9240 = 6;
+        }
+    }
+    if (D_800A9210 == 1) {
+        obj = D_800A9270[D_800A9228];
+        obj->pos_x.s.hi += 0x1E;
+        if (obj->pos_x.s.hi > 0x1F4) {
+            obj->pos_x.s.hi = 0xC8;
+            D_800A9210 = 0;
+            obj->pos_y.s.hi = 0x120;
+            D_800A9228 = D_800A9208;
+        }
+    }
+    return 1;
+}
 
+void func_8009A238(void) {
+    s32 i;
+    s32 j;
+    s32 which;
+    OverattrPlacement *p;
+    ObjectDef *def;
+    GameObject *obj;
+
+    func_80017B24();
+    if (D_801FA984[0] != 0 || D_801FA984[1] != 0 || D_801FA984[2] != 0) {
+        func_800180E4();
+    } else {
+        func_8009F9E0();
+    }
+    func_8001A420();
+    func_8001AA4C(0xB, 0x1E);
+    func_8001AA4C(6, 0x27);
+    D_801D3D7C = 0;
+    SetDispMask(1);
+    i = 0;
+    p = D_800A3954;
+    do {
+        obj = func_80099138(p++);
+        obj->unk_6C &= ~0x20;
+        i++;
+    } while (i < 6);
+    D_800A3450[0] = 4;
+    D_800A3450[1] = 3;
+    D_800A3450[2] = 5;
+    D_800A9248 = 0;
+    for (j = 0; j < 3; j++) {
+        if (D_801FA8A0[D_800A3450[j]] != 0) {
+            for (i = 0; i < 3; i++) {
+                if (D_801FA8A0[i] == 0) {
+                    D_800A3450[j] = i;
+                    D_801FA8A0[i] = 0x63;
+                    break;
+                }
+            }
+        }
+    }
+    for (j = 0; j < 3; j++) {
+        if (D_801FA8A0[j] == 0x63) {
+            D_801FA8A0[j] = 0;
+        }
+    }
+    if (D_801FA984[1] == 0) {
+        which = 1;
+    } else {
+        which = (D_801FA984[0] != 0) * 2;
+    }
+    D_800AA248.new_def = def = func_8001D110();
+    def->id = D_800A436C[D_800A3450[which]];
+    def->pos_x.w = D_800A40EC[which] << 16;
+    def->pos_y.w = D_800A40F4[which] << 16;
+    def->flags = 0x14;
+    def->unk_06 |= 0x20;
+    obj = func_8001DCB4();
+    D_801E28F4[0] = obj;
+    obj->anim = D_800A43A4[D_800A3450[which]];
+    obj->frames_left = 0;
+    D_800A9228 = which;
+    D_800A9208 = which;
+    obj->unk_74 = D_800A43C0[D_800A3450[which]];
+    obj->vel_x.w = 0;
+    obj->vel_y.w = 0;
+    obj->unk_60 = 0;
+    obj->arg.p = (void *)which;
+    D_800AA248.new_def = def = func_8001D110();
+    def->id = D_800A4388[D_800A3450[0]];
+    def->pos_x.w = 0xC80000;
+    def->pos_y.w = 0x1200000;
+    def->flags = 0x14;
+    def->unk_06 |= 0x20;
+    obj = func_8001DCB4();
+    D_801E28F4[6] = obj;
+    D_800A9270[0] = obj;
+    D_800AA248.new_def = def = func_8001D110();
+    def->id = D_800A4388[D_800A3450[1]];
+    def->pos_x.w = 0xC80000;
+    def->pos_y.w = 0x1200000;
+    def->flags = 0x14;
+    def->unk_06 |= 0x20;
+    obj = func_8001DCB4();
+    D_801E28F4[7] = obj;
+    D_800A9270[1] = obj;
+    D_800AA248.new_def = def = func_8001D110();
+    def->id = D_800A4388[D_800A3450[2]];
+    def->pos_x.w = 0xC80000;
+    def->pos_y.w = 0x1200000;
+    def->flags = 0x14;
+    def->unk_06 |= 0x20;
+    obj = func_8001DCB4();
+    D_801E28F4[8] = obj;
+    D_800A9270[2] = obj;
+    D_800AA248.new_def = def = func_8001D110();
+    def->id = 0x0B002FB0;
+    def->pos_x.w = 0x1130000;
+    def->pos_y.w = 0x1180000;
+    def->flags = 0xC;
+    def->unk_06 |= 0x20;
+    D_801E28F4[9] = func_8001DCB4();
+    D_800AA248.new_def = def = func_8001D110();
+    def->id = 0x0B002FB8;
+    def->pos_x.w = 0x1080000;
+    def->pos_y.w = 0x190000;
+    def->flags = 0xC;
+    def->unk_06 |= 0x20;
+    D_801E28F4[10] = func_8001DCB4();
+    D_800AA248.new_def = def = func_8001D110();
+    def->id = 0x0B002FB6;
+    def->pos_x.w = 0x1080000;
+    def->pos_y.w = 0x1180000;
+    def->flags = 0xC;
+    def->unk_06 |= 0x20;
+    D_801E28F4[11] = func_8001DCB4();
+    func_800999F8(which);
+    D_800A9218 = 0;
+    D_800A9240 = 0xA;
+    D_800A9238 = 2;
+    D_800A9248 = 0;
+    func_8001F724(0x4E);
+}
+
+#ifdef NON_MATCHING
+/* 99.62%: 99.62 %: the map pointer p gets s2 and the music s1, the original's the other way round (the dot loop's x
+ * pointer, a giv, outranks p for s1); everything else matches */
+void func_8009A708(void) {
+    OverattrPlacement *p;
+    s32 music;
+    s32 i;
+    s32 prev;
+    s16 region;
+    s16 x;
+    s16 y;
+    s16 cx;
+    s16 cy;
+    GameObject *obj;
+    ObjectDef *def;
+    s32 id;
+    Monster *m;
+    s32 n;
+
+    p = D_800A3CB4;
+    music = 0x20;
+    if (D_801FA960 >= 25) {
+        if (D_801FA960 < 50) {
+            p = D_800A3DB4;
+            music = 0x1F;
+        } else if (D_801FA960 < 75) {
+            p = D_800A3EB4;
+            music = 0x21;
+        } else if (D_801FA960 < 100) {
+            p = D_800A3FB4;
+            music = 0x22;
+        } else if (D_801FA960 < 0x71) {
+            p = D_800A3BB4;
+            music = 0x23;
+        } else if (D_801FA960 < 0x72) {
+            if (D_801CA464 & 1) {
+                p = D_800A39B4;
+                music = 0x24;
+            } else {
+                p = D_800A3AB4;
+                music = 0x25;
+            }
+        } else if (D_801FA960 < 0x7D) {
+            p = D_800A39B4;
+            music = 0x24;
+        }
+    }
+    i = 0;
+    D_8007C974++;
+    D_801FB198 = D_800A356C[D_801FA960];
+    func_8001A420();
+    func_80017B24();
+    func_8001AA4C(0xB, 0x1E);
+    func_8001AA4C(1, music);
+    D_801D3D7C = 0;
+    SetDispMask(1);
+    do {
+        obj = func_80099138(p++);
+        obj->unk_6C &= ~0x20;
+        i++;
+    } while (i < 16);
+    if (D_801CA464 & 1) {
+        prev = D_801FA960;
+    } else {
+        prev = D_801FA960 - 1;
+    }
+    region = D_801FA960 / 25;
+    i = region * 25;
+    if (D_801FA960 >= 0x71) {
+        i = 0x71;
+    }
+    if (D_801FA960 != 0x71 || prev != 0x70) {
+        if (i != D_801FA960) {
+            p = &D_800A40B4[1];
+            do {
+                x = D_800A3760[i * 2];
+                y = D_800A3760[i * 2 + 1];
+                obj = func_80099138(p);
+                obj->pos_x.s.hi = x;
+                obj->pos_y.s.hi = y;
+                obj->unk_6C &= ~0x20;
+                i++;
+            } while (i < D_801FA960);
+        } else {
+            D_801CA464 |= 1;
+        }
+    }
+    x = D_800A3760[prev * 2];
+    y = D_800A3760[prev * 2 + 1];
+    if (D_801FA960 == 0x71 && prev == 0x70) {
+        x = 0xC1;
+        y = 0x199;
+    }
+    cx = x - 0xC8;
+    cy = y - 0x80;
+    if (cx < 0) {
+        cx = 0;
+    }
+    if (cx > 0x190) {
+        cx = 0x190;
+    }
+    if (cy < 0) {
+        cy = 0;
+    }
+    if (cy > 0x100) {
+        cy = 0x100;
+    }
+    D_801F9AC8.w = cx << 16;
+    D_801F9ACC.w = cy << 16;
+    if (D_801CA464 & 1) {
+        obj = func_80099138(&D_800A40B4[0]);
+        D_801E28F4[0] = obj;
+        obj->unk_40.w = x;
+        obj->pos_x.s.hi = x;
+        obj->pos_y.s.hi = y;
+        obj->script.v = y;
+        obj->unk_6C &= ~0x20;
+    } else {
+        func_8001F6B4();
+        func_8001F724(0x6C);
+        p = &D_800A40B4[1];
+        obj = func_80099138(p);
+        D_801E28F4[0] = obj;
+        obj->pos_x.s.hi = x;
+        obj->pos_y.s.hi = y;
+        obj->unk_6C &= ~0x20;
+        obj = main_create_box(0, 0, 0, 0, 0xFF0000);
+        D_801E28F4[1] = obj;
+        obj->priority = 0xF;
+        obj->unk_6C |= 0x1000;
+        obj = func_80099138(p - 1);
+        D_801E28F4[2] = obj;
+        obj->pos_x.s.hi = D_800A3760[D_801FA960 * 2];
+        obj->pos_y.s.hi = D_800A3760[D_801FA960 * 2 + 1];
+        if (D_801FA960 == 0x71 && prev == 0x70) {
+            obj->pos_x.s.hi = 0x2AA;
+            obj->pos_y.s.hi = 0xA2;
+        }
+        obj->unk_6C &= ~0x20;
+        D_800AA284.p = def = func_8001D110();
+        def->pos_x.w = 0xC80000;
+        def->pos_y.w = 0x1180000;
+        def->id = 0x0B003E86;
+        def->flags = 0x14;
+        def->unk_06 |= 0x20;
+        D_800A9270[0] = func_8001DCB4();
+        D_800A9218 = 0;
+        D_800A9240 = 0xA;
+        D_800A9238 = 2;
+    }
+    if (!(D_801CA464 & 1)) {
+        func_8001AA4C(6, 0x26);
+        cx = 0xF0;
+        cy = 0xE6;
+        n = 0;
+        D_801E2904[0] = NULL;
+        D_801E2904[1] = NULL;
+        D_801E2904[2] = NULL;
+        i = 0;
+        do {
+            i++;
+            m = &D_801E0B78[func_80025DF8(i)];
+            id = m->id;
+            if (id != 0) {
+                cx -= 0x28;
+            }
+        } while (i < 3);
+        i = 0;
+        do {
+            m = &D_801E0B78[func_80025DF8(i + 1)];
+            id = m->id;
+            if (id != 0) {
+                D_800AA248.new_def = def = func_8001D110();
+                def->id = D_800A43DC[id - 1];
+                def->pos_x.w = cx << 16;
+                def->pos_y.w = cy << 16;
+                def->flags = 0x384;
+                def->unk_06 |= 0x20;
+                D_801E2904[n] = D_800AA248.cur_obj = func_8001DCB4();
+                D_800AA248.cur_obj->anim = D_800A43F8[id - 1];
+                D_800AA248.cur_obj->anim += (func_8001EA78() & 0xF) * 8;
+                D_800AA248.cur_obj->frames_left = 0;
+                if (id == 7) {
+                    if (D_801F9ABC == 0) {
+                        D_800AA248.cur_obj->unk_74 = D_800A4414[6];
+                    } else if (D_801F9ABC == 3) {
+                        D_800AA248.cur_obj->unk_74 = 8;
+                    } else {
+                        D_800AA248.cur_obj->unk_74 = id;
+                    }
+                } else {
+                    D_800AA248.cur_obj->unk_74 = D_800A4414[id - 1];
+                }
+                cx += 0x50;
+                n++;
+                D_800AA248.cur_obj->flags |= 0x400;
+            }
+            i++;
+        } while (i < 3);
+    }
+}
+#else
 INCLUDE_ASM("asm/overattr/nonmatchings/overattr_80099118", func_8009A708);
+#endif
 
 s32 func_8009AE40(s32 *step) {
     s32 t;
@@ -296,7 +778,7 @@ s32 func_8009AE40(s32 *step) {
             return 0;
         }
     } else {
-        obj = D_800A9270;
+        obj = D_800A9270[0];
         if (D_800A9218 != 0) {
             if (D_800A9240 != 0) {
                 if (--D_800A9238 == -1) {
