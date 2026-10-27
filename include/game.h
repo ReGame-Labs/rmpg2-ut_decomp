@@ -86,11 +86,13 @@ typedef struct GameObject {
     /* 0x4D */ s8 unk_4D;
     /* 0x4E */ u8 unk_4E[0x02];
     /* 0x50 */ struct GameObject *unk_50;
-    /* 0x54 */ u8 unk_54[0x08];
+    /* 0x54 */ s32 unk_54;
+    /* 0x58 */ u8 unk_58[0x04];
     /* 0x5C */ union {                  /* the operands of the script command being run */
                    void *p;
                    u16 *h;
                    s32 *w;
+                   s32 v;                   /* a value (OVERATTR's camera point, y << 16 | x) */
                } arg;
     /* 0x60 */ s32 unk_60;
     /* 0x64 */ s32 unk_64;
@@ -149,7 +151,8 @@ typedef struct Monster {
     /* 0x018 */ u8 unk_018[0x02];
     /* 0x01A */ u16 unk_01A;
     /* 0x01C */ u16 unk_01C;                   /* a countdown set from a random draw */
-    /* 0x01E */ u8 unk_01E[0x04];
+    /* 0x01E */ u8 unk_01E[0x02];
+    /* 0x020 */ u16 unk_020;
     /* 0x022 */ u16 unk_022;                   /* the step of a throw sequence, 0..4 */
     /* 0x024 */ u16 unk_024;
     /* 0x026 */ u16 unk_026;
@@ -176,7 +179,9 @@ typedef struct Monster {
     /* 0x074 */ u8 unk_074[0x0C];
     /* 0x080 */ GameObject *unk_080[6];        /* the score's digit sprites */
     /* 0x098 */ GameObject *unk_098;
-    /* 0x09C */ u8 unk_09C[0x18];
+    /* 0x09C */ u8 unk_09C[0x08];
+    /* 0x0A4 */ GameObject *unk_0A4[3];
+    /* 0x0B0 */ u8 unk_0B0[0x04];
     /* 0x0B4 */ s32 unk_0B4[2];
     /* 0x0BC */ u8 unk_0BC[0x0C];
     /* 0x0C8 */ u16 unk_0C8;
@@ -689,14 +694,14 @@ extern Anim D_8009556C;
 extern s16 D_800AA2EC;
 extern u16 D_801D36FC;                   /* the game mode */
 extern u16 D_801D376C;                   /* the screen's right edge, in pixels */
-extern s16 D_801D37B8;
+extern u16 D_801D37B8;
 extern u16 D_801D37BC;
 extern s16 D_801D3D8A;                   /* D_801D3D64.unk_26 */
 extern s32 D_801D3D98[];
 extern u16 D_801D8738;
 extern u16 D_801D8740;
 extern u16 D_801D87B0;                   /* the screen's left edge, in pixels */
-extern s16 D_801D87B4;
+extern u16 D_801D87B4;
 extern u16 D_801D8866;                   /* the level width's integer half */
 extern s16 D_801E0D4C;
 extern u8 D_801E0D98[];                  /* D_801E0B78[1] */
@@ -707,7 +712,7 @@ extern u16 D_801E2A50;
 extern s16 D_801F9914;
 extern s16 D_801F9A44[];
 extern s16 D_801F9AB0;
-extern u16 D_801F9ABC;
+extern s16 D_801F9ABC;
 extern s16 D_801F9ACA;                   /* the camera x's integer half */
 extern s32 D_801F9ACC;
 extern u16 D_801FA734;

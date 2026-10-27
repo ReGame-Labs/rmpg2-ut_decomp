@@ -672,8 +672,6 @@ s32 func_8003E59C(AiOrder *order, Actor *actor, Monster *player) {
     return 0;
 }
 
-#ifdef NON_MATCHING
-/* 89.31 %: the loop's exit by count undoes the last i++ (addiu a1,a1,-1 after the loop) and the bound 8 sits in a register; the loop shape is right */
 void func_8003E630(Ai *ai) {
     Monster *player;
     u16 i;
@@ -681,8 +679,9 @@ void func_8003E630(Ai *ai) {
     u16 max = 8;
 
     n = 8;
-    i = ai->unk_04 + 1;
+    i = ai->unk_04;
     do {
+        i++;
         if (i >= max) {
             i = 1;
         }
@@ -690,14 +689,10 @@ void func_8003E630(Ai *ai) {
         if (player->unk_058 & 1) {
             break;
         }
-        i++;
     } while (--n != 0);
     ai->unk_14 = (Monster *)player;
     ai->unk_04 = i;
 }
-#else
-INCLUDE_ASM("asm/main/nonmatchings/game_8003CD08", func_8003E630);
-#endif
 
 void func_8003E6A4(Ai *ai) {
     AiOrder *order;
@@ -744,26 +739,23 @@ void func_8003E788(Ai *ai) {
     ai->unk_10.order = NULL;
 }
 
-#ifdef NON_MATCHING
-/* 73.78 %: the success block is placed after the fail block in the original (an if/else whose fail arm is the fallthrough) and the result is copied through v1 before the store */
 s32 func_8003E79C(void) {
     s16 x;
 
     if (D_801D37B8 != 0) {
-        x = ((s16 *)&D_800AA248.cur_obj->pos_x.w)[1];
+        x = D_800AA248.cur_obj->pos_x.s.hi;
         if (x >= D_801D37B8 && x <= D_801D87B4) {
-            D_800AA248.unk_4C = 0;
-            D_800AA248.unk_78 = 1;
-            return 1;
+            goto inside;
         }
     }
     func_80030338(D_800AA248.cur_obj);
     D_800AA248.unk_78 = 0;
     return 0;
+inside:
+    D_800AA248.unk_4C = 0;
+    D_800AA248.unk_78 = 1;
+    return 1;
 }
-#else
-INCLUDE_ASM("asm/main/nonmatchings/game_8003CD08", func_8003E79C);
-#endif
 
 void func_8003E830(void) {
     if (D_801FA960 >= 0x5E && D_801FA960 != 0x63 && D_801D8728 == 0) {
@@ -1133,8 +1125,6 @@ s16 func_8003FCD8(s32 arg0, s32 arg1) {
     return r;
 }
 
-#ifdef NON_MATCHING
-/* 89.39 %: the right shape and calls; the original keeps three copies of the facing test (the v >= 2 one is not cross-jumped into the last one) and the neg path jumps into the first */
 void func_8003FD30(Actor *actor) {
     u16 v;
 
@@ -1147,10 +1137,10 @@ void func_8003FD30(Actor *actor) {
             func_8003FE70(actor);
         }
     } else if (v >= 2) {
-        if (D_800AA268.p->flags & 0x10) {
-            func_8003FE70(actor);
-        } else {
+        if (!(D_800AA268.p->flags & 0x10)) {
             func_8003FE40(actor);
+        } else {
+            func_8003FE70(actor);
         }
     } else if (D_800AA248.unk_00 < 0) {
         actor->unk_10 = 2;
@@ -1168,9 +1158,6 @@ void func_8003FD30(Actor *actor) {
         }
     }
 }
-#else
-INCLUDE_ASM("asm/main/nonmatchings/game_8003CD08", func_8003FD30);
-#endif
 
 void func_8003FE14(Actor *actor) {
     actor->unk_E = 0;
@@ -1439,15 +1426,14 @@ void func_80040900(Actor *actor) {
     func_800415B4();
 }
 
-#ifdef NON_MATCHING
-/* 97.05 %: register names only (the mover in v0, the sum in a1) */
 void func_80040930(Actor *actor) {
     GameObject *mover;
     s32 v;
 
     mover = actor->unk_0;
     D_800AA248.cur_obj = mover;
-    v = (mover->vel_x.w + mover->pos_x.w) & D_801D8864.w;
+    v = mover->vel_x.w + mover->pos_x.w;
+    v &= D_801D8864.w;
     mover->pos_x.w = v;
     v = D_800AA248.cur_obj->vel_y.w + 0x6500;
     D_800AA248.cur_obj->vel_y.w = v;
@@ -1457,19 +1443,16 @@ void func_80040930(Actor *actor) {
         func_800415B4();
     }
 }
-#else
-INCLUDE_ASM("asm/main/nonmatchings/game_8003CD08", func_80040930);
-#endif
 
-#ifdef NON_MATCHING
-/* 96.48 %: register names only, as func_80040930 */
 void func_800409CC(Actor *actor) {
     GameObject *mover;
     s32 v;
 
     mover = actor->unk_0;
     D_800AA248.cur_obj = mover;
-    mover->pos_x.w = (mover->pos_x.w + mover->vel_x.w) & D_801D8864.w;
+    v = mover->pos_x.w + mover->vel_x.w;
+    v &= D_801D8864.w;
+    mover->pos_x.w = v;
     v = D_800AA248.cur_obj->vel_y.w + 0x6500;
     D_800AA248.cur_obj->vel_y.w = v;
     D_800AA248.cur_obj->pos_y.w += v;
@@ -1479,9 +1462,6 @@ void func_800409CC(Actor *actor) {
         actor->unk_28 = 0;
     }
 }
-#else
-INCLUDE_ASM("asm/main/nonmatchings/game_8003CD08", func_800409CC);
-#endif
 
 void func_80040A7C(Actor *actor) {
     GameObject *mover;
@@ -1554,10 +1534,8 @@ void func_80040CA8(void) {
 void func_80040CB0(void) {
 }
 
-#ifdef NON_MATCHING
-/* 97.61 %: in case 0 the original loads a fresh 1 for actor->unk_28 while kind (= 1, in s0) is live; here the store reuses s0 */
 void func_80040CB8(Actor *actor) {
-    u16 kind;
+    u8 kind;
 
     D_800AA268.p = actor->unk_0;
     if (actor->unk_28 != 0) {
@@ -1582,9 +1560,6 @@ void func_80040CB8(Actor *actor) {
         actor->unk_28 = 0;
     }
 }
-#else
-INCLUDE_ASM("asm/main/nonmatchings/game_8003CD08", func_80040CB8);
-#endif
 
 /* 99.2%: the mover pointer and the frame's offsets get a0/a1 in the other order around the x/y adjustment */
 #ifdef NON_MATCHING
@@ -1724,12 +1699,10 @@ void func_800410AC(Actor *actor) {
     D_800AA248.cur_obj = saved;
 }
 
-#ifdef NON_MATCHING
-/* 95.34 %: register names only: the original holds &D_800AA248 in a0 (so reorg hoists its lui into the first branch's delay slot) and the velocity sum in a1; here a1 and a0 */
 void func_800411E8(Actor *actor) {
     GameObject *saved;
     GameObject *mover;
-    s32 d;
+    s32 d; /* one temporary for the speed, the distance and the bound: the original keeps all three in a1 */
     s16 target;
     s16 x;
     s32 v;
@@ -1749,16 +1722,18 @@ void func_800411E8(Actor *actor) {
         D_800AA248.cur_obj->pos_x.w += d;
         mover = D_800AA248.cur_obj;
         target = actor->unk_38;
-        x = ((s16 *)&mover->pos_x.w)[1];
-        if (abs(x - target) < 0x32) {
+        x = mover->pos_x.s.hi;
+        d = abs(x - target);
+        if (d < 0x32) {
             if (mover->vel_x.w != 0) {
                 mover->unk_84 = 0;
             } else {
                 mover->vel_x.w = 0x3500;
             }
         } else {
+            d = target + 0x32;
             v = 0x300;
-            if (target + 0x32 < x) {
+            if (d < x) {
                 v = -0x300;
             }
             mover->unk_84 = v;
@@ -1770,9 +1745,6 @@ void func_800411E8(Actor *actor) {
     actor->unk_28 = 0;
     D_800AA268.p = saved;
 }
-#else
-INCLUDE_ASM("asm/main/nonmatchings/game_8003CD08", func_800411E8);
-#endif
 
 void func_80041344(u16 kind, Actor *actor) {
     ActorSound *sound;
