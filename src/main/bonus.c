@@ -165,17 +165,17 @@ void bonus_update_lives(Monster *e) {
             func_8005E124(e, 0x7A8);
             func_8005E19C(e, 0x798);
             if (face != NULL) {
-                func_80020BA0(0x4F00417E, face->flags, face);
+                main_set_frame(0x4F00417E, face->flags, face);
             }
             return;
         }
     } else if (face != NULL) {
         if (D_801F9ABC == 3 && id == 7) {
-            func_80020BA0(0x4F003EB2, face->flags, face);
+            main_set_frame(0x4F003EB2, face->flags, face);
         } else if (D_801F9ABC == 4 && e->id == 7) {
-            func_80020BA0(0x4F003EB0, face->flags, face);
+            main_set_frame(0x4F003EB0, face->flags, face);
         } else {
-            func_80020BA0(D_8008427C[e->id - 1], face->flags, face);
+            main_set_frame(D_8008427C[e->id - 1], face->flags, face);
         }
     }
     if (e->unk_004 != e->unk_002) {
@@ -189,7 +189,7 @@ void bonus_update_lives(Monster *e) {
         for (i = 0; i < 2; i++) {
             if (e->unk_078[i] != NULL) {
                 face = e->unk_078[i];
-                func_80020BA0(D_800842B4[v % 10], face->flags, face);
+                main_set_frame(D_800842B4[v % 10], face->flags, face);
                 v /= 10;
             }
         }

@@ -1156,7 +1156,7 @@ s32 func_8001AB30(s32 arg0, s32 arg1) {
     file = arg1 & 0xFFFF;
     if (!func_8001A848(bank, file)) {
         D_801F9948 = (u8 *) (((s32) D_801F9948 + 3) & ~3);
-        size = func_80061170(file);
+        size = cdload_file_size(file);
         if (cdload_read_file(file, D_801F9948) == 0) {
             return 0;
         }
@@ -1180,7 +1180,7 @@ s32 func_8001AC18(s32 arg0, s32 arg1) {
     bank = arg0 & 0xFFFF;
     file = arg1 & 0xFFFF;
     if (!func_8001A820(bank, file)) {
-        func_80061170(file);
+        cdload_file_size(file);
         if (cdload_read_file(file, D_801F9948) == 0) {
             return 0;
         }
