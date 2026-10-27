@@ -8,10 +8,10 @@ u16 func_8004A468(void);
 s16 func_8003DC3C(Ai *ai);
 void func_8003DB74(Ai *ai);
 void func_8003DAA0(Ai *ai);
-void func_8003E788(Ai *ai, s32 arg1);
-u16 func_8003E79C(GameObject *mover, s32 arg1);
+void func_8003E788(Ai *ai);
+u16 func_8003E79C(void);
 u16 func_8004B6C4(s32 arg0, s32 arg1, s32 arg2);
-void func_8004E99C(s16 arg0, s16 arg1);
+void func_8004E99C(void);
 
 void func_800416AC(const AiHandler *handlers, Ai *ai);
 void func_80041928(const AiHandler *handlers, Ai *ai);
@@ -295,8 +295,6 @@ void func_80041AD0(s16 hit, const AiHandler *handlers, Ai *ai) {
     func_80041A70(handlers, ai);
 }
 
-/* 92.7%: scheduling of the constant and the argument moves before the call */
-#ifdef NON_MATCHING
 void func_80041B2C(const AiHandler *handlers, Ai *ai) {
     s32 speed;
 
@@ -317,14 +315,11 @@ void func_80041B2C(const AiHandler *handlers, Ai *ai) {
             speed = 0x1E000;
         }
         D_800AA248.cur_obj->vel_y.w = speed;
-        func_8003E788(ai, speed);
+        func_8003E788(ai);
         D_800AA248.cur_obj->unk_80 = 0x353;
         func_80041A70(handlers, ai);
     }
 }
-#else
-INCLUDE_ASM("asm/main/nonmatchings/game_8004160C", func_80041B2C);
-#endif
 
 void func_80041C0C(const AiHandler *handlers, Ai *ai) {
     s32 limit;
@@ -391,8 +386,6 @@ void func_80041DE4(const AiHandler *handlers, Ai *ai) {
     func_80041A70(handlers, ai);
 }
 
-/* 99.9%: the reload of the mover pointer gets v1, not a0 */
-#ifdef NON_MATCHING
 void func_80041E54(const AiHandler *handlers, Ai *ai) {
     s32 vel;
     s32 accel;
@@ -419,7 +412,7 @@ void func_80041E54(const AiHandler *handlers, Ai *ai) {
         }
     } else {
         if (ai->unk_38 == 0) {
-            if (func_8003E79C(D_800AA248.cur_obj, vel) == 1) {
+            if (func_8003E79C() == 1) {
                 D_800AA248.cur_obj->flags ^= 0x10;
                 D_800AA248.cur_obj->vel_x.w = -D_800AA248.cur_obj->vel_x.w;
                 D_800AA248.cur_obj->unk_84 = -D_800AA248.cur_obj->unk_84;
@@ -437,9 +430,6 @@ void func_80041E54(const AiHandler *handlers, Ai *ai) {
         }
     }
 }
-#else
-INCLUDE_ASM("asm/main/nonmatchings/game_8004160C", func_80041E54);
-#endif
 
 /* 97.9%: register allocation of the mover pointer and the velocity */
 #ifdef NON_MATCHING
@@ -507,8 +497,8 @@ void func_80042210(Ai *ai) {
     func_800416AC(D_8007E9E0, ai);
 }
 
-/* 89.8%: the far/near s16 copies: the original keeps the target x in a1 without a second load */
 #ifdef NON_MATCHING
+/* 94.5%: func_8004E99C takes no arguments. What differs: far = tx reloads the halfword here (the original copies tx, move v1,a1), and the original sign-extends near before far at the join */
 void func_80042238(Ai *ai) {
     GameObject *target;
     s16 tx;
@@ -540,7 +530,7 @@ void func_80042238(Ai *ai) {
         }
         if ((far < near - 0xE && (D_800AA248.cur_obj->flags & 0x10)) ||
             (near < far && !(D_800AA248.cur_obj->flags & 0x10))) {
-            func_8004E99C(near, tx);
+            func_8004E99C();
         }
     }
 }

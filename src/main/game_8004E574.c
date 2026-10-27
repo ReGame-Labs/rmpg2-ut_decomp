@@ -18,7 +18,7 @@ void func_8002CFAC(Monster *m, Building *b);
 void func_8002D0C0(Monster *m, Building *b);
 u16 func_80030CD4(void *);
 void func_80030E04(Monster *m, void *, void *);
-void func_80031280(Monster *m, Building *b, u16);
+void func_80031280(Monster *m, Building *b);
 void func_8004CFE8(void);
 s32 func_8004D150(u16 *, Monster *m, void *);
 void func_800524B4(Monster *m);
@@ -253,8 +253,6 @@ void func_8004EB88(void) {
     m->action = 0;
 }
 
-#ifdef NON_MATCHING
-/* 97%: the building index stays in a2 across the loop in the original; here it is copied to a3 and the masked counter takes a2 */
 void func_8004EBE8(void) {
     Monster *m = D_800AA248.cur_obj->owner.monster;
     u16 bld;
@@ -277,7 +275,7 @@ void func_8004EBE8(void) {
             do {
                 i++;
                 if (i == bld && b->unk_078 == 0) {
-                    func_80031280(m, b, bld);
+                    func_80031280(m, b);
                     return;
                 }
                 b++;
@@ -285,9 +283,6 @@ void func_8004EBE8(void) {
         }
     }
 }
-#else
-INCLUDE_ASM("asm/main/nonmatchings/game_8004E574", func_8004EBE8);
-#endif
 
 void func_8004ECA8(void) {
     D_800AA248.cur_obj->owner.monster->unk_05E = 1;
@@ -307,8 +302,6 @@ void func_8004ED44(void) {
     }
 }
 
-#ifdef NON_MATCHING
-/* 96%: the building array's address is materialized before the count test in the original (lui before, addiu in the delay slot) */
 void func_8004ED8C(void) {
     GameObject *saved = D_800AA248.cur_obj;
     Monster *m;
@@ -321,8 +314,8 @@ void func_8004ED8C(void) {
             b = D_801D3DC8;
             if (D_801E29A4 != 0) {
                 b += m->unk_1B2 - 1;
-                m->unk_0FC = m->pos.s.hi;
                 m->unk_0FA = m->pos.s.lo;
+                m->unk_0FC = m->pos.s.hi;
                 if (b->unk_058 == 0) {
                     func_8002D0C0(m, b);
                 } else {
@@ -336,18 +329,14 @@ void func_8004ED8C(void) {
                 b->unk_032 = m->id;
                 m->unk_18A = 1;
                 D_800AA248.unk_78 = 1;
-            } else {
-                D_800AA248.unk_78 = 0;
+                D_800AA248.cur_obj = saved;
+                return;
             }
-        } else {
-            D_800AA248.unk_78 = 0;
         }
+        D_800AA248.unk_78 = 0;
         D_800AA248.cur_obj = saved;
     }
 }
-#else
-INCLUDE_ASM("asm/main/nonmatchings/game_8004E574", func_8004ED8C);
-#endif
 
 void func_8004EEF4(void) {
     func_8001F7CC(0xE6, *D_800AA248.cur_obj->arg.h);
@@ -378,8 +367,6 @@ void func_8004EFAC(void) {
     func_8001F7CC(0xF0, v | 0x14);
 }
 
-#ifdef NON_MATCHING
-/* 96%: the registers of the monster and of the other monster's object are swapped (s1/s2) */
 void func_8004EFE8(void) {
     Monster *m = D_800AA248.cur_obj->owner.monster;
     Monster *other;
@@ -398,8 +385,8 @@ void func_8004EFE8(void) {
                             (D_800AA248.cur_obj->flags & 0x10) != (o->flags & 0x10)) {
                             if (func_8005453C(m->pos.s.lo, m->pos.s.hi, other)) {
                                 m->unk_18A = 1;
-                                other->action = 0x41;
                                 other->unk_0E4 = m->id;
+                                other->action = 0x41;
                                 m->action = 0x42;
                                 other->unk_18C = 0;
                                 m->unk_18C = 0;
@@ -415,12 +402,7 @@ void func_8004EFE8(void) {
         } while (--i != 0);
     }
 }
-#else
-INCLUDE_ASM("asm/main/nonmatchings/game_8004E574", func_8004EFE8);
-#endif
 
-#ifdef NON_MATCHING
-/* 86%: the definition pointer is kept in a1 and D_800AA248.new_def stored right after the call; the stores to the definition come in another order */
 void func_8004F1CC(void) {
     GameObject *saved = D_800AA248.cur_obj;
     GameObject *obj = saved;
@@ -430,8 +412,8 @@ void func_8004F1CC(void) {
     u16 v;
 
     func_8001E4B0(D_801D874C);
-    def = func_8001D110();
-    D_800AA248.new_def = def;
+    D_800AA248.new_def = func_8001D110();
+    def = D_800AA248.new_def;
     if (D_801E289C == 6) {
         anim = D_80011B08;
     } else {
@@ -439,11 +421,11 @@ void func_8004F1CC(void) {
     }
     D_801F9A44[D_801E289C] = 0;
     def->anim = anim;
-    def->unk_1C = 0;
     def->id = *anim;
+    def->unk_1C = 0;
     def->pos_x.s.hi = obj->pos_x.s.hi + 0x46;
-    def->flags = 0x101;
     def->pos_y.s.hi = obj->pos_y.s.hi - 0xA;
+    def->flags = 0x101;
     o = func_8001DCB4();
     o->kind = 0x540;
     if (D_801E289C == 6 && D_801FA8A6 != 0) {
@@ -454,9 +436,6 @@ void func_8004F1CC(void) {
     o->unk_74 = v;
     D_800AA248.cur_obj = saved;
 }
-#else
-INCLUDE_ASM("asm/main/nonmatchings/game_8004E574", func_8004F1CC);
-#endif
 
 void func_8004F300(void) {
     if (*(u16 *) ((u8 *) D_800AA248.cur_obj->owner.p - 0x88) < 2) {
@@ -752,35 +731,38 @@ void func_8004FC00(s32 n, Monster *m) {
 }
 
 #ifdef NON_MATCHING
-/* 84%: the sign extension of x for the third case is hoisted before the branches in the original */
+/* 97.6%: the layout is the original's; the sign-extended x goes to a temporary (v1) in the original and the facing bit is copied into s3 after the test, here both are computed in place */
 void func_8004FC2C(void) {
     GameObject *saved = D_800AA248.cur_obj;
     Monster *m = saved->owner.monster;
-    u16 x = saved->pos_x.s.hi;
+    s32 x = (u16) saved->pos_x.s.hi;
     u16 side = m->unk_1B0;
     u16 y = saved->pos_y.s.hi;
     s32 flip;
     ObjectDef *def;
     GameObject *obj;
 
-    if (side != 1) {
-        if (side == 2) {
-            x -= 0x24;
-            y -= 0x2B;
-            flip = 0x10;
-        } else {
-            flip = saved->flags & 0x10;
-            if (flip == 0) {
-                x = (s16) x + 0x21;
-            } else {
-                x = (s16) x - 0x21;
-            }
-            y -= 0x2A;
-        }
-    } else {
+    switch (side) {
+    case 2:
+        x -= 0x24;
+        y -= 0x2B;
+        flip = 0x10;
+        break;
+    case 1:
         x += 0x24;
         y -= 0x2B;
         flip = 0;
+        break;
+    default:
+        x = (s16) x;
+        flip = saved->flags & 0x10;
+        if (flip == 0) {
+            x += 0x21;
+        } else {
+            x -= 0x21;
+        }
+        y -= 0x2A;
+        break;
     }
     def = func_8001D110();
     D_800AA248.new_def = def;
@@ -832,7 +814,7 @@ void func_8004FD44(void) {
 }
 
 #ifdef NON_MATCHING
-/* 84%: the registers of y and the flip, and the sign of the top-of-sprite arithmetic */
+/* 94.6%, one instruction longer: the default case's -0x1E is loaded in the flags load's delay in the original and the sum is dx + x (addu s1,a0,s1); here the constant waits for the branch's delay slot */
 void func_8004FE28(void) {
     GameObject *saved = D_800AA248.cur_obj;
     Monster *m = saved->owner.monster;
@@ -841,27 +823,29 @@ void func_8004FE28(void) {
     s32 dx;
     s32 y;
     s32 flip;
-    s16 x;
+    s32 x;
     ObjectDef *def;
     GameObject *obj;
 
-    if (side != 1) {
-        y = top + 0x21;
-        if (side == 2) {
-            dx = 8;
-            y = top + 0x14;
-            flip = 0;
-        } else {
-            dx = -0x1E;
-            flip = saved->flags & 0x10;
-            if (flip == 0) {
-                dx = 0x1E;
-            }
-        }
-    } else {
+    switch (side) {
+    case 2:
+        dx = 8;
+        y = top + 0x14;
+        flip = 0;
+        break;
+    case 1:
         dx = -8;
         y = top + 0x14;
         flip = 0x10;
+        break;
+    default:
+        y = top + 0x21;
+        dx = -0x1E;
+        if (!(saved->flags & 0x10)) {
+            dx = 0x1E;
+        }
+        flip = saved->flags & 0x10;
+        break;
     }
     x = dx + (u16) D_800AA248.cur_obj->pos_x.s.hi;
     def = func_8001D110();
