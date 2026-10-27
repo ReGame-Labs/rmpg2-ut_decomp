@@ -92,6 +92,7 @@ typedef struct GameObject {
                    void *p;
                    u16 *h;
                    s32 *w;
+                   s32 v;                   /* a value (OVERATTR's camera point, y << 16 | x) */
                } arg;
     /* 0x60 */ s32 unk_60;
     /* 0x64 */ s32 unk_64;
@@ -150,7 +151,8 @@ typedef struct Monster {
     /* 0x018 */ u8 unk_018[0x02];
     /* 0x01A */ u16 unk_01A;
     /* 0x01C */ u16 unk_01C;                   /* a countdown set from a random draw */
-    /* 0x01E */ u8 unk_01E[0x04];
+    /* 0x01E */ u8 unk_01E[0x02];
+    /* 0x020 */ u16 unk_020;
     /* 0x022 */ u16 unk_022;                   /* the step of a throw sequence, 0..4 */
     /* 0x024 */ u16 unk_024;
     /* 0x026 */ u16 unk_026;
@@ -177,7 +179,9 @@ typedef struct Monster {
     /* 0x074 */ u8 unk_074[0x0C];
     /* 0x080 */ GameObject *unk_080[6];        /* the score's digit sprites */
     /* 0x098 */ GameObject *unk_098;
-    /* 0x09C */ u8 unk_09C[0x18];
+    /* 0x09C */ u8 unk_09C[0x08];
+    /* 0x0A4 */ GameObject *unk_0A4[3];
+    /* 0x0B0 */ u8 unk_0B0[0x04];
     /* 0x0B4 */ s32 unk_0B4[2];
     /* 0x0BC */ u8 unk_0BC[0x0C];
     /* 0x0C8 */ u16 unk_0C8;
@@ -228,7 +232,7 @@ typedef struct Monster {
     /* 0x134 */ u8 unk_134[0x04];
     /* 0x138 */ u16 unk_138;
     /* 0x13A */ u8 unk_13A[0x02];
-    /* 0x13C */ s16 unk_13C;
+    /* 0x13C */ u16 unk_13C;
     /* 0x13E */ u16 unk_13E;
     /* 0x140 */ u16 unk_140;
     /* 0x142 */ u16 unk_142;                   /* nonzero: the vibration presets 0-3 run twice as strong and long */
@@ -456,7 +460,7 @@ typedef struct BuildingPart {
     /* 0x0C */ struct UnkStruct14 *unk_0C;
     /* 0x10 */ GameObject *unk_10;
     /* 0x14 */ s16 unk_14;
-    /* 0x16 */ s16 unk_16;
+    /* 0x16 */ u16 unk_16;
 } BuildingPart;
 
 /* One of a building's 15 items: a sprite each. */
@@ -493,8 +497,8 @@ typedef struct Building {
     /* 0x026 */ s16 unk_026;
     /* 0x028 */ s16 unk_028;
     /* 0x02A */ u16 unk_02A;
-    /* 0x02C */ s16 unk_02C;
-    /* 0x02E */ s16 unk_02E;
+    /* 0x02C */ u16 unk_02C;
+    /* 0x02E */ u16 unk_02E;
     /* 0x030 */ u16 unk_030;
     /* 0x032 */ u16 unk_032;
     /* 0x034 */ u16 unk_034;
@@ -513,14 +517,14 @@ typedef struct Building {
     /* 0x076 */ u16 unk_076;
     /* 0x078 */ u16 unk_078;
     /* 0x07A */ u16 unk_07A;
-    /* 0x07C */ u8 unk_07C[0x04];
+    /* 0x07C */ GameObject *unk_07C;
     /* 0x080 */ u16 unk_080;
     /* 0x082 */ u16 unk_082;
     /* 0x084 */ void *unk_084;
     /* 0x088 */ u16 unk_088;
     /* 0x08A */ u16 unk_08A;
     /* 0x08C */ s32 unk_08C;
-    /* 0x090 */ s32 unk_090;
+    /* 0x090 */ GameObject *unk_090;
     /* 0x094 */ s16 unk_094;                   /* claimed (func_8002F01C) */
     /* 0x096 */ u8 unk_096[0x02];
     /* 0x098 */ BuildingItem items[15];
@@ -687,14 +691,14 @@ extern Anim D_8009556C;
 extern s16 D_800AA2EC;
 extern u16 D_801D36FC;                   /* the game mode */
 extern u16 D_801D376C;                   /* the screen's right edge, in pixels */
-extern s16 D_801D37B8;
+extern u16 D_801D37B8;
 extern u16 D_801D37BC;
 extern s16 D_801D3D8A;                   /* D_801D3D64.unk_26 */
 extern s32 D_801D3D98[];
 extern u16 D_801D8738;
 extern u16 D_801D8740;
 extern u16 D_801D87B0;                   /* the screen's left edge, in pixels */
-extern s16 D_801D87B4;
+extern u16 D_801D87B4;
 extern u16 D_801D8866;                   /* the level width's integer half */
 extern s16 D_801E0D4C;
 extern u8 D_801E0D98[];                  /* D_801E0B78[1] */
@@ -705,7 +709,7 @@ extern u16 D_801E2A50;
 extern s16 D_801F9914;
 extern s16 D_801F9A44[];
 extern s16 D_801F9AB0;
-extern u16 D_801F9ABC;
+extern s16 D_801F9ABC;
 extern s16 D_801F9ACA;                   /* the camera x's integer half */
 extern s32 D_801F9ACC;
 extern u16 D_801FA734;

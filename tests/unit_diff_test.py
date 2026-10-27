@@ -115,6 +115,11 @@ F2 = """int *func_80010090(void) {
 }
 """
 C = "extern int D_80020000[];\n\n" + F0 + "\n" + F1 + "\n" + F2
+# The original as an overlay's object ends: each section padded to 8 for the next object's `. = ALIGN(8);`, the
+# zero words in its asm (a word after the last function, one after the jump table).
+PADDED = ORIGINAL.replace(".size func_80010090, . - func_80010090\n",
+                          ".size func_80010090, . - func_80010090\n    .word 0\n") + "    .word 0\n"
+ALIGN8 = {".text": 8, ".rodata": 8}
 RESOLVER = dict(exact={"D_80020000": 0x80020000}, aliases={"D_80020000_alt": ("D_80020000", 0)})
 
 
@@ -139,18 +144,27 @@ def edit_asm(name, base, old, new):
     return W / f"{name}.o"
 
 
+def assemble(name, text):
+    (W / f"{name}.s").write_text(text)
+    sh([AS, "-EL", "-march=r3000", "-mtune=r3000", "-no-pad-sections", "-G0", "-o", W / f"{name}.o", W / f"{name}.s"])
+    return W / f"{name}.o"
+
+
 def main():
     shutil.rmtree(W, ignore_errors=True)
     W.mkdir(parents=True)
-    (W / "original.s").write_text(ORIGINAL)
-    sh([AS, "-EL", "-march=r3000", "-mtune=r3000", "-no-pad-sections", "-G0", "-o", W / "original.o",
-        W / "original.s"])
-    original = W / "original.o"
+    original = assemble("original", ORIGINAL)
+    padded = assemble("padded", PADDED)
+    padded_word = assemble("padded_word", PADDED.replace("    .word 0\n", "    .word 1\n", 1))
 
     good = compile_c("good", C)
     cases = [
-        # name, C object, the functions that must fail (None: the unit must link), why
+        # name, C object, the functions that must fail (None: the unit must link), why[, original, alignment]
         ("matching", good, None, "the alias, the jump table and the constant resolve to the original's words"),
+        ("aligned", good, None, "an original that ends with the zero fill up to the next object's ALIGN(8)",
+         padded, ALIGN8),
+        ("unaligned", good, set(), "the same original where the next object follows at 4", padded, None),
+        ("fillword", good, set(), "an original with a non-zero word where the fill would be", padded_word, ALIGN8),
         ("extra", compile_c("extra", C.replace(F1, "int func_extra(int x) {\n    return x + 2;\n}\n\n" + F1)),
          {"func_extra"}, "a function the original does not have, the others moved by it"),
         ("size", compile_c("size", C.replace("return D_80020000[x] + 1;", "return D_80020000[x] * 3 + 1;")),
@@ -169,8 +183,9 @@ def main():
     ]
     resolver = unit_diff.Resolver(**RESOLVER)
     failed = 0
-    for name, obj, must_fail, why in cases:
-        res = unit_diff.compare(original, obj, resolver)
+    for name, obj, must_fail, why, *against in cases:
+        orig, align = against or (original, None)
+        res = unit_diff.compare(orig, obj, resolver, align=align)
         bad = {n for n, reasons in res.functions.items() if reasons}
         ok = res.links if must_fail is None else (not res.links and bad == must_fail)
         detail = "; ".join(f"{n}: {', '.join(r)}" for n, r in res.functions.items() if r) or "-"

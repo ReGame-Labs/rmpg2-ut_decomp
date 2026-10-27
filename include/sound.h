@@ -216,8 +216,12 @@ typedef struct SoundEntry {
 /* The 32-byte header of the sequence file (read by func_8006E804; "SSEQ" on the disc's RAMPAGE.WSD): a word at 0x18
  * the loader returns. */
 typedef struct SoundFileHeader {
-    /* 0x00 */ s32 unk_00[6];
-    /* 0x18 */ s32 unk_18;
+    /* 0x00 */ u8 unk_00[0x0E];
+    /* 0x0E */ u16 unk_0E;          /* the number of sequences */
+    /* 0x10 */ u8 unk_10;           /* the sequence table's packing method, 0 none (func_800703D8) */
+    /* 0x11 */ u8 unk_11[0x03];
+    /* 0x14 */ s32 unk_14;          /* the table's packed size */
+    /* 0x18 */ s32 unk_18;          /* its size */
     /* 0x1C */ s32 unk_1C;
 } SoundFileHeader;
 
