@@ -40,6 +40,7 @@ import re
 import struct
 import subprocess
 import sys
+import threading
 from collections import Counter
 from pathlib import Path
 
@@ -512,6 +513,76 @@ def disasm(obj: Path, func: str):
     return out
 
 
+def compile_unit(target: str, unit: str, out: Path, src: Path = None, defines=(), cc: str = None, g: int = None):
+    """Compile the unit's C (or `src`, a copy of it) as build.ninja compiles src/<target>/<unit>.c: its compiler, -G
+    and flags from configure.py. Returns tools/cc_psx.sh's CompletedProcess."""
+    path = f"src/{target}/{unit}.c"
+    cc = cc or configure.CC_OVERRIDES.get(path, configure.DEFAULT_CC)
+    g = g if g is not None else configure.g_for(path)
+    out.parent.mkdir(parents=True, exist_ok=True)
+    extra = [f"-I{Path(path).parent}"] if src is not None else []  # a copy finds the headers next to the unit
+    return run(["tools/cc_psx.sh", "-V", cc, "-G", str(g), *configure.cc_flags(path), *(f"-D{d}" for d in defines),
+                *configure.CC_INCLUDES.split(), *extra, str(src or path), "-o", str(out)])
+
+
+def compiler_of(target: str, unit: str, cc: str = None, g: int = None):
+    path = f"src/{target}/{unit}.c"
+    return cc or configure.CC_OVERRIDES.get(path, configure.DEFAULT_CC), g if g is not None else configure.g_for(path)
+
+
+def objdiff_percents(expected: Path, out: Path) -> dict:
+    """objdiff's match percent per function of the original (None where objdiff gives none)."""
+    r = run([str(ROOT / "tools/bin/objdiff-cli"), "diff", "-1", str(expected), "-2", str(out), "-o", "-"])
+    if r.returncode != 0:
+        raise RuntimeError(r.stderr)
+    return {s["name"]: s.get("match_percent") for s in json.loads(r.stdout)["left"]["symbols"]
+            if s.get("kind") == "SYMBOL_FUNCTION"}
+
+
+class Checker:
+    """The comparison of one unit, set up once (the symbol files, the section bases, the data sections the C
+    provides, the alignment after them) for any number of C objects of it: tools/variant.py scores many."""
+
+    def __init__(self, target: str, unit: str, expected: Path = None, resolver: Resolver = None,
+                 bases: dict = None, c_sections=(), align: dict = None):
+        self.expected = expected or ROOT / f"build/expected/{target}/{unit}.s.o"
+        if not self.expected.exists():
+            sys.exit(f"{self.expected} missing: run scripts/build.sh once")
+        self.resolver = resolver or Resolver.for_target(target)
+        self.bases = map_bases(target, unit) if bases is None else bases
+        self.c_sections = c_data_sections(target, unit) if c_sections == () else c_sections
+        self.align = following_alignment(target, unit) if align is None else align
+        self.lock = threading.Lock()  # compare() fills the resolver's local names
+
+    def compare(self, out: Path) -> Result:
+        with self.lock:
+            return compare(self.expected, out, self.resolver, self.bases, self.c_sections, self.align)
+
+
+def mark(res: Result, name: str, pct) -> str:
+    """One function's result as the tools print it: OK, OK (by address), or objdiff's score and what differs."""
+    reasons = res.functions.get(name, ["not a function of the unit"])
+    if not reasons:
+        return "OK" if pct == 100.0 else "OK (by address)"
+    # objdiff's score, rounded down: never "100.00%" for a function that differs
+    score = "" if pct is None or pct >= 100.0 else f"{math.floor(pct * 100) / 100:.2f}%: "
+    return score + "; ".join(reasons)
+
+
+def side_by_side(expected: Path, out: Path, res: Result, func: str) -> list:
+    """The original's and the C's instructions of `func` side by side, the differences marked."""
+    a, b = disasm(expected, func), disasm(out, func)
+    wa, wb = res.words[func]
+    w = max([len(x) for x in a] + [10])
+    lines = [f"{'original':{w}}   C   (| differs once linked; ~ same once linked, other symbol or form)"]
+    for i in range(max(len(a), len(b))):
+        x = a[i] if i < len(a) else ""
+        y = b[i] if i < len(b) else ""
+        same = i < len(wa) and i < len(wb) and wa[i] == wb[i]
+        lines.append(f"{x:{w}} {'  ' if same and x == y else ' ~' if same else ' |'} {y}")
+    return lines
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("unit")
@@ -523,28 +594,19 @@ def main():
     ap.add_argument("-D", action="append", default=[], metavar="DEF", help="extra preprocessor define")
     args = ap.parse_args()
 
-    src = f"src/{args.target}/{args.unit}.c"
-    expected = ROOT / f"build/expected/{args.target}/{args.unit}.s.o"
-    if not expected.exists():
-        sys.exit(f"{expected} missing: run scripts/build.sh once")
+    checker = Checker(args.target, args.unit)
+    expected = checker.expected
     out = ROOT / f"build/unit_diff/{args.target}/{args.unit}.c.o"
-    out.parent.mkdir(parents=True, exist_ok=True)
-    cc = args.V or configure.CC_OVERRIDES.get(src, configure.DEFAULT_CC)
-    g = args.G if args.G is not None else configure.g_for(src)
-    r = run(["tools/cc_psx.sh", "-V", cc, "-G", str(g), *configure.cc_flags(src), *(f"-D{d}" for d in args.D),
-             *configure.CC_INCLUDES.split(),
-             src, "-o", str(out)])
+    cc, g = compiler_of(args.target, args.unit, args.V, args.G)
+    r = compile_unit(args.target, args.unit, out, defines=args.D, cc=cc, g=g)
     if r.returncode != 0:
         sys.exit(r.stdout + r.stderr)
+    try:
+        pct = objdiff_percents(expected, out)
+    except RuntimeError as e:
+        sys.exit(str(e))
 
-    r = run([str(ROOT / "tools/bin/objdiff-cli"), "diff", "-1", str(expected), "-2", str(out), "-o", "-"])
-    if r.returncode != 0:
-        sys.exit(r.stderr)
-    pct = {s["name"]: s.get("match_percent") for s in json.loads(r.stdout)["left"]["symbols"]
-           if s.get("kind") == "SYMBOL_FUNCTION"}
-
-    res = compare(expected, out, Resolver.for_target(args.target), map_bases(args.target, args.unit),
-                  c_data_sections(args.target, args.unit), following_alignment(args.target, args.unit))
+    res = checker.compare(out)
     ok = by_addr = done = 0
     still_asm = sum(1 for n in res.order if n in res.asm)
     for name in res.order:
@@ -558,15 +620,8 @@ def main():
         done += 1
         if not reasons:
             ok += 1
-            if p == 100.0:
-                mark = "OK"
-            else:
-                mark, by_addr = "OK (by address)", by_addr + 1
-        else:
-            # objdiff's score, rounded down: never "100.00%" for a function that differs
-            score = "" if p is None or p >= 100.0 else f"{math.floor(p * 100) / 100:.2f}%: "
-            mark = score + "; ".join(reasons)
-        print(f"  {name:24} {mark}")
+            by_addr += p != 100.0
+        print(f"  {name:24} {mark(res, name, p)}")
     for sec, (status, detail) in res.sections.items():
         if status != "asm" or args.all:
             print(f"  {sec:24} {status} ({detail})" if status != "DIFFERS" else f"  {sec:24} DIFFERS: {detail}")
@@ -578,17 +633,9 @@ def main():
     if args.func:
         if args.func not in res.words:
             sys.exit(f"{args.func}: {'; '.join(res.functions.get(args.func, ['not a function of the unit']))}")
-        a, b = disasm(expected, args.func), disasm(out, args.func)
-        wa, wb = res.words[args.func]
-        w = max([len(x) for x in a] + [10])
-        print(f"\n{'original':{w}}   C   (| differs once linked; ~ same once linked, other symbol or form)")
-        for i in range(max(len(a), len(b))):
-            x = a[i] if i < len(a) else ""
-            y = b[i] if i < len(b) else ""
-            same = i < len(wa) and i < len(wb) and wa[i] == wb[i]
-            print(f"{x:{w}} {'  ' if same and x == y else ' ~' if same else ' |'} {y}")
+        print()
+        print("\n".join(side_by_side(expected, out, res, args.func)))
     sys.exit(0 if res.links else 1)
-
 
 if __name__ == "__main__":
     main()

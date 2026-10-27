@@ -80,6 +80,9 @@ jobs:
       - name: unit_diff's comparison
         run: tools/venv/bin/python tests/unit_diff_test.py
 
+      - name: The variant scorer and the drafter
+        run: tools/venv/bin/python tests/variant_test.py
+
       - name: Byte-identical rebuild of every game file
         if: env.HAVE_GAME_FILES == 'true'
         run: scripts/build.sh --check

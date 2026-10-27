@@ -24,9 +24,11 @@ scripts/build.sh                  # splat + ninja; must end "build passed" (also
 |---|---|
 | splat (`configure.py`) | Splits each target from `config/<target>.yaml` into `asm/<t>/` and `src/<t>/` stubs; `configure.py` also writes `build.ninja` and `objdiff.json` |
 | `tools/cc_psx.sh` | The one compile path: cpp → cc1 (`-O2`) → maspsx → GNU as. ninja, the permuter and the scripts all use it. `-V`, `-G`, `-D`, `--data-in-c` |
-| m2c (`tools/ext/m2c`) | First draft: `m2c.py --target mipsel-gcc-c --context <ctx.h> asm/<t>/nonmatchings/<unit>/<func>.s` |
+| `tools/draft.py <func> [-t <target>]` | A typed m2c draft: m2c with the function's unit, preprocessed as the build does and reduced to its declarations, as its context; `--sweep <unit>` drafts and scores every `INCLUDE_ASM` function of a unit without editing it |
+| m2c (`tools/ext/m2c`) | By hand: `m2c.py --target mipsel-gcc-c --context <ctx.h> asm/<t>/nonmatchings/<unit>/<func>.s` (`draft.py --context` prints a unit's) |
 | `tools/compiler_id.py` | m2c drafts of a whole target, compiled with every GCC, scored; the exact ones are free matches |
 | `tools/unit_diff.py <unit> [func] [-t <target>] [-D NON_MATCHING]` | Checks one C unit against the original as the link would write it, per function and data section, and says whether the unit links to the original bytes; no ninja, parallel-safe; with a function, a side-by-side instruction diff |
+| `tools/variant.py get/put/try/perm <func> [file]` | The loop's scorer: puts C in place of a function in a copy of its unit and scores it with unit_diff's comparison (`put`), ranks variants (`try`), compiles every order of marked lines (`perm`); writes the unit only to keep a candidate, as C when it matches or as a WIP block (`--wip`) |
 | objdiff (`tools/bin/objdiff-cli`) | Per-function diff and the progress report (`objdiff.json`) |
 | asm-differ (`tools/ext/asm-differ/diff.py -mw <func>`) | Live terminal diff |
 | decomp-permuter (`tools/ext/decomp-permuter`) | Random source mutations scored against the target; a hint, never the answer |
@@ -59,26 +61,49 @@ GCC 2.8.1's sources, for reading why the compiler chose something:
 
 ## The loop per function
 
-1. **Draft** with m2c (or take the `compiler_id.py` draft) and replace the `INCLUDE_ASM` in `src/<t>/<unit>.c`.
-   m2c misreads arguments of calls through function pointers (check `a2`/`a3` and stack stores in the asm) and its
-   store order is not source order.
-2. **Score** with `tools/unit_diff.py <unit> <func>`. A C function is `OK` when its size is the original's and every
-   instruction is the original's word once linked (relocations and branch targets resolved to addresses, the names
-   `config/aliases.ld` gives one address included), its jump table too; `OK (by address)` when objdiff scores it
-   below 100% while the linked words are the same (a relocation naming another symbol for the same address, a
-   constant the original's asm has as a symbol). A function that differs shows
-   objdiff's score (the number to raise) and what differs: its size, the first differing instruction, its jump
-   table. The last line says whether the unit links to the original bytes: every function at its original offset
-   with its original size, the bytes between them, the data sections the C provides; the exit status says the
-   same. The build stays the proof: unit_diff sees one unit, not the .bss the C defines, the other units or a
-   symbol-file change.
+1. **Draft** with `tools/draft.py <func>`: m2c with the unit's own declarations as its context, so the draft has the
+   unit's types, struct fields, globals and prototypes (some drafts with real types match as drafted). `draft.py
+   --sweep <unit>` drafts every `INCLUDE_ASM` function of a unit into `build/draft/<t>/<unit>/` and scores each in a
+   copy of the unit; the `compiler_id.py` drafts are the untyped alternative. Turn the draft into natural C: no
+   `M2C_` macros, real fields for `M2C_FIELD`. m2c misreads arguments of calls through function pointers (check
+   `a2`/`a3` and stack stores in the asm) and its store order is not source order.
+2. **Score** with `tools/variant.py put <func> <file.c>`. It puts the C in place of the function (its `INCLUDE_ASM`,
+   its C or its WIP block) in a copy of the unit under `build/variant/`, compiles the unit as the build does and
+   checks it with `unit_diff.py`'s comparison; `-s` adds the side-by-side diff. The unit's file changes only when
+   the C matches: the function passes and the whole unit links to the original bytes. `variant.py get <func>` prints
+   a function's C (a WIP's C), the start of a variants file.
+   - A C function is `OK` when its size is the original's and every instruction is the original's word once linked
+     (relocations and branch targets resolved to addresses, the names `config/aliases.ld` gives one address
+     included), its jump table too; `OK (by address)` when objdiff scores it below 100% while the linked words are
+     the same (a relocation naming another symbol for the same address, a constant the original's asm has as a
+     symbol). A function that differs shows objdiff's score (the number to raise) and what differs: its size, the
+     first differing instruction, its jump table.
+   - `tools/unit_diff.py <unit> [func]` checks the unit's file as it is: every function's result, and on its last
+     line and in its exit status whether the unit links to the original bytes (every function at its original
+     offset with its original size, the bytes between them, the data sections the C provides).
+   - The ranking is that comparison's, never a diff count over aligned disassembly (an alignment can make a
+     function of another size or order look one instruction away). The build stays the proof: unit_diff sees one
+     unit, not the `.bss` the C defines, the other units or a symbol-file change.
 3. **Iterate on natural C**: types, struct fields, statement order, a variable per job (the patterns below). Look for
    an already matched sibling first.
-4. **Stop** after about 30-45 minutes on one function: put the C under `#ifdef NON_MATCHING` with the `INCLUDE_ASM` in
-   the `#else`, plus a comment with the score and the remaining difference. Every WIP must compile with
-   `-DNON_MATCHING` (`unit_diff.py <unit> -D NON_MATCHING`).
+   - `variant.py try <func> <file>` scores the variants of one file, separated by `//---` lines, and ranks them;
+     `-k N` keeps variant N (with `--wip` when it does not match).
+   - `variant.py perm <func> <file>` compiles every order of the lines marked `//@P` (sets `//@P2`, ... are permuted
+     independently) times every choice among the alternatives marked `//@G<name>` (a bare `//@G1` is the empty
+     alternative), stops at the first match and writes the best to `build/variant/`. The marker starts the line
+     (`//@P a->x = 0;`) or ends it (`a->x = 0; //@P`). Up to `--max` candidates (5040), sampled beyond; `-j` compiles
+     in parallel (`RMPG2_JOBS`); `-k` keeps the best.
+4. **Stop** after about 30-45 minutes on one function: `variant.py put <func> <file.c> --wip [--note "..."]` writes
+   the C under `#ifdef NON_MATCHING` with the `INCLUDE_ASM` in the `#else` and a comment with the score and the
+   remaining difference (the note; else the block's old note; else what unit_diff reports). It writes the block only
+   when the unit still links and the C compiles with `-DNON_MATCHING` (`unit_diff.py <unit> -D NON_MATCHING` scores
+   every WIP of a unit).
 5. **Build and commit** every ~10 matches: `scripts/build.sh` must say "build passed" (`--check` after config or symbol
    changes).
+
+Both tools find the function's unit under `src/` (`-t <target>` for an overlay's, `-u <unit>` to name it), take the
+compiler and `-G` from `configure.py` (the GCC 2.7.2 units included) and handle K&R definitions. They compile one
+unit, without ninja, so several sessions can use them while others build.
 
 ## Conventions
 
@@ -139,10 +164,21 @@ Each pattern below matched at least one GCC 2.8.1 function. Try them before sear
 - A function that leaves its object in `v0` returns it (`return obj;` changes no code); constructors whose result
   callers use return their object.
 - Method slots keep word-sized parameters: narrowing a slot's parameter type changes the callers' bytes.
+- Callers that load `a0` for a callee that never reads it: the callee keeps an unused parameter (`func_8002107C(Ai *)`).
+- Callers that pass fewer arguments than the callee reads: the callee is a K&R definition with no prototype in scope
+  (`func_80031154(kind, m)`).
+- A result masked with `andi 0xFFFF` after every call: the callee returns `u16` (`func_80038C1C`). A call with no
+  prototype in scope returns `int` and loses the mask.
 
 ### Structs, globals and aliasing
 - GCC 2.8 assumes a struct field and a scalar global never alias. A global reloaded after a struct-field store is a
-  struct member: make it a one-member struct (also for a function-pointer global called right after such stores).
+  struct member: make it a one-member struct (`D_801FB190` in `func_8002A3A4`; also for a function-pointer global
+  called right after such stores).
+- One global can be reached both through its struct (`D_800AA248.cur_obj`) and as a symbol of its own
+  (`D_800AA268.p`): the relocation's symbol says which form each access used, and the struct form keeps a field store
+  ordered before a later load (`func_80039D04`).
+- A word read with `lw` in one place and as a halfword at +2 in another is a union: `Fixed`'s `.w`, `.s.hi`, `.u.hi`
+  (`func_800346FC`).
 - Code that reaches `X + 0x68` and `X + 0x7C` with a hoisted `%hi` only matches as separate symbols.
 - cse forgets every field of a struct pointer after any store through it: the original's field reloads show where its
   stores sit.
@@ -161,6 +197,16 @@ Each pattern below matched at least one GCC 2.8.1 function. Try them before sear
   `static inline` accessor gives the original's order (its parameters are fresh pseudos).
 - Indexing a table directly (`T[i].a … T[i].b`) loads the base first, a pointer local doesn't; use `Entry *e =
   &array[i]` when the original computes `i * size` before the base.
+- A stepped pointer (`p = table; p += k - 1; *p`) gives `addu base,index` where `table[k - 1]` gives `addu
+  index,base` (`func_8002DAAC`).
+- `handler = &T[i]; (*handler)(x)` puts base and index in the other order than `T[i](x)` (`func_80026C04`). With the
+  index from a call, `i = f(); T[i & 7]()` computes the index first; `T[f() & 7]()` keeps the table base in a saved
+  register (`func_8003C0E8`).
+- A mask or wrap written stepwise keeps its `and`: `x = pos; x += vel; x &= w; pos = x;` (`func_80044F08`); the
+  single expression folds it.
+- `abs()` is a call to `s32 abs(s32)` (`func_80039D04`). Inline, `d >= 0 ? d : -d` negates a copy (`move` + `negu`)
+  and `if (d < 0) d = -d;` negates in place (`func_80023CFC`).
+- `if (c) v = -v; a = v + x;` puts a copy of the add in the delay slot after the `negu` (`func_80037960`).
 - fold reassociates `y + (t + c)` into `(y + c) + t`: write `y + c + t` to get `t + c` first. `v + c + i * k` keeps
   the original's order; `a - -b` keeps `a` first.
 - The left operand of a comparison loads first, so `a > b` and `b < a` differ.
@@ -192,7 +238,14 @@ Each pattern below matched at least one GCC 2.8.1 function. Try them before sear
   `lui/ori` constant stays in one register. Constant-init order decides which register cse copies from.
 - reload_cse has no cost check: `move vX,sY` at a constant store means the constant was stored before the variable
   was set.
-- When the original copies a value just stored into a field, write the read through the field.
+- When the original copies a value just stored into a field, write the read through the field: `D_800AA248.new_def =
+  f(); def = D_800AA248.new_def;` also puts the store right after the call (`func_80031364`).
+- A local read before it is set shows as a read of a callee-saved register before the prologue saves it: the
+  original's bug, kept with a comment (`func_80031074`).
+- An `andi 0xFFFF` re-extending a counter before a call: the counter variable was reused for another value
+  (`func_8004B540`).
+- A pointer parameter whose `move` sits late in the prologue was copied into a typed local (`MenuRecord *menu =
+  list;`, `func_8009DF98`).
 - When the original advances one register through a packet (`POLY_FT4` → `SPRT` → `DR_TPAGE`), keep one running
   pointer (`poly = (POLY_FT4 *)(sprt + 1)`), and step it in place.
 - Repeated `lui`/`li` before each use inside a loop is reload rematerialising a hoisted constant that got no register.
@@ -204,6 +257,9 @@ Each pattern below matched at least one GCC 2.8.1 function. Try them before sear
   it could alias is a block-local initialiser.
 - Scheduling ties go to the later insn in RTL order: an unrelated statement between a copy and a test can decide.
 - A store fed by a load sinks below independent constant stores (load latency).
+- An object definition's positions are stored before its constant fields (`func_80017F14`). A load from another
+  object comes before the stores into a new one, which may alias it: such store orders are found with `variant.py
+  perm`.
 - A statement placed after a call moves delay-slot fills; code after a branch can decide that branch's delay slot.
 - Pass order: sched1 → … → sched2 → jump2 (cross-jumping) → reorg. Analyse tail merges in sched2's order.
 
@@ -213,9 +269,19 @@ Each pattern below matched at least one GCC 2.8.1 function. Try them before sear
 - Case bodies are emitted in source order: order cases as the original places them, but try numeric order first, since
   a case out of order can switch cross-jumping on or off.
 - Hidden empty cases decide codegen: `case 0: break;` when the table starts at 0; `case 0: default:` in object
-  `switch (state)`es; a `slti` in a `u8` switch tree means an explicit `case 0:` sharing the default.
+  `switch (state)`es; a `slti` in a `u8` switch tree means an explicit `case 0:` sharing the default; an unbalanced
+  compare tree means an empty case whose test jump optimisation deleted (`case 0x240:` in `func_8001B858`).
+- Two case values make a compare chain, three a tree; an unsigned switch value drops the range test; a 6-entry table
+  can need its empty cases written out (`case 1: case 2: case 3: default:`, `card_write_save`). A 3-value switch
+  after a range test is `if (k < 4) … else switch (k)`, one call per arm (`func_80031154`).
 - An out-of-line stub jumping into a shared tail means the source wrote the tail in each branch: write the final call,
-  `return` or clear per branch when the original has them per branch. A variable per case stops tail merging.
+  `return` or clear per branch when the original has them per branch. A variable per case stops tail merging. Two
+  arms calling one function, each with its own argument, are two calls, not a `?:` or a selector local
+  (`func_80023CFC`).
+- When both arms return, the source wrote the later block first: `if (id < 0) return id; return …;` (`func_8001B660`).
+- Some layouts match only with the asm's block order written as labels and `goto`s (`func_8003FF54`). Invariants
+  hoisted into an inner loop's preheader mean the outer loop was a label (`restart:` in `game_main`); a `goto retry`
+  before an endless loop recomputes them (`cdload_read_file`).
 - Cross-jumping is order dependent: a tail first merges into the code before its target label. Put `case 0: default:`
   first to keep per-case tails separate. Branch sense decides which copies merge.
 - GCC emits a self tail call as `j` only for `return f(...)` in an int function.
@@ -240,6 +306,19 @@ Each pattern below matched at least one GCC 2.8.1 function. Try them before sear
   in the original were compiler temporaries.
 - GCC shares stack slots only between variables of nested blocks: a frame bigger than the original's means the original
   nested its blocks (often macro blocks).
+- Countdown loops are `do { …; p++; } while (--n != 0)` with a `u16 n` (`func_8004B540`); a table scan is `while (*t
+  != NULL) { if (*t == target) break; t++; }` (`func_80031280`).
+- Operands read in sequence go through a stepped pointer: `p = obj->arg.h; a = *p++; b = *p;` (`func_800476FC`).
+- A chained `a = b = c = 0` changes loop.c's hoisting against three stores (`game_main`).
+
+### GCC 2.7.2 (the sound driver)
+The units of `configure.py`'s `CC_OVERRIDES`. The patterns above hold unless one here says otherwise.
+- A global counter `while (G-- != 0)` stores, then tests (`func_8006DBC0`); `G = x; while (--G != -1)` keeps both
+  stores only with a statement between them.
+- `x->f &= ~2; x->f &= ~8;` gives two `and`s and one store; a local folds them (`func_8006BB14`).
+- `for (i = 0, p = table; …; i++, p++)` decides the loop's registers (`func_8006BF08`).
+- `if (p != NULL) return x; return 0;` gives the `bnez` layout (`func_8006EC18`); `if (n < 0 || n >= N) return 0;
+  return 1;` the branchy range check (`func_8006E504`).
 
 ### Small data and data in C
 - ASPSX uses `$gp` only for symbols defined earlier in the same file, so a `$gp` user and its variable share a file,
@@ -254,6 +333,10 @@ Each pattern below matched at least one GCC 2.8.1 function. Try them before sear
   tables precede it. A C `.rodata` definition right before an `INCLUDE_ASM` whose asm carries `.rodata` makes GCC omit
   the next `.rdata` directive: avoid that order.
 - Data objects are 4-aligned; small data and `.bss` start 8-aligned (`configure.py` inserts the `ALIGN(8)`).
+- A unit's data stays in asm, declared `extern`, unless one of its functions cannot match otherwise: a computed goto
+  whose `&&label` table is a `static` in `.data`, for example. Then the unit's `data` subsegment becomes `.data`, and
+  the C defines every object of it in the original order (the table as the function's `static`, in its place).
+  `.bss` can stay COMMON (no `DATA_IN_C` entry).
 
 ### LOOP_BLOCK and LOOP_BARRIER
 A loop's begin/end notes are scheduling barriers, and blocks leaving a loop are placed out of line. When a block matches
@@ -280,7 +363,7 @@ game code.
 - **Siblings first:** copy the shape of an already matched function with the same logic (locals, re-fetched records,
   nested `if`s).
 - **Hand searches that worked:** renaming variables across loops (one fresh variable per loop, declared first or last),
-  case splitting and case order, hidden empty cases, duplicating tails per branch, statement-order hill-climbing,
+  case splitting and case order, hidden empty cases, duplicating tails per branch, statement-order searches (`variant.py perm`),
   permuting declarations and types.
 - **Mini reproductions:** a standalone C file with the function's shape (fake types), compiled with `tools/cc_psx.sh`
   and cut down until the choice flips, finds a scheduler or reorg cause in minutes.

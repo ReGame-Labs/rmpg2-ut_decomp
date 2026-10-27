@@ -2,12 +2,13 @@
 # Compile one C file like the original toolchain: cpp -> cc1 -> maspsx -> GNU as.
 # Used by build.ninja (configure.py), decomp-permuter and experiments, so all compile the same way.
 #
-# Usage: tools/cc_psx.sh [-V GCC_VERSION] [-G N] [-MD DEPFILE] [--data-in-c] [-I DIR|-D DEF ...] input.c -o output.o
+# Usage: tools/cc_psx.sh [-V VERSION] [-G N] [-MD DEPFILE] [--data-in-c] [-E] [-I DIR|-D DEF ...] input.c -o output.o
 #   -V   old-gcc version in tools/gcc/ (default: configure.py's DEFAULT_CC, 2.8.1: docs/TOOLCHAIN.md "Compiler");
 #        maspsx emulates the ASPSX of the same Psy-Q
 #   -G   small-data size for cc1 and maspsx (default 0)
 #   -MD  write a make-style dependency file (headers and .include'd asm)
 #   --data-in-c  the file defines its own .bss/.sbss (configure.py DATA_IN_C): no --use-comm-section
+#   -E   preprocess only: cpp's output, with the build's flags, into the -o file (tools/draft.py's context)
 # Intermediates are kept next to the output: <out>.i, <out>.s (cc1), <out>.m.s (maspsx), except for outputs under /tmp
 # (decomp-permuter compiles every candidate to /tmp/permuterXXXX.o: kept files once filled the disk).
 #
@@ -17,7 +18,7 @@ set -euo pipefail
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 T="$ROOT/tools"
 
-ver=2.8.1 g=0 dep="" in="" out="" cpp_flags=() inc_flags=() comm=(--use-comm-section)
+ver=2.8.1 g=0 dep="" in="" out="" pp_only=0 cpp_flags=() inc_flags=() comm=(--use-comm-section)
 while [[ $# -gt 0 ]]; do
     case "$1" in
         -V) ver="$2"; shift 2 ;;
@@ -25,6 +26,7 @@ while [[ $# -gt 0 ]]; do
         -G*) g="${1#-G}"; shift ;;
         -MD) dep="$2"; shift 2 ;;
         --data-in-c) comm=(); shift ;;
+        -E) pp_only=1; shift ;;
         -o) out="$2"; shift 2 ;;
         -I) cpp_flags+=("-I$2"); inc_flags+=("-I$2"); shift 2 ;;
         -D) cpp_flags+=("-D$2"); shift 2 ;;
@@ -44,13 +46,17 @@ case "$ver" in
     2.91.66) aspsx=2.81 ;; 2.95.2) aspsx=2.86 ;;
     *) echo "cc_psx.sh: unknown GCC version $ver" >&2; exit 2 ;;
 esac
+gcc="$T/gcc/$ver"
+[[ -x "$gcc/cc1" ]] || { echo "cc_psx.sh: $gcc/cc1 missing (scripts/setup.sh gcc)" >&2; exit 1; }
+cpp=("$gcc/cpp" -nostdinc -lang-c -D_LANGUAGE_C -D__GNUC__=2 "${cpp_flags[@]}" "$in")
+if [[ $pp_only -eq 1 ]]; then
+    exec "${cpp[@]}" "$out"
+fi
 case "$out" in
     /tmp/*) trap 'rm -f "$out.i" "$out.s" "$out.m.s"' EXIT ;;
 esac
-gcc="$T/gcc/$ver"
-[[ -x "$gcc/cc1" ]] || { echo "cc_psx.sh: $gcc/cc1 missing (scripts/setup.sh gcc)" >&2; exit 1; }
 
-"$gcc/cpp" -nostdinc -lang-c -D_LANGUAGE_C -D__GNUC__=2 "${cpp_flags[@]}" "$in" "$out.i"
+"${cpp[@]}" "$out.i"
 "$gcc/cc1" -quiet -O2 -mips1 -mcpu=3000 -mgas -msoft-float -G"$g" "$out.i" -o "$out.s"
 # --use-comm-section: C definitions without an initializer stay COMMON instead of getting storage in this object, so
 # they resolve to the definitions in the data asm (a unit whose data is still asm) while maspsx still counts them as
