@@ -171,52 +171,61 @@ void pickup_clear(Pickup *p) {
     D_801E29B0 = 0;
 }
 
-/* 83 %: an object's hit box against a monster's; the original computes -w + x with negu in place (here x - w), loads the object's y and flags before the box, and loads the monster's four edges in another order */
 #ifdef NON_MATCHING
+/* 91.74%: the shape is right (the negu-then-add copies, the swap); registers differ, and the original loads the y
+ * before the flags */
 s32 pickup_test_touch(GameObject *obj, Monster *m) {
     SpriteFrame *box;
     s16 x;
     u16 y;
     s32 flip;
+    u16 dx;
+    u16 dy;
     u16 w;
-    s16 a;
+    u16 h;
     s16 left;
     s16 right;
     s16 top;
     s16 bottom;
+    s16 l;
+    s16 r;
     s16 m_right;
     s16 m_left;
     s16 m_top;
     s16 m_bottom;
 
-    x = (s16) obj->pos_x.u.hi;
+    x = obj->pos_x.s.hi;
     box = obj->frame;
     if (x < D_801F9ACA) {
         x += (D_801D8864.w + 1) >> 16;
     }
-    y = obj->pos_y.u.hi;
     flip = obj->flags & 0x10;
-    a = box->unk_10 + x;
+    dx = box->unk_10;
+    dy = box->unk_12;
+    y = obj->pos_y.u.hi;
     if (flip) {
-        a = (u16) -box->unk_10 + x;
+        dx = -dx;
     }
-    left = a;
+    left = dx + x;
+    l = left;
     w = box->unk_14;
-    top = box->unk_12 + y;
+    h = box->unk_16;
+    top = dy + y;
     if (flip) {
         w = -w;
     }
     right = w + x;
-    bottom = box->unk_16 + y;
+    r = right;
+    bottom = h + y;
     if (flip) {
-        left = right;
-        right = a;
+        l = right;
+        r = left;
     }
     m_bottom = m->unk_11E;
     m_right = m->unk_11C;
     m_left = m->unk_118;
     m_top = m->unk_11A;
-    if (left < m_right && m_left < right && top < m_bottom && m_top < bottom) {
+    if (l < m_right && m_left < r && top < m_bottom && m_top < bottom) {
         return 1;
     }
     return 0;
