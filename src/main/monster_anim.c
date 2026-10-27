@@ -1221,10 +1221,6 @@ void func_80059710(Monster *e, s16 want, s16 max) {
     } while ((s32)e->unk_188 < want && i < max);
 }
 
-#ifdef NON_MATCHING
-/* 99.96%: 99.96 %: a second pointer to the building (v, copied at the top of each iteration) gives the original's
- * a0 copy; the original reads the first unk_058 test through the building's own register, the second through a0,
- * and no u/v mix gives both with the original's s0/s1 assignment */
 s16 func_800598F4(Monster *e) {
     Building *u;
     Building *v;
@@ -1253,13 +1249,13 @@ s16 func_800598F4(Monster *e) {
         if (u->state < 4) {
             if ((e->unk_168 == 3 && left < (s16)u->left && (s16)u->left < right)
                 || (e->unk_168 == 7 && left < u->right && u->right < right)) {
-                k = 0;
-                if (v->unk_058 != 2 && v->unk_058 != 3) {
+                if (u->unk_058 != 2 && u->unk_058 != 3) {
                     u->unk_010 = u->unk_012;
                     if (v->unk_058 == 0) {
                         func_8002E278(e, u);
                     }
                 } else {
+                    k = 0;
                     do {
                         func_8002CFAC(e, u);
                         k++;
@@ -1278,9 +1274,6 @@ s16 func_800598F4(Monster *e) {
     } while (i < (s16)D_801E29A4);
     return 0;
 }
-#else
-INCLUDE_ASM("asm/main/nonmatchings/monster_anim", func_800598F4);
-#endif
 
 void func_80059B00(void) {
     Monster *e;
@@ -2143,9 +2136,9 @@ void func_8005BB04(Monster *e, s16 want, s16 max, Building *u) {
 }
 
 #ifdef NON_MATCHING
-/* 93.04%: 93.0 %: the shape is the original's (the frame box through copies, the flip in one variable); the
- * registers differ from the object on (t3 in the original, here t2), and the original keeps the no-flag return 0 in
- * the middle, after the &4 block */
+/* 96.36%: 96.36 %: the layout is the original's (the y box per flag branch, the &4 branch's facing test with equal
+ * arms, merged after reload, which keeps its return 0 in the middle); the registers differ in the &1 block: the
+ * original keeps the flip in v0, the two frame offsets in a3 and a2 (the registers of x0 and x1), the object in t3 */
 s32 monster_anim_test_box(s16 x, s16 y, s32 w, s32 h, GameObject *obj, u16 flags) {
     SpriteFrame *frame;
     s16 left;
@@ -2210,23 +2203,28 @@ s32 monster_anim_test_box(s16 x, s16 y, s32 w, s32 h, GameObject *obj, u16 flags
         if (fy0 > 0xC3) {
             y0 = 0xC3;
         }
-    } else {
-        if (flags & 2) {
-            if (obj->flags & 0x10) {
-                x0 = obj->pos_x.s.hi;
-                x1 = x0 + obj->size.u.lo;
-            } else {
-                x1 = obj->pos_x.s.hi;
-                x0 = x1 - obj->size.u.lo;
-            }
-        } else if (flags & 4) {
-            x0 = obj->pos_x.s.hi - ((s16)obj->size.u.lo >> 2);
-            x1 = obj->pos_x.s.hi + ((s16)obj->size.u.lo >> 2);
+    } else if (flags & 2) {
+        if (obj->flags & 0x10) {
+            x0 = obj->pos_x.s.hi;
+            x1 = x0 + obj->size.u.lo;
         } else {
-            return 0;
+            x1 = obj->pos_x.s.hi;
+            x0 = x1 - obj->size.u.lo;
         }
         y0 = obj->pos_y.s.hi - obj->size.u.hi;
         y1 = obj->pos_y.s.hi;
+    } else if (flags & 4) {
+        if (obj->flags & 0x10) {
+            x0 = obj->pos_x.s.hi - ((s16)obj->size.u.lo >> 2);
+            x1 = obj->pos_x.s.hi + ((s16)obj->size.u.lo >> 2);
+        } else {
+            x0 = obj->pos_x.s.hi - ((s16)obj->size.u.lo >> 2);
+            x1 = obj->pos_x.s.hi + ((s16)obj->size.u.lo >> 2);
+        }
+        y0 = obj->pos_y.s.hi - obj->size.u.hi;
+        y1 = obj->pos_y.s.hi;
+    } else {
+        return 0;
     }
     if (x0 < 0) {
         x0 += D_801D8866;
@@ -2373,8 +2371,6 @@ s16 func_8005C3C8(GameObject *b, Monster *skip) {
     return 0;
 }
 
-#ifdef NON_MATCHING
-/* 99.36 %: the saved registers are assigned in another order (the object in s7, its x in s4 in the original) */
 void func_8005C578(GameObject *b, Monster *e) {
     u16 n;
     Npc *npc;
@@ -2387,7 +2383,14 @@ void func_8005C578(GameObject *b, Monster *e) {
     if (n == 0 || func_8005D198() == 0) {
         return;
     }
-    x = b->pos_x.u.hi;
+    /* The facing test of func_8005C1F8 with a zero offset: both arms are the same. GCC merges
+     * them only after register allocation (jump2), so x is still counted as set twice and gets
+     * its saved register before the object. */
+    if (!(b->flags & 0x10)) {
+        x = b->pos_x.u.hi;
+    } else {
+        x = b->pos_x.u.hi;
+    }
     do {
         obj = npc->obj;
         if (obj != NULL) {
@@ -2410,12 +2413,7 @@ void func_8005C578(GameObject *b, Monster *e) {
         }
     } while (--n != 0);
 }
-#else
-INCLUDE_ASM("asm/main/nonmatchings/monster_anim", func_8005C578);
-#endif
 
-#ifdef NON_MATCHING
-/* 99.70 %: the object and its x swap saved registers (s5 and s6 in the original) */
 void func_8005C71C(GameObject *b, Monster *e) {
     u16 n;
     Pickup *r;
@@ -2426,7 +2424,12 @@ void func_8005C71C(GameObject *b, Monster *e) {
     if (n == 0) {
         return;
     }
-    x = b->pos_x.s.hi;
+    /* Both arms are the same (the facing test with a zero offset; see func_8005C578). */
+    if (!(b->flags & 0x10)) {
+        x = b->pos_x.s.hi;
+    } else {
+        x = b->pos_x.s.hi;
+    }
     if (func_8005D198() == 0) {
         return;
     }
@@ -2463,18 +2466,18 @@ void func_8005C71C(GameObject *b, Monster *e) {
         r++;
     } while (--n != 0);
 }
-#else
-INCLUDE_ASM("asm/main/nonmatchings/monster_anim", func_8005C71C);
-#endif
 
-#ifdef NON_MATCHING
-/* 90.75 %: the statements are right; the original loads the object's x before D_801D8740 (the count test keeps its load-delay nop) and gives x the higher saved register */
 void func_8005C958(GameObject *b, Monster *skip) {
     Monster *e;
     u16 x;
     s16 i;
 
-    x = b->pos_x.u.hi;
+    /* Both arms are the same (the facing test with a zero offset; see func_8005C578). */
+    if (!(b->flags & 0x10)) {
+        x = b->pos_x.u.hi;
+    } else {
+        x = b->pos_x.u.hi;
+    }
     for (i = 0; i < (s32) D_801D8740; i++) {
         e = &D_801E0B78[func_80025DF8(D_801FB49C[i])];
         if (e != NULL && skip != e && e->action < 7) {
@@ -2488,9 +2491,6 @@ void func_8005C958(GameObject *b, Monster *skip) {
         }
     }
 }
-#else
-INCLUDE_ASM("asm/main/nonmatchings/monster_anim", func_8005C958);
-#endif
 
 void func_8005CAA4(GameObject *b, Monster *e) {
     u16 n;
