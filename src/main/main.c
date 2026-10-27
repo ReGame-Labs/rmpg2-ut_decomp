@@ -300,7 +300,7 @@ extern u16 D_801F9AE0;
 extern s32 D_801E28E0;
 void func_8001BDCC(void);
 extern UnkFA738 D_801FA7EC[];
-void func_8001A534(s32 arg0, s16 arg1, s32 arg2);
+void func_8001A534(s32 arg0, s32 arg1, s32 arg2);
 extern UnkFA738 D_801FA738[];
 void func_8001A514(s32 arg0, s32 arg1, s32 arg2);
 void func_80024C08(void *arg0);
@@ -1097,7 +1097,7 @@ void func_8001A514(s32 arg0, s32 arg1, s32 arg2) {
     temp_a0->unk_4 = arg1;
 }
 
-void func_8001A534(s32 arg0, s16 arg1, s32 arg2) {
+void func_8001A534(s32 arg0, s32 arg1, s32 arg2) {
     UnkFA738 *temp_a0;
 
     temp_a0 = &D_801FA7EC[arg0 & 0xFFFF];
@@ -1115,7 +1115,7 @@ u16 func_8001A820(s32 index, s32 id) {
     return (u16) e->unk_4 == (u16) id;
 }
 
-s32 func_8001A848(s32 index, s32 id) {
+u16 func_8001A848(s32 index, s32 id) {
     UnkFA738 *e = &D_801FA7EC[index & 0xFFFF];
 
     return (u16) e->unk_4 == (u16) id;
@@ -1147,7 +1147,28 @@ s32 func_8001AA4C(s32 arg0, s32 arg1) {
     return 1;
 }
 
-INCLUDE_ASM("asm/main/nonmatchings/main", func_8001AB30);
+s32 func_8001AB30(s32 arg0, s32 arg1) {
+    s32 bank;
+    s32 file;
+    s32 size;
+
+    bank = arg0 & 0xFFFF;
+    file = arg1 & 0xFFFF;
+    if (!func_8001A848(bank, file)) {
+        D_801F9948 = (u8 *) (((s32) D_801F9948 + 3) & ~3);
+        size = func_80061170(file);
+        if (cdload_read_file(file, D_801F9948) == 0) {
+            return 0;
+        }
+        size = (size + 3) & ~3;
+        func_8001A534(bank, file, (s32) D_801F9948);
+        D_801F9948 += size;
+        if (D_801F9948 - D_800B09C0 > 0x114800) {
+            func_8001B5E8(4);
+        }
+    }
+    return 1;
+}
 
 s32 func_8001AC18(s32 arg0, s32 arg1) {
     s32 bank;
