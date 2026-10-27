@@ -652,13 +652,15 @@ void func_80044E98(Attacker *a) {
     func_8001E698(D_800AA248.cur_obj, D_800950F8);
 }
 
-#ifdef NON_MATCHING
-/* 99%: register names only: the object in a0 and the mask address in v1, here the other way round */
 void func_80044F08(Attacker *a) {
     s32 vel;
+    s32 x;
 
     vel = D_800AA248.cur_obj->vel_x.w;
-    D_800AA248.cur_obj->pos_x.w = (D_800AA248.cur_obj->pos_x.w + vel) & D_801D8864.w;
+    x = D_800AA248.cur_obj->pos_x.w;
+    x += vel;
+    x &= D_801D8864.w;
+    D_800AA248.cur_obj->pos_x.w = x;
     vel = D_800AA248.cur_obj->vel_y.w + 0x8000;
     if (vel > 0x40000) {
         vel = 0x40000;
@@ -673,9 +675,6 @@ void func_80044F08(Attacker *a) {
         func_8003EB5C(D_80095128, D_800AA248.cur_obj);
     }
 }
-#else
-INCLUDE_ASM("asm/main/nonmatchings/game_80043E28", func_80044F08);
-#endif
 
 void func_80044FD4(Attacker *a) {
     if (func_8003E79C() == 1) {
@@ -753,13 +752,15 @@ void func_800451CC(Attacker *a) {
     func_8001E698(D_800AA248.cur_obj, D_80095064);
 }
 
-#ifdef NON_MATCHING
-/* 99%: as func_80044F08 */
 void func_8004523C(Attacker *a) {
     s32 vel;
+    s32 x;
 
     vel = D_800AA248.cur_obj->vel_x.w;
-    D_800AA248.cur_obj->pos_x.w = (D_800AA248.cur_obj->pos_x.w + vel) & D_801D8864.w;
+    x = D_800AA248.cur_obj->pos_x.w;
+    x += vel;
+    x &= D_801D8864.w;
+    D_800AA248.cur_obj->pos_x.w = x;
     vel = D_800AA248.cur_obj->vel_y.w + 0x8000;
     if (vel > 0x40000) {
         vel = 0x40000;
@@ -774,9 +775,6 @@ void func_8004523C(Attacker *a) {
         func_8003EB5C(D_80095094, D_800AA248.cur_obj);
     }
 }
-#else
-INCLUDE_ASM("asm/main/nonmatchings/game_80043E28", func_8004523C);
-#endif
 
 void func_80045308(Attacker *a) {
     if (a->unk_0A != 0) {

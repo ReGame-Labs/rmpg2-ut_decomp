@@ -167,20 +167,20 @@ void func_80047554(void *anim, Attacker *at) {
     D_800AA248.cur_obj = saved;
 }
 
-#ifdef NON_MATCHING
-/* 99.6 %: the wrap's 'and' takes the mask as its first operand (and v1,v1,v0); the sum first moves the object to v1 instead of a0 */
-void func_80044204(Attacker *a);
-
 void func_800475F4(Attacker *at) {
     GameObject *saved;
     GameObject *obj;
     s32 vel;
+    s32 x;
 
     obj = at->obj;
     saved = D_800AA248.cur_obj;
     D_800AA248.cur_obj = obj;
     vel = obj->vel_x.w;
-    obj->pos_x.w = D_801D8864.w & (obj->pos_x.w + vel);
+    x = obj->pos_x.w;
+    x += vel;
+    x &= D_801D8864.w;
+    obj->pos_x.w = x;
     vel = D_800AA248.cur_obj->vel_y.w + 0x6500;
     D_800AA248.cur_obj->vel_y.w = vel;
     D_800AA248.cur_obj->pos_y.w += vel;
@@ -190,9 +190,6 @@ void func_800475F4(Attacker *at) {
     }
     D_800AA248.cur_obj = saved;
 }
-#else
-INCLUDE_ASM("asm/main/nonmatchings/game_8004750C", func_800475F4);
-#endif
 
 void func_800476A8(void) {
     u8 *slot;
@@ -1152,7 +1149,7 @@ void func_800494B4(Throw *t) {
 }
 
 #ifdef NON_MATCHING
-/* 99.3 %: register names only: the original keeps the object in a2, the x found in a0 and the counter in a1 (here a1, a2, a0) */
+/* 98 %: register names only: the x found and the counter take a0 and a1 in the original, a1 and a0 here */
 /* A pair per throw kind (D_8007F39C): the vertical speed it gets back when it lands, and the height it lands at. */
 typedef struct {
     /* 0x00 */ s32 unk_0;
@@ -1162,12 +1159,12 @@ typedef struct {
 extern ThrowLanding D_8007F39C[];
 
 void func_80049650(Throw *t) {
-    GameObject *cur;
+    u16 x;
     ThrowLanding *l;
     Monster *m;
     GameObject *o;
     s32 v;
-    u16 x;
+    GameObject *cur;
     u16 i;
 
     if (t->unk_0A == 0x10) {
@@ -1184,8 +1181,8 @@ void func_80049650(Throw *t) {
         if (cur->pos_y.w > D_8007F39C[cur->unk_08.w].unk_4) {
             return;
         }
-        x = 0;
         i = 7;
+        x = 0;
         cur->unk_88 = D_8007F39C[cur->unk_08.w].unk_0;
         do {
             m = &D_801E0B78[i];
@@ -1643,30 +1640,25 @@ void func_8004A90C(Monster *m) {
     m->unk_1B4 = 0;
 }
 
-#ifdef NON_MATCHING
-/* 99%: register names only: the action in v0 and the side in v1 in the original */
 void func_8004A93C(Monster *m) {
-    s16 action;
     u16 side = m->unk_1B0;
 
     if (side != 0) {
-        action = 0x3A;
         if (side != 3) {
             func_8004EFAC();
-            action = 0x12;
+            m->action = 0x12;
+        } else {
+            m->action = 0x3A;
         }
     } else {
-        action = 0x3A;
         if (m->obj->pos_y.s.hi < 0xE1) {
             func_8004EFAC();
-            action = 0xF;
+            m->action = 0xF;
+        } else {
+            m->action = 0x3A;
         }
     }
-    m->action = action;
 }
-#else
-INCLUDE_ASM("asm/main/nonmatchings/game_8004750C", func_8004A93C);
-#endif
 
 u16 func_80039358(Monster *m, u16 a, u16 kind, Throw *t);
 u16 func_8003A5A0(u16 a, u16 kind, Throw *t, s32 alt);
@@ -2014,7 +2006,7 @@ void func_8004B204(void) {
 }
 
 #ifdef NON_MATCHING
-/* 85%: the original hoists the high halves of the camera's x and the level width out of the loop into s7 and s8 (loop.c's choice); everything else matches */
+/* 92 %: the wrap is width & (camera + x), as the original; loop.c hoists only the width's high half out of the loop here, the original also the camera's (s7 and s8) */
 void func_8004B3D0(void) {
     u16 s = 7;
     ThrowRec *rec;
@@ -2051,7 +2043,7 @@ void func_8004B3D0(void) {
         }
         rec++;
         obj->pos_y.s.hi = y;
-        obj->pos_x.w = (D_801F9AC8.w + (x << 16)) & D_801D8864.w;
+        obj->pos_x.w = D_801D8864.w & (D_801F9AC8.w + (x << 16));
         obj->flags ^= 0x10;
         obj->vel_x.w = -obj->vel_x.w;
     } while (--n != 0);
@@ -2060,13 +2052,10 @@ void func_8004B3D0(void) {
 INCLUDE_ASM("asm/main/nonmatchings/game_8004750C", func_8004B3D0);
 #endif
 
-#ifdef NON_MATCHING
-/* 98%: the original zero-extends the mode again in the call's delay slot (andi a3) and loads the argument 100 before the jal */
 void func_8004B540(void) {
     ThrowRec *rec = D_801F9A54;
     u16 n = D_801D8710;
     GameObject *obj;
-    u16 mode;
     u16 s;
 
     do {
@@ -2075,12 +2064,13 @@ void func_8004B540(void) {
         obj->pos_x.w = (obj->vel_x.w + obj->pos_x.w) & D_801D8864.w;
     } while (--n != 0);
     func_8004B990();
-    mode = 2;
+    /* the counter doubles as the mode: the original re-extends it before the call (andi a3) */
+    n = 2;
     if (D_801E1C8C == 2) {
-        mode = 1;
+        n = 1;
     }
     rec = D_801F9A54;
-    if (func_8004B660((Throw *) rec, D_801F9A54[0].obj, 100, mode) == 0) {
+    if (func_8004B660((Throw *) rec, D_801F9A54[0].obj, 100, n) == 0) {
         if (D_801E1C8C == 3) {
             func_8004B80C();
         }
@@ -2101,9 +2091,6 @@ void func_8004B540(void) {
         }
     }
 }
-#else
-INCLUDE_ASM("asm/main/nonmatchings/game_8004750C", func_8004B540);
-#endif
 
 u16 func_8004B660(Throw *t, GameObject *target, s16 range, u16 mode) {
     u16 armed = t->armed;
@@ -2146,12 +2133,11 @@ u16 func_8004B6C4(GameObject *obj, s16 range, s32 mode) {
     return D_800AA2C0;
 }
 
-#ifdef NON_MATCHING
-/* 88%: the original checks the divisor (break 7) and keeps the quotient whole: the score table's value is divided as a u32 by a u16 that is not known to be non-zero */
 void func_8004B754(void) {
     u16 n = D_801D8710;
     ThrowRec *rec = D_801F9A54;
-    u32 q;
+    u16 q;
+    u32 total;
 
     do {
         if (rec->obj != NULL) {
@@ -2159,20 +2145,16 @@ void func_8004B754(void) {
         }
         rec++;
     } while (--n != 0);
-    q = (u32) *func_80025C08(D_8007F634) / D_801D8850;
+    total = *func_80025C08(D_8007F634);
+    q = total / D_801D8850;
     if (q < 0x537) {
-        D_801D8850++;
-    } else {
         q = 0x538;
+    } else {
+        D_801D8850++;
     }
     func_8004AF1C(q);
 }
-#else
-INCLUDE_ASM("asm/main/nonmatchings/game_8004750C", func_8004B754);
-#endif
 
-#ifdef NON_MATCHING
-/* 89%: register allocation in the loop: the original keeps the position and the animation's address in v0 in turn and loads the camera before the first object's position */
 void func_8004B80C(void) {
     GameObject *saved = D_800AA248.cur_obj;
     ThrowRec *rec = D_801F9A54;
@@ -2182,25 +2164,26 @@ void func_8004B80C(void) {
     u16 n;
 
     if (rec->thrown == NULL) {
-        x = rec->obj->pos_x.w;
+        obj = rec->obj;
+        x = obj->pos_x.w;
         if (x < D_801F9AC8.w) {
             x += D_801D8864.w;
         }
-        if (x >= D_801F9AC8.w + 0x820000 && x <= D_801F9AC8.w + (D_801D8864.w >> 1)) {
+        if (x >= D_801F9AC8.w + 0x820000 && x <= (D_801D8864.w >> 1) + D_801F9AC8.w) {
             n = D_801D8710;
             if (D_8007A696 & 8) {
                 func_80062E24(0x6D);
                 D_8007A696 &= ~8;
             }
-            def = func_8001D110();
-            D_800AA248.new_def = def;
+            D_800AA248.new_def = func_8001D110();
+            def = D_800AA248.new_def;
             do {
                 obj = rec->obj;
                 def->pos_x.w = obj->pos_x.w;
-                def->anim = D_80096150;
                 def->pos_y.w = obj->pos_y.w;
-                def->flags = 0x1004;
+                def->anim = D_80096150;
                 def->id = D_80096150[0];
+                def->flags = 0x1004;
                 D_800AA248.cur_obj = func_8001DCB4();
                 rec->thrown = D_800AA248.cur_obj;
                 D_800AA248.cur_obj->vel_x.w = rec->speed;
@@ -2211,29 +2194,26 @@ void func_8004B80C(void) {
     }
     D_800AA248.cur_obj = saved;
 }
-#else
-INCLUDE_ASM("asm/main/nonmatchings/game_8004750C", func_8004B80C);
-#endif
 
-#ifdef NON_MATCHING
-/* 91%: the original loads pos_x, vel_x and vel_y before the level width, then adds; the loop's exit tests are laid out the same */
 void func_8004B990(void) {
     u16 n = D_801D8710;
     ThrowRec *rec = D_801F9A54;
     GameObject *saved = D_800AA248.cur_obj;
     GameObject *obj;
-    s32 vy;
+    s32 v;
 
     obj = rec->thrown;
     if (obj != NULL) {
         do {
-            obj->pos_x.w = (obj->pos_x.w + obj->vel_x.w) & D_801D8864.w;
-            vy = obj->vel_y.w + obj->unk_88;
-            if (vy > 0xD0000) {
-                vy = 0xD0000;
+            v = obj->pos_x.w + obj->vel_x.w;
+            v &= D_801D8864.w;
+            obj->pos_x.w = v;
+            v = obj->vel_y.w + obj->unk_88;
+            if (v > 0xD0000) {
+                v = 0xD0000;
             }
-            obj->vel_y.w = vy;
-            obj->pos_y.w += vy;
+            obj->vel_y.w = v;
+            obj->pos_y.w += v;
             if (obj->pos_y.w > 0xDC0000) {
                 obj->pos_y.w = 0xDC0000;
                 obj->unk_88 = 0;
@@ -2251,9 +2231,6 @@ void func_8004B990(void) {
     }
     D_800AA248.cur_obj = saved;
 }
-#else
-INCLUDE_ASM("asm/main/nonmatchings/game_8004750C", func_8004B990);
-#endif
 
 void func_8004BAC0(void) {
     s32 i;
