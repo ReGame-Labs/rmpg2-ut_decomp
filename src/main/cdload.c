@@ -4,6 +4,7 @@
  * The boundaries and their evidence: config/main.yaml (docs/MATCHING.md "Splitting a target into files"). */
 #include "common.h"
 #include "cdload.h"
+#include "sound.h"
 #include "psyq/libapi.h"
 #include "psyq/libc2.h"
 #include "psyq/libcd.h"
@@ -35,14 +36,11 @@ s32 func_8006C8F8(s32);
 s16 func_8006EC18(void);
 s32 cdload_load_bank(s32, s32, s32, s32, s32, s32, s32);
 
-extern u8 D_801FA8A0[7];
-extern s32 D_801FB49C[3];
 
 /* The loaded file: its index, its data (the read buffer) and the read position (the fopen/fread emulation). */
 extern s32 D_801FB4AC;
 extern u8 *D_801FB4B0;
 extern s32 D_801FB4B4;
-extern u8 *D_801E1C78;
 
 /* The SPU upload's two sector buffers. */
 extern u8 D_801C41C0[0x800];
@@ -56,9 +54,7 @@ extern s32 D_801FB4A8;
 extern s32 D_801FB4B8;
 
 extern s32 D_80085264[];
-extern u16 D_801D8728;
-extern u16 D_801FA960;
-extern u16 D_801FA964;
+extern u16 D_801D8728;   /* not in game.h: read unsigned here and in game_8001781C, signed in game_8003CD08 */
 
 extern u8 D_80085274[];
 extern s32 D_80085278;
@@ -68,34 +64,16 @@ extern u8 *D_80016ACC;
 
 extern s32 D_801D3710;
 extern s32 D_801D3764;          /* the data-ready callback the XA player replaced, -1 for none */
-extern u16 D_801D8750;          /* the music playing, 0xFFFF for none */
 extern CdlFILTER D_801FB4BC;
 extern s32 D_8008A334[];        /* per XA track: its length (D_801E2A48 while it plays) */
 extern s32 D_801E2A48;
 extern s32 D_801E28EC;
-extern s16 D_801E1CB4;
 extern s32 D_801E0D48;
 extern s32 D_801F991C;
 extern s32 D_801FB4C0;
 extern u8 *D_80085300;
 
-/* What the sound driver reads its files with (func_800706C0): this file's stdio emulation, and parameters. */
-typedef struct {
-    /* 0x00 */ s32 (*open)(s32 index, s32 mode);
-    /* 0x04 */ s32 (*read)(void *buf, s32 size, s32 count, s32 handle);
-    /* 0x08 */ s32 (*seek)(s32 handle, s32 pos);
-    /* 0x0C */ s32 (*size)(void);
-    /* 0x10 */ s32 (*close)(s32 handle);
-    /* 0x14 */ s32 (*load_spu)(s32 handle, s32 spuAddr, s32 size);
-    /* 0x18 */ s32 unk_18;
-    /* 0x1C */ s32 unk_1C;
-    /* 0x20 */ s32 unk_20;
-    /* 0x24 */ s32 unk_24;
-    /* 0x28 */ s32 unk_28;
-    /* 0x2C */ s32 unk_2C;
-} SoundFileIO;
 
-void func_800706C0(SoundFileIO *io);
 s32 func_8006EE30(s32);
 void func_8006F0D8(s32, void *, s32);
 s32 func_8006E804(void *, s32);
@@ -160,39 +138,39 @@ s32 cdload_get_next_player(s32 arg0) {
 }
 
 void func_80061068(s32 *arg0, s16 arg1, s16 arg2) {
-    Unk800AA248Node *node;
-    Body *saved;
+    ObjectDef *def;
+    GameObject *saved;
 
-    saved = D_800AA248.unk_20;
-    node = func_8001D110();
-    D_800AA248.unk_3C = node;
-    node->unk_10.h.i = arg1;
-    node->unk_14.h.i = arg2;
-    node->unk_20 = 0x7000;
-    node->unk_28 = arg0;
-    node->unk_00 = *arg0;
+    saved = D_800AA248.cur_obj;
+    def = func_8001D110();
+    D_800AA248.new_def = def;
+    def->pos_x.s.hi = arg1;
+    def->pos_y.s.hi = arg2;
+    def->flags = 0x7000;
+    def->anim = arg0;
+    def->id = *arg0;
     func_8001DCB4();
-    D_800AA248.unk_20 = saved;
+    D_800AA248.cur_obj = saved;
 }
 
 void func_800610E8(void) {
 }
 
 void func_800610F0(void) {
-    D_800AA268.p->unk_80 = *D_800AA268.p->unk_5C;
+    D_800AA268.p->unk_80 = *D_800AA268.p->arg.w;
 }
 
 void func_80061110(void) {
-    D_800AA268.p->unk_18.w = 0x02000000;
+    D_800AA268.p->pos_y.w = 0x02000000;
     func_800415B4();
 }
 
 void func_8006113C(void) {
-    D_800AA268.p->unk_90->unk_010.h.hi = 1;
+    D_800AA268.p->owner.monster->unk_010.u.hi = 1;
 }
 
 void func_80061158(void) {
-    D_800AA268.p->unk_90->unk_010.h.hi = 0;
+    D_800AA268.p->owner.monster->unk_010.u.hi = 0;
 }
 
 s32 func_80061170(s32 index) {
@@ -374,9 +352,9 @@ s32 cdload_city_file_index(s32 which) {
 
     offset = D_80085264[D_801D8728];
     if (D_801D8728 != 0) {
-        p = (u8 *)(D_801FA964 + offset);
+        p = (u8 *)((u16) D_801FA964 + offset);   /* unsigned here (lhu), as D_801FA960 below */
     } else {
-        p = (u8 *)(D_801FA960 + offset);
+        p = (u8 *)((u16) D_801FA960 + offset);   /* an unsigned read here (lhu); game.h declares it s16 */
     }
     file = *p;
     pair = (file - 0x54) * 2;
@@ -691,7 +669,7 @@ void *cdload_alloc(s32 size) {
 }
 
 void func_80062C30(void) {
-    SoundFileIO io;
+    SoundInit io;
     s32 size;
     s32 bank_size;
     void *buf;
@@ -703,7 +681,7 @@ void func_80062C30(void) {
     io.size = cdload_size;
     io.close = cdload_close;
     io.load_spu = cdload_load_spu;
-    io.unk_20 = 0x78;
+    io.rate = 0x78;
     io.unk_18 = 0;
     io.unk_1C = 0;
     io.unk_28 = 1;

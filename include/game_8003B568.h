@@ -2,18 +2,18 @@
 #define GAME_8003B568_H
 
 #include "common.h"
-#include "game_8002A330.h"   /* the actor record (UnkStruct1) and D_800AA268 */
+#include "game_8002A330.h"   /* the declarations game_8002A330 shares with it */
 
 /* Declarations of src/main/game_8003B568.c: provisional types from the code's own use; refined as functions match. */
 
 typedef struct UnkStructB1 {  /* provisional: a 0x58-byte record of the table at D_801FA9BC */
-    UnkStruct4 *unk_00;
+    GameObject *unk_00;
     s16 unk_04;
     u16 unk_06;
     u16 unk_08;
     s16 unk_0A;
     u8 pad_0C[0x8];
-    UnkStruct1 *unk_14;
+    Monster *unk_14;
     u8 pad_18[0x2];
     u16 unk_1A;
     u8 pad_1C[0x14];
@@ -21,7 +21,7 @@ typedef struct UnkStructB1 {  /* provisional: a 0x58-byte record of the table at
     s32 unk_34;     /* x acceleration, 16.16 */
     u8 pad_38[0x6];
     u16 unk_3E;
-    UnkStruct4 *unk_40;
+    GameObject *unk_40;
     u8 pad_44[0x14];
 } UnkStructB1;
 
@@ -44,8 +44,6 @@ typedef struct UnkStructB2 {  /* provisional: a 0x30-byte record of the table at
 } UnkStructB2;
 
 extern UnkStructB2 D_801D3824[];
-extern u16 D_801D8738;
-extern u16 D_801E1C80;
 extern s16 D_801F9980;
 extern s16 D_801F9984;
 extern s16 D_801F9988;
@@ -55,7 +53,7 @@ extern UnkStructB1 D_801FA9BC[];
 void func_8001E4B0(void *);
 void func_8001F724(s32);
 void func_8004CFC0(void);
-void func_8005DD48(UnkStruct1 *);
+void func_8005DD48(Monster *);
 
 void func_8003B568(void);
 void func_8003B5D0(UnkStructB1 *);
@@ -68,12 +66,7 @@ void func_8003C0AC(void);
 void func_8003C0C8(void);
 void func_8003C0E0(void);
 void func_8003BD48(UnkStructB1 *);
-void func_8003BF34(UnkStruct4 *, UnkStructB1 *, u16);   /* the third argument is not used */
-extern u16 D_801D37BC;
-extern s16 D_801F9AB0;
-extern s16 D_801FA98C;
-extern s16 D_801FA990;
-extern s16 D_801FAC84;
+void func_8003BF34(GameObject *, UnkStructB1 *, u16);   /* the third argument is not used */
 extern u8 D_8008A494[];
 extern u8 D_8008A4A0[];
 extern u8 D_8008A4B8[];
@@ -89,17 +82,16 @@ typedef struct UnkStructB4 {  /* provisional: 8-byte records of D_8007DDD4 (an a
     u16 unk_04;
 } UnkStructB4;
 extern UnkStructB4 D_8007DDD4[];
-void func_80054374(u16, UnkStruct1 *);
-extern s16 D_801F9ACA;
+void func_80054374(u16, Monster *);
 extern void (*D_8007DDB4[8])(void);
-s32 func_8003B9C8(UnkStruct4 *, UnkStruct7 *);
+s32 func_8003B9C8(GameObject *, Monster *);
 void func_8003CA28(UnkStructB1 *arg0);
 void func_8003CA70(UnkStructB1 *);
-void func_8003CADC(UnkStruct1 *arg0);
-void func_8003CB30(UnkStruct1 *arg0);
+void func_8003CADC(Monster *arg0);
+void func_8003CB30(Monster *arg0);
 void func_8003CCA8(void);
 void func_8003CCC0(void *);
-void func_8003CB68(s16, UnkStruct1 *);
+void func_8003CB68(s16, Monster *);
 void func_8003CEA0(s32, s32);
 extern s32 D_800830BC[];
 u16 func_8003C858(UnkStructB3 *, s32, s32);

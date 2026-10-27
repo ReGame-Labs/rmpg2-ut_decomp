@@ -3,7 +3,7 @@
 #include "common.h"
 #include "overattr.h"
 #include "psyq/libmcrd.h"
-#include "psyq/libc.h"
+#include "psyq/libc2.h"
 
 s32 card_get_status(void) {
     long cmd;

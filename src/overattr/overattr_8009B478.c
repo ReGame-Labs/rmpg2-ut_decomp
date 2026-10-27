@@ -1,7 +1,7 @@
 /* OVERLAYS/OVERATTR.BIN: the credits, the menus and the memory-card screens (config/overattr.yaml). */
 #include "common.h"
 #include "overattr.h"
-#include "psyq/libc.h"
+#include "psyq/libc2.h"
 
 void func_8009B478(void) {
     GameObject *head;
@@ -13,11 +13,11 @@ void func_8009B478(void) {
         obj = head->next;
         if (obj != head) {
             do {
-                if ((obj->flags & 0x100) && obj->unk_78 != -1) {
-                    if (obj->unk_78 != 0) {
-                        obj->unk_78 -= 0x40404;
+                if ((obj->flags & 0x100) && obj->colour != -1) {
+                    if (obj->colour != 0) {
+                        obj->colour -= 0x40404;
                     } else {
-                        obj->unk_78 = 0;
+                        obj->colour = 0;
                         D_800A9888 = 0;
                     }
                 }
@@ -29,11 +29,11 @@ void func_8009B478(void) {
         obj = head->next;
         if (obj != head) {
             do {
-                if ((obj->flags & 0x100) && obj->unk_78 != -1) {
-                    if (obj->unk_78 <= 0x80807F) {
-                        obj->unk_78 += 0x40404;
+                if ((obj->flags & 0x100) && obj->colour != -1) {
+                    if (obj->colour <= 0x80807F) {
+                        obj->colour += 0x40404;
                     } else {
-                        obj->unk_78 = 0x808080;
+                        obj->colour = 0x808080;
                         D_800A9888 = 0;
                         obj->flags &= ~0x500;
                     }
@@ -369,8 +369,8 @@ void func_8009CD30(void) {
 
 void func_8009CE5C(void) {
     if (D_800A9808[0] != NULL) {
-        D_800A9808[0]->unk_40 = (D_801E2150 * 0x9A) >> 7;
-        D_800A9808[1]->unk_40 = (D_801E1CB4 * 0x9A) >> 7;
+        D_800A9808[0]->unk_40.w = (D_801E2150 * 0x9A) >> 7;
+        D_800A9808[1]->unk_40.w = (D_801E1CB4 * 0x9A) >> 7;
     }
 }
 
@@ -611,9 +611,9 @@ s32 func_8009E114(s32 kind, s32 y) {
     if (obj != head) {
         do {
             if (obj->kind == kind) {
-                obj->pos_y.v -= (obj->pos_y.v - y) >> 4;
-                obj->unk_28 = (u16) obj->unk_28 | (obj->pos_y.p.i << 16);
-                if (obj->pos_y.p.i == y >> 16) {
+                obj->pos_y.w -= (obj->pos_y.w - y) >> 4;
+                obj->unk_28.w = (u16) obj->unk_28.w | (obj->pos_y.s.hi << 16);
+                if (obj->pos_y.s.hi == y >> 16) {
                     done = 1;
                 }
             }
@@ -677,7 +677,7 @@ void func_8009E3C0(s32 kind, s32 value) {
     if (obj != head) {
         do {
             if (obj->kind == kind) {
-                obj->unk_78 = value;
+                obj->colour = value;
                 obj->flags |= 0x500;
             }
             obj = obj->next;
@@ -711,7 +711,7 @@ void func_8009E4D4(void) {
     if (obj != head) {
         do {
             if ((u32) (obj->kind - 0x400) < 0x100) {
-                obj->unk_78 = 0x808080;
+                obj->colour = 0x808080;
                 obj->flags |= 0x500;
             }
             obj = obj->next;
@@ -739,13 +739,13 @@ void func_8009E7D4(s16 n) {
     saved = D_800AA248.cur_obj;
     D_800AA248.new_def = def = func_8001D110();
     def->id = 0x4A00004E;
-    def->pos_x.v = ((n - 1) * 0x78 + 0x91) << 16;
-    def->pos_y.v = 0xBE0000;
+    def->pos_x.w = ((n - 1) * 0x78 + 0x91) << 16;
+    def->pos_y.w = 0xBE0000;
     def->flags = 0x1F8;
     def->unk_06 |= 0x20;
     D_800AA248.cur_obj = func_8001DCB4();
     *(D_801E28F4.obj + n) = D_800AA248.cur_obj;
-    D_800AA248.cur_obj->unk_48 = D_800A74E4;
+    D_800AA248.cur_obj->unk_48 = (s32) D_800A74E4;
     D_800AA248.cur_obj->unk_4D = 0;
     D_800AA248.cur_obj->flags |= 0x400;
     D_800AA248.cur_obj = saved;
@@ -769,11 +769,11 @@ void func_8009F968(OverattrPlacement *p, s32 n, s32 color) {
     s32 i;
     OverattrPlacement *q;
 
-    D_801F9AC8 = 0;
+    D_801F9AC8.w = 0;
     D_801F9ACC = 0;
     q = p;
     for (i = 0; i < n; i++) {
-        func_80099138(q++)->unk_78 = color;
+        func_80099138(q++)->colour = color;
     }
 }
 
@@ -784,22 +784,22 @@ void func_8009F9E0(void) {
 
     D_800AA248.new_def = def = func_8001D110();
     def->id = 0x4F002808;
-    def->pos_x.v = 0x320000;
-    def->pos_y.v = 0xD70000;
+    def->pos_x.w = 0x320000;
+    def->pos_y.w = 0xD70000;
     def->flags = 0x1FE;
     def->unk_06 |= 0x20;
     D_801D373C[0] = func_8001DCB4();
     D_801D373C[0]->kind = 0x550;
-    D_801D373C[0]->unk_78 = 0x808080;
+    D_801D373C[0]->colour = 0x808080;
     D_800AA248.new_def = def = func_8001D110();
     def->id = 0x4F00280A;
-    def->pos_x.v = 0x10E0000;
-    def->pos_y.v = 0xD70000;
+    def->pos_x.w = 0x10E0000;
+    def->pos_y.w = 0xD70000;
     def->flags = 0x1FE;
     def->unk_06 |= 0x20;
     D_801D373C[1] = func_8001DCB4();
     D_801D373C[1]->kind = 0x550;
-    D_801D373C[1]->unk_78 = 0x808080;
+    D_801D373C[1]->colour = 0x808080;
     func_8001F61C("SELECT", 0x4B, 0xD6, 1, 0x46, D_8007AD4C, 1, 0x550);
     func_8001F61C("BACK", 0x127, 0xD6, 1, 0x46, D_8007AD4C, 1, 0x550);
     head = &D_801E28C0;
@@ -807,7 +807,7 @@ void func_8009F9E0(void) {
     if (obj != head) {
         do {
             if (obj->kind == 0x550) {
-                obj->unk_78 = 0x808080;
+                obj->colour = 0x808080;
             }
             obj = obj->next;
         } while (obj != head);
@@ -820,21 +820,21 @@ void func_8009FB78(void) {
     GameObject *obj;
 
     D_800AA248.new_def = def = func_8001D110();
-    def->pos_x.v = 0x320000;
-    def->pos_y.v = 0xD70000;
+    def->pos_x.w = 0x320000;
+    def->pos_y.w = 0xD70000;
     def->id = 0x4F002808;
     def->flags = 0x1FE;
     def->unk_06 |= 0x20;
     D_801D373C[0] = func_8001DCB4();
     D_801D373C[0]->kind = 0x550;
-    D_801D373C[0]->unk_78 = 0x808080;
+    D_801D373C[0]->colour = 0x808080;
     func_8001F61C("SELECT", 0x4B, 0xD6, 1, 0x46, D_8007AD4C, 1, 0x550);
     head = &D_801E28C0;
     obj = head->next;
     if (obj != head) {
         do {
             if (obj->kind == 0x550) {
-                obj->unk_78 = 0x808080;
+                obj->colour = 0x808080;
             }
             obj = obj->next;
         } while (obj != head);

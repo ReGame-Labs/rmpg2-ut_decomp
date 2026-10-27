@@ -5,6 +5,7 @@
  * func_80063744, which pulses the motor byte of the port's PadSetAct buffer (D_801C51C8) by a duty cycle. */
 
 #include "common.h"
+#include "game.h"
 
 /* A vibration request (func_800638B0): the ports it is for, the ramps, the strength and the duration. */
 typedef struct {
@@ -41,13 +42,5 @@ typedef struct {
     /* 0x00 */ s32 *pcs;
     /* 0x04 */ RumblePreset preset;
 } RumbleCue;
-
-/* The monster record (D_801E0B78[], 0x220 bytes): only the fields read here; they move to include/game.h. */
-typedef struct {
-    /* 0x000 */ u16 id;             /* the monster id, 1-based; 0 for none */
-    /* 0x002 */ u8 unk_002[0x140];
-    /* 0x142 */ u16 unk_142;        /* nonzero: presets 0-3 vibrate twice as strong and as long */
-    /* 0x144 */ u8 unk_144[0xDC];
-} RumbleMonster;
 
 #endif /* GAME_800633EC_H */

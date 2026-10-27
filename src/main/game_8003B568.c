@@ -47,8 +47,8 @@ void func_8003B9A0(UnkStructB1 *p) {
 
 /* 83 %: an object's hit box against a monster's; the original computes -w + x with negu in place (here x - w), loads the object's y and flags before the box, and loads the monster's four edges in another order */
 #ifdef NON_MATCHING
-s32 func_8003B9C8(UnkStruct4 *obj, UnkStruct7 *m) {
-    UnkStruct16 *box;
+s32 func_8003B9C8(GameObject *obj, Monster *m) {
+    SpriteFrame *box;
     s16 x;
     u16 y;
     s32 flip;
@@ -63,13 +63,13 @@ s32 func_8003B9C8(UnkStruct4 *obj, UnkStruct7 *m) {
     s16 m_top;
     s16 m_bottom;
 
-    x = (s16) obj->unk_14.h.hi;
-    box = obj->unk_34;
+    x = (s16) obj->pos_x.u.hi;
+    box = obj->frame;
     if (x < D_801F9ACA) {
-        x += (D_801D8864 + 1) >> 16;
+        x += (D_801D8864.w + 1) >> 16;
     }
-    y = obj->unk_18.h.hi;
-    flip = obj->unk_22 & 0x10;
+    y = obj->pos_y.u.hi;
+    flip = obj->flags & 0x10;
     a = box->unk_10 + x;
     if (flip) {
         a = (u16) -box->unk_10 + x;
@@ -112,14 +112,14 @@ void func_8003BD48(UnkStructB1 *b) {
     s32 limit;
     u16 x;
     u16 d;
-    UnkStruct4 *obj;
+    GameObject *obj;
 
     if (b->unk_08 == 2) {
         if (D_801FAC84 != 0) {
             limit = D_801FAC84;
-            obj = D_800AA268.obj;
-            x = obj->unk_14.h.hi;
-            if (obj->unk_22 & 0x10) {
+            obj = D_800AA268.p;
+            x = obj->pos_x.u.hi;
+            if (obj->flags & 0x10) {
                 d = (u16) D_801F9AB0 - x + 0x31;
             } else {
                 d = (u16) (limit - x);
@@ -130,9 +130,9 @@ void func_8003BD48(UnkStructB1 *b) {
         } else if (D_801D37BC == 0) {
             if (D_801FA98C != 0) {
                 limit = D_801FA98C;
-                obj = D_800AA268.obj;
-                x = obj->unk_14.h.hi;
-                if (obj->unk_22 & 0x10) {
+                obj = D_800AA268.p;
+                x = obj->pos_x.u.hi;
+                if (obj->flags & 0x10) {
                     d = (u16) D_801FA990 - x + 0x31;
                 } else {
                     d = (u16) (limit - x);
@@ -149,20 +149,20 @@ INCLUDE_ASM("asm/main/nonmatchings/game_8003B568", func_8003BD48);
 #endif
 
 s32 func_8003BE34(UnkStructB1 *rec) {
-    D_800AA248.unk_20->unk_10 += rec->unk_30;
-    D_800AA248.unk_20->unk_18.w += D_800AA248.unk_20->unk_10;
-    D_800AA248.unk_20->unk_0C += rec->unk_34;
-    D_800AA248.unk_20->unk_14.w += D_800AA248.unk_20->unk_0C;
-    D_800AA248.unk_20->unk_14.w &= D_801D8864;
+    D_800AA248.cur_obj->vel_y.w += rec->unk_30;
+    D_800AA248.cur_obj->pos_y.w += D_800AA248.cur_obj->vel_y.w;
+    D_800AA248.cur_obj->vel_x.w += rec->unk_34;
+    D_800AA248.cur_obj->pos_x.w += D_800AA248.cur_obj->vel_x.w;
+    D_800AA248.cur_obj->pos_x.w &= D_801D8864.w;
     if (rec->unk_3E != 0) {
-        if (D_800AA248.unk_20->unk_6C & 0x80) {
+        if (D_800AA248.cur_obj->unk_6C & 0x80) {
             D_800AA248.unk_78 = 1;
             return 1;
         }
         D_800AA248.unk_78 = 0;
         return 0;
     }
-    if (!(D_800AA248.unk_20->unk_6C & 0x80)) {
+    if (!(D_800AA248.cur_obj->unk_6C & 0x80)) {
         rec->unk_3E = 1;
     }
     D_800AA248.unk_78 = 0;
@@ -173,19 +173,19 @@ s32 func_8003BE34(UnkStructB1 *rec) {
 #ifdef NON_MATCHING
 /* 98.8 %: the first test's second range check masks `st - 0xD` to 16 bits (andi) in the original; the same
  * expression in a local, in the field, or as a switch with case ranges drops the mask. */
-void func_8003BF34(UnkStruct4 *obj, UnkStructB1 *b, u16 x) {
+void func_8003BF34(GameObject *obj, UnkStructB1 *b, u16 x) {
     u8 *anim = NULL;
     u16 flags;
-    UnkStruct4 *o;
+    GameObject *o;
 
     if ((u32) (b->unk_06 - 0x16) < 2U || ((b->unk_06 - 0xD) & 0xFFFF) < 5U) {
         b->unk_0A = 1;
         return;
     }
-    flags = obj->unk_22;
-    obj->unk_22 = (flags & 0x10) ? (flags & 0xFFEF) : (flags | 0x10);
+    flags = obj->flags;
+    obj->flags = (flags & 0x10) ? (flags & 0xFFEF) : (flags | 0x10);
     b->unk_34 = -b->unk_34;
-    obj->unk_0C = -obj->unk_0C;
+    obj->vel_x.w = -obj->vel_x.w;
     switch (b->unk_06) {
     case 6:
         anim = D_8008A4A0;
@@ -209,7 +209,7 @@ void func_8003BF34(UnkStruct4 *obj, UnkStructB1 *b, u16 x) {
     }
     o = b->unk_40;
     if (o != NULL) {
-        o->unk_22 = obj->unk_22;
+        o->flags = obj->flags;
     }
 }
 #else
@@ -217,16 +217,16 @@ INCLUDE_ASM("asm/main/nonmatchings/game_8003B568", func_8003BF34);
 #endif
 
 void func_8003C080(void) {
-    (D_800AA248.unk_20->unk_90)->unk_06 = 0;
+    (D_800AA248.cur_obj->owner.item)->unk_06 = 0;
     func_8004CFC0();
 }
 
 void func_8003C0AC(void) {
-    (D_800AA248.unk_20->unk_90)->unk_0C = 1;
+    D_800AA248.cur_obj->owner.ai->unk_0C = 1;
 }
 
 void func_8003C0C8(void) {
-    (D_800AA248.unk_20->unk_90)->unk_1C = 0;
+    D_800AA248.cur_obj->owner.ai->unk_1C.s = 0;
 }
 
 void func_8003C0E0(void) {
@@ -253,7 +253,7 @@ void func_8003C0E8(void) {
 void func_8003C130(void) {
     UnkStructB2 *p = D_801D3824;
     u16 n = D_801D8738;
-    UnkStruct4 *saved = D_800AA268.obj;
+    GameObject *saved = D_800AA268.p;
 
     if (n != 0) {
         do {
@@ -263,7 +263,7 @@ void func_8003C130(void) {
             p++;
         } while (--n != 0);
     }
-    D_800AA268.obj = saved;
+    D_800AA268.p = saved;
 }
 
 INCLUDE_ASM("asm/main/nonmatchings/game_8003B568", func_8003C1C0);
@@ -367,13 +367,13 @@ block_4:
 }
 
 void func_8003C934(UnkStructB1 *rec) {
-    UnkStruct4 *saved;
+    GameObject *saved;
     UnkStructB4 *step;
     u16 k;
 
-    saved = D_800AA248.unk_20;
+    saved = D_800AA248.cur_obj;
     rec->unk_04 = 8;
-    D_800AA248.unk_20 = rec->unk_00;
+    D_800AA248.cur_obj = rec->unk_00;
     func_8003C9E8(rec);
     step = D_8007DDD4;
     k = rec->unk_1A;
@@ -385,9 +385,9 @@ void func_8003C934(UnkStructB1 *rec) {
         if (rec->unk_14 != NULL) {
             func_80054374(step->unk_04, rec->unk_14);
         }
-        func_8001E698(D_800AA248.unk_20, step->unk_00);
+        func_8001E698(D_800AA248.cur_obj, step->unk_00);
     }
-    D_800AA268.obj = saved;
+    D_800AA268.p = saved;
 }
 
 
@@ -400,7 +400,7 @@ void func_8003C9E8(UnkStructB1 *arg0) {
 }
 
 void func_8003CA28(UnkStructB1 *arg0) {
-    UnkStruct1 *temp_v1;
+    Monster *temp_v1;
 
     temp_v1 = arg0->unk_14;
     if ((temp_v1 != NULL) && ((u32) (arg0->unk_06 - 0x45) < 2U)) {
@@ -409,7 +409,7 @@ void func_8003CA28(UnkStructB1 *arg0) {
 }
 
 void func_8003CA70(UnkStructB1 *rec) {
-    UnkStruct1 *a;
+    Monster *a;
     s32 kind;
 
     a = rec->unk_14;
@@ -430,7 +430,7 @@ void func_8003CA70(UnkStructB1 *rec) {
 
 
 
-void func_8003CADC(UnkStruct1 *arg0) {
+void func_8003CADC(Monster *arg0) {
     s16 var_v1;
 
     func_8001F724(3);
@@ -440,17 +440,17 @@ void func_8003CADC(UnkStruct1 *arg0) {
         arg0->unk_186 = 0U;
     }
     arg0->unk_140 = var_v1;
-    arg0->unk_56 = 1;
+    arg0->unk_056 = 1;
     func_8005DD48(arg0);
 }
 
-void func_8003CB30(UnkStruct1 *arg0) {
+void func_8003CB30(Monster *arg0) {
     func_8001F724(3);
     arg0->unk_144 = 0x294;
-    arg0->unk_56 = 3;
+    arg0->unk_056 = 3;
 }
 
-void func_8003CB68(s16 n, UnkStruct1 *a) {
+void func_8003CB68(s16 n, Monster *a) {
     s16 v;
 
     v = n;
@@ -463,7 +463,7 @@ void func_8003CB68(s16 n, UnkStruct1 *a) {
         }
     }
     a->unk_142 = v;
-    a->unk_56 = 2;
+    a->unk_056 = 2;
     func_8005DD48(a);
 }
 
@@ -487,13 +487,13 @@ void func_8003CB68(s16 n, UnkStruct1 *a) {
 
 
 
-s32 func_8003CBE0(UnkStructB1 *rec, UnkStruct1 *a) {
+s32 func_8003CBE0(UnkStructB1 *rec, Monster *a) {
     s32 kind;
 
     if (a == NULL) {
         goto fail;
     }
-    switch (a->unk_00) {
+    switch (a->id) {
     case 1:
         kind = 4;
         break;
@@ -524,7 +524,7 @@ fail:
     }
     rec->unk_1A = 0xB;
     a->unk_146 = 0x5A;
-    a->unk_56 = 7;
+    a->unk_056 = 7;
     return 1;
 }
 

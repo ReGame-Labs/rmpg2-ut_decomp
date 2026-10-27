@@ -1,7 +1,7 @@
 #ifndef GAME_8004E574_H
 #define GAME_8004E574_H
 
-#include "gameobject.h"
+#include "game.h"
 
 /* game_8004E574: the monsters' script commands. The speed tables, one pair per Monster.unk_0CC value. */
 typedef struct {
