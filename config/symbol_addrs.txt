@@ -373,6 +373,13 @@ _copy_memcard_patch = 0x8007A640; // type:func
 // LIBCARD A75.OBJ
 StartCARD2 = 0x8007A674; // type:func
 
+// npc (src/main/npc.c), the per-kind handlers of the pickups (D_801FA9BC) and of the non-player characters (D_801FAC9C)
+npc_update_aim = 0x80039EC4; // type:func  (npc) when the countdown ends, the slope to the nearest player picks the aim 0..2 (unk_24) and a new aim starts D_8007DB04[old * 3 + new]
+
+// monster_anim (src/main/monster_anim.c), the monsters' animation scripts and the box tests against buildings, pickups and characters
+monster_anim_find_buildings = 0x8005B8C8; // type:func  (x, y, flags, half_w, half_h) the mask of the standing buildings whose box overlaps, flags 0x10 numbers them from the last
+monster_anim_test_box = 0x8005BC20; // type:func  (x, y, half_w, half_h, obj, how) 1 when the box overlaps the object's, how 1 its frame's box, 2 its size on one side by the facing, 4 a quarter of its width either side
+
 // cdload (src/main/cdload.c), the CD file reader and the overlay loader (docs/DISC_LAYOUT.md "The file table" and
 // "Overlays"). Files are read by index into the file table, checksummed and retried.
 cdload_get_next_player = 0x80061014; // type:func  (player) the player after `player` in the sorted list D_801FB49C, else the first

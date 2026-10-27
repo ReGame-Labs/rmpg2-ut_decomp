@@ -41,7 +41,7 @@ BuildingPart *func_8002ED30(u16, BuildingItem *);
 u16 func_8002F558(Building *);
 void func_8003089C(u16, Monster *);
 u16 func_8004F7A4(Building *u);         /* defined with a u8 * and an s32 result in game_8004E574 */
-s32 func_8005BC20(s16 x, s16 y, s32 w, s32 h, GameObject *obj, u16 flags);
+s32 monster_anim_test_box(s16 x, s16 y, s32 w, s32 h, GameObject *obj, u16 flags);
 void func_80053C50(s32, Monster *);
 u16 func_8005D198(void);                /* defined as s32 in bonus.c; the callers here mask a u16 */
 void func_80054374(s32, Monster *);
@@ -68,7 +68,7 @@ void func_8005883C();
 void func_80058984(Monster *);
 void func_8004EF28(void);
 s32 *func_8001B660(void *id);
-u16 func_8005B8C8(s16 x, s16 y, s32 kind, s32 half_w, s32 half_h);
+u16 monster_anim_find_buildings(s16 x, s16 y, s32 kind, s32 half_w, s32 half_h);
 void func_8005CAA4(GameObject *b, Monster *e);
 void func_8005CC54(GameObject *b, Monster *e);
 void func_8005CEC4(GameObject *b, Monster *skip);
@@ -771,36 +771,29 @@ void func_80058BCC(Monster *e) {
 
 extern s32 D_80084A30[];
 
-#ifdef NON_MATCHING
-/* 90.8 %: the -0x30000 constant is computed once before the tests in the original (a1), here inside the push block */
-
 void func_80058BF0(Monster *e) {
-    s32 vx;
+    s32 vy;
     u16 n;
 
     n = e->climb_side;
+    vy = -0x30000;
     if (n != 0) {
         if (n == 1) {
-            vx = -0x20000;
+            e->unk_100 = -0x20000;
+            D_800AA268.p->vel_y.w = vy;
+            e->unk_104 = 0x4000;
         } else if (n == 2) {
-            vx = 0x20000;
-        } else {
-            goto done;
+            e->unk_100 = 0x20000;
+            D_800AA268.p->vel_y.w = vy;
+            e->unk_104 = 0x4000;
         }
-        e->unk_100 = vx;
-        D_800AA268.p->vel_y.w = -0x30000;
-        e->unk_104 = 0x4000;
     }
-done:
     e->climb_side = 0;
     e->climb_building = 0;
     e->climb_floor = 0;
     e->unk_100 = 0;
     func_80057B94(e, D_80084A30);
 }
-#else
-INCLUDE_ASM("asm/main/nonmatchings/monster_anim", func_80058BF0);
-#endif
 
 void func_80058C6C(Monster *e) {
     func_80057B94(e, D_80084A84);
@@ -1380,7 +1373,7 @@ void func_80059F24(void) {
         func_8005CEC4(e->obj, e);
         if (e->climb_side != 3) {
             b = e->obj;
-            hits = func_8005B8C8(b->pos_x.s.hi, b->pos_y.s.hi - ((s16) b->size.u.hi >> 1), 1, (s16) b->size.u.lo >> 1, (s16) b->size.u.hi >> 1);
+            hits = monster_anim_find_buildings(b->pos_x.s.hi, b->pos_y.s.hi - ((s16) b->size.u.hi >> 1), 1, (s16) b->size.u.lo >> 1, (s16) b->size.u.hi >> 1);
             if (hits != 0) {
                 for (i = 0; i < 13; i++) {
                     if ((hits >> i) & 1) {
@@ -1534,7 +1527,7 @@ void func_8005B8A4(Monster *e) {
     func_80057B94(e, D_8008514C);
 }
 
-u16 func_8005B8C8(s16 x, s16 y, s32 kind, s32 half_w, s32 half_h) {
+u16 monster_anim_find_buildings(s16 x, s16 y, s32 kind, s32 half_w, s32 half_h) {
     Building *u;
     s16 left;
     s16 right;
@@ -1618,7 +1611,7 @@ void func_8005BB04(Monster *e, s16 want, s16 max, Building *u) {
 /* 93.04%: 93.0 %: the shape is the original's (the frame box through copies, the flip in one variable); the
  * registers differ from the object on (t3 in the original, here t2), and the original keeps the no-flag return 0 in
  * the middle, after the &4 block */
-s32 func_8005BC20(s16 x, s16 y, s32 w, s32 h, GameObject *obj, u16 flags) {
+s32 monster_anim_test_box(s16 x, s16 y, s32 w, s32 h, GameObject *obj, u16 flags) {
     SpriteFrame *frame;
     s16 left;
     s16 right;
@@ -1718,7 +1711,7 @@ s32 func_8005BC20(s16 x, s16 y, s32 w, s32 h, GameObject *obj, u16 flags) {
     return 0;
 }
 #else
-INCLUDE_ASM("asm/main/nonmatchings/monster_anim", func_8005BC20);
+INCLUDE_ASM("asm/main/nonmatchings/monster_anim", monster_anim_test_box);
 #endif
 
 u16 func_8005BF54(GameObject *b, Monster *e) {
@@ -1739,7 +1732,7 @@ u16 func_8005BF54(GameObject *b, Monster *e) {
     do {
         if (!(r->unk_00->unk_6C & 0x80) && r->unk_08 == 2 && r->unk_06 != 0 && r->unk_06 < 0x1D) {
             if (r->unk_06 >= 0xD && r->unk_06 < 0x12 && r->unk_40 != NULL
-                && func_8005BC20(x, b->pos_y.s.hi, (s16) b->unk_2C.u.lo >> 1, (s16) b->unk_2C.u.hi >> 1, r->unk_40, 1) != 0) {
+                && monster_anim_test_box(x, b->pos_y.s.hi, (s16) b->unk_2C.u.lo >> 1, (s16) b->unk_2C.u.hi >> 1, r->unk_40, 1) != 0) {
                 e->unk_024++;
                 func_80054374(0x28, e);
                 r->unk_54 = e;
@@ -1753,7 +1746,7 @@ u16 func_8005BF54(GameObject *b, Monster *e) {
                 func_800346FC(r);
                 return 1;
             }
-            if (func_8005BC20(x, b->pos_y.s.hi, (s16) b->unk_2C.u.lo >> 1, (s16) b->unk_2C.u.hi >> 1, r->unk_00, 1) != 0) {
+            if (monster_anim_test_box(x, b->pos_y.s.hi, (s16) b->unk_2C.u.lo >> 1, (s16) b->unk_2C.u.hi >> 1, r->unk_00, 1) != 0) {
                 e->unk_024++;
                 func_80054374(0x28, e);
                 r->unk_08 = 3;
@@ -1796,7 +1789,7 @@ u16 func_8005C1F8(GameObject *b, Monster *e) {
             if (!(obj->unk_6C & 0x80)) {
                 action = npc->unk_8;
                 if ((u16)action != 4 && (u16)action != 5 && (u16)action != 6 && (u16)action != 0x14 && (u16)action != 0x33 && (u16)action != 3 && (u16)action != 0x64 && (u16)action != 0x63
-                    && func_8005BC20(x, b->pos_y.s.hi, (s16) b->unk_2C.u.lo >> 1, b->unk_2C.s.hi, obj, 1) != 0) {
+                    && monster_anim_test_box(x, b->pos_y.s.hi, (s16) b->unk_2C.u.lo >> 1, b->unk_2C.s.hi, obj, 1) != 0) {
                     e->unk_024++;
                     func_80054374(0x28, e);
                     npc->unk_8 = 3;
@@ -1828,7 +1821,7 @@ u16 func_8005C3C8(GameObject *b, Monster *skip) {
     for (i = 0; i < (s32) D_801D8740; i++) {
         e = &D_801E0B78[func_80025DF8(D_801FB49C[i])];
         if (skip != e && e->action < 7) {
-            if (func_8005BC20(x, b->pos_y.s.hi, (s16) b->unk_2C.u.lo >> 1, (s16) b->unk_2C.u.hi >> 1, e->obj, 4) != 0) {
+            if (monster_anim_test_box(x, b->pos_y.s.hi, (s16) b->unk_2C.u.lo >> 1, (s16) b->unk_2C.u.hi >> 1, e->obj, 4) != 0) {
                 func_8001F724(0x14);
                 if (D_8007A68A != 0) {
                     func_80053C50(0x28000, e);
@@ -1866,7 +1859,7 @@ void func_8005C578(GameObject *b, Monster *e) {
             if (!(obj->unk_6C & 0x80)) {
                 action = npc->unk_8;
                 if ((u16)action != 4 && (u16)action != 5 && (u16)action != 6 && (u16)action != 0x14 && (u16)action != 0x33 && (u16)action != 3 && (u16)action != 0x64 && (u16)action != 0x63
-                    && func_8005BC20(x, b->pos_y.s.hi, 0x3C, 0x64, obj, 1) != 0) {
+                    && monster_anim_test_box(x, b->pos_y.s.hi, 0x3C, 0x64, obj, 1) != 0) {
                     e->unk_024++;
                     func_80054374(0x28, e);
                     npc->unk_8 = 3;
@@ -1905,7 +1898,7 @@ void func_8005C71C(GameObject *b, Monster *e) {
     do {
         if (!(r->unk_00->unk_6C & 0x80) && r->unk_08 == 2 && r->unk_06 != 0 && r->unk_06 < 0x1D) {
             if (r->unk_06 >= 0xD && r->unk_06 < 0x12 && r->unk_40 != NULL) {
-                if (func_8005BC20(x, b->pos_y.s.hi, 0x3C, 0x64, r->unk_40, 1) != 0) {
+                if (monster_anim_test_box(x, b->pos_y.s.hi, 0x3C, 0x64, r->unk_40, 1) != 0) {
                     e->unk_024++;
                     func_80054374(0x28, e);
                     r->unk_54 = e;
@@ -1918,7 +1911,7 @@ void func_8005C71C(GameObject *b, Monster *e) {
                     e->unk_18A = 1;
                     func_800346FC(r);
                 }
-            } else if (func_8005BC20(x, b->pos_y.s.hi, 0x3C, 0x64, r->unk_00, 1) != 0) {
+            } else if (monster_anim_test_box(x, b->pos_y.s.hi, 0x3C, 0x64, r->unk_00, 1) != 0) {
                 e->unk_024++;
                 func_80054374(0x28, e);
                 r->unk_08 = 3;
@@ -1950,7 +1943,7 @@ void func_8005C958(GameObject *b, Monster *skip) {
     for (i = 0; i < (s32) D_801D8740; i++) {
         e = &D_801E0B78[func_80025DF8(D_801FB49C[i])];
         if (e != NULL && skip != e && e->action < 7) {
-            if (func_8005BC20(x, b->pos_y.s.hi, 0x3C, 0x64, e->obj, 4) != 0) {
+            if (monster_anim_test_box(x, b->pos_y.s.hi, 0x3C, 0x64, e->obj, 4) != 0) {
                 func_8001F724(0x14);
                 if (D_8007A68A != 0) {
                     func_80053C50(0x28000, e);
@@ -1981,7 +1974,7 @@ void func_8005CAA4(GameObject *b, Monster *e) {
             if (!(obj->unk_6C & 0x80)) {
                 action = npc->unk_8;
                 if ((u16)action != 4 && (u16)action != 5 && (u16)action != 6 && (u16)action != 0x14 && (u16)action != 0x33 && (u16)action != 3 && (u16)action != 0x64 && (u16)action != 0x63
-                    && func_8005BC20(b->pos_x.s.hi, b->pos_y.s.hi - ((s16) b->size.u.hi >> 1), (s16) b->size.u.lo >> 1, (s16) b->size.u.hi >> 1, obj, 1) != 0) {
+                    && monster_anim_test_box(b->pos_x.s.hi, b->pos_y.s.hi - ((s16) b->size.u.hi >> 1), (s16) b->size.u.lo >> 1, (s16) b->size.u.hi >> 1, obj, 1) != 0) {
                     e->unk_024++;
                     func_80054374(0x28, e);
                     npc->unk_8 = 3;
@@ -2010,7 +2003,7 @@ void func_8005CC54(GameObject *b, Monster *e) {
     do {
         if (!(r->unk_00->unk_6C & 0x80) && r->unk_08 == 2 && r->unk_06 != 0 && r->unk_06 < 0x1D) {
             if (r->unk_06 >= 0xD && r->unk_06 < 0x12 && r->unk_40 != NULL) {
-                if (func_8005BC20(b->pos_x.s.hi, b->pos_y.s.hi - ((s16) b->size.u.hi >> 1), (s16) b->size.u.lo >> 1, (s16) b->size.u.hi >> 1, r->unk_40, 1) != 0) {
+                if (monster_anim_test_box(b->pos_x.s.hi, b->pos_y.s.hi - ((s16) b->size.u.hi >> 1), (s16) b->size.u.lo >> 1, (s16) b->size.u.hi >> 1, r->unk_40, 1) != 0) {
                     e->unk_024++;
                     func_80054374(0x28, e);
                     r->unk_54 = e;
@@ -2023,7 +2016,7 @@ void func_8005CC54(GameObject *b, Monster *e) {
                     e->unk_18A = 1;
                     func_800346FC(r);
                 }
-            } else if (func_8005BC20(b->pos_x.s.hi, b->pos_y.s.hi - ((s16) b->size.u.hi >> 1), (s16) b->size.u.lo >> 1, (s16) b->size.u.hi >> 1, r->unk_00, 1) != 0) {
+            } else if (monster_anim_test_box(b->pos_x.s.hi, b->pos_y.s.hi - ((s16) b->size.u.hi >> 1), (s16) b->size.u.lo >> 1, (s16) b->size.u.hi >> 1, r->unk_00, 1) != 0) {
                 e->unk_024++;
                 func_80054374(0x28, e);
                 r->unk_08 = 3;
@@ -2051,7 +2044,7 @@ void func_8005CEC4(GameObject *b, Monster *skip) {
         if (e != NULL && skip != e) {
             eb = e->obj;
             if (eb != NULL && e->id != 0 && e->action < 7) {
-                if (func_8005BC20(b->pos_x.s.hi, b->pos_y.s.hi - ((s16) b->size.u.hi >> 1), (s16) b->size.u.lo >> 1, (s16) b->size.u.hi >> 1, eb, 4) != 0) {
+                if (monster_anim_test_box(b->pos_x.s.hi, b->pos_y.s.hi - ((s16) b->size.u.hi >> 1), (s16) b->size.u.lo >> 1, (s16) b->size.u.hi >> 1, eb, 4) != 0) {
                     func_8001F724(0x14);
                     if (D_8007A68A != 0) {
                         func_80053C50(0x28000, e);

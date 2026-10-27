@@ -57,7 +57,7 @@ void func_80037A88(Npc *npc);
 void func_80037F20(Npc *npc);
 void func_80038348(Npc *npc);
 void func_8003A98C(Npc *npc);
-void func_80039EC4(Npc *npc);
+void npc_update_aim(Npc *npc);
 void func_8003A218(Npc *npc);
 void func_8003B294(Npc *npc);
 void func_8003B3C8(Npc *npc);
@@ -447,8 +447,9 @@ void func_80034DAC(Pickup *npc) {
     }
 }
 
-/* 86.73%: the three spawned movers are right; the prologue's setup order, the loop counters' increments (placed before the mask load here, after the store in the original) and the register of the 0x17 constant at the end differ */
 #ifdef NON_MATCHING
+/* 92.84%: 92.8 %: the original masks with D_801D8866 loaded signed (lh) and steps n after the x store; the prologue
+ * sets up the hoisted constants before n = 1 */
 void func_80034E48(Pickup *npc) {
     GameObject *mover;
     GameObject **slot;
@@ -460,10 +461,11 @@ void func_80034E48(Pickup *npc) {
     s32 n;
     s32 step;
     s32 offset;
+    s32 x;
 
+    mover = D_800AA248.cur_obj;
     i = 0;
     n = 1;
-    mover = D_800AA248.cur_obj;
     slot = D_801FB44C;
     do {
         kind = 4;
@@ -490,11 +492,13 @@ void func_80034E48(Pickup *npc) {
         } else {
             offset = n * -step;
         }
-        ((s16 *)&spawned->pos_x.w)[1] = (((u16 *)&mover->pos_x.w)[1] + offset) & (D_801D8864.w >> 16);
+        x = mover->pos_x.u.hi + offset;
+        x &= (s16)D_801D8866;
+        spawned->pos_x.s.hi = x;
         ((u16 *)&spawned->pos_y.w)[1] = ((u16 *)&mover->pos_y.w)[1];
         n++;
-        i++;
         slot++;
+        i++;
     } while (i < 3);
     D_800AA268.p = mover;
     if (npc->unk_06 == 0x17) {
@@ -1827,8 +1831,8 @@ void func_80038528(Npc *npc) {
 }
 
 #ifdef NON_MATCHING
-/* 11 instructions differ: the flags read into `facing` keep their own register (a1) before the `andi` in the
- * original; every variant tried ties the two. */
+/* 99.77%: 99.8 %: the flags read in either arm stay in a1 in the original and only the andi lands in v0; here the
+ * flags take v0 too */
 void func_800385F4(Npc *npc) {
     s32 speed;
     u16 n;
@@ -1838,17 +1842,17 @@ void func_800385F4(Npc *npc) {
         s32 idx;
 
         if (npc->unk_20 == 1) {
-            u16 facing;
+            u16 flags;
 
             speed = 0x28000;
             npc->unk_22 = 0x14;
             if (npc->unk_64 == NULL) {
-                facing = npc->unk_54 & 0x10;
+                flags = npc->unk_54;
             } else {
                 speed = -0x28000;
-                facing = D_800AA248.cur_obj->flags & 0x10;
+                flags = D_800AA248.cur_obj->flags;
             }
-            if (facing != 0) {
+            if (flags & 0x10) {
                 speed = -speed;
             }
         } else {
@@ -1859,20 +1863,20 @@ void func_800385F4(Npc *npc) {
                 speed = 0x28000;
             }
         }
-        D_800AA248.cur_obj->vel_x.w = speed;
+        D_800AA268.p->vel_x.w = speed;
         idx = npc->unk_2E & 3;
         if (npc->unk_20 == 1) {
             table = D_8007DA58;
         } else {
             table = D_8007DA68;
         }
-        func_8003EB5C(table[idx], D_800AA248.cur_obj);
+       table += idx; func_8003EB5C(*table, D_800AA268.p);
     }
     n = npc->unk_22 - 1;
     npc->unk_22 = n;
     if (n == 0 || func_80039958(npc) == 1) {
         npc->unk_22 = 0;
-        D_800AA248.cur_obj->vel_x.w = 0;
+        D_800AA268.p->vel_x.w = 0;
         npc->unk_8 = 2;
     }
 }
@@ -2110,7 +2114,139 @@ u16 func_80038DA8(Npc *npc) {
     return 0;
 }
 
+#ifdef NON_MATCHING
+/* 85.43%: 85.4 %: the counting part matches but for the registers of the three counts; the original's choice part
+ * has three state blocks, one per level, each reached from two cases by cross-jumping, with the state in v1; here
+ * the blocks merge differently */
+u16 func_80038F3C(u16 *out, Npc *npc) {
+    Monster *m;
+    u16 high;
+    u16 mid;
+    u16 low;
+    u16 i;
+    u16 level;
+    u16 state;
+
+    high = 0;
+    mid = 0;
+    low = 0;
+    if (npc->unk_64 != NULL) {
+        switch (npc->unk_64->dir) {
+        case 0:
+            return func_800391F8(out, npc);
+        case 1:
+        case 2:
+        case 8:
+            low = 1;
+            if (npc->unk_2C == 3) {
+                low = 0;
+                mid = 1;
+            }
+            break;
+        default:
+            high = 1;
+            if (npc->unk_2C < 2) {
+                high = 0;
+                mid = 1;
+            }
+            break;
+        }
+    } else {
+        i = 7;
+        do {
+            m = &D_801E0B78[i];
+            if ((m->unk_058 & 1) && m->action != 0x1F) {
+                if (m->climb_side == 0 || m->obj->pos_y.s.hi >= 0xD1) {
+                    low++;
+                } else if (m->obj->pos_y.s.hi >= 0x71) {
+                    mid++;
+                } else {
+                    high++;
+                }
+            }
+        } while (--i != 0);
+    }
+    D_800AA248.unk_18 = high | (low | mid);
+    *out = D_800AA248.unk_18;
+    if (*out == 0) {
+        return 0;
+    }
+    switch (npc->unk_2C) {
+    case 1:
+        if (mid >= high) {
+            if (mid == 0 && npc->unk_4 == 0) {
+                return func_800391F8(out, npc);
+            }
+            state = mid ? 1 : 3;
+            if (npc->unk_64 != NULL) {
+                state = 3;
+            }
+            npc->unk_4 = state;
+            level = 2;
+        } else {
+            state = high ? 1 : 3;
+            if (npc->unk_64 != NULL) {
+                state = 3;
+            }
+            npc->unk_4 = state;
+            level = 3;
+        }
+        break;
+    case 2:
+        if (high >= low) {
+            if (high == 0 && npc->unk_4 == 0) {
+                return func_800391F8(out, npc);
+            }
+            state = high ? 1 : 3;
+            if (npc->unk_64 != NULL) {
+                state = 3;
+            }
+            npc->unk_4 = state;
+            level = 3;
+        } else {
+            state = low ? 1 : 3;
+            if (npc->unk_64 != NULL) {
+                state = 3;
+            }
+            npc->unk_4 = state;
+            level = 1;
+        }
+        break;
+    default:
+        if (mid >= low) {
+            if (mid != 0) {
+                state = mid ? 1 : 3;
+                if (npc->unk_64 != NULL) {
+                    state = 3;
+                }
+                npc->unk_4 = state;
+                level = 2;
+            } else if (npc->unk_4 != 0) {
+                state = low ? 1 : 3;
+                if (npc->unk_64 != NULL) {
+                    state = 3;
+                }
+                npc->unk_4 = state;
+                level = 1;
+            } else {
+                return func_800391F8(out, npc);
+            }
+        } else {
+            state = low ? 1 : 3;
+            if (npc->unk_64 != NULL) {
+                state = 3;
+            }
+            npc->unk_4 = state;
+            level = 1;
+        }
+        break;
+    }
+    *out = level;
+    return 1;
+}
+#else
 INCLUDE_ASM("asm/main/nonmatchings/npc", func_80038F3C);
+#endif
 
 u16 func_800391F8(u16 *out, Npc *npc) {
     *out = npc->unk_2C;
@@ -2334,7 +2470,7 @@ extern u8 *D_8007DB04[];
 
 extern u8 *D_8007DB04[];
 
-void func_80039EC4(Npc *npc) {
+void npc_update_aim(Npc *npc) {
     Monster *player;
     s32 dx;
     s32 dy;
@@ -2577,7 +2713,7 @@ void func_8003A98C(Npc *npc) {
         func_8003A218(npc);
         break;
     case 0x11:
-        func_80039EC4(npc);
+        npc_update_aim(npc);
         break;
     case 3:
         func_8003A328(npc, 3);
