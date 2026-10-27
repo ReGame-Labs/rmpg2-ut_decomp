@@ -51,6 +51,10 @@ GCC 2.8.1's sources, for reading why the compiler chose something:
 - Several names for one address (the original's distinct symbols that the link placed together): splat takes one
   name per address, so the extra names go in `config/aliases.ld` as `other_name = name;` lines, a linker-script
   fragment the executable's link reads; the C uses the names the original did.
+- `main` is compiled as `game_main`, and `config/aliases.ld` gives it its name (`main = game_main;`). GCC 2.8.1
+  starts any function named `main` with `jal __main` (cc1 calls it to run global constructors on targets without
+  init sections), and the original's `main` has no such call. Nothing in the build references `main` by symbol:
+  crt0, kept as data, calls `0x8001781C` with a literal `jal` word.
 - `permuter_settings.toml` compiles at `-G 0`; set the file's `-G` there when permuting a function of another file.
 
 ## The loop per function

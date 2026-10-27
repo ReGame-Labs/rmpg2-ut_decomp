@@ -453,9 +453,8 @@ void func_8001F61C(u8 *, s16, s16, s32, s32, s32 *, s32, s32);
 u16 func_80025C54(void *);
 /* decls:end */
 
-/* 85 %: GCC 2.8.1 emits a call to __main at the start of any function named main (the target defines no init section); the original has none. The rest of the body is in place; whether the original was built with a compiler configured otherwise is open */
-#ifdef NON_MATCHING
-void main(void) {
+/* main: config/aliases.ld gives it its name (GCC 2.8.1 would start a function named main with a call to __main). */
+void game_main(void) {
     func_80017758();
     func_80018CB0();
     func_80017A40();
@@ -469,40 +468,34 @@ void main(void) {
     D_801F9A44[6] = 1;
     D_801F9ADC = 0;
     D_801F9ABC = 0;
+restart:
+    func_80017964();
+    func_80018D10(1);
     for (;;) {
-        func_80017964();
-        func_80018D10(1);
-        for (;;) {
-            func_80018CD0();
-            if (D_800AA2C8 == 0) {
-                D_800AA2C8++;
-                func_80017C04();
-                if (D_801F9A34 > 0) {
-                    D_801F9A34--;
-                }
-                if (func_8001828C() == 1) {
-                    break;
-                }
-                func_8001B7F4();
-                if (D_801D3D64.unk_62 == 0) {
-                    func_8001B858();
-                }
+        func_80018CD0();
+        if (D_800AA2C8 == 0) {
+            D_800AA2C8++;
+            func_80017C04();
+            if (D_801F9A34 > 0) {
+                D_801F9A34--;
             }
-            if (D_800AA2E0 != 0) {
-                D_800AA2C8 = 0;
-                D_800AA2E8 = 0;
-                D_800AA2E0 = 0;
+            if (func_8001828C() == 1) {
+                goto restart;
             }
-            func_8001EA78();
-            func_8001DF98();
-            func_8001D8E8();
-            func_80018CF0();
+            func_8001B7F4();
+            if (D_801D3D64.unk_62 == 0) {
+                func_8001B858();
+            }
         }
+        if (D_800AA2E0 != 0) {
+            D_800AA2E0 = D_800AA2E8 = D_800AA2C8 = 0;
+        }
+        func_8001EA78();
+        func_8001DF98();
+        func_8001D8E8();
+        func_80018CF0();
     }
 }
-#else
-INCLUDE_ASM("asm/main/nonmatchings/game_8001781C", main);
-#endif
 
 void func_80017964(void) {
     D_801D36FC = 0x110;
