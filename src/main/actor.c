@@ -54,7 +54,12 @@ void func_8003DAA0(Ai *ai);
 s16 func_8003DCC8(Ai *ai);
 void func_8003DD44(Ai *ai);
 void func_8003DF34(Ai *ai);
-BuildingItem *func_8003E1C8(BuildingPart **part, Ai *ai);   /* the second argument is not used */
+BuildingItem *actor_pick_building_part(BuildingPart **part, Ai *ai);   /* the second argument is not used */
+extern s16 D_8007DEC0[][8]; /* by item count - 3: 8 item numbers to pick from */
+extern s16 D_8007DFA0;      /* the last building picked */
+extern u16 D_801FA93C;      /* the picked part's side */
+extern u16 D_801FA940;      /* the picked item's unk_04 */
+extern u16 D_801FA944;      /* the picked building's index + 1 */
 void func_8003D71C(Ai *ai);
 void func_8003E630(Ai *ai);
 void func_8003E764(Ai *ai);
@@ -703,7 +708,7 @@ void func_8003DD70(Ai *ai) {
         D_800AA248.cur_obj->pos_y.w = 0x02000000;
         return;
     }
-    item = func_8003E1C8(&part, ai);
+    item = actor_pick_building_part(&part, ai);
     if (item == NULL) {
         ai->timer = 0xF0;
         return;
@@ -820,7 +825,172 @@ void func_8003DFD4(void) {
     D_800AA268.p = saved;
 }
 
-INCLUDE_ASM("asm/main/nonmatchings/actor", func_8003E1C8);
+/* Picks a free part of a standing building for a behaviour slot: a random building (not the last one picked in the
+ * modes of D_800AA2DC & 0xE00), then up to 5 random sides, then up to 7 items from the side's limit (or a random
+ * row of D_8007DEC0 by item count). Returns the item and the part in *part, or NULL. */
+BuildingItem *actor_pick_building_part(BuildingPart **part, Ai *ai) {
+    Building *b;
+    BuildingItem *item;
+    BuildingPart *p;
+    GameObject *obj;
+    s16 *row;
+    u16 count;
+    u16 id;
+    s16 idx;
+    s16 tries;
+    s16 s;
+    s16 side;
+    s16 limit;
+    s16 k;
+    s16 n;
+    s32 r;
+
+    count = D_801E29A4;
+    /* The building count is read here both as u16 (lhu) and as s16 (lh); the other units read it as u16. */
+    if (*(s16 *)&D_801E29A4 == 0) {
+        goto fail;
+    }
+    idx = func_8001EB10(*(s16 *)&D_801E29A4, 0);
+    if (idx == 0) {
+        idx = count;
+    }
+    if (D_800AA2DC & 0xE00) {
+        if (idx == D_8007DFA0 && *(s16 *)&D_801E29A4 >= 2) {
+            if (idx < *(s16 *)&D_801E29A4) {
+                idx++;
+            } else {
+                idx = 1;
+            }
+        }
+        D_8007DFA0 = idx;
+    }
+    b = D_801D3DC8;
+    tries = 0;
+    b += idx - 1;
+    for (;;) {
+        if (b->state == 0 && b->unk_058 == 0) {
+            obj = b->items[0].obj;
+            if (D_800AA2DC & 0xE00) {
+                goto found;
+            }
+            if (!(obj->unk_6C & 0x80)) {
+                goto found;
+            }
+            item = b->unk_070;
+            obj = item->obj;
+            if (!(obj->unk_6C & 0x80)) {
+            found:
+                D_801FA944 = b->unk_01E;
+                goto pick;
+            }
+        }
+        if (tries >= 6) {
+        fail:
+            D_801FA940 = 0;
+            D_801FA944 = 0;
+            D_801FA93C = 0;
+            *part = NULL;
+            return NULL;
+        }
+        tries++;
+        if (b->unk_01E < (s16)count) {
+            b++;
+        } else {
+            b = D_801D3DC8;
+        }
+    }
+
+pick:
+    tries = 0;
+retry:
+    if (tries >= 5) {
+        goto fail;
+    }
+    tries++;
+    r = func_8001EB10(0x8000, 0);
+    if (b->kind != 2) {
+        s = r & 3;
+        if (s != 0) {
+            if (s != 3) {
+                goto sides;
+            }
+        } else {
+            s = 3;
+        }
+        limit = b->unk_026;
+        goto have_limit;
+    }
+    s = (r & 1) + 1;
+sides:
+    if (s == 1) {
+        limit = b->left_side;
+    } else if (s == 2) {
+        limit = b->right_side;
+    } else {
+        goto fail;
+    }
+have_limit:
+    side = s;
+    if (limit == 0) {
+        count = b->unk_000;
+        if ((s16)b->unk_000 >= 0x10) {
+            goto fail;
+        }
+        n = count - 3;
+        if (n < 0) {
+            goto fail;
+        }
+        row = D_8007DEC0[n];
+        row += func_8001EB10(0x8000, 0) & 7;
+        limit = *row;
+        if (limit == 0) {
+            goto fail;
+        }
+    } else {
+        if (limit < 0) {
+            goto retry;
+        }
+        if (b->unk_000 == limit) {
+            goto retry;
+        }
+        limit--;
+    }
+    tries = 0;
+    item = &b->items[0];
+    do {
+        limit--;
+        item++;
+    } while (limit > 0);
+first_part:
+    if (side == 1) {
+        p = &item->unk_0C;
+    } else if (side == 2) {
+        p = &item->unk_24;
+    } else {
+        p = &item->unk_3C;
+    }
+    for (;;) {
+        k = item->unk_04;
+        id = k;
+        if (k < b->unk_000 && (u16)func_8003E59C(p, item, b) != 0) {
+            goto success;
+        }
+        if (++tries >= 7) {
+            goto fail;
+        }
+        item++;
+        if (k >= b->unk_000) {
+            item = &b->items[1];
+            goto first_part;
+        }
+        p = (BuildingPart *)((BuildingItem *)p + 1); /* the same part of the next item */
+    }
+success:
+    D_801FA940 = id;
+    D_801FA93C = side;
+    *part = p;
+    return item;
+}
 
 s32 func_8003E59C(BuildingPart *part, BuildingItem *item, Building *b) {
     s16 limit;
@@ -1279,9 +1449,6 @@ u16 func_8003F4A8(s16 x0, s16 y0, s16 x1, s16 y1, s16 x2, s16 y2) {
     return 1;
 }
 
-#ifdef NON_MATCHING
-/* 99.93%: one operand order: the original adds the size to y0 as (size + y0) with the result in y0's
- * register */
 u16 func_8003F50C(Monster *player) {
     Actor *actor = D_801E1E48;
     GameObject *mover;
@@ -1319,7 +1486,8 @@ u16 func_8003F50C(Monster *player) {
                         x0 = mover->pos_x.u.hi - x;
                         d = mover->unk_1C.u.hi;
                         y0 = mover->pos_y.u.hi - d;
-                        y1 = y0 + mover->size.u.hi;
+                        d = mover->size.u.hi;
+                        y1 = d + y0;
                         if (func_8003F4A8(x0, y0, player->pos.s.lo, player->pos.s.hi, x0, y1) == 1) {
                             goto hit;
                         }
@@ -1331,9 +1499,6 @@ u16 func_8003F50C(Monster *player) {
     }
     return 0;
 }
-#else
-INCLUDE_ASM("asm/main/nonmatchings/actor", func_8003F50C);
-#endif
 
 void actor_take_hit(Monster *player, Actor *actor) {
     GameObject *obj = actor->obj;

@@ -424,6 +424,7 @@ npc_create_shot = 0x8003A5A0; // type:func  (kind, throw kind, t, alt) a straigh
 npc_update_shot = 0x8003A744; // type:func  (t) flies straight and hits the monsters
 
 // actor (src/main/actor.c): the actors of the level's list and the behaviour slots around the current object.
+actor_pick_building_part = 0x8003E1C8; // type:func  (&part, ai) a random free part of a standing building for a behaviour slot, its item or NULL
 actor_take_hit = 0x8003F74C; // type:func  (player, actor) what the player's hit does, by the actor's kind and state
 
 // ai (src/main/ai.c): the behaviour slots' action dispatcher and state handlers.
