@@ -529,7 +529,7 @@ void func_8002FD24(BuildingItem *, Building *);
 s32 func_8002DB3C(u16, u16, BuildingItem *);
 void func_80034418(Building *);
 void func_8002F898(Building *, BuildingItem *);
-BuildingItem *func_8002ED30(u16, void *);   /* called with an actor and with one of its records */
+BuildingPart *func_8002ED30(u16, BuildingItem *);   /* the part `which` (1-3) of a record, NULL for another value */
 u16 func_8002F558(Building *);
 void func_8002DBF4(u16, s32, Building *, BuildingItem *);
 void func_80025848(BuildingItem *);
@@ -544,7 +544,7 @@ void func_80030D74(void);
 void func_8002CFAC(Monster *, Building *);
 BuildingItem *func_8002CD24(u16, Monster *, BuildingItem *);
 void func_80031280(s32, Building *);
-void func_8002CE74(u16, Building *, BuildingItem *);
+void func_8002CE74(u16, Monster *, BuildingItem *);
 void func_8003111C(s32, Monster *);
 void func_80031364(Building *);
 extern void *D_8007D008[];
@@ -572,15 +572,15 @@ extern s32 D_80011E90[];
 extern s32 D_8007CAFC[];
 extern s32 D_8007CD40[];
 extern s16 D_801F9A38;
-extern s32 D_801FB41C;
+extern u32 D_801FB41C;
 void func_8002FA20(s32, BuildingItem *);
 typedef struct UnkStruct18 {  /* provisional: what func_80025C08(D_80084028) returns (two counts and two lists) */
     u16 unk_00;
     u16 unk_02;
     s32 unk_04;
     s32 unk_08;
-    u8 unk_0C[0xC];
-    u8 unk_18[0xC];
+    u16 unk_0C[6];   /* func_8003197C: flags, x, y, ?, colour */
+    u16 unk_18[6];
 } UnkStruct18;
 
 typedef struct UnkStruct19 {  /* provisional: an object and the animation to start on it (func_80030D14) */
@@ -589,8 +589,8 @@ typedef struct UnkStruct19 {  /* provisional: an object and the animation to sta
 } UnkStruct19;
 
 extern u8 D_80084028[];
-extern s32 D_801E1E34[2];
-void func_8003197C(void *, s32, s32 *);
+extern GameObject *D_801E1E34[2];
+void func_8003197C(u16 *, s32, GameObject **);
 void func_80053C50(s32, Monster *);
 void func_8002BAEC(Monster *);
 extern Anim D_80011F58;
@@ -608,4 +608,7 @@ u16 func_8003E79C(GameObject *, s32);
 u16 func_8004B6C4(GameObject *, s16, s32);
 extern u8 D_80084268[];
 void func_8001B054(GameObject *);
+extern s16 D_8007C976;
+extern u32 D_801FB198;
+extern GameObject *D_801FB420;
 #endif /* GAME_8002A330_H */

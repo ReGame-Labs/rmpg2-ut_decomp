@@ -455,7 +455,7 @@ typedef struct BuildingPart {
     /* 0x0C */ struct UnkStruct14 *unk_0C;
     /* 0x10 */ GameObject *unk_10;
     /* 0x14 */ s16 unk_14;
-    /* 0x16 */ s16 unk_16;
+    /* 0x16 */ u16 unk_16;
 } BuildingPart;
 
 /* One of a building's 15 items: a sprite each. */
