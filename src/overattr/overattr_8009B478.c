@@ -302,7 +302,12 @@ INCLUDE_ASM("asm/overattr/nonmatchings/overattr_8009B478", func_8009CA68);
 
 INCLUDE_ASM("asm/overattr/nonmatchings/overattr_8009B478", func_8009CD30);
 
-INCLUDE_ASM("asm/overattr/nonmatchings/overattr_8009B478", func_8009CE5C);
+void func_8009CE5C(void) {
+    if (D_800A9808[0] != NULL) {
+        D_800A9808[0]->unk_40 = (D_801E2150 * 0x9A) >> 7;
+        D_800A9808[1]->unk_40 = (D_801E1CB4 * 0x9A) >> 7;
+    }
+}
 
 INCLUDE_ASM("asm/overattr/nonmatchings/overattr_8009B478", func_8009CEC8);
 
@@ -504,11 +509,11 @@ void func_8009DE00(void) {
     }
 }
 
-#ifdef NON_MATCHING
-/* 95.4 %: the prologue saves s3 before s2 in the original (as func_8009E40C). */
-void func_8009DEA8(MenuRecord *menu, s32 selected) {
+void func_8009DEA8(void *list, s32 selected) {
+    MenuRecord *menu;
     s32 i;
 
+    menu = list;
     for (i = 2; i <= menu->unk_00 + 1; i++) {
         if (selected != i - 2) {
             func_8001E450(menu[i].kind);
@@ -519,9 +524,6 @@ void func_8009DEA8(MenuRecord *menu, s32 selected) {
         func_8001E450(menu->sub[i + 2].kind);
     }
 }
-#else
-INCLUDE_ASM("asm/overattr/nonmatchings/overattr_8009B478", func_8009DEA8);
-#endif
 
 void func_8009DF60(void) {
     s32 i;
@@ -533,13 +535,73 @@ void func_8009DF60(void) {
 
 INCLUDE_ASM("asm/overattr/nonmatchings/overattr_8009B478", func_8009DF98);
 
-INCLUDE_ASM("asm/overattr/nonmatchings/overattr_8009B478", func_8009E114);
+s32 func_8009E114(s32 kind, s32 y) {
+    GameObject *head;
+    GameObject *obj;
+    s32 done;
 
-INCLUDE_ASM("asm/overattr/nonmatchings/overattr_8009B478", func_8009E190);
+    head = &D_801E28C0;
+    obj = head->next;
+    done = 0;
+    if (obj != head) {
+        do {
+            if (obj->kind == kind) {
+                obj->pos_y.v -= (obj->pos_y.v - y) >> 4;
+                obj->unk_28 = (u16) obj->unk_28 | (obj->pos_y.p.i << 16);
+                if (obj->pos_y.p.i == y >> 16) {
+                    done = 1;
+                }
+            }
+            obj = obj->next;
+        } while (obj != head);
+    }
+    return done;
+}
 
-INCLUDE_ASM("asm/overattr/nonmatchings/overattr_8009B478", func_8009E238);
+void func_8009E190(void *list, s32 selected, s32 lit, s32 normal) {
+    MenuRecord *menu;
+    s32 i;
 
-INCLUDE_ASM("asm/overattr/nonmatchings/overattr_8009B478", func_8009E310);
+    menu = list;
+    for (i = 2; i <= menu[0].unk_00 + 1; i++) {
+        if (selected == i - 2) {
+            func_8001EC74(menu[i].kind, lit);
+        } else {
+            func_8001EC74(menu[i].kind, normal);
+        }
+    }
+}
+
+void func_8009E238(void *list, s32 lit, s32 normal) {
+    MenuRecord *menu;
+    s32 i;
+
+    menu = list;
+    for (i = 2; i <= menu[0].unk_00 + 1; i++) {
+        if (D_800A92B0[0] == i - 2 || D_800A92B0[1] == i - 2 || D_800A92B0[2] == i - 2) {
+            func_8001EC74(menu[i].kind, lit);
+        } else {
+            func_8001EC74(menu[i].kind, normal);
+        }
+    }
+}
+
+void func_8009E310(s32 lit, s32 normal) {
+    s32 i;
+
+    for (i = 0; i < 6; i++) {
+        if (D_800A92D0 == i) {
+            func_8001EC74(0x450 + i, lit);
+        } else {
+            func_8001EC74(0x450 + i, normal);
+        }
+    }
+    if (D_800A92D0 == D_800A9840) {
+        func_8001EC74(0x499, lit);
+    } else {
+        func_8001EC74(0x499, normal);
+    }
+}
 
 void func_8009E3C0(s32 kind, s32 value) {
     GameObject *head;
@@ -558,11 +620,11 @@ void func_8009E3C0(s32 kind, s32 value) {
     }
 }
 
-#ifdef NON_MATCHING
-/* 95.8 %: the prologue saves s3 before s2 in the original. */
-void func_8009E40C(MenuRecord *menu, s32 selected) {
+void func_8009E40C(void *list, s32 selected) {
+    MenuRecord *menu;
     s32 i;
 
+    menu = list;
     for (i = 2; i <= menu[0].unk_00 + 1; i++) {
         if (selected != i - 2) {
             func_8009E3C0(menu[i].kind, 0x808080);
@@ -574,9 +636,6 @@ void func_8009E40C(MenuRecord *menu, s32 selected) {
     }
     D_800A9888 = 1;
 }
-#else
-INCLUDE_ASM("asm/overattr/nonmatchings/overattr_8009B478", func_8009E40C);
-#endif
 
 void func_8009E4D4(void) {
     GameObject *head;
@@ -608,7 +667,24 @@ void func_8009E540(MenuRecord *menu) {
 
 INCLUDE_ASM("asm/overattr/nonmatchings/overattr_8009B478", func_8009E5BC);
 
-INCLUDE_ASM("asm/overattr/nonmatchings/overattr_8009B478", func_8009E7D4);
+void func_8009E7D4(s16 n) {
+    GameObject *saved;
+    ObjectDef *def;
+
+    saved = D_800AA248.cur_obj;
+    D_800AA248.new_def = def = func_8001D110();
+    def->id = 0x4A00004E;
+    def->pos_x.v = ((n - 1) * 0x78 + 0x91) << 16;
+    def->pos_y.v = 0xBE0000;
+    def->flags = 0x1F8;
+    def->unk_06 |= 0x20;
+    D_800AA248.cur_obj = func_8001DCB4();
+    *(D_801E28F4.obj + n) = D_800AA248.cur_obj;
+    D_800AA248.cur_obj->unk_48 = D_800A74E4;
+    D_800AA248.cur_obj->unk_4D = 0;
+    D_800AA248.cur_obj->flags |= 0x400;
+    D_800AA248.cur_obj = saved;
+}
 
 INCLUDE_ASM("asm/overattr/nonmatchings/overattr_8009B478", func_8009E8B8);
 

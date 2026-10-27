@@ -12,18 +12,6 @@
 
 /* A sprite object of the level (gameobject.h GameObject; game_8001781C's Sprite), linked through `next` in the
  * sorted list whose sentinel head is D_801E28C0. */
-typedef struct GameObject {
-    /* 0x00 */ struct GameObject *next;
-    /* 0x04 */ u8 unk_04[0x1E];
-    /* 0x22 */ u16 flags;              /* gameobject.h unk_20.f.flags */
-    /* 0x24 */ u8 unk_24[0x4C];
-    /* 0x70 */ u16 kind;               /* the id func_8001E450/func_8001EC74 select objects by */
-    /* 0x72 */ u8 unk_72[0x02];
-    /* 0x74 */ u16 unk_74;
-    /* 0x76 */ u8 unk_76[0x02];
-    /* 0x78 */ s32 unk_78;
-} GameObject;
-
 typedef union {
     s32 v;
     struct {
@@ -31,6 +19,32 @@ typedef union {
         s16 i;
     } p;
 } Fixed16;
+
+typedef struct GameObject {
+    /* 0x00 */ struct GameObject *next;
+    /* 0x04 */ u8 unk_04[0x10];
+    /* 0x14 */ Fixed16 pos_x;
+    /* 0x18 */ Fixed16 pos_y;
+    /* 0x1C */ u8 unk_1C[0x06];
+    /* 0x22 */ u16 flags;              /* gameobject.h unk_20.f.flags */
+    /* 0x24 */ u8 unk_24[0x04];
+    /* 0x28 */ s32 unk_28;
+    /* 0x2C */ u8 unk_2C[0x14];
+    /* 0x40 */ s32 unk_40;
+    /* 0x44 */ u8 unk_44[0x04];
+    /* 0x48 */ void *unk_48;           /* gameobject.h unk_48 */
+    /* 0x4C */ u8 unk_4C;
+    /* 0x4D */ s8 unk_4D;
+    /* 0x4E */ u8 unk_4E[0x22];
+    /* 0x70 */ u16 kind;               /* the id func_8001E450/func_8001EC74 select objects by */
+    /* 0x72 */ u8 unk_72[0x02];
+    /* 0x74 */ u16 unk_74;
+    /* 0x76 */ u8 unk_76[0x02];
+    /* 0x78 */ s32 unk_78;             /* a colour, 0xBBGGRR */
+    /* 0x7C */ u8 unk_7C[0x04];
+    /* 0x80 */ s16 unk_80;
+} GameObject;
+
 
 /* What func_8001D110 hands out to describe an object to create (gameobject.h ObjectDef). */
 typedef struct {
@@ -46,7 +60,9 @@ typedef struct {
 
 /* The level state at D_800AA248 (gameobject.h GameState). */
 typedef struct {
-    /* 0x00 */ u8 unk_00[0x3C];
+    /* 0x00 */ u8 unk_00[0x20];
+    /* 0x20 */ GameObject *cur_obj;    /* the object being updated (D_800AA268) */
+    /* 0x24 */ u8 unk_24[0x18];
     /* 0x3C */ ObjectDef *new_def;     /* the object being created (D_800AA284) */
 } GameState;
 
@@ -58,7 +74,7 @@ extern GameObject D_801E28C0;          /* the object list's sentinel head */
 ObjectDef *func_8001D110(void);        /* a fresh definition to fill in */
 GameObject *func_8001DCB4();           /* creates the object of D_800AA248.new_def; no argument */
 void func_8001E450(u16 kind);          /* frees every object of a kind */
-void func_8001EC74(s32 kind, s16 value); /* sets unk_74 of every object of a kind */
+void func_8001EC74(s32 kind, s32 value); /* sets unk_74 of every object of a kind */
 void func_8001A420(void);
 void func_80017B24(void);
 void func_8001AC18(s32, s32);
@@ -129,7 +145,11 @@ typedef struct {
 } TextState;
 
 extern TextState D_801D8588;
-extern s32 D_801E28F4[];
+/* The screen's objects. */
+extern struct {
+    GameObject *unk_00;
+    GameObject *obj[18];
+} D_801E28F4;
 extern s16 D_801F9A4A;
 extern s16 D_801F9A4C;
 extern s16 D_801F9A4E;
@@ -182,7 +202,12 @@ extern MenuRecord *D_800A92C0;          /* the current menu */
 extern MenuRecord *D_800A92D8;          /* the menu to open next */
 extern s16 D_800A9870;                  /* the cursor in the next menu */
 extern s16 D_800A9878;
+extern s32 D_800A9228;                 /* the player slot before the last move */
+extern u8 D_800A74E4[];                /* an animation script */
+extern s16 D_800A92B0[3];
+extern s16 D_800A9840;
 extern s16 D_800A9800;
+extern GameObject *D_800A9808[2];      /* the two volume bars */
 extern u8 D_800A9890[6];                /* a name being entered, 5 letters */
 extern TextMessage *D_800A6F48[5];      /* the name entry's letters */
 extern MenuRecord D_800A6FCC[];
@@ -257,7 +282,7 @@ void card_string_to_sjis(s16 *dst, u8 *src);
 GameObject *func_80099138(OverattrPlacement *p);
 void func_800A0CC0(void);
 void func_8009E3C0(s32 kind, s32 value);
-void func_8009E40C(MenuRecord *menu, s32 selected);
+void func_8009E40C(void *list, s32 selected);
 void func_8009E4D4(void);
 void func_8009D0B0(void);
 

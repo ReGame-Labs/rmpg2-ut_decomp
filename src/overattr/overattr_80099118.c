@@ -24,12 +24,12 @@ GameObject *func_80099138(OverattrPlacement *p) {
 
 void func_800991BC(void) {
     u16 n;
-    s32 *p;
+    GameObject **p;
 
     n = 0x13;
-    p = D_801E28F4;
+    p = &D_801E28F4.unk_00;
     do {
-        *p++ = 0;
+        *p++ = NULL;
     } while (--n != 0);
     D_801FA88C = 0;
 }
@@ -40,11 +40,51 @@ INCLUDE_ASM("asm/overattr/nonmatchings/overattr_80099118", func_8009951C);
 
 INCLUDE_ASM("asm/overattr/nonmatchings/overattr_80099118", func_800996CC);
 
-INCLUDE_ASM("asm/overattr/nonmatchings/overattr_80099118", func_800999F8);
+void func_800999F8(u32 which) {
+    switch (which) {
+    case 0:
+        D_801E28F4.obj[8]->pos_y.v = 0x180000;
+        D_801E28F4.obj[9]->pos_y.v = 0x1180000;
+        D_801E28F4.obj[10]->pos_y.v = 0x1180000;
+        break;
+    case 1:
+        D_801E28F4.obj[8]->pos_y.v = 0x1180000;
+        D_801E28F4.obj[9]->pos_y.v = 0x190000;
+        D_801E28F4.obj[10]->pos_y.v = 0x1180000;
+        break;
+    case 2:
+        D_801E28F4.obj[8]->pos_y.v = 0x1180000;
+        D_801E28F4.obj[9]->pos_y.v = 0x1180000;
+        D_801E28F4.obj[10]->pos_y.v = 0x180000;
+        break;
+    }
+}
 
-INCLUDE_ASM("asm/overattr/nonmatchings/overattr_80099118", func_80099A94);
+s32 func_80099A94(s32 *slot) {
+    s32 i;
 
-INCLUDE_ASM("asm/overattr/nonmatchings/overattr_80099118", func_80099AF0);
+    for (i = *slot - 1; i >= 0; i--) {
+        if (D_801FA984[i] == 0) {
+            D_800A9228 = *slot;
+            *slot = i;
+            return 1;
+        }
+    }
+    return 0;
+}
+
+s32 func_80099AF0(s32 *slot) {
+    s32 i;
+
+    for (i = *slot + 1; i < 3; i++) {
+        if (D_801FA984[i] == 0) {
+            D_800A9228 = *slot;
+            *slot = i;
+            return 1;
+        }
+    }
+    return 0;
+}
 
 INCLUDE_ASM("asm/overattr/nonmatchings/overattr_80099118", func_80099B54);
 
