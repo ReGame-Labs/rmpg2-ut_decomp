@@ -579,7 +579,7 @@ s32 func_8004F7A4(u8 *list) {
 }
 
 #ifdef NON_MATCHING
-/* 88%: the original loads x1 once (lh) and keeps a copy in a1 to add to; here the compare reloads it, and the D_800AA284 store goes before the jal instead of into its delay slot */
+/* 93.7%: the original loads x1 once (lh) and keeps a copy in a1 to add to; here the compare reloads it */
 void func_8004F7F4(GameObject *obj, Monster *m1, Monster *m2, GameObject *cur) {
     ObjectDef *def;
     GameObject *o;
@@ -607,7 +607,7 @@ void func_8004F7F4(GameObject *obj, Monster *m1, Monster *m2, GameObject *cur) {
     def->flags = 0x5500;
     def->anim = &D_8009556C;
     def->id = 0x0100005E;
-    D_800AA284 = def;
+    D_800AA284.p = def;
     o = func_8001DCB4();
     o->kind = 0x743;
     m2->unk_0DC = 0;

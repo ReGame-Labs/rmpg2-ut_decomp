@@ -242,7 +242,7 @@ void func_8002B640(void) {
     func_8003EB5C(&D_80097E30, D_800AA248.cur_obj);
 }
 
-/* x */
+/* 99.35 %: the original loads the camera y's integer half with lh (as D_801F9ACE), this one with lhu */
 #ifdef NON_MATCHING
 void func_8002B6E8(s32 i) {
     GameObject **slot;
@@ -263,10 +263,11 @@ void func_8002B6E8(s32 i) {
         def->id = D_80097E30.id;
         def->unk_1C = 2;
         def->flags = 0x1005;
-        D_800AA284 = def;
+        D_800AA284.p = def;
         obj = func_8001DCB4();
         obj->pos_x.s.hi = (((D_801F9ACA - 400) & mask) + func_8001EA78() % 800) & mask;
-        obj->pos_y.s.hi = D_801F9ACE - ((func_8001EA78() & 0x1F) + 50);
+        dy = (func_8001EA78() & 0x1F) + 50;
+        obj->pos_y.s.hi = D_801F9ACC.s.hi - dy;
         obj->vel_x.w = 8;
         *slot = obj;
         return;

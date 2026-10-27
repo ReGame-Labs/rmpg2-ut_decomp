@@ -702,7 +702,7 @@ void func_800180E4(void) {
 
     kind = 0x7000;
     request = func_8001D110();
-    D_800AA284 = request;
+    D_800AA284.p = request;
     request->pos_x.w = 0xA00000;
     request->pos_y.w = 0xD70000;
     request->id = 0x4F002808;
@@ -1426,7 +1426,7 @@ void func_8001BBB0(void) {
             func_8001ED54(&D_800A5F40);
             func_8001ED54(&D_800A5F84);
             temp_v0 = func_8001D110();
-            D_800AA284 = temp_v0;
+            D_800AA284.p = temp_v0;
             temp_v0->id = 0x0A0041C8;
             temp_v0->pos_x.w = 0x930000;
             temp_v0->pos_y.w = 0x1E0000;
@@ -3880,7 +3880,7 @@ void func_80025124(Building *rec) {
     item = &rec->items[0];
     if (def->unk_08 != 0) {
         request->id = def->unk_08;
-        D_800AA284 = request;
+        D_800AA284.p = request;
         sprite = func_8001DCB4();
         rec->items[0].obj = sprite;
         sprite->owner.p = item;
@@ -4824,7 +4824,7 @@ void func_800299C4(void) {
         if (count >= 0xB4) {
             if (sprite == NULL) {
                 request = func_8001D110();
-                D_800AA284 = request;
+                D_800AA284.p = request;
                 request->flags = 0x7000;
                 request->anim = &D_80093F78;
                 request->pos_x.s.hi = 0x150;

@@ -393,10 +393,16 @@ typedef struct GameObjectRef {
 
 extern GameObjectRef D_800AA268;
 
+/* D_800AA248.new_def by its own name, a one-member struct for the same reason. */
+typedef struct ObjectDefRef {
+    ObjectDef *p;
+} ObjectDefRef;
+
+extern ObjectDefRef D_800AA284;
+
 /* Other members of the state block by their own names. */
 extern s32 D_800AA250;                  /* unk_08 */
 extern s32 D_800AA260;                  /* unk_18 */
-extern ObjectDef *D_800AA284;           /* new_def */
 extern u16 D_800AA2C0;                  /* result */
 extern s32 D_800AA2DC;                  /* unk_94 */
 

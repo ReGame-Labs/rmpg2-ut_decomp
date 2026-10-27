@@ -1098,7 +1098,7 @@ void func_80036440(Npc *npc, s32 depth) {
     effect = func_8001D110();
     effect->id = 0x4F000986;
     effect->flags = d;
-    D_800AA284 = effect;
+    D_800AA284.p = effect;
     mover = func_8001DCB4();
     mover->flags |= 0x400;
     npc->unk_74 = mover;
