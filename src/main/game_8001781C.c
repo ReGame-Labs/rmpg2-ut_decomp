@@ -289,7 +289,7 @@ extern u16 D_801FA898[];
 void func_80019268(void);
 extern s16 D_801D36F8;
 extern s16 D_801F9A34;
-s32 func_80017C80(s32 arg0);
+u16 func_80017C80(u16 id);
 void func_80020CE4(s32 arg0, s32 arg1);
 u16 func_8001D844(void);
 void func_8001D598(void);
@@ -465,6 +465,20 @@ extern Unk7B358 *D_8007B358[];
 extern Anim D_8008B744;
 extern Anim D_80097B3C;
 extern Unk7B358 *D_8007B348[];
+extern s16 D_8007A6E8[];
+u16 func_80023764(Ai *);
+void func_800242D8(Ai *);
+extern Anim D_8008B27C;
+extern Anim D_80097674;
+extern s32 D_80013654[];
+extern s32 D_800136A4[];
+extern GameObject *D_801D874C;
+void func_80020EDC(Ai *);
+void func_80021418(Ai *);
+void func_800211F4(Ai *);
+void func_80021384(Ai *);
+void func_80021644(Ai *);
+void func_800216C8(Ai *);
 /* decls:end */
 
 /* main: config/aliases.ld gives it its name (GCC 2.8.1 would start a function named main with a call to __main). */
@@ -591,18 +605,47 @@ void func_80017B98(void) {
 
 INCLUDE_ASM("asm/main/nonmatchings/game_8001781C", func_80017C04);
 
-s32 func_80017C80(s32 arg0) {
+u16 func_80017C80(u16 id) {
     u16 temp_v1;
     Monster *temp_a1;
 
-    temp_a1 = &D_801E0B78[arg0 & 0xFFFF];
+    temp_a1 = &D_801E0B78[id];
     if ((D_801D36F8 != 0) || (D_801FA890 != 0) || (D_801F9A34 > 0) || (temp_a1->id == 0) || (temp_v1 = temp_a1->action, (temp_v1 == 0x1F)) || (temp_v1 == 0x37) || (temp_v1 == 0x26) || (temp_a1->unk_046 != 0) || ((D_801D36FC != 0x240) && (D_801D36FC != 0x150) && (D_801D36FC != 0x220)) || ((D_801E1E40 == 0) && (D_801D36FC == 0x150)) || ((D_801D3758 < 5) && (D_801D36FC == 0x220))) {
         return 0;
     }
     return 1;
 }
 
-INCLUDE_ASM("asm/main/nonmatchings/game_8001781C", func_80017D8C);
+u16 func_80017D8C(void) {
+    s32 player;
+    s32 id;
+    s32 count;
+    s32 winner;
+    u8 who;
+
+    winner = 0;
+    count = 0;
+    for (player = 0; player < 3; player++) {
+        if (D_801E1C90[player] == 0 && D_801FA898[player] != 0) {
+            for (id = 0; id < 7; id++) {
+                who = D_801FA8A0[id];
+                if (who == player + 1 && func_80017C80(id + 1) == 1) {
+                    if (++D_8007A6E8[player] >= 3) {
+                        winner = who;
+                        count++;
+                    }
+                }
+            }
+        } else {
+            D_8007A6E8[player] = 0;
+            D_801FA898[player] = D_801E1C90[player];
+        }
+    }
+    if (count != 0 && count == D_801D8740 && (u16) count >= 2) {
+        return 0xFF;
+    }
+    return winner;
+}
 
 void func_80017F14(s16 x, s16 y, GameObject *link, s32 script) {
     GameObject *saved;
@@ -2415,7 +2458,35 @@ void func_80020CE4(s32 arg0, s32 arg1) {
 
 INCLUDE_ASM("asm/main/nonmatchings/game_8001781C", func_80020D20);
 
-INCLUDE_ASM("asm/main/nonmatchings/game_8001781C", func_80020DDC);
+void func_80020DDC(Ai *ai) {
+    D_800AA268.p = ai->obj;
+    switch (ai->action) {
+        case 0x64:
+            func_800211F4(ai);
+            break;
+        case 0x63:
+            func_80021384(ai);
+            break;
+        case 3:
+            func_80021418(ai);
+            break;
+        case 0x14:
+            func_800216C8(ai);
+            break;
+        case 4:
+            func_80021644(ai);
+            break;
+        case 1:
+            func_80020FC8((GameObject *) ai);
+            break;
+        case 2:
+            func_80020EDC(ai);
+            break;
+        default:
+            ai->action = 1;
+            break;
+    }
+}
 
 INCLUDE_ASM("asm/main/nonmatchings/game_8001781C", func_80020EDC);
 
@@ -2724,7 +2795,68 @@ void func_80021D24(Ai *ai) {
     func_800377B4(ai);
 }
 
-INCLUDE_ASM("asm/main/nonmatchings/game_8001781C", func_80021DA8);
+void func_80021DA8(Ai *ai) {
+    s32 result;
+
+    if (D_800AA248.cur_obj->unk_6C & 0x80) {
+        if (D_801D8740 == 0) {
+            func_80023F64(ai);
+            return;
+        }
+        func_800242D8(ai);
+        func_800232AC(0x36000);
+        ai->unk_30.w = 0;
+        D_800AA248.cur_obj->vel_y.w = 0;
+        return;
+    }
+    if (ai->unk_0C != 2) {
+        func_800232AC(0x36000);
+        if (ai->unk_3A == 2) {
+            ai->unk_0C = 2;
+            D_800AA248.cur_obj->vel_x.w >>= 2;
+            D_800AA248.cur_obj->vel_y.w = 0;
+            ai->unk_30.w = 0;
+            ai->unk_3A = 0;
+            if (ai->kind == 0x11) {
+                func_8003EB5C(&D_80097674, D_800AA248.cur_obj);
+            } else {
+                func_8003EB5C(&D_8008B27C, D_800AA248.cur_obj);
+            }
+            return;
+        }
+        if (func_80023114(ai) == 1) {
+            ai->unk_0C = 2;
+            D_800AA248.cur_obj->vel_x.w >>= 2;
+            D_800AA248.cur_obj->vel_y.w = 0;
+            ai->unk_30.w = 0;
+            if (ai->kind == 0x11) {
+                func_8003EB5C(&D_80097950, D_800AA248.cur_obj);
+            } else {
+                func_8003EB5C(&D_8008B558, D_800AA248.cur_obj);
+            }
+            return;
+        }
+        if (ai->kind == 0x11) {
+            func_8003EB5C(&D_80097340, D_800AA248.cur_obj);
+        } else {
+            func_8003EB5C(&D_8008AE40, D_800AA248.cur_obj);
+        }
+        result = func_80023764(ai);
+        if (result == 1) {
+            ai->unk_0C = 0;
+            D_800AA248.cur_obj->vel_x.w = 0;
+            D_800AA248.cur_obj->vel_y.w = 0;
+            ai->unk_30.w = 0;
+            func_800233E0(ai);
+            ai->state = result;
+            if (ai->kind == 0x11) {
+                func_8003EB5C(&D_80097C90, D_800AA248.cur_obj);
+            } else {
+                func_8003EB5C(&D_8008B898, D_800AA248.cur_obj);
+            }
+        }
+    }
+}
 
 void func_80021FDC(Ai *ai) {
     s16 a;
@@ -3657,7 +3789,29 @@ INCLUDE_ASM("asm/main/nonmatchings/game_8001781C", func_80024C2C);
 
 INCLUDE_ASM("asm/main/nonmatchings/game_8001781C", func_80024E08);
 
-INCLUDE_ASM("asm/main/nonmatchings/game_8001781C", func_8002503C);
+void func_8002503C(Building *building, GameObject *obj) {
+    GameObject *saved;
+    GameObject *sprite;
+    ObjectDef *def;
+
+    saved = D_800AA248.cur_obj;
+    def = D_800AA248.new_def = func_8001D110();
+    if (D_801FA960 == 0x63) {
+        def->anim = D_800136A4;
+    } else {
+        def->anim = D_80013654;
+    }
+    def->id = *(s32 *) def->anim;
+    def->unk_1C = 0;
+    def->pos_x.s.hi = building->unk_004 + 0x2F;
+    def->pos_y.s.hi = building->unk_006 - 0x3A;
+    def->flags = obj->unk_80 + 1;
+    sprite = func_8001DCB4();
+    sprite->kind = 0x728;
+    D_801D874C = sprite;
+    sprite->unk_80 = obj->unk_80 + 1;
+    D_800AA268.p = saved;
+}
 
 void func_80025124(Building *rec) {
     BuildingDef *def;
