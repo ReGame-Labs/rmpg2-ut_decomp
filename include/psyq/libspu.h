@@ -86,4 +86,6 @@ typedef struct SpuVoiceAttr {
 void SpuSetVoiceAttr(SpuVoiceAttr *attr);
 s32 SpuSetReverbVoice(s32 on_off, u32 voice_bit);
 
+void SpuGetAllKeysStatus(char *status);
+
 #endif /* PSYQ_LIBSPU_H */

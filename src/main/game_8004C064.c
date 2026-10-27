@@ -19,7 +19,7 @@ void func_8002CE74(u16, Monster *m, s32);
 void func_8002CFAC(Monster *m, Building *b);
 void func_8002D5B8(Monster *m, s32);
 u16 func_8003CBE0(Ai *p, Monster *m);
-u16 func_8003CC84(void);
+u16 func_8003CC84(Ai *p, Monster *m);
 u16 func_80053970(Monster *m, Monster *other);
 void func_80053C50(s32, Monster *m);
 void func_80053D68(s32, Monster *m);
@@ -58,10 +58,9 @@ void func_8004DCFC(GameObject *obj, Monster *m, Monster *other);
 void func_8004DD78(GameObject *obj, Monster *m, Monster *other);
 void func_8004FC00(s32 n, Monster *m);
 
-#ifdef NON_MATCHING
-/* 98%: register names (the table's address in v1, the kind in v0) */
 void func_8004C064(Ai *p, Monster *m) {
     u16 kind;
+    ProjectileHitFn *handler;
 
     if (p->unk_0E != 0) {
         kind = p->action;
@@ -69,23 +68,19 @@ void func_8004C064(Ai *p, Monster *m) {
             if (m->unk_1AE != 0 && kind == 1) {
                 p->action = 0;
             }
-            D_8007F680[p->action](p, m);
+            handler = &D_8007F680[p->action];
+            (*handler)(p, m);
         }
     }
 }
-#else
-INCLUDE_ASM("asm/main/nonmatchings/game_8004C064", func_8004C064);
-#endif
 
-#ifdef NON_MATCHING
-/* 96%: the constant 1 the two call results are compared with is kept in s1 across the calls in the original */
 void func_8004C0E0(Ai *p, Monster *m) {
     s32 push;
     s32 lift;
     s16 action;
 
-    m->unk_126++;
-    if (func_8003CC84() == 1) {
+    m->unk_022++;
+    if (func_8003CC84(p, m) == 1) {
         action = 0x55;
     } else {
         if (func_8003CBE0(p, m) == 1) {
@@ -105,9 +100,6 @@ void func_8004C0E0(Ai *p, Monster *m) {
     }
     m->action = action;
 }
-#else
-INCLUDE_ASM("asm/main/nonmatchings/game_8004C064", func_8004C0E0);
-#endif
 
 void func_8004C1A0(Ai *p, Monster *m) {
     func_80053C50(0x40000, m);
@@ -941,8 +933,6 @@ u16 func_8004D6F8(Monster *m, Ai **out) {
 INCLUDE_ASM("asm/main/nonmatchings/game_8004C064", func_8004D6F8);
 #endif
 
-#ifdef NON_MATCHING
-/* 99%: the bodies of the hit kinds come in another order (0x18 before 0x14, 0x49 before 0x65) in the original; the nested-if forms score lower */
 void func_8004D860(void) {
     Monster *m = D_800AA248.cur_obj->owner.monster;
 
@@ -952,34 +942,29 @@ void func_8004D860(void) {
             func_80053D68(0x440000, m);
             return;
         }
-        if (m->action != 0x45) {
-            goto hit;
-        }
-    } else {
-hit:
-        switch (m->unk_126) {
-        case 1:
-            m->action = 0x14;
-            break;
-        case 0:
-            m->action = 0x18;
-            break;
-        case 0xB:
-            m->action = 0x65;
+        if (m->action == 0x45) {
             return;
-        case 0xC:
-            m->action = 0x49;
-            return;
-        default:
-            m->action = 0x15;
-            break;
         }
-        func_8001EB10(3, 0);
     }
+    switch (m->unk_126) {
+    case 0:
+        m->action = 0x18;
+        break;
+    case 1:
+        m->action = 0x14;
+        break;
+    case 0xC:
+        m->action = 0x49;
+        return;
+    case 0xB:
+        m->action = 0x65;
+        return;
+    default:
+        m->action = 0x15;
+        break;
+    }
+    func_8001EB10(3, 0);
 }
-#else
-INCLUDE_ASM("asm/main/nonmatchings/game_8004C064", func_8004D860);
-#endif
 
 void func_8004D948(void) {
     func_8001F7CC(0xE6, 0x54);
@@ -989,8 +974,6 @@ void func_8004D96C(void) {
     D_800AA248.cur_obj->unk_80 = 0x1003;
 }
 
-#ifdef NON_MATCHING
-/* 92%: the monster's vertical speed is loaded before the first call in the original */
 void func_8004D980(GameObject *obj, Monster *m, Monster *other) {
     s32 vel;
 
@@ -1008,14 +991,9 @@ void func_8004D980(GameObject *obj, Monster *m, Monster *other) {
     other->unk_0E4 = m->id;
     m->unk_126 = 0;
     m->action = 0x4A;
-    D_800AA2C0 = 1;
+    D_800AA248.unk_78 = 1;
 }
-#else
-INCLUDE_ASM("asm/main/nonmatchings/game_8004C064", func_8004D980);
-#endif
 
-#ifdef NON_MATCHING
-/* 99.7%: the monster id is loaded into v0 in the original, a0 here */
 void func_8004DA30(GameObject *obj, Monster *m, Monster *other) {
     func_8001F724(0x55);
     other->unk_1CC = 4;
@@ -1024,11 +1002,9 @@ void func_8004DA30(GameObject *obj, Monster *m, Monster *other) {
     func_800634D4(other, 6);
     func_80053D68(0xE0000, m);
     other->unk_0E4 = m->id;
-    D_800AA2C0 = 1;
+
+    D_800AA248.unk_78 = 1;
 }
-#else
-INCLUDE_ASM("asm/main/nonmatchings/game_8004C064", func_8004DA30);
-#endif
 
 void func_8004DAB0(GameObject *obj, Monster *m, Monster *other) {
     func_8004DBB0(m, other);
@@ -1066,33 +1042,27 @@ void func_8004DBB0(Monster *m, Monster *other) {
     D_800AA2C0 = 1;
 }
 
-#ifdef NON_MATCHING
-/* 78%: the order of the stores and of the call's constant argument */
 void func_8004DC08(Monster *m, Monster *other) {
     other->unk_132 = 0;
     other->unk_0E4 = 0;
     other->unk_0E6 = 0;
     other->unk_0EE = 0x12C;
+    other->unk_0E4 = m->id;
     other->action = 0x22;
     other->unk_1B0 = 0;
-    other->unk_0E4 = m->id;
     func_800634D4(other, 5);
     func_8004FC00(1, m);
     func_8005417C(m);
     D_800AA2C0 = 1;
 }
-#else
-INCLUDE_ASM("asm/main/nonmatchings/game_8004C064", func_8004DC08);
-#endif
 
-#ifdef NON_MATCHING
-/* 79%: the order of the stores around the random call */
 void func_8004DC7C(Monster *m, Monster *other) {
     s16 action;
 
-    action = 0x1C;
     if (func_8001EB10(0xF, 0) & 1) {
         action = 0x39;
+    } else {
+        action = 0x1C;
     }
     other->action = action;
     other->unk_0E4 = m->id;
@@ -1101,9 +1071,6 @@ void func_8004DC7C(Monster *m, Monster *other) {
     D_800AA2C0 = 1;
     func_800540D0(m);
 }
-#else
-INCLUDE_ASM("asm/main/nonmatchings/game_8004C064", func_8004DC7C);
-#endif
 
 void func_8004DCFC(GameObject *obj, Monster *m, Monster *other) {
     s32 vel;
@@ -1122,15 +1089,13 @@ void func_8004DCFC(GameObject *obj, Monster *m, Monster *other) {
     D_800AA2C0 = 1;
 }
 
-#ifdef NON_MATCHING
-/* 85%: the order of the stores and of the call's constant argument */
 void func_8004DD78(GameObject *obj, Monster *m, Monster *other) {
     s32 vel;
 
+    other->unk_0E4 = m->id;
     other->action = 0xA;
     other->unk_1B0 = 0;
     other->unk_100 = 0;
-    other->unk_0E4 = m->id;
     vel = 0xFFFC0000;
     if (obj->flags & 0x10) {
         vel = 0x40000;
@@ -1141,9 +1106,6 @@ void func_8004DD78(GameObject *obj, Monster *m, Monster *other) {
     D_800AA2C0 = 1;
     func_8005417C(m);
 }
-#else
-INCLUDE_ASM("asm/main/nonmatchings/game_8004C064", func_8004DD78);
-#endif
 
 #ifdef NON_MATCHING
 /* 98%: the other monster's object is reread after the action test in the original (one register less) */
