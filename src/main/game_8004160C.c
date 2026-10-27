@@ -1,7 +1,7 @@
 /* A file of the game's code, named after its first function until its contents are understood.
  * The boundaries and their evidence: config/main.yaml (docs/MATCHING.md "Splitting a target into files"). */
 #include "common.h"
-#include "game.h"
+#include "game_80034590.h"
 
 void func_8003EB5C(u8 *table, Mover *mover);
 u16 func_8004A468(void);

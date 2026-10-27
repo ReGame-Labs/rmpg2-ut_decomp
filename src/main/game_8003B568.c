@@ -63,12 +63,12 @@ s32 func_8003B9C8(UnkStruct4 *obj, UnkStruct7 *m) {
     s16 m_top;
     s16 m_bottom;
 
-    x = (s16) obj->unk_14.h.hi;
+    x = (s16) obj->unk_14.u.hi;
     box = obj->unk_34;
     if (x < D_801F9ACA) {
         x += (D_801D8864 + 1) >> 16;
     }
-    y = obj->unk_18.h.hi;
+    y = obj->unk_18.u.hi;
     flip = obj->unk_22 & 0x10;
     a = box->unk_10 + x;
     if (flip) {
@@ -118,7 +118,7 @@ void func_8003BD48(UnkStructB1 *b) {
         if (D_801FAC84 != 0) {
             limit = D_801FAC84;
             obj = D_800AA268.obj;
-            x = obj->unk_14.h.hi;
+            x = obj->unk_14.u.hi;
             if (obj->unk_22 & 0x10) {
                 d = (u16) D_801F9AB0 - x + 0x31;
             } else {
@@ -131,7 +131,7 @@ void func_8003BD48(UnkStructB1 *b) {
             if (D_801FA98C != 0) {
                 limit = D_801FA98C;
                 obj = D_800AA268.obj;
-                x = obj->unk_14.h.hi;
+                x = obj->unk_14.u.hi;
                 if (obj->unk_22 & 0x10) {
                     d = (u16) D_801FA990 - x + 0x31;
                 } else {

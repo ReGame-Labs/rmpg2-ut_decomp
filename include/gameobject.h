@@ -2,19 +2,10 @@
 #define GAMEOBJECT_H
 
 #include "common.h"
+#include "game.h"
 
 /* This group of units' view of the game's shared types (GameObject, Monster, Building, the level state); include/game.h,
  * entity.h, game_8001781C.h and game_8002A330.h hold other groups' views of the same objects, to be unified. */
-
-/* A 16.16 fixed-point coordinate whose integer half the code reads on its own (little-endian: the fraction at +0,
- * the integer at +2). */
-typedef union {
-    s32 v;
-    struct {
-        s16 frac;
-        s16 i;
-    } p;
-} Fixed16;
 
 struct Monster;
 struct Attacker;
@@ -26,10 +17,10 @@ typedef struct GameObject {
     /* 0x00 */ s32 unk_00;             /* the sprite/animation id it was created from */
     /* 0x04 */ u8 unk_04[0x04];
     /* 0x08 */ s32 unk_08;
-    /* 0x0C */ Fixed16 vel_x;
-    /* 0x10 */ Fixed16 vel_y;
-    /* 0x14 */ Fixed16 pos_x;
-    /* 0x18 */ Fixed16 pos_y;
+    /* 0x0C */ Fixed vel_x;
+    /* 0x10 */ Fixed vel_y;
+    /* 0x14 */ Fixed pos_x;
+    /* 0x18 */ Fixed pos_y;
     /* 0x1C */ u8 unk_1C[0x04];
     /* 0x20 */ union {
                    s32 word;           /* written whole at creation */
@@ -104,8 +95,8 @@ typedef struct {
     /* 0x04 */ u16 unk_04;             /* flags: 0x10 faces left (game_8004750C) */
     /* 0x06 */ u8 unk_06[0x06];
     /* 0x0C */ s32 unk_0C;
-    /* 0x10 */ Fixed16 pos_x;          /* written whole from an object's position, or its integer half alone */
-    /* 0x14 */ Fixed16 pos_y;
+    /* 0x10 */ Fixed pos_x;          /* written whole from an object's position, or its integer half alone */
+    /* 0x14 */ Fixed pos_y;
     /* 0x18 */ u8 unk_18[0x04];
     /* 0x1C */ s32 unk_1C;
     /* 0x20 */ s32 flags;
@@ -120,7 +111,7 @@ typedef struct Monster {
     /* 0x002 */ u8 unk_002[0x02];
     /* 0x004 */ s16 unk_004;
     /* 0x006 */ u16 unk_006;           /* the monster kind: 0x15 has its own thrown objects (game_8004750C) */
-    /* 0x008 */ Fixed16 unk_008;
+    /* 0x008 */ Fixed unk_008;
     /* 0x00C */ u8 unk_00C[0x04];
     /* 0x010 */ s32 unk_010;           /* a vertical speed, 16.16 */
     /* 0x014 */ struct Monster *target;  /* the monster this one is attacking (game_8004750C) */
@@ -213,7 +204,7 @@ typedef struct Monster {
     /* 0x1B6 */ u8 unk_1B6[0x06];
     /* 0x1BC */ u16 unk_1BC;
     /* 0x1BE */ u8 unk_1BE[0x06];
-    /* 0x1C4 */ Fixed16 unk_1C4;
+    /* 0x1C4 */ Fixed unk_1C4;
     /* 0x1C8 */ s16 unk_1C8;
     /* 0x1CA */ s16 unk_1CA;
     /* 0x1CC */ s16 unk_1CC;

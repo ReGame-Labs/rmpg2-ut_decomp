@@ -478,8 +478,8 @@ void func_8002CA8C(void) {
     r = D_800AA248.unk_3C;
     r->unk_28 = anim;
     r->unk_00 = D_80011E10[0];
-    r->unk_12 = saved->unk_14.h.hi;
-    r->unk_16 = saved->unk_18.h.hi;
+    r->unk_12 = saved->unk_14.u.hi;
+    r->unk_16 = saved->unk_18.u.hi;
     r->unk_20 = saved->unk_80 - 1;
     spr = func_8001DCB4();
     owner->unk_84 = spr;
@@ -492,9 +492,9 @@ void func_8002CA8C(void) {
     if (D_8007A690 == 1) {
         anim = D_80011E90;
     } else {
-        r->unk_12 = spr->unk_14.h.hi + 0x14;
+        r->unk_12 = spr->unk_14.u.hi + 0x14;
         anim = D_80011E68;
-        r->unk_16 = spr->unk_18.h.hi - 0x32;
+        r->unk_16 = spr->unk_18.u.hi - 0x32;
     }
     r->unk_28 = anim;
     r->unk_00 = *anim;
@@ -528,14 +528,14 @@ void func_8002CBF4(UnkStruct7 *m) {
         }
         r->unk_28 = anim;
         r->unk_00 = *anim;
-        r->unk_12 = body->unk_14.h.hi;
-        r->unk_16 = body->unk_18.h.hi;
+        r->unk_12 = body->unk_14.u.hi;
+        r->unk_16 = body->unk_18.u.hi;
         r->unk_20 = body->unk_80 + 5;
         spr = func_8001DCB4();
         if (m->unk_58 != 3 && D_8007A690 != 1) {
             spr->unk_22 |= 0x400;
-            spr->unk_14.h.hi += 0x14;
-            spr->unk_18.h.hi -= 0x32;
+            spr->unk_14.u.hi += 0x14;
+            spr->unk_18.u.hi -= 0x32;
         }
         D_800AA268.obj = saved;
     }
@@ -828,8 +828,8 @@ void func_8002DBF4(u16 which, s32 n, UnkStruct1 *a, UnkStruct2 *rec) {
                         dy = ofs->unk_1A;
                         slot = &((UnkStruct5 *) rec)->unk_3C;
                     }
-                    req->unk_12 = rec->unk_00->unk_14.h.hi + dx;
-                    req->unk_16 = rec->unk_00->unk_18.h.hi + dy;
+                    req->unk_12 = rec->unk_00->unk_14.u.hi + dx;
+                    req->unk_16 = rec->unk_00->unk_18.u.hi + dy;
                     req->unk_20 = rec->unk_00->unk_80 + 7;
                     obj = func_8001DCB4();
                     D_800AA268.obj = obj;
@@ -1189,74 +1189,74 @@ void func_8002EE14(s16 dy, UnkStruct5 *s) {
     UnkStruct14 *q;
 
     if (b != NULL) {
-        b->unk_18.h.hi += dy;
+        b->unk_18.u.hi += dy;
         r = s->unk_0C.unk_00;
         g = &s->unk_0C;
         if (r != NULL) {
-            r->unk_18.h.hi += dy;
+            r->unk_18.u.hi += dy;
         }
         r = g->unk_10;
         if (r != NULL) {
-            r->unk_18.h.hi += dy;
+            r->unk_18.u.hi += dy;
         }
         pp = g->unk_08;
         if (pp != NULL) {
             r = *pp;
             if (r != NULL) {
-                r->unk_18.h.hi += dy;
+                r->unk_18.u.hi += dy;
             }
         }
         q = g->unk_0C;
         if (q != NULL) {
             r = q->unk_00;
             if (r != NULL) {
-                r->unk_18.h.hi += dy;
+                r->unk_18.u.hi += dy;
             }
         }
         r = s->unk_24.unk_00;
         g = &s->unk_24;
         if (r != NULL) {
-            r->unk_18.h.hi += dy;
+            r->unk_18.u.hi += dy;
         }
         r = g->unk_10;
         if (r != NULL) {
-            r->unk_18.h.hi += dy;
+            r->unk_18.u.hi += dy;
         }
         pp = g->unk_08;
         if (pp != NULL) {
             r = *pp;
             if (r != NULL) {
-                r->unk_18.h.hi += dy;
+                r->unk_18.u.hi += dy;
             }
         }
         q = g->unk_0C;
         if (q != NULL) {
             r = q->unk_00;
             if (r != NULL) {
-                r->unk_18.h.hi += dy;
+                r->unk_18.u.hi += dy;
             }
         }
         r = s->unk_3C.unk_00;
         g = &s->unk_3C;
         if (r != NULL) {
-            r->unk_18.h.hi += dy;
+            r->unk_18.u.hi += dy;
         }
         r = g->unk_10;
         if (r != NULL) {
-            r->unk_18.h.hi += dy;
+            r->unk_18.u.hi += dy;
         }
         pp = g->unk_08;
         if (pp != NULL) {
             r = *pp;
             if (r != NULL) {
-                r->unk_18.h.hi += dy;
+                r->unk_18.u.hi += dy;
             }
         }
         q = g->unk_0C;
         if (q != NULL) {
             r = q->unk_00;
             if (r != NULL) {
-                r->unk_18.h.hi += dy;
+                r->unk_18.u.hi += dy;
             }
         }
     }
@@ -1676,24 +1676,24 @@ void func_800308EC(s16 arg0, UnkStruct12 *arg1) {
 
     obj = arg1->unk_00;
     if (obj != NULL) {
-        obj->unk_14.h.hi = (u16) (obj->unk_14.h.hi + arg0);
+        obj->unk_14.u.hi = (u16) (obj->unk_14.u.hi + arg0);
     }
     obj = arg1->unk_10;
     if (obj != NULL) {
-        obj->unk_14.h.hi = (u16) (obj->unk_14.h.hi + arg0);
+        obj->unk_14.u.hi = (u16) (obj->unk_14.u.hi + arg0);
     }
     temp_v0 = arg1->unk_08;
     if (temp_v0 != NULL) {
         obj = *temp_v0;
         if (obj != NULL) {
-            obj->unk_14.h.hi = (u16) (obj->unk_14.h.hi + arg0);
+            obj->unk_14.u.hi = (u16) (obj->unk_14.u.hi + arg0);
         }
     }
     temp_d = arg1->unk_0C;
     if ((temp_d != NULL) && (temp_d->unk_04 < 0xBU)) {
         obj = temp_d->unk_00;
         if (obj != NULL) {
-            obj->unk_14.h.hi = (u16) (obj->unk_14.h.hi + arg0);
+            obj->unk_14.u.hi = (u16) (obj->unk_14.u.hi + arg0);
         }
     }
 }
@@ -2225,7 +2225,7 @@ void func_80032690(s32 n, UnkStruct9 *r) {
             v = 0x8000;
         }
         D_800AA248.unk_20->unk_0C = v;
-        D_800AA248.unk_20->unk_18.h.hi += 5;
+        D_800AA248.unk_20->unk_18.u.hi += 5;
         func_80032630(n, r);
     }
 }

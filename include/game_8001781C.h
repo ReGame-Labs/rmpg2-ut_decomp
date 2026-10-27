@@ -2,6 +2,7 @@
 #define GAME_8001781C_H
 
 #include "common.h"
+#include "game.h"
 #include "psyq/libc.h"
 #include "psyq/libapi.h"
 #include "psyq/libgpu.h"
@@ -10,20 +11,6 @@
 /* Provisional types of src/main/game_8001781C.c, the first file of the game's code (main, the game loop, the
  * sprite objects). Field names are offsets until their meaning is known; the types are the ones the code's loads and
  * stores imply. */
-
-/* A 16.16 fixed-point value read whole or by halves (the integer part is the high half), signed or unsigned as
- * the code needs. */
-typedef union Fixed {
-    s32 full;
-    struct {
-        s16 lo;
-        s16 hi;
-    } s;
-    struct {
-        u16 lo;
-        u16 hi;
-    } u;
-} Fixed;
 
 /* The image a sprite draws (reached through Sprite.unk_34). */
 typedef struct SpriteImage {

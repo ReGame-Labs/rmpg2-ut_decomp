@@ -2,6 +2,7 @@
 #define GAME_8002A330_H
 
 #include "common.h"
+#include "game.h"
 #include "psyq/libc.h"
 
 /* The state block at D_800AA248 (.bss), as func_80032064 reaches it: a base address with field offsets (its member
@@ -227,15 +228,6 @@ extern s16 D_801FAC84;
 extern s16 D_801FAC8C;
 extern s16 D_801FAC90;
 
-/* A 16.16 value whose high half the code also reads and writes on its own. */
-typedef union Fix1616 {
-    s32 w;
-    struct {
-        u16 lo;
-        u16 hi;
-    } h;
-} Fix1616;
-
 typedef struct UnkStructPair {  /* provisional: s16 pairs: D_801D8804 (func_800303DC), the tables D_8007CE08 and D_8007CE34 */
     s16 unk_00;
     s16 unk_02;
@@ -306,7 +298,7 @@ struct UnkStruct1 {  /* provisional: fields as the code reaches them */
     u16 unk_12;
     u16 unk_14;
     u16 unk_16;
-    Fix1616 unk_18;
+    Fixed unk_18;
     u16 unk_1C;
     u16 unk_1E;
     void *unk_20;
@@ -371,8 +363,8 @@ struct UnkStruct4 {  /* provisional: what the game state's unk_20 (D_800AA268) p
     u8 pad_06[0x6];
     s32 unk_0C;     /* x velocity, 16.16 */
     s32 unk_10;     /* y velocity, 16.16 */
-    Fix1616 unk_14; /* x, 16.16 */
-    Fix1616 unk_18; /* y, 16.16 */
+    Fixed unk_14; /* x, 16.16 */
+    Fixed unk_18; /* y, 16.16 */
     u16 unk_1C;
     u8 pad_1E[0x4];
     u16 unk_22;

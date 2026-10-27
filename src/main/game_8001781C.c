@@ -670,8 +670,8 @@ void func_800180E4(void) {
     kind = 0x7000;
     request = func_8001D110();
     D_800AA284 = request;
-    request->unk_10.full = 0xA00000;
-    request->unk_14.full = 0xD70000;
+    request->unk_10.w = 0xA00000;
+    request->unk_14.w = 0xD70000;
     request->unk_0 = 0x4F002808;
     request->unk_20 = kind;
     request->unk_6 |= 0x20;
@@ -1392,8 +1392,8 @@ void func_8001BBB0(void) {
             temp_v0 = func_8001D110();
             D_800AA284 = temp_v0;
             temp_v0->unk_0 = 0x0A0041C8;
-            temp_v0->unk_10.full = 0x930000;
-            temp_v0->unk_14.full = 0x1E0000;
+            temp_v0->unk_10.w = 0x930000;
+            temp_v0->unk_14.w = 0x1E0000;
             temp_v0->unk_20 = 0x14;
             temp_v0->unk_6 |= 0x20;
             func_8001DCB4(0x14);
@@ -1925,17 +1925,17 @@ s32 func_8001E59C(Sprite *sprite, s32 image) {
     offset = img->unk_4;
     sprite->unk_22 = 0;
     sprite->unk_2C = offset;
-    sprite->unk_30.full = offset;
-    size = img->unk_8.full;
-    sprite->unk_28.full = 0x02000200;
+    sprite->unk_30.w = offset;
+    size = img->unk_8.w;
+    sprite->unk_28.w = 0x02000200;
     sprite->unk_7C = size;
-    sprite->unk_1C.full = size;
+    sprite->unk_1C.w = size;
     D_800AA248.unk_7A = 0;
     return 0;
 }
 
 void func_8001E638(Unk1E638 *arg0, s32 arg1, Fixed *arg2, s32 *arg3) {
-    arg2->full = arg0->unk_8;
+    arg2->w = arg0->unk_8;
     func_8001E664(&arg0->unk_4, arg1 & 0xFFFF, arg2, arg3);
 }
 
@@ -1951,7 +1951,7 @@ void func_8001E664(Fixed *width, s32 flags, Fixed *pos, s32 *y) {
         x = w - x;
     }
     *y = hi;
-    pos->full = x;
+    pos->w = x;
 }
 
 void func_8001E698(Sprite *arg0, s32 arg1) {
@@ -2896,8 +2896,8 @@ void func_80023080(Unk22D58 *ai) {
     D_800AA248.unk_20->unk_22 &= ~0x10;
     ai->unk_8 = 1;
     ai->unk_1C = func_8001EB10(0xC8, 0x64);
-    D_800AA248.unk_20->unk_18.full = 0x02000000;
-    D_800AA248.unk_20->unk_14.full = 0x02000000;
+    D_800AA248.unk_20->unk_18.w = 0x02000000;
+    D_800AA248.unk_20->unk_14.w = 0x02000000;
     ai->unk_A = 0;
     D_800AA248.unk_20->unk_C = 0;
     D_800AA248.unk_20->unk_10 = 0;
@@ -2911,7 +2911,7 @@ u16 func_80023114(void) {
     s32 d;
     s32 dist;
 
-    x = D_800AA268->unk_14.full;
+    x = D_800AA268->unk_14.w;
     if (D_800AA268->unk_C < 0) {
         if (D_801F9AC8 >= x) {
             x += D_801D8864;
@@ -3116,7 +3116,7 @@ INCLUDE_ASM("asm/main/nonmatchings/game_8001781C", func_80023C58);
 #endif
 
 u16 func_80023CB8(void) {
-    if (D_800AA268->unk_18.full - D_801F9ACC <= 0x2FFFFF) {
+    if (D_800AA268->unk_18.w - D_801F9ACC <= 0x2FFFFF) {
         return 1;
     }
     D_800AA268->unk_10 = 0xFFFE8000;
@@ -3252,8 +3252,8 @@ void func_800242A0(void) {
 }
 
 void func_800242A8(void) {
-    D_800AA248.unk_20->unk_14.full = D_801F9AC8 - 0x1BC0000;
-    D_800AA248.unk_20->unk_18.full = 0x2000000;
+    D_800AA248.unk_20->unk_14.w = D_801F9AC8 - 0x1BC0000;
+    D_800AA248.unk_20->unk_18.w = 0x2000000;
 }
 
 INCLUDE_ASM("asm/main/nonmatchings/game_8001781C", func_800242D8);
@@ -3483,7 +3483,7 @@ void func_80024C2C(void) {
         rec->unk_6 = tile;
         rec->unk_4 = e->unk_10;
         rec->unk_E = e->unk_10 + (s16) (def->unk_4 - 9);
-        if (def->unk_0.full != 4) {
+        if (def->unk_0.w != 4) {
             rec->unk_5C = def->unk_8;
             rec->unk_60 = def->unk_C;
             rec->unk_64 = def->unk_10;
