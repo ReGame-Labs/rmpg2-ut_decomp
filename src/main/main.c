@@ -370,7 +370,7 @@ void func_8002503C(Building *, GameObject *);
 void func_800252CC(Building *);
 void func_80025124(Building *);
 void func_80024E08(Building *);
-void func_800258C8(void);
+void main_set_building_sides(void);
 extern u8 D_80082E94[];
 s32 func_8005F208(void);
 u16 func_80029B80(void);
@@ -4757,7 +4757,7 @@ void main_create_buildings(void) {
     } while (e->unk_0 != NULL);
     D_801E29A4 = n;
     D_801E1E40 = n;
-    func_800258C8();
+    main_set_building_sides();
 }
 
 #ifdef NON_MATCHING
@@ -5172,7 +5172,100 @@ void func_80025898(BuildingItem *arg0) {
     }
 }
 
-INCLUDE_ASM("asm/main/nonmatchings/main", func_800258C8);
+void main_set_building_sides(void) {
+    Building *b;
+    Building *o;
+    u32 pri;
+    u16 i;
+    u16 n;
+    u16 side;
+    u16 ol;
+    u16 bl;
+    u16 br;
+    u16 orr;
+
+    b = D_801D3DC8;
+    i = D_801E29A4;
+    if (i == 0) {
+        return;
+    }
+    pri = b->priority;
+    while (pri != 0x200) {
+        b++;
+        if (--i == 0) {
+            break;
+        }
+        pri = b->priority;
+    }
+    if (pri != 0x200) {
+        return;
+    }
+    n = D_801E29A4;
+again:
+    o = D_801D3DC8;
+    do {
+        if (pri < o->priority) {
+            ol = o->left;
+            bl = b->left;
+            br = b->right;
+            orr = o->right;
+            if ((s16) ol > (s16) bl || (s16) orr <= (s16) br) {
+                if ((s16) ol < (s16) bl) {
+                    if ((s16) bl < (s16) orr) {
+                        side = o->unk_000;
+                        if (side >= b->unk_000) {
+                            side = -1;
+                        } else if (side == 1) {
+                            side = 4;
+                        } else {
+                            side++;
+                        }
+                        b->left_side = side;
+                        if ((s16) orr - (s16) bl > 0x28) {
+                            b->unk_026 = side;
+                        }
+                    }
+                } else if ((s16) ol < (s16) br) {
+                    if ((s16) orr >= (s16) br || (s16) br - (s16) orr < 0x14) {
+                        side = o->unk_000;
+                        if (side >= b->unk_000) {
+                            side = -1;
+                        } else if (side == 1) {
+                            side = 4;
+                        } else {
+                            side++;
+                        }
+                        b->right_side = side;
+                        if ((s16) br - (s16) ol > 0x28) {
+                            b->unk_026 = side;
+                        }
+                    }
+                }
+            } else {
+                side = o->unk_000;
+                if (side >= b->unk_000) {
+                    side = -1;
+                } else if (side == 1) {
+                    side = 4;
+                } else {
+                    side++;
+                }
+                b->left_side = side;
+                b->right_side = side;
+                b->unk_026 = side;
+            }
+        }
+        o++;
+    } while (--n != 0);
+    n = D_801E29A4;
+    while (b->unk_01E != n) {
+        b++;
+        pri = b->priority;
+        if (pri == 0x200) {
+            goto again;
+        }
+    }
+}
 
 void func_80025B10(void) {
     if (D_801E1E40 == 0) {
@@ -5573,7 +5666,74 @@ void func_80026F98(Monster *arg0) {
 INCLUDE_ASM("asm/main/nonmatchings/main", func_80026F98);
 #endif
 
-INCLUDE_ASM("asm/main/nonmatchings/main", func_8002703C);
+extern s16 D_80084278;
+
+void main_use_full_meter(Monster *m) {
+    u16 action;
+    s16 n;
+
+    if ((m->unk_0D0 & 8) && (D_800AA2DC == 0 || (D_800AA2DC & 0x7000)) && m->meter.w == 0x440000) {
+        switch (m->id) {
+        case 1:
+        case 2:
+            if (m->obj->pos_y.w == 0xE10000 && m->action < 2) {
+                goto end_power;
+            }
+            break;
+        case 3:
+        case 4:
+        case 7:
+            if (m->action < 2) {
+                if (m->id == 3) {
+                    m->meter.w = 0;
+                }
+                goto end_power;
+            }
+            break;
+        case 5:
+            if (m->action != 0x63 && D_80084278 == 0
+                && (m->action < 2 || m->action == 5 || m->action == 6 || m->action == 2 || m->action == 0x19)) {
+                action = m->action;
+                if (action == 1 || action == 5 || action == 6 || action == 0) {
+                    func_800531C0(m);
+                    m->unk_05C = m->action;
+                    m->action = 0x63;
+                } else if (action == 2 || action == 0x19) {
+                    if (m->obj->vel_y.s.hi != 0) {
+                        m->unk_05C = action;
+                        m->action = 0x63;
+                    }
+                }
+                if (m->action == 0x63) {
+                    if ((m->unk_01A & 0xF) != 0) {
+                        n = (m->unk_01A & 0xF) - 1;
+                        m->unk_01A &= 0xFFF0;
+                        m->unk_01A |= n;
+                        if (n < 3 && m->extra[n + 2] != NULL) {
+                            func_8001E4B0(m->extra[n + 2]);
+                            m->extra[n + 2] = NULL;
+                        }
+                        if (!(m->unk_01A & 0xF)) {
+                            m->meter.w = 0;
+                        }
+                    } else {
+                        m->meter.w = 0;
+                    }
+                }
+            }
+            break;
+        case 6:
+            if (m->action < 2 || m->action == 5 || m->action == 6) {
+            end_power:
+                func_800531C0(m);
+                m->action = 0x63;
+                m->unk_188 = 0;
+                m->extra[0] = NULL;
+            }
+            break;
+        }
+    }
+}
 
 u16 func_800272B0(Monster *monster) {
     u16 *p;
@@ -5700,7 +5860,93 @@ void func_800273F4(Monster *monster, s32 arg1) {
 INCLUDE_ASM("asm/main/nonmatchings/main", func_800273F4);
 #endif
 
-INCLUDE_ASM("asm/main/nonmatchings/main", func_800275F8);
+extern s16 D_801D3DB2[];
+s32 func_80027878(Monster *m);
+
+void main_move_monster(Monster *m) {
+    GameObject *obj;
+    s32 vx;
+    s32 vel;
+    s16 dir;
+    s32 y;
+    s32 t;
+
+    if (m->action == 0x53 || m->action == 0x57) {
+        return;
+    }
+    obj = m->obj;
+    D_800AA268.p = obj;
+    vel = vx = obj->vel_x.w;
+    if (vx != 0) {
+        if ((u16) m->unk_1C8 != 0) {
+            goto clamp;
+        }
+        if (m->action == 0x37 || m->action == 0x2F) {
+            goto clamp;
+        }
+        if (m->action == 2) {
+            vel >>= 1;
+        } else {
+            vel >>= 2;
+        }
+        vel = -vel;
+        if (vel > 0x10000) {
+            vel = 0x10000;
+        } else if (vel < -0x10000) {
+            vel = -0x10000;
+        }
+    }
+    vel += vx;
+    if (m->unk_100 != 0) {
+        vel += m->unk_100;
+    } else if (vx >= -0x800 && vx <= 0x800) {
+        m->unk_100 = 0;
+        obj->vel_x.w = 0;
+        goto vertical;
+    }
+clamp:
+    t = *(D_801D3D98 + D_801FA8A0[m->id - 1]);
+    if (vel >= 0) {
+        dir = 1;
+        if (t > 0x16C0000 && t <= 0x1C20000) {
+            vel = 0;
+        }
+    } else {
+        dir = -1;
+        if (t < 0x200000 || t > 0x1C1FFFF) {
+            vel = 0;
+        }
+    }
+    *(D_801D3DB2 + D_801FA8A0[m->id - 1]) = dir;
+    t = obj->pos_x.w;
+    if (vel > 0x58000) {
+        vel = 0x58000;
+    } else if (vel < -0x58000) {
+        vel = -0x58000;
+    }
+    obj->vel_x.w = vel;
+    t += vel;
+    t &= D_801D8864.w;
+    obj->pos_x.w = t;
+vertical:
+    if (obj->vel_y.w != 0 || m->unk_104 != 0) {
+        if ((u16) func_80027878(m) == 0) {
+            vel = obj->vel_y.w;
+            t = m->unk_104 + vel;
+            if (t > 0xC0000) {
+                t = 0xC0000;
+            }
+            obj->vel_y.w = t;
+            if (t != 0) {
+                y = obj->pos_y.w + t;
+                if (m->climb_side == 0 && y > 0xE0FFFF && m->action != 0x1F) {
+                    y = 0xE10000;
+                }
+                obj->pos_y.w = y;
+            }
+        }
+    }
+}
 
 s32 func_80027878(Monster *m) {
     GameObject *obj;
