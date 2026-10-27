@@ -144,9 +144,9 @@ s32 main_load_image_8bit(s32, s32, s16, s16);
 s32 main_load_image_4bit(s32, s32, s16, s16);
 extern s16 D_801D876C[];
 void func_80025E68(void);
-void func_8002A72C(void);
+void building_update_sky_colours(void);
 void building_update_sky(void);
-void func_800377B4(Npc *);
+void npc_pick_target(Npc *);
 void func_8003C894(s32);
 void func_80044D34(void);
 void func_80057DD8(void);
@@ -2437,7 +2437,7 @@ void func_8001C784(void) {
     D_801D3758 += 1;
     func_8001CFE4();
     func_80025E68();
-    func_8002A72C();
+    building_update_sky_colours();
     building_update_sky();
     func_8005E3CC();
     bonus_check_round_end();
@@ -4382,7 +4382,7 @@ void func_800210C8(Npc *npc) {
     Unk7B358 *start;
 
     D_800AA248.cur_obj->unk_6C &= 0xFFEF;
-    func_800377B4(npc);
+    npc_pick_target(npc);
     start = D_8007B358[npc->start];
     D_800AA248.cur_obj->pos_x.w = D_801F9AC8.w + start->x;
     D_800AA248.cur_obj->pos_y.w = D_801F9ACC.w + start->y;
@@ -4703,7 +4703,7 @@ void func_80021D24(Npc *npc) {
     func_800232AC(0x36000);
     npc->unk_30 = 0;
     D_800AA268.p->vel_y.w = 0;
-    func_800377B4(npc);
+    npc_pick_target(npc);
 }
 
 void func_80021DA8(Npc *npc) {
@@ -5122,7 +5122,7 @@ void func_80022C68(Npc *npc) {
     s16 kind;
 
     if (npc->unk_10 == NULL) {
-        func_800377B4(npc);
+        npc_pick_target(npc);
     }
     func_800232D8(npc);
     kind = func_8002439C(npc);
@@ -5326,7 +5326,7 @@ void func_800232D8(Npc *npc) {
     if (target != NULL) {
         sprite = target->obj;
         if (!(target->unk_058 & 1) || (target->action == 0x37)) {
-            func_800377B4(npc);
+            npc_pick_target(npc);
             target = npc->unk_10;
             if ((target == NULL) || !(target->unk_058 & 1) || (target->action == 0x37)) {
                 npc->target_y = 0x64;
@@ -5358,7 +5358,7 @@ void func_800233E0(Npc *npc) {
     if (temp_v0 != NULL) {
         temp_v1 = temp_v0->obj;
         if (temp_v1 == NULL) {
-            func_800377B4(npc);
+            npc_pick_target(npc);
             return;
         }
         npc->target_y = (s16) (temp_v1->pos_y.u.hi - 0x1E);
@@ -5491,7 +5491,7 @@ u16 main_follow_monster(Npc *npc) {
     }
     body = npc->unk_10->obj;
     if (body == NULL) {
-        func_800377B4(npc);
+        npc_pick_target(npc);
         return 0;
     }
     if (body->flags & 0x10) {
@@ -5573,7 +5573,7 @@ u16 func_800239F4(Npc *npc) {
     if (target != NULL) {
         sprite = target->obj;
         if (sprite == NULL) {
-            func_800377B4(npc);
+            npc_pick_target(npc);
             return func_800239F4(npc);
         }
         dy = (s16) ((sprite->pos_y.u.hi - 0x58) - D_800AA268.p->pos_y.u.hi);
@@ -5690,7 +5690,7 @@ void func_80023CFC(Npc *npc) {
     if (target != NULL) {
         sprite = target->obj;
         if (sprite == NULL) {
-            func_800377B4(npc);
+            npc_pick_target(npc);
             return;
         }
         tx = sprite->pos_x.u.hi;
@@ -5767,7 +5767,7 @@ out:
     npc->unk_22 = 0;
     npc->state = 0;
     npc->unk_2A = 0;
-    func_800377B4(npc);
+    npc_pick_target(npc);
 }
 
 void func_80023F64(Npc *npc) {
@@ -5802,7 +5802,7 @@ void func_80023FAC(Npc *npc) {
         npc->unk_1C = 0;
         npc->unk_22 = 0;
         npc->unk_2A = 0;
-        func_800377B4(npc);
+        npc_pick_target(npc);
         npc->state = 3;
     }
 }

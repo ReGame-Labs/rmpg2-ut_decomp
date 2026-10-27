@@ -103,7 +103,97 @@ void building_set_sky_colours(void) {
 }
 
 
-INCLUDE_ASM("asm/main/nonmatchings/building", func_8002A72C);
+#ifdef NON_MATCHING
+/* 86.67%: 86.7 %: the sky's keyframe blend; the original's products land in v0 (mflo right after each mult, the
+ * from byte loaded after the shift), here in v1 with the lbu scheduled before the mflo; also the order of the i *
+ * 21600 chain */
+extern s16 D_8007C974;
+extern s32 D_8007C97C[4][12];
+extern s32 D_8007CA3C[4][12];
+void func_8002AC34(GameObject *obj);
+
+void building_update_sky_colours(void) {
+    s32 (*keys)[12];
+    s32 *from;
+    s32 *to;
+    u32 i;
+    s32 next;
+    s32 f;
+    s32 r;
+    s32 g;
+    s32 b;
+
+    if (D_801FB190.unk_00 == 0) {
+        D_801FB190.unk_00 = 1;
+        if (D_8007C976 == 1) {
+            func_8001F7CC(0x3C, 0x1D);
+            D_8007A696 |= 1;
+        } else if (D_8007C976 == 2) {
+            func_8001F7CC(0x3C, 0x2A);
+            D_8007A696 |= 2;
+        }
+    }
+    if (D_8007C976 == 1) {
+        keys = D_8007CA3C;
+    } else if (D_8007C976 == 2) {
+        keys = D_8007CA3C;
+    } else {
+        keys = D_8007C97C;
+    }
+    if (D_801FB198 > 86399) {
+        D_801FB198 -= 86400;
+        D_8007C974++;
+    }
+    if (D_801FA960 >= 100 && D_800AA2DC == 0) {
+        building_set_sky_colours();
+        return;
+    }
+    D_801F9A38 = 1;
+    i = D_801FB198 / 21600;
+    next = i + 1;
+    if (next == 4) {
+        next = 0;
+    }
+    from = keys[i];
+    to = keys[next];
+    f = 0;
+    if (D_801FB198 != i * 21600) {
+        f = ((D_801FB198 - i * 21600) << 16) / 21600;
+    }
+    D_801FAC80->unk_74 = (((to[3] - from[3]) * f) >> 16) + from[3];
+    D_801FAC80->unk_75 = (((to[4] - from[4]) * f) >> 16) + from[4];
+    D_801FAC80->unk_76 = (((to[5] - from[5]) * f) >> 16) + from[5];
+    D_801FAC80->unk_7C = D_801FAC80->unk_74;
+    D_801FAC80->unk_7D = D_801FAC80->unk_75;
+    D_801FAC80->unk_7E = D_801FAC80->unk_76;
+    D_801FAC80->unk_84 = (((to[0] - from[0]) * f) >> 16) + from[0];
+    D_801FAC80->unk_85 = (((to[1] - from[1]) * f) >> 16) + from[1];
+    D_801FAC80->unk_86 = (((to[2] - from[2]) * f) >> 16) + from[2];
+    D_801FAC80->unk_8C = D_801FAC80->unk_84;
+    D_801FAC80->unk_8D = D_801FAC80->unk_85;
+    D_801FAC80->unk_8E = D_801FAC80->unk_86;
+    D_801FAC80->unk_98 = (((to[6] - from[6]) * f) >> 16) + from[6];
+    D_801FAC80->unk_99 = (((to[7] - from[7]) * f) >> 16) + from[7];
+    D_801FAC80->unk_9A = (((to[8] - from[8]) * f) >> 16) + from[8];
+    D_801FAC80->unk_A0 = D_801FAC80->unk_98;
+    D_801FAC80->unk_A1 = D_801FAC80->unk_99;
+    D_801FAC80->unk_A2 = D_801FAC80->unk_9A;
+    D_801FAC80->unk_A8 = D_801FAC80->unk_74;
+    D_801FAC80->unk_A9 = D_801FAC80->unk_75;
+    D_801FAC80->unk_AA = D_801FAC80->unk_76;
+    D_801FAC80->unk_B0 = D_801FAC80->unk_7C;
+    D_801FAC80->unk_B1 = D_801FAC80->unk_7D;
+    D_801FAC80->unk_B2 = D_801FAC80->unk_7E;
+    r = (((to[9] - from[9]) * f) >> 16) + from[9];
+    g = (((to[10] - from[10]) * f) >> 16) + from[10];
+    b = (((to[11] - from[11]) * f) >> 16) + from[11];
+    D_801FA9A4 = (D_801FAC80->unk_98 << 16) | (D_801FAC80->unk_99 << 8) | D_801FAC80->unk_9A;
+    D_801FB41C = (r << 16) | (g << 8) | b;
+    func_8002AC34(D_801FB194);
+}
+#else
+INCLUDE_ASM("asm/main/nonmatchings/building", building_update_sky_colours);
+#endif
 
 void func_8002AC34(GameObject *obj) {
     s16 d;
@@ -3508,9 +3598,6 @@ void func_800315D8(void) {
     D_801F9AB0 = *p++;
 }
 
-#ifdef NON_MATCHING
-/* 92.42%: 92.4%: only the prologue's order differs: the original computes lists (s1) before the call's argument
- * (a0) */
 void func_80031690(void) {
     GameObject **lists;
     UnkStruct18 *r;
@@ -3521,13 +3608,11 @@ void func_80031690(void) {
     D_801D37C0 = r->unk_02;
     D_801D857C = r->unk_04;
     if (D_801D857C != 0) {
-        func_8003197C(r->unk_0C, r->unk_04, &lists[0]);
-        func_8003197C(r->unk_18, r->unk_08, &lists[1]);
+        func_8003197C(r->unk_0C, r->unk_04, lists);
+        lists++;
+        func_8003197C(r->unk_18, r->unk_08, lists);
     }
 }
-#else
-INCLUDE_ASM("asm/main/nonmatchings/building", func_80031690);
-#endif
 
 
 
