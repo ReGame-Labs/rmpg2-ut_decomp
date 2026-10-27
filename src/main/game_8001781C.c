@@ -84,7 +84,7 @@ extern u16 D_801F9950;
 extern u16 D_801F9954;
 extern s16 D_801F9958;
 extern u16 D_801F995C;
-extern s32 D_801F9A30;
+extern Unk1F9A30 D_801F9A30;
 extern u16 D_801F9A40;
 extern u16 D_801F9ACE;
 extern s16 D_801F9AD0;
@@ -218,7 +218,7 @@ void func_8001E6CC(GameObject *arg0);
 void func_8001E758(void);
 void func_8001E7A0(void);
 void func_8001E94C(s32 arg0, s32 arg1, GameObject *arg2);
-void func_8001E978(void);
+void func_8001E978(GameObject *obj);
 void func_8001E980(void);
 void func_8001E9C4(s16 arg0, s16 arg1);
 s32 func_8001EA78(void);
@@ -236,7 +236,7 @@ void func_8001F7CC(s32 arg0, s32 arg1);
 void func_8001F9BC(void);
 void func_80020FC8(GameObject *arg0);
 void func_80021034(void);
-void func_8002107C(void);
+void func_8002107C(Ai *ai);
 void func_80022D58(Ai *arg0);
 void func_80023064(s32 arg0);
 void func_800232AC(s32 arg0);
@@ -289,7 +289,7 @@ extern u16 D_801FA898[];
 void func_80019268(void);
 extern s16 D_801D36F8;
 extern s16 D_801F9A34;
-s32 func_80017C80(s32 arg0);
+u16 func_80017C80(u16 id);
 void func_80020CE4(s32 arg0, s32 arg1);
 u16 func_8001D844(void);
 void func_8001D598(void);
@@ -353,7 +353,7 @@ void func_8001BBB0(void);
 void func_800543FC(void);
 extern u16 D_8007AB60;
 void func_8001D1C8(void);
-void func_8001E174(void);
+void func_8001E174(GameObject *obj);
 void func_8001E2F8(GameObject *arg0);
 void func_8005DBC4(s32, Unk29510 *, s32);
 void func_80029510(Unk29510 *arg0);
@@ -362,7 +362,7 @@ void func_80025B3C(Building *);
 void func_80025B7C(BuildingItem *);
 void func_8003044C(void);
 void func_80024AEC(void);
-void func_8001E39C(void *);
+void func_8001E39C(GameObject *);
 void func_80029C6C(Monster *arg0);
 void func_80026A6C(void);
 ObjectDef *func_8001D110(void);
@@ -451,11 +451,42 @@ extern u8 D_800105A8[];
 extern s16 D_800AA300[11][8][8];
 void func_8001F61C(u8 *, s16, s16, s32, s32, s32 *, s32, s32);
 u16 func_80025C54(void *);
+extern void (*D_8007BE20[])(Monster *);
+void func_80023E30(Ai *);
+void func_80020BA0(s32, s32, GameObject *);
+extern s16 D_8007A6F8[];
+extern s16 D_801F9AB8;
+extern s16 D_801FAC7C;
+extern u16 D_801E2A44;
+void func_8001B0D8(s32 *, s32);
+void func_8006036C(s32 *, s32, s32, s32, s32, u8 *);
+void func_800210C8(Ai *);
+extern Unk7B358 *D_8007B358[];
+extern Anim D_8008B744;
+extern Anim D_80097B3C;
+extern Unk7B358 *D_8007B348[];
+extern s16 D_8007A6E8[];
+u16 func_80023764(Ai *);
+void func_800242D8(Ai *);
+extern Anim D_8008B27C;
+extern Anim D_80097674;
+extern s32 D_80013654[];
+extern s32 D_800136A4[];
+extern GameObject *D_801D874C;
+void func_80020EDC(Ai *);
+void func_80021418(Ai *);
+void func_800211F4(Ai *);
+void func_80021384(Ai *);
+void func_80021644(Ai *);
+void func_800216C8(Ai *);
+extern GameObject D_801E2A80[];
+extern GameObject D_801F9910[];
+extern u8 *D_801D85A4;   /* D_801D8588.text by its own name */
+extern u32 D_801D377C;
 /* decls:end */
 
-/* 85 %: GCC 2.8.1 emits a call to __main at the start of any function named main (the target defines no init section); the original has none. The rest of the body is in place; whether the original was built with a compiler configured otherwise is open */
-#ifdef NON_MATCHING
-void main(void) {
+/* main: config/aliases.ld gives it its name (GCC 2.8.1 would start a function named main with a call to __main). */
+void game_main(void) {
     func_80017758();
     func_80018CB0();
     func_80017A40();
@@ -469,40 +500,34 @@ void main(void) {
     D_801F9A44[6] = 1;
     D_801F9ADC = 0;
     D_801F9ABC = 0;
+restart:
+    func_80017964();
+    func_80018D10(1);
     for (;;) {
-        func_80017964();
-        func_80018D10(1);
-        for (;;) {
-            func_80018CD0();
-            if (D_800AA2C8 == 0) {
-                D_800AA2C8++;
-                func_80017C04();
-                if (D_801F9A34 > 0) {
-                    D_801F9A34--;
-                }
-                if (func_8001828C() == 1) {
-                    break;
-                }
-                func_8001B7F4();
-                if (D_801D3D64.unk_62 == 0) {
-                    func_8001B858();
-                }
+        func_80018CD0();
+        if (D_800AA2C8 == 0) {
+            D_800AA2C8++;
+            func_80017C04();
+            if (D_801F9A34 > 0) {
+                D_801F9A34--;
             }
-            if (D_800AA2E0 != 0) {
-                D_800AA2C8 = 0;
-                D_800AA2E8 = 0;
-                D_800AA2E0 = 0;
+            if (func_8001828C() == 1) {
+                goto restart;
             }
-            func_8001EA78();
-            func_8001DF98();
-            func_8001D8E8();
-            func_80018CF0();
+            func_8001B7F4();
+            if (D_801D3D64.unk_62 == 0) {
+                func_8001B858();
+            }
         }
+        if (D_800AA2E0 != 0) {
+            D_800AA2E0 = D_800AA2E8 = D_800AA2C8 = 0;
+        }
+        func_8001EA78();
+        func_8001DF98();
+        func_8001D8E8();
+        func_80018CF0();
     }
 }
-#else
-INCLUDE_ASM("asm/main/nonmatchings/game_8001781C", main);
-#endif
 
 void func_80017964(void) {
     D_801D36FC = 0x110;
@@ -584,27 +609,89 @@ void func_80017B98(void) {
 
 INCLUDE_ASM("asm/main/nonmatchings/game_8001781C", func_80017C04);
 
-s32 func_80017C80(s32 arg0) {
+u16 func_80017C80(u16 id) {
     u16 temp_v1;
     Monster *temp_a1;
 
-    temp_a1 = &D_801E0B78[arg0 & 0xFFFF];
+    temp_a1 = &D_801E0B78[id];
     if ((D_801D36F8 != 0) || (D_801FA890 != 0) || (D_801F9A34 > 0) || (temp_a1->id == 0) || (temp_v1 = temp_a1->action, (temp_v1 == 0x1F)) || (temp_v1 == 0x37) || (temp_v1 == 0x26) || (temp_a1->unk_046 != 0) || ((D_801D36FC != 0x240) && (D_801D36FC != 0x150) && (D_801D36FC != 0x220)) || ((D_801E1E40 == 0) && (D_801D36FC == 0x150)) || ((D_801D3758 < 5) && (D_801D36FC == 0x220))) {
         return 0;
     }
     return 1;
 }
 
-INCLUDE_ASM("asm/main/nonmatchings/game_8001781C", func_80017D8C);
+u16 func_80017D8C(void) {
+    s32 player;
+    s32 id;
+    s32 count;
+    s32 winner;
+    u8 who;
 
-INCLUDE_ASM("asm/main/nonmatchings/game_8001781C", func_80017F14);
+    winner = 0;
+    count = 0;
+    for (player = 0; player < 3; player++) {
+        if (D_801E1C90[player] == 0 && D_801FA898[player] != 0) {
+            for (id = 0; id < 7; id++) {
+                who = D_801FA8A0[id];
+                if (who == player + 1 && func_80017C80(id + 1) == 1) {
+                    if (++D_8007A6E8[player] >= 3) {
+                        winner = who;
+                        count++;
+                    }
+                }
+            }
+        } else {
+            D_8007A6E8[player] = 0;
+            D_801FA898[player] = D_801E1C90[player];
+        }
+    }
+    if (count != 0 && count == D_801D8740 && (u16) count >= 2) {
+        return 0xFF;
+    }
+    return winner;
+}
+
+void func_80017F14(s16 x, s16 y, GameObject *link, s32 script) {
+    GameObject *saved;
+    GameObject *obj;
+    ObjectDef *def;
+
+    saved = D_800AA248.cur_obj;
+    if (D_8007A698 == 0) {
+        def = func_8001D110();
+        def->pos_x.s.hi = x;
+        def->pos_y.s.hi = y;
+        def->flags = 0x6FFF;
+        obj = func_8001DCB4();
+        D_800AA248.cur_obj = obj;
+        obj->unk_40.obj = link;
+        D_800AA248.cur_obj->script_pc = script;
+        D_800AA248.cur_obj->colour = 0;
+        D_800AA248.cur_obj->flags |= 0x40C;
+        D_8007A698 = 1;
+        D_800AA248.cur_obj->unk_6C |= 0x20;
+        D_800AA248.cur_obj->kind = 0x7FE;
+    }
+    D_800AA248.cur_obj = saved;
+}
 
 void func_80018008(void) {
     func_8001E450(0x7FE);
     D_8007A698 = 0;
 }
 
-INCLUDE_ASM("asm/main/nonmatchings/game_8001781C", func_8001802C);
+void func_8001802C(s32 player) {
+    Monster *monster;
+    u16 *buttons;
+
+    D_801E0D7C = 0;
+    monster = &D_801E0B78[func_80025DF8(player + 1)];
+    if (monster->id != 0) {
+        buttons = &D_8007A7C0[D_801D8800[player]][6];
+        D_801E0D7C |= *buttons << D_8007C144[player];
+        monster->unk_0C8 = *buttons >> 4;
+    }
+}
 
 #ifdef NON_MATCHING
 /* 80.2 %: register allocation around the two constants 0x4F002808 and 0x7000 */
@@ -667,7 +754,7 @@ void func_800181D0(void) {
 
 INCLUDE_ASM("asm/main/nonmatchings/game_8001781C", func_8001828C);
 
-void func_80018BD4(s32 from, u16 to) {
+void func_80018BD4(s32 from, s32 to) {
     GameObject *head;
     GameObject *sprite;
 
@@ -683,7 +770,19 @@ void func_80018BD4(s32 from, u16 to) {
     }
 }
 
-INCLUDE_ASM("asm/main/nonmatchings/game_8001781C", func_80018C14);
+void func_80018C14(void) {
+    s16 prev;
+
+    if (--D_801FAC7C <= 0) {
+        prev = D_801F9AB8;
+        if (++D_801F9AB8 >= 10) {
+            D_801F9AB8 = 0;
+        }
+        D_801E2A44 = D_8007A6F8[D_801F9AB8];
+        func_80018BD4(D_8007A6F8[prev], D_8007A6F8[D_801F9AB8]);
+        D_801FAC7C = 4;
+    }
+}
 
 void func_80018CB0(void) {
     func_800193B8();
@@ -1099,23 +1198,14 @@ void func_8001B098(GameObject *arg0) {
     }
 }
 
-/* 83 %: the original copies the argument (move a2,a0) and walks two pointers from it, the first loop load ordered before the second */
-#ifdef NON_MATCHING
 void func_8001B0D8(s32 *p, s32 flags) {
-    s32 *q;
-
     if (p[1] != 0) {
-        q = p + 1;
         do {
-            D_801D8868[*p] = *q | flags;
-            q += 2;
+            D_801D8868[p[0]] = p[1] | flags;
             p += 2;
-        } while (*q != 0);
+        } while (p[1] != 0);
     }
 }
-#else
-INCLUDE_ASM("asm/main/nonmatchings/game_8001781C", func_8001B0D8);
-#endif
 
 Glyph *func_8001B128(u32 arg0) {
     u32 index;
@@ -1465,7 +1555,9 @@ void func_8001C3C4(void) {
     func_8001C404();
 }
 
-INCLUDE_ASM("asm/main/nonmatchings/game_8001781C", func_8001C3E4);
+u8 func_8001C3E4(s16 id) {
+    return D_801FA8A0[id];
+}
 
 INCLUDE_ASM("asm/main/nonmatchings/game_8001781C", func_8001C404);
 
@@ -1603,7 +1695,21 @@ void func_8001D1C8(void) {
 
 INCLUDE_ASM("asm/main/nonmatchings/game_8001781C", func_8001D28C);
 
-INCLUDE_ASM("asm/main/nonmatchings/game_8001781C", func_8001D4B8);
+void func_8001D4B8(void) {
+    s16 phase;
+
+    D_801FA968 = 1;
+    D_801D36FC = 0x150;
+    phase = D_801E29BC % 60;
+    if (phase == 59) {
+        func_8006036C(D_8007AD4C, 0xA3, 0xD7, 0x44, 0x402, "DEMO");
+    } else if (phase == 30) {
+        func_8001E450(0x402);
+    }
+    func_8001C784();
+    D_801D36FC = 0x120;
+    D_801FA968 = 0;
+}
 
 INCLUDE_ASM("asm/main/nonmatchings/game_8001781C", func_8001D598);
 
@@ -1748,7 +1854,14 @@ INCLUDE_ASM("asm/main/nonmatchings/game_8001781C", func_8001E010);
 
 INCLUDE_ASM("asm/main/nonmatchings/game_8001781C", func_8001E0AC);
 
-INCLUDE_ASM("asm/main/nonmatchings/game_8001781C", func_8001E174);
+void func_8001E174(GameObject *obj) {
+    if (obj < D_801E2A80 || obj >= D_801F9910) {
+        func_8001B5E8(0xE);
+    }
+    if (((u32) obj - (u32) D_801E2A80) % sizeof(GameObject) != 0) {
+        func_8001B5E8(0xE);
+    }
+}
 
 GameObject *func_8001E204(void) {
     u16 temp_v0;
@@ -1787,7 +1900,7 @@ void func_8001E2F8(GameObject *arg0) {
     GameObject *p;
     u16 key;
 
-    func_8001E174();
+    func_8001E174(arg0);
     head = arg0->next;
     if (head == NULL) {
         if (arg0->unk_82 != 1) {
@@ -1809,7 +1922,22 @@ void func_8001E2F8(GameObject *arg0) {
     }
 }
 
-INCLUDE_ASM("asm/main/nonmatchings/game_8001781C", func_8001E39C);
+void func_8001E39C(GameObject *obj) {
+    GameObject *next;
+    GameObject *prev;
+
+    if (obj->next != NULL) {
+        prev = obj->prev;
+        next = obj->next;
+        if (prev != &D_801E28C0 && prev != &D_801E29A8 && next != &D_801E28C0 && next != &D_801E29A8 &&
+            (prev < D_801E2A80 || prev > D_801F9910 || next < D_801E2A80 || next > D_801F9910)) {
+            func_8001E978(obj);
+        }
+        prev->next = next;
+        next->prev = prev;
+        obj->next = NULL;
+    }
+}
 
 void func_8001E450(s32 kind) {
     GameObject *head;
@@ -1828,7 +1956,7 @@ void func_8001E450(s32 kind) {
 }
 
 void func_8001E4B0(GameObject *sprite) {
-    func_8001E174();
+    func_8001E174(sprite);
     if (!(sprite->flags & 0x8000)) {
         for (;;) {
         }
@@ -1982,7 +2110,7 @@ void func_8001E94C(s32 arg0, s32 arg1, GameObject *arg2) {
     arg2->unk_28.s.hi = (s16) (arg1 - temp_v1->origin.u.hi);
 }
 
-void func_8001E978(void) {
+void func_8001E978(GameObject *obj) {
 }
 
 void func_8001E980(void) {
@@ -2035,17 +2163,12 @@ s32 func_8001EA78(void) {
     return temp_lo;
 }
 
-/* 84 %: the original's divu keeps the assembler's divide-by-zero check (bnez/break 7); the C, whose divisor is known non-zero on that path, gets none */
-#ifdef NON_MATCHING
 s32 func_8001EAC4(s32 range) {
     if (range == 0) {
         return 0;
     }
     return func_8001EA78() % (u32) range + 1;
 }
-#else
-INCLUDE_ASM("asm/main/nonmatchings/game_8001781C", func_8001EAC4);
-#endif
 
 s32 func_8001EB10(s32 arg0, s32 arg1) {
     return arg1 + func_8001EAC4(arg0 - arg1);
@@ -2083,7 +2206,28 @@ void func_8001EC74(s32 kind, s16 value) {
     }
 }
 
-INCLUDE_ASM("asm/main/nonmatchings/game_8001781C", func_8001ECB4);
+u8 *func_8001ECB4(u8 *dst, s32 value, s32 width) {
+    s32 digits[8];
+    s32 count;
+    s32 i;
+    u8 *end;
+
+    count = 0;
+    do {
+        digits[count] = value;
+        value /= 10;
+        digits[count] -= value * 10;
+        count++;
+        width--;
+    } while (value != 0 || width > 0);
+    end = dst + count;
+    dst = end;
+    *end = 0;
+    for (i = 0; i < count; i++) {
+        *--dst = digits[i] + '0';
+    }
+    return end;
+}
 
 void func_8001ED54(TextMessage *arg0) {
     func_8001F39C(arg0);
@@ -2321,8 +2465,6 @@ void func_80020704(void) {
 
 INCLUDE_ASM("asm/main/nonmatchings/game_8001781C", func_8002075C);
 
-#ifdef NON_MATCHING
-/* 98.8 %: register names only (the entry read into v0 in the original, a0 here) */
 void func_80020AF4(s32 id) {
     s32 *p;
     s32 *dst;
@@ -2341,20 +2483,17 @@ void func_80020AF4(s32 id) {
             if (key == 0) {
                 return;
             }
-            value = *p++;
-            D_800AA248.unk_38 = value;
-        } while (value != D_800AA248.unk_00);
+            key = *p++;
+            D_800AA248.unk_38 = key;
+        } while (key != D_800AA248.unk_00);
         do {
             dst = p - 2;
-            key = *p++;
-            dst[0] = key;
+            value = *p++;
+            dst[0] = value;
             dst[1] = *p++;
-        } while (key != 0);
+        } while (value != 0);
     }
 }
-#else
-INCLUDE_ASM("asm/main/nonmatchings/game_8001781C", func_80020AF4);
-#endif
 
 INCLUDE_ASM("asm/main/nonmatchings/game_8001781C", func_80020BA0);
 
@@ -2366,7 +2505,35 @@ void func_80020CE4(s32 arg0, s32 arg1) {
 
 INCLUDE_ASM("asm/main/nonmatchings/game_8001781C", func_80020D20);
 
-INCLUDE_ASM("asm/main/nonmatchings/game_8001781C", func_80020DDC);
+void func_80020DDC(Ai *ai) {
+    D_800AA268.p = ai->obj;
+    switch (ai->action) {
+        case 0x64:
+            func_800211F4(ai);
+            break;
+        case 0x63:
+            func_80021384(ai);
+            break;
+        case 3:
+            func_80021418(ai);
+            break;
+        case 0x14:
+            func_800216C8(ai);
+            break;
+        case 4:
+            func_80021644(ai);
+            break;
+        case 1:
+            func_80020FC8((GameObject *) ai);
+            break;
+        case 2:
+            func_80020EDC(ai);
+            break;
+        default:
+            ai->action = 1;
+            break;
+    }
+}
 
 INCLUDE_ASM("asm/main/nonmatchings/game_8001781C", func_80020EDC);
 
@@ -2393,18 +2560,85 @@ void func_80021034(void) {
     }
 }
 
-void func_8002107C(void) {
+void func_8002107C(Ai *ai) {
     if (!(D_8007A696 & 4)) {
         func_8001F7CC(0x64, 4);
         D_8007A696 |= 4;
     }
 }
 
-INCLUDE_ASM("asm/main/nonmatchings/game_8001781C", func_800210C8);
+void func_800210C8(Ai *ai) {
+    Unk7B358 *start;
 
-INCLUDE_ASM("asm/main/nonmatchings/game_8001781C", func_800211F4);
+    D_800AA248.cur_obj->unk_6C &= 0xFFEF;
+    func_800377B4(ai);
+    start = D_8007B358[ai->unk_3A];
+    D_800AA248.cur_obj->pos_x.w = D_801F9AC8.w + start->x;
+    D_800AA248.cur_obj->pos_y.w = D_801F9ACC + start->y;
+    D_800AA248.cur_obj->vel_x.w = start->vel_x;
+    D_800AA248.cur_obj->vel_y.w = start->vel_y;
+    D_800AA248.cur_obj->flags &= 0xFFEF;
+    D_800AA248.cur_obj->flags |= start->flags;
+    D_800AA248.cur_obj->unk_80 = 0x4000;
+    ai->action = 2;
+    ai->unk_28.s.hi = 0;
+    ai->unk_0C = 0;
+    if (ai->kind == 0x11) {
+        func_8003EB5C(&D_80097340, D_800AA248.cur_obj);
+    } else {
+        func_8003EB5C(&D_8008AE40, D_800AA248.cur_obj);
+    }
+}
 
-INCLUDE_ASM("asm/main/nonmatchings/game_8001781C", func_80021384);
+void func_800211F4(Ai *ai) {
+    Unk7B358 *start;
+
+    if (D_801E1CB0 == 0) {
+        if (ai->unk_1C.s != 0) {
+            ai->unk_1C.s--;
+            func_800242A8();
+            return;
+        }
+        func_80024138(ai);
+        if (ai->unk_24 != 3) {
+            ai->unk_3A = func_8001EB10(7, 0) & 1;
+        } else {
+            ai->unk_3A = 1;
+        }
+        start = D_8007B348[ai->unk_3A];
+        D_800AA248.cur_obj->pos_x.w = start->x;
+        D_800AA248.cur_obj->pos_y.w = D_801F9ACC + start->y;
+        D_800AA248.cur_obj->vel_x.w = start->vel_x;
+        D_800AA248.cur_obj->vel_y.w = start->vel_y;
+        D_800AA248.cur_obj->flags &= 0xFFEF;
+        D_800AA248.cur_obj->flags |= start->flags;
+        D_800AA248.cur_obj->unk_6C |= 0x10;
+        D_800AA248.cur_obj->unk_80 = 0x50;
+        ai->action = 0x63;
+        ai->unk_22 = 0;
+        ai->unk_28.s.hi = 0;
+        ai->unk_0C = 0;
+        ai->unk_1C.s = 0x122;
+        func_8002107C(ai);
+        if (ai->kind == 0x11) {
+            func_8003EB5C(&D_80097DF0, D_800AA248.cur_obj);
+        } else {
+            func_8003EB5C(&D_8008B9C8, D_800AA248.cur_obj);
+        }
+    }
+}
+
+void func_80021384(Ai *ai) {
+    D_800AA248.cur_obj->pos_x.w += D_800AA248.cur_obj->vel_x.w;
+    D_800AA248.cur_obj->pos_y.w += D_800AA248.cur_obj->vel_y.w;
+    if (ai->unk_1C.s != 0) {
+        ai->unk_1C.s--;
+        return;
+    }
+    if (D_800AA248.cur_obj->unk_6C & 0x80) {
+        func_800210C8(ai);
+    }
+}
 
 INCLUDE_ASM("asm/main/nonmatchings/game_8001781C", func_80021418);
 
@@ -2427,7 +2661,38 @@ void func_80021644(Ai *ai) {
     }
 }
 
-INCLUDE_ASM("asm/main/nonmatchings/game_8001781C", func_800216C8);
+void func_800216C8(Ai *ai) {
+    Anim *anim;
+
+    if (ai->kind == 0x11) {
+        anim = &D_80097B3C;
+    } else {
+        anim = &D_8008B744;
+    }
+    if (D_800AA248.cur_obj->unk_48 != (s32) anim) {
+        D_800AA248.cur_obj->vel_x.w >>= 1;
+        ai->unk_1C.s = 0x40;
+        ai->unk_30.w = 0x1000;
+        func_8003EB5C(anim, D_800AA248.cur_obj);
+        return;
+    }
+    if (ai->unk_1C.s == 0) {
+        ai->action = 3;
+        return;
+    }
+    ai->unk_1C.s--;
+    D_800AA248.cur_obj->pos_x.w += D_800AA248.cur_obj->vel_x.w;
+    D_800AA248.cur_obj->vel_y.w += 0x1000;
+    if (D_800AA248.cur_obj->vel_y.w > 0x8000) {
+        D_800AA248.cur_obj->vel_y.w = 0x8000;
+    }
+    D_800AA248.cur_obj->pos_y.w += D_800AA248.cur_obj->vel_y.w;
+    if (D_800AA248.cur_obj->pos_y.s.hi >= 0xF1) {
+        ai->action = 3;
+        return;
+    }
+    func_80024508((GameObject *) ai);
+}
 
 void func_8002180C(Ai *ai) {
     Anim *anim;
@@ -2563,9 +2828,82 @@ void func_80021C5C(Ai *ai) {
     ai->unk_34.w = 0;
 }
 
-INCLUDE_ASM("asm/main/nonmatchings/game_8001781C", func_80021D24);
+void func_80021D24(Ai *ai) {
+    ai->unk_0C = 0;
+    if (ai->kind == 0x11) {
+        func_8003EB5C(&D_80097340, D_800AA268.p);
+    } else {
+        func_8003EB5C(&D_8008AE40, D_800AA268.p);
+    }
+    ai->state = 0;
+    func_800232AC(0x36000);
+    ai->unk_30.w = 0;
+    D_800AA268.p->vel_y.w = 0;
+    func_800377B4(ai);
+}
 
-INCLUDE_ASM("asm/main/nonmatchings/game_8001781C", func_80021DA8);
+void func_80021DA8(Ai *ai) {
+    s32 result;
+
+    if (D_800AA248.cur_obj->unk_6C & 0x80) {
+        if (D_801D8740 == 0) {
+            func_80023F64(ai);
+            return;
+        }
+        func_800242D8(ai);
+        func_800232AC(0x36000);
+        ai->unk_30.w = 0;
+        D_800AA248.cur_obj->vel_y.w = 0;
+        return;
+    }
+    if (ai->unk_0C != 2) {
+        func_800232AC(0x36000);
+        if (ai->unk_3A == 2) {
+            ai->unk_0C = 2;
+            D_800AA248.cur_obj->vel_x.w >>= 2;
+            D_800AA248.cur_obj->vel_y.w = 0;
+            ai->unk_30.w = 0;
+            ai->unk_3A = 0;
+            if (ai->kind == 0x11) {
+                func_8003EB5C(&D_80097674, D_800AA248.cur_obj);
+            } else {
+                func_8003EB5C(&D_8008B27C, D_800AA248.cur_obj);
+            }
+            return;
+        }
+        if (func_80023114(ai) == 1) {
+            ai->unk_0C = 2;
+            D_800AA248.cur_obj->vel_x.w >>= 2;
+            D_800AA248.cur_obj->vel_y.w = 0;
+            ai->unk_30.w = 0;
+            if (ai->kind == 0x11) {
+                func_8003EB5C(&D_80097950, D_800AA248.cur_obj);
+            } else {
+                func_8003EB5C(&D_8008B558, D_800AA248.cur_obj);
+            }
+            return;
+        }
+        if (ai->kind == 0x11) {
+            func_8003EB5C(&D_80097340, D_800AA248.cur_obj);
+        } else {
+            func_8003EB5C(&D_8008AE40, D_800AA248.cur_obj);
+        }
+        result = func_80023764(ai);
+        if (result == 1) {
+            ai->unk_0C = 0;
+            D_800AA248.cur_obj->vel_x.w = 0;
+            D_800AA248.cur_obj->vel_y.w = 0;
+            ai->unk_30.w = 0;
+            func_800233E0(ai);
+            ai->state = result;
+            if (ai->kind == 0x11) {
+                func_8003EB5C(&D_80097C90, D_800AA248.cur_obj);
+            } else {
+                func_8003EB5C(&D_8008B898, D_800AA248.cur_obj);
+            }
+        }
+    }
+}
 
 void func_80021FDC(Ai *ai) {
     s16 a;
@@ -2601,9 +2939,47 @@ void func_80021FDC(Ai *ai) {
 
 INCLUDE_ASM("asm/main/nonmatchings/game_8001781C", func_800220D0);
 
-INCLUDE_ASM("asm/main/nonmatchings/game_8001781C", func_800221BC);
+void func_800221BC(Ai *ai) {
+    s16 x;
 
-INCLUDE_ASM("asm/main/nonmatchings/game_8001781C", func_800222E8);
+    if (D_800AA248.cur_obj->pos_y.s.hi < 0xF1) {
+        D_800AA248.cur_obj->vel_y.w = 0x18000;
+        ai->unk_22 = 0;
+        ai->unk_28.s.hi = 0;
+        if (ai->unk_0C != 0) {
+            if (ai->kind == 0x11) {
+                func_8003EB5C(&D_80097340, D_800AA248.cur_obj);
+            } else {
+                func_8003EB5C(&D_8008AE40, D_800AA248.cur_obj);
+            }
+        }
+    } else if (ai->unk_22 == 0) {
+        ai->unk_0C = 0;
+        D_800AA248.cur_obj->vel_x.w = 0;
+        D_800AA248.cur_obj->vel_y.w = 0;
+        ai->unk_30.w = 0;
+        ai->unk_22 = 0xB4;
+        if (D_801FA98C != 0) {
+            x = D_800AA248.cur_obj->pos_x.s.hi;
+            if (x >= D_801FA98C && D_801FA990 >= x) {
+                ai->unk_22 = 1;
+            }
+        }
+    } else if (--ai->unk_22 == 0) {
+        ai->unk_0C = 0;
+        ai->state++;
+    }
+}
+
+void func_800222E8(Ai *ai) {
+    D_800AA248.cur_obj->vel_y.w = 0xFFFE8000;
+    if (ai->kind == 0x11) {
+        func_8003EB5C(&D_80097340, D_800AA248.cur_obj);
+    } else {
+        func_8003EB5C(&D_8008AE40, D_800AA248.cur_obj);
+    }
+    func_80023E30(ai);
+}
 
 /* 92 %: the result is masked into its own register before the stores and the four stores are scheduled in source order; the C copies the result and moves the counter's store first */
 #ifdef NON_MATCHING
@@ -2885,7 +3261,19 @@ u16 func_80023114(void) {
 INCLUDE_ASM("asm/main/nonmatchings/game_8001781C", func_80023114);
 #endif
 
-INCLUDE_ASM("asm/main/nonmatchings/game_8001781C", func_800231E4);
+u16 func_800231E4(Ai *ai) {
+    s16 x;
+    s16 limit;
+
+    func_800232D8(ai);
+    func_80024418(&x, &limit, ai);
+    if (D_800AA268.p->vel_x.w >= 0) {
+        x += 0x50;
+        return limit >= x;
+    }
+    x -= 0x50;
+    return x >= limit;
+}
 
 u16 func_8002326C(s16 x) {
     if (D_800AA268.p->flags & 0x10) {
@@ -2966,8 +3354,6 @@ INCLUDE_ASM("asm/main/nonmatchings/game_8001781C", func_80023620);
 
 INCLUDE_ASM("asm/main/nonmatchings/game_8001781C", func_80023764);
 
-#ifdef NON_MATCHING
-/* 99.9 %: one instruction, the negation of the copy (negu v0,v0) comes out as negu v0,v1 */
 u16 func_800239F4(Ai *ai) {
     Monster *target;
     GameObject *sprite;
@@ -2983,10 +3369,7 @@ u16 func_800239F4(Ai *ai) {
             return func_800239F4(ai);
         }
         dy = (s16) ((sprite->pos_y.u.hi - 0x58) - D_800AA268.p->pos_y.u.hi);
-        ady = dy;
-        if (dy < 0) {
-            ady = -ady;
-        }
+        ady = (dy >= 0) ? dy : -dy;
         if (ady < 0xB) {
             D_800AA268.p->vel_y.w = 0;
             return 1;
@@ -3001,22 +3384,14 @@ u16 func_800239F4(Ai *ai) {
     D_800AA268.p->vel_y.w = 0x18000;
     return 0;
 }
-#else
-INCLUDE_ASM("asm/main/nonmatchings/game_8001781C", func_800239F4);
-#endif
 
-#ifdef NON_MATCHING
-/* 99.8 %: the negation reads the copy's register in the original (negu v0, v0), the s16 delta's here. */
 u16 func_80023AC0(Ai *ai) {
     s16 delta;
     s32 dist;
     s32 step;
 
     delta = ai->unk_28.s.lo - D_800AA268.p->pos_y.u.hi;
-    dist = delta;
-    if (delta < 0) {
-        dist = -dist;
-    }
+    dist = (delta >= 0) ? delta : -delta;
     if (dist < 0xB) {
         D_800AA268.p->vel_y.w = 0;
         return 1;
@@ -3028,24 +3403,16 @@ u16 func_80023AC0(Ai *ai) {
     D_800AA268.p->vel_y.w = step | 0x8000;
     return 0;
 }
-#else
-INCLUDE_ASM("asm/main/nonmatchings/game_8001781C", func_80023AC0);
-#endif
 
 INCLUDE_ASM("asm/main/nonmatchings/game_8001781C", func_80023B20);
 
-#ifdef NON_MATCHING
-/* 99.8 %: the negation reads the copy's register in the original (negu v0, v0), the s16 delta's here. */
 u16 func_80023C58(s16 arg0, Ai *ai) {
     s16 delta;
     s32 dist;
     s32 step;
 
     delta = arg0 - D_800AA268.p->pos_y.u.hi;
-    dist = delta;
-    if (delta < 0) {
-        dist = -dist;
-    }
+    dist = (delta >= 0) ? delta : -delta;
     if (dist < 0xB) {
         D_800AA268.p->vel_y.w = 0;
         return 1;
@@ -3057,9 +3424,6 @@ u16 func_80023C58(s16 arg0, Ai *ai) {
     D_800AA268.p->vel_y.w = step | 0x8000;
     return 0;
 }
-#else
-INCLUDE_ASM("asm/main/nonmatchings/game_8001781C", func_80023C58);
-#endif
 
 u16 func_80023CB8(void) {
     if (D_800AA268.p->pos_y.w - D_801F9ACC <= 0x2FFFFF) {
@@ -3231,7 +3595,22 @@ INCLUDE_ASM("asm/main/nonmatchings/game_8001781C", func_8002439C);
 
 INCLUDE_ASM("asm/main/nonmatchings/game_8001781C", func_80024418);
 
-INCLUDE_ASM("asm/main/nonmatchings/game_8001781C", func_800244A8);
+void func_800244A8(void) {
+    GameObject *obj;
+    GameObject *owner;
+    GameObject *part;
+    s32 *arg;
+
+    obj = D_800AA248.cur_obj;
+    owner = obj->owner.p;
+    part = owner->unk_50;
+    arg = obj->arg.w;
+    if (part != NULL) {
+        D_800AA248.cur_obj = part;
+        func_80020BA0(*arg, 0x8002, part);
+    }
+    D_800AA248.cur_obj = obj;
+}
 
 void func_80024508(GameObject *arg0) {
     func_80024530(arg0->unk_50, arg0);
@@ -3457,7 +3836,29 @@ INCLUDE_ASM("asm/main/nonmatchings/game_8001781C", func_80024C2C);
 
 INCLUDE_ASM("asm/main/nonmatchings/game_8001781C", func_80024E08);
 
-INCLUDE_ASM("asm/main/nonmatchings/game_8001781C", func_8002503C);
+void func_8002503C(Building *building, GameObject *obj) {
+    GameObject *saved;
+    GameObject *sprite;
+    ObjectDef *def;
+
+    saved = D_800AA248.cur_obj;
+    def = D_800AA248.new_def = func_8001D110();
+    if (D_801FA960 == 0x63) {
+        def->anim = D_800136A4;
+    } else {
+        def->anim = D_80013654;
+    }
+    def->id = *(s32 *) def->anim;
+    def->unk_1C = 0;
+    def->pos_x.s.hi = building->unk_004 + 0x2F;
+    def->pos_y.s.hi = building->unk_006 - 0x3A;
+    def->flags = obj->unk_80 + 1;
+    sprite = func_8001DCB4();
+    sprite->kind = 0x728;
+    D_801D874C = sprite;
+    sprite->unk_80 = obj->unk_80 + 1;
+    D_800AA268.p = saved;
+}
 
 void func_80025124(Building *rec) {
     BuildingDef *def;
@@ -3713,7 +4114,18 @@ void func_80025BBC(Building *block) {
     }
 }
 
-INCLUDE_ASM("asm/main/nonmatchings/game_8001781C", func_80025C08);
+void *func_80025C08(void *list) {
+    void **table;
+    u16 index;
+
+    table = ((void ***) list)[D_801D8728];
+    if (D_801D8728 != 0) {
+        index = D_801FA964;
+    } else {
+        index = D_801FA960;
+    }
+    return table[index];
+}
 
 INCLUDE_ASM("asm/main/nonmatchings/game_8001781C", func_80025C54);
 
@@ -3889,7 +4301,13 @@ void func_80026BC4(Monster *arg0) {
     }
 }
 
-INCLUDE_ASM("asm/main/nonmatchings/game_8001781C", func_80026C04);
+void func_80026C04(Monster *monster) {
+    void (**handler)(Monster *);
+
+    D_800AA268.p = monster->obj;
+    handler = &D_8007BE20[monster->action];
+    (*handler)(monster);
+}
 
 #ifdef NON_MATCHING
 /* 89.8 %: the zero stored into unk_3C/unk_3E goes through a register in the original (a variable that is 0 on both paths). */
@@ -4231,17 +4649,12 @@ void func_80028140(s32 arg0, Monster *arg1, s32 arg2) {
     arg1->unk_0CE = 0;
 }
 
-/* 78 %: the four stores come out in another order (the original stores the first word between the two halfwords); source order and other orders tried */
-#ifdef NON_MATCHING
 void func_80028160(void) {
     D_801D3D64.unk_26 = 0;
-    D_801F9A30 = 0;
+    D_801F9A30.unk_0 = 0;
     D_801D3D64.unk_28 = 0;
     D_801F9ACC = 0;
 }
-#else
-INCLUDE_ASM("asm/main/nonmatchings/game_8001781C", func_80028160);
-#endif
 
 INCLUDE_ASM("asm/main/nonmatchings/game_8001781C", func_80028184);
 
@@ -4252,12 +4665,12 @@ void func_800284D8(void) {
     if (D_801D8720 == 0) {
         var_v1 = 0x80000;
     }
-    D_801F9A30 = var_v1;
+    D_801F9A30.unk_0 = var_v1;
     D_801D3D8C = 2;
 }
 
 void func_80028508(void) {
-    D_801F9A30 = 0xFFFE0000;
+    D_801F9A30.unk_0 = 0xFFFE0000;
     D_801D3D8C = 1;
 }
 
@@ -4265,21 +4678,19 @@ INCLUDE_ASM("asm/main/nonmatchings/game_8001781C", func_80028524);
 
 INCLUDE_ASM("asm/main/nonmatchings/game_8001781C", func_800288B0);
 
+/* 91.3 %: the result is computed from a copy of the larger value (move v0,a2) in the original; the C computes it in place */
 #ifdef NON_MATCHING
-/* 84.7 %: register allocation (both inputs copied, the result built from a copy of the larger one) */
 s16 func_80028ADC(s32 a, s32 b) {
-    s32 lo;
-    s32 hi;
-    s32 mid;
+    s16 lo;
+    s16 hi;
 
     lo = a;
     hi = b;
-    if ((s16) a >= (s16) b) {
+    if ((s16) b <= (s16) a) {
         lo = b;
         hi = a;
     }
-    mid = hi;
-    return mid - ((s16) (mid - lo) >> 1);
+    return hi - ((s16) (hi - lo) >> 1);
 }
 #else
 INCLUDE_ASM("asm/main/nonmatchings/game_8001781C", func_80028ADC);

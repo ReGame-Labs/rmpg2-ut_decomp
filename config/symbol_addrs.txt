@@ -2,7 +2,7 @@
 // The single source of truth for the executable's names (docs/MATCHING.md "Conventions"); overlays use
 // config/<overlay>.symbols.txt. Keep splat's default names (func_8001xxxx, D_8001xxxx) for what is not understood.
 // Psy-Q library names come from tools/psyq_match.py (--symbols, then --functions per psyq/ unit) and stay Sony's.
-main = 0x8001781C; // type:func  crt0 calls it right after setting $gp (docs/TOOLCHAIN.md)
+game_main = 0x8001781C; // type:func  main, which crt0 calls right after setting $gp (docs/TOOLCHAIN.md), compiled under this name (config/aliases.ld)
 
 // The Psy-Q library objects (config/main.yaml's psyq/ units), function by function (tools/psyq_match.py
 // --functions; docs/TOOLCHAIN.md). Byte-identical twins were settled from callers and callees: PadStartCom,

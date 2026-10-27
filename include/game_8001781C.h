@@ -85,6 +85,22 @@ typedef struct Unk1AD1C {
     u32 unk_8;
 } Unk1AD1C;
 
+/* The word at 0x801F9A30, a vertical speed (0x20000, 0x80000, -0x20000). A one-member struct: GCC 2.8 keeps its
+ * stores in order with the stores into D_801D3D64 only then (func_80028160). */
+typedef struct Unk1F9A30 {
+    s32 unk_0;
+} Unk1F9A30;
+
+/* Where a behaviour slot's object starts (func_800210C8, the table D_8007B358 indexed by Ai.unk_3A): a position
+ * relative to the camera, a speed, and flags for the object. */
+typedef struct Unk7B358 {
+    s32 x;
+    s32 y;
+    s32 vel_x;
+    s32 vel_y;
+    u16 flags;
+} Unk7B358;
+
 /* A glyph of the font (func_8001B128 maps a packed glyph index to one): its size at unk_4/unk_6. */
 typedef struct Glyph {
     s32 unk_0;
