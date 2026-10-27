@@ -842,7 +842,8 @@ s32 bonus_get_round_kind(void) {
 }
 
 #ifdef NON_MATCHING
-/* 96.80%: 96.8 %: register allocation only: the original gives kind and i s2, x s3; here x s2, kind and i s3 */
+/* 98.16%: 98.2 %: register allocation: the original gives kind and i s2, x s3, here the other way round, and stores
+ * pos_x before the id */
 void bonus_create_counter(s32 kind, s32 n) {
     GameObject *saved;
     ObjectDef *def;
@@ -861,17 +862,17 @@ void bonus_create_counter(s32 kind, s32 n) {
         v = 0;
         count = 3;
         def->id = kind == 1 ? 0x4F00230A : 0x4F0021DE;
-        def->pos_x.s.hi = x;
         def->pos_y.s.hi = y + 0x30;
+        def->pos_x.s.hi = x;
         def->flags = 0x500;
         def->unk_06 |= 0x20;
         D_800AA268.p = func_8001DCB4();
         D_800AA268.p->kind = n + 0x7B0;
     } else {
         x = 0x64;
-        v = D_8007BD78.round_timer;
-        count = 2;
         y = 0xAA;
+        count = 2;
+        v = D_8007BD8C;
     }
     x += 0x5B;
     for (i = 0; i < count; i++) {
@@ -1107,8 +1108,8 @@ INCLUDE_ASM("asm/main/nonmatchings/bonus", bonus_award_places);
 #endif
 
 #ifdef NON_MATCHING
-/* 75.82%: 76 %: the logic is the original's; the original keeps 0x6C and 0x7001 in saved registers and rebuilds
- * &D_80084298 in each block, here the table address stays in s8; the player and the icon kind share s3 there */
+/* 99.68%: 99.7 %: register allocation only: the original gives frame s4 and the D_800AA248 base s5, here the other
+ * way round */
 void bonus_give_awards(s32 player, s32 awards) {
     Monster *m;
     ObjectDef *def;
@@ -1136,13 +1137,14 @@ void bonus_give_awards(s32 player, s32 awards) {
         D_8007BD78.flags |= 0x4000000;
         break;
     }
-    frame = 0xFFFF;
     if (m->id == 7 && D_801F9ABC != 0) {
         if (D_801F9ABC == 3) {
             frame = 0x53;
         } else {
             frame = 0x54;
         }
+    } else {
+        frame = 0xFFFF;
     }
     i = 0;
     if (awards & 1) {
@@ -1155,10 +1157,10 @@ void bonus_give_awards(s32 player, s32 awards) {
         }
         kind = 0x7E0;
         def->pos_x.s.hi = i * 0x11 + 0xDC;
+        def->id = D_80084298[m->id - 1];
         def->pos_y.s.hi = 0x6C;
         def->flags = 0x7001;
         def->unk_06 |= 0x20;
-        def->id = D_80084298[m->id - 1];
         D_800AA248.cur_obj = func_8001DCB4();
         D_800AA248.cur_obj->kind = kind;
         D_800AA248.cur_obj->unk_74 = frame;
@@ -1169,10 +1171,10 @@ void bonus_give_awards(s32 player, s32 awards) {
             m->lives++;
             m->lives_shown++;
             def->pos_x.s.hi = i * 0x11 + 0xDC;
+            def->id = D_80084298[m->id - 1];
             def->pos_y.s.hi = 0x6C;
             def->flags = 0x7001;
             def->unk_06 |= 0x20;
-            def->id = D_80084298[m->id - 1];
             D_800AA248.cur_obj = func_8001DCB4();
             D_800AA248.cur_obj->kind = kind;
             D_800AA248.cur_obj->unk_74 = frame;
@@ -1191,10 +1193,10 @@ void bonus_give_awards(s32 player, s32 awards) {
         m->unk_17C = 0x440000;
         m->unk_01A &= 0xFFF0;
         def->pos_x.s.hi = i * 0x11 + 0xDC;
+        def->id = D_80084298[m->id - 1];
         def->pos_y.s.hi = 0x85;
         def->unk_06 |= 0x20;
         def->flags = 0x7001;
-        def->id = D_80084298[m->id - 1];
         D_800AA248.cur_obj = func_8001DCB4();
         D_800AA248.cur_obj->kind = kind;
         D_800AA248.cur_obj->unk_74 = frame;
@@ -1210,10 +1212,10 @@ void bonus_give_awards(s32 player, s32 awards) {
         kind = 0x7E2;
         m->meter.w = 0x440000;
         def->pos_x.s.hi = i * 0x11 + 0xDC;
+        def->id = D_80084298[m->id - 1];
         def->pos_y.s.hi = 0x9E;
         def->unk_06 |= 0x20;
         def->flags = 0x7001;
-        def->id = D_80084298[m->id - 1];
         D_800AA248.cur_obj = func_8001DCB4();
         D_800AA248.cur_obj->kind = kind;
         D_800AA248.cur_obj->unk_74 = frame;
