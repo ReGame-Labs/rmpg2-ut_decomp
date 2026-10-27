@@ -623,11 +623,11 @@ typedef struct LevelFlags {
     /* 0x04 */ s32 unk_04;
     /* 0x08 */ s32 unk_08[3];                  /* per player (D_801FA8A0[monster id - 1] - 1): the bonus round's tally */
     /* 0x14 */ s32 round_timer;                /* the bonus round's time left in seconds, 0x14..0x3C by round (D_8007BD8C) */
-    /* 0x18 */ u16 unk_18[4];                  /* per player - 1: frames counted towards a second (func_8005F5B8) */
-    /* 0x20 */ u8 unk_20[0x04];
+    /* 0x18 */ u16 unk_18[4];                  /* per player - 1: frames counted towards a second (bonus_update_counters) */
+    /* 0x20 */ u32 unk_20;                     /* frames since the awards screen opened (bonus_update_awards) */
     /* 0x24 */ GameObject *digits[4][3];       /* per player - 1: digit sprites (bonus_create_counter) */
     /* 0x54 */ s32 unk_54;
-    /* 0x58 */ u8 unk_58[0x0C];
+    /* 0x58 */ s32 unk_58[3];                  /* the award messages sliding in (kinds 0x7D2, 0x7D3, 0x7D1; bonus_update_awards) */
     /* 0x64 */ s32 health_icons[3];            /* the award icons shown (bonus_give_awards), by kind: health, */
     /* 0x70 */ s32 meter_icons[3];             /* meter, */
     /* 0x7C */ s32 lives_icons[6];             /* extra lives */

@@ -447,6 +447,8 @@ monster_update_climb = 0x8005086C; // type:func  (e) the climbing speed by direc
 monster_start_jump = 0x800524B4; // type:func  (e) action 0x2C, the upward speed by direction
 monster_test_boxes = 0x80053854; // type:func  (x, y, m) 1 or 2 when the point is in its first or second box, else 0
 monster_test_hit_box = 0x80053970; // type:func  (e, m) 1 or 2 when e's hit box overlaps m's first or second box, else 0
+monster_test_point = 0x80053B30; // type:func  (x, y, dx, dy, e) 1 when the point is in e's box grown by dx and dy, x wrapped by the level width
+monster_test_box_x = 0x80053BE8; // type:func  (x, e) 1 when x is within e's box horizontally, wrapped by the level width
 monster_get_building = 0x80054728; // type:func  (n) building n of the ring, 1-based, NULL for 0
 monster_grab_building = 0x800547EC; // type:func  (e) a building wall in reach of its front, grabbed from that side
 monster_test_left_side = 0x800561CC; // type:func  (x, city) near the building's left wall and that side free, then the probe y is 0xE0
@@ -469,10 +471,16 @@ bonus_update_lives = 0x8005D9BC; // type:func  (e) the portrait and the two live
 bonus_update_bars = 0x8005DBC4; // type:func  (old, e, value) eases the shown health and meter towards their values
 bonus_add_icon = 0x8005DD48; // type:func  (e) an icon for its pickup kind (unk_056) in a free slot of unk_098, after the others
 bonus_update_icons = 0x8005DF2C; // type:func  (e) closes the gaps between the slot icons, frees spent ones, blinks the last frames
+bonus_check_round_end = 0x8005E60C; // type:func  each frame of a bonus round - the end test by round kind, the winner into D_801FB468, then the counters
 bonus_start_round = 0x8005EE54; // type:func  the bonus round of D_800AA2DC - its timer (D_8007BD8C) and flags
+bonus_get_round_kind = 0x8005F208; // type:func  the kind of the bonus round D_800AA2DC (0 to 4, three rounds each), -1 for none
 bonus_create_counter = 0x8005F33C; // type:func  (kind, n) the digit sprites of player n's tally, n 4 the round's timer
+bonus_update_counters = 0x8005F5B8; // type:func  (kind) the round timer each second, kind 2 the players' tallies, kind 3 redraws them
+bonus_save_health = 0x8005F9FC; // type:func  each player's health into unk_17C, lives shown as they are
+bonus_restore_health = 0x8005FA8C; // type:func  each player's health back from unk_17C
 bonus_award_places = 0x8005FB14; // type:func  the round's end - each player's awards by place
 bonus_give_awards = 0x8005FEF4; // type:func  (player, awards) bits 1 and 2 extra lives, 4 health, 8 meter, each with its icon
+bonus_update_awards = 0x80060524; // type:func  the BONUS AWARDS screen - its box, the LIFE, HEALTH and POWER lines sliding in, cleared at the end
 
 // cdload (src/main/cdload.c), the CD file reader and the overlay loader (docs/DISC_LAYOUT.md "The file table" and
 // "Overlays"). Files are read by index into the file table, checksummed and retried.

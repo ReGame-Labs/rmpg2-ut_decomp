@@ -152,8 +152,8 @@ void func_80044D34(void);
 void func_80057DD8(void);
 void func_8005E3CC(void);
 s32 func_8005E5C8(void);
-void func_8005E60C(void);
-void func_80060524(void);
+void bonus_check_round_end(void);
+void bonus_update_awards(void);
 void func_80060DCC(void);
 void func_80062D88(s32);
 void func_80062DA8(s32);
@@ -372,7 +372,7 @@ void func_80025124(Building *);
 void func_80024E08(Building *);
 void func_800258C8(void);
 extern u8 D_80082E94[];
-s32 func_8005F208(void);
+s32 bonus_get_round_kind(void);
 u16 func_80029B80(void);
 extern BuildingDef D_800135E8;
 extern BuildingDef D_8001687C;
@@ -1635,8 +1635,8 @@ void func_8001C784(void) {
     func_8002A72C();
     building_update_sky();
     func_8005E3CC();
-    func_8005E60C();
-    func_80060524();
+    bonus_check_round_end();
+    bonus_update_awards();
     func_80060DCC();
     if (D_801D36FC != 0x120) {
         func_8001BA98();
@@ -4914,7 +4914,7 @@ void func_80025124(Building *rec) {
             rec->unk_012 = 0x7D;
         } else {
             rec->unk_012 = 5;
-            if ((D_800AA2DC != 0) && (func_8005F208() == 4)) {
+            if ((D_800AA2DC != 0) && (bonus_get_round_kind() == 4)) {
                 u16 y = sprite->pos_y.u.hi;
 
                 rec->unk_058 = 0;

@@ -18,6 +18,7 @@ void func_8001EE24(void);
 void func_8001F724(u16);
 void main_set_frame(s32, u16, GameObject *);
 s32 func_80025DF8(s32);
+s32 cdload_get_next_player(s32);
 s32 func_80031714(Monster *);
 void func_8005E124(Monster *, s32);
 void func_8005E19C(Monster *, s32);
@@ -25,13 +26,17 @@ void func_8005E2D8(void);
 void bonus_start_round(void);
 void func_8005F12C(void);
 void bonus_create_counter(s32, s32);
-void func_8005F9FC(void);
+void bonus_save_health(void);
 void bonus_give_awards(s32, s32);
+void bonus_award_places(void);
+void bonus_restore_health(void);
 void func_8006036C(s32 *, s32, s32, s32, s32, u8 *);
 void func_800603FC(s32 *, s32, s32, s32, s32);
 void func_80060A7C(s32, u32, s32);
+void func_80060BA8(void);
 void func_80060D44(Monster *);
 void func_80062E44(void);
+void func_800636B0(void);
 
 extern Anim D_80016A84;
 extern s32 D_8007BD7C;
@@ -56,5 +61,10 @@ extern s16 D_801FB46C;
 extern TextMessage D_801FB470;           /* the message func_8006036C builds */
 extern s32 D_8007ABCC[];                /* a font's glyphs */
 extern s32 D_801FB474;                   /* D_801FB470.spacing */
+
+extern u8 D_800115B0[];                  /* "BONUS AWARDS!!" (split into monster_anim's .rodata) */
+extern u8 D_800115C0[];
+extern u8 D_800115C8[];
+extern u8 D_800115D0[];
 
 #endif /* BONUS_H */

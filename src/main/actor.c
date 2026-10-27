@@ -36,7 +36,7 @@ void func_8004CFC0(void);
 void func_80053D68(s32 arg0, Monster *player);
 void func_80054374(s32 arg0, Monster *player);
 void func_8005E0E8(Monster *player);
-s32 func_8005F208(void);
+s32 bonus_get_round_kind(void);
 struct AnimFrame *func_8001A784(s32 arg0);
 
 typedef struct AnimFrame {
@@ -652,7 +652,7 @@ void func_8003DBCC(Ai *ai) {
 s32 func_8003DC3C(Ai *ai) {
     u16 k;
 
-    if (func_8005F208() == 3) {
+    if (bonus_get_round_kind() == 3) {
         return 1;
     }
     k = ai->unk_1C.building->state;
@@ -810,7 +810,7 @@ void func_8003DFD4(void) {
         D_800AA248.cur_obj->owner.p = ai;
         y += 0x12C;
         D_800AA248.cur_obj->pos_y.s.hi = y;
-        if (func_8005F208() == 3) {
+        if (bonus_get_round_kind() == 3) {
             ai->timer = 0;
             ai->delay = 0;
         } else {
@@ -1060,7 +1060,7 @@ void func_8003E6A4(Ai *ai) {
     mover->vel_x.w = 0;
     mover->vel_y.w = 0;
     ai->action = 1;
-    if (func_8005F208() == 3) {
+    if (bonus_get_round_kind() == 3) {
         ai->timer = 0;
         ai->delay = 0;
         return;
