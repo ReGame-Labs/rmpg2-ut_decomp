@@ -1424,9 +1424,9 @@ void menu_update_player_select(void) {
 }
 
 #ifdef NON_MATCHING
-/* 80.38%: the loop's invariants differ: the original keeps %hi(D_800A9860) in fp and D_800A8F00 in s7, and
- * steps a pointer at the record's unk_08 (s0 = D_800A8FD4 + 8); this C hoists D_800A8FD4 itself and reaches the
- * records from it. */
+/* 89.18%: with the record pointer stepped the invariants and the record pointer at unk_08 are the original's; the
+ * original shifts the pad bits before it loads the slot's object and copies them to a1 for the later tests, and
+ * loads a new animation before the D_800A9860 store */
 void menu_choose_monsters(s32 unused, s32 *timer) {
     s32 i;
     OverattrPlayer *rec;
@@ -1437,8 +1437,7 @@ void menu_choose_monsters(s32 unused, s32 *timer) {
     u32 pad;
     GameObject *obj;
 
-    for (i = 0; i < 3; i++) {
-        rec = &D_800A8FD4[i];
+    for (i = 0, rec = D_800A8FD4; i < 3; i++, rec++) {
         monster = rec->unk_04;
         pad = (u32) func_80099118() >> D_8007C144[i];
         obj = *(D_801E28F4 + i + 13);
