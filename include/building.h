@@ -19,6 +19,10 @@ extern u8 D_8007D19C[];
 extern u8 D_8007D1E8[];
 extern u8 D_8007D234[];
 extern u8 D_8007D280[];
+extern s32 D_8007CB2C[4];   /* the four frames of a cloud strip (func_8002B0E0), one set */
+extern s32 D_8007CB3C[4];   /* the other set */
+extern s16 D_8007D0A8[4][2];   /* four x ranges (first, last) func_80031714 tests */
+s32 func_8005F208(void);
 extern u8 D_8007D2CC[];
 extern u8 D_8007D318[];
 extern u8 D_8007D364[];
@@ -575,6 +579,15 @@ extern GameObject *D_801E1E34[2];
 void func_8003197C(u16 *, s32, GameObject **);
 void func_80053C50(s32, Monster *);
 void func_8002BAEC(Monster *);
+extern s32 D_8007CDEC[7];   /* the body sprite of each monster id (func_8002BAEC) */
+extern Anim D_80096560;
+s32 func_8001E2B8(GameObject *);
+void func_8002A1AC(Monster *, s32);
+void func_8005D20C(Monster *);
+void func_8005D364(Monster *);
+void func_8005D644(Monster *);
+void func_8005E124(Monster *, s32);
+void func_8005F33C(s32, u8);
 extern Anim D_80011D48;   /* func_8002E658's sprite at a part's point */
 extern Anim D_80011F10;   /* its second sprite, 8 pixels lower right, half the time */
 extern Anim D_80016890;   /* func_8002F100's three stages */

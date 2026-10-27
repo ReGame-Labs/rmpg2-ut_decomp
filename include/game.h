@@ -122,7 +122,7 @@ typedef struct GameObject {
     /* 0x6E */ u16 unk_6E;
     /* 0x70 */ u16 kind;                /* the id func_8001E450 and func_8001EC74 select objects by (0x790 + a
                                          * monster's slot for the status sprites) */
-    /* 0x72 */ u8 unk_72[0x02];
+    /* 0x72 */ u16 unk_72;
     /* 0x74 */ u16 unk_74;
     /* 0x76 */ u8 unk_76[0x02];
     /* 0x78 */ u32 colour;              /* 0x808080: neutral */
@@ -168,7 +168,7 @@ typedef struct Monster {
     /* 0x018 */ u8 unk_018[0x02];
     /* 0x01A */ u16 unk_01A;
     /* 0x01C */ u16 unk_01C;                   /* a countdown set from a random draw */
-    /* 0x01E */ u8 unk_01E[0x02];
+    /* 0x01E */ u16 unk_01E;
     /* 0x020 */ u16 unk_020;                   /* a tally for the results (OVERATTR's first bar) */
     /* 0x022 */ u16 unk_022;                   /* the step of a throw sequence, 0..4 */
     /* 0x024 */ u16 unk_024;                   /* a tally for the results (the second bar): eating a person or a
@@ -222,7 +222,7 @@ typedef struct Monster {
     /* 0x0E6 */ u16 unk_0E6;
     /* 0x0E8 */ u8 unk_0E8[0x02];
     /* 0x0EA */ u16 unk_0EA;
-    /* 0x0EC */ u8 unk_0EC[0x02];
+    /* 0x0EC */ u16 unk_0EC;
     /* 0x0EE */ s16 unk_0EE;
     /* 0x0F0 */ s32 unk_0F0;                   /* a change to its health, applied once (func_80029510) */
     /* 0x0F4 */ s16 front_x;                   /* its front: pos_x plus or minus half its width, by its facing */
@@ -272,7 +272,10 @@ typedef struct Monster {
     /* 0x16A */ u8 unk_16A[0x02];
     /* 0x16C */ GameObject *unk_16C;
     /* 0x170 */ u16 unk_170;
-    /* 0x172 */ u8 unk_172[0x0A];
+    /* 0x172 */ u8 unk_172[0x02];
+    /* 0x174 */ s32 unk_174;
+    /* 0x178 */ u16 unk_178;
+    /* 0x17A */ u8 unk_17A[0x02];
     /* 0x17C */ s32 unk_17C;
     /* 0x180 */ struct Monster *attacker;      /* the monster that hit it last (func_8005421C) */
     /* 0x184 */ u16 unk_184;
@@ -303,7 +306,7 @@ typedef struct Monster {
     /* 0x1DA */ u8 unk_1DA[0x04];
     /* 0x1DE */ u16 unk_1DE;
     /* 0x1E0 */ u16 unk_1E0;
-    /* 0x1E2 */ u8 unk_1E2[0x02];
+    /* 0x1E2 */ u16 unk_1E2;
     /* 0x1E4 */ s16 *unk_1E4;                  /* the demo's input script: 12-byte records (frame, direction, buttons), 0x7FFF ends it */
     /* 0x1E8 */ u8 unk_1E8[0x10];
     /* 0x1F8 */ s32 unk_1F8;
