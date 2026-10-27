@@ -51,6 +51,8 @@ typedef struct SpriteFrame {
     /* 0x1E */ u16 unk_1E;
     /* 0x20 */ u16 unk_20;              /* a third point: x (a spawn origin) */
     /* 0x22 */ u16 unk_22;              /* y */
+    /* 0x24 */ s16 unk_24;              /* a fourth point: x (where an Npc's second object sits, func_80024530) */
+    /* 0x26 */ s16 unk_26;              /* y */
 } SpriteFrame;
 
 /* A sprite object of the level, 0xCC bytes: a monster's body, a vehicle, a projectile, an effect, a building's
