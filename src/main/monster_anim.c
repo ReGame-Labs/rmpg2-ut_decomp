@@ -2629,11 +2629,3 @@ u16 func_8005D0D8(Monster *e) {
     }
     return 0;
 }
-
-INCLUDE_RODATA("asm/main/nonmatchings/monster_anim", D_800115B0);
-
-INCLUDE_RODATA("asm/main/nonmatchings/monster_anim", D_800115C0);
-
-INCLUDE_RODATA("asm/main/nonmatchings/monster_anim", D_800115C8);
-
-INCLUDE_RODATA("asm/main/nonmatchings/monster_anim", D_800115D0);

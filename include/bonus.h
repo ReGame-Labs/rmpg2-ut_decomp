@@ -62,9 +62,4 @@ extern TextMessage D_801FB470;           /* the message func_8006036C builds */
 extern s32 D_8007ABCC[];                /* a font's glyphs */
 extern s32 D_801FB474;                   /* D_801FB470.spacing */
 
-extern u8 D_800115B0[];                  /* "BONUS AWARDS!!" (split into monster_anim's .rodata) */
-extern u8 D_800115C0[];
-extern u8 D_800115C8[];
-extern u8 D_800115D0[];
-
 #endif /* BONUS_H */
