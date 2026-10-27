@@ -420,7 +420,14 @@ extern s32 D_800AA260;                  /* unk_18 */
 extern u16 D_800AA2C0;                  /* result */
 extern s32 D_800AA2DC;                  /* unk_94 */
 
-/* A behaviour slot: 0x40 bytes, in the array D_801D85C8 (D_801D870C in use). Each drives one object through the
+/* The behaviour records: each drives one object (GameObject.owner points back to it). Five record sets share a head
+ * (the object at 0x00, the kind at 0x06; Ai, Npc, Pickup and UnkStructB2 also the action at 0x08 and the "new state"
+ * flag at 0x0C) but not a size: Ai and Actor are 0x40 bytes, Npc 0x78, Pickup 0x58, UnkStructB2 0x30, the strides of
+ * their arrays. So each set is its own type, with the same names at the same offsets; a function takes the record its
+ * callers pass (main.c's func_80020DDC chain is the Npc kinds 0x11 and 0x12's, not the Ai's), and the few that take
+ * any record (func_8003C8D4, func_8003D4AC) are called with a cast.
+ *
+ * A behaviour slot: 0x40 bytes, in the array D_801D85C8 (D_801D870C in use). Each drives one object through the
  * handler table of its kind (func_80041A70 calls handlers[state]); the monsters' behaviours, the thrown objects.
  * The words from 0x10 on hold different things by kind. */
 typedef struct Ai {
@@ -445,7 +452,7 @@ typedef struct Ai {
                    s16 s;                   /* a countdown */
                } unk_1C;
     /* 0x20 */ u8 unk_20[0x02];
-    /* 0x22 */ u16 unk_22;                     /* a countdown (func_800221BC: 0xB4 frames); func_8003E6A4 copies it
+    /* 0x22 */ u16 unk_22;                     /* a countdown; func_8003E6A4 copies it
                                                 * into its order */
     /* 0x24 */ u16 unk_24;
     /* 0x26 */ s16 unk_26;
@@ -461,7 +468,7 @@ typedef struct Ai {
     /* 0x30 */ Fixed unk_30;
     /* 0x34 */ Fixed unk_34;
     /* 0x38 */ u16 unk_38;                     /* a countdown */
-    /* 0x3A */ u16 start;                      /* the start position, an index into D_8007B358/D_8007B348 */
+    /* 0x3A */ u16 unk_3A;
     /* 0x3C */ u16 unk_3C;
     /* 0x3E */ u8 unk_3E[0x02];
 } Ai;                                   /* 0x40 bytes */

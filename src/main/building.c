@@ -4594,8 +4594,8 @@ void building_bob_pickup(Building *b) {
 }
 
 void building_update_pickup(Pickup *r) {
-    D_800AA268.p = r->unk_00;
-    if (r->unk_06 == 0x12 || r->unk_06 == 0x13) {
+    D_800AA268.p = r->obj;
+    if (r->kind == 0x12 || r->kind == 0x13) {
         building_bob_pickup((Building *) r);   /* bobs the object: counts in the record's halfword at 0x14 */
     }
     switch (r->unk_08) {

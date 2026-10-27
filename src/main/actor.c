@@ -319,7 +319,7 @@ void *func_8003D1F8(Actor *actor) {
 void func_8003D228(UnkStructB2 *rec) {
     Anim *anim = NULL;
 
-    switch (rec->unk_06) {
+    switch (rec->kind) {
     case 0x2A:
         anim = &D_80094514;
         if (rec->unk_04 < 2) {
@@ -353,7 +353,7 @@ void func_8003D228(UnkStructB2 *rec) {
 }
 
 void func_8003D30C(UnkStructB2 *rec) {
-    switch (rec->unk_06) {
+    switch (rec->kind) {
     case 0x34:
         if (rec->unk_0E != 0 && rec->unk_14 != NULL) {
             func_8001F724(0x11);
@@ -376,7 +376,7 @@ void func_8003D30C(UnkStructB2 *rec) {
 void func_8003D3CC(UnkStructB2 *rec) {
     Anim *anim = NULL;
 
-    switch (rec->unk_06) {
+    switch (rec->kind) {
     case 0x2F:
         anim = &D_80094AEC;
         if (rec->unk_04 < 2) {
@@ -1039,17 +1039,17 @@ void func_8003EC40(Actor *actor) {
     void (**p)(Actor *);
     void (*handler)(Actor *);
 
-    D_800AA268.p = actor->unk_0;
+    D_800AA268.p = actor->obj;
     func_80029D1C();
     if (actor->unk_4 == 0) {
         return;
     }
-    if ((u16)actor->unk_6 >= 0x11) {
+    if ((u16)actor->kind >= 0x11) {
         goto bad;
     }
     /* FAKE: the table and the index in one comma expression; the plain p[actor->unk_6] gives the kind another register
      * (a0 for v1), the only difference (99.2 %). */
-    handler = *(p = actor->unk_20, p + actor->unk_6);
+    handler = *(p = actor->unk_20, p + actor->kind);
     if (handler == NULL) {
         return;
     }
@@ -1057,14 +1057,14 @@ void func_8003EC40(Actor *actor) {
     if (actor->unk_4 == 0) {
         return;
     }
-    if ((u16)actor->unk_6 < 0x11) {
+    if ((u16)actor->kind < 0x11) {
         goto ok;
     }
 bad:
     func_800415E0(actor);
     return;
 ok:
-    func_8004155C(actor->unk_6, actor);
+    func_8004155C(actor->kind, actor);
 }
 
 void func_8003ECF8(void) {
@@ -1114,14 +1114,14 @@ void func_8003ED4C(void) {
         effect->id = ed->id;
         actor->unk_8 = 0;
         p++;
-        actor->unk_6 = def->unk_4;
+        actor->kind = def->unk_4;
         effect->pos_x.s.hi = *p++;
         y = *p;
         effect->unk_0C = 0x745;
         effect->pos_y.s.hi = y;
         effect->flags = (s16)y + 0xF23;
         D_800AA248.cur_obj = func_8001DCB4();
-        actor->unk_0 = D_800AA248.cur_obj;
+        actor->obj = D_800AA248.cur_obj;
         D_800AA248.cur_obj->owner.actor = actor;
         p++;
         actor->unk_38 = ((u16 *)&D_800AA248.cur_obj->pos_x.w)[1];
@@ -1160,14 +1160,14 @@ void func_8003EF64(Monster *player) {
         mover = player->obj;
         px = ((s16 *)&mover->pos_x.w)[1];
         do {
-            mover = actor->unk_0;
+            mover = actor->obj;
             if (!(mover->unk_6C & 0x80) && actor->unk_12 == 0 && actor->unk_4 != 0x55 && actor->unk_4 != 0x54 &&
-                actor->unk_4 != 0x56 && actor->unk_4 != 0x8E && actor->unk_6 != 0 && actor->unk_6 != 0xB &&
-                actor->unk_6 != 0xE && actor->unk_6 != 1 && actor->unk_6 != 5 && actor->unk_6 != 6 &&
-                actor->unk_6 != 7 && actor->unk_6 != 3) {
+                actor->unk_4 != 0x56 && actor->unk_4 != 0x8E && actor->kind != 0 && actor->kind != 0xB &&
+                actor->kind != 0xE && actor->kind != 1 && actor->kind != 5 && actor->kind != 6 &&
+                actor->kind != 7 && actor->kind != 3) {
                 d = abs(((s16 *)&mover->pos_x.w)[1] - px);
                 if (d <= (((s16)mover->size.u.lo) >> 1) - 1) {
-                    if (actor->unk_6 != 0xA) {
+                    if (actor->kind != 0xA) {
                         D_800AA268.p = mover;
                         func_8004155C(7, actor);
                     } else if (((s16 *)&mover->pos_y.w)[1] == 0xE2) {
@@ -1206,9 +1206,9 @@ s32 func_8003F150(Monster *player) {
         px = player->pos.u.lo;
         py = player->pos.u.hi;
         do {
-            mover = actor->unk_0;
+            mover = actor->obj;
             if (actor->unk_12 == 0 && actor->unk_4 != 0x56 && actor->unk_4 != 0x55 && actor->unk_4 != 0x8E) {
-                kind = actor->unk_6;
+                kind = actor->kind;
                 if (kind != 0 && kind != 0xB && kind != 0xE && kind != 1 && kind != 7 && kind != 3) {
                     x = mover->pos_x.s.hi;
                     if (x < D_801F9ACA) {
@@ -1231,7 +1231,7 @@ s32 func_8003F150(Monster *player) {
                                 }
                                 D_800AA248.cur_obj->vel_y.w = -0x58000;
                                 D_800AA248.cur_obj->unk_88 = 0x4000;
-                                actor->unk_6 = 6;
+                                actor->kind = 6;
                                 actor->unk_20 = &D_8007E398;
                                 func_8004155C(6, actor);
                             }
@@ -1256,8 +1256,8 @@ s32 func_8003F378(Monster *player) {
 
     if (n != 0) {
         do {
-            if (actor->unk_6 == 0xE) {
-                mover = actor->unk_0;
+            if (actor->kind == 0xE) {
+                mover = actor->obj;
                 if (!(mover->unk_6C & 0x80)) {
                     x = (((u16 *)&mover->pos_x.w)[1] - mover->unk_1C.u.lo) + (((s16)mover->size.u.lo) >> 1);
                     y = (((u16 *)&mover->pos_y.w)[1] - mover->unk_1C.u.hi) + (((s16)mover->size.u.hi) >> 1);
@@ -1301,11 +1301,11 @@ s32 func_8003F50C(Monster *player) {
     if (n != 0) {
         do {
             if (actor->unk_12 == 0 && actor->unk_4 != 0 && actor->unk_4 != 0x55 &&
-                (actor->unk_4 == 0x54 || actor->unk_4 == 0x8E || actor->unk_6 == 0xE || player->unk_18E != 0 ||
+                (actor->unk_4 == 0x54 || actor->unk_4 == 0x8E || actor->kind == 0xE || player->unk_18E != 0 ||
                  player->unk_0EA == 4)) {
-                mover = actor->unk_0;
-                if (!(mover->unk_6C & 0x80) && ((actor->unk_6 != 0 && actor->unk_28 == 0) || actor->unk_4 == 0x8E)) {
-                    if (actor->unk_6 != 0xE) {
+                mover = actor->obj;
+                if (!(mover->unk_6C & 0x80) && ((actor->kind != 0 && actor->unk_28 == 0) || actor->unk_4 == 0x8E)) {
+                    if (actor->kind != 0xE) {
                         x = mover->pos_x.s.hi;
                         if (x < D_801F9ACA) {
                             x += (D_801D8864.w + 1) >> 16;
@@ -1341,19 +1341,19 @@ INCLUDE_ASM("asm/main/nonmatchings/actor", func_8003F50C);
 #endif
 
 void actor_take_hit(Monster *player, Actor *actor) {
-    GameObject *obj = actor->unk_0;
+    GameObject *obj = actor->obj;
     s32 kind;
     s32 vx;
     s32 score;
 
-    if (actor->unk_4 == 0x54 || actor->unk_6 == 0xE) {
+    if (actor->unk_4 == 0x54 || actor->kind == 0xE) {
         actor->unk_28 = 1;
         actor->unk_2C = player;
         actor->unk_3A = player->pos.u.lo;
         actor->unk_3C = player->pos.u.hi;
         return;
     }
-    if (actor->unk_6 == 0xB) {
+    if (actor->kind == 0xB) {
         score = 0x5A;
         if (player->unk_1AC == 0) {
             score = 0x1E;
@@ -1364,13 +1364,13 @@ void actor_take_hit(Monster *player, Actor *actor) {
         return;
     }
     actor->unk_28 = 1;
-    if (actor->unk_6 == 0xA) {
+    if (actor->kind == 0xA) {
         func_80054374(0x28, player);
         func_800634D4(player, 4);
         player->unk_024++;
         return;
     }
-    if (actor->unk_6 == 1) {
+    if (actor->kind == 1) {
         func_8003FB5C(player, actor);
         return;
     }
@@ -1384,15 +1384,15 @@ void actor_take_hit(Monster *player, Actor *actor) {
         func_80054374(score, player);
         func_8005E0E8(player);
     }
-    kind = actor->unk_6;
+    kind = actor->kind;
     actor->unk_1C = D_800AA248.cur_obj->flags;
     if (kind != 3) {
         if (actor->unk_4 == 0x8E) {
             if (kind != 0) {
                 func_80053D68(0x28000, player);
                 player->action = 8;
-                actor->unk_0->vel_x.w = (D_800AA248.cur_obj->flags & 0x10) ? -0x12000 : 0x12000;
-                actor->unk_0->vel_y.w = -0x90000;
+                actor->obj->vel_x.w = (D_800AA248.cur_obj->flags & 0x10) ? -0x12000 : 0x12000;
+                actor->obj->vel_y.w = -0x90000;
                 actor->unk_20 = &D_8007E244;
                 actor->unk_2C = player;
                 func_8004155C(0, actor);
@@ -1433,7 +1433,7 @@ void actor_take_hit(Monster *player, Actor *actor) {
         if (player->unk_05C == 0x4E || player->unk_05C == 2) {
             return;
         }
-        switch (actor->unk_6) {
+        switch (actor->kind) {
         case 4:
         case 8:
         case 9:
@@ -1443,13 +1443,13 @@ void actor_take_hit(Monster *player, Actor *actor) {
                 if (actor->unk_4 == 0x56) {
                     player->unk_126 = 0x19;
                 }
-                actor->unk_6 = 2;
+                actor->kind = 2;
                 actor->unk_20 = &D_8007E2CC;
                 func_80053D68(8, player);
                 player->action = 8;
                 return;
             }
-            obj = actor->unk_0;
+            obj = actor->obj;
             player->action = 0x45;
             if (D_800AA248.cur_obj->flags & 0x10) {
                 obj->vel_x.w = 0x6000;
@@ -1458,7 +1458,7 @@ void actor_take_hit(Monster *player, Actor *actor) {
                 obj->vel_x.w = -0x6000;
                 obj->pos_x.w = D_800AA248.cur_obj->pos_x.w + 0xF0000;
             }
-            player->unk_1D0 = &actor->unk_0;
+            player->unk_1D0 = &actor->obj;
             return;
         }
     }
@@ -1716,7 +1716,7 @@ void func_800403B4(Actor *actor) {
     GameObject *saved;
 
     saved = D_800AA248.cur_obj;
-    D_800AA248.cur_obj = actor->unk_0;
+    D_800AA248.cur_obj = actor->obj;
     if (actor->unk_34 == NULL || actor->unk_34->unk_10 != 0) {
         func_8004155C(2, actor);
     }
@@ -1728,7 +1728,7 @@ void func_80040418(Actor *actor) {
     s32 v;
     s32 speed;
 
-    mover = actor->unk_0;
+    mover = actor->obj;
     D_800AA248.cur_obj = mover;
     if (actor->unk_28 == 0) {
         if (actor->unk_10 == 0) {
@@ -1782,7 +1782,7 @@ void func_80040418(Actor *actor) {
 void func_800405D8(Actor *actor) {
     GameObject *mover;
 
-    mover = actor->unk_0;
+    mover = actor->obj;
     D_800AA248.cur_obj = mover;
     if (actor->unk_28 != 0) {
         mover->vel_y.w = -0xA0000;
@@ -1800,7 +1800,7 @@ void func_80040668(void) {
 void func_80040670(Actor *actor) {
     GameObject *mover;
 
-    mover = actor->unk_0;
+    mover = actor->obj;
     D_800AA248.cur_obj = mover;
     if (actor->unk_28 != 0) {
         mover->vel_y.w = -0xA0000;
@@ -1819,7 +1819,7 @@ void func_80040704(Actor *actor) {
     GameObject *mover;
     s32 v;
 
-    mover = actor->unk_0;
+    mover = actor->obj;
     D_800AA248.cur_obj = mover;
     if (actor->unk_28 != 0) {
         mover->vel_y.w = -0xA0000;
@@ -1847,7 +1847,7 @@ void func_80040704(Actor *actor) {
 }
 
 void func_80040824(Actor *actor) {
-    D_800AA248.cur_obj = actor->unk_0;
+    D_800AA248.cur_obj = actor->obj;
     if (actor->unk_28 == 0) {
         if (actor->unk_34 == NULL || actor->unk_34->unk_10 != 0) {
             func_8004155C(2, actor);
@@ -1878,7 +1878,7 @@ void func_8004089C(Actor *actor) {
 void func_80040900(Actor *actor) {
     GameObject *mover;
 
-    mover = actor->unk_0;
+    mover = actor->obj;
     D_800AA248.cur_obj = mover;
     mover->pos_y.w = 0x02000000;
     func_800415B4();
@@ -1888,7 +1888,7 @@ void func_80040930(Actor *actor) {
     GameObject *mover;
     s32 v;
 
-    mover = actor->unk_0;
+    mover = actor->obj;
     D_800AA248.cur_obj = mover;
     v = mover->vel_x.w + mover->pos_x.w;
     v &= D_801D8864.w;
@@ -1906,7 +1906,7 @@ void func_800409CC(Actor *actor) {
     GameObject *mover;
     s32 v;
 
-    mover = actor->unk_0;
+    mover = actor->obj;
     D_800AA248.cur_obj = mover;
     v = mover->pos_x.w + mover->vel_x.w;
     v &= D_801D8864.w;
@@ -1924,7 +1924,7 @@ void func_800409CC(Actor *actor) {
 void func_80040A7C(Actor *actor) {
     GameObject *mover;
 
-    mover = actor->unk_0;
+    mover = actor->obj;
     D_800AA248.cur_obj = mover;
     if (actor->unk_28 != 0) {
         mover->pos_y.w = 0x02000000;
@@ -1933,7 +1933,7 @@ void func_80040A7C(Actor *actor) {
 }
 
 void func_80040AB8(Actor *actor) {
-    D_800AA248.cur_obj = actor->unk_0;
+    D_800AA248.cur_obj = actor->obj;
     if (actor->unk_28 != 0) {
         actor->unk_28 = 0;
         D_800AA248.cur_obj->pos_y.w = 0x2000000;
@@ -1944,7 +1944,7 @@ void func_80040AB8(Actor *actor) {
 void func_80040B00(Actor *actor) {
     GameObject *mover;
 
-    mover = actor->unk_0;
+    mover = actor->obj;
     D_800AA248.cur_obj = mover;
     if (actor->unk_28 != 0) {
         mover->vel_y.w = -0xA0000;
@@ -1995,7 +1995,7 @@ void func_80040CB0(void) {
 void func_80040CB8(Actor *actor) {
     u8 kind;
 
-    D_800AA268.p = actor->unk_0;
+    D_800AA268.p = actor->obj;
     if (actor->unk_28 != 0) {
         switch (actor->unk_14) {
         case 2:
@@ -2027,7 +2027,7 @@ void func_80040D68(Actor *actor) {
     s32 anchor;
 
     saved = D_800AA248.cur_obj;
-    D_800AA248.cur_obj = actor->unk_0;
+    D_800AA248.cur_obj = actor->obj;
     if (actor->unk_30 == 0) {
         if (actor->unk_28 != 0) {
             actor->unk_32++;
@@ -2057,7 +2057,7 @@ void func_80040EA0(Actor *actor) {
     GameObject *mover;
     GameObject *saved;
 
-    mover = actor->unk_0;
+    mover = actor->obj;
     saved = D_800AA248.cur_obj;
     D_800AA248.cur_obj = mover;
     if (mover->unk_6C & 0x80) {
@@ -2086,7 +2086,7 @@ void func_80040F84(Actor *actor) {
     GameObject *saved;
     GameObject *mover;
 
-    mover = actor->unk_0;
+    mover = actor->obj;
     saved = D_800AA248.cur_obj;
     D_800AA248.cur_obj = mover;
     if (mover->unk_6C & 0x80) {
@@ -2121,7 +2121,7 @@ void func_800410AC(Actor *actor) {
     GameObject *mover;
     GameObject *saved;
 
-    mover = actor->unk_0;
+    mover = actor->obj;
     saved = D_800AA248.cur_obj;
     D_800AA248.cur_obj = mover;
     if (mover->unk_6C & 0x80) {
@@ -2161,7 +2161,7 @@ void func_800411E8(Actor *actor) {
     s32 v;
 
     saved = D_800AA248.cur_obj;
-    D_800AA248.cur_obj = actor->unk_0;
+    D_800AA248.cur_obj = actor->obj;
     if (actor->unk_30 == 0 && actor->unk_28 != 0) {
         actor->unk_32++;
         actor->unk_30 = 0x3C;
@@ -2239,7 +2239,7 @@ void func_8004143C(Actor *actor) {
     if (actor->unk_4 != 0x8E) {
         return;
     }
-    mover = actor->unk_0;
+    mover = actor->obj;
     D_800AA248.cur_obj = mover;
     if (!(mover->unk_6C & 0x80)) {
         mover->pos_x.w = (mover->vel_x.w + mover->pos_x.w) & D_801D8864.w;
@@ -2265,7 +2265,7 @@ void func_8004143C(Actor *actor) {
 void func_8004155C(u16 kind, Actor *actor) {
     Anim *anim;
 
-    actor->unk_6 = kind;
+    actor->kind = kind;
     anim = func_80041598(actor);
     if (anim != NULL) {
         func_8003EB5C(anim, D_800AA248.cur_obj);
@@ -2276,7 +2276,7 @@ Anim *func_80041598(Actor *actor) {
     Anim **anims;
 
     anims = actor->unk_24;
-    anims += actor->unk_6;
+    anims += actor->kind;
     return *anims;
 }
 
@@ -2286,7 +2286,7 @@ void func_800415B4(void) {
 }
 
 void func_800415E0(Actor *actor) {
-    D_800AA248.cur_obj = actor->unk_0;
+    D_800AA248.cur_obj = actor->obj;
     actor->unk_4 = 0;
     func_8004CFC0();
 }

@@ -1727,8 +1727,8 @@ u16 func_8005BF54(GameObject *b, Monster *e) {
         x = b->pos_x.u.hi - b->unk_2C.u.lo;
     }
     do {
-        if (!(r->unk_00->unk_6C & 0x80) && r->unk_08 == 2 && r->unk_06 != 0 && r->unk_06 < 0x1D) {
-            if (r->unk_06 >= 0xD && r->unk_06 < 0x12 && r->unk_40 != NULL
+        if (!(r->obj->unk_6C & 0x80) && r->unk_08 == 2 && r->kind != 0 && r->kind < 0x1D) {
+            if (r->kind >= 0xD && r->kind < 0x12 && r->unk_40 != NULL
                 && monster_anim_test_box(x, b->pos_y.s.hi, (s16) b->unk_2C.u.lo >> 1, (s16) b->unk_2C.u.hi >> 1, r->unk_40, 1) != 0) {
                 e->unk_024++;
                 func_80054374(0x28, e);
@@ -1743,7 +1743,7 @@ u16 func_8005BF54(GameObject *b, Monster *e) {
                 func_800346FC(r);
                 return 1;
             }
-            if (monster_anim_test_box(x, b->pos_y.s.hi, (s16) b->unk_2C.u.lo >> 1, (s16) b->unk_2C.u.hi >> 1, r->unk_00, 1) != 0) {
+            if (monster_anim_test_box(x, b->pos_y.s.hi, (s16) b->unk_2C.u.lo >> 1, (s16) b->unk_2C.u.hi >> 1, r->obj, 1) != 0) {
                 e->unk_024++;
                 func_80054374(0x28, e);
                 r->unk_08 = 3;
@@ -1781,15 +1781,15 @@ u16 func_8005C1F8(GameObject *b, Monster *e) {
         x = b->pos_x.u.hi - b->unk_2C.u.lo;
     }
     do {
-        obj = npc->unk_0;
+        obj = npc->obj;
         if (obj != NULL) {
             if (!(obj->unk_6C & 0x80)) {
-                action = npc->unk_8;
+                action = npc->action;
                 if ((u16)action != 4 && (u16)action != 5 && (u16)action != 6 && (u16)action != 0x14 && (u16)action != 0x33 && (u16)action != 3 && (u16)action != 0x64 && (u16)action != 0x63
                     && monster_anim_test_box(x, b->pos_y.s.hi, (s16) b->unk_2C.u.lo >> 1, b->unk_2C.s.hi, obj, 1) != 0) {
                     e->unk_024++;
                     func_80054374(0x28, e);
-                    npc->unk_8 = 3;
+                    npc->action = 3;
                     npc->unk_60 = e;
                     npc->unk_54 = D_800AA248.cur_obj->flags;
                     npc->unk_5C = e->pos.u.lo;
@@ -1851,15 +1851,15 @@ void func_8005C578(GameObject *b, Monster *e) {
     }
     x = b->pos_x.u.hi;
     do {
-        obj = npc->unk_0;
+        obj = npc->obj;
         if (obj != NULL) {
             if (!(obj->unk_6C & 0x80)) {
-                action = npc->unk_8;
+                action = npc->action;
                 if ((u16)action != 4 && (u16)action != 5 && (u16)action != 6 && (u16)action != 0x14 && (u16)action != 0x33 && (u16)action != 3 && (u16)action != 0x64 && (u16)action != 0x63
                     && monster_anim_test_box(x, b->pos_y.s.hi, 0x3C, 0x64, obj, 1) != 0) {
                     e->unk_024++;
                     func_80054374(0x28, e);
-                    npc->unk_8 = 3;
+                    npc->action = 3;
                     npc->unk_60 = e;
                     npc->unk_54 = D_800AA248.cur_obj->flags;
                     npc->unk_5C = e->pos.u.lo;
@@ -1893,8 +1893,8 @@ void func_8005C71C(GameObject *b, Monster *e) {
         return;
     }
     do {
-        if (!(r->unk_00->unk_6C & 0x80) && r->unk_08 == 2 && r->unk_06 != 0 && r->unk_06 < 0x1D) {
-            if (r->unk_06 >= 0xD && r->unk_06 < 0x12 && r->unk_40 != NULL) {
+        if (!(r->obj->unk_6C & 0x80) && r->unk_08 == 2 && r->kind != 0 && r->kind < 0x1D) {
+            if (r->kind >= 0xD && r->kind < 0x12 && r->unk_40 != NULL) {
                 if (monster_anim_test_box(x, b->pos_y.s.hi, 0x3C, 0x64, r->unk_40, 1) != 0) {
                     e->unk_024++;
                     func_80054374(0x28, e);
@@ -1908,7 +1908,7 @@ void func_8005C71C(GameObject *b, Monster *e) {
                     e->unk_18A = 1;
                     func_800346FC(r);
                 }
-            } else if (monster_anim_test_box(x, b->pos_y.s.hi, 0x3C, 0x64, r->unk_00, 1) != 0) {
+            } else if (monster_anim_test_box(x, b->pos_y.s.hi, 0x3C, 0x64, r->obj, 1) != 0) {
                 e->unk_024++;
                 func_80054374(0x28, e);
                 r->unk_08 = 3;
@@ -1966,15 +1966,15 @@ void func_8005CAA4(GameObject *b, Monster *e) {
         return;
     }
     do {
-        obj = npc->unk_0;
+        obj = npc->obj;
         if (obj != NULL) {
             if (!(obj->unk_6C & 0x80)) {
-                action = npc->unk_8;
+                action = npc->action;
                 if ((u16)action != 4 && (u16)action != 5 && (u16)action != 6 && (u16)action != 0x14 && (u16)action != 0x33 && (u16)action != 3 && (u16)action != 0x64 && (u16)action != 0x63
                     && monster_anim_test_box(b->pos_x.s.hi, b->pos_y.s.hi - ((s16) b->size.u.hi >> 1), (s16) b->size.u.lo >> 1, (s16) b->size.u.hi >> 1, obj, 1) != 0) {
                     e->unk_024++;
                     func_80054374(0x28, e);
-                    npc->unk_8 = 3;
+                    npc->action = 3;
                     npc->unk_60 = e;
                     npc->unk_54 = D_800AA248.cur_obj->flags;
                     npc->unk_5C = e->pos.u.lo;
@@ -1998,8 +1998,8 @@ void func_8005CC54(GameObject *b, Monster *e) {
         return;
     }
     do {
-        if (!(r->unk_00->unk_6C & 0x80) && r->unk_08 == 2 && r->unk_06 != 0 && r->unk_06 < 0x1D) {
-            if (r->unk_06 >= 0xD && r->unk_06 < 0x12 && r->unk_40 != NULL) {
+        if (!(r->obj->unk_6C & 0x80) && r->unk_08 == 2 && r->kind != 0 && r->kind < 0x1D) {
+            if (r->kind >= 0xD && r->kind < 0x12 && r->unk_40 != NULL) {
                 if (monster_anim_test_box(b->pos_x.s.hi, b->pos_y.s.hi - ((s16) b->size.u.hi >> 1), (s16) b->size.u.lo >> 1, (s16) b->size.u.hi >> 1, r->unk_40, 1) != 0) {
                     e->unk_024++;
                     func_80054374(0x28, e);
@@ -2013,7 +2013,7 @@ void func_8005CC54(GameObject *b, Monster *e) {
                     e->unk_18A = 1;
                     func_800346FC(r);
                 }
-            } else if (monster_anim_test_box(b->pos_x.s.hi, b->pos_y.s.hi - ((s16) b->size.u.hi >> 1), (s16) b->size.u.lo >> 1, (s16) b->size.u.hi >> 1, r->unk_00, 1) != 0) {
+            } else if (monster_anim_test_box(b->pos_x.s.hi, b->pos_y.s.hi - ((s16) b->size.u.hi >> 1), (s16) b->size.u.lo >> 1, (s16) b->size.u.hi >> 1, r->obj, 1) != 0) {
                 e->unk_024++;
                 func_80054374(0x28, e);
                 r->unk_08 = 3;

@@ -38,9 +38,9 @@ void pickup_update_all(void) {
 }
 
 void pickup_update(Pickup *r) {
-    D_800AA268.p = r->unk_00;
+    D_800AA268.p = r->obj;
     func_80029D1C();
-    switch (r->unk_06) {
+    switch (r->kind) {
     case 1:
     case 2:
     case 3:
@@ -123,15 +123,15 @@ void pickup_spawn_all(void) {
         def->id = anim->id;
         r->unk_0A = 0;
         r->unk_08 = 1;
-        r->unk_06 = item->unk_04;
+        r->kind = item->unk_04;
         obj = func_8001DCB4();
-        r->unk_00 = obj;
+        r->obj = obj;
         obj->owner.p = r;
         obj->pos_x.u.hi = item->unk_06;
         obj->pos_y.u.hi = item->unk_08;
         obj->flags |= item->unk_0A;
         obj->priority = item->unk_0C;
-        if (r->unk_06 != 0x17) {
+        if (r->kind != 0x17) {
             obj->priority = obj->pos_y.u.hi + 0xF23;
         }
         obj->kind = 0x71A;
@@ -140,18 +140,18 @@ void pickup_spawn_all(void) {
         } else {
             r->unk_1C = item->unk_0E;
         }
-        if (r->unk_06 != 0x16 && r->unk_06 != 0x17) {
+        if (r->kind != 0x16 && r->kind != 0x17) {
             func_800380C0(obj);
         }
-        if (r->unk_06 >= 0xD && r->unk_06 < 0x12) {
+        if (r->kind >= 0xD && r->kind < 0x12) {
             obj->priority += 2;
             D_800AA248.new_def = func_8001D110();
             def = D_800AA248.new_def;
-            def->id = D_8007DB60[r->unk_06 - 0xD];
-            if (r->unk_06 == 0xD && (obj->flags & 0x10)) {
+            def->id = D_8007DB60[r->kind - 0xD];
+            if (r->kind == 0xD && (obj->flags & 0x10)) {
                 def->id = 0x080027EA;
             }
-            if (r->unk_06 == 0xF && (obj->flags & 0x10)) {
+            if (r->kind == 0xF && (obj->flags & 0x10)) {
                 def->id = 0x080027F4;
             }
             r->unk_40 = func_8001DCB4();
@@ -250,8 +250,8 @@ void pickup_collect(Monster *e) {
         return;
     }
     do {
-        if (!(r->unk_00->unk_6C & 0x80) && r->unk_08 == 2 && r->unk_06 != 0 && r->unk_06 < 0x1D) {
-            if (r->unk_06 >= 0xD && r->unk_06 < 0x12 && r->unk_40 != NULL && pickup_test_touch(r->unk_40, e) != 0) {
+        if (!(r->obj->unk_6C & 0x80) && r->unk_08 == 2 && r->kind != 0 && r->kind < 0x1D) {
+            if (r->kind >= 0xD && r->kind < 0x12 && r->unk_40 != NULL && pickup_test_touch(r->unk_40, e) != 0) {
                 e->unk_024++;
                 func_80054374(0x28, e);
                 r->unk_54 = e;
@@ -265,7 +265,7 @@ void pickup_collect(Monster *e) {
                 func_800346FC(r);
                 func_800634D4(e, 4);
             }
-            if (r->unk_06 == 0x16 || r->unk_06 == 0x17) {
+            if (r->kind == 0x16 || r->kind == 0x17) {
                 for (i = 0; i < 3; i++) {
                     obj = D_801FB44C[i];
                     if (obj != NULL && pickup_test_touch(obj, e) != 0) {
@@ -275,7 +275,7 @@ void pickup_collect(Monster *e) {
                     }
                 }
             }
-            if (pickup_test_touch(r->unk_00, e) != 0) {
+            if (pickup_test_touch(r->obj, e) != 0) {
                 e->unk_024++;
                 func_80054374(0x28, e);
                 r->unk_08 = 3;
@@ -365,11 +365,11 @@ void func_8003BF34(GameObject *obj, Pickup *b, u16 x) {
     u16 flags;
     GameObject *o;
 
-    if (b->unk_06 == 0x16 || b->unk_06 == 0x17) {
+    if (b->kind == 0x16 || b->kind == 0x17) {
         b->unk_0A = 1;
         return;
     }
-    if (b->unk_06 >= 0xD && b->unk_06 < 0x12) {
+    if (b->kind >= 0xD && b->kind < 0x12) {
         b->unk_0A = 1;
         return;
     }
@@ -377,26 +377,26 @@ void func_8003BF34(GameObject *obj, Pickup *b, u16 x) {
     obj->flags = (flags & 0x10) ? (flags & 0xFFEF) : (flags | 0x10);
     b->unk_34 = -b->unk_34;
     obj->vel_x.w = -obj->vel_x.w;
-    switch (b->unk_06) {
+    switch (b->kind) {
     case 6:
         anim = D_8008A4A0;
-        b->unk_06 = 7;
+        b->kind = 7;
         break;
     case 7:
         anim = D_8008A494;
-        b->unk_06 = 6;
+        b->kind = 6;
         break;
     case 8:
         anim = D_8008A4C4;
-        b->unk_06 = 9;
+        b->kind = 9;
         break;
     case 9:
         anim = D_8008A4B8;
-        b->unk_06 = 8;
+        b->kind = 8;
         break;
     }
     if (anim != NULL) {
-        func_8001E698(b->unk_00, anim);
+        func_8001E698(b->obj, anim);
     }
     o = b->unk_40;
     if (o != NULL) {
@@ -455,10 +455,10 @@ void func_8003C130(void) {
 }
 
 void func_8003C1C0(u16 kind, UnkStructB2 *rec) {
-    D_800AA268.p = rec->unk_00;
+    D_800AA268.p = rec->obj;
     func_80029D1C();
     if (rec->unk_04 == 1) {
-        func_8003C2D4(rec->unk_06, rec);
+        func_8003C2D4(rec->kind, rec);
     } else if (rec->unk_18 > 0) {
         if (--rec->unk_18 == 0) {
             func_8003D5C8();
@@ -494,7 +494,7 @@ void func_8003C2D4(u16 k, UnkStructB2 *rec) {
         rec->unk_04 = 2;
         if ((u16) (k - 1) < 0x4A) {
             t = (s32 *) ((k << 2) + (u32) D_800830BC);
-            func_8003CEA0(*t, rec->unk_00);
+            func_8003CEA0(*t, rec->obj);
         }
     }
 }
@@ -575,13 +575,13 @@ void func_8003C3B0(void) {
                         if (obj == NULL) {
                             goto done;
                         }
-                        rec->unk_00 = obj;
+                        rec->obj = obj;
                         if (p->unk_04 != 2) {
                             obj->flags &= ~0x10;
                         }
                         obj->owner.p = rec;
                         rec->unk_1C = item->unk_0C;
-                        rec->unk_06 = item->unk_04;
+                        rec->kind = item->unk_04;
                         rec->unk_0A = item->unk_06;
                         rec->unk_0C = item->unk_08;
                         rec->unk_08 = item->unk_0A;
@@ -708,7 +708,7 @@ void func_8003C894(void **arg0) {
 void func_8003C8D4(Pickup *arg0) {
     void *temp_a0;
 
-    temp_a0 = arg0->unk_00;
+    temp_a0 = arg0->obj;
     if (temp_a0 != NULL) {
         if (arg0->unk_1A != 0) {
             func_8003C934(arg0);
@@ -728,7 +728,7 @@ void func_8003C934(Pickup *rec) {
 
     saved = D_800AA248.cur_obj;
     rec->unk_04 = 8;
-    D_800AA248.cur_obj = rec->unk_00;
+    D_800AA248.cur_obj = rec->obj;
     func_8003C9E8(rec);
     step = D_8007DDD4;
     k = rec->unk_1A;
@@ -758,7 +758,7 @@ void func_8003CA28(Pickup *arg0) {
     Monster *temp_v1;
 
     temp_v1 = arg0->unk_14;
-    if ((temp_v1 != NULL) && ((u32) (arg0->unk_06 - 0x45) < 2U)) {
+    if ((temp_v1 != NULL) && ((u32) (arg0->kind - 0x45) < 2U)) {
         func_8003CADC(temp_v1);
     }
 }
@@ -769,7 +769,7 @@ void func_8003CA70(Pickup *rec) {
 
     a = rec->unk_14;
     if (a != NULL) {
-        kind = rec->unk_06;
+        kind = rec->kind;
         if (kind >= 0x31) {
             if (kind < 0x34) {
                 func_8003CB68(0x1E0, a);
@@ -873,7 +873,7 @@ s32 func_8003CBE0(Pickup *rec, Monster *a) {
     default:
         goto fail;
     }
-    if (kind != rec->unk_06) {
+    if (kind != rec->kind) {
 fail:
         return 0;
     }

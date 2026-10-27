@@ -81,7 +81,7 @@ typedef struct Unk1F9A30 {
     s32 unk_0;
 } Unk1F9A30;
 
-/* Where a behaviour slot's object starts (func_800210C8, the table D_8007B358 indexed by Ai.start): a position
+/* Where an Npc's object starts (func_800210C8, the table D_8007B358 indexed by Npc.start): a position
  * relative to the camera, a speed, and flags for the object. */
 typedef struct Unk7B358 {
     s32 x;
@@ -98,12 +98,12 @@ typedef struct Glyph {
     s16 unk_6;
 } Glyph;
 
-/* A step of an Ai's flight towards its target (func_80022EC0): the speed and the animation for one of 8x8
+/* A step of an Npc's flight towards its target (func_80022EC0): the speed and the animation for one of 8x8
  * direction classes (the distances halved until both are below 8). */
-typedef struct AiStep {
+typedef struct NpcStep {
     s32 vel_x;
     s32 vel_y;
     Anim *anim;
-} AiStep;
+} NpcStep;
 
 #endif /* MAIN_H */
