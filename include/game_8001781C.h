@@ -19,19 +19,19 @@ typedef struct SpriteSlots {
     u8 pad_4[0x8];
     GameObject *unk_C;
     u8 pad_10[0x4];
-    struct Unk22D58 *unk_14;
+    struct Ai *unk_14;
     s32 unk_18;
     GameObject *unk_1C;
     u8 pad_20[0x4];
     GameObject *unk_24;
     u8 pad_28[0x4];
-    struct Unk22D58 *unk_2C;
+    struct Ai *unk_2C;
     s32 unk_30;
     GameObject *unk_34;
     u8 pad_38[0x4];
     GameObject *unk_3C;
     u8 pad_40[0x4];
-    struct Unk22D58 *unk_44;
+    struct Ai *unk_44;
     s32 unk_48;
     GameObject *unk_4C;
 } SpriteSlots;
@@ -219,34 +219,6 @@ typedef struct Unk7BD78 {
 
 /* An animation (the tables in .data from 0x8008AE40 on); opaque here. */
 typedef struct Anim Anim;
-
-/* A monster's behaviour state (the handlers func_80022490 ... func_80023080 run on the current sprite,
- * D_800AA268): its kind at unk_6, the state index at unk_A, "the state is new" at unk_C. */
-typedef struct Unk22D58 {
-    GameObject *unk_0;
-    u8 pad_4[0x2];
-    u16 unk_6;
-    s16 unk_8;
-    u16 unk_A;
-    u16 unk_C;
-    u8 pad_E[0x2];
-    struct Monster *unk_10;
-    u8 pad_14[0x8];
-    s16 unk_1C;
-    u8 pad_1E[0x4];
-    s16 unk_22;
-    s16 unk_24;
-    s16 unk_26;
-    s16 unk_28;
-    s16 unk_2A;
-    u8 pad_2C[0x4];
-    s32 unk_30;
-    s32 unk_34;
-    u16 unk_38;
-    u16 unk_3A;
-    u16 unk_3C;
-    u8 pad_3E[0x2];
-} Unk22D58;
 
 /* A glyph of the font (func_8001B128 maps a packed glyph index to one): its size at unk_4/unk_6. */
 typedef struct Glyph {

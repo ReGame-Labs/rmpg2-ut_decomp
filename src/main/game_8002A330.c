@@ -544,7 +544,7 @@ void func_8002CBF4(Monster *m) {
 #ifdef NON_MATCHING
 /* 98.2 %: the original reloads r->unk_06 for the argument of func_8003089C where this reuses the compare's
  * load, and keeps rec in s1 and r in s2 (swapped here). */
-UnkStruct2 *func_8002CD24(u16 idx, UnkStruct1 *a, UnkStruct2 *rec) {
+UnkStruct2 *func_8002CD24(u16 idx, Monster *a, UnkStruct2 *rec) {
     GameObject *q = NULL;
     UnkStruct5 *r;
     u16 k;
@@ -651,7 +651,7 @@ void func_8002D144(s32 arg0, UnkStruct1 *arg1) {
     }
 }
 
-void func_8002D1F4(s32 arg0, UnkStruct1 *arg1) {
+void func_8002D1F4(s32 arg0, UnkStruct2 *arg1) {
     if (arg1->unk_06 == 0) {
         func_8002D370(arg0, arg1, arg1->unk_08);
     }
@@ -682,7 +682,7 @@ s32 func_8002D2CC(s32 arg0, UnkStruct1 *arg1) {
     return arg1->unk_76 != 0;
 }
 
-void func_8002D370(s32 a, UnkStruct1 *b, UnkStruct1 *c) {
+void func_8002D370(s32 a, UnkStruct2 *b, UnkStruct1 *c) {
     u16 i = 0;
     u16 n = func_8002F558(c);
 
@@ -843,12 +843,12 @@ void func_8002DBF4(u16 which, s32 n, UnkStruct1 *a, UnkStruct2 *rec) {
                         }
                     }
                     func_80030698(m, a, rec);
-                    func_8002FA20((s32) a, (UnkStruct1 *) rec);
+                    func_8002FA20((s32) a, (UnkStruct5 *) rec);
                 }
             } else if (r == 2) {
                 func_8002DE08(which, m, (s32) a, (UnkStruct5 *) rec);
                 func_80030698(m, a, rec);
-                func_8002FA20((s32) a, (UnkStruct1 *) rec);
+                func_8002FA20((s32) a, (UnkStruct5 *) rec);
             }
         }
     }
@@ -1182,14 +1182,14 @@ void func_8002ED90(UnkStruct1 *arg0) {
 }
 
 void func_8002EE14(s16 dy, UnkStruct5 *s) {
-    UnkStruct1 *b = s->unk_00;
+    GameObject *b = s->unk_00;
     UnkStruct12 *g;
     GameObject *r;
     GameObject **pp;
     UnkStruct14 *q;
 
     if (b != NULL) {
-        b->unk_18.u.hi += dy;
+        b->pos_y.u.hi += dy;
         r = s->unk_0C.unk_00;
         g = &s->unk_0C;
         if (r != NULL) {
@@ -1406,9 +1406,9 @@ void func_8002F9F4(UnkStruct2 *arg0) {
     }
 }
 
-void func_8002FA20(s32 arg0, UnkStruct1 *arg1) {
-    if ((arg1->unk_06 == 0) && (arg1->unk_12 >= 5U) && (arg1->unk_2A >= 5U) &&
-        ((arg1->unk_08->unk_02 == 2) || (arg1->unk_42 >= 5U))) {
+void func_8002FA20(s32 arg0, UnkStruct5 *arg1) {
+    if ((arg1->unk_06 == 0) && (arg1->unk_0C.unk_06 >= 5U) && (arg1->unk_24.unk_06 >= 5U) &&
+        ((arg1->unk_08->unk_02 == 2) || (arg1->unk_3C.unk_06 >= 5U))) {
         func_8002FDC0();
     }
 }
@@ -1700,12 +1700,12 @@ void func_800308EC(s16 arg0, UnkStruct12 *arg1) {
 
 void func_800309AC(s16 arg0, UnkStruct5 *arg1) {
     UnkStruct3 *temp_a0;
-    UnkStruct1 *temp_v1;
-    UnkStruct1 *temp_v1_2;
+    GameObject *temp_v1;
+    GameObject *temp_v1_2;
 
     temp_v1 = arg1->unk_00;
     if (temp_v1 != NULL) {
-        temp_v1->unk_16 = (u16) (temp_v1->unk_16 + arg0);
+        temp_v1->pos_x.u.hi = (u16) (temp_v1->pos_x.u.hi + arg0);
         func_800308EC(arg0, &arg1->unk_0C);
         func_800308EC(arg0, &arg1->unk_24);
         func_800308EC(arg0, &arg1->unk_3C);
@@ -1713,7 +1713,7 @@ void func_800309AC(s16 arg0, UnkStruct5 *arg1) {
         if ((temp_a0 != NULL) && (temp_a0->unk_0A == arg1->unk_04)) {
             temp_v1_2 = temp_a0->unk_00;
             if (temp_v1_2 != NULL) {
-                temp_v1_2->unk_16 = (u16) (temp_v1_2->unk_16 + arg0);
+                temp_v1_2->pos_x.u.hi = (u16) (temp_v1_2->pos_x.u.hi + arg0);
             }
         }
     }
@@ -1924,7 +1924,7 @@ void func_80031224(void) {
     UnkStruct1 *temp_v0;
 
     func_8001F724(5);
-    temp_v0 = func_8003D1F8((D_800AA248.cur_obj->owner.item)->unk_10);
+    temp_v0 = func_8003D1F8(D_800AA248.cur_obj->owner.ai->unk_10.p);
     if (((u16) temp_v0->unk_14) < 3U) {
         temp_v0->unk_14 = 0xCU;
     }
@@ -2896,11 +2896,11 @@ void func_80034360(void) {
 }
 
 void func_8003438C(void) {
-    (D_800AA248.cur_obj->owner.item)->unk_36 = 1;
+    D_800AA248.cur_obj->owner.ai->unk_34.s.hi = 1;
 }
 
 void func_800343A8(void) {
-    (D_800AA248.cur_obj->owner.item)->unk_36 = 0;
+    D_800AA248.cur_obj->owner.ai->unk_34.s.hi = 0;
 }
 
 void func_800343C0(void) {

@@ -643,7 +643,7 @@ extern u8 D_8007C95C[];
 extern s32 *D_801D85A4;
 void func_8002DFA8(s32, UnkStruct1 *);
 void func_8002E148(s32, UnkStruct1 *);
-void func_8002D370(s32, UnkStruct1 *, UnkStruct1 *);
+void func_8002D370(s32, UnkStruct2 *, UnkStruct1 *);
 void func_8002FDC0();
 void func_8002E440();
 void func_8002FB6C(s32, UnkStruct2 *, UnkStruct1 *);
@@ -700,7 +700,7 @@ extern u16 D_8007CFF8[];   /* a u16 table after a header word (func_8003089C) */
 void func_800303DC(UnkStruct1 *, GameObject *);
 void func_80030D74(void);
 void func_8002CFAC(Monster *, UnkStruct1 *);
-UnkStruct2 *func_8002CD24(u16, UnkStruct1 *, UnkStruct2 *);
+UnkStruct2 *func_8002CD24(u16, Monster *, UnkStruct2 *);
 void func_80031280(s32, UnkStruct1 *);
 void func_8002CE74(u16, UnkStruct1 *, UnkStruct2 *);
 void func_8003111C(s32, Monster *);
@@ -770,7 +770,7 @@ extern s16 D_801F9A38;
 extern s16 D_801FA960;
 extern s32 D_801FA9A4;
 extern s32 D_801FB41C;
-void func_8002FA20(s32, UnkStruct1 *);   /* its second argument is the record (the views to be unified) */
+void func_8002FA20(s32, UnkStruct5 *);
 typedef struct UnkStruct17 {  /* provisional: a building's part (what a building's record at 0x18 points to; func_8004F65C) */
     u8 pad_00[0x8];
     u16 unk_08;     /* hit points? zero: destroyed */

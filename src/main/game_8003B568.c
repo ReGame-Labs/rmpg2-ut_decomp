@@ -222,11 +222,11 @@ void func_8003C080(void) {
 }
 
 void func_8003C0AC(void) {
-    (D_800AA248.cur_obj->owner.item)->unk_0C = 1;
+    D_800AA248.cur_obj->owner.ai->unk_0C = 1;
 }
 
 void func_8003C0C8(void) {
-    (D_800AA248.cur_obj->owner.item)->unk_1C = 0;
+    D_800AA248.cur_obj->owner.ai->unk_1C.s = 0;
 }
 
 void func_8003C0E0(void) {
@@ -400,7 +400,7 @@ void func_8003C9E8(UnkStructB1 *arg0) {
 }
 
 void func_8003CA28(UnkStructB1 *arg0) {
-    UnkStruct1 *temp_v1;
+    Monster *temp_v1;
 
     temp_v1 = arg0->unk_14;
     if ((temp_v1 != NULL) && ((u32) (arg0->unk_06 - 0x45) < 2U)) {
@@ -409,7 +409,7 @@ void func_8003CA28(UnkStructB1 *arg0) {
 }
 
 void func_8003CA70(UnkStructB1 *rec) {
-    UnkStruct1 *a;
+    Monster *a;
     s32 kind;
 
     a = rec->unk_14;
@@ -430,7 +430,7 @@ void func_8003CA70(UnkStructB1 *rec) {
 
 
 
-void func_8003CADC(UnkStruct1 *arg0) {
+void func_8003CADC(Monster *arg0) {
     s16 var_v1;
 
     func_8001F724(3);
@@ -440,17 +440,17 @@ void func_8003CADC(UnkStruct1 *arg0) {
         arg0->unk_186 = 0U;
     }
     arg0->unk_140 = var_v1;
-    arg0->unk_56 = 1;
+    arg0->unk_056 = 1;
     func_8005DD48(arg0);
 }
 
-void func_8003CB30(UnkStruct1 *arg0) {
+void func_8003CB30(Monster *arg0) {
     func_8001F724(3);
     arg0->unk_144 = 0x294;
-    arg0->unk_56 = 3;
+    arg0->unk_056 = 3;
 }
 
-void func_8003CB68(s16 n, UnkStruct1 *a) {
+void func_8003CB68(s16 n, Monster *a) {
     s16 v;
 
     v = n;
@@ -463,7 +463,7 @@ void func_8003CB68(s16 n, UnkStruct1 *a) {
         }
     }
     a->unk_142 = v;
-    a->unk_56 = 2;
+    a->unk_056 = 2;
     func_8005DD48(a);
 }
 
@@ -487,13 +487,13 @@ void func_8003CB68(s16 n, UnkStruct1 *a) {
 
 
 
-s32 func_8003CBE0(UnkStructB1 *rec, UnkStruct1 *a) {
+s32 func_8003CBE0(UnkStructB1 *rec, Monster *a) {
     s32 kind;
 
     if (a == NULL) {
         goto fail;
     }
-    switch (a->unk_00) {
+    switch (a->id) {
     case 1:
         kind = 4;
         break;
@@ -524,7 +524,7 @@ fail:
     }
     rec->unk_1A = 0xB;
     a->unk_146 = 0x5A;
-    a->unk_56 = 7;
+    a->unk_056 = 7;
     return 1;
 }
 

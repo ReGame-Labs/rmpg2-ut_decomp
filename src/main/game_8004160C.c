@@ -161,7 +161,7 @@ void func_80041684(Ai *ai) {
 void func_800416AC(const AiHandler *handlers, Ai *ai) {
     s16 hit;
 
-    switch (ai->unk_8) {
+    switch (ai->action) {
     case 0xA:
         func_80041928(handlers, ai);
         return;
@@ -206,7 +206,7 @@ void func_800416AC(const AiHandler *handlers, Ai *ai) {
             return;
         }
         func_80042238(ai);
-        switch (ai->unk_8) {
+        switch (ai->action) {
         case 0x15:
             func_80041988(handlers, ai);
             return;
@@ -227,49 +227,49 @@ INCLUDE_ASM("asm/main/nonmatchings/game_8004160C", func_800416AC);
 #endif
 
 void func_80041928(const AiHandler *handlers, Ai *ai) {
-    if (ai->unk_A != 0) {
-        if (ai->unk_C == 1) {
-            ai->unk_A = 4;
-            ai->unk_C = 0;
-            ai->unk_8 = 0x15;
+    if (ai->state != 0) {
+        if (ai->unk_0C == 1) {
+            ai->state = 4;
+            ai->unk_0C = 0;
+            ai->action = 0x15;
             func_80041A70(handlers, ai);
         }
     } else {
-        ai->unk_C = 0;
-        ai->unk_A = 1;
+        ai->unk_0C = 0;
+        ai->state = 1;
         func_80041A70(handlers, ai);
     }
 }
 
 void func_80041988(const AiHandler *handlers, Ai *ai) {
-    if (ai->unk_C == 1) {
-        ai->unk_A = 5;
-        ai->unk_C = 0;
-        ai->unk_8 = 0x16;
+    if (ai->unk_0C == 1) {
+        ai->state = 5;
+        ai->unk_0C = 0;
+        ai->action = 0x16;
         func_80041A70(handlers, ai);
     }
 }
 
 void func_800419C4(const AiHandler *handlers, Ai *ai) {
-    if (ai->unk_C == 1) {
-        ai->unk_A = 6;
-        ai->unk_C = 0;
-        ai->unk_8 = 0x17;
+    if (ai->unk_0C == 1) {
+        ai->state = 6;
+        ai->unk_0C = 0;
+        ai->action = 0x17;
         func_80041A70(handlers, ai);
     }
 }
 
 void func_80041A00(const AiHandler *handlers, Ai *ai) {
-    if (ai->unk_C == 1) {
-        ai->unk_A = 3;
-        ai->unk_C = 0;
-        ai->unk_8 = 0xB;
+    if (ai->unk_0C == 1) {
+        ai->state = 3;
+        ai->unk_0C = 0;
+        ai->action = 0xB;
         func_80041A70(handlers, ai);
     }
 }
 
 void func_80041A3C(const AiHandler *handlers, Ai *ai) {
-    if (ai->unk_C == 1) {
+    if (ai->unk_0C == 1) {
         func_8003DB74(ai);
     }
 }
@@ -278,7 +278,7 @@ void func_80041A70(const AiHandler *handlers, Ai *ai) {
     const AiHandler *handler;
 
     handler = handlers;
-    handler += ai->unk_A;
+    handler += ai->state;
     (*handler)(ai);
 }
 
@@ -292,14 +292,14 @@ void func_80041AD0(s16 hit, const AiHandler *handlers, Ai *ai) {
     s16 action;
 
     if (hit != -1) {
-        ai->unk_A = 9;
+        ai->state = 9;
         action = 0x32;
     } else {
-        ai->unk_A = 0xA;
+        ai->state = 0xA;
         action = 0x33;
     }
-    ai->unk_C = 0;
-    ai->unk_8 = action;
+    ai->unk_0C = 0;
+    ai->action = action;
     func_80041A70(handlers, ai);
 }
 #else
@@ -311,20 +311,20 @@ INCLUDE_ASM("asm/main/nonmatchings/game_8004160C", func_80041AD0);
 void func_80041B2C(const AiHandler *handlers, Ai *ai) {
     s32 speed;
 
-    ai->unk_36 = 0;
-    if (ai->unk_C == 1) {
-        ai->unk_C = 0;
+    ai->unk_34.s.hi = 0;
+    if (ai->unk_0C == 1) {
+        ai->unk_0C = 0;
         if (D_800AA248.cur_obj->pos_y.w <= 0x5F0000) {
             speed = 0x30000;
-            ai->unk_A = 0xC;
-            ai->unk_8 = 0x3C;
+            ai->state = 0xC;
+            ai->action = 0x3C;
         } else {
             speed = 0x2C000;
-            ai->unk_A = 0xB;
-            ai->unk_8 = 0x3B;
+            ai->state = 0xB;
+            ai->action = 0x3B;
         }
         ai->unk_24 = 1;
-        if ((u16)(ai->unk_6 - 0x17) < 2) {
+        if ((u16)(ai->kind - 0x17) < 2) {
             speed = 0x1E000;
         }
         D_800AA248.cur_obj->vel_y.w = speed;
@@ -350,14 +350,14 @@ void func_80041C0C(const AiHandler *handlers, Ai *ai) {
     }
     D_800AA248.cur_obj->pos_y.w += D_800AA248.cur_obj->vel_y.w;
     if (D_800AA248.cur_obj->pos_y.w >= limit) {
-        if (ai->unk_28 != NULL && ai->unk_28->unk_8 != NULL) {
+        if (ai->unk_28.link != NULL && ai->unk_28.link->unk_8 != NULL) {
             D_800AA248.cur_obj->pos_y.w = limit;
             D_800AA248.cur_obj->unk_80 = ((s16 *)&D_800AA248.cur_obj->pos_y.w)[1] + 0xF23;
             D_800AA248.cur_obj->vel_y.w = 0;
-            ai->unk_C = 0;
-            if (ai->unk_28->unk_8->unk_14 == 4) {
-                ai->unk_A = 0x15;
-                ai->unk_8 = 0x46;
+            ai->unk_0C = 0;
+            if (ai->unk_28.link->unk_8->unk_14 == 4) {
+                ai->state = 0x15;
+                ai->action = 0x46;
                 if (D_800AA248.cur_obj->flags & 0x10) {
                     D_800AA248.cur_obj->vel_x.w = 0xC000;
                     D_800AA248.cur_obj->unk_84 = 0x400;
@@ -366,12 +366,12 @@ void func_80041C0C(const AiHandler *handlers, Ai *ai) {
                     D_800AA248.cur_obj->unk_84 = -0x400;
                 }
             } else {
-                if (ai->unk_A != 0xB) {
-                    ai->unk_A = 0xD;
-                    ai->unk_8 = 0x36;
+                if (ai->state != 0xB) {
+                    ai->state = 0xD;
+                    ai->action = 0x36;
                 } else {
-                    ai->unk_A = 0xE;
-                    ai->unk_8 = 0x37;
+                    ai->state = 0xE;
+                    ai->action = 0x37;
                 }
             }
         }
@@ -380,10 +380,10 @@ void func_80041C0C(const AiHandler *handlers, Ai *ai) {
 }
 
 void func_80041DA8(const AiHandler *handlers, Ai *ai) {
-    if (ai->unk_C == 1) {
-        ai->unk_A = 0xF;
-        ai->unk_C = 0;
-        ai->unk_8 = 0x1E;
+    if (ai->unk_0C == 1) {
+        ai->state = 0xF;
+        ai->unk_0C = 0;
+        ai->action = 0x1E;
         func_80041A70(handlers, ai);
     }
 }
@@ -393,10 +393,10 @@ void func_80041DA8(const AiHandler *handlers, Ai *ai) {
 void func_80041DE4(const AiHandler *handlers, Ai *ai) {
     s32 vel;
 
-    ai->unk_A = 0x10;
-    ai->unk_C = 0;
-    ai->unk_8 = 0x46;
-    if ((u16)(ai->unk_6 - 0x17) >= 2) {
+    ai->state = 0x10;
+    ai->unk_0C = 0;
+    ai->action = 0x46;
+    if ((u16)(ai->kind - 0x17) >= 2) {
         vel = 0x20000;
         if (!(D_800AA248.cur_obj->flags & 0x10)) {
             vel = -0x30000;
@@ -433,7 +433,7 @@ void func_80041E54(const AiHandler *handlers, Ai *ai) {
         if (D_800AA248.cur_obj->flags & 0x10) {
             kind = 2;
         }
-        if (func_8004B6C4(ai->unk_0, 0x64, kind) == 1) {
+        if (func_8004B6C4(ai->obj, 0x64, kind) == 1) {
             func_8003DAA0(ai);
         }
     } else {
@@ -452,7 +452,7 @@ void func_80041E54(const AiHandler *handlers, Ai *ai) {
             D_800AA248.cur_obj->vel_x.w = 0;
             D_800AA248.cur_obj->vel_y.w = 0;
             D_800AA248.cur_obj->unk_88 = 0;
-            ai->unk_8 = 5;
+            ai->action = 5;
         }
     }
 }
@@ -476,11 +476,11 @@ void func_80042008(const AiHandler *handlers, Ai *ai) {
         D_800AA248.cur_obj->vel_x.w = 0;
         D_800AA248.cur_obj->vel_y.w = 0;
         D_800AA248.cur_obj->unk_88 = 0;
-        ai->unk_8 = 0x4E;
+        ai->action = 0x4E;
         return;
     }
-    if (ai->unk_A != 0x14) {
-        ai->unk_A = 0x14;
+    if (ai->state != 0x14) {
+        ai->state = 0x14;
         func_80041A70(handlers, ai);
     }
 }
@@ -489,19 +489,19 @@ INCLUDE_ASM("asm/main/nonmatchings/game_8004160C", func_80042008);
 #endif
 
 void func_800420F8(const AiHandler *handlers, Ai *ai) {
-    if (ai->unk_C == 1) {
-        ai->unk_A = 0x12;
-        ai->unk_C = 0;
-        ai->unk_8 = 0x4C;
+    if (ai->unk_0C == 1) {
+        ai->state = 0x12;
+        ai->unk_0C = 0;
+        ai->action = 0x4C;
         func_80041A70(handlers, ai);
     }
 }
 
 void func_80042134(const AiHandler *handlers, Ai *ai) {
-    if (ai->unk_C == 1) {
-        ai->unk_A = 0x13;
-        ai->unk_C = 0;
-        ai->unk_8 = 0x4D;
+    if (ai->unk_0C == 1) {
+        ai->state = 0x13;
+        ai->unk_0C = 0;
+        ai->action = 0x4D;
         func_80041A70(handlers, ai);
     }
 }
@@ -537,7 +537,7 @@ void func_80042238(Ai *ai) {
     s32 dist;
 
     if (ai->unk_14 != NULL) {
-        target = ai->unk_14->unk_68;
+        target = ai->unk_14->obj;
         if (target == NULL) {
             ai->unk_14 = NULL;
             return;

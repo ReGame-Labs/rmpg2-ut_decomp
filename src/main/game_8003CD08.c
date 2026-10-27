@@ -93,9 +93,9 @@ void func_8003F150(void);
 void func_80030338(GameObject *mover);
 ObjectDef *func_8001D110(void);
 GameObject *func_8001DCB4(void);       /* spawns D_800AA248.unk_3C */
-void func_8004003C(s32 arg0, MoverLink *link);
+void func_8004003C(s32 arg0, Ai *link);
 s16 func_80053AC4(s16 x, s16 y, s32 w, s32 h, Monster *player);
-void func_8003CCC0(MoverLink *link);
+void func_8003CCC0(Ai *link);
 void func_80040B94(Actor *actor);
 void func_800634D4(Monster *player, s32 arg1);
 
@@ -136,8 +136,6 @@ extern u16 D_801D37B8;
 extern u16 D_801D87B4;
 extern EffectDef D_8009556C;
 extern s16 D_801D8728;
-extern Ai D_801D85C8[];
-extern u16 D_801D870C;
 extern s16 D_801D8718;
 extern s16 D_801D871C;
 extern s32 D_801D8864;
@@ -224,11 +222,11 @@ void func_8003CEA0(Anim *anim, GameObject *mover) {
 
     if (mover->unk_48 != anim) {
         if (*(u16 *)&mover->unk_80 == 0) {
-            mover->unk_80 = ((AnimFrame *)func_8003D1F8(mover->owner.link->unk_10))->unk_8 - 1;
+            mover->unk_80 = ((AnimFrame *)func_8003D1F8(mover->owner.ai->unk_10.actor))->unk_8 - 1;
         }
         func_80024964(0, mover);
         func_8001E698(mover, anim);
-        actor = mover->owner.link->unk_10;
+        actor = mover->owner.ai->unk_10.actor;
         if (actor->unk_4 == 1) {
             o = *(GameObject **)((u8 *)actor - 0xC);
             ((u16 *)&mover->pos_x.w)[1] = ((u16 *)&o->pos_x.w)[1] + o->frame->unk_10;
@@ -278,13 +276,13 @@ void func_8003D0D4(Actor *actor) {
 }
 
 void func_8003D11C(Ai *ai) {
-    s32 k = ai->unk_6;
+    s32 k = ai->kind;
 
     if (k < 0x3B) {
         if (k >= 0x36) {
-            if (ai->unk_E != 0) {
+            if (ai->unk_0E != 0) {
                 ai->unk_18 = 0x28;
-                ai->unk_E = 0;
+                ai->unk_0E = 0;
             }
         }
     }
@@ -419,32 +417,32 @@ void func_8003D490(Actor *actor) {
 }
 
 void func_8003D4AC(Ai *ai) {
-    ai->unk_8 = 6;
+    ai->action = 6;
     D_800AA248.cur_obj->unk_80 = 0xF00;
-    if (ai->unk_10->unk_4 == 2) {
+    if (ai->unk_10.order->unk_4 == 2) {
         D_800AA248.cur_obj->flags |= 0x10;
     }
     func_8003D58C(&D_80094350);
 }
 
 void func_8003D51C(Ai *ai) {
-    switch ((u16)ai->unk_8) {
+    switch ((u16)ai->action) {
     case 1:
-        ai->unk_8 = 0;
+        ai->action = 0;
         break;
     case 3:
     case 6:
-        ai->unk_8 = 2;
+        ai->action = 2;
         break;
     case 9:
-        ai->unk_8 = 6;
+        ai->action = 6;
         break;
     case 8:
-        ai->unk_8 = 7;
+        ai->action = 7;
         break;
     case 5:
     case 10:
-        ai->unk_8 = 5;
+        ai->action = 5;
         break;
     }
 }
@@ -456,7 +454,7 @@ void func_8003D58C(Anim *anim) {
 }
 
 void func_8003D5C8(void) {
-    func_8003CCC0(D_800AA248.cur_obj->owner.link);
+    func_8003CCC0(D_800AA248.cur_obj->owner.ai);
     func_8001E4B0(D_800AA248.cur_obj);
 }
 
@@ -511,32 +509,32 @@ void func_8003D920(Ai *ai) {
         func_8003DAA0(ai);
         return;
     }
-    if (ai->unk_C == 1) {
-        ai->unk_A = 3;
-        ai->unk_C = 0;
-        ai->unk_8 = 4;
+    if (ai->unk_0C == 1) {
+        ai->state = 3;
+        ai->unk_0C = 0;
+        ai->action = 4;
         func_8003DF34(ai);
     }
 }
 
 void func_8003D988(Ai *ai) {
-    if (ai->unk_C != 0) {
+    if (ai->unk_0C != 0) {
         func_8003DAA0(ai);
         return;
     }
-    if (ai->unk_A != 4) {
-        ai->unk_A = 4;
+    if (ai->state != 4) {
+        ai->state = 4;
         func_8003DF34(ai);
     }
 }
 
 void func_8003D9D8(Ai *ai) {
-    if (ai->unk_C != 0) {
+    if (ai->unk_0C != 0) {
         func_8003DAA0(ai);
         return;
     }
-    if (ai->unk_A != 5) {
-        ai->unk_A = 5;
+    if (ai->state != 5) {
+        ai->state = 5;
         func_8003DF34(ai);
         D_800AA248.cur_obj->unk_80 = 0x390;
         func_8001E39C(D_800AA248.cur_obj);
@@ -545,7 +543,7 @@ void func_8003D9D8(Ai *ai) {
 }
 
 void func_8003DA58(Ai *ai) {
-    if (func_8003DCC8(ai) != 0 || ai->unk_C == 1) {
+    if (func_8003DCC8(ai) != 0 || ai->unk_0C == 1) {
         func_8003DAA0(ai);
     }
 }
@@ -560,15 +558,15 @@ void func_8003DACC(Ai *ai) {
         func_8003DAA0(ai);
         return;
     }
-    ai->unk_C = 1;
+    ai->unk_0C = 1;
     ai->unk_22 = 1;
-    ai->unk_A = 7;
-    ai->unk_8 = 0xF1;
+    ai->state = 7;
+    ai->action = 0xF1;
     func_8003DF34(ai);
 }
 
 void func_8003DB2C(Ai *ai) {
-    if (func_8003DCC8(ai) != 0 || ai->unk_C != 0) {
+    if (func_8003DCC8(ai) != 0 || ai->unk_0C != 0) {
         func_8003DAA0(ai);
     }
 }
@@ -578,9 +576,9 @@ void func_8003DB74(Ai *ai) {
         func_8003DAA0(ai);
         return;
     }
-    ai->unk_A = 2;
-    ai->unk_C = 0;
-    ai->unk_8 = 3;
+    ai->state = 2;
+    ai->unk_0C = 0;
+    ai->action = 3;
     func_8003DF34(ai);
 }
 
@@ -589,8 +587,8 @@ void func_8003DBCC(Ai *ai) {
         func_8003DAA0(ai);
         return;
     }
-    if (ai->unk_C == 1) {
-        ai->unk_1A = ai->unk_10->unk_6;
+    if (ai->unk_0C == 1) {
+        ai->unk_1A = ai->unk_10.order->unk_6;
         func_8003E630(ai);
         func_8003DD44(ai);
     }
@@ -602,14 +600,14 @@ s32 func_8003DC3C(Ai *ai) {
     if (func_8005F208() == 3) {
         return 1;
     }
-    k = ai->unk_1C->unk_14;
+    k = ai->unk_1C.order->unk_14;
     if (k != 0 && k != 2 && k != 3) {
         return -1;
     }
-    if (ai->unk_1A != ai->unk_10->unk_6) {
+    if (ai->unk_1A != ai->unk_10.order->unk_6) {
         return 1;
     }
-    if (ai->unk_28->unk_6 != 2) {
+    if (ai->unk_28.link->unk_6 != 2) {
         return 0;
     }
     return -1;
@@ -619,9 +617,9 @@ s16 func_8003DCC8(Ai *ai) {
     AiOrder *order;
     u16 kind;
 
-    order = ai->unk_1C;
-    if (order != NULL && ai->unk_28->unk_6 < 2) {
-        if (ai->unk_10 != NULL && ai->unk_10->unk_C != 0) {
+    order = ai->unk_1C.order;
+    if (order != NULL && ai->unk_28.link->unk_6 < 2) {
+        if (ai->unk_10.order != NULL && ai->unk_10.order->unk_C != 0) {
             return -1;
         }
         kind = order->unk_14;
@@ -633,17 +631,17 @@ s16 func_8003DCC8(Ai *ai) {
 }
 
 void func_8003DD44(Ai *ai) {
-    if (ai->unk_32 == 1) {
-        ai->unk_6 = ai->unk_34;
+    if (ai->unk_30.u.hi == 1) {
+        ai->kind = ai->unk_34.u.lo;
     }
-    ai->unk_A = 0;
-    ai->unk_8 = 0xA;
+    ai->state = 0;
+    ai->action = 0xA;
 }
 
 INCLUDE_ASM("asm/main/nonmatchings/game_8003CD08", func_8003DD70);
 
 void func_8003DF34(Ai *ai) {
-    D_8007DEA0[ai->unk_A](ai);
+    D_8007DEA0[ai->state](ai);
 }
 
 void func_8003DF70(void) {
@@ -692,7 +690,7 @@ void func_8003E630(Ai *ai) {
     u16 max = 8;
 
     n = 8;
-    i = ai->unk_4 + 1;
+    i = ai->unk_04 + 1;
     do {
         if (i >= max) {
             i = 1;
@@ -703,8 +701,8 @@ void func_8003E630(Ai *ai) {
         }
         i++;
     } while (--n != 0);
-    ai->unk_14 = (AiTarget *)player;
-    ai->unk_4 = i;
+    ai->unk_14 = (Monster *)player;
+    ai->unk_04 = i;
 }
 #else
 INCLUDE_ASM("asm/main/nonmatchings/game_8003CD08", func_8003E630);
@@ -715,7 +713,7 @@ void func_8003E6A4(Ai *ai) {
     GameObject *mover;
     u16 kind;
 
-    order = ai->unk_10;
+    order = ai->unk_10.order;
     if (order != NULL) {
         order->unk_8 = 0;
         kind = ai->unk_22;
@@ -723,21 +721,21 @@ void func_8003E6A4(Ai *ai) {
             order->unk_14 = kind;
         }
     }
-    ai->unk_32++;
-    mover = ai->unk_0;
+    ai->unk_30.u.hi++;
+    mover = ai->obj;
     ai->unk_22 = 0;
-    ai->unk_36 = 0;
-    ai->unk_A = 0;
-    ai->unk_10 = NULL;
-    ai->unk_1C = 0;
+    ai->unk_34.s.hi = 0;
+    ai->state = 0;
+    ai->unk_10.order = NULL;
+    ai->unk_1C.order = 0;
     ai->unk_14 = NULL;
     ai->unk_38 = 0;
-    ai->unk_C = 0;
+    ai->unk_0C = 0;
     ((s16 *)&mover->pos_x.w)[1] = -0x190;
     ((s16 *)&mover->pos_y.w)[1] = -0x190;
     mover->vel_x.w = 0;
     mover->vel_y.w = 0;
-    ai->unk_8 = 1;
+    ai->action = 1;
     if (func_8005F208() == 3) {
         ai->unk_18 = 0;
         ai->unk_2E = 0;
@@ -751,8 +749,8 @@ void func_8003E764(Ai *ai) {
 }
 
 void func_8003E788(Ai *ai) {
-    ai->unk_10->unk_8 = 0;
-    ai->unk_10 = NULL;
+    ai->unk_10.order->unk_8 = 0;
+    ai->unk_10.order = NULL;
 }
 
 #ifdef NON_MATCHING
@@ -827,7 +825,7 @@ void func_8003EA4C(void) {
 void func_8003EAB8(Ai *ai) {
     Anim *anim;
 
-    if (ai->unk_C == 0) {
+    if (ai->unk_0C == 0) {
         if (func_8001EB10(0x8000, 0) & 1) {
             anim = &D_8008AB4C;
         } else {
@@ -842,7 +840,7 @@ void func_8003EB14(void) {
 }
 
 void func_8003EB40(void) {
-    D_800AA248.cur_obj->owner.link->unk_C = 1;
+    D_800AA248.cur_obj->owner.ai->unk_0C = 1;
 }
 
 u16 func_8003EB5C(Anim *anim, GameObject *mover) {
@@ -1225,7 +1223,7 @@ void func_8003FF54(void) {
     if (*(u16 *)&actor->unk_8 != 0) {
         goto stop;
     }
-    func_8004003C(D_800AA248.cur_obj->flags, (MoverLink *)actor);
+    func_8004003C(D_800AA248.cur_obj->flags, (Ai *)actor);
     if (D_800AA248.unk_0C != 0) {
         if (actor->unk_4 != 0x2F && abs(D_800AA248.unk_00) < 0x41) {
             goto turn;
@@ -1246,7 +1244,7 @@ stop:
     func_8003FE70(actor);
 }
 
-void func_8004003C(s32 arg0, MoverLink *arg1) {
+void func_8004003C(s32 arg0, Ai *arg1) {
     s16 dx;
     s16 dy;
     u16 i;
@@ -1285,7 +1283,7 @@ void func_8004003C(s32 arg0, MoverLink *arg1) {
 }
 
 void func_800401AC(void) {
-    func_8004003C(D_800AA248.cur_obj->flags, D_800AA248.cur_obj->owner.link);
+    func_8004003C(D_800AA248.cur_obj->flags, D_800AA248.cur_obj->owner.ai);
     if (D_800AA248.unk_00 > 0) {
         D_800AA248.cur_obj->flags &= ~0x10;
     } else {
@@ -1297,7 +1295,7 @@ void func_8004022C(void) {
     Anim **p;
 
     p = (Anim **)D_800AA248.cur_obj->arg.h;
-    func_8004003C(D_800AA248.cur_obj->flags ^ 0x10, D_800AA248.cur_obj->owner.link);
+    func_8004003C(D_800AA248.cur_obj->flags ^ 0x10, D_800AA248.cur_obj->owner.ai);
     if (D_800AA248.unk_0C != 0) {
         D_800AA248.cur_obj->script_pc = *p;
     }
@@ -1307,7 +1305,7 @@ void func_80040294(void) {
     Anim **p;
 
     p = (Anim **)D_800AA248.cur_obj->arg.h;
-    func_8004003C(D_800AA248.cur_obj->flags ^ 0x10, D_800AA248.cur_obj->owner.link);
+    func_8004003C(D_800AA248.cur_obj->flags ^ 0x10, D_800AA248.cur_obj->owner.ai);
     if (abs(D_800AA248.unk_00) < 0x4B) {
         D_800AA248.cur_obj->script_pc = *p;
     }
@@ -1867,7 +1865,7 @@ Anim *func_80041598(Actor *actor) {
 }
 
 void func_800415B4(void) {
-    D_800AA248.cur_obj->owner.link->unk_4 = 0;
+    D_800AA248.cur_obj->owner.ai->unk_04 = 0;
     func_8004CFC0();
 }
 

@@ -1510,15 +1510,15 @@ void func_800382A8(NpcS *npc) {
 }
 
 void func_800382E8(void) {
-    ((NpcS *)D_800AA248.cur_obj->owner.link)->unk_1C = 0;
+    ((NpcS *)D_800AA248.cur_obj->owner.ai)->unk_1C = 0;
 }
 
 void func_80038300(void) {
-    ((NpcS *)D_800AA248.cur_obj->owner.link)->unk_C = 1;
+    ((NpcS *)D_800AA248.cur_obj->owner.ai)->unk_C = 1;
 }
 
 void func_8003831C(void) {
-    ((NpcS *)D_800AA248.cur_obj->owner.link)->unk_6 = 0;
+    ((NpcS *)D_800AA248.cur_obj->owner.ai)->unk_6 = 0;
     func_8004CFC0();
 }
 
@@ -1876,7 +1876,7 @@ INCLUDE_ASM("asm/main/nonmatchings/game_80034590", func_80039358);
 INCLUDE_ASM("asm/main/nonmatchings/game_80034590", func_8003956C);
 
 void func_80039890(void) {
-    NpcS *npc = (NpcS *)D_800AA248.cur_obj->owner.link;
+    NpcS *npc = (NpcS *)D_800AA248.cur_obj->owner.ai;
     u16 *info;
 
     npc->unk_C = 1;

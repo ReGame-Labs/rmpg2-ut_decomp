@@ -25,7 +25,7 @@ struct Attacker;
 struct UnkStruct2;
 struct Npc;
 struct Actor;
-struct MoverLink;
+struct Ai;
 struct MoverTarget;
 
 /* A sprite frame's metrics (GameObject.frame): its size and origin, then points the code places things at. */
@@ -113,7 +113,7 @@ typedef struct GameObject {
                    struct UnkStruct2 *item;
                    struct Npc *npc;
                    struct Actor *actor;
-                   struct MoverLink *link;
+                   struct Ai *ai;
                } owner;
     /* 0x94 */ union {                  /* a second monster (the other side of a grab), or a thrown object's slot */
                    struct Monster *monster;
@@ -134,7 +134,7 @@ typedef struct Monster {
     /* 0x008 */ Fixed unk_008;
     /* 0x00C */ u8 unk_00C[0x04];
     /* 0x010 */ Fixed unk_010;                 /* a vertical speed, 16.16 */
-    /* 0x014 */ struct Monster *target;       /* the monster this one is attacking */
+    /* 0x014 */ struct Monster *target;        /* the monster this one is attacking */
     /* 0x018 */ u8 unk_018[0x02];
     /* 0x01A */ u16 unk_01A;
     /* 0x01C */ u16 unk_01C;                   /* a countdown set from a random draw */
@@ -159,11 +159,11 @@ typedef struct Monster {
     /* 0x05C */ u16 unk_05C;
     /* 0x05E */ s16 unk_05E;
     /* 0x060 */ u8 unk_060[0x08];
-    /* 0x068 */ GameObject *obj;              /* its body */
+    /* 0x068 */ GameObject *obj;               /* its body */
     /* 0x06C */ GameObject *unk_06C;
     /* 0x070 */ GameObject *unk_070;
     /* 0x074 */ u8 unk_074[0x0C];
-    /* 0x080 */ GameObject *unk_080[6];       /* the score's digit sprites */
+    /* 0x080 */ GameObject *unk_080[6];        /* the score's digit sprites */
     /* 0x098 */ GameObject *unk_098;
     /* 0x09C */ u8 unk_09C[0x18];
     /* 0x0B4 */ s32 unk_0B4[2];
@@ -220,7 +220,9 @@ typedef struct Monster {
     /* 0x13E */ s16 unk_13E;
     /* 0x140 */ u16 unk_140;
     /* 0x142 */ u16 unk_142;
-    /* 0x144 */ u8 unk_144[0x0C];
+    /* 0x144 */ s16 unk_144;
+    /* 0x146 */ s16 unk_146;
+    /* 0x148 */ u8 unk_148[0x08];
     /* 0x150 */ s16 unk_150;
     /* 0x152 */ s16 unk_152;
     /* 0x154 */ u8 unk_154[0x10];
@@ -234,7 +236,7 @@ typedef struct Monster {
     /* 0x17C */ s32 unk_17C;
     /* 0x180 */ struct Monster *unk_180;
     /* 0x184 */ u16 unk_184;
-    /* 0x186 */ u8 unk_186[0x02];
+    /* 0x186 */ u16 unk_186;
     /* 0x188 */ u16 unk_188;
     /* 0x18A */ u16 unk_18A;
     /* 0x18C */ u16 unk_18C;
@@ -256,13 +258,13 @@ typedef struct Monster {
     /* 0x1CC */ u16 unk_1CC;
     /* 0x1CE */ u8 unk_1CE[0x02];
     /* 0x1D0 */ GameObject **unk_1D0;
-    /* 0x1D4 */ struct MonsterLink *unk_1D4;  /* cleared when the player is dropped */
+    /* 0x1D4 */ struct MonsterLink *unk_1D4;   /* cleared when the player is dropped */
     /* 0x1D8 */ u16 unk_1D8;
     /* 0x1DA */ u8 unk_1DA[0x04];
     /* 0x1DE */ u16 unk_1DE;
     /* 0x1E0 */ u16 unk_1E0;
     /* 0x1E2 */ u8 unk_1E2[0x02];
-    /* 0x1E4 */ s16 * unk_1E4;                 /* the demo's input script: 12-byte records (frame, direction, buttons), 0x7FFF ends it */
+    /* 0x1E4 */ s16 *unk_1E4;                  /* the demo's input script: 12-byte records (frame, direction, buttons), 0x7FFF ends it */
     /* 0x1E8 */ u8 unk_1E8[0x10];
     /* 0x1F8 */ s32 unk_1F8;
     /* 0x1FC */ u8 unk_1FC[0x04];
@@ -354,5 +356,53 @@ extern s32 D_800AA260;                  /* unk_18 */
 extern ObjectDef *D_800AA284;           /* new_def */
 extern u16 D_800AA2C0;                  /* 1 when a hit landed this frame */
 extern s32 D_800AA2DC;                  /* unk_94 */
+
+/* A behaviour slot: 0x40 bytes, in the array D_801D85C8 (D_801D870C in use). Each drives one object through the
+ * handler table of its kind (func_80041A70 calls handlers[state]); the monsters' behaviours, the thrown objects.
+ * The words from 0x10 on hold different things by kind. */
+typedef struct Ai {
+    /* 0x00 */ GameObject *obj;                /* the object it drives */
+    /* 0x04 */ u16 unk_04;                     /* the player slot last targeted */
+    /* 0x06 */ u16 kind;                       /* picks the handler table; 0x17 and 0x18 are special */
+    /* 0x08 */ u16 action;                     /* the current action (a thrown object's kind: it indexes D_8007F680) */
+    /* 0x0A */ u16 state;                      /* the index into the handler table */
+    /* 0x0C */ u16 unk_0C;                     /* 1 while the state is new */
+    /* 0x0E */ u16 unk_0E;
+    /* 0x10 */ union {                  /* by kind */
+                   void *p;
+                   struct Monster *monster;
+                   struct AiOrder *order;
+                   struct Actor *actor;
+               } unk_10;
+    /* 0x14 */ struct Monster *unk_14;
+    /* 0x18 */ s16 unk_18;
+    /* 0x1A */ u16 unk_1A;
+    /* 0x1C */ union {
+                   struct AiOrder *order;
+                   s16 s;                   /* a countdown */
+               } unk_1C;
+    /* 0x20 */ u8 unk_20[0x02];
+    /* 0x22 */ u16 unk_22;
+    /* 0x24 */ u16 unk_24;
+    /* 0x26 */ s16 unk_26;
+    /* 0x28 */ union {
+                   struct AiLink *link;
+                   struct {
+                       s16 lo;
+                       s16 hi;
+                   } s;
+               } unk_28;
+    /* 0x2C */ u8 unk_2C[0x02];
+    /* 0x2E */ s16 unk_2E;
+    /* 0x30 */ Fixed unk_30;
+    /* 0x34 */ Fixed unk_34;
+    /* 0x38 */ u16 unk_38;                     /* a countdown */
+    /* 0x3A */ u16 unk_3A;
+    /* 0x3C */ u16 unk_3C;
+    /* 0x3E */ u8 unk_3E[0x02];
+} Ai;                                   /* 0x40 bytes */
+
+extern Ai D_801D85C8[];
+extern u16 D_801D870C;
 
 #endif /* GAME_H */

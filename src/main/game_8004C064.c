@@ -18,7 +18,7 @@ s32 func_8002CD24(u16, Monster *m, s32);
 void func_8002CE74(u16, Monster *m, s32);
 void func_8002CFAC(Monster *m, Building *b);
 void func_8002D5B8(Monster *m, s32);
-u16 func_8003CBE0(Projectile *p, Monster *m);
+u16 func_8003CBE0(Ai *p, Monster *m);
 u16 func_8003CC84(void);
 u16 func_80053970(Monster *m, Monster *other);
 void func_80053C50(s32, Monster *m);
@@ -42,19 +42,19 @@ extern u16 D_801F9ABC;
 extern u16 D_801FA98C;
 extern u16 D_801FA990;
 
-void func_8004C0E0(Projectile *p, Monster *m);
-void func_8004C1A0(Projectile *p, Monster *m);
-void func_8004C1E4(Projectile *p, Monster *m);
-void func_8004C1F8(Projectile *p, Monster *m);
-void func_8004C20C(Projectile *p, Monster *m);
-void func_8004C220(Projectile *p, Monster *m);
-void func_8004C2B0(Projectile *p, Monster *m);
+void func_8004C0E0(Ai *p, Monster *m);
+void func_8004C1A0(Ai *p, Monster *m);
+void func_8004C1E4(Ai *p, Monster *m);
+void func_8004C1F8(Ai *p, Monster *m);
+void func_8004C20C(Ai *p, Monster *m);
+void func_8004C220(Ai *p, Monster *m);
+void func_8004C2B0(Ai *p, Monster *m);
 u16 func_8004C308(s32 pc, s32);
 s32 func_8004D150(u16 *side, Monster *m, s32 bld);
 s32 func_8004D264(s16 *side, Monster *m, s32 bld);
-u16 func_8004D530(Monster *m, Projectile **out);
-u16 func_8004D5D4(Projectile *p);
-u16 func_8004D6F8(Monster *m, Projectile **out);
+u16 func_8004D530(Monster *m, Ai **out);
+u16 func_8004D5D4(Ai *p);
+u16 func_8004D6F8(Monster *m, Ai **out);
 void func_8004D980(GameObject *obj, Monster *m, Monster *other);
 void func_8004DAB0(GameObject *obj, Monster *m, Monster *other);
 void func_8004DAD4(Monster *m, Monster *other);
@@ -68,16 +68,16 @@ void func_8004FC00(s32 n, Monster *m);
 
 #ifdef NON_MATCHING
 /* 98%: register names (the table's address in v1, the kind in v0) */
-void func_8004C064(Projectile *p, Monster *m) {
+void func_8004C064(Ai *p, Monster *m) {
     u16 kind;
 
     if (p->unk_0E != 0) {
-        kind = p->kind;
+        kind = p->action;
         if (kind < 0xF) {
             if (m->unk_1AE != 0 && kind == 1) {
-                p->kind = 0;
+                p->action = 0;
             }
-            D_8007F680[p->kind](p, m);
+            D_8007F680[p->action](p, m);
         }
     }
 }
@@ -87,7 +87,7 @@ INCLUDE_ASM("asm/main/nonmatchings/game_8004C064", func_8004C064);
 
 #ifdef NON_MATCHING
 /* 96%: the constant 1 the two call results are compared with is kept in s1 across the calls in the original */
-void func_8004C0E0(Projectile *p, Monster *m) {
+void func_8004C0E0(Ai *p, Monster *m) {
     s32 push;
     s32 lift;
     s16 action;
@@ -117,28 +117,28 @@ void func_8004C0E0(Projectile *p, Monster *m) {
 INCLUDE_ASM("asm/main/nonmatchings/game_8004C064", func_8004C0E0);
 #endif
 
-void func_8004C1A0(Projectile *p, Monster *m) {
+void func_8004C1A0(Ai *p, Monster *m) {
     func_80053C50(0x40000, m);
-    m->unk_126 = p->kind;
+    m->unk_126 = p->action;
     m->action = 8;
 }
 
-void func_8004C1E4(Projectile *p, Monster *m) {
-    m->unk_126 = p->kind;
+void func_8004C1E4(Ai *p, Monster *m) {
+    m->unk_126 = p->action;
     m->action = 8;
 }
 
-void func_8004C1F8(Projectile *p, Monster *m) {
+void func_8004C1F8(Ai *p, Monster *m) {
     m->unk_126 = 6;
     m->action = 0x25;
 }
 
-void func_8004C20C(Projectile *p, Monster *m) {
+void func_8004C20C(Ai *p, Monster *m) {
     m->unk_126 = 3;
     m->action = 0x2A;
 }
 
-void func_8004C220(Projectile *p, Monster *m) {
+void func_8004C220(Ai *p, Monster *m) {
     func_8001F724(0x4F);
     m->unk_126 = 5;
     m->action = 0x1A;
@@ -156,7 +156,7 @@ void func_8004C258(void) {
     }
 }
 
-void func_8004C2B0(Projectile *p, Monster *m) {
+void func_8004C2B0(Ai *p, Monster *m) {
 }
 
 s32 func_8004C2B8(s32 pc, s32 arg1) {
@@ -680,7 +680,7 @@ void func_8004CFE8(void) {
                         if (m->unk_1BC == 0) {
                             hit = func_8002CD24(sp10, m, r);
                             if (hit != 0) {
-                                func_8004C064((Projectile *) hit, m);
+                                func_8004C064((Ai *) hit, m);
                                 m->unk_18A = 1;
                                 D_800AA248.cur_obj = saved;
                                 return;
@@ -802,12 +802,12 @@ void func_8004D2F0(void) {
 }
 
 void func_8004D38C(Monster *m) {
-    Projectile *p;
+    Ai *p;
     s32 vel;
     GameObject *o;
 
-    if (func_8004D6F8(m, &p) == 1 && p->kind != 0x4E) {
-        p->kind = 0xF2;
+    if (func_8004D6F8(m, &p) == 1 && p->action != 0x4E) {
+        p->action = 0xF2;
         vel = 0xFFFB8000;
         if (D_800AA248.cur_obj->flags & 0x10) {
             vel = 0x48000;
@@ -824,10 +824,10 @@ void func_8004D38C(Monster *m) {
 }
 
 void func_8004D488(Monster *m) {
-    Projectile *p;
+    Ai *p;
 
     if (func_8004D530(m, &p) == 1) {
-        p->kind = 0x4E;
+        p->action = 0x4E;
         p->unk_0C = 0;
         if (D_800AA2DC != 0 && func_8005F208(D_800AA2DC) == 3) {
             D_8007BD78.unk_08[D_801FA8A0[m->id - 1] - 1] += 3;
@@ -836,8 +836,8 @@ void func_8004D488(Monster *m) {
     }
 }
 
-u16 func_8004D530(Monster *m, Projectile **out) {
-    Projectile *p;
+u16 func_8004D530(Monster *m, Ai **out) {
+    Ai *p;
     u16 n;
     u16 kind;
 
@@ -845,7 +845,7 @@ u16 func_8004D530(Monster *m, Projectile **out) {
     p = D_801D85C8;
     if (n != 0) {
         do {
-            kind = p->kind;
+            kind = p->action;
             if (kind == 0x1E || (u32) (kind - 0x46) < 8) {
                 if (func_8004D5D4(p)) {
                     *out = p;
@@ -859,7 +859,7 @@ u16 func_8004D530(Monster *m, Projectile **out) {
     return 0;
 }
 
-u16 func_8004D5D4(Projectile *p) {
+u16 func_8004D5D4(Ai *p) {
     s16 x = D_800AA248.cur_obj->pos_x.s.hi;
     s16 px = p->obj->pos_x.s.hi;
 
@@ -871,7 +871,7 @@ u16 func_8004D5D4(Projectile *p) {
 
 void func_8004D614(void) {
     Monster *m = D_800AA248.cur_obj->owner.monster;
-    Projectile *p;
+    Ai *p;
     s32 push;
     u16 kind;
     u16 prev;
@@ -885,11 +885,11 @@ void func_8004D614(void) {
         func_80054374(push, m);
         m->unk_126 = 0;
         kind = 0xF0;
-        if (p->kind >= 0x1E) {
+        if (p->action >= 0x1E) {
             kind = 0xF5;
         }
         func_80053D68(0x30000, m);
-        p->kind = kind;
+        p->action = kind;
         prev = m->unk_05C;
         if (prev != 2 && prev != 0x4E) {
             m->action = 8;
@@ -903,9 +903,9 @@ void func_8004D614(void) {
 
 #ifdef NON_MATCHING
 /* 68%: the hit-box test against the projectile's frame; the loop keeps two pointers (record and record + 0x36) as givs */
-u16 func_8004D6F8(Monster *m, Projectile **out) {
+u16 func_8004D6F8(Monster *m, Ai **out) {
     u16 n;
-    Projectile *p;
+    Ai *p;
     GameObject *o;
     SpriteFrame *f;
     s16 x;
@@ -917,7 +917,7 @@ u16 func_8004D6F8(Monster *m, Projectile **out) {
     p = D_801D85C8;
     if (n != 0) {
         do {
-            if ((u32) (p->kind - 9) < 0x5C && p->unk_36 == 0) {
+            if ((u32) (p->action - 9) < 0x5C && p->unk_34.u.hi == 0) {
                 o = p->obj;
                 x = o->pos_x.s.hi;
                 f = o->frame;
