@@ -2326,7 +2326,7 @@ void cdload_sort_players(void);
 void func_8002B988(void);
 void func_80031444(void);
 void func_8003684C(void);
-void func_8003C3B0(void);
+void pickup_hide_items(void);
 void func_8003DFD4(void);
 void func_8003ED4C(void);
 void func_80043F30(void);
@@ -2407,7 +2407,7 @@ void main_init_level(void) {
     main_create_buildings();
     func_8003684C();
     pickup_spawn_all();
-    func_8003C3B0();
+    pickup_hide_items();
     if (D_800AA2DC == 0 || !(D_8007BD78.flags & 0x80)) {
         func_8003DFD4();
     }
