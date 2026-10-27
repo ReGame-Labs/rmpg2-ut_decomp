@@ -1901,9 +1901,6 @@ void func_80038528(Npc *npc) {
     func_800385F4(npc);
 }
 
-#ifdef NON_MATCHING
-/* 99.77%: 99.8 %: the flags read in either arm stay in a1 in the original and only the andi lands in v0; here the
- * flags take v0 too */
 void func_800385F4(Npc *npc) {
     s32 speed;
     u16 n;
@@ -1913,17 +1910,15 @@ void func_800385F4(Npc *npc) {
         s32 idx;
 
         if (npc->unk_20 == 1) {
-            u16 flags;
-
             speed = 0x28000;
             npc->unk_22 = 0x14;
             if (npc->unk_64 == NULL) {
-                flags = npc->unk_54;
+                idx = npc->unk_54;
             } else {
                 speed = -0x28000;
-                flags = D_800AA248.cur_obj->flags;
+                idx = D_800AA248.cur_obj->flags;
             }
-            if (flags & 0x10) {
+            if (idx & 0x10) {
                 speed = -speed;
             }
         } else {
@@ -1941,7 +1936,8 @@ void func_800385F4(Npc *npc) {
         } else {
             table = D_8007DA68;
         }
-       table += idx; func_8003EB5C(*table, D_800AA268.p);
+        table += idx;
+        func_8003EB5C(*table, D_800AA268.p);
     }
     n = npc->unk_22 - 1;
     npc->unk_22 = n;
@@ -1951,9 +1947,6 @@ void func_800385F4(Npc *npc) {
         npc->action = 2;
     }
 }
-#else
-INCLUDE_ASM("asm/main/nonmatchings/npc", func_800385F4);
-#endif
 
 void func_80038754(Npc *npc) {
     Monster *player;
@@ -2436,19 +2429,12 @@ u16 npc_create_throw(Monster *m, u16 a, u16 kind, Throw *t) {
     return 1;
 }
 
-#ifdef NON_MATCHING
-/* 96.36%: vy takes a0 where the original has a1 (the object pointer swaps with it); the original places the unk_98
- * = 2 block of the pos_y test after the loop's code (beqz to it), the C inline */
-
 void npc_update_throw(Throw *t) {
     GameObject *saved = D_800AA248.cur_obj;
     Monster *m;
     GameObject *body;
-    s32 vx;
-    s32 vy;
     u16 i;
-    s32 n;
-    u16 hit;
+    s32 v;
     Npc *npc;
 
     if (t->state == 0x10 || t->state == 1) {
@@ -2459,56 +2445,56 @@ void npc_update_throw(Throw *t) {
             t->state = 0x10;
             func_8003EB5C(D_80096018, D_800AA248.cur_obj);
         } else {
-            vx = saved->vel_x.w;
-            if (vx <= 0) {
+            v = saved->vel_x.w;
+            if (v <= 0) {
                 if (D_801D3D8A < 0) {
-                    vx += D_801D3D8A;
+                    v += D_801D3D8A;
                 }
             } else if (D_801D3D8A > 0) {
-                vx += D_801D3D8A;
+                v += D_801D3D8A;
             }
-            D_800AA248.cur_obj->pos_x.w = (D_800AA248.cur_obj->pos_x.w + vx) & D_801D8864.w;
-            vy = D_800AA248.cur_obj->vel_y.w + t->unk_0C;
-            if (vy > 0x90000) {
-                vy = 0x90000;
+            D_800AA248.cur_obj->pos_x.w = (D_800AA248.cur_obj->pos_x.w + v) & D_801D8864.w;
+            v = D_800AA248.cur_obj->vel_y.w + t->unk_0C;
+            if (v > 0x90000) {
+                v = 0x90000;
             }
-            D_800AA248.cur_obj->vel_y.w = vy;
-            D_800AA248.cur_obj->pos_y.w += vy;
+            D_800AA248.cur_obj->vel_y.w = v;
+            D_800AA248.cur_obj->pos_y.w += v;
             if (D_800AA248.cur_obj->pos_y.s.hi >= 0xD9) {
-                D_800AA268.p->unk_98 = (void *) 2;
-            } else {
-                i = 7;
-                do {
-                    m = &D_801E0B78[i];
-                    if ((m->unk_058 & 1) && !((body = m->obj)->unk_6C & 0x80)) {
-                        hit = monster_test_boxes(D_800AA248.cur_obj->pos_x.s.hi, D_800AA248.cur_obj->pos_y.s.hi, m);
-                        if (hit != 0) {
-                            func_80053C50(0x54000, m);
-                            func_8004EFAC();
-                            t->state = 0x10;
-                            D_800AA248.cur_obj->unk_98 = (void *) 1;
-                            if (body->pos_y.s.hi <= 0xE0) {
-                                m->action = 0xF;
-                            } else if ((D_800AA248.cur_obj->flags & 0x10) == (body->flags & 0x10)) {
-                                m->action = 0x22;
-                            } else {
-                                m->action = 0xA;
-                                func_800531C0(m);
-                            }
-                            goto end;
-                        }
-                    }
-                } while (--i != 0);
-                npc = t->thrower->owner.npc;
-                if (npc != NULL) {
-                    m = npc->unk_64;
-                    if ((m == NULL || D_800AA268.p->vel_y.w < -0x70000) && D_800AA268.p->vel_y.w >= 0) {
-                        n = D_800AA268.p->unk_8C - 1;
-                        if (n == 0) {
-                            D_800AA268.p->unk_98 = (void *) 2;
+                goto fall;
+            }
+            i = 7;
+            do {
+                m = &D_801E0B78[i];
+                if ((m->unk_058 & 1) && !((body = m->obj)->unk_6C & 0x80)) {
+                    v = monster_test_boxes(D_800AA248.cur_obj->pos_x.s.hi, D_800AA248.cur_obj->pos_y.s.hi, m);
+                    if (v != 0) {
+                        func_80053C50(0x54000, m);
+                        func_8004EFAC();
+                        t->state = 0x10;
+                        D_800AA248.cur_obj->unk_98 = (void *) 1;
+                        if (body->pos_y.s.hi <= 0xE0) {
+                            m->action = 0xF;
+                        } else if ((D_800AA248.cur_obj->flags & 0x10) == (body->flags & 0x10)) {
+                            m->action = 0x22;
                         } else {
-                            D_800AA268.p->unk_8C = n;
+                            m->action = 0xA;
+                            func_800531C0(m);
                         }
+                        goto end;
+                    }
+                }
+            } while (--i != 0);
+            npc = t->thrower->owner.npc;
+            if (npc != NULL) {
+                m = npc->unk_64;
+                if ((m == NULL || D_800AA268.p->vel_y.w < -0x70000) && D_800AA268.p->vel_y.w >= 0) {
+                    v = D_800AA268.p->unk_8C - 1;
+                    if (v == 0) {
+                    fall:
+                        D_800AA268.p->unk_98 = (void *) 2;
+                    } else {
+                        D_800AA268.p->unk_8C = v;
                     }
                 }
             }
@@ -2517,9 +2503,6 @@ void npc_update_throw(Throw *t) {
 end:
     D_800AA268.p = saved;
 }
-#else
-INCLUDE_ASM("asm/main/nonmatchings/npc", npc_update_throw);
-#endif
 
 void func_80039890(void) {
     Npc *npc = D_800AA248.cur_obj->owner.npc;

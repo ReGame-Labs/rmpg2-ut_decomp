@@ -1078,15 +1078,14 @@ void func_8002CBF4(Monster *m) {
     }
 }
 
-/* 98.98 %: only rec and r swap s1/s2 (the original gives rec, 7 uses over 40 insns, priority over r, 5 over 15: its r lives longer or rec has more uses); the reload of r->unk_06 for the argument comes from one call per arm */
-#ifdef NON_MATCHING
 BuildingItem *func_8002CD24(u16 idx, Monster *a, BuildingItem *rec) {
     Ai *q = NULL;
     BuildingPart *r;
     u16 k;
 
     if (rec->building->unk_070 == rec) {
-        func_8002CE74(idx, a, rec - 1);
+        rec--;
+        func_8002CE74(idx, a, rec);
     } else if (a->icon_timers[1] != 0) {
         func_80030E04(a, rec);
     } else {
@@ -1109,9 +1108,6 @@ BuildingItem *func_8002CD24(u16 idx, Monster *a, BuildingItem *rec) {
     }
     return (BuildingItem *) q;
 }
-#else
-INCLUDE_ASM("asm/main/nonmatchings/building", func_8002CD24);
-#endif
 
 void func_8002CE40(Ai *arg0, Monster *arg1) {
     if ((arg0->obj != 0) && ((u16) arg0->unk_04 >= 2U)) {
