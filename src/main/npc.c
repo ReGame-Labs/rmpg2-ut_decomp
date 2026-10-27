@@ -2002,8 +2002,6 @@ void func_80038838(Npc *npc) {
     func_8003831C();
 }
 
-#ifdef NON_MATCHING
-/* 98.73 %: register choices only: the original builds both table addresses in a0 and adds the row before the index (row + which * 4); here which * 4 + row */
 void func_80038920(Npc *npc) {
     u16 which;
     u8 *anim;
@@ -2014,11 +2012,13 @@ void func_80038920(Npc *npc) {
     }
     if (func_80039220(&which, npc) == 0) {
         if (npc->unk_0C != 0) {
-            func_8003EB5C(*(D_8007DA68 + (npc->unk_2E & 3)), D_800AA268.p);
+            row = D_8007DA68 + (npc->unk_2E & 3);
+            func_8003EB5C(*row, D_800AA268.p);
         }
     } else {
-        row = *(D_8007DA78 + (npc->unk_2C & 3));
-        anim = row[which];
+        row = D_8007DA78[npc->unk_2C & 3];
+        row += which;
+        anim = *row;
         if (anim != (u8 *)D_800AA268.p->anim) {
             func_8003EB5C(anim, D_800AA268.p);
             return;
@@ -2034,9 +2034,6 @@ void func_80038920(Npc *npc) {
         }
     }
 }
-#else
-INCLUDE_ASM("asm/main/nonmatchings/npc", func_80038920);
-#endif
 
 void func_80038A2C(Npc *npc) {
     u16 move = npc->unk_2A;
@@ -2063,17 +2060,15 @@ void func_80038A2C(Npc *npc) {
     func_80038920(npc);
 }
 
-#ifdef NON_MATCHING
-/* 97.85%: 97.9 %: the order is right; the table base and the index swap v0 and v1 (the original builds the base in
- * v0), in the shared call tail and at &D_800AA248 */
 void func_80038AE8(Npc *npc) {
     Monster *player;
-    GameObject *obj;
+    u8 **p;
 
     player = npc->unk_64;
     if ((player == NULL || player->dir == 0 || player->dir == 5 || player->dir == 1) && npc->unk_2A == 4) {
         if (npc->unk_0C != 0) {
-           func_8003EB5C(D_8007DA68[npc->unk_2E & 3], D_800AA268.p);
+            p = D_8007DA68 + (npc->unk_2E & 3);
+            func_8003EB5C(*p, D_800AA268.p);
         }
         return;
     }
@@ -2094,11 +2089,9 @@ void func_80038AE8(Npc *npc) {
         npc->unk_1C--;
     }
     D_800AA248.cur_obj->vel_x.w = 0;
-   func_8003EB5C(*(D_8007DA68 + (npc->unk_2E & 3)), D_800AA248.cur_obj);
+    p = D_8007DA68 + (npc->unk_2E & 3);
+    func_8003EB5C(*p, D_800AA248.cur_obj);
 }
-#else
-INCLUDE_ASM("asm/main/nonmatchings/npc", func_80038AE8);
-#endif
 
 u16 func_80038C1C(npc)
     Npc *npc;

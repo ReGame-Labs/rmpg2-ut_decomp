@@ -41,7 +41,7 @@ extern u8 D_8008A4C4[];
 void func_8003C1C0(u16, UnkStructB2 *);
 void func_8003C674();                  /* empty; func_8003C3B0 passes it two arguments */
 BuildingPart *func_8003C67C(Building *u, UnkStructB2 *rec);
-void func_8003CE24(BuildingPart *p, ObjectDef *def, UnkStructB2 *rec, s32 arg3);
+void func_8003CE24();                  /* actor.c: (Actor *, ObjectDef *); func_8003C3B0 passes it a third argument */
 void func_8003C8D4(Pickup *arg0);
 void func_8003C934(Pickup *);
 void func_8003C9E8(Pickup *arg0);
@@ -591,9 +591,6 @@ void func_8003C344(void) {
     D_801F9988 = 0;
 }
 
-#ifdef NON_MATCHING
-/* 98.84%: the statements are right; the original reloads the spilled list pointer and the constant 1 of the
- * D_801D8748 test into a3 (here t0), so reload_cse drops the call's li a3,1 */
 void func_8003C3B0(void) {
     SpawnItem *list;
     SpawnItem *item;
@@ -634,7 +631,7 @@ void func_8003C3B0(void) {
                         def->flags = q[4] - 1;
                     }
                     if (D_801D8748 != 1 || item->unk_0A == 0) {
-                        func_8003CE24(p, def, rec, 1);
+                        func_8003CE24(p, def, rec);
                         def->anim = item->anim;
                         def->id = item->anim->id;
                         def->unk_0C = 0x780;
@@ -675,9 +672,6 @@ void func_8003C3B0(void) {
 done:
     D_801D8738 = 0x1C - (u16)D_800AA250;
 }
-#else
-INCLUDE_ASM("asm/main/nonmatchings/pickup", func_8003C3B0);
-#endif
 
 void func_8003C674(void) {
 }
