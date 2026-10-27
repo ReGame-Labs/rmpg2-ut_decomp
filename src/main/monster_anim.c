@@ -383,15 +383,12 @@ void func_80058264(Monster *e) {
     func_80057B94(e, D_800845B4);
 }
 
-#ifdef NON_MATCHING
-/* 87.8%: register and load order around the direction branches */
 void func_80058288(Monster *e) {
     Building *u;
     s32 *table;
     GameObject *b;
     u16 x;
     u16 dir;
-    u16 v;
 
     u = func_80054728(e->climb_building);
     b = D_800AA268.p;
@@ -400,29 +397,26 @@ void func_80058288(Monster *e) {
     if (u != NULL) {
         dir = e->climb_side;
         if (dir == 2) {
-            v = u->unk_00E;
+            x = u->unk_00E;
             if (b->flags & 0x10) {
-                x = v + 8;
+                x += 8;
             } else {
-                x = v - 4;
+                x -= 4;
                 table = D_800850F8;
             }
         } else if (dir == 1) {
-            v = u->unk_004;
+            x = u->unk_004;
             if (b->flags & 0x10) {
-                x = v + 4;
+                x += 4;
                 table = D_800850F8;
             } else {
-                x = v - 8;
+                x -= 8;
             }
         }
     }
     D_800AA268.p->pos_x.s.hi = x;
     func_80057B94(e, table);
 }
-#else
-INCLUDE_ASM("asm/main/nonmatchings/monster_anim", func_80058288);
-#endif
 
 void func_8005834C(Monster *e) {
     func_80057B94(e, D_80084640);
@@ -1186,9 +1180,11 @@ void func_80059710(Monster *e, s16 want, s16 max) {
 }
 
 #ifdef NON_MATCHING
-/* 96.1 %: the original copies the building pointer into a0 at the top of each iteration and reads unk_058 through it for the == 0 test; the saved registers of the building and the counter are swapped */
+/* 99.42%: 99.4 %: a second pointer to the building (v, copied at the top of each iteration) gives the original's a0
+ * reload of unk_058; the building and the inner counter still swap s0 and s1 */
 s32 func_800598F4(Monster *e) {
     Building *u;
+    Building *v;
     GameObject *b;
     s16 left;
     s16 right;
@@ -1210,13 +1206,14 @@ s32 func_800598F4(Monster *e) {
     i = 0;
     do {
         u = &D_801D3DC8[i];
+        v = u;
         if (u->state < 4) {
             if ((e->unk_168 == 3 && left < (s16)u->unk_004 && (s16)u->unk_004 < right)
                 || (e->unk_168 == 7 && left < u->unk_00E && u->unk_00E < right)) {
                 k = 0;
                 if (u->unk_058 != 2 && u->unk_058 != 3) {
                     u->unk_010 = u->unk_012;
-                    if (u->unk_058 == 0) {
+                    if (v->unk_058 == 0) {
                         func_8002E278(e, u);
                     }
                 } else {
