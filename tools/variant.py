@@ -414,6 +414,7 @@ def score_many(unit: Unit, func: str, region: Region, texts: list, jobs: int, st
                defines=(), includes=(), progress=None):
     """Score each replacement text (a list of (id, text)) in parallel: [(id, Score)] in completion order."""
     base = unit.text()
+    unit.checker  # set up once, before the threads
     results = []
     with ThreadPoolExecutor(max(1, jobs)) as ex:
         futs = {ex.submit(unit.score, put_text(base, region, t), func, f"c{n}", False, defines, includes): n
