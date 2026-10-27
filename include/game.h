@@ -43,11 +43,11 @@ typedef struct SpriteFrame {
     /* 0x0C */ s32 unk_0C;
     /* 0x10 */ u16 unk_10;              /* a second point: x (a throw's origin) */
     /* 0x12 */ u16 unk_12;              /* y */
-    /* 0x14 */ u16 unk_14;
-    /* 0x16 */ u16 unk_16;
-    /* 0x18 */ u16 unk_18;
+    /* 0x14 */ u16 unk_14;              /* a building item's frame: where a behaviour slot's object sits on each */
+    /* 0x16 */ u16 unk_16;              /* part (func_8003DD70): (x, y) on the left part, */
+    /* 0x18 */ u16 unk_18;              /* on the middle one, */
     /* 0x1A */ u16 unk_1A;
-    /* 0x1C */ u16 unk_1C;
+    /* 0x1C */ u16 unk_1C;              /* on the right one */
     /* 0x1E */ u16 unk_1E;
     /* 0x20 */ u16 unk_20;              /* a third point: x (a spawn origin) */
     /* 0x22 */ u16 unk_22;              /* y */
@@ -170,7 +170,7 @@ typedef struct Monster {
     /* 0x018 */ u8 unk_018[0x02];
     /* 0x01A */ u16 unk_01A;
     /* 0x01C */ u16 unk_01C;                   /* a countdown set from a random draw */
-    /* 0x01E */ u16 unk_01E;
+    /* 0x01E */ u16 unk_01E;                   /* its id at spawn */
     /* 0x020 */ u16 unk_020;                   /* a tally for the results (OVERATTR's first bar) */
     /* 0x022 */ u16 unk_022;                   /* the step of a throw sequence, 0..4 */
     /* 0x024 */ u16 unk_024;                   /* a tally for the results (the second bar): eating a person or a
@@ -278,8 +278,8 @@ typedef struct Monster {
     /* 0x16C */ GameObject *unk_16C;
     /* 0x170 */ u16 unk_170;
     /* 0x172 */ u8 unk_172[0x02];
-    /* 0x174 */ s32 unk_174;
-    /* 0x178 */ u16 unk_178;
+    /* 0x174 */ s32 unk_174;                   /* -1 at spawn */
+    /* 0x178 */ u16 unk_178;                   /* its id at spawn */
     /* 0x17A */ u16 idle_alt;                  /* toggled when idle_timer runs out: picks the other idle animation */
     /* 0x17C */ s32 unk_17C;
     /* 0x180 */ struct Monster *attacker;      /* the monster that hit it last (func_8005421C) */
