@@ -78,12 +78,12 @@ typedef struct GameObject {
     /* 0x3E */ u8 unk_3E[0x02];
     /* 0x40 */ union {
                    struct GameObject *obj;  /* a link (main.c's list from D_801D8584) */
-                   s32 w;                   /* a value; a box's width (func_8001EB9C: the status bars, OVERATTR's
+                   s32 w;                   /* a value; a box's width (main_create_box: the status bars, OVERATTR's
                                              * volume bars) */
                } unk_40;
     /* 0x44 */ union {                  /* by kind */
                    s32 pc;                  /* the animation script's next command (an address) */
-                   s32 height;              /* a box's height (func_8001EB9C; the results bars, func_800991EC) */
+                   s32 height;              /* a box's height (main_create_box; the results bars, func_800991EC) */
                    s32 v;                   /* a value (OVERATTR's logo: a y, with unk_40.w its x) */
                } script;
     /* 0x48 */ s32 anim;                /* the current animation (an address: the script restarts there) */
@@ -120,7 +120,7 @@ typedef struct GameObject {
                } unk_68;
     /* 0x6C */ u16 unk_6C;              /* 0x80: gone */
     /* 0x6E */ u16 unk_6E;
-    /* 0x70 */ u16 kind;                /* the id func_8001E450 and func_8001EC74 select objects by (0x790 + a
+    /* 0x70 */ u16 kind;                /* the id main_free_kind and func_8001EC74 select objects by (0x790 + a
                                          * monster's slot for the status sprites) */
     /* 0x72 */ u8 unk_72[0x02];
     /* 0x74 */ u16 unk_74;
@@ -360,7 +360,7 @@ typedef struct GameState {
     /* 0x18 */ s32 unk_18;                     /* the argument of the current actor's handler (D_800AA260) */
     /* 0x1C */ union {
                    ObjectDef *def;
-                   s32 n;                   /* a count (func_8002958C) */
+                   s32 n;                   /* a count (main_count_monsters) */
                } unk_1C;
     /* 0x20 */ GameObject *cur_obj;            /* the object being updated (D_800AA268) */
     /* 0x24 */ s32 unk_24;                     /* D_800AA26C */
@@ -688,7 +688,7 @@ typedef struct TextMessage {
     /* 0x0A */ u16 y;
     /* 0x0C */ s32 unk_0C;
     /* 0x10 */ void (*layout)(void);       /* func_8001EDE4: centred */
-    /* 0x14 */ s32 kind;                   /* the kind of the objects that show it (func_8001E450 frees them) */
+    /* 0x14 */ s32 kind;                   /* the kind of the objects that show it (main_free_kind frees them) */
     /* 0x18 */ u8 text[1];                 /* as long as the message */
 } TextMessage;
 

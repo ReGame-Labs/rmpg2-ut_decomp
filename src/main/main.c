@@ -114,9 +114,9 @@ void func_8001C404(void);
 void func_8001D184(void);
 void func_8001D7D0(void);
 s32 func_8001D998(GameObject *);
-void func_8001DF98(void);
-void func_8001E0AC(void);
-void func_8001E450(s32);
+void main_sort_objects(void);
+void main_init_objects(void);
+void main_free_kind(s32);
 void func_8001E4B0(GameObject *);
 void func_8001E664(Fixed *, s32, Fixed *, s32 *);
 s32 func_8001B660(s32);
@@ -454,7 +454,7 @@ void func_8001F61C(u8 *, s16, s16, s32, s32, s32 *, s32, s32);
 u16 func_80025C54(void *);
 extern void (*D_8007BE20[])(Monster *);
 void func_80023E30(Ai *);
-void func_80020BA0(s32, s32, GameObject *);
+void main_set_frame(s32, s32, GameObject *);
 extern s16 D_8007A6F8[];
 extern s16 D_801F9AB8;
 extern s16 D_801FAC7C;
@@ -489,7 +489,7 @@ extern Anim D_8008AE08;
 extern Anim D_8008AE08_alt;   /* the same table (config/aliases.ld) */
 extern AiStep *D_8007B660[];
 extern AiStep *D_8007B980[];
-void func_800247E4(GameObject *obj, s32 left, s32 right);
+void main_wrap_layer_x(GameObject *obj, s32 left, s32 right);
 extern s16 D_801FA7E4[];
 extern void (*D_8007C14C[])(Monster *);
 extern void (*D_8007C170[])(Monster *);
@@ -537,7 +537,7 @@ restart:
             D_800AA2E0 = D_800AA2E8 = D_800AA2C8 = 0;
         }
         func_8001EA78();
-        func_8001DF98();
+        main_sort_objects();
         func_8001D8E8();
         func_80018CF0();
     }
@@ -561,7 +561,7 @@ void func_80017964(void) {
     D_801FA8A0[6] = 0;
     func_8001E9C4(GetRCnt(0xF2000001), GetRCnt(0xF2000001));
     func_8001B848();
-    func_8001E0AC();
+    main_init_objects();
     func_8001E980();
 }
 
@@ -690,7 +690,7 @@ void func_80017F14(s16 x, s16 y, GameObject *link, s32 script) {
 }
 
 void func_80018008(void) {
-    func_8001E450(0x7FE);
+    main_free_kind(0x7FE);
     D_8007A698 = 0;
 }
 
@@ -1334,7 +1334,7 @@ INCLUDE_ASM("asm/main/nonmatchings/main", func_8001B694);
 void func_8001B7F4(void) {
     u16 temp_v1;
 
-    func_8001DF98();
+    main_sort_objects();
     if (D_801D3DC6 == 0) {
         func_8001B694();
         func_800205AC();
@@ -1745,7 +1745,7 @@ void func_8001D4B8(void) {
     if (phase == 59) {
         func_8006036C(D_8007AD4C, 0xA3, 0xD7, 0x44, 0x402, "DEMO");
     } else if (phase == 30) {
-        func_8001E450(0x402);
+        main_free_kind(0x402);
     }
     func_8001C784();
     D_801D36FC = 0x120;
@@ -1909,7 +1909,7 @@ INCLUDE_ASM("asm/main/nonmatchings/main", func_8001DCB4);
 #ifdef NON_MATCHING
 /* 85.83%: one pass of a bubble sort of the object list by priority. The body matches; the original enters the loop
  * at its test at the bottom (jump.c did not copy the exit test before the loop), the C gets the copy */
-void func_8001DF98(void) {
+void main_sort_objects(void) {
     GameObject *cur;
     GameObject *obj;
     GameObject *p;
@@ -1934,7 +1934,7 @@ void func_8001DF98(void) {
     }
 }
 #else
-INCLUDE_ASM("asm/main/nonmatchings/main", func_8001DF98);
+INCLUDE_ASM("asm/main/nonmatchings/main", main_sort_objects);
 #endif
 
 #ifdef NON_MATCHING
@@ -1970,7 +1970,7 @@ void func_8001E010(void) {
 INCLUDE_ASM("asm/main/nonmatchings/main", func_8001E010);
 #endif
 
-void func_8001E0AC(void) {
+void main_init_objects(void) {
     GameObject *obj;
     GameObject *last;
     u16 n;
@@ -2084,7 +2084,7 @@ void func_8001E39C(GameObject *obj) {
     }
 }
 
-void func_8001E450(s32 kind) {
+void main_free_kind(s32 kind) {
     GameObject *head;
     GameObject *sprite;
     GameObject *next;
@@ -2245,7 +2245,7 @@ void func_8001E878(void) {
     }
 }
 
-INCLUDE_ASM("asm/main/nonmatchings/main", func_8001E8C0);
+INCLUDE_ASM("asm/main/nonmatchings/main", main_free_kind_masked);
 
 void func_8001E94C(s32 arg0, s32 arg1, GameObject *arg2) {
     SpriteFrame *temp_v1;
@@ -2264,7 +2264,7 @@ void func_8001E980(void) {
     func_8002495C();
     func_80024954();
     D_801D3D6C = 0;
-    func_8001E0AC();
+    main_init_objects();
 }
 
 void func_8001E9C4(s16 arg0, s16 arg1) {
@@ -2333,7 +2333,7 @@ void func_8001EB3C(void) {
     D_801FA9A4 = temp_s1;
 }
 
-GameObject *func_8001EB9C(s16 x, s16 y, s16 width, s16 height, u32 colour) {
+GameObject *main_create_box(s16 x, s16 y, s16 width, s16 height, u32 colour) {
     GameState *g;
     ObjectDef *def;
 
@@ -2656,7 +2656,7 @@ void func_80020AF4(s32 id) {
     }
 }
 
-void func_80020BA0(s32 id, s32 flags, GameObject *obj) {
+void main_set_frame(s32 id, s32 flags, GameObject *obj) {
     SpriteFrame *frame;
     Fixed origin;
     Fixed off;
@@ -4100,7 +4100,7 @@ void func_800244A8(void) {
     arg = obj->arg.w;
     if (part != NULL) {
         D_800AA248.cur_obj = part;
-        func_80020BA0(*arg, 0x8002, part);
+        main_set_frame(*arg, 0x8002, part);
     }
     D_800AA248.cur_obj = obj;
 }
@@ -4164,7 +4164,7 @@ void func_8002469C(s32 *p, s16 arg1, s16 arg2) {
 #ifdef NON_MATCHING
 /* 96.07%: the order and the operations match; the width and the distance swap registers (a0/v1), and the left
  * branch shifts the width into v0 where the original uses v1 */
-void func_800247E4(GameObject *obj, s32 left, s32 right) {
+void main_wrap_layer_x(GameObject *obj, s32 left, s32 right) {
     s32 x;
     s32 width;
     s32 d;
@@ -4193,33 +4193,33 @@ void func_800247E4(GameObject *obj, s32 left, s32 right) {
     obj->pos_x.w = x;
 }
 #else
-INCLUDE_ASM("asm/main/nonmatchings/main", func_800247E4);
+INCLUDE_ASM("asm/main/nonmatchings/main", main_wrap_layer_x);
 #endif
 
 #ifdef NON_MATCHING
 /* 89.70%: loop.c hoists 0x510 but not 0x500 (the original keeps both in s3/s2), and the sentinel is copied into s1
  * instead of built there; one call with the bounds in locals hoists both but loses the per-case a0 */
-void func_8002488C(void) {
+void main_scroll_layers(void) {
     GameObject *obj;
 
     if (D_801D3D8A != 0) {
         for (obj = D_801E29A8.next; obj != &D_801E29A8; obj = obj->next) {
             switch (obj->kind) {
                 case 0x520:
-                    func_800247E4(obj, -0x4000, 0x4000);
+                    main_wrap_layer_x(obj, -0x4000, 0x4000);
                     break;
                 case 0x500:
-                    func_800247E4(obj, -0x10000, 0x10000);
+                    main_wrap_layer_x(obj, -0x10000, 0x10000);
                     break;
                 case 0x510:
-                    func_800247E4(obj, -0x8000, 0x8000);
+                    main_wrap_layer_x(obj, -0x8000, 0x8000);
                     break;
             }
         }
     }
 }
 #else
-INCLUDE_ASM("asm/main/nonmatchings/main", func_8002488C);
+INCLUDE_ASM("asm/main/nonmatchings/main", main_scroll_layers);
 #endif
 
 void func_80024954(void) {
@@ -5338,7 +5338,7 @@ void func_80029510(Monster *arg0) {
 INCLUDE_ASM("asm/main/nonmatchings/main", func_80029510);
 #endif
 
-void func_8002958C(void) {
+void main_count_monsters(void) {
     Monster *m;
     s32 i;
     u16 result;

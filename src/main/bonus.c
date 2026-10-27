@@ -13,10 +13,10 @@ s32 func_8005D198(void) {
 }
 
 void func_8005D1BC(s32 arg0, s32 n) {
-    func_8001E450((u16)(n + 0x790));
-    func_8001E450((u16)(n + 0x798));
-    func_8001E450((u16)(n + 0x7A8));
-    func_8001E450((u16)(n + 0x7A0));
+    main_free_kind((u16)(n + 0x790));
+    main_free_kind((u16)(n + 0x798));
+    main_free_kind((u16)(n + 0x7A8));
+    main_free_kind((u16)(n + 0x7A0));
 }
 
 void func_8005D20C(Monster *e) {
@@ -27,14 +27,14 @@ void func_8005D20C(Monster *e) {
 
     saved = D_800AA248.cur_obj;
     x = (D_801FA8A0[e->id - 1] - 2) * 0x78;
-    s = func_8001EB9C(0, 0, 0x44, 4, 0xFF00);
+    s = main_create_box(0, 0, 0x44, 4, 0xFF00);
     x2 = x + 0xA6;
     s->pos_x.s.hi = x2;
     s->pos_y.s.hi = 0x18;
     s->priority = 0x501;
     s->kind = e->id + 0x790;
     e->health_bar = s;
-    s = func_8001EB9C(0, 0, 0, 2, 0xFF00FF);
+    s = main_create_box(0, 0, 0, 2, 0xFF00FF);
     s->pos_x.s.hi = x2;
     s->pos_y.s.hi = 0x22;
     s->priority = 0x501;
@@ -74,7 +74,7 @@ void func_8005D7D8(Monster *e) {
         for (i = 0; i < 6; i++) {
             digit = e->unk_080[i];
             if (digit != NULL) {
-                func_80020BA0(D_800842B4[v % 10], digit->flags, digit);
+                main_set_frame(D_800842B4[v % 10], digit->flags, digit);
                 v /= 10;
             }
         }
@@ -235,16 +235,16 @@ void func_8005E2D8(void) {
         D_801FB46C = t;
         switch (t) {
         case 0x3C:
-            func_8001E450(0x401);
+            main_free_kind(0x401);
             func_8001ED54(&D_80089624);
             break;
         case 0x78:
-            func_8001E450(0x401);
+            main_free_kind(0x401);
             func_8001ED54(&D_80089644);
             break;
         case 0xB4:
-            func_8001E450(0x401);
-            func_8001E450(0x402);
+            main_free_kind(0x401);
+            main_free_kind(0x402);
             D_801FB46C = 0;
             break;
         }

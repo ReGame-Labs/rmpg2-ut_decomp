@@ -4,6 +4,17 @@
 // Psy-Q library names come from tools/psyq_match.py (--symbols, then --functions per psyq/ unit) and stay Sony's.
 game_main = 0x8001781C; // type:func  main, which crt0 calls right after setting $gp (docs/TOOLCHAIN.md), compiled under this name (config/aliases.ld)
 
+// main (src/main/main.c)
+main_sort_objects = 0x8001DF98; // type:func
+main_init_objects = 0x8001E0AC; // type:func
+main_free_kind = 0x8001E450; // type:func
+main_free_kind_masked = 0x8001E8C0; // type:func
+main_create_box = 0x8001EB9C; // type:func
+main_set_frame = 0x80020BA0; // type:func
+main_wrap_layer_x = 0x800247E4; // type:func
+main_scroll_layers = 0x8002488C; // type:func
+main_count_monsters = 0x8002958C; // type:func
+
 // The Psy-Q library objects (config/main.yaml's psyq/ units), function by function (tools/psyq_match.py
 // --functions; docs/TOOLCHAIN.md). Byte-identical twins were settled from callers and callees: PadStartCom,
 // SpuWrite, CdFlush/CdSync/CdReady, DsReadyCallback.
