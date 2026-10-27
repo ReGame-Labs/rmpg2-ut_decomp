@@ -15,7 +15,8 @@ void func_8001DCB4(void);
 void func_800415B4(void);
 void func_8001B5E8(s32);
 void func_800630E8(s32);
-s32 func_800632E8(s32);
+s32 func_800632E8(u32);
+void func_800632CC(s32);
 void func_80063E48(s32, s32);
 s32 func_80063F30(void);
 void func_800700CC(s32);
@@ -27,6 +28,8 @@ void func_800700A8(void);
 void func_8006BBA0(s32, s32);
 void func_8006BD60(s32);
 void func_8006C8D8(s32, s32);
+s32 func_8006C8B4(s32);
+s32 func_8006C8F8(s32);
 s16 func_8006EC18(void);
 s32 func_80062F14(s32, s32, s32, s32, s32, s32, s32);
 
@@ -41,6 +44,12 @@ extern u8 *D_801E1C78;
 
 /* The SPU upload's two sector buffers. */
 extern u8 D_801C41C0[0x800];
+/* A sound bank file's first sector: its sample count, then the sample numbers. */
+typedef struct {
+    s16 count;
+    u16 ids[0x3FF];
+} SoundBankHeader;
+extern SoundBankHeader D_801C49C0;
 extern s32 D_801FB4A8;
 extern s32 D_801FB4B8;
 
@@ -56,30 +65,68 @@ extern u8 *D_80016AC8;
 extern u8 *D_80016ACC;
 
 extern s32 D_801D3710;
-extern s32 D_801D3764;
+extern s32 D_801D3764;          /* the data-ready callback the XA player replaced, -1 for none */
+extern u16 D_801D8750;          /* the music playing, 0xFFFF for none */
+extern CdlFILTER D_801FB4BC;
+extern s32 D_8008A334[];        /* per XA track: its length (D_801E2A48 while it plays) */
+extern s32 D_801E2A48;
 extern s32 D_801E28EC;
 extern s16 D_801E1CB4;
 extern s32 D_801E0D48;
 extern s32 D_801F991C;
 extern s32 D_801FB4C0;
 extern u8 *D_80085300;
+
+/* What the sound driver reads its files with (func_800706C0): this file's stdio emulation, and parameters. */
+typedef struct {
+    /* 0x00 */ s32 (*open)(s32 index, s32 mode);
+    /* 0x04 */ s32 (*read)(void *buf, s32 size, s32 count, s32 handle);
+    /* 0x08 */ s32 (*seek)(s32 handle, s32 pos);
+    /* 0x0C */ s32 (*size)(void);
+    /* 0x10 */ s32 (*close)(s32 handle);
+    /* 0x14 */ s32 (*load_spu)(s32 handle, s32 spuAddr, s32 size);
+    /* 0x18 */ s32 unk_18;
+    /* 0x1C */ s32 unk_1C;
+    /* 0x20 */ s32 unk_20;
+    /* 0x24 */ s32 unk_24;
+    /* 0x28 */ s32 unk_28;
+    /* 0x2C */ s32 unk_2C;
+} SoundFileIO;
+
+void func_800706C0(SoundFileIO *io);
+s32 func_8006EE30(s32);
+void func_8006F0D8(s32, void *, s32);
+s32 func_8006E804(void *, s32);
+void func_8006E8B4(void *, s32, s32, void *, s32);
+void *func_8006EC08(void);
+s32 func_8006E4F4(void);
+s32 func_80070298(s32, s32);
+s32 func_80070324(s32, s32, void *);
+void *func_80062C10(s32 size);
+void func_80062EB0(void);
+void func_80063064(void);
+s32 func_80061444(void *buf, s32 size, s32 count, s32 handle);
+s32 func_800614E0(s32 handle, s32 pos);
+s32 func_800614BC(void);
+s32 func_800614B0(s32 handle);
+s32 func_80061774(s32 handle, s32 spuAddr, s32 size);
+s32 func_800613FC(s32 index, s32 mode);
+s32 func_8006301C(s32 index, s32 spuAddr);
 extern s16 D_80085304[];
 
-#ifdef NON_MATCHING
-/* 92.9%: the order of the first loop's setup (i = 0 and the array bases) and p assigned through a temporary differ */
+/* Lists the players of the monsters in D_801FB49C, sorted, 99 for none. */
 void func_80060F3C(void) {
+    s32 m;
     s32 i;
     s32 j;
-    s32 *p;
+    s32 n;
 
     func_8002958C();
-    p = D_801FB49C;
-    D_801FB49C[2] = 0x63;
-    D_801FB49C[1] = 0x63;
-    D_801FB49C[0] = 0x63;
-    for (i = 0; i < 7; i++) {
-        if (D_801FA8A0[i] != 0) {
-            *p++ = D_801FA8A0[i];
+    D_801FB49C[0] = D_801FB49C[1] = D_801FB49C[2] = 99;
+    n = 0;
+    for (m = 0; m < 7; m++) {
+        if (D_801FA8A0[m] != 0) {
+            D_801FB49C[n++] = D_801FA8A0[m];
         }
     }
     for (i = 0; i < 2; i++) {
@@ -93,9 +140,6 @@ void func_80060F3C(void) {
         }
     }
 }
-#else
-INCLUDE_ASM("asm/main/nonmatchings/cdload", func_80060F3C);
-#endif
 
 s32 func_80061014(s32 arg0) {
     s32 i;
@@ -167,7 +211,7 @@ s32 cdload_wait_sync(void) {
     return 0;
 }
 
-s32 func_800613FC(s32 index) {
+s32 func_800613FC(s32 index, s32 mode) {
     D_801FB4AC = index;
     D_801FB4B4 = 0;
     D_801FB4B0 = D_801E1C78;
@@ -254,14 +298,12 @@ s32 cdload_checksum(u8 *buf, s32 len) {
     return sum;
 }
 
-#ifdef NON_MATCHING
-/* 99.6%: the city byte is loaded into a register of its own (v1) in the original */
+/* The file index of the current city's data: two files per city from 0x54, in the order of the city byte. */
 s32 cdload_city_file_index(s32 which) {
     s32 offset;
     u8 *p;
-    s32 city;
-    s32 index;
-    s32 r;
+    s32 pair;
+    s32 file;
 
     offset = D_80085264[D_801D8728];
     if (D_801D8728 != 0) {
@@ -269,17 +311,14 @@ s32 cdload_city_file_index(s32 which) {
     } else {
         p = (u8 *)(D_801FA960 + offset);
     }
-    city = *p;
-    index = (city - 0x54) * 2;
-    r = index + 0x54;
+    file = *p;
+    pair = (file - 0x54) * 2;
+    file = pair + 0x54;
     if (which != 1) {
-        r = index + 0x55;
+        file = pair + 0x55;
     }
-    return r;
+    return file;
 }
-#else
-INCLUDE_ASM("asm/main/nonmatchings/cdload", cdload_city_file_index);
-#endif
 
 void func_80061668(s32 handle, s32 len, s32 spuAddr) {
     u8 *buf;
@@ -426,7 +465,37 @@ void *func_80062C10(s32 size) {
     return p;
 }
 
-INCLUDE_ASM("asm/main/nonmatchings/cdload", func_80062C30);
+void func_80062C30(void) {
+    SoundFileIO io;
+    s32 size;
+    s32 bank_size;
+    void *buf;
+    void *seqs;
+
+    io.open = func_800613FC;
+    io.read = func_80061444;
+    io.seek = func_800614E0;
+    io.size = func_800614BC;
+    io.close = func_800614B0;
+    io.load_spu = func_80061774;
+    io.unk_20 = 0x78;
+    io.unk_18 = 0;
+    io.unk_1C = 0;
+    io.unk_28 = 1;
+    io.unk_24 = 1;
+    func_800706C0(&io);
+    size = func_8006EE30(0x4F);
+    func_8006F0D8(0x4F, func_80062C10(size), size);
+    bank_size = func_8006E804(func_8006EC08(), 0x50);
+    buf = func_80062C10(bank_size);
+    func_8006E8B4(func_8006EC08(), 0x50, 0, buf, bank_size);
+    seqs = func_80062C10(func_80070298(0, func_8006E4F4()));
+    func_80070324(0, func_8006E4F4(), seqs);
+    D_801FB4C0 = 0x1010;
+    func_80063064();
+    func_80062EB0();
+    D_801FB4C0 += func_8006301C(0, D_801FB4C0);
+}
 
 void func_80062D88(s32 arg0) {
     func_800700CC(arg0 & 0xFF);
@@ -478,10 +547,33 @@ void func_80062EB0(void) {
     D_801FB4C0 = 0x1010;
 }
 
-INCLUDE_ASM("asm/main/nonmatchings/cdload", func_80062F14);
+s32 func_80062F14(s32 index, s32 spuAddr, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 reload) {
+    s32 handle;
+    s32 addr;
+    s32 count;
+    s32 i;
+    s32 id;
+    s32 size;
 
-void func_8006301C(s32 index, s32 spuAddr) {
-    func_80062F14(D_80085304[index], spuAddr, 0, 0, 0, 500, 0);
+    handle = func_800613FC(index, 0);
+    func_80061444(&D_801C49C0, 1, 0x800, handle);
+    addr = spuAddr;
+    count = D_801C49C0.count;
+    for (i = 0; i < count; i++) {
+        id = D_801C49C0.ids[i];
+        if (func_8006C8F8(id) == 0 || reload != 0) {
+            size = func_8006C8B4(id);
+            func_80061774(handle, addr, size);
+            func_8006C8D8(id, addr);
+            addr += size;
+        }
+    }
+    func_800614B0(handle);
+    return addr - spuAddr;
+}
+
+s32 func_8006301C(s32 index, s32 spuAddr) {
+    return func_80062F14(D_80085304[index], spuAddr, 0, 0, 0, 500, 0);
 }
 
 void func_80063064(void) {
@@ -501,7 +593,28 @@ s32 func_80063084(s32 arg0) {
     return func_800632E8(arg0);
 }
 
-INCLUDE_ASM("asm/main/nonmatchings/cdload", func_800630E8);
+void func_800630E8(s32 mode) {
+    s32 i;
+
+    if (mode == 1) {
+        for (i = 60; i != 0; i--) {
+            VSync(0);
+        }
+        if (cdload_wait_sync() == 0) {
+            CdReset(0);
+        }
+    }
+    CdControl(CdlPause, NULL, NULL);
+    if (mode == 1 && cdload_wait_sync() == 0) {
+        CdReset(0);
+    }
+    if (D_801D3764 != -1) {
+        CdReadyCallback((void *)D_801D3764);
+    }
+    D_801E28EC = 0;
+    D_801D3710 = 0;
+    D_801D8750 = 0xFFFF;
+}
 
 void func_800631B4(void) {
     if (D_801E28EC != 0 || D_801D3710 != 0) {
@@ -533,4 +646,25 @@ void func_800632CC(s32 arg0) {
     D_801E0D48++;
 }
 
-INCLUDE_ASM("asm/main/nonmatchings/cdload", func_800632E8);
+s32 func_800632E8(u32 track) {
+    u8 param[4];
+
+    D_801FB4BC.file = (track >> 4) + 1;
+    D_801FB4BC.chan = (track & 0xF) + 1;
+    if (CdControl(CdlSetfilter, (u8 *)&D_801FB4BC, NULL) == 0) {
+        return 0;
+    }
+    D_801E0D48 = 0;
+    D_801F991C = 0;
+    D_801E2A48 = D_8008A334[track];
+    D_801D3764 = CdReadyCallback(func_800632CC);
+    D_801E28EC = 1;
+    D_801D3710 = 0;
+    CdControl(CdlSetloc, (u8 *)D_80089820, NULL);
+    param[0] = 0xC8;
+    param[1] = 0;
+    CdControl(CdlSetmode, param, NULL);
+    CdControl(CdlReadS, NULL, NULL);
+    func_80063E48(0x7D, D_801E1CB4 << 7);
+    return 1;
+}
