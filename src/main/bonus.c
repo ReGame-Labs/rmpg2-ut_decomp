@@ -52,7 +52,47 @@ void func_8005D20C(Monster *e) {
 
 INCLUDE_ASM("asm/main/nonmatchings/bonus", func_8005D364);
 
+#ifdef NON_MATCHING
+/* 92.10%: 92.1 %: the first block's schedule: the original stores new_def through the copy of &D_800AA248 (s5) and
+ * orders the definition's stores unk_06, id, pos_y, flags around the table read */
+void func_8005D644(Monster *e) {
+    GameObject *saved;
+    ObjectDef *def;
+    s32 x;
+    s16 dx;
+    s32 v;
+    s32 i;
+
+    saved = D_800AA248.cur_obj;
+    def = func_8001D110();
+    D_800AA248.new_def = def;
+    x = (D_801FA8A0[e->id - 1] - 2) * 0x78;
+    def->id = 0x4F0021DE;
+    def->pos_y.s.hi = 0x30;
+    def->flags = 0x4FF;
+    def->unk_06 |= 0x20;
+    def->pos_x.s.hi = x + 0x96;
+    D_800AA248.cur_obj = func_8001DCB4();
+    dx = x + 0xF1;
+    D_800AA248.cur_obj->kind = e->id + 0x7A0;
+    v = e->unk_038;
+    for (i = 0; i < 6; i++) {
+        def->pos_x.s.hi = dx;
+        dx -= 8;
+        def->id = D_800842B4[v % 10];
+        def->pos_y.s.hi = 0x30;
+        def->flags = 0x4FF;
+        def->unk_06 |= 0x20;
+        D_800AA248.cur_obj = func_8001DCB4();
+        D_800AA248.cur_obj->kind = e->id + 0x7A0;
+        v /= 10;
+        e->unk_080[i] = D_800AA248.cur_obj;
+    }
+    D_800AA268.p = saved;
+}
+#else
 INCLUDE_ASM("asm/main/nonmatchings/bonus", func_8005D644);
+#endif
 
 void func_8005D7D8(Monster *e) {
     GameObject *saved;
@@ -106,7 +146,56 @@ Monster *func_8005D918(Monster *skip) {
     return found;
 }
 
-INCLUDE_ASM("asm/main/nonmatchings/bonus", func_8005D9BC);
+void func_8005D9BC(Monster *e) {
+    GameObject *saved;
+    GameObject *face;
+    s32 i;
+    s32 v;
+    u16 id;
+
+    id = e->id;
+    saved = D_800AA268.p;
+    if (id == 0) {
+        return;
+    }
+    face = e->unk_074;
+    if (e->unk_1CC == 1) {
+        if (func_8005D918(e) != NULL) {
+            func_8005E124(e, 0x7A0);
+            func_8005E124(e, 0x7A8);
+            func_8005E19C(e, 0x798);
+            if (face != NULL) {
+                func_80020BA0(0x4F00417E, face->flags, face);
+            }
+            return;
+        }
+    } else if (face != NULL) {
+        if (D_801F9ABC == 3 && id == 7) {
+            func_80020BA0(0x4F003EB2, face->flags, face);
+        } else if (D_801F9ABC == 4 && e->id == 7) {
+            func_80020BA0(0x4F003EB0, face->flags, face);
+        } else {
+            func_80020BA0(D_8008427C[e->id - 1], face->flags, face);
+        }
+    }
+    if (e->unk_004 != e->unk_002) {
+        func_8005E124(e, 0x7A0);
+        func_8005E19C(e, 0x798);
+        func_8005E19C(e, 0x7A8);
+    }
+    v = e->unk_004;
+    e->unk_002 = v;
+    if (v >= 0) {
+        for (i = 0; i < 2; i++) {
+            if (e->unk_078[i] != NULL) {
+                face = e->unk_078[i];
+                func_80020BA0(D_800842B4[v % 10], face->flags, face);
+                v /= 10;
+            }
+        }
+    }
+    D_800AA268.p = saved;
+}
 
 void func_8005DBC4(s32 old, Monster *m, s32 value) {
     s32 v; /* FAKE: one scratch for the colour bits and the eased meter: a variable live in two blocks keeps the

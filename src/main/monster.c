@@ -140,7 +140,45 @@ void func_800506BC(Monster *e) {
     }
 }
 
+#ifdef NON_MATCHING
+/* 83.56%: 83.6 %: the original keeps the x offset and its copy (negated when the holder faces left) in two
+ * registers and reads the holder's x before the index; here they share one */
+void func_80050774(Monster *e) {
+    GameObject *holder;
+    SpriteFrame *frame;
+    FramePoint *pt;
+    s32 i;
+    s32 x;
+    s32 d;
+    s32 dx;
+    s32 dy;
+
+    holder = e->unk_160;
+    if (holder != NULL) {
+        D_800AA248.cur_obj->priority = holder->priority + 1;
+        D_800AA248.cur_obj->vel_y.w = holder->vel_y.w;
+        D_800AA248.cur_obj->vel_x.w = 0;
+        frame = holder->frame;
+        x = holder->pos_x.u.hi;
+        pt = (FramePoint *) &frame->unk_10;
+        i = e->id - 1;
+        pt += i;
+        dy = pt->y - frame->origin.u.hi;
+        d = pt->x - frame->origin.u.lo;
+        if (holder->flags & 0x10) {
+            dx = -d;
+            D_800AA248.cur_obj->flags |= 0x10;
+        } else {
+            dx = d;
+            D_800AA248.cur_obj->flags &= ~0x10;
+        }
+        D_800AA248.cur_obj->pos_x.w = D_801D8864.w & ((x + dx) << 16);
+        D_800AA248.cur_obj->pos_y.s.hi = dy + holder->pos_y.u.hi;
+    }
+}
+#else
 INCLUDE_ASM("asm/main/nonmatchings/monster", func_80050774);
+#endif
 
 void func_8005086C(Monster *e) {
     s32 *speeds;
@@ -2308,7 +2346,36 @@ void func_80056560(Monster *e) {
 
 INCLUDE_ASM("asm/main/nonmatchings/monster", func_80056598);
 
-INCLUDE_ASM("asm/main/nonmatchings/monster", func_80056708);
+s32 func_80056708(Monster *e, Building *u) {
+    GameState *g;
+    s32 y;
+    s16 py;
+    s16 top;
+    u16 action;
+
+    g = &D_800AA248;
+    y = g->cur_obj->pos_y.w;
+    g->unk_10 = y;
+    action = e->action;
+    g->action = action;
+    if (action == 0x2C) {
+        g->unk_10 = y + 8;
+    }
+    g->unk_10 -= D_801F9ACC.w;
+    if ((u32) (g->unk_10 - 0x500000) > 0xB80000) {
+        return 0;
+    }
+    py = g->cur_obj->pos_y.s.hi;
+    g->unk_10 = py;
+    if (g->unk_0C < (s16) u->unk_004 + 0x10 || (s16) u->unk_00E - 0x10 < g->unk_0C || g->unk_08 != 0) {
+        return 0;
+    }
+    top = u->unk_074;
+    if (py < top || top + 0x10 < py) {
+        return 0;
+    }
+    return 1;
+}
 
 void func_800567E8(Monster *e, Building *city) {
     D_800AA248.cur_obj->pos_y.s.hi = city->unk_074;
@@ -2495,7 +2562,67 @@ void func_80056EB8(Monster *e, Building *city) {
     }
 }
 
+#ifdef NON_MATCHING
+/* 98.00%: 98 %: the scan only matches as labels (the original enters the loop at its test, which jump.c did not
+ * copy); the floor and the item count swap t0/t1 (the count's value, live into the action 9 test, outranks the
+ * floor) */
+void func_80056F38(Monster *e, Building *city) {
+    s16 *limit;
+    u16 side;
+    u16 floor;
+    u16 ledge;
+    u16 kind;
+    u16 y;
+    s16 top;
+
+    ledge = 0;
+    side = e->climb_side;
+    D_800AA248.unk_08 = side;
+    y = D_800AA248.cur_obj->pos_y.s.hi;
+    floor = 0;
+    if (side != 0) {
+        D_800AA248.unk_04 = city->unk_000;
+        if (D_800AA248.action == 9 || side == 3) {
+            D_800AA248.unk_04--;
+            floor = D_800AA248.unk_04;
+        } else {
+            kind = city->unk_008;
+            switch (kind) {
+            case 0x300:
+                limit = D_8007FD04;
+                break;
+            case 0x200:
+                limit = D_8007FD24;
+                break;
+            default:
+                limit = D_8007FD44;
+                break;
+            }
+            goto next;
+        loop:
+            top = *limit++;
+            if ((s16) y >= top) {
+                if ((s16) y < (s16) (top + 6)) {
+                    ledge++;
+                }
+                goto done;
+            }
+        next:
+            floor++;
+            if ((u32) floor < D_800AA248.unk_04) {
+                goto loop;
+            }
+            D_800AA248.unk_04--;
+            floor = D_800AA248.unk_04;
+        }
+    }
+done:
+    e->climb_floor = floor;
+    e->unk_1BC = ledge;
+}
+#else
 INCLUDE_ASM("asm/main/nonmatchings/monster", func_80056F38);
+#endif
 
 u16 func_8005703C(Monster *e, Building *u) {
     BuildingBlock *p;

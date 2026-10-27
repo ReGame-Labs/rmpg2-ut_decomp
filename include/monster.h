@@ -5,6 +5,12 @@
 
 #include "game.h"
 
+/* A point of a sprite frame: the frames carry one per monster id from SpriteFrame.unk_10 on (func_80050774). */
+typedef struct FramePoint {
+    u16 x;
+    u16 y;
+} FramePoint;
+
 s32 func_8001B660(s32);
 ObjectDef *func_8001D110(void);
 void *func_8001DCB4(void);

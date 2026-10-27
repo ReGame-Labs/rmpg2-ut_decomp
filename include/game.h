@@ -196,7 +196,8 @@ typedef struct Monster {
     /* 0x068 */ GameObject *obj;               /* its body */
     /* 0x06C */ GameObject *meter_bar;         /* status bars: boxes whose width (unk_40.w) is the value shown, */
     /* 0x070 */ GameObject *health_bar;        /* at most 0x44 (func_8005D20C, func_8005DBC4) */
-    /* 0x074 */ u8 unk_074[0x0C];
+    /* 0x074 */ GameObject *unk_074;               /* its portrait in the status panel (func_8005D9BC) */
+    /* 0x078 */ GameObject *unk_078[2];            /* the lives' digit sprites */
     /* 0x080 */ GameObject *unk_080[6];        /* the score's digit sprites */
     /* 0x098 */ GameObject *unk_098;
     /* 0x09C */ u8 unk_09C[0x08];
@@ -265,7 +266,8 @@ typedef struct Monster {
     /* 0x148 */ u8 unk_148[0x08];
     /* 0x150 */ s16 unk_150;
     /* 0x152 */ s16 unk_152;
-    /* 0x154 */ u8 unk_154[0x10];
+    /* 0x154 */ u8 unk_154[0x0C];
+    /* 0x160 */ GameObject *unk_160;               /* an object it is carried by: func_80050774 places it there */
     /* 0x164 */ s16 unk_164;
     /* 0x166 */ u16 unk_166;
     /* 0x168 */ u16 unk_168;
