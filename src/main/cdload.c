@@ -1,4 +1,6 @@
 /* The CD file reader (by index into the file table, with a checksum) and the overlay loader; docs/DISC_LAYOUT.md.
+ * Also: a stdio emulation over the loaded file (what the sound driver reads its banks with), the unpackers of packed
+ * files, the SPU upload of sound banks and the XA music player.
  * The boundaries and their evidence: config/main.yaml (docs/MATCHING.md "Splitting a target into files"). */
 #include "common.h"
 #include "cdload.h"
@@ -14,9 +16,9 @@ void *func_8001D110(void);
 void func_8001DCB4(void);
 void func_800415B4(void);
 void func_8001B5E8(s32);
-void func_800630E8(s32);
-s32 func_800632E8(u32);
-void func_800632CC(s32);
+void cdload_stop_xa(s32);
+s32 cdload_play_xa(u32);
+void cdload_on_xa_ready(s32);
 void func_80063E48(s32, s32);
 s32 func_80063F30(void);
 void func_800700CC(s32);
@@ -31,7 +33,7 @@ void func_8006C8D8(s32, s32);
 s32 func_8006C8B4(s32);
 s32 func_8006C8F8(s32);
 s16 func_8006EC18(void);
-s32 func_80062F14(s32, s32, s32, s32, s32, s32, s32);
+s32 cdload_load_bank(s32, s32, s32, s32, s32, s32, s32);
 
 extern u8 D_801FA8A0[7];
 extern s32 D_801FB49C[3];
@@ -102,20 +104,20 @@ void *func_8006EC08(void);
 s32 func_8006E4F4(void);
 s32 func_80070298(s32, s32);
 s32 func_80070324(s32, s32, void *);
-void *func_80062C10(s32 size);
+void *cdload_alloc(s32 size);
 void func_80062EB0(void);
-void func_80063064(void);
-s32 func_80061444(void *buf, s32 size, s32 count, s32 handle);
-s32 func_800614E0(s32 handle, s32 pos);
-s32 func_800614BC(void);
-s32 func_800614B0(s32 handle);
-s32 func_80061774(s32 handle, s32 spuAddr, s32 size);
-s32 func_800613FC(s32 index, s32 mode);
-s32 func_8006301C(s32 index, s32 spuAddr);
-s32 func_80061ACC(u8 *src, u8 *dst);
-s32 func_80061B4C(u8 *src, u8 *dst);
-s32 func_80061D10(u8 *src, u8 *dst);
-s32 func_80061F90(u8 *src, u8 *dst);
+void cdload_reset_xa(void);
+s32 cdload_read(void *buf, s32 size, s32 count, s32 handle);
+s32 cdload_seek(s32 handle, s32 pos);
+s32 cdload_size(void);
+s32 cdload_close(s32 handle);
+s32 cdload_load_spu(s32 handle, s32 spuAddr, s32 size);
+s32 cdload_open(s32 index, s32 mode);
+s32 cdload_load_bank_by_number(s32 index, s32 spuAddr);
+s32 cdload_unpack_rle8(u8 *src, u8 *dst);
+s32 cdload_unpack_rle16(u8 *src, u8 *dst);
+s32 cdload_unpack_rle6(u8 *src, u8 *dst);
+s32 cdload_unpack_rle4(u8 *src, u8 *dst);
 void func_800621F8(u8 *bits, u8 *table, u32 dims);
 extern s16 D_80085304[];
 
@@ -146,7 +148,7 @@ void func_80060F3C(void) {
     }
 }
 
-s32 func_80061014(s32 arg0) {
+s32 cdload_get_next_player(s32 arg0) {
     s32 i;
 
     for (i = 0; i < 2; i++) {
@@ -210,7 +212,7 @@ retry:
         size = D_80089DA0[index];
         sectors = (u32)(size + 0x7FF) >> 11;
         if (D_801E28EC != 0 || D_801D3710 != 0) {
-            func_800630E8(1);
+            cdload_stop_xa(1);
         }
         if (cdload_wait_sync() == 0) {
             CdReset(0);
@@ -276,7 +278,7 @@ s32 cdload_wait_sync(void) {
     return 0;
 }
 
-s32 func_800613FC(s32 index, s32 mode) {
+s32 cdload_open(s32 index, s32 mode) {
     D_801FB4AC = index;
     D_801FB4B4 = 0;
     D_801FB4B0 = D_801E1C78;
@@ -284,7 +286,7 @@ s32 func_800613FC(s32 index, s32 mode) {
     return index;
 }
 
-s32 func_80061444(void *buf, s32 size, s32 count, s32 handle) {
+s32 cdload_read(void *buf, s32 size, s32 count, s32 handle) {
     s32 len;
 
     if (handle == -1) {
@@ -296,15 +298,15 @@ s32 func_80061444(void *buf, s32 size, s32 count, s32 handle) {
     return len;
 }
 
-s32 func_800614B0(s32 handle) {
+s32 cdload_close(s32 handle) {
     return handle != -1;
 }
 
-s32 func_800614BC(void) {
+s32 cdload_size(void) {
     return D_80089DA0[D_801FB4AC];
 }
 
-s32 func_800614E0(s32 handle, s32 pos) {
+s32 cdload_seek(s32 handle, s32 pos) {
     D_801FB4B4 = pos;
     return 0;
 }
@@ -385,26 +387,26 @@ s32 cdload_city_file_index(s32 which) {
     return file;
 }
 
-void func_80061668(s32 handle, s32 len, s32 spuAddr) {
+void cdload_write_spu(s32 handle, s32 len, s32 spuAddr) {
     u8 *buf;
     u8 *prev;
 
     buf = D_801C41C0;
     prev = D_801C41C0 - 0x800;
     if (D_801FB4B8 != 0) {
-        func_80061444(buf, len, 1, handle);
+        cdload_read(buf, len, 1, handle);
         SpuSetTransferStartAddr(spuAddr);
         SpuWrite(buf, len);
         D_801FB4A8 = 1;
         D_801FB4B8 = 0;
     } else if (D_801FB4A8 != 0) {
-        func_80061444(prev, len, 1, handle);
+        cdload_read(prev, len, 1, handle);
         SpuIsTransferCompleted(SPU_TRANSFER_WAIT);
         SpuSetTransferStartAddr(spuAddr);
         SpuWrite(prev, len);
         D_801FB4A8 = 0;
     } else {
-        func_80061444(buf, len, 1, handle);
+        cdload_read(buf, len, 1, handle);
         SpuIsTransferCompleted(SPU_TRANSFER_WAIT);
         SpuSetTransferStartAddr(spuAddr);
         SpuWrite(buf, len);
@@ -412,7 +414,7 @@ void func_80061668(s32 handle, s32 len, s32 spuAddr) {
     }
 }
 
-s32 func_80061774(s32 handle, s32 spuAddr, s32 size) {
+s32 cdload_load_spu(s32 handle, s32 spuAddr, s32 size) {
     s32 left;
     s32 addr;
 
@@ -420,12 +422,12 @@ s32 func_80061774(s32 handle, s32 spuAddr, s32 size) {
     addr = spuAddr;
     D_801FB4B8 = 1;
     while (left >= 0x800) {
-        func_80061668(handle, 0x800, addr);
+        cdload_write_spu(handle, 0x800, addr);
         left -= 0x800;
         addr += 0x800;
     }
     if (left != 0) {
-        func_80061668(handle, left, addr);
+        cdload_write_spu(handle, left, addr);
     }
     SpuIsTransferCompleted(SPU_TRANSFER_WAIT);
     return size;
@@ -486,7 +488,7 @@ void cdload_load_city_table(s32 index) {
 /* 85.7%: dst is kept in a3 in the original (a1 here: something keeps a1 live, maybe a used second parameter), which
  * moves every case's argument setup */
 #ifdef NON_MATCHING
-s32 func_800619A4(u8 *dst, s32 arg1, u8 *src) {
+s32 cdload_unpack(u8 *dst, s32 arg1, u8 *src) {
     s32 size;
     u32 dims;
 
@@ -496,13 +498,13 @@ s32 func_800619A4(u8 *dst, s32 arg1, u8 *src) {
         memcpy(dst, src + 4, size);
         return size;
     case 1:
-        return func_80061ACC(src, dst);
+        return cdload_unpack_rle8(src, dst);
     case 2:
-        return func_80061B4C(src, dst);
+        return cdload_unpack_rle16(src, dst);
     case 3:
-        return func_80061D10(src, dst);
+        return cdload_unpack_rle6(src, dst);
     case 4:
-        return func_80061F90(src, dst);
+        return cdload_unpack_rle4(src, dst);
     case 5:
         func_800621F8(src + ((s32 *)src)[1], src + 12, ((u32 *)src)[2]);
         dims = ((u32 *)src)[2];
@@ -511,10 +513,10 @@ s32 func_800619A4(u8 *dst, s32 arg1, u8 *src) {
     return 0;
 }
 #else
-INCLUDE_ASM("asm/main/nonmatchings/cdload", func_800619A4);
+INCLUDE_ASM("asm/main/nonmatchings/cdload", cdload_unpack);
 #endif
 
-s32 func_80061ACC(u8 *src, u8 *dst) {
+s32 cdload_unpack_rle8(u8 *src, u8 *dst) {
     s8 *in;
     u8 *out;
     u8 *end;
@@ -542,7 +544,7 @@ s32 func_80061ACC(u8 *src, u8 *dst) {
     return out - dst;
 }
 
-INCLUDE_ASM("asm/main/nonmatchings/cdload", func_80061B4C);
+INCLUDE_ASM("asm/main/nonmatchings/cdload", cdload_unpack_rle16);
 
 /* Takes the next 6-bit symbol of the stream: four per three bytes, most significant first. */
 #define CDLOAD_GET6(x)                          \
@@ -567,7 +569,7 @@ INCLUDE_ASM("asm/main/nonmatchings/cdload", func_80061B4C);
 
 /* Unpacks a 6-bit RLE stream: a symbol below 32 repeats the next one that many times plus one, a symbol from 32
  * copies that many minus 31 symbols; the top two bits of byte 3 count the padding symbols at the end. */
-s32 func_80061D10(u8 *src, u8 *dst) {
+s32 cdload_unpack_rle6(u8 *src, u8 *dst) {
     u8 *start;
     s32 count;
     s32 phase;
@@ -617,7 +619,7 @@ s32 func_80061D10(u8 *src, u8 *dst) {
 
 /* Unpacks a 4-bit RLE stream: 0x80 | n is n + 7 zeros, 0x0v n a run of n v, 0x1v-0x6v one to six v, 0x7n n + 3
  * nibbles packed two per byte, high first. */
-s32 func_80061F90(u8 *src, u8 *dst) {
+s32 cdload_unpack_rle4(u8 *src, u8 *dst) {
     u8 *start;
     u8 *end;
     s32 half;
@@ -680,7 +682,7 @@ INCLUDE_ASM("asm/main/nonmatchings/cdload", func_800621F8);
 
 INCLUDE_ASM("asm/main/nonmatchings/cdload", func_80062868);
 
-void *func_80062C10(s32 size) {
+void *cdload_alloc(s32 size) {
     u8 *p;
 
     p = (u8 *)(((u32)D_80085300 + 7) & ~7);
@@ -695,12 +697,12 @@ void func_80062C30(void) {
     void *buf;
     void *seqs;
 
-    io.open = func_800613FC;
-    io.read = func_80061444;
-    io.seek = func_800614E0;
-    io.size = func_800614BC;
-    io.close = func_800614B0;
-    io.load_spu = func_80061774;
+    io.open = cdload_open;
+    io.read = cdload_read;
+    io.seek = cdload_seek;
+    io.size = cdload_size;
+    io.close = cdload_close;
+    io.load_spu = cdload_load_spu;
     io.unk_20 = 0x78;
     io.unk_18 = 0;
     io.unk_1C = 0;
@@ -708,16 +710,16 @@ void func_80062C30(void) {
     io.unk_24 = 1;
     func_800706C0(&io);
     size = func_8006EE30(0x4F);
-    func_8006F0D8(0x4F, func_80062C10(size), size);
+    func_8006F0D8(0x4F, cdload_alloc(size), size);
     bank_size = func_8006E804(func_8006EC08(), 0x50);
-    buf = func_80062C10(bank_size);
+    buf = cdload_alloc(bank_size);
     func_8006E8B4(func_8006EC08(), 0x50, 0, buf, bank_size);
-    seqs = func_80062C10(func_80070298(0, func_8006E4F4()));
+    seqs = cdload_alloc(func_80070298(0, func_8006E4F4()));
     func_80070324(0, func_8006E4F4(), seqs);
     D_801FB4C0 = 0x1010;
-    func_80063064();
+    cdload_reset_xa();
     func_80062EB0();
-    D_801FB4C0 += func_8006301C(0, D_801FB4C0);
+    D_801FB4C0 += cdload_load_bank_by_number(0, D_801FB4C0);
 }
 
 void func_80062D88(s32 arg0) {
@@ -770,7 +772,7 @@ void func_80062EB0(void) {
     D_801FB4C0 = 0x1010;
 }
 
-s32 func_80062F14(s32 index, s32 spuAddr, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 reload) {
+s32 cdload_load_bank(s32 index, s32 spuAddr, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 reload) {
     s32 handle;
     s32 addr;
     s32 count;
@@ -778,28 +780,28 @@ s32 func_80062F14(s32 index, s32 spuAddr, s32 arg2, s32 arg3, s32 arg4, s32 arg5
     s32 id;
     s32 size;
 
-    handle = func_800613FC(index, 0);
-    func_80061444(&D_801C49C0, 1, 0x800, handle);
+    handle = cdload_open(index, 0);
+    cdload_read(&D_801C49C0, 1, 0x800, handle);
     addr = spuAddr;
     count = D_801C49C0.count;
     for (i = 0; i < count; i++) {
         id = D_801C49C0.ids[i];
         if (func_8006C8F8(id) == 0 || reload != 0) {
             size = func_8006C8B4(id);
-            func_80061774(handle, addr, size);
+            cdload_load_spu(handle, addr, size);
             func_8006C8D8(id, addr);
             addr += size;
         }
     }
-    func_800614B0(handle);
+    cdload_close(handle);
     return addr - spuAddr;
 }
 
-s32 func_8006301C(s32 index, s32 spuAddr) {
-    return func_80062F14(D_80085304[index], spuAddr, 0, 0, 0, 500, 0);
+s32 cdload_load_bank_by_number(s32 index, s32 spuAddr) {
+    return cdload_load_bank(D_80085304[index], spuAddr, 0, 0, 0, 500, 0);
 }
 
-void func_80063064(void) {
+void cdload_reset_xa(void) {
     D_801E28EC = 0;
     D_801D3710 = 0;
     D_801D3764 = -1;
@@ -813,10 +815,10 @@ s32 func_80063084(s32 arg0) {
         CdControl(9, NULL, NULL);
         cdload_wait_sync();
     }
-    return func_800632E8(arg0);
+    return cdload_play_xa(arg0);
 }
 
-void func_800630E8(s32 mode) {
+void cdload_stop_xa(s32 mode) {
     s32 i;
 
     if (mode == 1) {
@@ -860,16 +862,16 @@ void func_80063270(void) {
         func_80063E48(0xFA, 0);
         while (func_80063F30() != 0) {
         }
-        func_800630E8(0);
+        cdload_stop_xa(0);
     }
 }
 
-void func_800632CC(s32 arg0) {
+void cdload_on_xa_ready(s32 arg0) {
     D_801F991C = arg0;
     D_801E0D48++;
 }
 
-s32 func_800632E8(u32 track) {
+s32 cdload_play_xa(u32 track) {
     u8 param[4];
 
     D_801FB4BC.file = (track >> 4) + 1;
@@ -880,7 +882,7 @@ s32 func_800632E8(u32 track) {
     D_801E0D48 = 0;
     D_801F991C = 0;
     D_801E2A48 = D_8008A334[track];
-    D_801D3764 = CdReadyCallback(func_800632CC);
+    D_801D3764 = CdReadyCallback(cdload_on_xa_ready);
     D_801E28EC = 1;
     D_801D3710 = 0;
     CdControl(CdlSetloc, (u8 *)D_80089820, NULL);
