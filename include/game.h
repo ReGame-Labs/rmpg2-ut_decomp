@@ -666,7 +666,7 @@ typedef struct TextState {
     /* 0x28 */ u16 unk_28;
     /* 0x2A */ u16 unk_2A;
     /* 0x2C */ s16 unk_2C;
-    /* 0x2E */ u16 unk_2E;
+    /* 0x2E */ s16 unk_2E;
     /* 0x30 */ s16 unk_30;
     /* 0x32 */ u16 unk_32;
     /* 0x34 */ u16 unk_34;
