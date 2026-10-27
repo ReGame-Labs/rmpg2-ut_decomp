@@ -34,16 +34,13 @@ void func_80050190(Monster *e) {
     }
 }
 
-#ifdef NON_MATCHING
-/* 82.67%: 82.7 %: the original stores D_800AA26C before the speed load and keeps the speed in a0; its unk_168 == 7
- * arm jumps into the other arm's three bodies (stop, stop with 0xC, walk), which here stay separate */
+// u16 A2 B1
 void func_800501B0(Monster *e) {
     s32 *speeds;
     s32 speed;
     u16 dir;
     u16 act;
     s16 x;
-    u16 side;
 
     if (e->unk_18E == 0 || e->dir == 0) {
         D_800AA268.p->vel_y.w = 0;
@@ -58,7 +55,7 @@ void func_800501B0(Monster *e) {
             speeds = D_8007FB08[e->id - 1];
         }
         dir = e->dir;
-        D_800AA26C = dir;
+        D_800AA248.dir = dir;
         speed = speeds[dir];
         if (D_8007C976 == 2) {
             if (speed > 0x6000) {
@@ -85,25 +82,25 @@ void func_800501B0(Monster *e) {
                 e->unk_100 = 0;
                 act = 0;
                 D_800AA268.p->vel_x.w = 0;
-            } else if (e->dir < 6) {
-                act = 1;
-                e->unk_100 = speed;
-            } else {
+            } else if (e->dir >= 6) {
                 e->unk_100 = 0;
                 act = 0xC;
                 D_800AA268.p->vel_x.w = 0;
+            } else {
+                act = 1;
+                e->unk_100 = speed;
             }
         }
-        D_800AA248.action = act;
-        e->action = act;
+        e->action = D_800AA248.action = act;
         D_800AA248.unk_08 = e->climb_side;
         if (D_800AA248.unk_08 != 0) {
             func_8005520C(e);
         } else if ((u16) (e->dir - 4) < 3 && e->health.w > 0xFFFF) {
             monster_grab_building(e);
         }
-        e->action = D_800AA25C;
-        if (e->action == 0 && D_801E1E44 >= 2) {
+        act = D_800AA25C;
+        e->action = act;
+        if (act == 0 && D_801E1E44 >= 2) {
             func_80050E88(e);
         }
         if (e->unk_18E == 0 && e->climb_side == 0 && D_801D37BC == 0 && D_800AA268.p->pos_y.s.hi >= 0xE1 &&
@@ -111,15 +108,15 @@ void func_800501B0(Monster *e) {
             x = D_800AA268.p->pos_x.s.hi;
             if (x >= D_801FA98C && x <= D_801FA990) {
                 if (x - D_801FA98C < 0x21) {
-                    side = 7;
+                    if (e->unk_168 != 7) {
+                        e->action = 0x3D;
+                    }
                 } else if (D_801FA990 - x < 0x21) {
-                    side = 3;
+                    if (e->unk_168 != 3) {
+                        e->action = 0x3D;
+                    }
                 } else {
                     e->action = 0x35;
-                    return;
-                }
-                if (e->unk_168 != side) {
-                    e->action = 0x3D;
                 }
             }
         }
@@ -127,9 +124,6 @@ void func_800501B0(Monster *e) {
         func_80050B40(e);
     }
 }
-#else
-INCLUDE_ASM("asm/main/nonmatchings/monster", func_800501B0);
-#endif
 
 void func_800504B4(Monster *e) {
     D_800AA248.dir = e->dir;
@@ -688,68 +682,64 @@ void func_80051410(Monster *e, Monster *e2) {
     func_800510E8(e);
 }
 
-#ifdef NON_MATCHING
-/* 76.08%: 76 %: the logic is the original's; its block layout differs: the original places the four call-and-return
- * tails (func_80051410, func_800511B4, func_80051248, func_800511F8) before the loop, after the climb_side tests */
 void func_800514CC(Monster *e) {
     Monster *m;
     u16 i;
 
-    if (e->pos.s.lo != 0 && (e->climb_side == 0 || e->climb_side == 3)) {
-        i = 7;
-        do {
-            m = &D_801E0B78[i];
-            if (m != e && (m->unk_058 & 1) && m->unk_0DC != 0 && m->action != 0x37) {
-                D_800AA248.unk_08 = monster_test_hit_box(e, m);
-                if (D_800AA248.unk_08 != 0) {
-                    m->attacker = e;
-                    if (m->action == 0x4D) {
-                        func_80051410(e, m);
-                        return;
-                    }
-                    func_800634D4(m, 5);
-                    if (D_8007A68A != 0) {
-                        func_80053C50(0x30000, m);
-                    }
-                    if (m->unk_18E != 0) {
-                        func_800511B4(e, m);
-                        return;
-                    }
-                    if (e->unk_164 != 0) {
-                        func_80051248(e, m);
-                        return;
-                    }
-                    if (m->climb_side != 0 || m->obj->pos_y.s.hi != 0xE1) {
-                        func_80051150(e, m);
-                        return;
-                    }
-                    if ((D_800AA248.cur_obj->flags & 0x10) == (m->obj->flags & 0x10)) {
-                        func_800511F8(e, m);
-                        return;
-                    }
-                    if (D_800AA248.unk_08 != 1 || e->action != 4 || e->unk_104 != 0) {
-                        func_800512CC(e, m);
-                        return;
-                    }
-                    m->action = 0x28;
-                    func_8004FC00(2, e);
-                    func_800540D0(e);
-                    func_800510E8(e);
+    if (e->pos.s.lo == 0 || (e->climb_side != 0 && e->climb_side != 3)) {
+        func_800510E8(e);
+        return;
+    }
+    i = 7;
+    do {
+        m = &D_801E0B78[i];
+        if (m != e && (m->unk_058 & 1) && m->unk_0DC != 0 && m->action != 0x37) {
+            D_800AA248.unk_08 = monster_test_hit_box(e, m);
+            if (D_800AA248.unk_08 != 0) {
+                m->attacker = e;
+                if (m->action == 0x4D) {
+                    func_80051410(e, m);
                     return;
                 }
+                func_800634D4(m, 5);
+                if (D_8007A68A != 0) {
+                    func_80053C50(0x30000, m);
+                }
+                if (m->unk_18E != 0) {
+                    func_800511B4(e, m);
+                    return;
+                }
+                if ((u16) e->unk_164 != 0) {
+                    func_80051248(e, m);
+                    return;
+                }
+                if (m->climb_side != 0 || m->obj->pos_y.s.hi != 0xE1) {
+                    func_80051150(e, m);
+                    return;
+                }
+                if ((D_800AA248.cur_obj->flags & 0x10) == (m->obj->flags & 0x10)) {
+                    func_800511F8(e, m);
+                    return;
+                }
+                if (D_800AA248.unk_08 != 1 || e->action != 4 || e->unk_104 != 0) {
+                    func_800512CC(e, m);
+                    return;
+                }
+                m->action = 0x28;
+                func_8004FC00(2, e);
+                func_800540D0(e);
+                func_800510E8(e);
+                return;
             }
-        } while (--i != 0);
-        if (e->unk_18A != 0 || (func_80036A20(e), e->unk_18A != 0) || (pickup_collect(e), e->unk_18A != 0) ||
-            (func_8004D38C(e), e->unk_18A != 0) || (func_8003F114(e), e->unk_18A != 0) ||
-            (func_80047028(e), e->unk_18A != 0)) {
-            func_800634D4(e, 3);
         }
+    } while (--i != 0);
+    if (e->unk_18A != 0 || (func_80036A20(e), e->unk_18A != 0) || (pickup_collect(e), e->unk_18A != 0) ||
+        (func_8004D38C(e), e->unk_18A != 0) || (func_8003F114(e), e->unk_18A != 0) ||
+        (func_80047028(e), e->unk_18A != 0)) {
+        func_800634D4(e, 3);
     }
     func_800510E8(e);
 }
-#else
-INCLUDE_ASM("asm/main/nonmatchings/monster", func_800514CC);
-#endif
 
 void func_800517C0(Monster *e) {
     e->unk_104 = 0x4000;
@@ -1233,9 +1223,6 @@ void func_80052798(Monster *e) {
     D_800AA268.p->vel_y.w = vy;
 }
 
-#ifdef NON_MATCHING
-/* 87.30%: 87.3 %: the original loads the 3 into s1 before the first call in the default case, so case 1 (player 3
- * first) cross-jumps into the default case right after its argument; here only the second halves merge */
 void func_80052880(Monster *e, GameState *g) {
     Monster *other;
     s32 vx;
@@ -1243,40 +1230,38 @@ void func_80052880(Monster *e, GameState *g) {
     switch (e->id) {
     default:
         other = &D_801E0B78[func_80025DF8(1)];
-        if (other->climb_side == 3) {
-            goto grab;
+        if (other->climb_side != 3) {
+            other = &D_801E0B78[func_80025DF8(2)];
+            if (other->climb_side != 3) {
+                vx = func_80052A68(e);
+                break;
+            }
         }
-        other = &D_801E0B78[func_80025DF8(2)];
-        if (other->climb_side == 3) {
-            goto grab;
-        }
+        vx = func_80052A0C(e, other);
         break;
     case 1:
         other = &D_801E0B78[func_80025DF8(3)];
-        if (other->climb_side == 3) {
-            goto grab;
+        if (other->climb_side != 3) {
+            other = &D_801E0B78[func_80025DF8(2)];
+            if (other->climb_side != 3) {
+                vx = func_80052A68(e);
+                break;
+            }
         }
-        other = &D_801E0B78[func_80025DF8(2)];
-        if (other->climb_side == 3) {
-            goto grab;
-        }
+        vx = func_80052A0C(e, other);
         break;
     case 2:
         other = &D_801E0B78[func_80025DF8(1)];
-        if (other->climb_side == 3) {
-            goto grab;
+        if (other->climb_side != 3) {
+            other = &D_801E0B78[func_80025DF8(3)];
+            if (other->climb_side != 3) {
+                vx = func_80052A68(e);
+                break;
+            }
         }
-        other = &D_801E0B78[func_80025DF8(3)];
-        if (other->climb_side == 3) {
-            goto grab;
-        }
+        vx = func_80052A0C(e, other);
         break;
     }
-    vx = func_80052A68(e);
-    goto done;
-grab:
-    vx = func_80052A0C(e, other);
-done:
     e->unk_100 = vx;
     e->unk_104 = 0x4000;
     e->climb_side = 0;
@@ -1292,9 +1277,6 @@ done:
     }
     func_800531C0(e);
 }
-#else
-INCLUDE_ASM("asm/main/nonmatchings/monster", func_80052880);
-#endif
 
 /* 0x8000 when a's player has a lower D_801D3D98 entry than b's, else -0x8000. */
 s32 func_80052A0C(Monster *a, Monster *b) {
@@ -3419,11 +3401,6 @@ void func_80056EB8(Monster *e, Building *city) {
     }
 }
 
-#ifdef NON_MATCHING
-/* 98.00%: 98 %: the goto layout gives the original's blocks but no loop notes, so the floor's references count
- * once: the count (3 over 8 insns, 0.38) outranks the floor (7 over 51, 0.27) for t0. The original was a real loop
- * (its refs doubled) whose rolled exit test jump.c did not copy to the entry; while/for forms get the copied test
- * (62-65 %) */
 void monster_find_floor(Monster *e, Building *city) {
     s16 *limit;
     u16 side;
@@ -3456,31 +3433,26 @@ void monster_find_floor(Monster *e, Building *city) {
                 limit = D_8007FD44;
                 break;
             }
-            goto next;
-        loop:
-            top = *limit++;
-            if ((s16) y >= top) {
-                if ((s16) y < (s16) (top + 6)) {
-                    ledge++;
+            for (;;) {
+                floor++;
+                if ((u32) floor >= D_800AA248.unk_04) {
+                    D_800AA248.unk_04--;
+                    floor = D_800AA248.unk_04;
+                    break;
                 }
-                goto done;
+                top = *limit++;
+                if ((s16) y >= top) {
+                    if ((s16) y < (s16) (top + 6)) {
+                        ledge++;
+                    }
+                    break;
+                }
             }
-        next:
-            floor++;
-            if ((u32) floor < D_800AA248.unk_04) {
-                goto loop;
-            }
-            D_800AA248.unk_04--;
-            floor = D_800AA248.unk_04;
         }
     }
-done:
     e->climb_floor = floor;
     e->unk_1BC = ledge;
 }
-#else
-INCLUDE_ASM("asm/main/nonmatchings/monster", monster_find_floor);
-#endif
 
 u16 func_8005703C(Monster *e, Building *u) {
     BuildingBlock *p;
