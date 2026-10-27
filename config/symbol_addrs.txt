@@ -5,11 +5,22 @@
 game_main = 0x8001781C; // type:func  main, which crt0 calls right after setting $gp (docs/TOOLCHAIN.md), compiled under this name (config/aliases.ld)
 
 // main (src/main/main.c)
+main_update_pressed = 0x80017C04; // type:func
+main_begin_frame = 0x80019764; // type:func
+main_load_image_8bit = 0x80019B08; // type:func
+main_load_image_4bit = 0x80019DAC; // type:func
+main_load_cluts = 0x8001A870; // type:func
+main_get_tpage = 0x8001AE70; // type:func
+main_load_font = 0x8001B178; // type:func
+main_alloc_vram_slot = 0x8001B3C4; // type:func
 main_sort_objects = 0x8001DF98; // type:func
+main_resort_objects = 0x8001E010; // type:func
 main_init_objects = 0x8001E0AC; // type:func
 main_free_kind = 0x8001E450; // type:func
 main_free_kind_masked = 0x8001E8C0; // type:func
 main_create_box = 0x8001EB9C; // type:func
+main_draw_lists = 0x8001F848; // type:func
+main_step_anim = 0x8002075C; // type:func
 main_set_frame = 0x80020BA0; // type:func
 main_approach_xy = 0x80023474; // type:func  (npc) speed from D_8007B9A0 towards the target height and x, 1 once there
 main_approach_x = 0x80023620; // type:func  (npc) speed from D_8007B9A0 towards the target x, 1 once within 0x60..0x70

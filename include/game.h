@@ -70,14 +70,13 @@ typedef struct GameObject {
     /* 0x1C */ Fixed unk_1C;
     /* 0x20 */ u16 unk_20;
     /* 0x22 */ u16 flags;               /* 0x10: faces left; 0x20 */
-    /* 0x24 */ u8 unk_24[0x04];
+    /* 0x24 */ s32 unk_24;               /* the frame's first word, or its VRAM slot's (func_8001A554) */
     /* 0x28 */ Fixed unk_28;
     /* 0x2C */ Fixed unk_2C;            /* the frame's size too (func_8001E59C sets both): u.lo the width, u.hi the height */
     /* 0x30 */ Fixed size;              /* the frame's size: u.lo the width, u.hi the height */
     /* 0x34 */ SpriteFrame *frame;      /* the current frame's metrics */
     /* 0x38 */ s32 anim_frame;          /* the current animation frame id */
-    /* 0x3C */ u16 unk_3C;
-    /* 0x3E */ u8 unk_3E[0x02];
+    /* 0x3C */ s32 unk_3C;               /* the frame id func_8001A554 last set */
     /* 0x40 */ union {
                    struct GameObject *obj;  /* a link (main.c's list from D_801D8584) */
                    s32 w;                   /* a value; a box's width (main_create_box: the status bars, OVERATTR's
@@ -132,7 +131,7 @@ typedef struct GameObject {
     /* 0x76 */ u8 unk_76[0x02];
     /* 0x78 */ u32 colour;              /* 0x808080: neutral */
     /* 0x7C */ s32 unk_7C;
-    /* 0x80 */ u16 priority;            /* the draw order: the list is kept sorted by it, highest first (func_8001E010) */
+    /* 0x80 */ u16 priority;            /* the draw order: the list is kept sorted by it, highest first (main_resort_objects) */
     /* 0x82 */ u16 unk_82;
     /* 0x84 */ s32 unk_84;              /* a horizontal acceleration, 16.16 */
     /* 0x88 */ s32 unk_88;
@@ -378,14 +377,14 @@ typedef struct GameState {
     /* 0x1C */ union {
                    ObjectDef *def;
                    s32 n;                   /* a count (main_count_monsters) */
-                   s32 flags;               /* the object's flags while its script runs (func_8002075C) */
+                   s32 flags;               /* the object's flags while its script runs (main_step_anim) */
                } unk_1C;
     /* 0x20 */ GameObject *cur_obj;            /* the object being updated (D_800AA268) */
     /* 0x24 */ s32 dir;                        /* a monster's direction, copied before its handlers run (D_800AA26C);
                                                 * scratch: main_count_monsters's count */
     /* 0x28 */ union {
                    s32 n;                   /* a counter (func_8003C3B0: the items left in the building) */
-                   s32 *p;                  /* a write pointer into a word list (func_8002075C) */
+                   s32 *p;                  /* a write pointer into a word list (main_step_anim) */
                } unk_28;
     /* 0x2C */ s32 unk_2C;
     /* 0x30 */ s32 *unk_30;
@@ -398,7 +397,8 @@ typedef struct GameState {
     /* 0x4C */ s32 unk_4C;
     /* 0x50 */ s32 unk_50;
     /* 0x54 */ s32 unk_54;
-    /* 0x58 */ u8 unk_58[0x08];
+    /* 0x58 */ void (*unk_58)(void);          /* the creation callback of an ObjectDef (func_8001DCB4) */
+    /* 0x5C */ u8 unk_5C[0x04];
     /* 0x60 */ s32 unk_60;
     /* 0x64 */ u8 unk_64[0x10];
     /* 0x74 */ s32 unk_74;
@@ -661,7 +661,7 @@ typedef struct Unk1D3D64 {
 extern Unk1D3D64 D_801D3D64;
 
 /* The frame's drawing state D_801FAC80 points to: the draw and display environments, two gouraud quads (the sky's
- * gradient: their colour bytes at 0x74..0xB2), the ordering table at 0x154. */
+ * gradient: their colour bytes at 0x74..0xB2), the ordering table at 0x148. */
 typedef struct DrawState {
     /* 0x00 */ DRAWENV draw;
     /* 0x5C */ DISPENV disp;
@@ -669,37 +669,51 @@ typedef struct DrawState {
     /* 0x74 */ u8 unk_74;
     /* 0x75 */ u8 unk_75;
     /* 0x76 */ u8 unk_76;
-    /* 0x77 */ u8 unk_77[0x5];
+    /* 0x77 */ u8 unk_77[0x3];
+    /* 0x7A */ s16 unk_7A;
     /* 0x7C */ u8 unk_7C;
     /* 0x7D */ u8 unk_7D;
     /* 0x7E */ u8 unk_7E;
-    /* 0x7F */ u8 unk_7F[0x5];
+    /* 0x7F */ u8 unk_7F[0x3];
+    /* 0x82 */ s16 unk_82;
     /* 0x84 */ u8 unk_84;
     /* 0x85 */ u8 unk_85;
     /* 0x86 */ u8 unk_86;
-    /* 0x87 */ u8 unk_87[0x5];
+    /* 0x87 */ u8 unk_87[0x3];
+    /* 0x8A */ s16 unk_8A;
     /* 0x8C */ u8 unk_8C;
     /* 0x8D */ u8 unk_8D;
     /* 0x8E */ u8 unk_8E;
-    /* 0x8F */ u8 unk_8F[0x9];
+    /* 0x8F */ u8 unk_8F[0x3];
+    /* 0x92 */ s16 unk_92;
+    /* 0x94 */ u8 unk_94[0x4];
     /* 0x98 */ u8 unk_98;
     /* 0x99 */ u8 unk_99;
     /* 0x9A */ u8 unk_9A;
-    /* 0x9B */ u8 unk_9B[0x5];
+    /* 0x9B */ u8 unk_9B[0x3];
+    /* 0x9E */ s16 unk_9E;
     /* 0xA0 */ u8 unk_A0;
     /* 0xA1 */ u8 unk_A1;
     /* 0xA2 */ u8 unk_A2;
-    /* 0xA3 */ u8 unk_A3[0x5];
+    /* 0xA3 */ u8 unk_A3[0x3];
+    /* 0xA6 */ s16 unk_A6;
     /* 0xA8 */ u8 unk_A8;
     /* 0xA9 */ u8 unk_A9;
     /* 0xAA */ u8 unk_AA;
-    /* 0xAB */ u8 unk_AB[0x5];
+    /* 0xAB */ u8 unk_AB[0x3];
+    /* 0xAE */ s16 unk_AE;
     /* 0xB0 */ u8 unk_B0;
     /* 0xB1 */ u8 unk_B1;
     /* 0xB2 */ u8 unk_B2;
-    /* 0xB3 */ u8 unk_B3[0xA1];
-    /* 0x154 */ unsigned long ot[1];
-} DrawState;
+    /* 0xB3 */ u8 unk_B3[0x3];
+    /* 0xB6 */ s16 unk_B6;
+    /* 0xB8 */ u8 unk_B8[0x90];
+    /* 0x148 */ unsigned long ot[4];        /* cleared reversed, drawn from ot[3] */
+    /* 0x158 */ u8 prims[0x47E0];           /* the frame's primitives */
+    /* 0x4938 */ u8 *next_prim;
+    /* 0x493C */ u16 unk_493C;
+    /* 0x493E */ u16 unk_493E;
+} DrawState;                                /* two at D_801CA474, the frames' double buffer */
 
 extern DrawState *D_801FAC80;
 
