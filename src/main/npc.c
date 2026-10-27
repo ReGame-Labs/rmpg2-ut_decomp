@@ -457,25 +457,22 @@ void func_80034DAC(Pickup *npc) {
 }
 
 #ifdef NON_MATCHING
-/* 92.84%: 92.8 %: the original masks with D_801D8866 loaded signed (lh) and steps n after the x store; the prologue
- * sets up the hoisted constants before n = 1 */
+/* 96.82%: 96.8 %: the slot pointer and n are loop.c's givs of i (the prologue now matches); left: the original
+ * keeps the giv increment of n after the x store and the mflo after the loads, here both go to the top of the join
+ * block */
 void func_80034E48(Pickup *npc) {
     GameObject *mover;
-    GameObject **slot;
     GameObject *spawned;
     ObjectDef *effect;
     Anim *def;
     s32 kind;
     s32 i;
-    s32 n;
     s32 step;
     s32 offset;
     s32 x;
 
     mover = D_800AA248.cur_obj;
     i = 0;
-    n = 1;
-    slot = D_801FB44C;
     do {
         kind = 4;
         if (npc->kind != 0x17) {
@@ -488,7 +485,7 @@ void func_80034E48(Pickup *npc) {
         effect->id = def->id;
         effect->flags = (u16)mover->priority;
         spawned = func_8001DCB4();
-        *slot = spawned;
+        D_801FB44C[i] = spawned;
         spawned->flags = mover->flags;
         spawned->kind = 0x71A;
         spawned->unk_68.w = (i << 16) | kind;
@@ -497,16 +494,14 @@ void func_80034E48(Pickup *npc) {
             step = 0x64;
         }
         if (mover->flags & 0x10) {
-            offset = n * step;
+            offset = (i + 1) * step;
         } else {
-            offset = n * -step;
+            offset = (i + 1) * -step;
         }
         x = mover->pos_x.u.hi + offset;
         x &= (s16)D_801D8866;
         spawned->pos_x.s.hi = x;
         ((u16 *)&spawned->pos_y.w)[1] = ((u16 *)&mover->pos_y.w)[1];
-        n++;
-        slot++;
         i++;
     } while (i < 3);
     D_800AA268.p = mover;
@@ -1583,53 +1578,46 @@ u16 func_8003761C(s16 x, s16 y, Monster *player, Npc *npc) {
 void func_800376D8(void) {
 }
 
-#ifdef NON_MATCHING
-/* 82.2 %: the twin of func_8003BD48 (pickup.c), with the same difference: the original tests the loaded limit in v0 and copies it into a1, where every form tried loads it straight into one register */
 void func_800376E0(Npc *npc) {
-    s32 limit;
+    s16 limit;
     u16 x;
-    u16 d;
 
     if (npc->action == 2) {
         limit = D_801FAC84;
-        if (D_801FAC84 != 0) {
+        if (limit != 0) {
             x = D_800AA268.p->pos_x.u.hi;
             if (!(D_800AA268.p->flags & 0x10)) {
-                d = limit - x;
-            } else {
-                d = (u16) D_801F9AB0 - x + 0x31;
-            }
-            if (d < 0x32) {
+                limit -= x;
+                if ((u16)limit < 0x32) {
+                    npc->state = 1;
+                }
+            } else if ((u16)(D_801F9AB0 - x + 0x31) < 0x32) {
                 npc->state = 1;
             }
         } else if (D_801D37BC == 0) {
-            limit = (s16)D_801FA98C;
-            if ((s16)D_801FA98C != 0) {
+            limit = D_801FA98C;
+            if (limit != 0) {
                 x = D_800AA268.p->pos_x.u.hi;
                 if (!(D_800AA268.p->flags & 0x10)) {
-                    d = limit - x;
-                } else {
-                    d = D_801FA990 - x + 0x31;
-                }
-                if (d < 0x32) {
+                    limit -= x;
+                    if ((u16)limit < 0x32) {
+                        npc->state = 1;
+                    }
+                } else if ((u16)(D_801FA990 - x + 0x31) < 0x32) {
                     npc->state = 1;
                 }
             }
         }
     }
 }
-#else
-INCLUDE_ASM("asm/main/nonmatchings/npc", func_800376E0);
-#endif
 
-#ifdef NON_MATCHING
-/* 94.25%: the original keeps the slot bound 8 in a register (sltu against t0) and counts with a2/a1 where this C
- * uses sltiu and a3/a2; first draft after the Npc typing */
 void func_800377B4(Npc *npc) {
     u16 i;
     u16 slot;
     u16 best;
     Monster *m;
+    u16 max;
+    u16 k;
 
     npc->unk_58 ^= 1;
     if (D_801D8740 == 0) {
@@ -1639,11 +1627,12 @@ void func_800377B4(Npc *npc) {
     }
     best = 0;
     if (npc->unk_58 == 0) {
+        max = 8;
         i = 7;
         slot = npc->unk_04;
         do {
             slot++;
-            if (slot >= 8) {
+            if (slot >= max) {
                 slot = 1;
             }
             m = &D_801E0B78[slot];
@@ -1656,24 +1645,25 @@ void func_800377B4(Npc *npc) {
         return;
     }
     i = 7;
-    slot = 1;
+    k = 1;
     do {
-        m = &D_801E0B78[slot];
+        m = &D_801E0B78[k];
         if ((m->unk_058 & 1) && m->unk_040 >= 0x1C20 && m->unk_040 >= best) {
             best = m->unk_040;
         }
-        slot++;
+        k++;
     } while (--i != 0);
+    max = 8;
     i = 7;
     slot = npc->unk_56;
     do {
         slot++;
-        if (slot >= 8) {
+        if (slot >= max) {
             slot = 1;
         }
         m = &D_801E0B78[slot];
         if (m->unk_058 & 1) {
-            if (m->unk_040 + 0x12C < best) {
+            if (m->unk_040 + 0x12C >= best) {
                 break;
             }
         } else {
@@ -1683,9 +1673,6 @@ void func_800377B4(Npc *npc) {
     npc->unk_10 = m;
     npc->unk_56 = slot;
 }
-#else
-INCLUDE_ASM("asm/main/nonmatchings/npc", func_800377B4);
-#endif
 
 void func_80037960(Npc *npc, GameObject *obj) {
     s16 x;
