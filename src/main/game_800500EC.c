@@ -388,7 +388,31 @@ void func_8005180C(Monster *e) {
     }
 }
 
-INCLUDE_ASM("asm/main/nonmatchings/game_800500EC", func_8005189C);
+void func_8005189C(Monster *e) {
+    if (D_800AA268.p->pos_y.s.hi < 0xE1) {
+        func_8005199C(e);
+        return;
+    }
+    D_800AA268.p->pos_y.s.hi = 0xE1;
+    if (D_801D8740 < 2 || D_801F9ACC == 0 || D_801F9ACC > 0xFFF00000U) {
+        if ((u16) func_80031714(e) == 1) {
+            e->action = 0x35;
+            D_800AA268.p->pos_y.s.hi = 0xED;
+        } else {
+            if (e->action != 0x17) {
+                func_80029118(5, 8);
+                e->action = 0xE;
+            } else {
+                func_80029118(5, 0xC);
+                e->action = 0x66;
+            }
+            func_8004EFAC();
+        }
+        func_800531C0(e);
+        return;
+    }
+    func_80052798(e);
+}
 
 void func_8005199C(Monster *e) {
     func_800376D8(e);
@@ -1113,7 +1137,58 @@ void func_80053DEC(void) {
     D_800AA248.cur_obj = b;
 }
 
+#ifdef NON_MATCHING
+/* 92.3 %: y and the flip flag swap s3/s4, and the original computes the flag into v1 and copies it (move in the delay slot) */
+void func_80053EA8(void) {
+    GameObject *obj;
+    Monster *m;
+    ObjectDef *def;
+    u16 x;
+    s32 y;
+    s32 sx;
+    s16 flip;
+
+    obj = D_800AA268.p;
+    y = obj->pos_y.u.hi;
+    x = obj->pos_x.u.hi;
+    m = obj->owner.monster;
+    func_8001F724(0x61);
+    if ((u32) (m->unk_1B0 - 1) < 2) {
+        y = y - 0x13;
+        sx = (s16) x;
+        flip = obj->flags & 0x10;
+        if (flip) {
+            x = sx + 6;
+        } else {
+            x = sx - 6;
+        }
+        flip = (flip == 0) * 0x10;
+    } else {
+        y = y - 0x20;
+        sx = (s16) x;
+        flip = obj->flags & 0x10;
+        if (flip) {
+            x = sx - 0x31;
+        } else {
+            x = sx + 0x31;
+        }
+    }
+    def = func_8001D110();
+    D_800AA248.new_def = def;
+    def->unk_0C = 0x739;
+    def->flags = 0x1100;
+    def->pos_y.s.hi = y;
+    def->pos_x.s.hi = x;
+    def->id = 0x4F0000B2;
+    def->anim = &D_8008C7A4;
+    obj = func_8001DCB4();
+    obj->flags |= flip;
+    obj->unk_9C = m->id;
+    D_800AA248.cur_obj = obj;
+}
+#else
 INCLUDE_ASM("asm/main/nonmatchings/game_800500EC", func_80053EA8);
+#endif
 
 void func_80053FDC(void) {
     GameObject *b;
@@ -1293,7 +1368,34 @@ void func_800544D8(Monster *e, GameObject *dst, GameObject *src) {
     dst->unk_80 = src->unk_80 + 0x1000;
 }
 
+#ifdef NON_MATCHING
+/* 95.4 %: the original reloads m->unk_108 for the facing-left test (its first load dies in the bound's subtraction) and keeps m->unk_10C in v1 */
+s32 func_8005453C(s16 x, s32 unused, Monster *m) {
+    GameObject *obj;
+    s16 px;
+
+    obj = m->obj;
+    px = x;
+    if (m->unk_0DC == 0 || m->action == 0x37) {
+        return 0;
+    }
+    if (x < D_801F9ACA) {
+        px = x + ((D_801D8864.w + 1) >> 16);
+    }
+    if (px >= m->unk_108 - 0x30 && m->unk_10C + 0x30 >= px) {
+        if (!(obj->flags & 0x10)) {
+            if (px >= m->unk_10C) {
+                return 1;
+            }
+        } else if (m->unk_108 >= px) {
+            return 1;
+        }
+    }
+    return 0;
+}
+#else
 INCLUDE_ASM("asm/main/nonmatchings/game_800500EC", func_8005453C);
+#endif
 
 void func_80054608(u16 kind, Monster *e, Building *u) {
     s16 y;

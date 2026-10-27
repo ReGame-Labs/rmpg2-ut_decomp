@@ -2,35 +2,8 @@
  * The boundaries and their evidence: config/main.yaml (docs/MATCHING.md "Splitting a target into files"). */
 #include "common.h"
 #include "game.h"
-
-s32 func_8001A3AC(void);
-void func_8001E450(s32);
-void func_8001ED54(s32 *);
-void func_8005EE54(void);
-
-extern s32 D_80089624[];
-extern s32 D_80089644[];
-void func_8005E2D8(void);
-void func_8006036C(s32 *, s32, s32, s32, s32, s32 *);
-void func_80020BA0(s32, u16, GameObject *);
-void func_8005E124(Monster *, s32);
-void func_8005E19C(Monster *, s32);
-void func_800603FC(s32 *, s32, s32, s32, s32);
-s32 func_80025DF8(s32);
-extern s32 D_8007BD7C;
-extern s32 D_80089604[];
-extern s32 D_80089678[];
-extern s32 D_8008969C[];
-extern s32 D_800896C0[];
-extern s32 D_800842B4[];
-extern Anim D_80016A84;
-void func_8001F724(s32);
-GameObject *func_8001EB9C(s32, s32, s32, s32, s32);
-ObjectDef *func_8001D110(void);
-GameObject *func_8001DCB4(void);
-void func_80060A7C(s32, u32, s32);
-extern s16 D_801FB468;
-extern s16 D_801FB46C;
+#include "game_8005D198.h"
+#include "psyq/libc2.h"
 
 s32 func_8005D198(void) {
     return func_8001A3AC() >= 0x46;
@@ -152,12 +125,40 @@ void func_8005E0E8(GameObject *b) {
     }
 }
 
-INCLUDE_ASM("asm/main/nonmatchings/game_8005D198", func_8005E124);
+void func_8005E124(Monster *e, s32 base) {
+    GameObject *s;
+    GameObject *head;
 
-INCLUDE_ASM("asm/main/nonmatchings/game_8005D198", func_8005E19C);
+    head = &D_801E28C0;
+    s = head->next;
+    if (s != head) {
+        do {
+            if (s->kind == base + e->id) {
+                func_8001BB68(s);
+            }
+            s = s->next;
+        } while (s != head);
+    }
+}
+
+void func_8005E19C(Monster *e, s32 base) {
+    GameObject *s;
+    GameObject *head;
+
+    head = &D_801E28C0;
+    s = head->next;
+    if (s != head) {
+        do {
+            if (s->kind == base + e->id) {
+                func_8001BB88(s);
+            }
+            s = s->next;
+        } while (s != head);
+    }
+}
 
 void func_8005E214(void) {
-    s32 *table;
+    u8 *table;
 
     D_801FB46C = 1;
     if (D_800AA2DC & 0x30) {
@@ -179,7 +180,7 @@ void func_8005E214(void) {
         }
     }
     D_800AA2EC = 0x47;
-    func_8001ED54(D_80089604);
+    func_8001ED54(&D_80089604);
 }
 
 void func_8005E2D8(void) {
@@ -191,11 +192,11 @@ void func_8005E2D8(void) {
         switch (t) {
         case 0x3C:
             func_8001E450(0x401);
-            func_8001ED54(D_80089624);
+            func_8001ED54(&D_80089624);
             break;
         case 0x78:
             func_8001E450(0x401);
-            func_8001ED54(D_80089644);
+            func_8001ED54(&D_80089644);
             break;
         case 0xB4:
             func_8001E450(0x401);
@@ -262,7 +263,17 @@ INCLUDE_ASM("asm/main/nonmatchings/game_8005D198", func_8005F33C);
 
 INCLUDE_ASM("asm/main/nonmatchings/game_8005D198", func_8005F5B8);
 
-INCLUDE_ASM("asm/main/nonmatchings/game_8005D198", func_8005F9FC);
+void func_8005F9FC(void) {
+    Monster *e;
+    s32 i;
+
+    for (i = 0; i < (s32) D_801D8740; i++) {
+        e = &D_801E0B78[func_80025DF8(D_801FB49C[i])];
+        e->unk_0F0 = 0;
+        e->unk_17C = e->unk_008.w;
+        e->unk_002 = e->unk_004;
+    }
+}
 
 void func_8005FA8C(void) {
     Monster *e;
@@ -279,7 +290,22 @@ INCLUDE_ASM("asm/main/nonmatchings/game_8005D198", func_8005FB14);
 
 INCLUDE_ASM("asm/main/nonmatchings/game_8005D198", func_8005FEF4);
 
-INCLUDE_ASM("asm/main/nonmatchings/game_8005D198", func_8006036C);
+void func_8006036C(s32 *glyphs, s32 x, s32 y, s32 n, s32 kind, u8 *text) {
+    if (glyphs == D_8007ABCC) {
+        D_801FB474 = 2;
+    } else {
+        D_801FB474 = 1;
+    }
+    D_800AA2EC = n;
+    D_801FB470.glyphs = glyphs;
+    D_801FB470.x = x;
+    D_801FB470.y = y;
+    D_801FB470.unk_0C = n;
+    D_801FB470.layout = func_8001EE24;
+    D_801FB470.kind = kind;
+    strcpy(D_801FB470.text, text);
+    func_8001ED54(&D_801FB470);
+}
 
 void func_800603FC(s32 *id, s32 dx, s32 dy, s32 x, s32 y) {
     GameObject *s;
@@ -368,7 +394,23 @@ void func_80060A7C(s32 id, u32 color, s32 mode) {
 
 INCLUDE_ASM("asm/main/nonmatchings/game_8005D198", func_80060BA8);
 
-INCLUDE_ASM("asm/main/nonmatchings/game_8005D198", func_80060D44);
+void func_80060D44(Monster *e) {
+    switch (D_801FA8A0[e->id - 1]) {
+    case 1:
+        e->unk_168 = 3;
+        break;
+    default:
+        if (!(D_801E0B78[1].unk_058 & 1)) {
+            e->unk_168 = 3;
+        }
+        break;
+    case 2:
+    case 3:
+        e->obj->flags |= 0x10;
+        e->unk_168 = 7;
+        break;
+    }
+}
 
 void func_80060DCC(void) {
     GameObject *saved;
