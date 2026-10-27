@@ -145,7 +145,7 @@ s32 func_80019DAC(s32, s32, s32, s16);
 extern s16 D_801D876C[];
 void func_80025E68(void);
 void func_8002A72C(void);
-void func_8002AF28(void);
+void building_update_sky(void);
 void func_800377B4(Ai *);
 void func_8003C894(s32);
 void func_80044D34(void);
@@ -1570,7 +1570,7 @@ void func_8001C784(void) {
     func_8001CFE4();
     func_80025E68();
     func_8002A72C();
-    func_8002AF28();
+    building_update_sky();
     func_8005E3CC();
     func_8005E60C();
     func_80060524();

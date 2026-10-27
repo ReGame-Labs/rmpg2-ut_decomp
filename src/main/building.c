@@ -62,7 +62,7 @@ void func_8002A3A4(void) {
     func_8001B054(obj);
 }
 
-void func_8002A4E8(void) {
+void building_set_sky_colours(void) {
     s32 colour;
     s32 *c;
 
@@ -170,13 +170,13 @@ void func_8002ADE8(void) {
 INCLUDE_ASM("asm/main/nonmatchings/building", func_8002ADE8);
 #endif
 
-void func_8002AF28(void) {
+void building_update_sky(void) {
     s32 i;
     s32 r;
 
     if (D_8007C976 == 1) {
         for (i = 0; i < 80; i++) {
-            func_8002B0E0(i);
+            building_update_cloud(i);
         }
         if (D_8007C979 != 0) {
             func_8002ADE8();
@@ -217,17 +217,17 @@ void func_8002AF28(void) {
     if (D_8007C976 == 2) {
         if (D_801FA960 >= 100 && D_801D8728 == 0) {
             for (i = 0; i < 40; i++) {
-                func_8002B6E8(i);
+                building_update_snowflake(i);
             }
         } else {
             for (i = 0; i < 80; i++) {
-                func_8002B3AC(i);
+                building_update_raindrop(i);
             }
         }
     }
 }
 
-void func_8002B0E0(s32 i) {
+void building_update_cloud(s32 i) {
     GameObject *obj;
     ObjectDef *def;
     s32 *ids;
@@ -288,7 +288,7 @@ void func_8002B0E0(s32 i) {
     obj->flags |= 0x400;
 }
 
-void func_8002B3AC(s32 i) {
+void building_update_raindrop(s32 i) {
     GameObject *obj;
     ObjectDef *def;
     s32 mask;
@@ -350,7 +350,7 @@ void func_8002B640(void) {
     func_8003EB5C(&D_80097E30, D_800AA248.cur_obj);
 }
 
-void func_8002B6E8(s32 i) {
+void building_update_snowflake(s32 i) {
     GameObject **slot;
     GameObject *obj;
     ObjectDef *def;
@@ -423,7 +423,7 @@ void func_8002B988(void) {
     do {
         if (D_801FA8A0[var_s1] != 0) {
             temp_s0 = (var_s1 + 1) & 0xFFFF;
-            func_8002BA70(temp_s0);
+            building_reset_monster(temp_s0);
             temp_a0 = func_8002BA30(temp_s0);
             if (D_8007A7D4 & 1) {
                 temp_v0 = D_8007A688 - 1;
@@ -445,21 +445,21 @@ Monster *func_8002BA30(s32 arg0) {
     return temp_a1;
 }
 
-void func_8002BA70(s32 n) {
+void building_reset_monster(s32 n) {
     Monster *m;
     GameObject *saved;
 
     m = &D_801E0B78[(u16) n];
     saved = D_800AA248.cur_obj;
-    func_8002BE30(m);
+    building_clear_monster(m);
     m->id = n;
     m->unk_128 = n;
-    func_8002BAEC(m);
+    building_spawn_monster(m);
     D_800AA248.cur_obj = saved;
 }
 
 
-void func_8002BAEC(Monster *m) {
+void building_spawn_monster(Monster *m) {
     ObjectDef *def;
     GameObject *obj;
     s32 i;
@@ -541,7 +541,7 @@ void func_8002BAEC(Monster *m) {
     }
 }
 
-void func_8002BE30(Monster *arg0) {
+void building_clear_monster(Monster *arg0) {
     s32 unused[2];  /* never used: the original frame has 8 bytes for it */
 
     if (D_8007A7D4 & 1) {
@@ -787,7 +787,7 @@ void func_8002C430(Building *arg0) {
     func_8002E9F8(arg0);
 }
 
-void func_8002C4B8(void) {
+void building_update_all(void) {
     GameObject *saved;
     Building *b;
     Building *p;
@@ -795,7 +795,7 @@ void func_8002C4B8(void) {
 
     saved = D_800AA248.cur_obj;
     if (D_801D36FC == 0x150) {
-        func_80030D74();
+        building_count_standing();
         b = p = D_801D3DC8;
         n = D_801E29A4;
         if (n == 0) {
@@ -1256,7 +1256,7 @@ s32 func_8002D2CC(s32 arg0, Building *arg1) {
 
 void func_8002D370(Monster *a, BuildingItem *b, Building *c) {
     u16 i = 0;
-    u16 n = func_8002F558(c);
+    u16 n = building_pick_part(c);
 
     while (1) {
         i++;
@@ -1297,7 +1297,7 @@ void func_8002D448(Monster *m, Building *b) {
         return;
     }
     tries = 0;
-    idx = func_8002F558(b);
+    idx = building_pick_part(b);
     for (;;) {
         p = func_8002ED30(idx, rec);
         if (p->unk_06 == 0) {
@@ -2241,7 +2241,7 @@ void func_8002F100(Building *b) {
                     D_801FB448->colour = 0xFFFF00;
                     func_8002CBF4((Monster *) b);
                     func_80029118(8, 8);
-                    func_8002F474(10);
+                    building_set_players_action(10);
                     func_8001E698(b->items[0].obj, &D_800168B8);
                     D_800AA284.p = func_8001D110();
                     def = D_800AA284.p;
@@ -2261,7 +2261,7 @@ void func_8002F100(Building *b) {
                     D_801FB448->unk_40.w = 0x96;
                     func_8002CBF4((Monster *) b);
                     func_80029118(8, 8);
-                    func_8002F474(10);
+                    building_set_players_action(10);
                     b->unk_074 += 0x14;
                     func_8001E698(b->items[0].obj, &D_800168D8);
                 } else {
@@ -2273,7 +2273,7 @@ void func_8002F100(Building *b) {
                         D_801FB448->unk_40.w = 0;
                         func_8001E4B0(D_801FB448);
                         D_801FB448 = NULL;
-                        func_8002F474(0x62);
+                        building_set_players_action(0x62);
                     }
                 }
             }
@@ -2300,7 +2300,7 @@ void func_8002F100(Building *b) {
     D_800AA268.p = saved;
 }
 
-void func_8002F474(u16 action) {
+void building_set_players_action(u16 action) {
     s16 i;
     Monster *m;
 
@@ -2312,7 +2312,7 @@ void func_8002F474(u16 action) {
     }
 }
 
-u16 func_8002F558(Building *a) {
+u16 building_pick_part(Building *a) {
     s32 r;
 
     r = func_8001EB10(0x8000, 0);
@@ -2634,7 +2634,7 @@ void func_8002FEA4(Building *a) {
     }
 }
 
-void func_8002FF74(void) {
+void building_create_roof(void) {
     GameObject *saved;
     Building *b;
     ObjectDef *def;
@@ -3114,7 +3114,7 @@ void func_80030D14(UnkStruct19 *p) {
 
 /* 98.6 %: the loop's pointer register is &p->items[0] in the original (negative offsets for unk_070 and state), &p->state here; count and n swap a1/a2 */
 #ifdef NON_MATCHING
-void func_80030D74(void) {
+void building_count_standing(void) {
     u16 n = D_801E29A4;
     s16 count = 0;
     Building *p;
@@ -3137,7 +3137,7 @@ void func_80030D74(void) {
     }
 }
 #else
-INCLUDE_ASM("asm/main/nonmatchings/building", func_80030D74);
+INCLUDE_ASM("asm/main/nonmatchings/building", building_count_standing);
 #endif
 
 void func_80030E04(Monster *m, BuildingItem *rec) {
@@ -4574,7 +4574,7 @@ void func_800343EC(void) {
     func_8003EB5C(D_80093F44, D_800AA248.cur_obj);
 }
 
-void func_80034418(Building *b) {
+void building_bob_pickup(Building *b) {
     if (b->state < 0x20) {
         D_800AA268.p->vel_y.w = 0x2000;
         b->state++;
@@ -4593,10 +4593,10 @@ void func_80034418(Building *b) {
     D_800AA268.p->pos_y.w += D_800AA268.p->vel_y.w;
 }
 
-void func_800344B8(Pickup *r) {
+void building_update_pickup(Pickup *r) {
     D_800AA268.p = r->unk_00;
     if (r->unk_06 == 0x12 || r->unk_06 == 0x13) {
-        func_80034418((Building *) r);   /* bobs the object: counts in the record's halfword at 0x14 */
+        building_bob_pickup((Building *) r);   /* bobs the object: counts in the record's halfword at 0x14 */
     }
     switch (r->unk_08) {
     case 1:

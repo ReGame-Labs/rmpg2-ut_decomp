@@ -40,7 +40,7 @@ void func_800634D4(Monster *, u32);
 s32 abs(s32 n);
 
 void func_80029D1C(void);
-s32 func_8003B9C8(GameObject *mover, Monster *player);
+s32 pickup_test_touch(GameObject *mover, Monster *player);
 void func_8005E0E8(Monster *player);
 void func_8004BBC8(Npc *npc);
 void func_80020DDC(Npc *npc);
@@ -84,7 +84,7 @@ void func_80035DC0(Pickup *npc);
 void func_80035BE8(Pickup *npc);
 void func_80035A3C(Pickup *npc);
 void func_80035B30(Pickup *npc);
-void func_80034418(void);
+void building_bob_pickup(void);
 void func_80034670(void);                /* called with the record and without: no prototype in the original */
 void func_8003AA7C(Npc *npc);
 u16 func_80038DA8(Npc *npc);
@@ -609,7 +609,7 @@ void func_80035330(Pickup *npc) {
 void func_8003537C(Pickup *npc) {
     D_800AA248.cur_obj = npc->unk_00;
     if (npc->unk_06 == 0x15) {
-        func_80034418();
+        building_bob_pickup();
     }
     switch (npc->unk_08) {
     case 0x64:
@@ -1194,7 +1194,7 @@ void func_80036A20(Monster *player) {
         kind = npc->unk_6;
         mover = npc->unk_0;
         if (kind == 0x31 || kind == 0x13 || kind == 0x14 || (kind == 0x15 && npc->unk_8 != 0x63)) {
-            if (func_8003B9C8(mover, player) != 0) {
+            if (pickup_test_touch(mover, player) != 0) {
                 func_80037078(player, npc);
                 return;
             }

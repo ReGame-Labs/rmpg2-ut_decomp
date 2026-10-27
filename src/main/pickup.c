@@ -15,7 +15,7 @@ void func_80034C54(GameObject *obj);
 void func_800634D4(Monster *, u32);
 extern GameObject *D_801FB44C[3];
 
-void func_8003B568(void) {
+void pickup_update_all(void) {
     Pickup *var_s0;
     u16 temp_v0_2;
     u16 var_s1;
@@ -29,7 +29,7 @@ void func_8003B568(void) {
             var_s1 = 8;
         }
         do {
-            func_8003B5D0(var_s0);
+            pickup_update(var_s0);
             temp_v0_2 = var_s1 - 1;
             var_s1 = temp_v0_2;
             var_s0++;
@@ -37,7 +37,7 @@ void func_8003B568(void) {
     }
 }
 
-void func_8003B5D0(Pickup *r) {
+void pickup_update(Pickup *r) {
     D_800AA268.p = r->unk_00;
     func_80029D1C();
     switch (r->unk_06) {
@@ -60,7 +60,7 @@ void func_8003B5D0(Pickup *r) {
     case 17:
     case 18:
     case 19:
-        func_800344B8(r);
+        building_update_pickup(r);
         break;
     case 24:
         func_8003566C(r);
@@ -83,18 +83,18 @@ void func_8003B5D0(Pickup *r) {
     }
 }
 
-void func_8003B68C(void) {
+void pickup_clear_all(void) {
     u16 n = 8;
     Pickup *p = D_801FA9BC;
 
     do {
-        func_8003B9A0(p);
+        pickup_clear(p);
         p++;
     } while (--n != 0);
     D_801E29B0 = 0;
 }
 
-void func_8003B6E0(void) {
+void pickup_spawn_all(void) {
     Anim *anim;
     SpawnItem *item;
     Pickup *r;
@@ -103,7 +103,7 @@ void func_8003B6E0(void) {
     ObjectDef *def;
     u16 n;
 
-    func_8003B68C();
+    pickup_clear_all();
     item = (SpawnItem *)func_80025C08(D_8007DDA4);
     n = item->unk_04;
     item++;
@@ -166,14 +166,14 @@ void func_8003B6E0(void) {
     } while (--n != 0);
 }
 
-void func_8003B9A0(Pickup *p) {
+void pickup_clear(Pickup *p) {
     memset(p, 0, sizeof(Pickup));
     D_801E29B0 = 0;
 }
 
 /* 83 %: an object's hit box against a monster's; the original computes -w + x with negu in place (here x - w), loads the object's y and flags before the box, and loads the monster's four edges in another order */
 #ifdef NON_MATCHING
-s32 func_8003B9C8(GameObject *obj, Monster *m) {
+s32 pickup_test_touch(GameObject *obj, Monster *m) {
     SpriteFrame *box;
     s16 x;
     u16 y;
@@ -222,14 +222,14 @@ s32 func_8003B9C8(GameObject *obj, Monster *m) {
     return 0;
 }
 #else
-INCLUDE_ASM("asm/main/nonmatchings/pickup", func_8003B9C8);
+INCLUDE_ASM("asm/main/nonmatchings/pickup", pickup_test_touch);
 #endif
 
 
 
 
 
-void func_8003BAB0(Monster *e) {
+void pickup_collect(Monster *e) {
     u16 n;
     Pickup *r;
     GameObject *obj;
@@ -242,7 +242,7 @@ void func_8003BAB0(Monster *e) {
     }
     do {
         if (!(r->unk_00->unk_6C & 0x80) && r->unk_08 == 2 && r->unk_06 != 0 && r->unk_06 < 0x1D) {
-            if (r->unk_06 >= 0xD && r->unk_06 < 0x12 && r->unk_40 != NULL && func_8003B9C8(r->unk_40, e) != 0) {
+            if (r->unk_06 >= 0xD && r->unk_06 < 0x12 && r->unk_40 != NULL && pickup_test_touch(r->unk_40, e) != 0) {
                 e->unk_024++;
                 func_80054374(0x28, e);
                 r->unk_54 = e;
@@ -259,14 +259,14 @@ void func_8003BAB0(Monster *e) {
             if (r->unk_06 == 0x16 || r->unk_06 == 0x17) {
                 for (i = 0; i < 3; i++) {
                     obj = D_801FB44C[i];
-                    if (obj != NULL && func_8003B9C8(obj, e) != 0) {
+                    if (obj != NULL && pickup_test_touch(obj, e) != 0) {
                         func_8001F724(0x60);
                         func_80034C54(obj);
                         D_801FB44C[i] = NULL;
                     }
                 }
             }
-            if (func_8003B9C8(r->unk_00, e) != 0) {
+            if (pickup_test_touch(r->unk_00, e) != 0) {
                 e->unk_024++;
                 func_80054374(0x28, e);
                 r->unk_08 = 3;
