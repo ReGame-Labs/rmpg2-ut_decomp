@@ -135,7 +135,7 @@ void func_800205AC(void);
 void func_80022EC0(Npc *npc);
 void func_80023080(Npc *);
 void func_800242A8(void);
-void func_80024530(GameObject *, Npc *);   /* the second argument is not used */
+void main_place_attached(GameObject *, Npc *);   /* the second argument is not used */
 void func_8002469C(s32 *, s16, s16);
 void func_80023CFC(Npc *npc);
 void func_800256CC(BuildingItem *);
@@ -284,8 +284,8 @@ extern u16 D_801E1C98[];
 extern u8 D_800AA900[][0x22];
 extern u16 D_800AFB78[];
 s32 func_80018DBC(void *, u16, s16, s16);
-u16 func_80023474(Npc *);
-void func_80024418(s16 *, s16 *, Npc *);
+u16 main_approach_xy(Npc *);
+void main_unwrap_target_x(s16 *, s16 *, Npc *);
 extern u16 D_801FA898[];
 void func_80019268(void);
 extern s16 D_801D36F8;
@@ -430,8 +430,8 @@ s32 func_8003EB5C(Anim *, GameObject *);
 u16 func_80023CB8(void);
 s16 func_8002439C(Npc *);
 u16 func_8002326C(s16);
-u16 func_80023620(Npc *);
-u16 func_80023B20(Npc *);
+u16 main_approach_x(Npc *);
+u16 main_approach_y(Npc *);
 u16 func_80023114();   /* no parameter (it works on D_800AA268.p); func_8002180C passes its state anyway */
 u16 func_800231E4(Npc *);
 void func_80023FAC(Npc *npc);
@@ -465,7 +465,7 @@ extern Anim D_8008B744;
 extern Anim D_80097B3C;
 extern Unk7B358 *D_8007B348[];
 extern s16 D_8007A6E8[];
-u16 func_80023764(Npc *);
+u16 main_follow_monster(Npc *);
 void func_800242D8(Npc *);
 extern Anim D_8008B27C;
 extern Anim D_80097674;
@@ -3208,7 +3208,7 @@ void func_80021DA8(Npc *npc) {
         } else {
             func_8003EB5C(&D_8008AE40, D_800AA248.cur_obj);
         }
-        result = func_80023764(npc);
+        result = main_follow_monster(npc);
         if (result == 1) {
             npc->unk_0C = 0;
             D_800AA248.cur_obj->vel_x.w = 0;
@@ -3237,7 +3237,7 @@ void func_80021FDC(Npc *npc) {
         } else {
             func_8003EB5C(&D_8008B248, D_800AA268.p);
         }
-        result = func_80023474(npc);
+        result = main_approach_xy(npc);
         if (result == 1) {
             func_80023CFC(npc);
             npc->unk_0C = 0;
@@ -3247,7 +3247,7 @@ void func_80021FDC(Npc *npc) {
             npc->unk_30 = 0;
             npc->unk_2A = result;
             npc->unk_22 = 0x30;
-            func_80024418(&a, &b, npc);
+            main_unwrap_target_x(&a, &b, npc);
             side = 2;
             if (b < a) {
                 side = 1;
@@ -3381,7 +3381,7 @@ void func_80022490(Npc *npc) {
             func_8003EB5C(&D_8008AE40, D_800AA268.p);
         }
     done:
-        if (func_80023B20(npc) == 1) {
+        if (main_approach_y(npc) == 1) {
             npc->unk_2A = 0;
             npc->unk_22 = 0x30;
             npc->state++;
@@ -3396,7 +3396,7 @@ void func_80022578(Npc *npc) {
         } else {
             func_8003EB5C(&D_8008AE40, D_800AA268.p);
         }
-        if (func_80023620(npc) == 1) {
+        if (main_approach_x(npc) == 1) {
             npc->unk_22 = 0x30;
             npc->state++;
             npc->unk_0C = 0;
@@ -3651,7 +3651,7 @@ void func_80022EC0(Npc *npc) {
     NpcStep *step;
     s32 v;
 
-    func_80024418(&x, &y, npc);
+    main_unwrap_target_x(&x, &y, npc);
     dx = x - y;
     x = y;
     y = npc->target_y;
@@ -3750,7 +3750,7 @@ u16 func_800231E4(Npc *npc) {
     s16 limit;
 
     func_800232D8(npc);
-    func_80024418(&x, &limit, npc);
+    main_unwrap_target_x(&x, &limit, npc);
     if (D_800AA268.p->vel_x.w >= 0) {
         x += 0x50;
         return limit >= x;
@@ -3832,7 +3832,7 @@ void func_800233E0(Npc *npc) {
     }
 }
 
-u16 func_80023474(Npc *npc) {
+u16 main_approach_xy(Npc *npc) {
     s16 x;
     s16 cx;
     u16 dir;
@@ -3848,7 +3848,7 @@ u16 func_80023474(Npc *npc) {
     if (x < 0) {
         dir = 4;
     }
-    func_80024418(&x, &cx, npc);
+    main_unwrap_target_x(&x, &cx, npc);
     if (npc->unk_3C & 0x10) {
         if (cx < x) {
             dir |= 1;
@@ -3890,13 +3890,13 @@ u16 func_80023474(Npc *npc) {
     return 1;
 }
 
-u16 func_80023620(Npc *npc) {
+u16 main_approach_x(Npc *npc) {
     s16 x;
     s16 cx;
     u16 dir;
     s32 d;
 
-    func_80024418(&x, &cx, npc);
+    main_unwrap_target_x(&x, &cx, npc);
     dir = 0;
     if (npc->unk_38 == 1) {
         if (cx > x) {
@@ -3939,7 +3939,7 @@ u16 func_80023620(Npc *npc) {
     return 0;
 }
 
-u16 func_80023764(Npc *npc) {
+u16 main_follow_monster(Npc *npc) {
     GameObject *body;
     s16 tx;
     s16 cx;
@@ -4072,27 +4072,25 @@ u16 func_80023AC0(Npc *npc) {
     return 0;
 }
 
-#ifdef NON_MATCHING
-/* 96.66%: the original keeps the raw difference in a2 and extends it again for the second distance test; the C
- * reuses the first extension (cse keeps it across the step's if), so the function is two instructions short */
-u16 func_80023B20(Npc *npc) {
+u16 main_approach_y(Npc *npc) {
     s16 delta;
     s32 dist;
-    s32 step;
 
     delta = npc->target_y - 0x6C;
     delta -= D_800AA268.p->pos_y.u.hi;
-    dist = (delta >= 0) ? delta : -delta;
-    if (dist < 0xB) {
+    if ((delta >= 0 ? delta : -delta) < 0xB) {
         D_800AA268.p->vel_y.w = 0;
         return 1;
     }
-    step = 0xFFFE0000;
     if (delta >= 0) {
-        step = 0x10000;
+        D_800AA268.p->vel_y.w = 0x18000;
+    } else {
+        D_800AA268.p->vel_y.w = -0x18000;
     }
-    D_800AA268.p->vel_y.w = step | 0x8000;
-    dist = delta; if (dist < 0) { dist = -dist; }
+    dist = delta;
+    if (dist < 0) {
+        dist = -dist;
+    }
     if (dist < 0x1F && D_800AA248.cur_obj->vel_x.w == 0) {
         npc->unk_0C = 0;
         if (npc->unk_38 != 1) {
@@ -4113,9 +4111,6 @@ u16 func_80023B20(Npc *npc) {
     }
     return 0;
 }
-#else
-INCLUDE_ASM("asm/main/nonmatchings/main", func_80023B20);
-#endif
 
 u16 func_80023C58(s16 arg0, Npc *npc) {
     s16 delta;
@@ -4407,7 +4402,7 @@ INCLUDE_ASM("asm/main/nonmatchings/main", func_8002439C);
 #ifdef NON_MATCHING
 /* 80.55%: the two loads of unk_26 merge into one lh (the original loads it lhu for x and again lh for the
  * difference); the absolute values live in a2, the original's in v0 */
-void func_80024418(s16 *px, s16 *pcur, Npc *npc) {
+void main_unwrap_target_x(s16 *px, s16 *pcur, Npc *npc) {
     u16 x;
     s16 cur;
     u16 half;
@@ -4439,7 +4434,7 @@ void func_80024418(s16 *px, s16 *pcur, Npc *npc) {
     *pcur = cur;
 }
 #else
-INCLUDE_ASM("asm/main/nonmatchings/main", func_80024418);
+INCLUDE_ASM("asm/main/nonmatchings/main", main_unwrap_target_x);
 #endif
 
 void func_800244A8(void) {
@@ -4460,10 +4455,10 @@ void func_800244A8(void) {
 }
 
 void func_80024508(Npc *npc) {
-    func_80024530(npc->unk_50, npc);
+    main_place_attached(npc->unk_50, npc);
 }
 
-void func_80024530(GameObject *obj, Npc *npc) {
+void main_place_attached(GameObject *obj, Npc *npc) {
     SpriteFrame *fr;
     s32 dx;
     s32 dy;

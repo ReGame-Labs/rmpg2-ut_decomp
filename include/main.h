@@ -106,7 +106,8 @@ typedef struct NpcStep {
     Anim *anim;
 } NpcStep;
 
-/* The Npc chain's speeds (func_80023620): (vel_x, vel_y) pairs by direction, 1 and 2 used. */
+/* The Npc chain's speeds (main_approach_x, main_approach_xy): (vel_x, vel_y) pairs by direction, its bits 1 and 2 for x,
+ * 4 and 8 for y. */
 extern s32 D_8007B9A0[];
 
 #endif /* MAIN_H */

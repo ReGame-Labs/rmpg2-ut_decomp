@@ -2371,7 +2371,7 @@ count:
     }
 }
 
-u16 func_80039358(Monster *m, u16 a, u16 kind, Throw *t) {
+u16 npc_create_throw(Monster *m, u16 a, u16 kind, Throw *t) {
     GameObject *saved;
     ObjectDef *def;
     GameObject *cur;
@@ -2440,7 +2440,7 @@ u16 func_80039358(Monster *m, u16 a, u16 kind, Throw *t) {
 /* 96.36%: vy takes a0 where the original has a1 (the object pointer swaps with it); the original places the unk_98
  * = 2 block of the pos_y test after the loop's code (beqz to it), the C inline */
 
-void func_8003956C(Throw *t) {
+void npc_update_throw(Throw *t) {
     GameObject *saved = D_800AA248.cur_obj;
     Monster *m;
     GameObject *body;
@@ -2518,7 +2518,7 @@ end:
     D_800AA268.p = saved;
 }
 #else
-INCLUDE_ASM("asm/main/nonmatchings/npc", func_8003956C);
+INCLUDE_ASM("asm/main/nonmatchings/npc", npc_update_throw);
 #endif
 
 void func_80039890(void) {
@@ -2887,7 +2887,7 @@ void func_8003A520(void) {
     D_800AA248.cur_obj = mover;
 }
 
-u16 func_8003A5A0(u16 a, u16 kind, Throw *t, s32 alt) {
+u16 npc_create_shot(u16 a, u16 kind, Throw *t, s32 alt) {
     GameObject *saved;
     ObjectDef *def;
     SpriteFrame *fr;
@@ -2935,7 +2935,7 @@ u16 func_8003A5A0(u16 a, u16 kind, Throw *t, s32 alt) {
     return 0;
 }
 
-void func_8003A744(Throw *t) {
+void npc_update_shot(Throw *t) {
     GameObject *saved = D_800AA268.p;
     Monster *m;
     s32 vx;

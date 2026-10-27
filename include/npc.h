@@ -82,7 +82,7 @@ typedef struct Npc {
     /* 0x24 */ u16 aim;                    /* the slope band, 0..2 (D_8007DB04 holds the animations [old][new]); 3 in
                                             * func_80020EDC's tables */
     /* 0x26 */ s16 unk_26;
-    /* 0x28 */ s16 target_y;               /* the y it flies to (func_80023B20) */
+    /* 0x28 */ s16 target_y;               /* the y it flies to (main_approach_y) */
     /* 0x2A */ u16 unk_2A;
     /* 0x2C */ u16 unk_2C;
     /* 0x2E */ u16 unk_2E;
@@ -117,7 +117,7 @@ typedef struct Npc {
 extern Npc D_801FAC9C[6];
 extern u16 D_801D8730;                   /* how many of D_801FAC9C are live */
 
-/* The speeds of the throws npc.c makes (func_80039358), by kind 1..3: the object's velocity and the Throw's vertical
+/* The speeds of the throws npc.c makes (npc_create_throw), by kind 1..3: the object's velocity and the Throw's vertical
  * acceleration (Throw.unk_0C). */
 typedef struct NpcThrowSpeed {
     s32 vel_x;
@@ -131,9 +131,9 @@ extern Anim D_80095FA4;
 extern Anim D_80095FC8;
 
 /* The throw kinds npc.c makes (func_8004A9B0 calls the first two) and runs (func_8004AD18's handlers). */
-u16 func_80039358(Monster *m, u16 a, u16 kind, Throw *t);
-u16 func_8003A5A0(u16 a, u16 kind, Throw *t, s32 alt);
-void func_8003956C(Throw *t);
-void func_8003A744(Throw *t);
+u16 npc_create_throw(Monster *m, u16 a, u16 kind, Throw *t);
+u16 npc_create_shot(u16 a, u16 kind, Throw *t, s32 alt);
+void npc_update_throw(Throw *t);
+void npc_update_shot(Throw *t);
 
 #endif /* NPC_H */
