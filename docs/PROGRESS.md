@@ -5,13 +5,13 @@ Code compiled from matching C, per part. The table between the markers is genera
 [decmp.dev](https://decmp.dev/ReGame-Labs/rmpg2-ut_decomp).
 
 <!-- progress:start -->
-_Code compiled from matching C (objdiff, Psy-Q SDK excluded); updated 2026-10-22. Every file already rebuilds byte-identical from split assembly._
+_Code compiled from matching C (objdiff, Psy-Q SDK excluded); updated 2026-10-27. Every file already rebuilds byte-identical from split assembly._
 
 | Part | Progress | Matched | Functions | Code bytes |
 |---|---|---:|---:|---:|
-| **All game code** | `███████░░░░░░░░░░░░░` |  37.8% | 1507 / 2122 | 385,404 |
-| Executable (`SLUS_007.42`) | `████████░░░░░░░░░░░░` |  43.0% | 1507 / 2005 | 339,192 |
-| Overlays (2) | `░░░░░░░░░░░░░░░░░░░░` |   0.0% | 0 / 117 | 46,212 |
-| `OVERATTR` | `░░░░░░░░░░░░░░░░░░░░` |   0.0% | 0 / 108 | 44,072 |
-| `OVERMOVE` | `░░░░░░░░░░░░░░░░░░░░` |   0.0% | 0 / 9 | 2,140 |
+| **All game code** | `███████████░░░░░░░░░` |  58.9% | 1842 / 2122 | 385,404 |
+| Executable (`SLUS_007.42`) | `████████████░░░░░░░░` |  60.4% | 1746 / 2005 | 339,192 |
+| Overlays (2) | `█████████░░░░░░░░░░░` |  47.9% | 96 / 117 | 46,212 |
+| `OVERATTR` | `█████████░░░░░░░░░░░` |  45.4% | 87 / 108 | 44,072 |
+| `OVERMOVE` | `████████████████████` | 100.0% | 9 / 9 | 2,140 |
 <!-- progress:end -->

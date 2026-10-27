@@ -1,7 +1,8 @@
-/* A file of the game's code, named after its first function until its contents are understood.
+/* The behaviour slots (Ai): the action dispatcher (func_800416AC) and the state handlers of the Ai kinds 13 to 21,
+ * with their animation states.
  * The boundaries and their evidence: config/main.yaml (docs/MATCHING.md "Splitting a target into files"). */
 #include "common.h"
-#include "game_80034590.h"
+#include "npc.h"
 
 void func_8003EB5C(u8 *table, GameObject *mover);
 u16 func_8004A468(Ai *ai);    /* defined returning s32: its callers take the low half */
@@ -219,7 +220,7 @@ void func_800416AC(const AiHandler *handlers, Ai *ai) {
     }
 }
 #else
-INCLUDE_ASM("asm/main/nonmatchings/game_8004160C", func_800416AC);
+INCLUDE_ASM("asm/main/nonmatchings/ai", func_800416AC);
 #endif
 
 void func_80041928(const AiHandler *handlers, Ai *ai) {
@@ -532,7 +533,7 @@ void func_80042238(Ai *ai) {
     }
 }
 #else
-INCLUDE_ASM("asm/main/nonmatchings/game_8004160C", func_80042238);
+INCLUDE_ASM("asm/main/nonmatchings/ai", func_80042238);
 #endif
 
 void func_80042358(void) {

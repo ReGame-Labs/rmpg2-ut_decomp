@@ -1,9 +1,9 @@
-#ifndef GAME_80043E28_H
-#define GAME_80043E28_H
+#ifndef ATTACKER_H
+#define ATTACKER_H
 
 #include "game.h"
 
-/* game_80043E28: the attackers (the military units that hunt the monsters): a pool of four, each driving one
+/* attacker.c: the attackers (the military units that hunt the monsters): a pool of four, each driving one
  * GameObject through a state machine of handlers (one function per state and type). */
 typedef struct Attacker {
     /* 0x00 */ GameObject *obj;
@@ -27,4 +27,4 @@ extern u16 D_801E1C84;                 /* attackers in use */
 extern s32 D_8007F1F4[];               /* the sprite id per attacker type */
 extern u16 D_8007F224[2];
 
-#endif /* GAME_80043E28_H */
+#endif /* ATTACKER_H */

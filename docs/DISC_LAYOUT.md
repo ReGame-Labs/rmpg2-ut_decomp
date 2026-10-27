@@ -54,34 +54,36 @@ The game's code is split into the files below (`config/main.yaml`, one `c` subse
 `.data`; the evidence of every boundary is in the YAML's comments, following [`MATCHING.md`](MATCHING.md)
 "Splitting a target into files"). The link order is the order of the `.text`: psylink placed each object's
 `.rodata` and `.data` in that order, with data-only objects between the code files (the file table's checksums
-first of all, the screens' tables between `game_800500EC` and `game_80057C94`, the overlay region's address after
+first of all, the screens' tables between `monster` and `monster_anim`, the overlay region's address after
 `cdload`, and the tables pulled from a library after the Psy-Q objects). Twelve boundaries are proven by jump-table
 parity, their position inside the window then taken from the `.data` pieces each side uses (weak where the window
-has none); the others by a file's `.data` and its callers. Files are named after their first function until their
-contents are understood; `cdload` is the CD file reader.
+has none); the others by a file's `.data` and its callers. Each file is named after its module, the name its code
+suggests (`src/main/<module>.c`, the prefix of its functions' names: [`MATCHING.md`](MATCHING.md) "Conventions"); a
+file whose code does not tell yet keeps the address of its first function (`game_80043118`, `game_8004C064`,
+`game_8004E574`).
 
-| File | `.text` | `.rodata` | `.data` | Contents |
+| Module | `.text` | `.rodata` | `.data` | Contents |
 |---|---|---|---|---|
-| `game_8001781C` | `0x8001781C`–`0x8002A330` | `0x800105A8`–`0x80010784` | `0x8007A684`–`0x8007C934` | `main` and the start of the game: 352 functions |
-| `game_8002A330` | `0x8002A330`–`0x80034590` | `0x80010784`–`0x800108D8` | `0x8007C934`–`0x8007D448` | 340 functions |
-| `game_80034590` | `0x80034590`–`0x8003B568` | `0x800108D8`–`0x80010CB4` | `0x8007D448`–`0x8007DB60` | 141 functions |
-| `game_8003B568` | `0x8003B568`–`0x8003CD08` | `0x80010CB4`–`0x80010D70` | `0x8007DB60`–`0x8007DE44` | 36 functions |
-| `game_8003CD08` | `0x8003CD08`–`0x8004160C` | `0x80010D70`–`0x80010E64` | `0x8007DE44`–`0x8007E6C8` | 120 functions |
-| `game_8004160C` | `0x8004160C`–`0x80043118` | `0x80010E64`–`0x80010F78` | `0x8007E6C8`–`0x8007ED64` | 82 functions; a run of 11-instruction stubs before `func_80042670` |
-| `game_80043118` | `0x80043118`–`0x80043E28` | `0x80010F78`–`0x8001107C` |  | 49 functions, starting with a run of 11-instruction stubs; no `.data` of its own |
-| `game_80043E28` | `0x80043E28`–`0x8004750C` | `0x8001107C`–`0x80011340` | `0x8007F1F4`–`0x8007F228` | 116 functions, starting with a run of 11-instruction stubs |
-| `game_8004750C` | `0x8004750C`–`0x8004C064` | `0x80011340`–`0x800113FC` | `0x8007F228`–`0x8007F680` | 73 functions |
-| `game_8004C064` | `0x8004C064`–`0x8004E574` | `0x800113FC`–`0x800114E0` | `0x8007F680`–`0x8007F710` | 79 functions |
-| `game_8004E574` | `0x8004E574`–`0x800500EC` | `0x800114E0`–`0x80011534` | `0x8007F710`–`0x8007F8FC` | 58 functions |
-| `game_800500EC` | `0x800500EC`–`0x80057C94` | `0x80011534`–`0x80011594` | `0x8007F8FC`–`0x8007FC84` | the last file whose `.data` precedes the screens' tables |
-| `game_80057C94` | `0x80057C94`–`0x8005D198` | `0x80011594`–`0x800115D8` | `0x8008434C`–`0x80085264` | the first file whose `.data` follows the screens' tables; 150 small tables, one per function |
-| `game_8005D198` | `0x8005D198`–`0x80060F3C` | `0x800115D8`–`0x8001169C` |  | 38 functions; uses the config tables `D_8008427C`–`D_8008433C` |
+| `main` | `0x8001781C`–`0x8002A330` | `0x800105A8`–`0x80010784` | `0x8007A684`–`0x8007C934` | `main` first: the game loop and the game modes, the object pool and its draw lists, the text printer, the random numbers; 352 functions |
+| `building` | `0x8002A330`–`0x80034590` | `0x80010784`–`0x800108D8` | `0x8007C934`–`0x8007D448` | the buildings (the records of `D_801D3DC8`, their items and what falls from them), after the sky and before the handlers of the `Ai` kinds 1–12; 340 functions |
+| `npc` | `0x80034590`–`0x8003B568` | `0x800108D8`–`0x80010CB4` | `0x8007D448`–`0x8007DB60` | the non-player characters (the `Npc` records of `D_801FAC9C`), after the pickups' per-kind handlers; 141 functions |
+| `pickup` | `0x8003B568`–`0x8003CD08` | `0x80010CB4`–`0x80010D70` | `0x8007DB60`–`0x8007DE44` | the pickups (the `Pickup` records of `D_801FA9BC`): spawned, run by kind, taken by a monster; 36 functions |
+| `actor` | `0x8003CD08`–`0x8004160C` | `0x80010D70`–`0x80010E64` | `0x8007DE44`–`0x8007E6C8` | the actors (the `Actor` records of `D_801E1E48`) and the behaviour slots (`Ai`) around the current object; 120 functions |
+| `ai` | `0x8004160C`–`0x80043118` | `0x80010E64`–`0x80010F78` | `0x8007E6C8`–`0x8007ED64` | the behaviour slots' action dispatcher and the handlers of the `Ai` kinds 13–21; 82 functions, a run of 11-instruction stubs before `func_80042670` |
+| `game_80043118` | `0x80043118`–`0x80043E28` | `0x80010F78`–`0x8001107C` |  | more `Ai` animation states, entries of the previous file's handler tables; 49 functions, starting with a run of 11-instruction stubs; no `.data` of its own |
+| `attacker` | `0x80043E28`–`0x8004750C` | `0x8001107C`–`0x80011340` | `0x8007F1F4`–`0x8007F228` | the attackers (the military units that hunt the monsters, four `Attacker` slots); 116 functions, starting with a run of 11-instruction stubs |
+| `throw` | `0x8004750C`–`0x8004C064` | `0x80011340`–`0x800113FC` | `0x8007F228`–`0x8007F680` | the monsters' attacks and the objects they throw (the `Throw` records); 73 functions |
+| `game_8004C064` | `0x8004C064`–`0x8004E574` | `0x800113FC`–`0x800114E0` | `0x8007F680`–`0x8007F710` | commands of the monsters' animation scripts, and the hit reactions (the handlers by projectile kind `D_8007F680`, monster against monster); 79 functions |
+| `game_8004E574` | `0x8004E574`–`0x800500EC` | `0x800114E0`–`0x80011534` | `0x8007F710`–`0x8007F8FC` | commands of the monsters' animation scripts; 58 functions |
+| `monster` | `0x800500EC`–`0x80057C94` | `0x80011534`–`0x80011594` | `0x8007F8FC`–`0x8007FC84` | the monsters' actions (the dispatcher on `Monster.action`), hits, score and climbing; the last file whose `.data` precedes the screens' tables |
+| `monster_anim` | `0x80057C94`–`0x8005D198` | `0x80011594`–`0x800115D8` | `0x8008434C`–`0x80085264` | the monsters' animation scripts and the functions that start them per action; the first file whose `.data` follows the screens' tables: 150 small tables (the scripts), one per function |
+| `bonus` | `0x8005D198`–`0x80060F3C` | `0x800115D8`–`0x8001169C` |  | the bonus rounds ("READY!", "SET!", "GO!") and the players' status panels; 38 functions; uses the config tables `D_8008427C`–`D_8008433C` |
 | `cdload` | `0x80060F3C`–`0x800633EC` | `0x80016A90`–`0x80016AC8` | `0x80085264`–`0x80085308` | the CD file reader and the overlay loader (`cdload_read_file`, `cdload_load_overlay`); `func_800619A4`–`func_80062868` and the stream reader `func_80062C10`–`func_800632E8` may be files of their own |
-| `game_800633EC` | `0x800633EC`–`0x80063A78` | `0x80016AD0`–`0x80016ADC` | `0x80085308`–`0x800853C0` | the controllers' vibration (the `PadSetAct` buffers' motor bytes), before the `InitHeap` stub |
-| `game_80063A88` | `0x80063A88`–`0x80063FA8` |  | `0x800853C0`–`0x800853F4` | the SPU setup, between the first two library objects |
-| `game_8006BB14` | `0x8006BB14`–`0x80070914` |  |  | the sound driver (the `SPSX` string), between library objects |
-| `game_80076C8C` | `0x80076C8C`–`0x800783C0` |  |  | more of the sound driver |
-| `game_80078A40` | `0x80078A40`–`0x80078A88` |  |  | one sound-driver function |
+| `vibrate` | `0x800633EC`–`0x80063A78` | `0x80016AD0`–`0x80016ADC` | `0x80085308`–`0x800853C0` | the controllers' vibration (the `PadSetAct` buffers' motor bytes), before the `InitHeap` stub |
+| `wess_spu` | `0x80063A88`–`0x80063FA8` |  | `0x800853C0`–`0x800853F4` | the sound driver WESS, its SPU layer: the setup, the reverb, the master and CD volumes and their fades; between the first two library objects |
+| `wess` | `0x8006BB14`–`0x80070914` |  |  | the sound driver WESS (the `SPSX` string): the API, the SPU commands and voices, the sequence loader, the timer; between library objects |
+| `wess_seq` | `0x80076C8C`–`0x800783C0` |  |  | the sound driver's sequencer: the per-tick engine and its 36 commands |
+| `wess_trigger` | `0x80078A40`–`0x80078A88` |  |  | one sound-driver function, the sequence trigger by type |
 
 The `.rodata` between the files' pieces holds data-only objects: `0x80010000`–`0x800105A8` the file table's
 checksums, `0x8001169C`–`0x80016A90` const tables and strings used from `.data` and from code all over,
@@ -138,7 +140,7 @@ executable resolve to the executable's own definitions; splat gets the executabl
 
 | Overlay | `.rodata` | `.text` | `.data` and `.bss` |
 |---|---|---|---|
-| `OVERATTR.BIN` | `0x80097EA4`–`0x80098730`: the save header, the credits' and the memory-card screens' strings, nine jump tables | `0x80098730`–`0x800A3360`: 108 functions in three files (`card` the memory-card file, `overattr_80099118`, `overattr_8009B478`), each object's `.rodata` and `.text` 8-aligned (`config/overattr.yaml`); a data-only word at `0x80097EA4` first | `0x800A3360`–`0x800A92A4` `.data`, then zeros to the file's end `0x800A98C0`: its `.bss`, inside the file. The file table says 72,244 bytes, 24 more than the file: the loader copies that much, so the image in memory extends 24 bytes past the file's last word |
+| `OVERATTR.BIN` | `0x80097EA4`–`0x80098730`: the save header, the credits' and the memory-card screens' strings, nine jump tables | `0x80098730`–`0x800A3360`: 108 functions in three files (`card` the memory-card file, `overattr_80099118` the screens around a city and the results, `menu` the credits, the menus and the memory-card screens), each object's `.rodata` and `.text` 8-aligned (`config/overattr.yaml`); a data-only word at `0x80097EA4` first | `0x800A3360`–`0x800A92A4` `.data`, then zeros to the file's end `0x800A98C0`: its `.bss`, inside the file. The file table says 72,244 bytes, 24 more than the file: the loader copies that much, so the image in memory extends 24 bytes past the file's last word |
 | `OVERMOVE.BIN` | `0x80097EA4`–`0x80097EF8`: libpress's strings (`MDEC_rest`, `MDEC_in_sync`, ...) | `0x80097EF8`–`0x800AA0EC`: libpress first (`psyq/libpress/vlc`: `DecDCTvlc`; `psyq/libpress/libpress`: `DecDCTReset`, `DecDCTin`, `DecDCTout`, `DecDCToutCallback` and its static helpers; `psyq/libpress/vlctbl`: the VLC decoding tables, 70 KB of data in `.text`, `0x8009870C`–`0x800A9890`), then the game's movie player (`overmove`, 9 functions from `0x800A9890`) | `0x800AA0EC`–`0x800AA240`: the movie table and the player's state |
 
 No other library code is in the overlays: `OVERATTR.BIN` calls the executable's `MemCard*`, `strchr`, `strcmp` and

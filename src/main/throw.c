@@ -1,10 +1,10 @@
 /* The monsters' attacks and the objects they throw: script commands that spawn and drive them, the hit tests
- * against monsters, and the attack table. Named after its first function until the rest is understood.
+ * against monsters, and the attack table.
  * The boundaries and their evidence: config/main.yaml (docs/MATCHING.md "Splitting a target into files"). */
 #include "common.h"
 #include "game.h"
 #include "psyq/libc2.h"
-#include "game_80043E28.h"           /* Attacker: the attack command func_80047554 drives one */
+#include "attacker.h"           /* Attacker: the attack command func_80047554 drives one */
 
 /* A thrown object's bookkeeping (func_8004B660). */
 typedef struct {
@@ -758,7 +758,7 @@ u16 func_8004874C(u16 b, Throw *t) {
     return 0;
 }
 #else
-INCLUDE_ASM("asm/main/nonmatchings/game_8004750C", func_8004874C);
+INCLUDE_ASM("asm/main/nonmatchings/throw", func_8004874C);
 #endif
 
 extern s32 D_80091B24[];
@@ -1208,7 +1208,7 @@ void func_80049650(Throw *t) {
     }
 }
 #else
-INCLUDE_ASM("asm/main/nonmatchings/game_8004750C", func_80049650);
+INCLUDE_ASM("asm/main/nonmatchings/throw", func_80049650);
 #endif
 
 extern s32 D_80091A20[];
@@ -1336,7 +1336,7 @@ void func_80049B9C(Throw *t) {
     } while (--i != 0);
 }
 #else
-INCLUDE_ASM("asm/main/nonmatchings/game_8004750C", func_80049B9C);
+INCLUDE_ASM("asm/main/nonmatchings/throw", func_80049B9C);
 #endif
 
 void func_80049D90(Throw *t) {
@@ -1627,7 +1627,7 @@ end:
     D_800AA268.p = saved;
 }
 #else
-INCLUDE_ASM("asm/main/nonmatchings/game_8004750C", func_8004A698);
+INCLUDE_ASM("asm/main/nonmatchings/throw", func_8004A698);
 #endif
 
 void func_8004A90C(Monster *m) {
@@ -2049,7 +2049,7 @@ void func_8004B3D0(void) {
     } while (--n != 0);
 }
 #else
-INCLUDE_ASM("asm/main/nonmatchings/game_8004750C", func_8004B3D0);
+INCLUDE_ASM("asm/main/nonmatchings/throw", func_8004B3D0);
 #endif
 
 void func_8004B540(void) {
@@ -2259,7 +2259,7 @@ void func_8004BAC0(void) {
     func_8006353C(7);
 }
 
-INCLUDE_ASM("asm/main/nonmatchings/game_8004750C", func_8004BBC8);
+INCLUDE_ASM("asm/main/nonmatchings/throw", func_8004BBC8);
 
 void func_8004BFE0(void) {
     ObjectDef *def = func_8001D110();

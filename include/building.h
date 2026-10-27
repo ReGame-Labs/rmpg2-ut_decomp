@@ -1,11 +1,11 @@
-#ifndef GAME_8002A330_H
-#define GAME_8002A330_H
+#ifndef BUILDING_H
+#define BUILDING_H
 
 #include "common.h"
 #include "game.h"
 #include "psyq/libc2.h"
 
-/* Declarations of src/main/game_8002A330.c: provisional types from the code's own use; refined as functions match. */
+/* Declarations of src/main/building.c: provisional types from the code's own use; refined as functions match. */
 
 extern u8 D_80011BA4[];
 extern u8 D_80011BA4_alt[];   /* another name for D_80011BA4 (config/aliases.ld) */
@@ -524,7 +524,7 @@ BuildingItem *func_8002CD24(u16, Monster *, BuildingItem *);
 void func_80031280(Monster *, Building *);
 void func_8002CE74(u16, Monster *, BuildingItem *);
 void func_8003111C(s32, Monster *);
-void func_80054374(s32, Monster *);   /* game_800500EC: adds to the monster's score */
+void func_80054374(s32, Monster *);   /* monster.c: adds to the monster's score */
 void func_80031364(Building *);
 extern void *D_8007D008[];
 extern void *D_8007D060[];
@@ -625,4 +625,4 @@ extern s16 D_801F9ACE;   /* the camera y's integer half (D_801F9ACC) */
 extern u8 D_80097E64[];
 s32 func_80030268(s16, s32, Monster *);
 void func_800302AC(u16, Monster *);
-#endif /* GAME_8002A330_H */
+#endif /* BUILDING_H */

@@ -61,10 +61,10 @@ segments:
       - [0x0, rodata, rodata_80097EA4]        # 0x80097EA4 the word 11, used by nothing: an object of its own (the jump tables after it need an 8-aligned start)
       - [0x4, .rodata, card]                  # 0x80097EA8 the save file's name BASLUS-00742RAMPAGE, the jump tables of func_80098848/func_80098A48, the save title
       - [0x94, .rodata, overattr_80099118]    # 0x80097F38 "??????", "NOOB MYUKUS", "WINS" (func_800991EC), then the pad word 0x80097F54
-      - [0xB4, .rodata, overattr_8009B478]    # 0x80097F58 the movie names (the strings of the table at 0x800A72D8, last element first), then the users in text order to the end
+      - [0xB4, .rodata, menu]                 # 0x80097F58 the movie names (the strings of the table at 0x800A72D8, last element first), then the users in text order to the end
       - [0x88C, c, card]                      # 0x80098730 the memory-card file: MemCard* wrappers, the save header, ASCII to Shift-JIS
       - [0x1274, c, overattr_80099118]        # 0x80099118 after the pad word 0x80099114: the pad edges, the attract screens
-      - [0x35D4, c, overattr_8009B478]        # 0x8009B478 after the pad word 0x8009B474: the credits, the menus and the memory-card screens
+      - [0x35D4, c, menu]                     # 0x8009B478 after the pad word 0x8009B474: the credits, the menus and the memory-card screens
       - [0xB4BC, data, data]                  # 0x800A3360 .data, then zeros from 0x800A92A4: the overlay's .bss, inside the file
 
   - [0x11A1C]

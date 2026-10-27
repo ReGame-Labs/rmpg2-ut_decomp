@@ -1,7 +1,8 @@
-/* A file of the game's code, named after its first function until its contents are understood.
+/* The pickups: the eight 0x58-byte Pickup records of D_801FA9BC, made from a spawn list, run by kind and handed to
+ * the monster that touches them; also the 0x30-byte records of D_801D3824.
  * The boundaries and their evidence: config/main.yaml (docs/MATCHING.md "Splitting a target into files"). */
 #include "common.h"
-#include "game_8003B568.h"
+#include "pickup.h"
 
 
 extern s32 D_8007DDA4[];
@@ -221,7 +222,7 @@ s32 func_8003B9C8(GameObject *obj, Monster *m) {
     return 0;
 }
 #else
-INCLUDE_ASM("asm/main/nonmatchings/game_8003B568", func_8003B9C8);
+INCLUDE_ASM("asm/main/nonmatchings/pickup", func_8003B9C8);
 #endif
 
 
@@ -325,7 +326,7 @@ void func_8003BD48(Pickup *b) {
     }
 }
 #else
-INCLUDE_ASM("asm/main/nonmatchings/game_8003B568", func_8003BD48);
+INCLUDE_ASM("asm/main/nonmatchings/pickup", func_8003BD48);
 #endif
 
 s32 func_8003BE34(Pickup *rec) {
@@ -393,7 +394,7 @@ void func_8003BF34(GameObject *obj, Pickup *b, u16 x) {
     }
 }
 #else
-INCLUDE_ASM("asm/main/nonmatchings/game_8003B568", func_8003BF34);
+INCLUDE_ASM("asm/main/nonmatchings/pickup", func_8003BF34);
 #endif
 
 void func_8003C080(void) {
@@ -599,7 +600,7 @@ done:
     D_801D8738 = 0x1C - (u16)D_800AA250;
 }
 #else
-INCLUDE_ASM("asm/main/nonmatchings/game_8003B568", func_8003C3B0);
+INCLUDE_ASM("asm/main/nonmatchings/pickup", func_8003C3B0);
 #endif
 
 void func_8003C674(void) {
@@ -667,7 +668,7 @@ BuildingPart *func_8003C67C(Building *u, UnkStructB2 *rec) {
     return part;
 }
 #else
-INCLUDE_ASM("asm/main/nonmatchings/game_8003B568", func_8003C67C);
+INCLUDE_ASM("asm/main/nonmatchings/pickup", func_8003C67C);
 #endif
 
 u16 func_8003C858(BuildingPart *p, s32 arg1, s32 arg2) {

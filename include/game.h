@@ -77,7 +77,7 @@ typedef struct GameObject {
     /* 0x3C */ u16 unk_3C;
     /* 0x3E */ u8 unk_3E[0x02];
     /* 0x40 */ union {
-                   struct GameObject *obj;  /* a link (game_8001781C's list from D_801D8584) */
+                   struct GameObject *obj;  /* a link (main.c's list from D_801D8584) */
                    s32 w;                   /* a value; a box's width (func_8001EB9C: the status bars, OVERATTR's
                                              * volume bars) */
                } unk_40;
@@ -353,9 +353,9 @@ typedef struct GameState {
     /* 0x04 */ s32 unk_04;                     /* scratch: func_80056840's scan index, func_8004003C's "a player is
                                                 * ahead" */
     /* 0x08 */ s32 unk_08;
-    /* 0x0C */ s32 unk_0C;                     /* D_800AA254; scratch: game_800500EC's probe x, func_8004003C's "a
+    /* 0x0C */ s32 unk_0C;                     /* D_800AA254; scratch: monster.c's probe x, func_8004003C's "a
                                                 * player is in play", func_800297B4's count */
-    /* 0x10 */ s32 unk_10;                     /* D_800AA258; scratch: game_800500EC's probe y, func_800297B4's count */
+    /* 0x10 */ s32 unk_10;                     /* D_800AA258; scratch: monster.c's probe y, func_800297B4's count */
     /* 0x14 */ s32 action;                     /* the monster's action, clamped, before the dispatch (func_800500EC;
                                                 * D_800AA25C) */
     /* 0x18 */ s32 unk_18;                     /* the argument of the current actor's handler (D_800AA260) */
@@ -569,7 +569,7 @@ typedef struct Building {
 extern Building D_801D3DC8[];
 extern u16 D_801E29A4;
 
-/* Level-wide flags and per-player counters at D_8007BD78 (.data of game_8001781C; cleared as 0x94 bytes). */
+/* Level-wide flags and per-player counters at D_8007BD78 (.data of main.c; cleared as 0x94 bytes). */
 typedef struct LevelFlags {
     /* 0x00 */ s32 flags;                      /* 0x20, 0x40 */
     /* 0x04 */ s32 unk_04;

@@ -64,10 +64,10 @@ DEFAULT_CC = "2.8.1"
 # GCC 2.7.2: its stores to globals go through the assembler's macro form (`sh $v1, sym`, a `lui $at` once
 # assembled), which 2.8.x never emits, and 2.7.2 matches 72 of its functions against 2.8.1's 32.
 CC_OVERRIDES: dict[str, str] = {
-    "src/main/game_80063A88.c": "2.7.2",
-    "src/main/game_8006BB14.c": "2.7.2",
-    "src/main/game_80076C8C.c": "2.7.2",
-    "src/main/game_80078A40.c": "2.7.2",
+    "src/main/wess_spu.c": "2.7.2",
+    "src/main/wess.c": "2.7.2",
+    "src/main/wess_seq.c": "2.7.2",
+    "src/main/wess_trigger.c": "2.7.2",
 }
 # -G per target: the executable's code makes no $gp-relative access at all (docs/TOOLCHAIN.md), so every file is
 # -G0. Exceptions by C path in G_OVERRIDES (none expected for the executable; the overlays are settled separately).

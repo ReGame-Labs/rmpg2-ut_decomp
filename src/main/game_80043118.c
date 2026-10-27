@@ -1,7 +1,7 @@
 /* A file of the game's code, named after its first function until its contents are understood.
  * The boundaries and their evidence: config/main.yaml (docs/MATCHING.md "Splitting a target into files"). */
 #include "common.h"
-#include "game_80034590.h"
+#include "npc.h"
 
 void func_8003EB5C(u8 *table, GameObject *mover);
 u16 func_8004A468(Ai *ai);    /* defined returning s32: its callers take the low half */

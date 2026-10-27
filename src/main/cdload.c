@@ -54,7 +54,7 @@ extern s32 D_801FB4A8;
 extern s32 D_801FB4B8;
 
 extern s32 D_80085264[];
-extern u16 D_801D8728;   /* not in game.h: read unsigned here and in game_8001781C, signed in game_8003CD08 */
+extern u16 D_801D8728;   /* not in game.h: read unsigned here and in main.c, signed in actor.c */
 
 extern u8 D_80085274[];
 extern s32 D_80085278;

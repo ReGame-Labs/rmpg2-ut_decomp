@@ -1,8 +1,9 @@
-/* A file of the game's code, named after its first function until its contents are understood.
+/* The monsters: the action dispatcher (func_800500EC, the handler table D_8007F8FC by Monster.action) and the
+ * actions, the hits and the knockback, the score and the extra lives, and climbing the buildings.
  * The boundaries and their evidence: config/main.yaml (docs/MATCHING.md "Splitting a target into files"). */
 #include "common.h"
 #include "game.h"
-#include "game_800500EC.h"
+#include "monster.h"
 
 #ifdef NON_MATCHING
 /* 83.5%: the original copies e to a3 and builds &D_800AA248 in a0 (the clamped action in v1); here e stays in a0 and the action takes a3 */
@@ -29,7 +30,7 @@ void func_800500EC(Monster *e, GameObject *obj) {
     D_8007F8FC[state](e);
 }
 #else
-INCLUDE_ASM("asm/main/nonmatchings/game_800500EC", func_800500EC);
+INCLUDE_ASM("asm/main/nonmatchings/monster", func_800500EC);
 #endif
 
 void func_80050190(Monster *e) {
@@ -38,7 +39,7 @@ void func_80050190(Monster *e) {
     }
 }
 
-INCLUDE_ASM("asm/main/nonmatchings/game_800500EC", func_800501B0);
+INCLUDE_ASM("asm/main/nonmatchings/monster", func_800501B0);
 
 void func_800504B4(Monster *e) {
     D_800AA248.unk_24 = e->dir;
@@ -139,9 +140,9 @@ void func_800506BC(Monster *e) {
     }
 }
 
-INCLUDE_ASM("asm/main/nonmatchings/game_800500EC", func_80050774);
+INCLUDE_ASM("asm/main/nonmatchings/monster", func_80050774);
 
-INCLUDE_ASM("asm/main/nonmatchings/game_800500EC", func_8005086C);
+INCLUDE_ASM("asm/main/nonmatchings/monster", func_8005086C);
 
 void func_800509EC(Monster *e) {
     func_80050E58(e);
@@ -193,7 +194,7 @@ void func_80050B40(Monster *e) {
     }
 }
 
-INCLUDE_ASM("asm/main/nonmatchings/game_800500EC", func_80050BBC);
+INCLUDE_ASM("asm/main/nonmatchings/monster", func_80050BBC);
 
 void func_80050DAC(Monster *e) {
     func_80050E58(e);
@@ -229,7 +230,7 @@ void func_80050E58(Monster *e) {
     }
 }
 
-INCLUDE_ASM("asm/main/nonmatchings/game_800500EC", func_80050E88);
+INCLUDE_ASM("asm/main/nonmatchings/monster", func_80050E88);
 
 void func_800510BC(Monster *a, Monster *b) {
     GameObject *body;
@@ -358,7 +359,7 @@ void func_80051410(Monster *e, Monster *e2) {
     func_800510E8(e);
 }
 
-INCLUDE_ASM("asm/main/nonmatchings/game_800500EC", func_800514CC);
+INCLUDE_ASM("asm/main/nonmatchings/monster", func_800514CC);
 
 void func_800517C0(Monster *e) {
     e->unk_104 = 0x4000;
@@ -711,7 +712,7 @@ void func_800524A4(void) {
 void func_800524AC(void) {
 }
 
-INCLUDE_ASM("asm/main/nonmatchings/game_800500EC", func_800524B4);
+INCLUDE_ASM("asm/main/nonmatchings/monster", func_800524B4);
 
 void func_80052520(Monster *e) {
     GameState *g;
@@ -820,7 +821,7 @@ void func_80052798(Monster *e) {
     D_800AA268.p->vel_y.w = vy;
 }
 
-INCLUDE_ASM("asm/main/nonmatchings/game_800500EC", func_80052880);
+INCLUDE_ASM("asm/main/nonmatchings/monster", func_80052880);
 
 /* 0x8000 when a's player has a lower D_801D3D98 entry than b's, else -0x8000. */
 s32 func_80052A0C(Monster *a, Monster *b) {
@@ -982,7 +983,7 @@ void func_80052E70(Monster *e) {
 void func_80052E94(void) {
 }
 
-INCLUDE_ASM("asm/main/nonmatchings/game_800500EC", func_80052E9C);
+INCLUDE_ASM("asm/main/nonmatchings/monster", func_80052E9C);
 
 void func_800531C0(Monster *e) {
     D_800AA248.cur_obj->vel_x.w = 0;
@@ -993,9 +994,9 @@ void func_800531C0(Monster *e) {
     e->unk_104 = 0;
 }
 
-INCLUDE_ASM("asm/main/nonmatchings/game_800500EC", func_80053204);
+INCLUDE_ASM("asm/main/nonmatchings/monster", func_80053204);
 
-INCLUDE_ASM("asm/main/nonmatchings/game_800500EC", func_800535E4);
+INCLUDE_ASM("asm/main/nonmatchings/monster", func_800535E4);
 
 void func_80053804(s32 unused, Monster *e) {
     /* LOOP_BLOCK class A2: the plain statements give the original's order only with -fno-schedule-insns
@@ -1032,10 +1033,10 @@ s32 func_80053854(s16 x, s16 y, Monster *m) {
     return 0;
 }
 #else
-INCLUDE_ASM("asm/main/nonmatchings/game_800500EC", func_80053854);
+INCLUDE_ASM("asm/main/nonmatchings/monster", func_80053854);
 #endif
 
-INCLUDE_ASM("asm/main/nonmatchings/game_800500EC", func_80053970);
+INCLUDE_ASM("asm/main/nonmatchings/monster", func_80053970);
 
 u16 func_80053AC4(s16 a, s16 b, s16 c, s16 d, Monster *e) {
     if (e->unk_0DC == 0 || e->action == 0x37) {
@@ -1068,7 +1069,7 @@ s32 func_80053B30(s16 x, s16 y, s16 dx, s16 dy, Monster *e) {
     return 1;
 }
 #else
-INCLUDE_ASM("asm/main/nonmatchings/game_800500EC", func_80053B30);
+INCLUDE_ASM("asm/main/nonmatchings/monster", func_80053B30);
 #endif
 
 u16 func_80053BE8(s16 x, Monster *e) {
@@ -1209,7 +1210,7 @@ void func_80053EA8(void) {
     D_800AA248.cur_obj = obj;
 }
 #else
-INCLUDE_ASM("asm/main/nonmatchings/game_800500EC", func_80053EA8);
+INCLUDE_ASM("asm/main/nonmatchings/monster", func_80053EA8);
 #endif
 
 void func_80053FDC(void) {
@@ -1416,7 +1417,7 @@ s32 func_8005453C(s16 x, s32 unused, Monster *m) {
     return 0;
 }
 #else
-INCLUDE_ASM("asm/main/nonmatchings/game_800500EC", func_8005453C);
+INCLUDE_ASM("asm/main/nonmatchings/monster", func_8005453C);
 #endif
 
 void func_80054608(u16 kind, Monster *e, Building *u) {
@@ -1474,7 +1475,7 @@ Building *func_80054728(u16 n) {
     return city;
 }
 #else
-INCLUDE_ASM("asm/main/nonmatchings/game_800500EC", func_80054728);
+INCLUDE_ASM("asm/main/nonmatchings/monster", func_80054728);
 #endif
 
 void func_8005478C(Monster *e) {
@@ -1486,7 +1487,7 @@ void func_8005478C(Monster *e) {
     }
 }
 
-INCLUDE_ASM("asm/main/nonmatchings/game_800500EC", func_800547EC);
+INCLUDE_ASM("asm/main/nonmatchings/monster", func_800547EC);
 
 void func_80054A18(Monster *e) {
     func_800578E0(e, func_80054728(e->climb_building));
@@ -1752,7 +1753,7 @@ void func_8005520C(Monster *e) {
     }
 }
 #else
-INCLUDE_ASM("asm/main/nonmatchings/game_800500EC", func_8005520C);
+INCLUDE_ASM("asm/main/nonmatchings/monster", func_8005520C);
 #endif
 
 void func_800553B0(Monster *e) {
@@ -1957,7 +1958,7 @@ void func_80055B68(Monster *e, Building *city) {
     }
 }
 
-INCLUDE_ASM("asm/main/nonmatchings/game_800500EC", func_80055CA8);
+INCLUDE_ASM("asm/main/nonmatchings/monster", func_80055CA8);
 
 void func_80055FBC(Monster *e, Building *city) {
     u16 target;
@@ -2065,7 +2066,7 @@ u16 func_800561CC(s16 x, Building *city) {
     return 1;
 }
 #else
-INCLUDE_ASM("asm/main/nonmatchings/game_800500EC", func_800561CC);
+INCLUDE_ASM("asm/main/nonmatchings/monster", func_800561CC);
 #endif
 
 #ifdef NON_MATCHING
@@ -2091,12 +2092,12 @@ u16 func_80056258(s16 x, Building *city) {
     return 1;
 }
 #else
-INCLUDE_ASM("asm/main/nonmatchings/game_800500EC", func_80056258);
+INCLUDE_ASM("asm/main/nonmatchings/monster", func_80056258);
 #endif
 
-INCLUDE_ASM("asm/main/nonmatchings/game_800500EC", func_800562E4);
+INCLUDE_ASM("asm/main/nonmatchings/monster", func_800562E4);
 
-INCLUDE_ASM("asm/main/nonmatchings/game_800500EC", func_80056378);
+INCLUDE_ASM("asm/main/nonmatchings/monster", func_80056378);
 
 void func_8005640C(Monster *e, Building *city) {
     u16 n;
@@ -2150,9 +2151,9 @@ void func_80056560(Monster *e) {
     D_800AA268.p->pos_y.s.hi = func_80054728(e->climb_building)->unk_074 + 8;
 }
 
-INCLUDE_ASM("asm/main/nonmatchings/game_800500EC", func_80056598);
+INCLUDE_ASM("asm/main/nonmatchings/monster", func_80056598);
 
-INCLUDE_ASM("asm/main/nonmatchings/game_800500EC", func_80056708);
+INCLUDE_ASM("asm/main/nonmatchings/monster", func_80056708);
 
 void func_800567E8(Monster *e, Building *city) {
     D_800AA248.cur_obj->pos_y.s.hi = city->unk_074;
@@ -2293,7 +2294,7 @@ s32 func_80056C18(Monster *e, Building *u) {
     return 0;
 }
 
-INCLUDE_ASM("asm/main/nonmatchings/game_800500EC", func_80056CCC);
+INCLUDE_ASM("asm/main/nonmatchings/monster", func_80056CCC);
 
 void func_80056E2C(Monster *e, Building *city) {
     u16 n;
@@ -2339,7 +2340,7 @@ void func_80056EB8(Monster *e, Building *city) {
     }
 }
 
-INCLUDE_ASM("asm/main/nonmatchings/game_800500EC", func_80056F38);
+INCLUDE_ASM("asm/main/nonmatchings/monster", func_80056F38);
 
 u16 func_8005703C(Monster *e, Building *u) {
     BuildingBlock *p;
@@ -2656,7 +2657,7 @@ void func_800578E0(Monster *e, Building *city) {
     func_80056E78(e);
 }
 #else
-INCLUDE_ASM("asm/main/nonmatchings/game_800500EC", func_800578E0);
+INCLUDE_ASM("asm/main/nonmatchings/monster", func_800578E0);
 #endif
 
 u16 func_80057A08(Monster *e) {

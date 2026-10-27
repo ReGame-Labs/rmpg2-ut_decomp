@@ -1,9 +1,9 @@
-/* A file of the game's code, named after its first function until its contents are understood: the records of
- * D_801FA9BC (Pickup) and D_801FAC9C (Npc, include/game_80034590.h) and their per-kind updaters.
+/* The non-player characters: the six 0x78-byte Npc records of D_801FAC9C (include/npc.h) and their per-kind
+ * updaters. The file starts with the per-kind handlers of the Pickup records of D_801FA9BC (pickup.c).
  * The boundaries and their evidence: config/main.yaml (docs/MATCHING.md "Splitting a target into files"). */
 #include "common.h"
 #include "game.h"
-#include "game_80034590.h"
+#include "npc.h"
 #include "psyq/libc2.h"
 
 /* Other units. */
@@ -511,7 +511,7 @@ void func_80034E48(Pickup *npc) {
     npc->unk_08 = 2;
 }
 #else
-INCLUDE_ASM("asm/main/nonmatchings/game_80034590", func_80034E48);
+INCLUDE_ASM("asm/main/nonmatchings/npc", func_80034E48);
 #endif
 
 void func_80035040(void) {
@@ -1105,10 +1105,10 @@ void func_80036440(Npc *npc, s32 depth) {
     func_8001BB68(mover);
 }
 #else
-INCLUDE_ASM("asm/main/nonmatchings/game_80034590", func_80036440);
+INCLUDE_ASM("asm/main/nonmatchings/npc", func_80036440);
 #endif
 
-INCLUDE_ASM("asm/main/nonmatchings/game_80034590", func_80036504);
+INCLUDE_ASM("asm/main/nonmatchings/npc", func_80036504);
 
 void func_80036818(Npc *npc) {
     GameObject *a = npc->unk_70;
@@ -1238,10 +1238,10 @@ void func_80036A20(Monster *player) {
     } while (--n != 0);
 }
 #else
-INCLUDE_ASM("asm/main/nonmatchings/game_80034590", func_80036A20);
+INCLUDE_ASM("asm/main/nonmatchings/npc", func_80036A20);
 #endif
 
-INCLUDE_ASM("asm/main/nonmatchings/game_80034590", func_80036C30);
+INCLUDE_ASM("asm/main/nonmatchings/npc", func_80036C30);
 
 u16 func_80036FD0(s16 x, s16 y, GameObject *mover) {
     u16 pos;
@@ -1282,7 +1282,7 @@ void func_80037078(Monster *player, Npc *npc) {
     player->unk_18A = 1;
 }
 
-INCLUDE_ASM("asm/main/nonmatchings/game_80034590", func_8003712C);
+INCLUDE_ASM("asm/main/nonmatchings/npc", func_8003712C);
 
 #ifdef NON_MATCHING
 /* 99.85 %: the control flow and the saved registers are right; the first rectangle's x tests load the field into v1 (a0 in the original) */
@@ -1305,7 +1305,7 @@ hit:
     return func_8003761C(x, y, player, npc);
 }
 #else
-INCLUDE_ASM("asm/main/nonmatchings/game_80034590", func_800372DC);
+INCLUDE_ASM("asm/main/nonmatchings/npc", func_800372DC);
 #endif
 
 u16 func_800374FC(s16 x, s16 y, Npc *npc, GameObject *arg3) {
@@ -1365,7 +1365,7 @@ void func_800376D8(void) {
 }
 
 #ifdef NON_MATCHING
-/* 82.2 %: the twin of func_8003BD48 (game_8003B568), with the same difference: the original tests the loaded limit in v0 and copies it into a1, where every form tried loads it straight into one register */
+/* 82.2 %: the twin of func_8003BD48 (pickup.c), with the same difference: the original tests the loaded limit in v0 and copies it into a1, where every form tried loads it straight into one register */
 void func_800376E0(Npc *npc) {
     s32 limit;
     u16 x;
@@ -1400,10 +1400,10 @@ void func_800376E0(Npc *npc) {
     }
 }
 #else
-INCLUDE_ASM("asm/main/nonmatchings/game_80034590", func_800376E0);
+INCLUDE_ASM("asm/main/nonmatchings/npc", func_800376E0);
 #endif
 
-INCLUDE_ASM("asm/main/nonmatchings/game_80034590", func_800377B4);
+INCLUDE_ASM("asm/main/nonmatchings/npc", func_800377B4);
 
 void func_80037960(Npc *npc, GameObject *obj) {
     s16 x;
@@ -1831,7 +1831,7 @@ void func_800385F4(Npc *npc) {
     }
 }
 #else
-INCLUDE_ASM("asm/main/nonmatchings/game_80034590", func_800385F4);
+INCLUDE_ASM("asm/main/nonmatchings/npc", func_800385F4);
 #endif
 
 void func_80038754(Npc *npc) {
@@ -1921,7 +1921,7 @@ void func_80038920(Npc *npc) {
     }
 }
 #else
-INCLUDE_ASM("asm/main/nonmatchings/game_80034590", func_80038920);
+INCLUDE_ASM("asm/main/nonmatchings/npc", func_80038920);
 #endif
 
 void func_80038A2C(Npc *npc) {
@@ -1981,7 +1981,7 @@ void func_80038AE8(Npc *npc) {
     func_8003EB5C(D_8007DA68[npc->unk_2E & 3], D_800AA248.cur_obj);
 }
 #else
-INCLUDE_ASM("asm/main/nonmatchings/game_80034590", func_80038AE8);
+INCLUDE_ASM("asm/main/nonmatchings/npc", func_80038AE8);
 #endif
 
 u16 func_80038C1C(npc)
@@ -2062,7 +2062,7 @@ u16 func_80038DA8(Npc *npc) {
     return 0;
 }
 
-INCLUDE_ASM("asm/main/nonmatchings/game_80034590", func_80038F3C);
+INCLUDE_ASM("asm/main/nonmatchings/npc", func_80038F3C);
 
 u16 func_800391F8(u16 *out, Npc *npc) {
     *out = npc->unk_2C;
@@ -2116,9 +2116,9 @@ count:
     }
 }
 
-INCLUDE_ASM("asm/main/nonmatchings/game_80034590", func_80039358);
+INCLUDE_ASM("asm/main/nonmatchings/npc", func_80039358);
 
-INCLUDE_ASM("asm/main/nonmatchings/game_80034590", func_8003956C);
+INCLUDE_ASM("asm/main/nonmatchings/npc", func_8003956C);
 
 void func_80039890(void) {
     Npc *npc = (Npc *)D_800AA248.cur_obj->owner.ai;
@@ -2280,7 +2280,7 @@ void func_80039D04(Npc *npc) {
     }
 }
 
-INCLUDE_ASM("asm/main/nonmatchings/game_80034590", func_80039EC4);
+INCLUDE_ASM("asm/main/nonmatchings/npc", func_80039EC4);
 
 void func_8003A0A8(Npc *npc) {
     if (D_801FA990 != 0 || D_801FA98C != 0) {
@@ -2339,7 +2339,7 @@ void func_8003A218(Npc *npc) {
     npc->unk_24 = 0;
 }
 #else
-INCLUDE_ASM("asm/main/nonmatchings/game_80034590", func_8003A218);
+INCLUDE_ASM("asm/main/nonmatchings/npc", func_8003A218);
 #endif
 
 void func_8003A328(Npc *npc, s32 arg1) {
@@ -2414,9 +2414,9 @@ void func_8003A520(void) {
     D_800AA248.cur_obj = mover;
 }
 
-INCLUDE_ASM("asm/main/nonmatchings/game_80034590", func_8003A5A0);
+INCLUDE_ASM("asm/main/nonmatchings/npc", func_8003A5A0);
 
-INCLUDE_ASM("asm/main/nonmatchings/game_80034590", func_8003A744);
+INCLUDE_ASM("asm/main/nonmatchings/npc", func_8003A744);
 
 void func_8003A904(Npc *npc) {
     npc->unk_2A = 1;
@@ -2435,7 +2435,7 @@ void func_8003A904(Npc *npc) {
     npc->unk_1C = 0x14;
 }
 
-INCLUDE_ASM("asm/main/nonmatchings/game_80034590", func_8003A98C);
+INCLUDE_ASM("asm/main/nonmatchings/npc", func_8003A98C);
 
 void func_8003AA7C(Npc *npc) {
     D_800AA248.cur_obj->priority = 0x4000;
@@ -2472,7 +2472,7 @@ void func_8003AAF8(Npc *npc) {
     }
 }
 #else
-INCLUDE_ASM("asm/main/nonmatchings/game_80034590", func_8003AAF8);
+INCLUDE_ASM("asm/main/nonmatchings/npc", func_8003AAF8);
 #endif
 
 void func_8003ABE8(Npc *npc) {
@@ -2547,7 +2547,7 @@ void func_8003AC74(Npc *npc) {
     }
 }
 #else
-INCLUDE_ASM("asm/main/nonmatchings/game_80034590", func_8003AC74);
+INCLUDE_ASM("asm/main/nonmatchings/npc", func_8003AC74);
 #endif
 
 void func_8003AEA0(Npc *npc) {
@@ -2567,7 +2567,7 @@ void func_8003AEA0(Npc *npc) {
     }
 }
 
-INCLUDE_ASM("asm/main/nonmatchings/game_80034590", func_8003AF40);
+INCLUDE_ASM("asm/main/nonmatchings/npc", func_8003AF40);
 
 void func_8003B1D0(Npc *npc) {
     if (npc->unk_C != 0) {
@@ -2674,5 +2674,5 @@ void func_8003B3C8(Npc *npc) {
     }
 }
 #else
-INCLUDE_ASM("asm/main/nonmatchings/game_80034590", func_8003B3C8);
+INCLUDE_ASM("asm/main/nonmatchings/npc", func_8003B3C8);
 #endif

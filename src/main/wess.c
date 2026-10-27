@@ -1,4 +1,6 @@
-/* A piece of the game's own code between Psy-Q library objects: the sound driver on libspu (docs/TOOLCHAIN.md).
+/* The sound driver WESS (the "SPSX" module): its API (the sequences' start, stop, pause and volume), the SPU command
+ * set and the voice allocator on libspu, the sequence loader, the timer, and the file access through the game's
+ * functions (docs/TOOLCHAIN.md "The sound driver: GCC 2.7.2").
  * The boundaries and their evidence: config/main.yaml (docs/MATCHING.md "Splitting a target into files"). */
 #include "common.h"
 #include "sound.h"
@@ -333,7 +335,7 @@ s32 func_8006C1F4(void) {
     return D_800870F4;
 }
 
-INCLUDE_ASM("asm/main/nonmatchings/game_8006BB14", func_8006C204);
+INCLUDE_ASM("asm/main/nonmatchings/wess", func_8006C204);
 
 s32 func_8006C8B4(s32 n) {
     return D_801FDA90[n].unk_04;
@@ -477,7 +479,7 @@ void func_8006CEE4(SoundChannel *ch) {
 void func_8006CF0C(void) {
 }
 
-INCLUDE_ASM("asm/main/nonmatchings/game_8006BB14", func_8006CF14);
+INCLUDE_ASM("asm/main/nonmatchings/wess", func_8006CF14);
 
 void func_8006D17C(void) {
 }
@@ -485,9 +487,9 @@ void func_8006D17C(void) {
 void func_8006D184(void) {
 }
 
-INCLUDE_ASM("asm/main/nonmatchings/game_8006BB14", func_8006D18C);
+INCLUDE_ASM("asm/main/nonmatchings/wess", func_8006D18C);
 
-INCLUDE_ASM("asm/main/nonmatchings/game_8006BB14", func_8006D6E4);
+INCLUDE_ASM("asm/main/nonmatchings/wess", func_8006D6E4);
 
 void func_8006DBC0(SoundChannel *ch) {
     u8 n;
@@ -707,7 +709,7 @@ void func_8006E59C(void) {
     }
 }
 
-INCLUDE_ASM("asm/main/nonmatchings/game_8006BB14", func_8006E5F0);
+INCLUDE_ASM("asm/main/nonmatchings/wess", func_8006E5F0);
 
 s32 func_8006E804(SoundDriver *drv, s32 name) {
     s32 r;
@@ -898,11 +900,11 @@ void func_8006EDAC(void) {
     }
 }
 
-INCLUDE_ASM("asm/main/nonmatchings/game_8006BB14", func_8006EE30);
+INCLUDE_ASM("asm/main/nonmatchings/wess", func_8006EE30);
 
-INCLUDE_ASM("asm/main/nonmatchings/game_8006BB14", func_8006F0D8);
+INCLUDE_ASM("asm/main/nonmatchings/wess", func_8006F0D8);
 
-INCLUDE_ASM("asm/main/nonmatchings/game_8006BB14", func_8006F634);
+INCLUDE_ASM("asm/main/nonmatchings/wess", func_8006F634);
 
 void func_8006F8F8(SoundChannel *ch, SoundTrack *track) {
     u8 *seq;
@@ -915,7 +917,7 @@ void func_8006F8F8(SoundChannel *ch, SoundTrack *track) {
     ch->unk_38 = track->unk_04;
 }
 
-INCLUDE_ASM("asm/main/nonmatchings/game_8006BB14", func_8006F96C);
+INCLUDE_ASM("asm/main/nonmatchings/wess", func_8006F96C);
 
 void func_8006FC6C(s32 n) {
     func_80078A40(n, 0);

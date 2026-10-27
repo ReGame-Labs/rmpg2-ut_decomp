@@ -112,6 +112,12 @@ unit, without ninja, so several sessions can use them while others build.
   `MODULE_UPPER_SNAKE`, unknown fields `unk_<offset>`, alignment padding `pad_<offset>`. Only what is understood is
   named; otherwise splat's `func_<addr>`/`D_<addr>`. An original name found in the binary wins; Psy-Q names stay
   Sony's. Rename everywhere at once (`grep -rn` over `src/ include/ config/`).
+- **Files:** each C file is a module named from its code, the name the original would have had (`building.c`,
+  `monster.c`; the sound driver's parts `wess.c`, `wess_seq.c`, `wess_spu.c`), its header `include/<module>.h`. A file
+  whose code does not tell yet keeps the address of its first function (`game_8004C064.c`); a wrong name is worse
+  than an address. Renaming a file renames its splat subsegment, its header, its `#include`s, its `CC_OVERRIDES`
+  entry and its `// <module>` block in the symbol file together. The list: [`DISC_LAYOUT.md`](DISC_LAYOUT.md) "The
+  files".
 - **Match status:** a function is matching when it compiles from C and the whole build is byte-identical; otherwise
   it stays `INCLUDE_ASM`, with any WIP C under `#ifdef NON_MATCHING`. Matching C must be natural: no dummy
   temporaries, bare `do {} while (0)` or other permuter-only shapes.
