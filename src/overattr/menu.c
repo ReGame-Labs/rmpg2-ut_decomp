@@ -1439,7 +1439,7 @@ void menu_choose_monsters(s32 unused, s32 *timer) {
 
     for (i = 0, rec = D_800A8FD4; i < 3; i++, rec++) {
         monster = rec->unk_04;
-        pad = (u32) func_80099118() >> D_8007C144[i];
+        pad = (u32) tour_get_pressed() >> D_8007C144[i];
         obj = *(D_801E28F4 + i + 13);
         if (obj == NULL) {
             continue;
@@ -1541,7 +1541,7 @@ void menu_place_objects(OverattrPlacement *p, s32 n, s32 color) {
     D_801F9ACC.w = 0;
     q = p;
     for (i = 0; i < n; i++) {
-        func_80099138(q++)->colour = color;
+        tour_place_object(q++)->colour = color;
     }
 }
 
@@ -1844,7 +1844,7 @@ s16 func_8009FF38(void) {
                 D_801D872C = 0x32;
             }
         } else {
-            func_800991BC();
+            tour_clear_objects();
             D_801E0D64 = 0;
             D_801F9944 = 0xB;
             menu_free_objects();

@@ -1,7 +1,8 @@
 #ifndef OVERATTR_H
 #define OVERATTR_H
 
-/* OVERLAYS/OVERATTR.BIN: the attract mode, the credits and the memory-card screens (src/overattr/overattr.c).
+/* OVERLAYS/OVERATTR.BIN: the memory card, the tour screens, the attract mode, the credits and the menus
+ * (src/overattr/card.c, tour.c, menu.c).
  *
  * The executable's records are include/game.h's; this header declares the executable's functions and data the
  * overlay uses, then the overlay's own. */
@@ -33,7 +34,7 @@ s32 func_8002A300(void);
 extern s16 D_801CA464;
 extern s16 D_801CA468;
 extern u32 D_801FB198;                 /* the time of day in minutes */
-/* What func_80025C08 picks from the list D_800A49D4: the three texts func_8009B19C prints. */
+/* What func_80025C08 picks from the list D_800A49D4: the three texts tour_print_goal prints. */
 typedef struct {
     u8 *text[3];
 } OverattrTexts;
@@ -49,7 +50,7 @@ extern s32 D_8007ABCC[];               /* a font's glyphs */
 GameObject *main_create_box(s32 x, s32 y, s32 w, s32 h, s32 colour); /* creates a coloured box */
 s32 func_80025DF8(s32 player);          /* the monster number of a player */
 extern u8 *D_8007F8E0[];               /* the monsters' names, by number - 1 */
-extern Monster *D_800A9258;             /* the round's winner (func_800996CC) */
+extern Monster *D_800A9258;             /* the round's winner (tour_init_results) */
 extern s32 D_800A9230;
 extern s16 D_801E29BC;
 extern s16 D_801F9AAC;                 /* the printer's normal colour */
@@ -72,9 +73,9 @@ void func_8001ED54(TextMessage *msg);  /* loads and prints a message */
 u8 *func_8001ECB4(u8 *dst, s32 value, s32 digits); /* writes a number into a text, returns the end */
 extern u16 D_801E2A44;                 /* the printer's colour for the item under the cursor */
 
-/* The screen's objects (func_800991BC clears 19). */
+/* The screen's objects (tour_clear_objects clears 19). */
 extern GameObject *D_801E28F4[];
-/* Its [1] and [4] reached as symbols of their own (func_8009AE40): only these give its code. */
+/* Its [1] and [4] reached as symbols of their own (tour_update_map): only these give its code. */
 extern GameObject *D_801E28F8[];
 extern GameObject *D_801E2904[];
 extern s16 D_801F9A4A;
@@ -82,7 +83,7 @@ extern s16 D_801F9A4C;
 extern s16 D_801F9A4E;
 extern s16 D_801F9A50;
 extern s16 D_801FA88C;
-extern GameObject *D_800A9270[3];       /* the three monsters of the selection screen (func_8009A238); [0] drops in */
+extern GameObject *D_800A9270[3];       /* the selection screen's three monsters (tour_init_selection); [0] drops in */
 extern s32 D_800A9218;                 /* 1 once it has landed */
 extern s32 D_800A9240;                 /* its speed, bouncing to rest */
 extern s32 D_800A9238;                 /* frames to the next bounce */
@@ -90,7 +91,7 @@ GameObject *menu_animate(GameObject *obj, s32 arg1);
 
 /* ---- the overlay's own types and data ---- */
 
-/* An object placed at a screen's start (func_80099138). */
+/* An object placed at a screen's start (tour_place_object). */
 typedef struct {
     /* 0x00 */ s32 id;
     /* 0x04 */ u16 flags;              /* or-ed into the object's flags */
@@ -333,7 +334,7 @@ extern OverattrPlacement D_800A7384[4];
 extern TextMessage D_800897FC;
 extern s16 D_800A9860;                 /* frames left before the attract mode resumes, reset by a key */
 
-extern s32 D_800A9220;                 /* the pad buttons pressed this frame (func_80099118) */
+extern s32 D_800A9220;                 /* the pad buttons down this frame (tour_get_pressed keeps the new ones) */
 extern s32 D_800A9250;
 
 /* card.c */
@@ -346,7 +347,7 @@ void card_init_save(CardSave *save);
 s16 card_ascii_to_sjis(u8 c);
 void card_string_to_sjis(s16 *dst, u8 *src);
 
-/* The monster selection screen (func_8009A238). */
+/* The monster selection screen (tour_init_selection). */
 void func_800180E4(void);               /* the SELECT button alone */
 void menu_create_buttons(void);               /* the SELECT and BACK buttons */
 extern s32 D_800A3450[3];               /* the three monsters offered (0-based numbers), a player's own replaced */
@@ -359,14 +360,14 @@ extern s16 D_800A40F4[];                /* and y */
 extern OverattrPlacement D_800A3954[6];
 extern s32 D_800A9208;                  /* the player slot choosing */
 extern s16 D_800A9248;
-extern s32 D_800A356C[];                /* per city: the time of day it starts at (func_80099B54) */
+extern s32 D_800A356C[];                /* per city: the time of day it starts at (tour_update_selection) */
 extern s32 D_800A9210;                  /* 1 while the previous monster slides out */
 void func_8001D084(void);
 void func_8001D17C(void);
 void func_8001E758(void);
 void func_8002497C(void);
 
-/* The tour map (func_8009A708): the cities in groups of 25, each group a map of its own. */
+/* The tour map (tour_init_map): the cities in groups of 25, each group a map of its own. */
 void func_8001F6B4(void);
 s32 func_8001EA78(void);                /* a random number */
 extern s16 D_800A3760[];                /* per city: its x, y on the map */
@@ -389,10 +390,10 @@ extern s32 D_800A9290;                  /* the player select's frames left */
 extern s16 D_800A92B2;                  /* D_800A92B0[1] and [2], reached as symbols of their own */
 extern s16 D_800A92B4;
 extern s16 D_801E1CA4;
-void func_800991BC(void);               /* clears the screen's objects */
+void tour_clear_objects(void);               /* clears the screen's objects */
 
-/* overattr_80099118.c */
-GameObject *func_80099138(OverattrPlacement *p);
+/* tour.c */
+GameObject *tour_place_object(OverattrPlacement *p);
 void menu_update_load_screen(void);
 void menu_place_objects(OverattrPlacement *p, s32 n, s32 color);
 void menu_set_colour(s32 kind, s32 value);
