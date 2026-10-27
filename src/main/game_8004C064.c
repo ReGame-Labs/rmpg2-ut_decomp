@@ -875,8 +875,9 @@ void func_8004D614(void) {
 }
 
 #ifdef NON_MATCHING
-/* 94.96%: 94.96 %: the object's y read with its x and frame keeps m in a0; the x, its wrapped copy and the
- * D_801F9AC8 limit take v1/t1/a3 for the original's t1/a2/v1, and the monster's box is loaded in another order */
+/* 94.96%: registers: the original's t-registers are one higher (n t6, p t5, the giv t4, D_801F9AC8 t7) because its
+ * bottom takes t3: all four m_* values are loaded while top and bottom are live, and its m_top (t2) is allocated
+ * before bottom; here bottom shares y's t2. No order of the six box statements changes the allocation */
 u16 func_8004D6F8(Monster *m, Ai **out) {
     u16 n;
     Ai *p;

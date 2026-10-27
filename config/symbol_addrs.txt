@@ -476,6 +476,8 @@ ai_face_target = 0x80042238; // type:func  (ai) turns the current object round w
 
 // attacker (src/main/attacker.c): the pool of four attackers.
 attacker_spawn = 0x80044240; // type:func  (kind, x, y, flags, vel_x, state) a free slot's object, 0 when made, 1 when none
+attacker_start_knockback = 0x800447F0; // type:func  (a) state 28, pushed away from the hitter (vel_x 7.0 against a 1.0 drag), then state 27
+attacker_update_knockback = 0x8004489C; // type:func  (a) state 27, the hit's knock-back slide with gravity, lands in state 23 at y 0xD9 (0xE0 for type 9)
 
 // monster (src/main/monster.c): the action handlers, the hits, climbing the buildings.
 monster_dispatch_action = 0x800500EC; // type:func  (e, obj) runs D_8007F8FC[e->action], the action clamped to 0..0x67

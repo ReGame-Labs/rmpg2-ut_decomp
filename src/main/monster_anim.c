@@ -1689,8 +1689,10 @@ void func_8005A7C4(void) {
 }
 
 #ifdef NON_MATCHING
-/* 99.86%: 99.86 %: the falling bomb's vel_y: the original loads it into a0 and increments a copy in v1 (the move in
- * the beqz delay slot); here the loaded register is incremented and the copy feeds pos_y */
+/* 99.93%: the falling bomb's vel_y: the original loads it into a0 (vy) and increments a copy in v1 (vx, the move in
+ * the beqz delay slot); here vx gets the load and vy the copy. Written vx = vy = load, cse swaps the pair when vx
+ * outlives vy (vx reused for vel_x below) and otherwise folds the copy into the add (size -4); a separate w for
+ * vel_x gives this form */
 void monster_anim_update_bomb(Monster *e) {
     GameObject *obj;
     GameObject *self;
@@ -1699,6 +1701,7 @@ void monster_anim_update_bomb(Monster *e) {
     s16 max;
     s32 vy;
     s32 vx;
+    s32 w;
 
     obj = e->extra[0];
     self = D_800AA268.p;
@@ -1706,8 +1709,8 @@ void monster_anim_update_bomb(Monster *e) {
         return;
     }
     if (e->obj->anim == (s32)&D_80011A80) {
-        vx = vy = obj->vel_y.w;
-        if (vy != 0) {
+        vy = vx = obj->vel_y.w;
+       if (vy != 0) {
             vx += 0x2100;
             obj->vel_y.w = vx;
             obj->pos_y.w += vy;
@@ -1729,9 +1732,9 @@ void monster_anim_update_bomb(Monster *e) {
             }
         }
     } else {
-        vx = obj->vel_x.w;
-        if (vx != 0) {
-            obj->pos_x.w += vx;
+        w = obj->vel_x.w;
+        if (w != 0) {
+            obj->pos_x.w += w;
             obj->pos_y.w += obj->vel_y.w;
             if (obj->pos_y.w > 0xE10000) {
                 func_8001F724(0x4B);
@@ -2136,9 +2139,10 @@ void func_8005BB04(Monster *e, s16 want, s16 max, Building *u) {
 }
 
 #ifdef NON_MATCHING
-/* 96.36%: 96.36 %: the layout is the original's (the y box per flag branch, the &4 branch's facing test with equal
- * arms, merged after reload, which keeps its return 0 in the middle); the registers differ in the &1 block: the
- * original keeps the flip in v0, the two frame offsets in a3 and a2 (the registers of x0 and x1), the object in t3 */
+/* 98.36%: the instructions and their order are the original's (the frame offsets loaded straight into x0/y0/x1/y1);
+ * only the registers differ: the original gives oy t0, frame t1, ox t2, obj t3, so oy was allocated before frame.
+ * Here oy has 3 refs over 14 insns (priority 0.21) and frame 5 over 20 (0.50): oy needs a 4th ref. Loading unk_16
+ * before unk_14 scores 98.72 but is not the original's order */
 s32 monster_anim_test_box(s16 x, s16 y, s32 w, s32 h, GameObject *obj, u16 flags) {
     SpriteFrame *frame;
     s16 left;
@@ -2178,24 +2182,25 @@ s32 monster_anim_test_box(s16 x, s16 y, s32 w, s32 h, GameObject *obj, u16 flags
         if (ox < D_801F9ACA) {
             ox += (D_801D8864.w + 1) >> 16;
         }
-        dx = frame->unk_10;
+        x0 = frame->unk_10;
         flip = obj->flags & 0x10;
-        dy = frame->unk_12;
+        y0 = frame->unk_12;
         oy = obj->pos_y.u.hi;
         if (flip) {
-            dx = -dx;
+            x0 = -x0;
         }
-        fx0 = dx + ox;
+        fx0 = x0 + ox;
         x0 = fx0;
-        fy0 = dy + oy;
+        fy0 = y0 + oy;
         y0 = fy0;
-        dx = frame->unk_14;
+        x1 = frame->unk_14;
+        y1 = frame->unk_16;
         if (flip) {
-            dx = -dx;
+            x1 = -x1;
         }
-        fx1 = dx + ox;
+        fx1 = x1 + ox;
         x1 = fx1;
-        y1 = frame->unk_16 + oy;
+        y1 += oy;
         if (flip) {
             x0 = fx1;
             x1 = fx0;
