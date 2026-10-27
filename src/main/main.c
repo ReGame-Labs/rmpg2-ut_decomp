@@ -6474,7 +6474,117 @@ void func_80029170(void) {
     D_801D3D64.unk_5E = 0;
 }
 
+#ifdef NON_MATCHING
+/* 95.49%: 95.5 %: the original keeps 0x37 from the first compare in a2 and stores it (m->action = 0x37), the C
+ * loads it again (one instruction more); action - 9 is computed before the 0x34 test, the original after it */
+s32 func_800291DC(Monster *m, GameObject *obj) {
+    u16 action;
+    u16 next;
+    u16 i;
+    Monster *other;
+    u16 id;
+
+    if (!(m->unk_058 & 1) || m->unk_046 != 0) {
+        return 0;
+    }
+    if (m->action == 0x37 || m->action == 0x26) {
+        if (m->lives == 0) {
+            if ((u16) m->unk_05E == 0) {
+                return 0;
+            }
+            func_8005D1BC((s32) m, m->id);
+            m->unk_058 &= ~1;
+            D_801FA8A0[m->id - 1] = 0;
+            m->id = 0;
+            D_8007A7D4 |= 1;
+            building_clear_monster(m);
+            m->unk_046 = 1;
+            D_8007A7D4 &= ~1;
+            if (m->obj != NULL) {
+                func_8001E4B0(m->obj);
+                m->obj = NULL;
+            }
+            main_free_kind((u16) (m->id + 0x790));
+            m->unk_178 = 0;
+            cdload_sort_players();
+            return 1;
+        }
+    } else if (m->action == 0x60) {
+        m->health.w = 0;
+        return 0;
+    } else {
+        if (m->health.w > 0xFFFF) {
+            return 0;
+        }
+        if (m->action == 0x63 || m->action == 0x2A || m->action == 0x47) {
+            return 0;
+        }
+        m->health.w = 0;
+        if (m->lives == 0) {
+            if (m->unk_18E == 0) {
+                if (m->climb_side != 0) {
+                    m->action = 0xF;
+                } else if (obj->pos_y.u.hi < 0xE1 || obj->pos_y.u.hi >= 0xF9) {
+                    m->action = 0xF;
+                    func_8001F724(0x72);
+                } else {
+                    next = m->action;
+                    action = next - 9;
+                    if (next == 0x34 || next == 0x35) {
+                        m->action = 0x26;
+                    } else if (action < 6) {
+                        return 0;
+                    } else {
+                        m->action = 0x37;
+                    }
+                    m->unk_0DC = 0;
+                    m->unk_0E4 = 0;
+                    m->unk_0E6 = 0;
+                    func_8001F724(0x72);
+                    if (D_801F9ACC.w != 0) {
+                        id = m->id;
+                        i = 7;
+                        do {
+                            if (id != i) {
+                                other = &D_801E0B78[i];
+                                if ((other->unk_058 & 1) && other->climb_side != 0) {
+                                    other->action = 0xF;
+                                }
+                            }
+                        } while (--i != 0);
+                    }
+                }
+            } else {
+                m->health.w = 0x50000;
+            }
+            return 0;
+        }
+    }
+    m->health.w = 0x440000;
+    m->unk_018 = 1;
+    m->unk_14C = 0;
+    m->unk_040 = 0;
+    m->lives--;
+    func_8001F724(0x14);
+    func_8001F724(0x72);
+    action = m->action;
+    if (action == 0x26) {
+        next = 0x34;
+    } else if (action == 0x37) {
+        next = 0xE;
+    } else if (m->climb_side != 0 || obj->pos_y.s.hi < 0xE1 || obj->pos_y.s.hi >= 0xF9) {
+        next = 0xF;
+    } else if (action >= 0x34 && action <= 0x35) {
+        return 0;
+    } else {
+        next = 0xA;
+    }
+    m->action = next;
+    return 0;
+}
+#else
 INCLUDE_ASM("asm/main/nonmatchings/main", func_800291DC);
+#endif
 
 void main_apply_health(Monster *arg0) {
     s32 old;
