@@ -48,6 +48,7 @@ void func_80020DDC(Npc *npc);
 /* This unit. */
 u16 func_80036FD0(s16 x, s16 y, GameObject *mover);
 u16 func_80036C30(Monster *player, Npc *npc, GameObject *mover, s32 reach);
+void func_80037078(Monster *player, Npc *npc);
 void func_800383F4(Npc *npc);
 void func_80038494(Npc *npc);
 void func_800384E8(Npc *npc);
@@ -1117,7 +1118,84 @@ void func_80036440(Npc *npc, s32 depth) {
     func_8001BB68(mover);
 }
 
-INCLUDE_ASM("asm/main/nonmatchings/npc", func_80036504);
+extern u32 D_801FB198;
+extern s32 D_8007D5F0[];
+
+void func_80036504(GameObject *line, GameObject *obj, GameObject *end) {
+    s32 i;
+    s32 x;
+    s32 y;
+    s32 len;
+    s32 bits;
+    s32 dx;
+    s32 dy;
+    s32 step;
+    s32 prev;
+    s32 nx;
+    s32 ex;
+
+    if (D_801FB198 - 0x5461 > 0xA8BE && !(obj->unk_6C & 0x80)) {
+        i = 0;
+        while (D_8007D5F0[i] != obj->anim_frame) {
+            if (D_8007D5F0[i] == 0) {
+                goto hide;
+            }
+            i += 4;
+        }
+        if (obj->flags & 0x10) {
+            x = (obj->pos_x.w - (D_8007D5F0[i + 2] << 16)) & D_801D8864.w;
+        } else {
+            x = (obj->pos_x.w + (D_8007D5F0[i + 2] << 16)) & D_801D8864.w;
+        }
+        y = obj->pos_y.w + (D_8007D5F0[i + 3] << 16);
+        len = 0xE10000 - y;
+        if ((u32)(len - 0xA0000) <= 0xE60000) {
+            bits = 6;
+            if (D_801D8864.w == 0x7FFFFFF) {
+                bits = 5;
+            } else if (D_801D8864.w == 0xFFFFFFF) {
+                bits = 4;
+            }
+            dx = ((x - D_801F9AC8.w) << bits) >> bits;
+            dy = y - D_801F9ACC.w;
+            if ((u32)(dx + 0x500000) <= 0x2300000) {
+                dx -= 0x10000;
+                line->unk_50.xy = ((u32)dx >> 16) | (dy & 0xFFFF0000);
+                dx += 0x30000;
+                line->unk_54.w = ((u32)dx >> 16) | (dy & 0xFFFF0000);
+                step = len / D_8007D5F0[i + 1];
+                if (obj->flags & 0x10) {
+                    step = -step - 0x30000;
+                }
+                prev = line->unk_40.w;
+                if (prev != -999) {
+                    nx = (x + step) & D_801D8864.w;
+                    x = prev;
+                    step = ((nx - x) << bits) >> (bits + 3);
+                }
+                nx = (x + step) & D_801D8864.w;
+                ex = ((nx - D_801F9AC8.w) << bits) >> bits;
+                dy = y + len - D_801F9ACC.w;
+                if (dx > 0x1500000 && ex < 0) {
+                    ex += D_801D8864.w + 1;
+                }
+                ex -= 0x180000;
+                line->arg.xy = ((u32)ex >> 16) | (dy & 0xFFFF0000);
+                ex += 0x300000;
+                line->unk_60 = ((u32)ex >> 16) | (dy & 0xFFFF0000);
+                line->unk_40.w = nx;
+                end->pos_x.w = x + step - 0x180000;
+                end->pos_y.w = y + len;
+                func_8001BB88(line);
+                func_8001BB88(end);
+                return;
+            }
+        }
+    }
+hide:
+    func_8001BB68(line);
+    func_8001BB68(end);
+}
 
 void func_80036818(Npc *npc) {
     GameObject *a = npc->unk_70;
@@ -1249,7 +1327,75 @@ void func_80036A20(Monster *player) {
     } while (--n != 0);
 }
 
-INCLUDE_ASM("asm/main/nonmatchings/npc", func_80036C30);
+u16 func_80036C30(Monster *player, Npc *npc, GameObject *mover, s32 reach) {
+    s16 x;
+    s16 y;
+    s16 e;
+
+    x = player->pos.u.lo;
+    y = player->pos.u.hi;
+    func_80037960(npc, mover);
+    e = npc->unk_3E;
+    if (x < e && x < (s16)(e - 4)) {
+        if (player->unk_0DE == 0 || player->unk_0EA != 1 || x < (s16)(e - 4) - 0x19) {
+            goto second;
+        }
+    }
+    e = npc->unk_40;
+    if (x > e && x > (s16)(e + 4)) {
+        if (player->unk_0DE == 0 || player->unk_0EA != 2 || x > (s16)(e + 4) + 0x19) {
+            goto second;
+        }
+    }
+    e = npc->unk_44;
+    if (y < e && y < (s16)(e - 4)) {
+        if (player->unk_0DE == 0 || player->unk_0EA != 3 || y < (s16)(e - 4) - 0x19) {
+            goto second;
+        }
+    }
+    e = npc->unk_42;
+    if (y > e && y > (s16)(e + 4)) {
+        if (player->unk_0DE == 0 || player->unk_0EA != 4 || y > (s16)(e + 4) + 0x19) {
+            goto second;
+        }
+        return 1;
+    }
+    goto first;
+second:
+    e = npc->unk_46;
+    if (x < e && x < (s16)(e - 4)) {
+        if (player->unk_0DE == 0 || player->unk_0EA != 1 || x < (s16)(e - 4) - 0x19) {
+            return 0;
+        }
+    }
+    e = npc->unk_48;
+    if (x > e && x > (s16)(e + 4)) {
+        if (player->unk_0DE == 0 || player->unk_0EA != 2 || x > (s16)(e + 4) + 0x19) {
+            return 0;
+        }
+    }
+    e = npc->unk_4C;
+    if (y < e && y < (s16)(e - 4)) {
+        if (player->unk_0DE == 0 || player->unk_0EA != 3 || y < (s16)(e - 4) - 0x19) {
+            return 0;
+        }
+    }
+    e = npc->unk_4A;
+    if (y > e && y > (s16)(e + 4)) {
+        if (player->unk_0DE == 0 || player->unk_0EA != 4 || y > (s16)(e + 4) + 0x19) {
+            return 0;
+        }
+    }
+    player->unk_024++;
+    func_80054374(0x28, player);
+    func_800634D4(player, 4);
+    npc->action = reach;
+    goto done;
+first:
+    func_80037078(player, npc);
+done:
+    return 1;
+}
 
 u16 func_80036FD0(s16 x, s16 y, GameObject *mover) {
     u16 pos;
@@ -1290,17 +1436,13 @@ void func_80037078(Monster *player, Npc *npc) {
     player->unk_18A = 1;
 }
 
-#ifdef NON_MATCHING
-/* 76.88%: 76.9 %: the case order and the calls are the original's; the original sign-extends x and y once (s1, s2)
- * and keeps a copy of each (fp, s7) for the call to func_800372DC; here the shifted values stay live and x, y spill */
-u16 func_800372DC(s16 x, s16 y, Monster *player, Npc *npc, s32 arg4);
+u16 func_800372DC(s16 x, s16 y, Monster *player, Npc *npc, GameObject *mover);
 u16 func_800374FC(s16 x, s16 y, Npc *npc, GameObject *mover);
 
 u16 func_8003712C(s16 x, s16 y, Monster *player) {
     Npc *npc;
     GameObject *obj;
     u16 n;
-    u16 hit;
 
     n = D_801D8730;
     npc = D_801FAC9C;
@@ -1313,11 +1455,10 @@ u16 func_8003712C(s16 x, s16 y, Monster *player) {
             switch (npc->kind) {
             case 0x42:
                 if (player->unk_18E != 1) {
-                    hit = func_800374FC(x, y, npc, obj);
-                } else {
-                    hit = func_80037574(x, y, obj);
-                }
-                if (hit == 1) {
+                    if (func_800374FC(x, y, npc, obj) == 1) {
+                        return func_8003761C(x, y, player, npc);
+                    }
+                } else if (func_80037574(x, y, obj) == 1) {
                     return func_8003761C(x, y, player, npc);
                 }
                 break;
@@ -1328,7 +1469,7 @@ u16 func_8003712C(s16 x, s16 y, Monster *player) {
                 }
                 break;
             case 0x12:
-                if (func_800372DC(x, y, player, npc, (s32)obj) == 1) {
+                if (func_800372DC(x, y, player, npc, obj) == 1) {
                     return func_8003761C(x, y, player, npc);
                 }
                 break;
@@ -1338,23 +1479,45 @@ u16 func_8003712C(s16 x, s16 y, Monster *player) {
     } while (--n != 0);
     return 0;
 }
-#else
-INCLUDE_ASM("asm/main/nonmatchings/npc", func_8003712C);
-#endif
 
-#ifdef NON_MATCHING
-/* 99.85%: 99.85 %: the first rectangle's lhu temporaries (global, they cross the beqz) take v1 first in global-
- * alloc; the original's a0 needs v1 excluded: a v1 conflict or a v1 preference of the lower-priority s16 x (88) */
-u16 func_800372DC(s16 x, s16 y, Monster *player, Npc *npc, s32 arg4) {
-    func_80037960(npc, arg4);
-    if ((x >= npc->unk_3E || x >= (s16)(npc->unk_3E - 4)) && (x <= npc->unk_40 || x <= (s16)(npc->unk_40 + 4)) &&
-        (y >= npc->unk_44 || y >= (s16)(npc->unk_44 - 4)) && (y <= npc->unk_42 || y <= (s16)(npc->unk_42 + 4))) {
-        goto hit;
+u16 func_800372DC(s16 x, s16 y, Monster *player, Npc *npc, GameObject *mover) {
+    s16 e;
+
+    func_80037960(npc, mover);
+    e = npc->unk_3E;
+    if (x < e && x < (s16)(e - 4)) {
+        goto second;
     }
-    if (x < npc->unk_46 && x < (s16)(npc->unk_46 - 4)) return 0;
-    if (x > npc->unk_48 && x > (s16)(npc->unk_48 + 4)) return 0;
-    if (y < npc->unk_4C && y < (s16)(npc->unk_4C - 4)) return 0;
-    if (y > npc->unk_4A && y > (s16)(npc->unk_4A + 4)) return 0;
+    e = npc->unk_40;
+    if (x > e && x > (s16)(e + 4)) {
+        goto second;
+    }
+    e = npc->unk_44;
+    if (y < e && y < (s16)(e - 4)) {
+        goto second;
+    }
+    e = npc->unk_42;
+    if (y > e && y > (s16)(e + 4)) {
+        goto second;
+    }
+    goto hit;
+second:
+    e = npc->unk_46;
+    if (x < e && x < (s16)(e - 4)) {
+        return 0;
+    }
+    e = npc->unk_48;
+    if (x > e && x > (s16)(e + 4)) {
+        return 0;
+    }
+    e = npc->unk_4C;
+    if (y < e && y < (s16)(e - 4)) {
+        return 0;
+    }
+    e = npc->unk_4A;
+    if (y > e && y > (s16)(e + 4)) {
+        return 0;
+    }
     if (player != NULL) {
         player->unk_024++;
         func_80054374(0x28, player);
@@ -1363,9 +1526,6 @@ u16 func_800372DC(s16 x, s16 y, Monster *player, Npc *npc, s32 arg4) {
 hit:
     return func_8003761C(x, y, player, npc);
 }
-#else
-INCLUDE_ASM("asm/main/nonmatchings/npc", func_800372DC);
-#endif
 
 u16 func_800374FC(s16 x, s16 y, Npc *npc, GameObject *arg3) {
     MoverTarget *target = D_800AA248.cur_obj->unk_94.target;
