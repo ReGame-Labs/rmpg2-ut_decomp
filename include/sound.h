@@ -56,7 +56,9 @@ typedef struct SoundChannel {
 /* A 16-byte slot of the driver's sequence table (SoundSeqTable.unk_20[]): a sequence pointer at 0x0C. */
 typedef struct SoundSlot {
     /* 0x00 */ u16 unk_00;          /* the number of channels (tracks) */
-    /* 0x02 */ u8 unk_02[0xA];
+    /* 0x02 */ u8 unk_02[0x2];
+    /* 0x04 */ s32 unk_04;          /* the size of its data */
+    /* 0x08 */ s32 unk_08;
     /* 0x0C */ s32 unk_0C;
 } SoundSlot;
 
@@ -90,6 +92,12 @@ typedef struct SoundTrack {
     /* 0x08 */ u8 *unk_08;          /* the sequence data */
 } SoundTrack;
 
+/* What SoundDriver.unk_14 points to: a count at 0xC (func_8006EC18). */
+typedef struct SoundBank {
+    /* 0x00 */ u8 unk_00[0xC];
+    /* 0x0C */ s16 unk_0C;
+} SoundBank;
+
 /* An 8-byte handler of the table SoundDriver.unk_10 points to: an id at 1 matched against the sequence's byte 1, a
  * 16-bit value at 2 and the function called with them. */
 typedef struct SoundHandler {
@@ -117,28 +125,39 @@ struct SoundDriver {
     /* 0x00 */ s32 unk_00;
     /* 0x04 */ u8 unk_04;           /* sequences active */
     /* 0x05 */ u8 unk_05;           /* channels active */
-    /* 0x06 */ u8 unk_06[0x3];
+    /* 0x06 */ u8 unk_06;           /* voices active */
+    /* 0x07 */ u8 unk_07[0x2];
     /* 0x09 */ u8 unk_09;           /* the number of handlers in use */
     /* 0x0A */ u8 unk_0A;           /* the channel entries per sequence (SoundSeqStat.unk_0C) */
     /* 0x0B */ u8 unk_0B;
     /* 0x0C */ SoundSeqTable *unk_0C;
     /* 0x10 */ SoundHandler *unk_10;
-    /* 0x14 */ s32 unk_14;
+    /* 0x14 */ SoundBank *unk_14;
     /* 0x18 */ SoundSeqStat *unk_18;
     /* 0x1C */ SoundChannel *unk_1C;
 };
 
 extern SoundDriver *D_801FDF20;
 
-/* A 0x14-byte note record (D_801FDA78 holds D_801FDA7C of them): a kind in the low bits of the first word, the
- * channel's id in its byte 3, a sequence byte at 5 and a pending flag at 7. */
+/* A patch map of the sound bank, 16 bytes: what a note of a patch plays (the voice's unk_08). */
+typedef struct SoundPatchmap {
+    /* 0x00 */ u8 unk_00;           /* the voice's priority */
+    /* 0x01 */ u8 unk_01[0xD];
+    /* 0x0E */ u16 unk_0E;          /* the release: bit 5 linear/exponential, bits 0-4 the rate */
+} SoundPatchmap;
+
+/* A 0x14-byte voice record (D_801FDA78 holds D_801FDA7C of them): flags in the low bits of the first word (1 on,
+ * 2 released), the SPU voice in its byte 2, the channel's index in its byte 3, the note at 5, the velocity at 6, a
+ * held flag at 7 (the sustain pedal), the patch map at 8, the release's end time at 0x10. */
 typedef struct SoundNote {
     /* 0x00 */ SoundWord unk_00;
-    /* 0x04 */ u8 unk_04;
-    /* 0x05 */ u8 unk_05;
-    /* 0x06 */ u8 unk_06;
+    /* 0x04 */ u8 unk_04;           /* priority */
+    /* 0x05 */ u8 unk_05;           /* note */
+    /* 0x06 */ u8 unk_06;           /* velocity */
     /* 0x07 */ u8 unk_07;
-    /* 0x08 */ u8 unk_08[0xC];
+    /* 0x08 */ SoundPatchmap *unk_08;
+    /* 0x0C */ struct SoundEntry *unk_0C;
+    /* 0x10 */ u32 unk_10;
 } SoundNote;
 
 /* An entry of the event queue D_80087100 points to (func_8006C084 appends them). */
@@ -166,5 +185,29 @@ typedef struct SoundEntry {
     /* 0x04 */ s32 unk_04;
     /* 0x08 */ s32 unk_08;
 } SoundEntry;
+
+/* The 32-byte header of the sequence file (read by func_8006E804; "SSEQ" on the disc's RAMPAGE.WSD): a word at 0x18
+ * the loader returns. */
+typedef struct SoundFileHeader {
+    /* 0x00 */ s32 unk_00[6];
+    /* 0x18 */ s32 unk_18;
+    /* 0x1C */ s32 unk_1C;
+} SoundFileHeader;
+
+/* What the game hands func_800706C0: the file access functions the driver calls (open, read, seek, ..., close),
+ * two tables copied into the driver and the timer's settings. */
+typedef struct SoundInit {
+    /* 0x00 */ s32 (*unk_00)(s32, u8 *);
+    /* 0x04 */ s32 (*unk_04)(void *, s32, s32, s32);
+    /* 0x08 */ s32 (*unk_08)(s32, s32, s32);
+    /* 0x0C */ s32 unk_0C;
+    /* 0x10 */ void (*unk_10)(s32);
+    /* 0x14 */ s32 unk_14;
+    /* 0x18 */ u8 *unk_18;          /* 0x80 bytes for func_8006BED0 */
+    /* 0x1C */ u16 *unk_1C;         /* 0x80 halves for func_8006BF08 */
+    /* 0x20 */ s32 unk_20;          /* the timer's ticks per second (func_800704E4) */
+    /* 0x24 */ s32 unk_24;          /* the timer is installed when non-zero (func_800707BC) */
+    /* 0x28 */ s32 unk_28;
+} SoundInit;
 
 #endif /* SOUND_H */

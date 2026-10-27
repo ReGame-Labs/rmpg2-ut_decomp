@@ -57,4 +57,31 @@ s32 SpuSetReverbModeParam(SpuReverbAttr *attr);
 void SpuSetReverbDepth(SpuReverbAttr *attr);
 s32 SpuSetReverb(s32 on_off);
 
+typedef struct SpuVoiceAttr {
+    u32 voice;
+    u32 mask;
+    SpuVolume volume;
+    SpuVolume volmode;
+    SpuVolume volumex;
+    u16 pitch;
+    u16 note;
+    u16 sample_note;
+    s16 envx;
+    u32 addr;
+    u32 loop_addr;
+    s32 a_mode;
+    s32 s_mode;
+    s32 r_mode;
+    u16 ar;
+    u16 dr;
+    u16 sr;
+    u16 rr;
+    u16 sl;
+    u16 adsr1;
+    u16 adsr2;
+} SpuVoiceAttr;
+
+void SpuSetVoiceAttr(SpuVoiceAttr *attr);
+s32 SpuSetReverbVoice(s32 on_off, u32 voice_bit);
+
 #endif /* PSYQ_LIBSPU_H */
