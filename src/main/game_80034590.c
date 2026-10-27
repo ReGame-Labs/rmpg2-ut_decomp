@@ -11,7 +11,7 @@ GameObject *func_8001DCB4(void);         /* spawns D_800AA248.unk_3C */
 void func_8001E4B0(GameObject *mover);
 void func_80029118(s32 a, s32 b);
 void func_8004BFE0(void);
-void func_80053D68(s32 n, Player *player);
+void func_80053D68(s32 n, Monster *player);
 s32 func_8001EA78(void);
 void func_8001F7CC(s32 a, s32 b);
 u16 func_8004A9B0(void *a, s32 b, s32 c, s32 d, s32 e);
@@ -26,24 +26,24 @@ s32 func_80025DF8(s32 n);
 void func_8003EB5C(u8 *anim, GameObject *mover);
 u16 func_8003BE34(Npc *npc);
 void func_8004CFC0(void);
-void func_80054374(s32 n, Player *player);
-void func_80053C50(s32 n, Player *player);
-void func_8004A90C(Player *player);
+void func_80054374(s32 n, Monster *player);
+void func_80053C50(s32 n, Monster *player);
+void func_8004A90C(Monster *player);
 void func_800215C0(s16 x, s16 y);
 void func_8003C080();                /* called with the position and without: no prototype in the original */
-void func_800634D4(Player *player, s32 n);
+void func_800634D4(Monster *player, s32 n);
 void *memset(void *s, s32 c, u32 n);
 s32 abs(s32 n);
 
 void func_80029D1C(void);
-s32 func_8003B9C8(GameObject *mover, Player *player);
-void func_8005E0E8(Player *player);
+s32 func_8003B9C8(GameObject *mover, Monster *player);
+void func_8005E0E8(Monster *player);
 void func_8004BBC8(Npc *npc);
 void func_80020DDC(Npc *npc);
 
 /* This unit. */
 u16 func_80036FD0(s16 x, s16 y, GameObject *mover);
-u16 func_80036C30(Player *player, Npc *npc, GameObject *mover, s32 reach);
+u16 func_80036C30(Monster *player, Npc *npc, GameObject *mover, s32 reach);
 void func_800383F4(NpcS *npc);
 void func_80038494(NpcS *npc);
 void func_800384E8(NpcS *npc);
@@ -92,8 +92,8 @@ void func_80038240(NpcS *npc);
 void func_800382A8(NpcS *npc);
 void func_80038A2C(NpcS *npc);
 void func_80038920(NpcS *npc);
-Player *func_80039B60(s32 x);
-s32 func_80039B04(Player *player, s32 x);
+Monster *func_80039B60(s32 x);
+s32 func_80039B04(Monster *player, s32 x);
 void func_80034988(Npc *npc);
 void func_80034C54(GameObject *mover);
 void func_80034D28(Npc *npc);
@@ -112,7 +112,7 @@ void func_80035FF0(void);
 void func_80036300(Npc *npc);
 void func_800369F8(Npc *npc);
 u16 func_80037574(s16 x, s16 y, GameObject *mover);
-u16 func_8003761C(s16 x, s16 y, Player *player, NpcS *npc);
+u16 func_8003761C(s16 x, s16 y, Monster *player, NpcS *npc);
 void func_800376E0(NpcS *npc);
 void func_80037960(NpcS *npc, s32 arg1);
 void func_80037BB4(NpcS *npc);
@@ -195,7 +195,6 @@ extern Npc D_801FAC9C[6];
 extern GameObject *D_801FB44C[3];
 extern u16 D_801FA98C;
 extern u16 D_801FA990;
-extern Player D_801E0B78[3];
 extern u8 D_8008A9D4[];
 extern u8 D_8008AA40[];
 extern u8 D_8008AA34[];
@@ -936,7 +935,7 @@ void func_80035E80(Npc *npc) {
 }
 
 void func_80035EBC(Npc *npc) {
-    Player *player;
+    Monster *player;
 
     if (npc->unk_6 == 0x1C) {
         func_8001F724(5);
@@ -949,7 +948,7 @@ void func_80035EBC(Npc *npc) {
         return;
     }
     player = npc->unk_54;
-    player->unk_5A = 8;
+    player->action = 8;
     npc->unk_1C = 0x12;
     func_80053D68(0x28000, player);
     D_800AA248.unk_20->vel_x.w = 0;
@@ -1106,7 +1105,7 @@ void func_800369F8(Npc *npc) {
 
 /* 99.61%: the live count and the constant 1 swap saved registers (s4 and s3 in the original) */
 #ifdef NON_MATCHING
-void func_80036A20(Player *player) {
+void func_80036A20(Monster *player) {
     u16 n;
     Npc *npc;
     GameObject *mover;
@@ -1129,15 +1128,15 @@ void func_80036A20(Player *player) {
             switch (npc->unk_6) {
             case 0x3E:
             case 0x3F:
-                if (npc->unk_8 != 0x1E && (u16)player->unk_5A != 4) {
+                if (npc->unk_8 != 0x1E && (u16)player->action != 4) {
                     if (func_80036C30(player, npc, mover, 0x1E) != 1) {
                         break;
                     }
                     if (npc->unk_8 == 0x1E) {
                         func_8005E0E8(player);
                         func_80053D68(8, player);
-                        if (player->unk_68->pos_y.s.hi == 0xE1) {
-                            player->unk_5A = 8;
+                        if (player->obj->pos_y.s.hi == 0xE1) {
+                            player->action = 8;
                         }
                     }
                     return;
@@ -1148,7 +1147,7 @@ void func_80036A20(Player *player) {
             case 0x3B:
             case 0x3C:
             case 0x42:
-                if (func_80036FD0((s16)player->unk_120, (s16)player->unk_122, mover) == 1) {
+                if (func_80036FD0((s16)player->pos.u.lo, (s16)player->pos.u.hi, mover) == 1) {
                     func_80037078(player, (NpcS *)npc);
                     return;
                 }
@@ -1194,15 +1193,15 @@ u16 func_80036FD0(s16 x, s16 y, GameObject *mover) {
     return 0;
 }
 
-void func_80037078(Player *player, NpcS *npc) {
-    player->unk_24++;
+void func_80037078(Monster *player, NpcS *npc) {
+    player->unk_024++;
     func_80054374(0x28, player);
     func_800634D4(player, 4);
     npc->unk_8 = 3;
     npc->unk_60 = player;
     npc->unk_54 = D_800AA248.unk_20->flags;
-    npc->unk_5C = player->unk_120;
-    npc->unk_5E = player->unk_122;
+    npc->unk_5C = player->pos.u.lo;
+    npc->unk_5E = player->pos.u.hi;
     if (player->unk_142 != 0) {
         npc->unk_1A += 0xA;
     }
@@ -1213,7 +1212,7 @@ INCLUDE_ASM("asm/main/nonmatchings/game_80034590", func_8003712C);
 
 /* 82.46%: the two rectangle tests and their shared call are right; the saved registers are assigned in another order (the record in s1, the player in s5 in the original) and the first test keeps x sign-extended in s0 */
 #ifdef NON_MATCHING
-u16 func_800372DC(s16 x, s16 y, Player *player, NpcS *npc, s32 arg4) {
+u16 func_800372DC(s16 x, s16 y, Monster *player, NpcS *npc, s32 arg4) {
     func_80037960(npc, arg4);
     if ((x >= npc->unk_3E || x >= (s16)(npc->unk_3E - 4)) && (x <= npc->unk_40 || x <= (s16)(npc->unk_40 + 4)) &&
         (y >= npc->unk_44 || y >= (s16)(npc->unk_44 - 4)) && (y <= npc->unk_42 || y <= (s16)(npc->unk_42 + 4))) {
@@ -1222,7 +1221,7 @@ u16 func_800372DC(s16 x, s16 y, Player *player, NpcS *npc, s32 arg4) {
     if ((x >= npc->unk_46 || x >= (s16)(npc->unk_46 - 4)) && (x <= npc->unk_48 || x <= (s16)(npc->unk_48 + 4)) &&
         (y >= npc->unk_4C || y >= (s16)(npc->unk_4C - 4)) && (y <= npc->unk_4A || y <= (s16)(npc->unk_4A + 4))) {
         if (player != NULL) {
-            player->unk_24++;
+            player->unk_024++;
             func_80054374(0x28, player);
             func_800634D4(player, 4);
         }
@@ -1270,11 +1269,11 @@ u16 func_80037574(s16 x, s16 y, GameObject *mover) {
     return 0;
 }
 
-u16 func_8003761C(s16 x, s16 y, Player *player, NpcS *npc) {
+u16 func_8003761C(s16 x, s16 y, Monster *player, NpcS *npc) {
     if (player == NULL) {
         return 0;
     }
-    player->unk_24++;
+    player->unk_024++;
     func_80054374(0x28, player);
     func_800634D4(player, 4);
     npc->unk_8 = 3;
@@ -1584,7 +1583,7 @@ void func_800384E8(NpcS *npc) {
 }
 
 void func_80038528(NpcS *npc) {
-    switch (npc->unk_64->unk_CC) {
+    switch (npc->unk_64->unk_0CC) {
     case 6:
     case 7:
     case 8:
@@ -1669,7 +1668,7 @@ INCLUDE_ASM("asm/main/nonmatchings/game_80034590", func_800385F4);
 #endif
 
 void func_80038754(NpcS *npc) {
-    Player *player;
+    Monster *player;
 
     func_8001F724(5);
     D_800AA248.unk_20->vel_x.w = 0;
@@ -1784,10 +1783,10 @@ void func_80038A2C(NpcS *npc) {
 #ifdef NON_MATCHING
 /* 96.62 %: register choices only, as func_80038920: the table entry's address is built in v1 in the original */
 void func_80038AE8(NpcS *npc) {
-    Player *player;
+    Monster *player;
 
     player = npc->unk_64;
-    if ((player == NULL || player->unk_CC == 0 || player->unk_CC == 5 || player->unk_CC == 1) && npc->unk_2A == 4) {
+    if ((player == NULL || player->unk_0CC == 0 || player->unk_0CC == 5 || player->unk_0CC == 1) && npc->unk_2A == 4) {
         if (npc->unk_C != 0) {
             func_8003EB5C(D_8007DA68[npc->unk_2E & 3], D_800AA268);
         }
@@ -1798,7 +1797,7 @@ void func_80038AE8(NpcS *npc) {
     }
     if (D_800AA268->vel_x.w == 0) {
         npc->unk_C = 0;
-        if (player != NULL && player->unk_CC != 0 && player->unk_CC != 5 && player->unk_CC != 1) {
+        if (player != NULL && player->unk_0CC != 0 && player->unk_0CC != 5 && player->unk_0CC != 1) {
             npc->unk_8 = 0x32;
             func_80038528(npc);
             return;
@@ -1913,7 +1912,7 @@ u16 func_80039958(NpcS *npc) {
 
     if (npc->unk_64 != NULL) {
         speed = D_800AA268->vel_x.w;
-        edge = &D_801D3D98[D_801FA8A0[npc->unk_64->unk_0 - 1]];
+        edge = &D_801D3D98[D_801FA8A0[npc->unk_64->id - 1]];
         if (speed >= 0) {
             if (*edge > 0x16C0000) {
                 speed = 0;
@@ -1950,8 +1949,8 @@ void func_80039A58(NpcS *npc) {
     }
 }
 
-s32 func_80039B04(Player *player, s32 x) {
-    s32 pos = player->unk_68->pos_x.w;
+s32 func_80039B04(Monster *player, s32 x) {
+    s32 pos = player->obj->pos_x.w;
 
     if (abs(x - pos) > (D_801D8864[0] + 1) / 2) {
         x += D_801D8864[0] + 1;
@@ -1959,8 +1958,8 @@ s32 func_80039B04(Player *player, s32 x) {
     return abs(x - pos);
 }
 
-Player *func_80039B60(s32 x) {
-    Player *best = NULL;
+Monster *func_80039B60(s32 x) {
+    Monster *best = NULL;
     s32 bestDist = 0x1FFF0000;
     s32 i;
 
@@ -1968,7 +1967,7 @@ Player *func_80039B60(s32 x) {
         s32 slot = func_80025DF8(i + 1);
 
         if (*(u16 *)&D_801E0B78[slot] != 0) {
-            s32 pos = D_801E0B78[slot].unk_68->pos_x.w;
+            s32 pos = D_801E0B78[slot].obj->pos_x.w;
             s32 dist;
 
             if (pos < D_801F9AC8[0]) {
@@ -2007,7 +2006,7 @@ s32 func_80039C98(s32 x, s32 left, s32 right) {
 
 void func_80039D04(NpcS *npc) {
     s32 x;
-    Player *player;
+    Monster *player;
     s32 px;
     s32 d;
 
@@ -2015,7 +2014,7 @@ void func_80039D04(NpcS *npc) {
     if (--npc->unk_1C == -1) {
         player = func_80039B60(x);
         if (player != NULL) {
-            px = player->unk_68->pos_x.w;
+            px = player->obj->pos_x.w;
             d = abs(x - px);
             if (d < (D_801D8864[0] + 1) / 2) {
                 if ((x < px && (D_800AA248.unk_20->flags & 0x10)) || (px < x && !(D_800AA248.unk_20->flags & 0x10))) {
@@ -2074,7 +2073,7 @@ stop:
 #ifdef NON_MATCHING
 /* 99.78 %: the velocity lands in v1 here; the original reuses the flag test's v0 */
 void func_8003A218(NpcS *npc) {
-    Player *player;
+    Monster *player;
     s32 v;
 
     npc->unk_1C--;

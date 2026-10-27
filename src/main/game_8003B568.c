@@ -47,7 +47,7 @@ void func_8003B9A0(UnkStructB1 *p) {
 
 /* 83 %: an object's hit box against a monster's; the original computes -w + x with negu in place (here x - w), loads the object's y and flags before the box, and loads the monster's four edges in another order */
 #ifdef NON_MATCHING
-s32 func_8003B9C8(GameObject *obj, UnkStruct7 *m) {
+s32 func_8003B9C8(GameObject *obj, Monster *m) {
     SpriteFrame *box;
     s16 x;
     u16 y;

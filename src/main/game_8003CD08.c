@@ -32,9 +32,9 @@ void func_8001F724(s32 arg0);
 void func_8003C894(Actor *actor);
 void func_8003C8D4(Actor *actor);
 void func_8004CFC0(void);
-void func_80053D68(s32 arg0, Player *player);
-void func_80054374(s32 arg0, Player *player);
-void func_8005E0E8(Player *player);
+void func_80053D68(s32 arg0, Monster *player);
+void func_80054374(s32 arg0, Monster *player);
+void func_8005E0E8(Monster *player);
 s32 func_8005F208(void);
 struct AnimFrame *func_8001A784(s32 arg0);
 
@@ -78,7 +78,7 @@ typedef struct ActorDef {
     /* 0x12 */ u16 unk_12;
 } ActorDef;
 void func_8001F7CC(s32 a, s32 b);
-u16 func_8003712C(s16 x, s16 y, Player *player);
+u16 func_8003712C(s16 x, s16 y, Monster *player);
 void func_800415E0(Actor *actor);
 void func_8003D4AC(Ai *ai);
 void func_8003FEE4(Actor *actor);
@@ -86,7 +86,7 @@ void func_80041344(u16 arg0, Actor *actor);
 void func_80024964(s32 arg0, GameObject *mover);
 void func_8001E2F8(GameObject *mover);
 void func_8001E39C(GameObject *mover);
-void func_80053C50(s32 arg0, Player *player);
+void func_80053C50(s32 arg0, Monster *player);
 void func_80061068(s32 arg0, s16 arg1, s16 arg2);
 void func_8001E4B0(GameObject *mover);
 void func_8003F150(void);
@@ -94,10 +94,10 @@ void func_80030338(GameObject *mover);
 Effect *func_8001D110(void);
 GameObject *func_8001DCB4(void);       /* spawns D_800AA248.unk_3C */
 void func_8004003C(s32 arg0, MoverLink *link);
-s16 func_80053AC4(s16 x, s16 y, s32 w, s32 h, Player *player);
+s16 func_80053AC4(s16 x, s16 y, s32 w, s32 h, Monster *player);
 void func_8003CCC0(MoverLink *link);
 void func_80040B94(Actor *actor);
-void func_800634D4(Player *player, s32 arg1);
+void func_800634D4(Monster *player, s32 arg1);
 
 /* A sound and an argument per kind of actor hit (the file's .data). */
 typedef struct ActorSound {
@@ -116,7 +116,7 @@ void func_800413BC(u16 arg0, Actor *actor);
 void func_8003E6A4(Ai *ai);
 u16 func_8003EB5C(Anim *anim, GameObject *mover);
 void func_8003EC40(Actor *actor);
-void func_8003F74C(Player *player, Actor *actor);
+void func_8003F74C(Monster *player, Actor *actor);
 s16 func_8003FCD8(s32 arg0, s32 arg1);
 void func_8003FF0C(s32 vel, s32 kind, Actor *actor);
 void func_8004089C(Actor *actor);
@@ -135,7 +135,6 @@ extern u16 D_801D36FC;        /* the game mode */
 extern u16 D_801D37B8;
 extern u16 D_801D87B4;
 extern EffectDef D_8009556C;
-extern Player D_801E0B78[];
 /* D_800AA248.unk_20 by its own name (the restores store it so). A one-member struct rather than a plain pointer:
  * GCC 2.8 keeps its stores ordered with struct-field loads only then (docs/MATCHING.md "Structs, globals and
  * aliasing"; func_80040CB8 stores it before reading the actor's fields). */
@@ -673,16 +672,16 @@ INCLUDE_ASM("asm/main/nonmatchings/game_8003CD08", func_8003DFD4);
 
 INCLUDE_ASM("asm/main/nonmatchings/game_8003CD08", func_8003E1C8);
 
-s32 func_8003E59C(AiOrder *order, Actor *actor, Player *player) {
+s32 func_8003E59C(AiOrder *order, Actor *actor, Monster *player) {
     s16 limit;
 
     if (order->unk_8 == 0 && order->unk_14 == 0) {
         if (order->unk_4 == 1) {
-            limit = player->unk_24;
+            limit = player->unk_024;
         } else if (order->unk_4 == 2) {
-            limit = player->unk_28;
+            limit = player->unk_028;
         } else {
-            limit = player->unk_26;
+            limit = player->unk_026;
         }
         if (limit == 0 || (limit != -1 && actor->unk_4 >= limit)) {
             return 1;
@@ -694,7 +693,7 @@ s32 func_8003E59C(AiOrder *order, Actor *actor, Player *player) {
 #ifdef NON_MATCHING
 /* 89.31 %: the loop's exit by count undoes the last i++ (addiu a1,a1,-1 after the loop) and the bound 8 sits in a register; the loop shape is right */
 void func_8003E630(Ai *ai) {
-    Player *player;
+    Monster *player;
     u16 i;
     u16 n;
     u16 max = 8;
@@ -706,7 +705,7 @@ void func_8003E630(Ai *ai) {
             i = 1;
         }
         player = &D_801E0B78[i];
-        if (player->unk_58 & 1) {
+        if (player->unk_058 & 1) {
             break;
         }
         i++;
@@ -1000,7 +999,7 @@ void func_8003EF40(Actor *actor) {
     memset(actor, 0, sizeof(Actor));
 }
 
-void func_8003EF64(Player *player) {
+void func_8003EF64(Monster *player) {
     GameObject *saved;
     GameObject *mover;
     Actor *actor = D_801E1E48;
@@ -1011,7 +1010,7 @@ void func_8003EF64(Player *player) {
     n = D_801E28A4;
     saved = D_800AA268.p;
     if (n != 0) {
-        mover = player->unk_68;
+        mover = player->obj;
         px = ((s16 *)&mover->pos_x.w)[1];
         do {
             mover = actor->unk_0;
@@ -1027,7 +1026,7 @@ void func_8003EF64(Player *player) {
                     } else if (((s16 *)&mover->pos_y.w)[1] == 0xE2) {
                         func_80054374(0x28, player);
                         func_800634D4(player, 4);
-                        player->unk_24++;
+                        player->unk_024++;
                         actor->unk_28 = 1;
                     }
                     break;
@@ -1048,7 +1047,7 @@ void func_8003F114(void) {
 
 INCLUDE_ASM("asm/main/nonmatchings/game_8003CD08", func_8003F150);
 
-s32 func_8003F378(Player *player) {
+s32 func_8003F378(Monster *player) {
     Actor *actor = D_801E1E48;
     GameObject *mover;
     u16 n = D_801E28A4;
@@ -1089,12 +1088,12 @@ INCLUDE_ASM("asm/main/nonmatchings/game_8003CD08", func_8003F50C);
 
 INCLUDE_ASM("asm/main/nonmatchings/game_8003CD08", func_8003F74C);
 
-void func_8003FB5C(Player *player, Actor *actor) {
+void func_8003FB5C(Monster *player, Actor *actor) {
     switch (actor->unk_4) {
     case 0x1F:
         func_80053C50(0x28000, player);
-        if (player->unk_5C != 2 && player->unk_5C != 0x4E) {
-            player->unk_5A = 0x49;
+        if (player->unk_05C != 2 && player->unk_05C != 0x4E) {
+            player->action = 0x49;
             player->unk_126 = 1;
         }
         break;
@@ -1102,19 +1101,19 @@ void func_8003FB5C(Player *player, Actor *actor) {
     case 0x7A:
     case 0x7C:
         func_80053D68(8, player);
-        player->unk_5A = 8;
+        player->action = 8;
         break;
     default:
         func_80053C50(0x28000, player);
-        if (player->unk_5C != 2 && player->unk_5C != 0x4E) {
-            player->unk_5A = 8;
+        if (player->unk_05C != 2 && player->unk_05C != 0x4E) {
+            player->action = 8;
             player->unk_126 = 1;
         }
         break;
     }
 }
 
-s32 func_8003FC30(Player *player, Actor *actor) {
+s32 func_8003FC30(Monster *player, Actor *actor) {
     if (actor->unk_14 == 0) {
         func_8003F74C(player, actor);
     }
@@ -1260,7 +1259,7 @@ void func_8004003C(s32 arg0, MoverLink *arg1) {
     u16 i;
     u16 best;
     s32 best_dx;
-    Player *player;
+    Monster *player;
     s16 reach;
 
     i = 7;
@@ -1268,13 +1267,13 @@ void func_8004003C(s32 arg0, MoverLink *arg1) {
     best_dx = 9999;
     D_800AA248.unk_4 = 0;
     D_800AA248.unk_C = 0;
-    *(Player **)&D_800AA248.unk_20->unk_68.u.lo = NULL;
+    D_800AA248.unk_20->unk_68.monster = NULL;
     do {
         player = &D_801E0B78[i];
-        if (player->unk_58 & 1) {
+        if (player->unk_058 & 1) {
             D_800AA248.unk_C = 1;
             reach = player->unk_1DE;
-            func_8003FC70(&dx, &dy, player->unk_68, D_800AA248.unk_20);
+            func_8003FC70(&dx, &dy, player->obj, D_800AA248.unk_20);
             if (dx >= 0) {
                 if (!(D_800AA248.unk_20->flags & 0x10)) {
                     D_800AA248.unk_4 = 1;
@@ -1285,7 +1284,7 @@ void func_8004003C(s32 arg0, MoverLink *arg1) {
             if (reach != 0 && abs(dx) <= best) {
                 best = reach;
                 best_dx = dx;
-                *(Player **)&D_800AA248.unk_20->unk_68.u.lo = player;
+                D_800AA248.unk_20->unk_68.monster = player;
             }
         }
     } while (--i != 0);
@@ -1321,7 +1320,7 @@ void func_80040294(void) {
     }
 }
 
-void func_80040314(Player *player) {
+void func_80040314(Monster *player) {
     GameObject *saved;
     Effect *effect;
     GameObject *mover;
@@ -1331,12 +1330,12 @@ void func_80040314(Player *player) {
     D_800AA248.unk_3C = effect;
     effect->unk_28 = &D_8009556C;
     effect->unk_0 = D_8009556C.unk_0;
-    mover = player->unk_68;
+    mover = player->obj;
     effect->unk_12 = ((u16 *)&mover->pos_x.w)[1];
     effect->unk_16 = ((u16 *)&mover->pos_y.w)[1] | 0xC000;
     effect->unk_20 = *(u16 *)&mover->unk_80 - 1;
     D_800AA248.unk_20 = func_8001DCB4();
-    D_800AA248.unk_20->owner.link = (MoverLink *)player;
+    D_800AA248.unk_20->owner.monster = player;
     D_800AA248.unk_20 = saved;
 }
 
@@ -1433,7 +1432,7 @@ void func_80040824(Actor *actor) {
 }
 
 void func_8004089C(Actor *actor) {
-    Player *player;
+    Monster *player;
     s32 n;
 
     player = actor->unk_2C;
@@ -1445,7 +1444,7 @@ void func_8004089C(Actor *actor) {
         func_80054374(n, player);
         func_8005E0E8(player);
         func_80053D68(8, player);
-        player->unk_5A = 8;
+        player->action = 8;
     }
 }
 
@@ -1795,7 +1794,7 @@ INCLUDE_ASM("asm/main/nonmatchings/game_8003CD08", func_800411E8);
 
 void func_80041344(u16 kind, Actor *actor) {
     ActorSound *sound;
-    Player *player;
+    Monster *player;
 
     if (kind >= 7) {
         kind = 6;
@@ -1810,7 +1809,7 @@ void func_80041344(u16 kind, Actor *actor) {
 
 void func_800413BC(u16 kind, Actor *actor) {
     ActorSound *sound;
-    Player *player;
+    Monster *player;
 
     if (kind >= 2) {
         kind = 1;

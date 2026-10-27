@@ -92,7 +92,7 @@ extern UnkStructB4 D_8007DDD4[];
 void func_80054374(u16, UnkStruct1 *);
 extern s16 D_801F9ACA;
 extern void (*D_8007DDB4[8])(void);
-s32 func_8003B9C8(GameObject *, UnkStruct7 *);
+s32 func_8003B9C8(GameObject *, Monster *);
 void func_8003CA28(UnkStructB1 *arg0);
 void func_8003CA70(UnkStructB1 *);
 void func_8003CADC(UnkStruct1 *arg0);

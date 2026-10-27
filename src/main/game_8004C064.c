@@ -104,9 +104,9 @@ void func_8004C0E0(Projectile *p, Monster *m) {
             push = 0xA0000;
             lift = 0x1C000;
         }
-        m->unk_010 += lift;
-        if (m->unk_010 > 0x440000) {
-            m->unk_010 = 0x440000;
+        m->unk_010.w += lift;
+        if (m->unk_010.w > 0x440000) {
+            m->unk_010.w = 0x440000;
         }
         func_80053D68(push, m);
         action = 8;
@@ -672,8 +672,8 @@ void func_8004CFE8(void) {
             if ((u32) (ea - 3) >= 2 && ea != side) {
                 b = func_80054728(m->unk_1B2);
                 if (b != NULL) {
-                    m->unk_0FA = m->x;
-                    m->unk_0FC = m->y;
+                    m->unk_0FA = m->pos.s.lo;
+                    m->unk_0FC = m->pos.s.hi;
                     if (b->unk_058 != 0) {
                         func_8002CFAC(m, b);
                     } else {
@@ -725,8 +725,8 @@ void func_8004D194(void) {
         b = func_80054728(m->unk_1B2);
         if (b != NULL) {
             if (m->unk_1B0 != 3) {
-                m->unk_0FA = m->x;
-                m->unk_0FC = m->y;
+                m->unk_0FA = m->pos.s.lo;
+                m->unk_0FC = m->pos.s.hi;
                 if (b->unk_058 != 0) {
                     func_8002CFAC(m, b);
                 } else {
@@ -1009,10 +1009,10 @@ void func_8004D980(GameObject *obj, Monster *m, Monster *other) {
     obj->pos_y.s.hi = 0x500;
     func_800634D4(other, 6);
     func_80053D68(0xE0000, m);
-    vel = m->unk_010 + 0x90000;
-    m->unk_010 = vel;
+    vel = m->unk_010.w + 0x90000;
+    m->unk_010.w = vel;
     if (vel > 0x440000) {
-        m->unk_010 = 0x440000;
+        m->unk_010.w = 0x440000;
     }
     other->unk_0E4 = m->id;
     m->unk_126 = 0;

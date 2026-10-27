@@ -103,7 +103,7 @@ void func_8002B988(void) {
     s16 temp_v0;
     s32 temp_s0;
     s32 var_s1;
-    UnkStruct7 *temp_a0;
+    Monster *temp_a0;
 
     func_8002B878();
     var_s1 = 0;
@@ -114,32 +114,32 @@ void func_8002B988(void) {
             temp_a0 = func_8002BA30(temp_s0);
             if (D_8007A7D4 & 1) {
                 temp_v0 = D_8007A688 - 1;
-                temp_a0->unk_02 = temp_v0;
-                temp_a0->unk_04 = temp_v0;
+                temp_a0->unk_002 = temp_v0;
+                temp_a0->unk_004 = temp_v0;
             }
         }
         var_s1 += 1;
     } while (var_s1 < 7);
 }
 
-UnkStruct7 *func_8002BA30(s32 arg0) {
-    UnkStruct7 *temp_a1;
+Monster *func_8002BA30(s32 arg0) {
+    Monster *temp_a1;
 
     temp_a1 = &D_801E0B78[arg0 & 0xFFFF];
     if (D_8007A7D4 & 1) {
-        temp_a1->unk_08 = 0x440000;
+        temp_a1->unk_008.w = 0x440000;
     }
     return temp_a1;
 }
 
 void func_8002BA70(s32 n) {
-    UnkStruct7 *m;
+    Monster *m;
     GameObject *saved;
 
     m = &D_801E0B78[(u16) n];
     saved = D_800AA248.unk_20;
     func_8002BE30(m);
-    m->unk_00 = n;
+    m->id = n;
     m->unk_128 = n;
     func_8002BAEC(m);
     D_800AA248.unk_20 = saved;
@@ -150,11 +150,11 @@ INCLUDE_ASM("asm/main/nonmatchings/game_8002A330", func_8002BAEC);
 
 #ifdef NON_MATCHING
 /* 99.8 %: the original's frame is 32 bytes (a spilled or address-taken local?), this one's 24. */
-void func_8002BE30(UnkStruct7 *arg0) {
+void func_8002BE30(Monster *arg0) {
     if (D_8007A7D4 & 1) {
         memset(arg0, 0, 0x220);
     } else {
-        memset(arg0->unk_58, 0, 0x1C0);
+        memset(arg0->unk_058, 0, 0x1C0);
     }
 }
 #else
@@ -386,7 +386,7 @@ UnkStruct1 *a;
     D_800AA268.obj = obj;
     if (obj != NULL) {
         func_8001E698(obj, D_80011E48);
-        func_8002CBF4((UnkStruct7 *) a);
+        func_8002CBF4((Monster *) a);
         a->unk_84 = NULL;
     }
     func_8002EBD8(a);
@@ -508,7 +508,7 @@ void func_8002CA8C(void) {
     D_800AA268.obj = saved;
 }
 
-void func_8002CBF4(UnkStruct7 *m) {
+void func_8002CBF4(Monster *m) {
     GameObject *saved = D_800AA248.unk_20;
     GameObject *body;
     UnkStructD110 *r;
@@ -516,10 +516,10 @@ void func_8002CBF4(UnkStruct7 *m) {
     s32 *anim;
 
     if (func_8001A3AC() >= 0x46) {
-        body = m->unk_98;
+        body = m->unk_098;
         r = func_8001D110();
         D_800AA248.unk_3C = r;
-        if (m->unk_58 == 3) {
+        if (m->unk_058 == 3) {
             anim = D_80011ED8;
         } else if (D_8007A690 == 1) {
             anim = D_80011ED0;
@@ -532,7 +532,7 @@ void func_8002CBF4(UnkStruct7 *m) {
         r->unk_16 = body->pos_y.u.hi;
         r->unk_20 = body->unk_80 + 5;
         spr = func_8001DCB4();
-        if (m->unk_58 != 3 && D_8007A690 != 1) {
+        if (m->unk_058 != 3 && D_8007A690 != 1) {
             spr->flags |= 0x400;
             spr->pos_x.u.hi += 0x14;
             spr->pos_y.u.hi -= 0x32;
@@ -587,36 +587,36 @@ void func_8002CE40(UnkStruct2 *arg0, s32 arg1) {
 
 INCLUDE_ASM("asm/main/nonmatchings/game_8002A330", func_8002CE74);
 
-void func_8002CFAC(UnkStruct1 *a, UnkStruct7 *m) {
+void func_8002CFAC(Monster *m, UnkStruct1 *b) {
     u16 v;
 
-    if (m->unk_58 == 2 && D_801E1E40 != 1) {
+    if (b->unk_58 == 2 && D_801E1E40 != 1) {
         func_8001F724(0x2B);
         return;
     }
-    if (m->unk_58 == 3 && D_801E1E40 != 1) {
+    if (b->unk_58 == 3 && D_801E1E40 != 1) {
         func_8001F724(0x2B);
         return;
     }
-    if (m->unk_14 != 0x10) {
+    if (b->unk_14 != 0x10) {
         v = 5;
-        if (m->unk_10 != 0) {
+        if (b->unk_10 != 0) {
             v = 7;
-            if (m->unk_10 >= m->unk_12) {
+            if (b->unk_10 >= b->unk_12) {
                 v = 8;
                 goto done;
             }
         }
-        m->unk_10++;
-        if ((u16) (m->unk_58 - 2) >= 2) {
+        b->unk_10++;
+        if ((u16) (b->unk_58 - 2) >= 2) {
             func_8001F724(0x4D);
         }
-        func_8003111C(1, a);
-        func_80031154(5, a);
-        m->unk_32 = a->unk_00;
-        a->unk_18A = 1;
+        func_8003111C(1, m);
+        func_80031154(5, m);
+        b->unk_32 = m->id;
+        m->unk_18A = 1;
 done:
-        m->unk_14 = v;
+        b->unk_14 = v;
     }
 }
 
@@ -1442,17 +1442,17 @@ INCLUDE_ASM("asm/main/nonmatchings/game_8002A330", func_8002FB6C);
 void func_8002FD24(UnkStruct1 *arg0, UnkStruct1 *arg1) {
     u16 i;
     u16 temp_a3;
-    UnkStruct7 *temp_a2;
+    Monster *temp_a2;
 
     i = 7;
     do {
         temp_a2 = &D_801E0B78[i];
-        if (temp_a2->unk_58 & 1) {
+        if (temp_a2->unk_058 & 1) {
             temp_a3 = temp_a2->unk_1B0;
             if (temp_a3 != 0) {
                 if ((temp_a2->unk_1B2 == arg1->unk_1E) && (temp_a3 != 3)) {
                     if (temp_a2->unk_1B4 >= arg0->unk_04) {
-                        temp_a2->unk_5A = 0xF;
+                        temp_a2->action = 0xF;
                     }
                 }
             }
@@ -1516,7 +1516,7 @@ s32 func_80030268(s16 arg0, s32 arg1, UnkStruct8 *arg2) {
     return 0;
 }
 
-void func_800302AC(u16 kind, UnkStruct7 *m) {
+void func_800302AC(u16 kind, Monster *m) {
     s16 action;
     s32 push;
 
@@ -1536,8 +1536,8 @@ void func_800302AC(u16 kind, UnkStruct7 *m) {
     default:
         return;
     }
-    m->unk_5A = action;
-    m->unk_5C = 0;
+    m->action = action;
+    m->unk_05C = 0;
     func_80053C50(push, m);
     m->unk_13C = 0x4B;
 }
@@ -1912,9 +1912,9 @@ void func_80030FA4(void) {
 
 INCLUDE_ASM("asm/main/nonmatchings/game_8002A330", func_80031074);
 
-void func_8003111C(s32 arg0, UnkStruct1 *arg1) {
+void func_8003111C(s32 arg0, Monster *arg1) {
     if (((u8 *) arg1 >= D_801E0D98) && ((u8 *) arg1 <= D_801E0D98 + 0xCC0)) {
-        arg1->unk_26 = (u16) (((u16) arg1->unk_26) + arg0);
+        arg1->unk_026 = (u16) (((u16) arg1->unk_026) + arg0);
     }
 }
 

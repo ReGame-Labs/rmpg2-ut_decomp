@@ -333,8 +333,8 @@ void func_8004ED8C(void) {
             b = D_801D3DC8;
             if (D_801E29A4 != 0) {
                 b += m->unk_1B2 - 1;
-                m->unk_0FC = m->y;
-                m->unk_0FA = m->x;
+                m->unk_0FC = m->pos.s.hi;
+                m->unk_0FA = m->pos.s.lo;
                 if (b->unk_058 == 0) {
                     func_8002D0C0(m, b);
                 } else {
@@ -408,7 +408,7 @@ void func_8004EFE8(void) {
                     if (o != NULL && !(o->unk_6C & 0x80)) {
                         if (other->unk_0DC != 0 && other->action == 3 && o->pos_y.s.hi == 0xE1 &&
                             (D_800AA248.cur_obj->flags & 0x10) != (o->flags & 0x10)) {
-                            if (func_8005453C(m->x, m->y, other)) {
+                            if (func_8005453C(m->pos.s.lo, m->pos.s.hi, other)) {
                                 m->unk_18A = 1;
                                 other->action = 0x41;
                                 other->unk_0E4 = m->id;
@@ -548,8 +548,8 @@ void func_8004F47C(void) {
     if (obj == NULL) {
         def = func_8001D110();
         D_800AA248.new_def = def;
-        def->pos_x.s.hi = m->x;
-        def->pos_y.s.hi = m->y;
+        def->pos_x.s.hi = m->pos.s.lo;
+        def->pos_y.s.hi = m->pos.s.hi;
         def->id = 0x4F00000C;
         def->flags = saved->unk_80 + 1;
         D_800AA248.cur_obj = func_8001DCB4();
@@ -574,7 +574,7 @@ void func_8004F65C(void) {
         if (bld != NULL) {
             part = *(u8 **) ((u8 *) bld + 0x18);
             if (part != NULL && *(s16 *) (part + 0x1C) == m->unk_1B0) {
-                y = m->y;
+                y = m->pos.s.hi;
                 if (*(s16 *) (part + 0x1E) + 0xE >= y && y >= *(s16 *) (part + 0xE) - 0xE) {
                     m->unk_18A = 1;
                     if (func_80030CD4(part) == 1) {
@@ -918,8 +918,8 @@ void func_8004FF3C(void) {
                 if (ea != side) {
                     bld = func_80054728(m->unk_1B2);
                     if (bld != NULL) {
-                        m->unk_0FA = m->x;
-                        m->unk_0FC = m->y;
+                        m->unk_0FA = m->pos.s.lo;
+                        m->unk_0FC = m->pos.s.hi;
                         if (*(u16 *) ((u8 *) bld + 0x58) != 0) {
                             func_8002CFAC(m, bld);
                             m->unk_18A = 1;

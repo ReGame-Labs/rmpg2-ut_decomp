@@ -125,4 +125,166 @@ typedef struct GameObject {
     /* 0xA0 */ u8 unk_A0[0x2C];
 } GameObject;                           /* 0xCC bytes */
 
+/* A monster, a player's or the computer's: 0x220 bytes, in the array D_801E0B78 (by its number). */
+typedef struct Monster {
+    /* 0x000 */ u16 id;                        /* its number, 1..7 (a player's is 1-based) */
+    /* 0x002 */ s16 unk_002;
+    /* 0x004 */ s16 unk_004;
+    /* 0x006 */ u16 kind;                      /* the monster kind: 0x15 has its own thrown objects */
+    /* 0x008 */ Fixed unk_008;
+    /* 0x00C */ u8 unk_00C[0x04];
+    /* 0x010 */ Fixed unk_010;                 /* a vertical speed, 16.16 */
+    /* 0x014 */ struct Monster * target;       /* the monster this one is attacking */
+    /* 0x018 */ u8 unk_018[0x02];
+    /* 0x01A */ u16 unk_01A;
+    /* 0x01C */ u16 unk_01C;                   /* a countdown set from a random draw */
+    /* 0x01E */ u8 unk_01E[0x04];
+    /* 0x022 */ u16 unk_022;                   /* the step of a throw sequence, 0..4 */
+    /* 0x024 */ u16 unk_024;
+    /* 0x026 */ u16 unk_026;
+    /* 0x028 */ u16 unk_028;
+    /* 0x02A */ u16 unk_02A;                   /* the kind of throw in progress, 0 none */
+    /* 0x02C */ u8 unk_02C[0x08];
+    /* 0x034 */ s32 unk_034;
+    /* 0x038 */ s32 unk_038;
+    /* 0x03C */ u16 unk_03C;
+    /* 0x03E */ u16 unk_03E;
+    /* 0x040 */ u8 unk_040[0x04];
+    /* 0x044 */ s16 unk_044;
+    /* 0x046 */ u16 unk_046;
+    /* 0x048 */ u8 unk_048[0x0E];
+    /* 0x056 */ s16 unk_056;
+    /* 0x058 */ u16 unk_058;                   /* flags; 1: in play */
+    /* 0x05A */ u16 action;                    /* the state the script dispatcher runs */
+    /* 0x05C */ u16 unk_05C;
+    /* 0x05E */ s16 unk_05E;
+    /* 0x060 */ u8 unk_060[0x08];
+    /* 0x068 */ GameObject * obj;              /* its body */
+    /* 0x06C */ GameObject * unk_06C;
+    /* 0x070 */ GameObject * unk_070;
+    /* 0x074 */ u8 unk_074[0x0C];
+    /* 0x080 */ GameObject * unk_080[6];       /* the score's digit sprites */
+    /* 0x098 */ GameObject * unk_098;
+    /* 0x09C */ u8 unk_09C[0x18];
+    /* 0x0B4 */ s32 unk_0B4[2];
+    /* 0x0BC */ u8 unk_0BC[0x0C];
+    /* 0x0C8 */ u16 unk_0C8;
+    /* 0x0CA */ u8 unk_0CA[0x02];
+    /* 0x0CC */ u16 unk_0CC;                   /* an index into the per-file speed tables */
+    /* 0x0CE */ s16 unk_0CE;
+    /* 0x0D0 */ u16 unk_0D0;
+    /* 0x0D2 */ u8 unk_0D2[0x02];
+    /* 0x0D4 */ s16 unk_0D4;
+    /* 0x0D6 */ u8 unk_0D6[0x02];
+    /* 0x0D8 */ s32 unk_0D8;
+    /* 0x0DC */ u16 unk_0DC;
+    /* 0x0DE */ u16 unk_0DE;
+    /* 0x0E0 */ s16 unk_0E0;
+    /* 0x0E2 */ s16 unk_0E2;
+    /* 0x0E4 */ u16 unk_0E4;
+    /* 0x0E6 */ u16 unk_0E6;
+    /* 0x0E8 */ u8 unk_0E8[0x02];
+    /* 0x0EA */ u16 unk_0EA;
+    /* 0x0EC */ u8 unk_0EC[0x02];
+    /* 0x0EE */ s16 unk_0EE;
+    /* 0x0F0 */ s32 unk_0F0;
+    /* 0x0F4 */ s16 unk_0F4;
+    /* 0x0F6 */ u16 unk_0F6;
+    /* 0x0F8 */ u8 unk_0F8[0x02];
+    /* 0x0FA */ u16 unk_0FA;
+    /* 0x0FC */ u16 unk_0FC;
+    /* 0x0FE */ u8 unk_0FE[0x02];
+    /* 0x100 */ s32 unk_100;                   /* a horizontal speed, 16.16 */
+    /* 0x104 */ s32 unk_104;                   /* a vertical acceleration, 16.16 */
+    /* 0x108 */ s16 unk_108;
+    /* 0x10A */ s16 unk_10A;                   /* an x range: 0x10A..0x10E */
+    /* 0x10C */ s16 unk_10C;
+    /* 0x10E */ s16 unk_10E;
+    /* 0x110 */ u8 unk_110[0x08];
+    /* 0x118 */ u16 unk_118;                   /* the hit box: left, top, right, bottom */
+    /* 0x11A */ u16 unk_11A;
+    /* 0x11C */ s16 unk_11C;
+    /* 0x11E */ u16 unk_11E;
+    /* 0x120 */ Fixed pos;                     /* its position: s.lo x, s.hi y */
+    /* 0x124 */ u8 unk_124[0x02];
+    /* 0x126 */ u16 unk_126;
+    /* 0x128 */ u16 unk_128;
+    /* 0x12A */ u16 unk_12A;
+    /* 0x12C */ u16 unk_12C;
+    /* 0x12E */ u8 unk_12E[0x04];
+    /* 0x132 */ u16 unk_132;
+    /* 0x134 */ u8 unk_134[0x04];
+    /* 0x138 */ u16 unk_138;
+    /* 0x13A */ u8 unk_13A[0x02];
+    /* 0x13C */ s16 unk_13C;
+    /* 0x13E */ s16 unk_13E;
+    /* 0x140 */ u16 unk_140;
+    /* 0x142 */ u16 unk_142;
+    /* 0x144 */ u8 unk_144[0x0C];
+    /* 0x150 */ s16 unk_150;
+    /* 0x152 */ s16 unk_152;
+    /* 0x154 */ u8 unk_154[0x10];
+    /* 0x164 */ s16 unk_164;
+    /* 0x166 */ u16 unk_166;
+    /* 0x168 */ u16 unk_168;
+    /* 0x16A */ u8 unk_16A[0x02];
+    /* 0x16C */ GameObject * unk_16C;
+    /* 0x170 */ u16 unk_170;
+    /* 0x172 */ u8 unk_172[0x0A];
+    /* 0x17C */ s32 unk_17C;
+    /* 0x180 */ struct Monster * unk_180;
+    /* 0x184 */ u16 unk_184;
+    /* 0x186 */ u8 unk_186[0x02];
+    /* 0x188 */ u16 unk_188;
+    /* 0x18A */ u16 unk_18A;
+    /* 0x18C */ u16 unk_18C;
+    /* 0x18E */ u16 unk_18E;
+    /* 0x190 */ u8 unk_190[0x1A];
+    /* 0x1AA */ u16 unk_1AA;
+    /* 0x1AC */ u16 unk_1AC;
+    /* 0x1AE */ u16 unk_1AE;
+    /* 0x1B0 */ u16 unk_1B0;
+    /* 0x1B2 */ u16 unk_1B2;
+    /* 0x1B4 */ u16 unk_1B4;
+    /* 0x1B6 */ u8 unk_1B6[0x06];
+    /* 0x1BC */ u16 unk_1BC;
+    /* 0x1BE */ u16 unk_1BE;
+    /* 0x1C0 */ s32 unk_1C0;
+    /* 0x1C4 */ Fixed unk_1C4;
+    /* 0x1C8 */ s16 unk_1C8;
+    /* 0x1CA */ s16 unk_1CA;
+    /* 0x1CC */ u16 unk_1CC;
+    /* 0x1CE */ u8 unk_1CE[0x02];
+    /* 0x1D0 */ GameObject ** unk_1D0;
+    /* 0x1D4 */ struct MonsterLink * unk_1D4;  /* cleared when the player is dropped */
+    /* 0x1D8 */ u16 unk_1D8;
+    /* 0x1DA */ u8 unk_1DA[0x04];
+    /* 0x1DE */ u16 unk_1DE;
+    /* 0x1E0 */ u16 unk_1E0;
+    /* 0x1E2 */ u8 unk_1E2[0x02];
+    /* 0x1E4 */ s16 * unk_1E4;                 /* the demo's input script: 12-byte records (frame, direction, buttons), 0x7FFF ends it */
+    /* 0x1E8 */ u8 unk_1E8[0x10];
+    /* 0x1F8 */ s32 unk_1F8;
+    /* 0x1FC */ u8 unk_1FC[0x04];
+    /* 0x200 */ s32 unk_200;
+    /* 0x204 */ u16 unk_204;
+    /* 0x206 */ u8 unk_206[0x02];
+    /* 0x208 */ s32 unk_208;
+    /* 0x20C */ s32 unk_20C;
+    /* 0x210 */ s32 unk_210;
+    /* 0x214 */ s32 unk_214;
+    /* 0x218 */ GameObject * unk_218;
+    /* 0x21C */ u8 unk_21C[0x04];
+} Monster;                              /* 0x220 bytes */
+
+
+extern Monster D_801E0B78[];
+
+/* What Monster.unk_1D4 points to: a link to another object's body (a target, a rider?). */
+typedef struct MonsterLink {
+    /* 0x00 */ GameObject *unk_00;
+    /* 0x04 */ u8 unk_04[0x02];
+    /* 0x06 */ u16 unk_06;
+} MonsterLink;
+
 #endif /* GAME_H */

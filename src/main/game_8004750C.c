@@ -1018,7 +1018,7 @@ u16 func_80048F60(Monster *m, u16 b, Throw *t) {
     def->pos_y.s.hi = D_800AA248.cur_obj->pos_y.s.hi + dy;
     def->flags = 0x1005;
     def->unk_0C = 0x724;
-    if (m->unk_006 == 0x15) {
+    if (m->kind == 0x15) {
         def->anim = D_80091ABC;
     } else {
         def->anim = D_80091A7C;

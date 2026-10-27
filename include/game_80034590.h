@@ -85,44 +85,6 @@ typedef struct AiTarget {
 /* A state handler; the first argument is the table it was called from. */
 typedef void (*AiHandler)(Ai *ai);
 
-/* A player's monster as the game drives it (game_8003CD08: the actor files call into it); large and mostly
- * unknown. */
-typedef struct Player {
-    /* 0x000 */ u16 unk_0;       /* the player's number, 1-based (game_80034590: func_80039958) */
-    /* 0x002 */ u8 unk_2[0x22];
-    /* 0x024 */ u16 unk_24;
-    /* 0x026 */ u16 unk_26;
-    /* 0x028 */ u16 unk_28;
-    /* 0x02A */ u8 unk_2A[0x2E];
-    /* 0x058 */ u16 unk_58;      /* flags; 1: in play (game_8003CD08: func_8003E630) */
-    /* 0x05A */ s16 unk_5A;
-    /* 0x05C */ u16 unk_5C;      /* game_8003CD08: func_8003FB5C */
-    /* 0x05E */ u8 unk_5E[0xA];
-    /* 0x068 */ GameObject *unk_68;     /* the player's monster's mover (game_80034590: func_80039B60) */
-    /* 0x06C */ u8 unk_6C[0x60];
-    /* 0x0CC */ u16 unk_CC;      /* game_80034590: func_80038528 */
-    /* 0x0CE */ u8 unk_CE[0x52];
-    /* 0x120 */ u16 unk_120;
-    /* 0x122 */ u16 unk_122;
-    /* 0x124 */ u8 unk_124[0x2];
-    /* 0x126 */ s16 unk_126;
-    /* 0x128 */ u8 unk_128[0x1A];
-    /* 0x142 */ u16 unk_142;     /* game_80034590: func_80037078 */
-    /* 0x144 */ u8 unk_144[0x46];
-    /* 0x18A */ s16 unk_18A;
-    /* 0x18C */ u8 unk_18C[0x20];
-    /* 0x1AC */ u16 unk_1AC;
-    /* 0x1AE */ u8 unk_1AE[0x26];
-    /* 0x1D4 */ s32 unk_1D4;     /* game_80034590: func_80038754 clears it when the player is dropped */
-    /* 0x1D8 */ u8 unk_1D8[0x6];
-    /* 0x1DE */ u16 unk_1DE;     /* game_8003CD08: func_8004003C */
-    /* 0x1E0 */ u8 unk_1E0[0x24];
-    /* 0x204 */ u16 unk_204;
-    /* 0x206 */ u8 unk_206[0x12];
-    /* 0x218 */ GameObject *unk_218;    /* game_8003CD08: func_80040F84 */
-    /* 0x21C */ u8 unk_21C[0x4];
-} Player;                   /* 0x220: D_801E0B78 holds three, one per player slot */
-
 /* A thing on screen with a mover and an animation set, driven by a state (unk_4) and a kind (unk_6): the
  * actors of game_8003CD08. */
 typedef struct Actor {
@@ -143,7 +105,7 @@ typedef struct Actor {
     /* 0x24 */ Anim **unk_24;   /* one animation per kind */
     /* 0x28 */ u16 unk_28;
     /* 0x2A */ u16 unk_2A;
-    /* 0x2C */ Player *unk_2C;
+    /* 0x2C */ Monster *unk_2C;
     /* 0x30 */ u16 unk_30;      /* a countdown */
     /* 0x32 */ u16 unk_32;
     /* 0x34 */ struct ActorLink *unk_34;
@@ -224,12 +186,12 @@ typedef struct Npc {
     /* 0x4C */ s16 unk_4C;
     /* 0x4E */ u16 unk_4E;
     /* 0x50 */ u8 unk_50[0x4];
-    /* 0x54 */ Player *unk_54;
+    /* 0x54 */ Monster *unk_54;
     /* 0x58 */ u8 unk_58[0x4];
     /* 0x5C */ u16 unk_5C;
     /* 0x5E */ u16 unk_5E;
-    /* 0x60 */ Player *unk_60;
-    /* 0x64 */ Player *unk_64;
+    /* 0x60 */ Monster *unk_60;
+    /* 0x64 */ Monster *unk_64;
     /* 0x68 */ u8 unk_68[0x8];
     /* 0x70 */ GameObject *unk_70;
     /* 0x74 */ GameObject *unk_74;
@@ -273,8 +235,8 @@ typedef struct NpcS {
     /* 0x56 */ u8 unk_56[0x6];
     /* 0x5C */ u16 unk_5C;
     /* 0x5E */ u16 unk_5E;
-    /* 0x60 */ Player *unk_60;
-    /* 0x64 */ Player *unk_64;
+    /* 0x60 */ Monster *unk_60;
+    /* 0x64 */ Monster *unk_64;
     /* 0x68 */ u8 unk_68[0x10];
 } NpcS;
 

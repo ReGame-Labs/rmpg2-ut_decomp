@@ -405,40 +405,6 @@ typedef struct UnkStruct9 {  /* provisional: the second argument of the func_800
     s16 unk_36;
 } UnkStruct9;
 
-typedef struct UnkStruct7 {  /* provisional: the 0x220-byte records at D_801E0B78 */
-    s16 unk_00;     /* its own index */
-    s16 unk_02;
-    s16 unk_04;
-    u8 pad_06[0x2];
-    s32 unk_08;
-    u8 pad_0C[0x4];
-    u16 unk_10;
-    u16 unk_12;
-    u16 unk_14;
-    u8 pad_16[0x1C];
-    u16 unk_32;
-    u8 pad_34[0x24];
-    u16 unk_58;
-    s16 unk_5A;     /* the action */
-    s16 unk_5C;
-    u8 pad_5E[0x3A];
-    GameObject *unk_98;
-    u8 pad_9C[0x7C];
-    u16 unk_118;    /* its hit box: left, top, right, bottom */
-    u16 unk_11A;
-    s16 unk_11C;
-    u16 unk_11E;
-    u8 pad_120[0x8];
-    s16 unk_128;
-    u8 pad_12A[0x12];
-    s16 unk_13C;
-    u8 pad_13E[0x72];
-    u16 unk_1B0;
-    u16 unk_1B2;
-    u16 unk_1B4;
-    u8 pad_1B6[0x6A];
-} UnkStruct7;
-
 typedef struct UnkStruct8 {  /* provisional: func_80030268's third argument */
     u8 pad_00[0xDC];
     u16 unk_DC;
@@ -706,7 +672,6 @@ s32 func_8001EA78();
 extern s32 D_801FB19C[0x50];
 extern s32 D_801FB2DC[0x50];
 extern u16 D_8007A7D4;
-extern UnkStruct7 D_801E0B78[];
 void func_80025BBC(UnkStruct1 *);
 void func_8001EDB0();
 void func_8001F39C(void *);
@@ -747,7 +712,7 @@ void func_8003DB74(UnkStruct9 *);
 void func_80031FD4(s32, UnkStruct9 *);
 void func_80030834(UnkStruct1 *, s32);
 void func_8002E9A4(UnkStruct1 *);
-void func_8002BE30(UnkStruct7 *);
+void func_8002BE30(Monster *);
 void func_80031154();   /* called with one and with two arguments: no prototype in the original */
 extern u16 D_8007CFE8[];
 extern UnkStructPair D_8007CE08[];
@@ -773,18 +738,18 @@ extern s16 D_801FA734;
 extern u16 D_8007CFF8[];   /* a u16 table after a header word (func_8003089C) */
 void func_800303DC(UnkStruct1 *, GameObject *);
 void func_80030D74(void);
-void func_8002CFAC(UnkStruct1 *, UnkStruct7 *);
+void func_8002CFAC(Monster *, UnkStruct1 *);
 UnkStruct2 *func_8002CD24(u16, UnkStruct1 *, UnkStruct2 *);
 void func_80031280(s32, UnkStruct1 *);
 void func_8002CE74(u16, UnkStruct1 *, UnkStruct2 *);
-void func_8003111C(s32, UnkStruct1 *);
+void func_8003111C(s32, Monster *);
 void func_80031364(UnkStruct1 *);
 extern void *D_8007D008[];
 extern void *D_8007D060[];
 s32 func_8001A3AC(void);
 UnkStructD110 *func_8001D110(void);
 GameObject *func_8001DCB4(void);
-void func_8002CBF4(UnkStruct7 *);
+void func_8002CBF4(Monster *);
 void func_8002EBD8(UnkStruct1 *);
 extern u8 D_80011E48[];
 extern s32 D_80011E68[];
@@ -872,6 +837,6 @@ typedef struct UnkStruct19 {  /* provisional: an object and the animation to sta
 extern u8 D_80084028[];
 extern s32 D_801E1E34[2];
 void func_8003197C(void *, s32, s32 *);
-void func_80053C50(s32, UnkStruct7 *);
-void func_8002BAEC(UnkStruct7 *);
+void func_80053C50(s32, Monster *);
+void func_8002BAEC(Monster *);
 #endif /* GAME_8002A330_H */

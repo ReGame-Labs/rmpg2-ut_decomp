@@ -320,7 +320,6 @@ void func_80019268(void);
 extern s16 D_801D36F8;
 extern s16 D_801F9A34;
 extern s16 D_801FA890;
-extern Monster D_801E0B78[];
 s32 func_80017C80(s32 arg0);
 extern s16 D_801D3D7C;
 void func_80020CE4(s32 arg0, s32 arg1);
@@ -643,7 +642,7 @@ s32 func_80017C80(s32 arg0) {
     Monster *temp_a1;
 
     temp_a1 = &D_801E0B78[arg0 & 0xFFFF];
-    if ((D_801D36F8 != 0) || (D_801FA890 != 0) || (D_801F9A34 > 0) || (temp_a1->unk_0 == 0) || (temp_v1 = temp_a1->unk_5A, (temp_v1 == 0x1F)) || (temp_v1 == 0x37) || (temp_v1 == 0x26) || (temp_a1->unk_46 != 0) || ((D_801D36FC != 0x240) && (D_801D36FC != 0x150) && (D_801D36FC != 0x220)) || ((D_801E1E40 == 0) && (D_801D36FC == 0x150)) || ((D_801D3758 < 5) && (D_801D36FC == 0x220))) {
+    if ((D_801D36F8 != 0) || (D_801FA890 != 0) || (D_801F9A34 > 0) || (temp_a1->id == 0) || (temp_v1 = temp_a1->action, (temp_v1 == 0x1F)) || (temp_v1 == 0x37) || (temp_v1 == 0x26) || (temp_a1->unk_046 != 0) || ((D_801D36FC != 0x240) && (D_801D36FC != 0x150) && (D_801D36FC != 0x220)) || ((D_801E1E40 == 0) && (D_801D36FC == 0x150)) || ((D_801D3758 < 5) && (D_801D36FC == 0x220))) {
         return 0;
     }
     return 1;
@@ -1238,13 +1237,13 @@ void func_8001B694(void) {
     if ((s16) D_801E0D38 >= 0x3C) {
         D_801E0D38 = 0;
         if ((D_801FA968 == 0) && (D_801D36FC == 0x150)) {
-            if (D_801E0B78[func_80025DF8(1)].unk_0 != 0) {
+            if (D_801E0B78[func_80025DF8(1)].id != 0) {
                 D_801FA95C += 1;
             }
-            if (D_801E0B78[func_80025DF8(2)].unk_0 != 0) {
+            if (D_801E0B78[func_80025DF8(2)].id != 0) {
                 D_801FA99C += 1;
             }
-            if (D_801E0B78[func_80025DF8(3)].unk_0 != 0) {
+            if (D_801E0B78[func_80025DF8(3)].id != 0) {
                 D_801FA994 += 1;
             }
         }
@@ -1341,10 +1340,10 @@ void func_8001BA98(void) {
     i = 7;
     do {
         monster = &D_801E0B78[i];
-        if (monster->unk_46 != 0) {
+        if (monster->unk_046 != 0) {
             func_8001BB60(monster, i);
-        } else if ((monster->unk_1E0 != 2) && (monster->unk_0 != 0) &&
-                   ((monster->unk_5A == 0x37) || (monster->unk_5A == 0x26)) && (monster->unk_1F8 == 0)) {
+        } else if ((monster->unk_1E0 != 2) && (monster->id != 0) &&
+                   ((monster->action == 0x37) || (monster->action == 0x26)) && (monster->unk_1F8 == 0)) {
             func_8001BBA8(monster, i);
         }
     } while (--i != 0);
@@ -2966,16 +2965,16 @@ void func_800232D8(Unk22D58 *ai) {
 
     target = ai->unk_10;
     if (target != NULL) {
-        sprite = target->unk_68;
-        if (!(target->unk_58 & 1) || (target->unk_5A == 0x37)) {
+        sprite = target->obj;
+        if (!(target->unk_058 & 1) || (target->action == 0x37)) {
             func_800377B4(ai);
             target = ai->unk_10;
-            if ((target == NULL) || !(target->unk_58 & 1) || (target->unk_5A == 0x37)) {
+            if ((target == NULL) || !(target->unk_058 & 1) || (target->action == 0x37)) {
                 ai->unk_28 = 0x64;
                 ai->unk_26 = (D_801F9ACA + 0xC8) & D_801D8866;
                 return;
             }
-            sprite = target->unk_68;
+            sprite = target->obj;
         }
         y = sprite->pos_y.u.hi - 0x16;
         if (y >= 0xE1) {
@@ -2998,7 +2997,7 @@ void func_800233E0(Unk22D58 *arg0) {
 
     temp_v0 = arg0->unk_10;
     if (temp_v0 != NULL) {
-        temp_v1 = temp_v0->unk_68;
+        temp_v1 = temp_v0->obj;
         if (temp_v1 == NULL) {
             func_800377B4(arg0);
             return;
@@ -3031,7 +3030,7 @@ u16 func_800239F4(Unk22D58 *ai) {
 
     target = ai->unk_10;
     if (target != NULL) {
-        sprite = target->unk_68;
+        sprite = target->obj;
         if (sprite == NULL) {
             func_800377B4(ai);
             return func_800239F4(ai);
@@ -3132,7 +3131,7 @@ void func_80023CFC(Unk22D58 *ai) {
 
     target = ai->unk_10;
     if (target != NULL) {
-        sprite = target->unk_68;
+        sprite = target->obj;
         if (sprite == NULL) {
             func_800377B4(ai);
             return;
@@ -3793,14 +3792,14 @@ void func_800267CC(Monster *monster) {
     s32 i;
 
     i = 0;
-    if (monster->unk_0 == 5 && monster->unk_10 == 0x440000 && !(monster->unk_1A & 0xF)) {
-        monster->unk_1A |= 3;
+    if (monster->id == 5 && monster->unk_010.w == 0x440000 && !(monster->unk_01A & 0xF)) {
+        monster->unk_01A |= 3;
         func_8002A1AC(monster, 3);
         i = 0;
     }
     for (i = 0; i < 2; i++) {
-        if (monster->unk_B4[i] != 0) {
-            switch (monster->unk_0) {
+        if (monster->unk_0B4[i] != 0) {
+            switch (monster->id) {
             case 5:
                 func_8005A2F4(monster, i);
                 break;
@@ -3829,14 +3828,14 @@ void func_800268BC(void) {
     m1 = &D_801E0B78[func_80025DF8(1)];
     m2 = &D_801E0B78[func_80025DF8(2)];
     m3 = &D_801E0B78[func_80025DF8(3)];
-    if ((m1->unk_0 != 0) && (m3->unk_68 != NULL)) {
-        x1 = m1->unk_68->pos_y.u.hi;
+    if ((m1->id != 0) && (m3->obj != NULL)) {
+        x1 = m1->obj->pos_y.u.hi;
     }
-    if ((m2->unk_0 != 0) && (m3->unk_68 != NULL)) {
-        x2 = m2->unk_68->pos_y.u.hi;
+    if ((m2->id != 0) && (m3->obj != NULL)) {
+        x2 = m2->obj->pos_y.u.hi;
     }
-    if ((m3->unk_0 != 0) && (m3->unk_68 != NULL)) {
-        x3 = m3->unk_68->pos_y.u.hi;
+    if ((m3->id != 0) && (m3->obj != NULL)) {
+        x3 = m3->obj->pos_y.u.hi;
     }
     if ((s16) x1 <= (s16) x2) {
         if ((s16) x1 < (s16) x3) {
@@ -3894,20 +3893,20 @@ void func_80026A6C(void) {
     temp_s3 = &D_801E0B78[func_80025DF8(1)];
     temp_s1 = &D_801E0B78[func_80025DF8(2)];
     temp_a0 = &D_801E0B78[func_80025DF8(3)];
-    if (temp_s3->unk_0 != 0) {
-        temp_v1 = temp_s3->unk_68;
+    if (temp_s3->id != 0) {
+        temp_v1 = temp_s3->obj;
         if (temp_v1 != NULL) {
             var_s4 = temp_v1->pos_y.u.hi;
         }
     }
-    if (temp_s1->unk_0 != 0) {
-        temp_v1_2 = temp_s1->unk_68;
+    if (temp_s1->id != 0) {
+        temp_v1_2 = temp_s1->obj;
         if (temp_v1_2 != NULL) {
             var_s5 = temp_v1_2->pos_y.u.hi;
         }
     }
-    if (temp_a0->unk_0 != 0) {
-        temp_v1_3 = temp_a0->unk_68;
+    if (temp_a0->id != 0) {
+        temp_v1_3 = temp_a0->obj;
         if (temp_v1_3 != NULL) {
             var_s2 = temp_v1_3->pos_y.u.hi;
         }
@@ -3932,14 +3931,14 @@ void func_80026BC4(Monster *arg0) {
     s16 var_a1;
     GameObject *temp_v1;
 
-    temp_v1 = arg0->unk_68;
+    temp_v1 = arg0->obj;
     D_800AA268 = temp_v1;
-    if ((temp_v1 != 0) && (arg0->unk_CC == 0)) {
+    if ((temp_v1 != 0) && (arg0->unk_0CC == 0)) {
         var_a1 = 3;
         if (arg0->unk_168 == 7) {
             var_a1 = 7;
         }
-        arg0->unk_D4 = var_a1;
+        arg0->unk_0D4 = var_a1;
     }
 }
 
@@ -3950,18 +3949,18 @@ INCLUDE_ASM("asm/main/nonmatchings/game_8001781C", func_80026C04);
 void func_80026C4C(Monster *arg0) {
     u16 value;
 
-    if ((arg0->unk_D0 & 2) && !(func_80027348() & 0xFFFF) && !(func_80026D54(arg0) & 0xFFFF)) {
+    if ((arg0->unk_0D0 & 2) && !(func_80027348() & 0xFFFF) && !(func_80026D54(arg0) & 0xFFFF)) {
         if (arg0->unk_18E == 0) {
-            value = arg0->unk_3C;
+            value = arg0->unk_03C;
             if ((value == 0) || (value = 0, ((func_80026D90(arg0) & 0xFFFF) == 0))) {
-                arg0->unk_3E = value;
-                arg0->unk_3C = value;
+                arg0->unk_03E = value;
+                arg0->unk_03C = value;
             }
             arg0->unk_18A = 0;
             func_80026CFC(arg0);
             return;
         }
-        arg0->unk_5A = 0x40;
+        arg0->action = 0x40;
     }
 }
 #else
@@ -3971,9 +3970,9 @@ INCLUDE_ASM("asm/main/nonmatchings/game_8001781C", func_80026C4C);
 void func_80026CFC(Monster *arg0) {
     u16 temp_v1;
 
-    D_800AA248.unk_38 = arg0->unk_0;
+    D_800AA248.unk_38 = arg0->id;
     func_80026E0C(arg0);
-    temp_v1 = arg0->unk_5A;
+    temp_v1 = arg0->action;
     if ((temp_v1 != 2) && (temp_v1 != 0x4E)) {
         func_80026DE4(arg0)(arg0);
     }
@@ -3982,8 +3981,8 @@ void func_80026CFC(Monster *arg0) {
 s32 func_80026D54(Monster *monster) {
     u16 state;
 
-    state = monster->unk_5A;
-    if (state != 2 && state != 0x4E && state != 0x11 && monster->unk_5C == 0x16) {
+    state = monster->action;
+    if (state != 2 && state != 0x4E && state != 0x11 && monster->unk_05C == 0x16) {
         return 1;
     }
     return 0;
@@ -3993,7 +3992,7 @@ s32 func_80026D90(Monster *monster) {
     if (D_801D36FC == 0x240) {
         return 1;
     }
-    switch (monster->unk_5A) {
+    switch (monster->action) {
     case 0:
     case 1:
     case 5:
@@ -4004,8 +4003,8 @@ s32 func_80026D90(Monster *monster) {
 }
 
 void (*func_80026DE4(void *arg0))(void *) {
-    D_800AA248.unk_38 = ((Monster *) arg0)->unk_58;
-    D_800AA248.unk_0 = ((Monster *) arg0)->unk_0;
+    D_800AA248.unk_38 = ((Monster *) arg0)->unk_058;
+    D_800AA248.unk_0 = ((Monster *) arg0)->id;
     return func_800585C0;
 }
 
@@ -4013,26 +4012,26 @@ void func_80026E0C(Monster *arg0) {
     s32 temp_v1;
     u16 temp_v0;
 
-    temp_v0 = arg0->unk_5A;
+    temp_v0 = arg0->action;
     temp_v1 = temp_v0 & 0xFFFF;
-    arg0->unk_5C = temp_v0;
+    arg0->unk_05C = temp_v0;
     if ((temp_v1 == 2) || (temp_v1 == 0x4E)) {
         if (arg0->unk_104 == 0) {
             arg0->unk_104 = 0x4000;
             D_800AA268->vel_y.w = 0xFFFB0000;
         }
-        arg0->unk_5A = 0x16U;
+        arg0->action = 0x16U;
         return;
     }
-    arg0->unk_5A = 4U;
+    arg0->action = 4U;
 }
 
 INCLUDE_ASM("asm/main/nonmatchings/game_8001781C", func_80026E6C);
 
 void func_80026F58(Monster *arg0) {
-    D_800AA248.unk_38 = arg0->unk_0;
-    arg0->unk_5A = 3;
-    arg0->unk_DE = 1;
+    D_800AA248.unk_38 = arg0->id;
+    arg0->action = 3;
+    arg0->unk_0DE = 1;
     arg0->unk_18A = 0;
     arg0->unk_126 = 0;
     func_80057DD8();
@@ -4043,18 +4042,18 @@ void func_80026F58(Monster *arg0) {
 void func_80026F98(Monster *arg0) {
     u16 temp_v1;
 
-    D_800AA248.unk_20 = arg0->unk_68;
-    if ((arg0->unk_D0 & 4) && !(func_800272FC() & 0xFFFF)) {
-        temp_v1 = arg0->unk_5A;
+    D_800AA248.unk_20 = arg0->obj;
+    if ((arg0->unk_0D0 & 4) && !(func_800272FC() & 0xFFFF)) {
+        temp_v1 = arg0->action;
         if (temp_v1 == 0x53) {
-            arg0->unk_5A = 0x54U;
+            arg0->action = 0x54U;
             return;
         }
         arg0->unk_152 = (u16) (temp_v1 - 5) < 2;
-        arg0->unk_5A = 2U;
+        arg0->action = 2U;
         func_800580F8(arg0);
         if (arg0->unk_18E == 0) {
-            arg0->unk_5A = 0x4EU;
+            arg0->action = 0x4EU;
         }
         arg0->unk_1B0 = 0;
     }
@@ -4069,7 +4068,7 @@ s32 func_800272B0(Monster *monster) {
     u16 *p;
 
     for (p = D_8007BFBC; *p != 0xFFFF; p++) {
-        if (*p == monster->unk_5A) {
+        if (*p == monster->action) {
             return 0;
         }
     }
@@ -4080,7 +4079,7 @@ s32 func_800272FC(Monster *monster) {
     u16 *p;
 
     for (p = D_8007BFD4; *p != 0xFFFF; p++) {
-        if (*p == monster->unk_5A) {
+        if (*p == monster->action) {
             return 0;
         }
     }
@@ -4091,7 +4090,7 @@ s32 func_80027348(Monster *monster) {
     u16 *p;
 
     for (p = D_8007BFEC; *p != 0xFFFF; p++) {
-        if (*p == monster->unk_5A) {
+        if (*p == monster->action) {
             return 0;
         }
     }
@@ -4133,24 +4132,24 @@ void func_800273F4(Monster *monster, s32 arg1) {
                 if (buttons != 0) {
                     monster->unk_13E = 0x1A4;
                 }
-                held = monster->unk_C8;
-                monster->unk_C8 = buttons;
+                held = monster->unk_0C8;
+                monster->unk_0C8 = buttons;
                 func_8002808C(buttons, held, monster);
                 dir = script[1];
                 if (dir != 0) {
                     monster->unk_13E = 0x1A4;
                 }
-                prevDir = monster->unk_CC;
-                monster->unk_CC = dir;
+                prevDir = monster->unk_0CC;
+                monster->unk_0CC = dir;
                 func_80028140(prevDir, monster, dir);
                 func_80028140(prevDir, monster, dir);
                 if (dir != 0) {
-                    monster->unk_D4 = dir;
+                    monster->unk_0D4 = dir;
                 }
                 if (prevDir == dir) {
-                    monster->unk_D8++;
+                    monster->unk_0D8++;
                 } else {
-                    monster->unk_D8 = 0;
+                    monster->unk_0D8 = 0;
                 }
             }
             return;
@@ -4167,23 +4166,23 @@ void func_800273F4(Monster *monster, s32 arg1) {
     if (buttons != 0) {
         monster->unk_13E = 0x1A4;
     }
-    held = monster->unk_C8;
-    monster->unk_C8 = buttons;
+    held = monster->unk_0C8;
+    monster->unk_0C8 = buttons;
     func_8002808C(buttons, held, monster);
     dir = D_8007C124[bits & 0xF];
     if (dir != 0) {
         monster->unk_13E = 0x1A4;
     }
-    prevDir = monster->unk_CC;
-    monster->unk_CC = dir;
+    prevDir = monster->unk_0CC;
+    monster->unk_0CC = dir;
     func_80028140(prevDir, monster, dir);
     if (dir != 0) {
-        monster->unk_D4 = dir;
+        monster->unk_0D4 = dir;
     }
     if (prevDir == dir) {
-        monster->unk_D8++;
+        monster->unk_0D8++;
     } else {
-        monster->unk_D8 = 0;
+        monster->unk_0D8 = 0;
     }
 }
 #else
@@ -4266,7 +4265,7 @@ void func_8002808C(u16 buttons, u16 held, Monster *monster) {
         pressed |= 8;
         count++;
     }
-    monster->unk_D0 = pressed;
+    monster->unk_0D0 = pressed;
     monster->unk_18C = count;
     if (buttons & 4) {
         if (monster->unk_1AA == 0) {
@@ -4279,10 +4278,10 @@ void func_8002808C(u16 buttons, u16 held, Monster *monster) {
 
 void func_80028140(s32 arg0, Monster *arg1, s32 arg2) {
     if ((arg0 & 0xFFFF) != (arg2 & 0xFFFF)) {
-        arg1->unk_CE = arg2;
+        arg1->unk_0CE = arg2;
         return;
     }
-    arg1->unk_CE = 0;
+    arg1->unk_0CE = 0;
 }
 
 /* 78 %: the four stores come out in another order (the original stores the first word between the two halfwords); source order and other orders tried */
@@ -4404,7 +4403,7 @@ void func_800297B4(void) {
     D_800AA248.unk_8 = 7;
     do {
         monster = &D_801E0B78[D_800AA248.unk_8];
-        if (monster->unk_58 & 1) {
+        if (monster->unk_058 & 1) {
             if (monster->unk_1B0 != 0) {
                 D_800AA248.unk_10++;
             }
@@ -4423,15 +4422,15 @@ void func_8002987C(Monster *monster) {
     u16 *p;
 
     if ((D_800AA2DC != 0) && (D_8007BD78.unk_0 & 0x100)) {
-        monster->unk_DC = 0;
+        monster->unk_0DC = 0;
         return;
     }
-    action = monster->unk_5A;
+    action = monster->action;
     if ((action == 0x37) || (action == 0x26)) {
         return;
     }
     found = 0;
-    if ((monster->unk_126 != 0x19) && !(monster->unk_68->unk_6C & 0x80) && (monster->unk_140 == 0)) {
+    if ((monster->unk_126 != 0x19) && !(monster->obj->unk_6C & 0x80) && (monster->unk_140 == 0)) {
         for (p = D_8007C1D4; *p != 0xFFFF; p++) {
             if (*p == action) {
                 found = 1;
@@ -4439,7 +4438,7 @@ void func_8002987C(Monster *monster) {
             }
         }
     }
-    monster->unk_DC = found;
+    monster->unk_0DC = found;
 }
 
 void func_8002994C(void) {
@@ -4545,9 +4544,9 @@ void func_80029C6C(Monster *arg0) {
     GameObject *sprite;
     u16 state;
 
-    sprite = D_800AA268 = arg0->unk_68;
+    sprite = D_800AA268 = arg0->obj;
     if (sprite != NULL) {
-        state = arg0->unk_5A;
+        state = arg0->action;
         if (((state != 2) && (state != 0x4E)) || (arg0->unk_1BE == 0) || (sprite->vel_y.w > 0)) {
             if (arg0->unk_12C != sprite->unk_80) {
                 func_8001E39C(sprite);
