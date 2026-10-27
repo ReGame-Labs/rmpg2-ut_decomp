@@ -10,12 +10,12 @@ void func_8001BB68(GameObject *);
 void func_8001BB88(GameObject *);
 ObjectDef *func_8001D110(void);
 GameObject *func_8001DCB4(void);
-void func_8001E450(s32);
-GameObject *func_8001EB9C(s32, s32, s32, s32, s32);
+void main_free_kind(s32);
+GameObject *main_create_box(s32, s32, s32, s32, s32);
 void func_8001ED54(TextMessage *);
 void func_8001EE24(void);
 void func_8001F724(u16);
-void func_80020BA0(s32, u16, GameObject *);
+void main_set_frame(s32, u16, GameObject *);
 s32 func_80025DF8(s32);
 void func_8005E124(Monster *, s32);
 void func_8005E19C(Monster *, s32);
@@ -27,6 +27,7 @@ void func_80060A7C(s32, u32, s32);
 
 extern Anim D_80016A84;
 extern s32 D_8007BD7C;
+extern s32 D_8008427C[];                /* the portrait animations, by monster id - 1 */
 extern s32 D_800842B4[];
 extern TextMessage D_80089604;
 extern TextMessage D_80089624;

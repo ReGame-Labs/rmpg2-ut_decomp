@@ -263,11 +263,11 @@ void menu_draw_cheats(void) {
     func_8001ECB4(D_800A6380, D_8007A686, 0);
     func_8001ECB4(D_800A63A3, D_8007A688, 0);
     func_8009BF94(&D_800A63A8.text[7], D_8007A692);
-    func_8001E450(0x421);
-    func_8001E450(0x422);
-    func_8001E450(0x423);
-    func_8001E450(0x424);
-    func_8001E450(0x425);
+    main_free_kind(0x421);
+    main_free_kind(0x422);
+    main_free_kind(0x423);
+    main_free_kind(0x424);
+    main_free_kind(0x425);
     D_800AA2EC = D_801F9AAC;
     if (D_800A92D0 == 0) {
         D_800AA2EC = D_801E2A44;
@@ -347,7 +347,7 @@ void menu_update_name_entry(void) {
     }
     for (i = 0; i < 5; i++) {
         D_800A6F48[i]->text[0] = D_800A9890[i];
-        func_8001E450(i + 0x421);
+        main_free_kind(i + 0x421);
         func_8001ED54((TextMessage *) D_800A92C0[i + 2].unk_00);
     }
     menu_light_items(D_800A92C0, D_800A92D0, (s16) D_801E2A44, D_801F9AAC);
@@ -512,7 +512,7 @@ void menu_draw_controls(void) {
             end = kind + 4;
             n = 0;
             for (; kind < end; kind++) {
-                func_8001E450(kind);
+                main_free_kind(kind);
             }
             for (k = 4, j = 0; k < 8; k++, j++) {
                 switch (cfg[i][k]) {
@@ -543,7 +543,7 @@ void menu_draw_controls(void) {
                 default:
                     continue;
                 }
-                func_80020BA0(D_800A6F7C[j], D_801E28F4[obj]->flags, D_801E28F4[obj]);
+                main_set_frame(D_800A6F7C[j], D_801E28F4[obj]->flags, D_801E28F4[obj]);
                 D_801E28F4[obj]->pos_x.s.hi = D_800A6F8C[i];
                 D_801E28F4[obj]->pos_y.s.hi = D_800A6F94[obj];
                 n++;
@@ -590,10 +590,10 @@ void func_8009CE5C(void) {
 }
 
 void menu_draw_options(void) {
-    func_8001E450(0x442);
-    func_8001E450(0x443);
-    func_8001E450(0x402);
-    func_8001E450(0x403);
+    main_free_kind(0x442);
+    main_free_kind(0x443);
+    main_free_kind(0x402);
+    main_free_kind(0x403);
     D_800AA2EC = D_801F9AAC;
     if (D_800A92D0 == 0) {
         D_800AA2EC = D_801E2A44;
@@ -822,12 +822,12 @@ void func_8009D948(void) {
         def->flags = 0x14;
         def->unk_06 |= 0x20;
         D_800A92F8[1] = func_8001DCB4();
-        D_800A9808[0] = func_8001EB9C(0, 0, 0x4B, 5, 0xFF00);
+        D_800A9808[0] = main_create_box(0, 0, 0x4B, 5, 0xFF00);
         D_800A9808[0]->pos_x.s.hi = 0x1F4;
         D_800A9808[0]->pos_y.s.hi = 0x69;
         D_800A9808[0]->priority = 0x32;
         D_800A9808[0]->kind = 0x400;
-        D_800A9808[1] = func_8001EB9C(0, 0, 0x32, 5, 0xFF00);
+        D_800A9808[1] = main_create_box(0, 0, 0x32, 5, 0xFF00);
         D_800A9808[1]->pos_x.s.hi = 0x1F4;
         D_800A9808[1]->pos_y.s.hi = 0xA3;
         D_800A9808[1]->priority = 0x32;
@@ -909,12 +909,12 @@ void func_8009DEA8(void *list, s32 selected) {
     menu = list;
     for (i = 2; i <= menu->unk_00 + 1; i++) {
         if (selected != i - 2) {
-            func_8001E450(menu[i].kind);
+            main_free_kind(menu[i].kind);
         }
     }
     if (menu->sub != NULL) {
         i = menu->kind;
-        func_8001E450(menu->sub[i + 2].kind);
+        main_free_kind(menu->sub[i + 2].kind);
     }
 }
 
@@ -922,7 +922,7 @@ void func_8009DF60(void) {
     s32 i;
 
     for (i = 0x400; i < 0x4FF; i++) {
-        func_8001E450(i);
+        main_free_kind(i);
     }
 }
 
@@ -1176,17 +1176,17 @@ void menu_create_player_bars(s16 player, s16 flag) {
     }
     bx = (x + 0x90000) >> 16;
     by = y >> 16;
-    bar0 = func_8001EB9C(bx, by - 1, D_800A734C[player * 3], 7, 0xFF0000);
+    bar0 = main_create_box(bx, by - 1, D_800A734C[player * 3], 7, 0xFF0000);
     *(D_801E28F4 + player * 3 + 31) = bar0;
     bar0->priority = 0x1F1;
     bar0->anim = (s32) anim;
     bar0->flags |= 0x400;
-    bar1 = func_8001EB9C(bx, by + 9, D_800A734C[player * 3 + 1], 7, 0xFF00);
+    bar1 = main_create_box(bx, by + 9, D_800A734C[player * 3 + 1], 7, 0xFF00);
     *(D_801E28F4 + player * 3 + 32) = bar1;
     bar1->priority = 0x1F1;
     bar1->anim = (s32) anim;
     bar1->flags |= 0x400;
-    bar2 = func_8001EB9C(bx, by + 19, D_800A734C[player * 3 + 2], 7, 0xFFFF);
+    bar2 = main_create_box(bx, by + 19, D_800A734C[player * 3 + 2], 7, 0xFFFF);
     *(D_801E28F4 + player * 3 + 33) = bar2;
     bar2->priority = 0x1F1;
     bar2->anim = (s32) anim;
@@ -1245,7 +1245,7 @@ void menu_create_player_monster(s16 player, s16 flag) {
     def->unk_06 |= 0x20;
     D_800AA248.cur_obj = func_8001DCB4();
     *(D_801E28F4 + player + 19) = D_800AA248.cur_obj;
-    func_80020BA0(D_800A8FA8[D_800A8FD4[player].unk_04], D_800AA248.cur_obj->flags, D_800AA248.cur_obj);
+    main_set_frame(D_800A8FA8[D_800A8FD4[player].unk_04], D_800AA248.cur_obj->flags, D_800AA248.cur_obj);
     x = (player - 1) * 0x78 + 0xC8;
     D_800AA248.cur_obj->pos_x.w = (x - (s16) D_800AA248.cur_obj->frame->size.u.lo / 2) << 16;
     D_800AA248.cur_obj->pos_y.w = 0xC80000;
@@ -1312,26 +1312,26 @@ GameObject *menu_animate(GameObject *obj, s32 player) {
                                 D_800A92E0[player * 3] = D_800A734C[D_800A8FD4[player].unk_04 * 3];
                                 D_800A92E0[player * 3 + 1] = D_800A734C[D_800A8FD4[player].unk_04 * 3 + 1];
                                 D_800A92E0[player * 3 + 2] = D_800A734C[D_800A8FD4[player].unk_04 * 3 + 2];
-                                func_80020BA0(D_800A8FA8[D_800A8FD4[player].unk_04], name->flags, name);
+                                main_set_frame(D_800A8FA8[D_800A8FD4[player].unk_04], name->flags, name);
                             } else if (D_801F9ABC == 3) {
                                 obj->unk_74 = 7;
                                 D_800A92E0[player * 3] = D_800A734C[21];
                                 D_800A92E0[player * 3 + 1] = D_800A734C[22];
                                 D_800A92E0[player * 3 + 2] = D_800A734C[23];
-                                func_80020BA0(0x4F003EB2, name->flags, name);
+                                main_set_frame(0x4F003EB2, name->flags, name);
                             } else {
                                 obj->unk_74 = 8;
                                 D_800A92E0[player * 3] = D_800A734C[24];
                                 D_800A92E0[player * 3 + 1] = D_800A734C[25];
                                 D_800A92E0[player * 3 + 2] = D_800A734C[26];
-                                func_80020BA0(0x4F003EB0, name->flags, name);
+                                main_set_frame(0x4F003EB0, name->flags, name);
                             }
                         } else {
                             obj->unk_74 = D_800A8FF4[D_800A8FD4[player].unk_04];
                             D_800A92E0[player * 3] = D_800A734C[D_800A8FD4[player].unk_04 * 3];
                             D_800A92E0[player * 3 + 1] = D_800A734C[D_800A8FD4[player].unk_04 * 3 + 1];
                             D_800A92E0[player * 3 + 2] = D_800A734C[D_800A8FD4[player].unk_04 * 3 + 2];
-                            func_80020BA0(D_800A8FA8[D_800A8FD4[player].unk_04], name->flags, name);
+                            main_set_frame(D_800A8FA8[D_800A8FD4[player].unk_04], name->flags, name);
                         }
                         x = (player - 1) * 0x78 + 0xC8;
                         name->pos_x.w = (x - (s16) name->frame->size.u.lo / 2) << 16;
@@ -1366,7 +1366,7 @@ GameObject *menu_animate(GameObject *obj, s32 player) {
             id = ((s32 *) obj->anim)[0];
             frames = ((s32 *) obj->anim)[1];
             if (id != 0xDEAD) {
-                func_80020BA0(id, obj->flags, obj);
+                main_set_frame(id, obj->flags, obj);
             }
             obj->unk_4D = frames;
             obj->anim += 8;
@@ -1645,12 +1645,12 @@ void menu_update_title(void) {
             func_8001F61C("PRESS START", 0xC8, 0xD2, 1, 0x45, D_8007ABCC, 0, 0x400);
         }
         if (D_800A92C8 == 0) {
-            func_8001E450(0x400);
+            main_free_kind(0x400);
             D_800A92C8 = 0x5B;
         }
         D_800A92C8--;
         if (D_800A9220 & 0x11044110) {
-            func_8001E450(0x400);
+            main_free_kind(0x400);
             func_8001F724(3);
             D_800AA2EC = 0x45;
             func_8001ED54(&D_800897FC);
@@ -1703,7 +1703,7 @@ void menu_update_load_screen(void) {
             break;
         }
         status = card_get_status();
-        func_8001E450(0x400);
+        main_free_kind(0x400);
         if (status == 2) {
             D_801E29BC = 0x96;
             D_800A9878 = 1;
@@ -1747,7 +1747,7 @@ void menu_update_load_screen(void) {
         status = card_read_save(&D_800A9300);
         D_800A9878 = 3;
         D_801D3780 = 0xA;
-        func_8001E450(0x400);
+        main_free_kind(0x400);
         if (status != 0) {
             card_init_save(&D_800A9300);
             D_800A9840 = 0;
@@ -1897,7 +1897,7 @@ void menu_update_save_screen(void) {
     D_801D885C = 0x44;
     if (D_800A9898 == 1) {
         D_800A9898 = 0;
-        func_8001E8C0(0x400, -0x100);
+        main_free_kind_masked(0x400, -0x100);
     }
     switch (D_800A98B8) {
     case 0:
@@ -1934,7 +1934,7 @@ void menu_check_card(void) {
             break;
         }
         status = card_get_status();
-        func_8001E8C0(0x400, -0x100);
+        main_free_kind_masked(0x400, -0x100);
         if (status == 2) {
             D_800A9898 = 1;
             D_800A92A0 = 0;
@@ -1964,7 +1964,7 @@ void menu_check_card(void) {
         if (D_801E29BC > 0) {
             D_801E29BC--;
         } else {
-            func_8001E8C0(0x400, -0x100);
+            main_free_kind_masked(0x400, -0x100);
             D_801D3780 -= 2;
         }
         break;
@@ -2063,7 +2063,7 @@ void menu_ask_format(void) {
         } else if ((D_800A9220 & 0x01004010) && D_801F9944 == 0) {
             D_801F9944 = 0x15;
             if (D_800A92D0 == 1) {
-                func_8001E8C0(0x400, -0x100);
+                main_free_kind_masked(0x400, -0x100);
                 D_801D3780 -= 2;
                 return;
             }
@@ -2100,7 +2100,7 @@ void menu_format_card(void) {
     case 0:
         status = card_get_status();
         if (status != 2) {
-            func_8001E8C0(0x400, -0x100);
+            main_free_kind_masked(0x400, -0x100);
             D_801D3780 -= 2;
             break;
         }
@@ -2122,7 +2122,7 @@ void menu_format_card(void) {
                 D_800A98B8 = state;
             } else {
                 D_801D3780 -= 2;
-                func_8001E8C0(0x400, -0x100);
+                main_free_kind_masked(0x400, -0x100);
             }
         }
         break;
@@ -2145,7 +2145,7 @@ void menu_delete_save(void) {
         break;
     case 11:
         if (D_801E29BC-- < 0) {
-            func_8001E450(0x400);
+            main_free_kind(0x400);
             D_800A9880 = 3;
             D_800A9840 = menu_list_saves();
             D_800AA2EC = (s16) D_801E2A44;
@@ -2177,7 +2177,7 @@ void menu_delete_save(void) {
             func_8001F724(0x1E);
         } else if ((D_800A9220 & 0x01004010) && D_801F9944 == 0) {
             if (D_800A92D0 == D_800A9840) {
-                func_8001E8C0(0x400, -0x100);
+                main_free_kind_masked(0x400, -0x100);
                 D_801F9944 = 0xB;
                 D_801D3780 -= 2;
                 D_801D872C /= 2;
@@ -2185,7 +2185,7 @@ void menu_delete_save(void) {
             }
             D_800A9848 = 1;
             D_800A9880 = 0xD;
-            func_8001E8C0(0x400, -0x100);
+            main_free_kind_masked(0x400, -0x100);
             D_801F9944 = 0xB;
             D_801D872C /= 2;
         } else if ((D_800A9220 & 0x04010040) && D_801F9944 == 0) {
@@ -2226,8 +2226,8 @@ void menu_delete_save(void) {
                 D_800A98B8 = 2;
                 D_800A9300.unk_204[D_800A9830[D_800A92D0]] = 1;
             } else {
-                func_8001E8C0(0x550, -0x100);
-                func_8001E8C0(0x400, -0x100);
+                main_free_kind_masked(0x550, -0x100);
+                main_free_kind_masked(0x400, -0x100);
                 D_801D3780 -= 2;
             }
             D_801F9944 = 0xB;
@@ -2365,7 +2365,7 @@ void menu_write_save(void) {
             }
         }
         if (D_801E29BC-- < 0) {
-            func_8001E8C0(0x400, -0x100);
+            main_free_kind_masked(0x400, -0x100);
             D_801D3780 -= 2;
         }
         break;
@@ -2379,7 +2379,7 @@ void menu_write_save(void) {
             }
         }
         if (D_801E29BC-- < 0) {
-            func_8001E8C0(0x400, -0x100);
+            main_free_kind_masked(0x400, -0x100);
             D_801D3780 -= 2;
         }
         break;
@@ -2390,7 +2390,7 @@ void menu_write_save(void) {
         }
         if (D_801E29BC-- < 0) {
             D_801FA958 = -1;
-            func_8001E8C0(0x400, -0x100);
+            main_free_kind_masked(0x400, -0x100);
             D_801D3780 -= 2;
         }
         break;
