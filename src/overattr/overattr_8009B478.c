@@ -1,7 +1,7 @@
 /* OVERLAYS/OVERATTR.BIN: the credits, the menus and the memory-card screens (config/overattr.yaml). */
 #include "common.h"
 #include "overattr.h"
-#include "psyq/libc.h"
+#include "psyq/libc2.h"
 
 void func_8009B478(void) {
     GameObject *head;
