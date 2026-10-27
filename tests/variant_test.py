@@ -57,7 +57,15 @@ int b;
     return a - b;
 }
 """
-ORIGINAL = HEAD + "\n" + "\n".join([ADD_ONE, TWICE, PICK, SETBOTH, KRSUM])
+SUMCALL = """int sumcall(int n) {
+    int i, s = 0;
+    for (i = 0; i < n; i++) {
+        s += krsum(i, n);
+    }
+    return s;
+}
+"""
+ORIGINAL = HEAD + "\n" + "\n".join([ADD_ONE, TWICE, PICK, SETBOTH, KRSUM, SUMCALL])
 INCLUDE_ASM = ('#define INCLUDE_ASM(FOLDER, NAME) __asm__(".section .text\\n.set noat\\n.set noreorder\\n'
                '.include \\"" FOLDER "/" #NAME ".s\\"\\n.set reorder\\n.set at\\n")\n')
 PICK_WIP = PICK.replace("return b - a;", "return a - b;")
@@ -65,8 +73,9 @@ UNIT = (INCLUDE_ASM + HEAD + "\n" + ADD_ONE + "\n"
         + f'INCLUDE_ASM("{ASM}", twice);\n\n'
         + "/* 50.00%: the old note */\n#ifdef NON_MATCHING\n" + PICK_WIP
         + f'#else\nINCLUDE_ASM("{ASM}", pick);\n#endif\n\n'
-        + SETBOTH + "\n" + KRSUM)
+        + SETBOTH + "\n" + KRSUM + "\n" + SUMCALL)
 
+DUMP_ROW = re.compile(r"^\s+(\d+)\s+(\d+)\s+(-?\d+)\s+(\S+)\s+(global \d+|local b\d+|none)\s+(\S+)\s*(.*)$")
 failed = 0
 
 
@@ -127,9 +136,16 @@ def run(cc: str):
     s, what = put("twice", TWICE.replace("* 2", "* 3"))
     check(not s.match and s.reasons and unit.text() == before, "put: C that differs is scored and not kept",
           f"{s}; {what}")
-    s, what = put("twice", TWICE)
+    decls = "extern int D_x;\nint krsum(); /* the unit has it */\n\n/* twice */\n"
+    s, what = put("twice", decls + TWICE)
     check(s.match and what == "kept as C" and variant.find(unit.text(), "twice").kind == "c",
           "put: an INCLUDE_ASM function's matching C is kept", f"{s}; {what}")
+    once = unit.text()
+    check(once.count("extern int D_x;") == 1 and once.count("int krsum();") == 1 and "/* twice */\nint twice" in once,
+          "put: the declarations above the function, without the one the unit has", once)
+    s, what = put("twice", decls + TWICE)
+    check(s.match and what == "kept as C" and unit.text() == once,
+          "put twice: the declarations and the comment above the function are not repeated", unit.text())
     s, what = put("pick", PICK_WIP.replace("a - b;\n}", "b + a;\n}"), wip=True)
     region = variant.find(unit.text(), "pick")
     block = unit.text()[region.start:region.end]
@@ -170,6 +186,35 @@ def run(cc: str):
           "perm: the original's order and alternative match, no other alternative, no order with D_a first",
           str(matches))
     check(tpl.indices(5, seed=1)[0] == 0 and len(set(tpl.indices(5, seed=1))) == 5, "perm: the cap samples")
+
+    # -s: the candidate's instructions aligned with the original's
+    region = variant.find(unit.text(), "pick")
+    s = unit.score(variant.put_text(unit.text(), region, PICK.replace("    if", "    D_c = a;\n    if")), "pick",
+                   "show", keep=True)
+    a, b = unit_diff.disasm_at(checker.expected, "pick"), unit_diff.disasm_at(s.obj, "pick")
+    rows = variant.aligned(a, b, *s.res.words["pick"])
+    unit.clean("show")
+    marks = "".join(m for *_, m in rows)
+    lines = "\n".join(variant.aligned_lines(a, b, rows))
+    check(len(b) > len(a) and marks.count(" ") >= len(a) - 1 and set(marks) <= set(" >|")
+          and any(variant.BRANCH.match(b[j][1]) for i, j, m in rows if m == " " and i is not None),
+          "-s: a store more, aligned: the original's instructions the same, its branch too", lines)
+
+    # --dump: cc1's register allocation
+    lines = variant.dump(unit, unit.text(), "sumcall", "L")
+    rows = [m.groups() for m in (DUMP_ROW.match(ln) for ln in lines) if m]
+    prios = [float(r[3]) for r in rows if r[4].startswith("global")]
+    crossing = [r for r in rows if "crosses 1 call" in r[6]]
+    names = next((ln for ln in lines if ln.startswith("  variables (-g): ")), "")
+    check(rows and all(r[3] == "-" or abs(float(r[3]) - (int(r[1]).bit_length() - 1) * int(r[1]) / int(r[2])) < 0.01
+                       for r in rows)
+          and prios == sorted(prios, reverse=True) and crossing and all(r[5].startswith("s") for r in crossing)
+          and re.search(r"\bn s\d\b", names) and any(ln.startswith("---- cc1 -dL (loop)") for ln in lines),
+          "--dump: priority = floor_log2(refs) x refs / live, in global-alloc's order; the pseudos crossing the call"
+          " in s registers; the variables' registers; the loop dump", "\n".join(lines[:40]))
+    check(variant.dump_letters("Lc") == "Lc" and variant.dump_letters("loop,combine,l") == "Lcl",
+          "--dump: the sections by letter or name")
+
 
 
 PP = """# 1 "x.c"

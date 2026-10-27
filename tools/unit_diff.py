@@ -498,19 +498,25 @@ def following_alignment(target: str, unit: str) -> dict:
     return out
 
 
-def disasm(obj: Path, func: str):
-    """objdump's text of `func`'s instructions, each relocation's type and symbol appended."""
+def disasm_at(obj: Path, func: str):
+    """objdump's text of `func`'s instructions with their offsets in the section: [(offset, text)], each
+    relocation's type and symbol appended to its instruction's text."""
     r = run([str(OBJDUMP), "-drz", "-m", "mips:3000", f"--disassemble={func}", str(obj)])
     out = []
     for ln in r.stdout.splitlines():
         m = re.match(r"^\t+[0-9a-f]+: R_MIPS_(\w+)\t(\S+)$", ln)
         if m and out:
-            out[-1] += f"  ; {m.group(1)} {m.group(2)}"
+            out[-1] = (out[-1][0], out[-1][1] + f"  ; {m.group(1)} {m.group(2)}")
             continue
         m = re.match(r"^\s*([0-9a-f]+):\t([0-9a-f]{8}) \t(.*)$", ln)
         if m:
-            out.append(" ".join(p.strip() for p in m.group(3).split("\t")))
+            out.append((int(m.group(1), 16), " ".join(p.strip() for p in m.group(3).split("\t"))))
     return out
+
+
+def disasm(obj: Path, func: str):
+    """objdump's text of `func`'s instructions, each relocation's type and symbol appended."""
+    return [text for _, text in disasm_at(obj, func)]
 
 
 def compile_unit(target: str, unit: str, out: Path, src: Path = None, defines=(), cc: str = None, g: int = None):

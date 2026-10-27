@@ -2,13 +2,17 @@
 # Compile one C file like the original toolchain: cpp -> cc1 -> maspsx -> GNU as.
 # Used by build.ninja (configure.py), decomp-permuter and experiments, so all compile the same way.
 #
-# Usage: tools/cc_psx.sh [-V VERSION] [-G N] [-MD DEPFILE] [--data-in-c] [-E] [-I DIR|-D DEF ...] input.c -o output.o
+# Usage: tools/cc_psx.sh [-V VERSION] [-G N] [-MD DEPFILE] [--data-in-c] [-E|-S] [--cc1 FLAG ...] [-I DIR|-D DEF ...]
+#            input.c -o output.o
 #   -V   old-gcc version in tools/gcc/ (default: configure.py's DEFAULT_CC, 2.8.1: docs/TOOLCHAIN.md "Compiler");
 #        maspsx emulates the ASPSX of the same Psy-Q
 #   -G   small-data size for cc1 and maspsx (default 0)
 #   -MD  write a make-style dependency file (headers and .include'd asm)
 #   --data-in-c  the file defines its own .bss/.sbss (configure.py DATA_IN_C): no --use-comm-section
 #   -E   preprocess only: cpp's output, with the build's flags, into the -o file (tools/draft.py's context)
+#   -S   stop after cc1: its assembly into the -o file, cpp's output in <out>.i
+#   --cc1 FLAG  one more cc1 flag, e.g. -dg -dl (its dumps land next to the .i, <out>.i.greg; tools/variant.py
+#        --dump) or -g; not for the build
 # Intermediates are kept next to the output: <out>.i, <out>.s (cc1), <out>.m.s (maspsx), except for outputs under /tmp
 # (decomp-permuter compiles every candidate to /tmp/permuterXXXX.o: kept files once filled the disk).
 #
@@ -18,7 +22,7 @@ set -euo pipefail
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 T="$ROOT/tools"
 
-ver=2.8.1 g=0 dep="" in="" out="" pp_only=0 cpp_flags=() inc_flags=() comm=(--use-comm-section)
+ver=2.8.1 g=0 dep="" in="" out="" pp_only=0 asm_only=0 cpp_flags=() inc_flags=() cc1_flags=() comm=(--use-comm-section)
 while [[ $# -gt 0 ]]; do
     case "$1" in
         -V) ver="$2"; shift 2 ;;
@@ -27,6 +31,8 @@ while [[ $# -gt 0 ]]; do
         -MD) dep="$2"; shift 2 ;;
         --data-in-c) comm=(); shift ;;
         -E) pp_only=1; shift ;;
+        -S) asm_only=1; shift ;;
+        --cc1) cc1_flags+=("$2"); shift 2 ;;
         -o) out="$2"; shift 2 ;;
         -I) cpp_flags+=("-I$2"); inc_flags+=("-I$2"); shift 2 ;;
         -D) cpp_flags+=("-D$2"); shift 2 ;;
@@ -36,7 +42,8 @@ while [[ $# -gt 0 ]]; do
         *) in="$1"; shift ;;
     esac
 done
-[[ -n "$in" && -n "$out" ]] || { echo "usage: cc_psx.sh [-V ver] [-G n] [-MD dep] [-I..] in.c -o out.o" >&2; exit 2; }
+[[ -n "$in" && -n "$out" ]] ||
+    { echo "usage: cc_psx.sh [-V ver] [-G n] [-MD dep] [-E|-S] [--cc1 flag] [-I..] in.c -o out.o" >&2; exit 2; }
 
 # GCC version -> ASPSX version of the same Psy-Q release (decomp.me's table). 2.8.1 pairs with 2.80 rather than 2.79
 # so that maspsx can take the address of a $gp variable (`addiu rX, $gp, %gp_rel(x)`, gp_allow_la); it changes
@@ -57,7 +64,11 @@ case "$out" in
 esac
 
 "${cpp[@]}" "$out.i"
-"$gcc/cc1" -quiet -O2 -mips1 -mcpu=3000 -mgas -msoft-float -G"$g" "$out.i" -o "$out.s"
+cc1=("$gcc/cc1" -quiet -O2 -mips1 -mcpu=3000 -mgas -msoft-float -G"$g" ${cc1_flags[@]+"${cc1_flags[@]}"} "$out.i")
+if [[ $asm_only -eq 1 ]]; then
+    exec "${cc1[@]}" -o "$out"
+fi
+"${cc1[@]}" -o "$out.s"
 # --use-comm-section: C definitions without an initializer stay COMMON instead of getting storage in this object, so
 # they resolve to the definitions in the data asm (a unit whose data is still asm) while maspsx still counts them as
 # defined in this file for $gp. --data-in-c drops it: the object then holds its .bss/.sbss itself, in definition
