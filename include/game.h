@@ -202,8 +202,7 @@ typedef struct Monster {
     /* 0x09C */ u8 unk_09C[0x08];
     /* 0x0A4 */ GameObject *bars[3];           /* the results bars, one per tally (OVERATTR, func_8009951C) */
     /* 0x0B0 */ u8 unk_0B0[0x04];
-    /* 0x0B4 */ GameObject *extra[2];          /* sprites of its own (monster 5's, 7's: kind 0x73A), NULL for none */
-    /* 0x0BC */ u8 unk_0BC[0x0C];
+    /* 0x0B4 */ GameObject *extra[5];          /* its own sprites (5's, 7's: kind 0x73A; 2-4 func_8002A1AC), or NULL */
     /* 0x0C8 */ u16 buttons;                   /* the pad's buttons held, pad bits >> 4 (func_800273F4) */
     /* 0x0CA */ u8 unk_0CA[0x02];
     /* 0x0CC */ u16 dir;                       /* the d-pad direction, 0 none (D_8007C124[pad bits & 0xF]); an index

@@ -445,7 +445,7 @@ void func_8002075C(void);
 extern u16 *D_8007A7C0[];
 extern u8 D_801E2154[];
 extern u16 D_801FB188;
-void func_8002A1AC(Monster *, s32);
+void func_8002A1AC(Monster *, s16);
 void func_8005A2F4(Monster *, s32);
 void func_8005A964(Monster *);
 extern u8 D_800105A8[];
@@ -491,6 +491,9 @@ extern AiStep *D_8007B660[];
 extern AiStep *D_8007B980[];
 void func_800247E4(GameObject *obj, s32 left, s32 right);
 extern s16 D_801FA7E4[];
+extern void (*D_8007C14C[])(Monster *);
+extern void (*D_8007C170[])(Monster *);
+extern void (*D_8007C194[])(Monster *);
 /* decls:end */
 
 /* main: config/aliases.ld gives it its name (GCC 2.8.1 would start a function named main with a call to __main). */
@@ -5167,7 +5170,27 @@ INCLUDE_ASM("asm/main/nonmatchings/main", func_80027CB8);
 void func_80027FC8(void) {
 }
 
-INCLUDE_ASM("asm/main/nonmatchings/main", func_80027FD0);
+void func_80027FD0(Monster *m) {
+    u32 dir;
+    void (**table)(Monster *);
+
+    dir = 0;
+    if (m->health.w != 0 && m->action != 0x60) {
+        dir = m->buttons;
+    }
+    dir &= 0xF;
+    if (dir >= 9) {
+        dir = 0;
+    }
+    table = D_8007C170;
+    if (m->action == 0x4D) {
+        table = D_8007C14C;
+    } else if (m->action == 2 || m->action == 0x4E || m->unk_05C == 2 || m->unk_05C == 0x4E) {
+        table = D_8007C194;
+    }
+    table = &table[dir];
+    (*table)(m);
+}
 
 void func_8002808C(u16 buttons, u16 held, Monster *monster) {
     s16 pressed;
@@ -5495,7 +5518,29 @@ void func_80029D1C(void) {
 
 INCLUDE_ASM("asm/main/nonmatchings/main", func_80029D5C);
 
-INCLUDE_ASM("asm/main/nonmatchings/main", func_8002A1AC);
+void func_8002A1AC(Monster *m, s16 count) {
+    GameObject *saved;
+    ObjectDef *def;
+    s32 i;
+    s32 player;
+
+    saved = D_800AA248.cur_obj;
+    if (m->extra[2] == NULL && (D_800AA2DC == 0 || (D_800AA2DC & 0x7000))) {
+        player = D_801FA8A0[m->id - 1];
+        def = D_800AA248.new_def = func_8001D110();
+        for (i = 0; i < count; i++) {
+            def->id = 0x4F0035B6;
+            def->pos_x.s.hi = (player - 2) * 0x78 + 0x9B + i * 0xF;
+            def->pos_y.s.hi = 0x3F;
+            def->flags = 0x500;
+            def->unk_06 |= 0x20;
+            D_800AA248.cur_obj = func_8001DCB4();
+            D_800AA248.cur_obj->kind = m->id + 0x790;
+            m->extra[i + 2] = D_800AA248.cur_obj;
+        }
+        D_800AA268.p = saved;
+    }
+}
 
 s32 func_8002A300(void) {
     return 1;
