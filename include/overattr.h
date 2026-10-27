@@ -66,6 +66,24 @@ void func_8001F61C(u8 *text, s16 x, s16 y, s32 spacing, s32 arg4, s32 *glyphs, s
 extern s32 D_8007ABCC[];               /* a font's glyphs */
 extern s16 D_801F9AAC;
 
+void func_8001F724(u16 id);            /* plays a sound or a music by id; 0xFFFF stops */
+void func_80062E44(void);
+void func_80062D88(s32 volume);
+void func_80062DA8(s32 volume);
+
+extern s16 D_8007A684;                 /* the music test's track, 0..0x72 */
+extern s16 D_8007A686;                 /* options, 15..90 by 5 */
+extern s16 D_8007A688;                 /* options, 1..100 */
+extern u16 D_8007A68A;                 /* a toggle */
+extern u16 D_8007A68C;                 /* a toggle */
+extern s16 D_8007A68E;                 /* 0..2, selects D_800A6F3C */
+extern s16 D_8007A692;                 /* 0..0x1C */
+extern u16 D_8007A694;                 /* a toggle */
+extern u8 *D_8007C704[];               /* names, by index */
+extern s16 D_801E1CB4;                 /* a volume, 0..0x7F (func_80062DA8) */
+extern s16 D_801E2150;                 /* a volume, 0..0x7F (func_80062D88) */
+extern s16 D_801F9944;
+extern s16 D_801FA960;                 /* 0..0x7C */
 extern s16 D_801D3D7C;
 extern s32 D_801E28F4[];
 extern s16 D_801F9A4A;
@@ -130,7 +148,12 @@ extern u16 D_800A340C[];               /* the Shift-JIS codes of the ASCII punct
 extern CardIcon D_800A3360;            /* the save icon */
 extern CardClut D_800A33E0;            /* its CLUT */
 
-extern s32 D_800A9220;
+extern s16 D_800A6F3C[3 * 2];          /* per D_8007A68E: the values of D_8007A688 and D_8007A686 */
+extern s16 D_800A6F78;
+extern u8 *D_800A72D8[];               /* the movies' names */
+extern s16 D_800A9860;                 /* frames left before the attract mode resumes, reset by a key */
+
+extern s32 D_800A9220;                 /* the pad buttons pressed this frame (func_80099118) */
 extern s32 D_800A9250;
 
 /* card.c */

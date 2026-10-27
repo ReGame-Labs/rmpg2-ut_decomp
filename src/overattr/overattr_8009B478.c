@@ -4,31 +4,215 @@
 
 INCLUDE_ASM("asm/overattr/nonmatchings/overattr_8009B478", func_8009B478);
 
-INCLUDE_ASM("asm/overattr/nonmatchings/overattr_8009B478", func_8009B598);
+void func_8009B598(void) {
+    if ((D_800A9220 & 0x401004) && D_801F9944 == 0) {
+        D_800A9860 = 0x708;
+        if (--D_8007A684 < 0) {
+            D_8007A684 = 0x72;
+        }
+        func_80062E44();
+        func_8001F724(D_8007A684);
+    } else if ((D_800A9220 & 0x802008) && D_801F9944 == 0) {
+        D_800A9860 = 0x708;
+        if (++D_8007A684 >= 0x73) {
+            D_8007A684 = 0;
+        }
+        func_80062E44();
+        func_8001F724(D_8007A684);
+    } else if ((D_800A9220 & 0x1004010) && D_801F9944 == 0) {
+        D_800A9860 = 0x708;
+        func_80062E44();
+        func_8001F724(D_8007A684);
+    }
+}
 
-INCLUDE_ASM("asm/overattr/nonmatchings/overattr_8009B478", func_8009B6DC);
+void func_8009B6DC(void) {
+    if ((D_800A9220 & 0x401004) && D_801F9944 == 0) {
+        D_800A9860 = 0x708;
+        D_8007A686 -= 5;
+        if (D_8007A686 < 0xF) {
+            D_8007A686 = 0x5A;
+        }
+        func_8001F724(0x2F);
+    } else if ((D_800A9220 & 0x802008) && D_801F9944 == 0) {
+        D_800A9860 = 0x708;
+        D_8007A686 += 5;
+        if (D_8007A686 >= 0x5B) {
+            D_8007A686 = 0xF;
+        }
+        func_8001F724(0x30);
+    }
+}
 
-INCLUDE_ASM("asm/overattr/nonmatchings/overattr_8009B478", func_8009B7C4);
+void func_8009B7C4(void) {
+    if ((D_800A9220 & 0x401004) && D_801F9944 == 0) {
+        D_800A9860 = 0x708;
+        if (--D_8007A688 <= 0) {
+            D_8007A688 = 0x64;
+        }
+        func_8001F724(0x2F);
+    } else if ((D_800A9220 & 0x802008) && D_801F9944 == 0) {
+        D_800A9860 = 0x708;
+        if (++D_8007A688 >= 0x65) {
+            D_8007A688 = 1;
+        }
+        func_8001F724(0x30);
+    }
+}
 
-INCLUDE_ASM("asm/overattr/nonmatchings/overattr_8009B478", func_8009B8A4);
+void func_8009B8A4(void) {
+    if ((D_800A9220 & 0x401004) && D_801F9944 == 0) {
+        D_800A9860 = 0x708;
+        if (--D_801FA960 < 0) {
+            D_801FA960 = 0x7C;
+        }
+        func_8001F724(0x2F);
+    } else if ((D_800A9220 & 0x802008) && D_801F9944 == 0) {
+        D_800A9860 = 0x708;
+        if (++D_801FA960 >= 0x7D) {
+            D_801FA960 = 0;
+        }
+        func_8001F724(0x30);
+    }
+}
 
-INCLUDE_ASM("asm/overattr/nonmatchings/overattr_8009B478", func_8009B980);
+void func_8009B980(void) {
+    if ((D_800A9220 & 0x401004) && D_801F9944 == 0) {
+        D_800A9860 = 0x708;
+        if (--D_8007A692 < 0) {
+            D_8007A692 = 0x1C;
+        }
+        func_8001F724(0x2F);
+    } else if ((D_800A9220 & 0x802008) && D_801F9944 == 0) {
+        D_800A9860 = 0x708;
+        if (++D_8007A692 >= 0x1D) {
+            D_8007A692 = 0;
+        }
+        func_8001F724(0x30);
+    } else if ((D_800A9220 & 0x1004010) && D_801F9944 == 0) {
+        D_800A6F78 = 1;
+    }
+}
 
-INCLUDE_ASM("asm/overattr/nonmatchings/overattr_8009B478", func_8009BAA4);
+void func_8009BAA4(void) {
+    if ((D_800A9220 & 0x401004) && D_801F9944 == 0) {
+        D_800A9860 = 0x708;
+        D_801E2150 -= 3;
+        if (D_801E2150 < 0) {
+            D_801E2150 = 0;
+        }
+        func_8001F724(0x1E);
+    } else if ((D_800A9220 & 0x802008) && D_801F9944 == 0) {
+        D_800A9860 = 0x708;
+        D_801E2150 += 3;
+        if (D_801E2150 >= 0x80) {
+            D_801E2150 = 0x7F;
+        }
+        func_8001F724(0x1E);
+    }
+    func_80062D88((u8) D_801E2150);
+}
 
-INCLUDE_ASM("asm/overattr/nonmatchings/overattr_8009B478", func_8009BB90);
+void func_8009BB90(void) {
+    if ((D_800A9220 & 0x401004) && D_801F9944 == 0) {
+        D_800A9860 = 0x708;
+        D_801E1CB4 -= 3;
+        if (D_801E1CB4 < 0) {
+            D_801E1CB4 = 0;
+        }
+        func_8001F724(0x1E);
+    } else if ((D_800A9220 & 0x802008) && D_801F9944 == 0) {
+        D_800A9860 = 0x708;
+        D_801E1CB4 += 3;
+        if (D_801E1CB4 >= 0x80) {
+            D_801E1CB4 = 0x7F;
+        }
+        func_8001F724(0x1E);
+    }
+    func_80062DA8((u8) D_801E1CB4);
+}
 
-INCLUDE_ASM("asm/overattr/nonmatchings/overattr_8009B478", func_8009BC7C);
+void func_8009BC7C(void) {
+    if ((D_800A9220 & 0x401004) && D_801F9944 == 0) {
+        D_800A9860 = 0x708;
+        D_8007A68A ^= 1;
+        func_8001F724(0x1E);
+    } else if ((D_800A9220 & 0x802008) && D_801F9944 == 0) {
+        D_800A9860 = 0x708;
+        D_8007A68A ^= 1;
+        func_8001F724(0x1E);
+    }
+}
 
-INCLUDE_ASM("asm/overattr/nonmatchings/overattr_8009B478", func_8009BD0C);
+void func_8009BD0C(void) {
+    if ((D_800A9220 & 0x401004) && D_801F9944 == 0) {
+        D_800A9860 = 0x708;
+        D_8007A68C ^= 1;
+        func_8001F724(0x1E);
+    } else if ((D_800A9220 & 0x802008) && D_801F9944 == 0) {
+        D_800A9860 = 0x708;
+        D_8007A68C ^= 1;
+        func_8001F724(0x1E);
+    }
+}
 
-INCLUDE_ASM("asm/overattr/nonmatchings/overattr_8009B478", func_8009BD9C);
+void func_8009BD9C(void) {
+    if ((D_800A9220 & 0x401004) && D_801F9944 == 0) {
+        D_800A9860 = 0x708;
+        if (--D_8007A68E < 0) {
+            D_8007A68E = 2;
+        }
+        func_8001F724(0x1E);
+    } else if ((D_800A9220 & 0x802008) && D_801F9944 == 0) {
+        D_800A9860 = 0x708;
+        if (++D_8007A68E >= 3) {
+            D_8007A68E = 0;
+        }
+        func_8001F724(0x1E);
+    }
+    D_8007A688 = D_800A6F3C[D_8007A68E * 2];
+    D_8007A686 = D_800A6F3C[D_8007A68E * 2 + 1];
+}
 
-INCLUDE_ASM("asm/overattr/nonmatchings/overattr_8009B478", func_8009BEB0);
+void func_8009BEB0(void) {
+    if ((D_800A9220 & 0x401004) && D_801F9944 == 0) {
+        D_800A9860 = 0x708;
+        D_8007A694 ^= 1;
+        func_8001F724(0x1E);
+    } else if ((D_800A9220 & 0x802008) && D_801F9944 == 0) {
+        D_800A9860 = 0x708;
+        D_8007A694 ^= 1;
+        func_8001F724(0x1E);
+    }
+}
 
-INCLUDE_ASM("asm/overattr/nonmatchings/overattr_8009B478", func_8009BF40);
+void func_8009BF40(u8 *dst, s32 index) {
+    u8 *src;
+    s32 i;
 
-INCLUDE_ASM("asm/overattr/nonmatchings/overattr_8009B478", func_8009BF94);
+    src = D_8007C704[index];
+    i = 0;
+    if (*src != 0) {
+        do {
+            dst[i++] = *src++;
+        } while (*src != 0);
+    }
+    dst[i] = 0;
+}
+
+void func_8009BF94(u8 *dst, s32 index) {
+    u8 *src;
+    s32 i;
+
+    src = D_800A72D8[index];
+    i = 0;
+    if (*src != 0) {
+        do {
+            dst[i++] = *src++;
+        } while (*src != 0);
+    }
+    dst[i] = 0;
+}
 
 INCLUDE_ASM("asm/overattr/nonmatchings/overattr_8009B478", func_8009BFE8);
 
