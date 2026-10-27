@@ -431,19 +431,19 @@ void func_80041E54(const AiHandler *handlers, Ai *ai) {
     }
 }
 
-/* 97.9%: register allocation of the mover pointer and the velocity */
-#ifdef NON_MATCHING
 void func_80042008(const AiHandler *handlers, Ai *ai) {
     s32 vel;
 
-    D_800AA248.cur_obj->pos_x.w = (D_800AA248.cur_obj->pos_x.w - D_800AA248.cur_obj->vel_x.w) & D_801D8864.w;
+    vel = D_800AA248.cur_obj->pos_x.w - D_800AA248.cur_obj->vel_x.w;
+    vel &= D_801D8864.w;
+    D_800AA248.cur_obj->pos_x.w = vel;
     vel = D_800AA248.cur_obj->vel_y.w + D_800AA248.cur_obj->unk_88;
     if (vel > 0x60000) {
         vel = 0x60000;
     }
     D_800AA248.cur_obj->vel_y.w = vel;
     D_800AA248.cur_obj->pos_y.w += vel;
-    if (((s16 *)&D_800AA248.cur_obj->pos_y.w)[1] >= 0xD9) {
+    if (D_800AA248.cur_obj->pos_y.s.hi >= 0xD9) {
         D_800AA248.cur_obj->vel_x.w = 0;
         D_800AA248.cur_obj->vel_y.w = 0;
         D_800AA248.cur_obj->unk_88 = 0;
@@ -455,9 +455,6 @@ void func_80042008(const AiHandler *handlers, Ai *ai) {
         func_80041A70(handlers, ai);
     }
 }
-#else
-INCLUDE_ASM("asm/main/nonmatchings/game_8004160C", func_80042008);
-#endif
 
 void func_800420F8(const AiHandler *handlers, Ai *ai) {
     if (ai->unk_0C == 1) {

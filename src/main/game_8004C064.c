@@ -1042,24 +1042,19 @@ void func_8004DBB0(Monster *m, Monster *other) {
     D_800AA2C0 = 1;
 }
 
-#ifdef NON_MATCHING
-/* 78%: the order of the stores and of the call's constant argument */
 void func_8004DC08(Monster *m, Monster *other) {
     other->unk_132 = 0;
     other->unk_0E4 = 0;
     other->unk_0E6 = 0;
     other->unk_0EE = 0x12C;
+    other->unk_0E4 = m->id;
     other->action = 0x22;
     other->unk_1B0 = 0;
-    other->unk_0E4 = m->id;
     func_800634D4(other, 5);
     func_8004FC00(1, m);
     func_8005417C(m);
     D_800AA2C0 = 1;
 }
-#else
-INCLUDE_ASM("asm/main/nonmatchings/game_8004C064", func_8004DC08);
-#endif
 
 void func_8004DC7C(Monster *m, Monster *other) {
     s16 action;

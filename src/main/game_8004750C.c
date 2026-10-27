@@ -1149,7 +1149,7 @@ void func_800494B4(Throw *t) {
 }
 
 #ifdef NON_MATCHING
-/* 99.3 %: register names only: the original keeps the object in a2, the x found in a0 and the counter in a1 (here a1, a2, a0) */
+/* 98 %: register names only: the x found and the counter take a0 and a1 in the original, a1 and a0 here */
 /* A pair per throw kind (D_8007F39C): the vertical speed it gets back when it lands, and the height it lands at. */
 typedef struct {
     /* 0x00 */ s32 unk_0;
@@ -1159,12 +1159,12 @@ typedef struct {
 extern ThrowLanding D_8007F39C[];
 
 void func_80049650(Throw *t) {
-    GameObject *cur;
+    u16 x;
     ThrowLanding *l;
     Monster *m;
     GameObject *o;
     s32 v;
-    u16 x;
+    GameObject *cur;
     u16 i;
 
     if (t->unk_0A == 0x10) {
@@ -1181,8 +1181,8 @@ void func_80049650(Throw *t) {
         if (cur->pos_y.w > D_8007F39C[cur->unk_08.w].unk_4) {
             return;
         }
-        x = 0;
         i = 7;
+        x = 0;
         cur->unk_88 = D_8007F39C[cur->unk_08.w].unk_0;
         do {
             m = &D_801E0B78[i];
@@ -2006,7 +2006,7 @@ void func_8004B204(void) {
 }
 
 #ifdef NON_MATCHING
-/* 85%: the original hoists the high halves of the camera's x and the level width out of the loop into s7 and s8 (loop.c's choice); everything else matches */
+/* 92 %: the wrap is width & (camera + x), as the original; loop.c hoists only the width's high half out of the loop here, the original also the camera's (s7 and s8) */
 void func_8004B3D0(void) {
     u16 s = 7;
     ThrowRec *rec;
@@ -2043,7 +2043,7 @@ void func_8004B3D0(void) {
         }
         rec++;
         obj->pos_y.s.hi = y;
-        obj->pos_x.w = (D_801F9AC8.w + (x << 16)) & D_801D8864.w;
+        obj->pos_x.w = D_801D8864.w & (D_801F9AC8.w + (x << 16));
         obj->flags ^= 0x10;
         obj->vel_x.w = -obj->vel_x.w;
     } while (--n != 0);
@@ -2155,8 +2155,6 @@ void func_8004B754(void) {
     func_8004AF1C(q);
 }
 
-#ifdef NON_MATCHING
-/* 89%: register allocation in the loop: the original keeps the position and the animation's address in v0 in turn and loads the camera before the first object's position */
 void func_8004B80C(void) {
     GameObject *saved = D_800AA248.cur_obj;
     ThrowRec *rec = D_801F9A54;
@@ -2166,25 +2164,26 @@ void func_8004B80C(void) {
     u16 n;
 
     if (rec->thrown == NULL) {
-        x = rec->obj->pos_x.w;
+        obj = rec->obj;
+        x = obj->pos_x.w;
         if (x < D_801F9AC8.w) {
             x += D_801D8864.w;
         }
-        if (x >= D_801F9AC8.w + 0x820000 && x <= D_801F9AC8.w + (D_801D8864.w >> 1)) {
+        if (x >= D_801F9AC8.w + 0x820000 && x <= (D_801D8864.w >> 1) + D_801F9AC8.w) {
             n = D_801D8710;
             if (D_8007A696 & 8) {
                 func_80062E24(0x6D);
                 D_8007A696 &= ~8;
             }
-            def = func_8001D110();
-            D_800AA248.new_def = def;
+            D_800AA248.new_def = func_8001D110();
+            def = D_800AA248.new_def;
             do {
                 obj = rec->obj;
                 def->pos_x.w = obj->pos_x.w;
-                def->anim = D_80096150;
                 def->pos_y.w = obj->pos_y.w;
-                def->flags = 0x1004;
+                def->anim = D_80096150;
                 def->id = D_80096150[0];
+                def->flags = 0x1004;
                 D_800AA248.cur_obj = func_8001DCB4();
                 rec->thrown = D_800AA248.cur_obj;
                 D_800AA248.cur_obj->vel_x.w = rec->speed;
@@ -2195,9 +2194,6 @@ void func_8004B80C(void) {
     }
     D_800AA248.cur_obj = saved;
 }
-#else
-INCLUDE_ASM("asm/main/nonmatchings/game_8004750C", func_8004B80C);
-#endif
 
 void func_8004B990(void) {
     u16 n = D_801D8710;

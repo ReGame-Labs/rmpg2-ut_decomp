@@ -1444,15 +1444,15 @@ void func_80040930(Actor *actor) {
     }
 }
 
-#ifdef NON_MATCHING
-/* 96.48 %: register names only, as func_80040930 */
 void func_800409CC(Actor *actor) {
     GameObject *mover;
     s32 v;
 
     mover = actor->unk_0;
     D_800AA248.cur_obj = mover;
-    mover->pos_x.w = (mover->pos_x.w + mover->vel_x.w) & D_801D8864.w;
+    v = mover->pos_x.w + mover->vel_x.w;
+    v &= D_801D8864.w;
+    mover->pos_x.w = v;
     v = D_800AA248.cur_obj->vel_y.w + 0x6500;
     D_800AA248.cur_obj->vel_y.w = v;
     D_800AA248.cur_obj->pos_y.w += v;
@@ -1462,9 +1462,6 @@ void func_800409CC(Actor *actor) {
         actor->unk_28 = 0;
     }
 }
-#else
-INCLUDE_ASM("asm/main/nonmatchings/game_8003CD08", func_800409CC);
-#endif
 
 void func_80040A7C(Actor *actor) {
     GameObject *mover;
@@ -1702,12 +1699,10 @@ void func_800410AC(Actor *actor) {
     D_800AA248.cur_obj = saved;
 }
 
-#ifdef NON_MATCHING
-/* 95.34 %: register names only: the original holds &D_800AA248 in a0 (so reorg hoists its lui into the first branch's delay slot) and the velocity sum in a1; here a1 and a0 */
 void func_800411E8(Actor *actor) {
     GameObject *saved;
     GameObject *mover;
-    s32 d;
+    s32 d; /* one temporary for the speed, the distance and the bound: the original keeps all three in a1 */
     s16 target;
     s16 x;
     s32 v;
@@ -1727,16 +1722,18 @@ void func_800411E8(Actor *actor) {
         D_800AA248.cur_obj->pos_x.w += d;
         mover = D_800AA248.cur_obj;
         target = actor->unk_38;
-        x = ((s16 *)&mover->pos_x.w)[1];
-        if (abs(x - target) < 0x32) {
+        x = mover->pos_x.s.hi;
+        d = abs(x - target);
+        if (d < 0x32) {
             if (mover->vel_x.w != 0) {
                 mover->unk_84 = 0;
             } else {
                 mover->vel_x.w = 0x3500;
             }
         } else {
+            d = target + 0x32;
             v = 0x300;
-            if (target + 0x32 < x) {
+            if (d < x) {
                 v = -0x300;
             }
             mover->unk_84 = v;
@@ -1748,9 +1745,6 @@ void func_800411E8(Actor *actor) {
     actor->unk_28 = 0;
     D_800AA268.p = saved;
 }
-#else
-INCLUDE_ASM("asm/main/nonmatchings/game_8003CD08", func_800411E8);
-#endif
 
 void func_80041344(u16 kind, Actor *actor) {
     ActorSound *sound;
