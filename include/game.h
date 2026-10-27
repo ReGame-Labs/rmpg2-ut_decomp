@@ -68,14 +68,13 @@ typedef struct GameObject {
     /* 0x1C */ Fixed unk_1C;
     /* 0x20 */ u16 unk_20;
     /* 0x22 */ u16 flags;               /* 0x10: faces left; 0x20 */
-    /* 0x24 */ u8 unk_24[0x04];
+    /* 0x24 */ s32 unk_24;               /* the frame's first word, or its VRAM slot's (func_8001A554) */
     /* 0x28 */ Fixed unk_28;
     /* 0x2C */ Fixed unk_2C;            /* the frame's size too (func_8001E59C sets both): u.lo the width, u.hi the height */
     /* 0x30 */ Fixed size;              /* the frame's size: u.lo the width, u.hi the height */
     /* 0x34 */ SpriteFrame *frame;      /* the current frame's metrics */
     /* 0x38 */ s32 anim_frame;          /* the current animation frame id */
-    /* 0x3C */ u16 unk_3C;
-    /* 0x3E */ u8 unk_3E[0x02];
+    /* 0x3C */ s32 unk_3C;               /* the frame id func_8001A554 last set */
     /* 0x40 */ union {
                    struct GameObject *obj;  /* a link (main.c's list from D_801D8584) */
                    s32 w;                   /* a value; a box's width (main_create_box: the status bars, OVERATTR's

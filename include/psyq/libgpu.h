@@ -49,5 +49,6 @@ void SetDefDispEnv(DISPENV *env, int x, int y, int w, int h);
 
 /* Appended for the frame's draw lists (main). */
 void AddPrim(void *ot, void *p);
+unsigned short GetClut(int x, int y);
 
 #endif /* PSYQ_LIBGPU_H */

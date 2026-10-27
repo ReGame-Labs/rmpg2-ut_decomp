@@ -323,7 +323,7 @@ extern u8 D_800B09C0[];
 extern u16 D_8007C1D4[];
 extern u16 D_8007BA20[];
 extern u16 D_801E289A;
-void func_8001A870(s32, u8 *);
+s32 func_8001A870(s32, u8 *);
 s32 cdload_file_size(s32);
 s32 cdload_read_file(s32, u8 *);
 extern s32 D_801D3D9C[];
@@ -1147,7 +1147,62 @@ void func_8001A534(s32 arg0, s32 arg1, s32 arg2) {
     temp_a0->unk_4 = arg1;
 }
 
+#ifdef NON_MATCHING
+/* 97.14%: 97.1 %: in both slot branches the original forms D_801F9AE4's address after the slot's index (sll), here
+ * between the andi and the sll. Maps a frame id to its SpriteFrame (bank D_801FA738[id >> 24] + offset
+ * D_801D8868[id >> 1]), takes a VRAM slot for it unless the frame is resident (0x40000000), and keeps the frame's
+ * tpage word in obj->unk_24 */
+SpriteFrame *func_8001A554(s32 id, GameObject *obj) {
+    SpriteFrame *frame;
+    u32 index;
+    u16 b;
+    u16 flags;
+    u16 slot;
+
+    if ((obj->unk_6C & 0x400) && obj->unk_3C != id) {
+        obj->unk_6C &= 0xFBFF;
+        func_8001B350(obj->unk_6E);
+    }
+    if (id < 0) {
+        frame = (SpriteFrame *) id;
+        obj->unk_6C |= 8;
+        obj->unk_24 = frame->unk_00;
+    } else {
+        index = (u32) (id & 0xFFFFFF) >> 1;
+        obj->unk_72 = b = ((u32) id >> 24) & 0x3F;
+        obj->anim_frame = id;
+        if (index >= 0x2135) {
+            index = 0;
+            b = 0xF;
+        }
+        frame = (SpriteFrame *) (D_801FA738[b].unk_0 + (D_801D8868[index] & 0x7FFFFFFF));
+        if ((D_801D8868[index] & 0x7FFFFFFF) == 0) {
+            id = D_8007AD4C[(func_8001EB10(0x8000, 0xE) & 0x1F) + 10];
+            frame = (SpriteFrame *) func_8001B128(id);
+            obj->unk_24 = frame->unk_00;
+        }
+        if (frame->unk_00 & 0x40000000) {
+            obj->unk_6C |= 8;
+            obj->unk_24 = frame->unk_00;
+        } else if (obj->unk_3C != id || !(obj->unk_6C & 0x400)) {
+            flags = obj->unk_6C;
+            obj->unk_6C = flags & 0xFFF7;
+            if (!(flags & 0x80)) {
+                obj->unk_6C = (flags & 0xFFF7) | 0x400;
+                if (frame->unk_00 & 0x20000000) {
+                    obj->unk_24 = (D_801F9AE4 + (obj->unk_6E = func_8001B3C4(frame, D_801FA738[b].unk_0, 1)))->unk_0 | 0x20000000;
+                } else {
+                    obj->unk_24 = (D_801F9AE4 + (obj->unk_6E = func_8001B3C4(frame, D_801FA738[b].unk_0, 0)))->unk_0;
+                }
+            }
+        }
+    }
+    obj->unk_3C = id;
+    return frame;
+}
+#else
 INCLUDE_ASM("asm/main/nonmatchings/main", func_8001A554);
+#endif
 
 s32 func_8001A784(u32 id) {
     u32 index;
@@ -1174,7 +1229,70 @@ u16 func_8001A848(s32 index, s32 id) {
     return (u16) e->unk_4 == (u16) id;
 }
 
-INCLUDE_ASM("asm/main/nonmatchings/main", func_8001A870);
+/* Loads a bank's CLUTs into VRAM at (D_800AA944, D_800AA948) and appends their ids to D_801C51D4, the bank's first
+ * one at D_800AFB54[bank]. The data: a word offset to a header (its size at +4), then runs of a count and the
+ * colours; every colour after a run's first gets the transparency bit. */
+s32 func_8001A870(s32 bank, u8 *data) {
+    u16 *slot;
+    u16 buf[256];
+    RECT rect;
+    u8 *hdr;
+    u16 *dst;
+    u16 *src;
+    u16 *end;
+    u16 count;
+    s32 i;
+    u16 clut;
+    u16 n;
+
+    slot = &D_800AFB54[bank & 0xFFFF];
+    dst = buf;
+    hdr = data + *(s32 *) data;
+    src = (u16 *) (hdr + 0xA);
+    end = (u16 *) (hdr + *(s32 *) (hdr + 4) + 8);
+    n = D_800AFB74;
+    *slot = n;
+    count = *(u16 *) (hdr + 8);
+    if (count != 0) {
+        do {
+            for (i = 0; i < count; i++) {
+                dst[i] = *src++;
+                if (i != 0) {
+                    dst[i] |= 0x8000;
+                }
+            }
+            if (D_800AA944 & 0xF) {
+                D_800AA944 = (D_800AA944 & 0xFFF0) + 0x10;
+            }
+            if (count + D_800AA944 > 0x180) {
+                D_800AA944 = 0;
+                D_800AA948++;
+                if (D_800AA948 >= 0x1F0) {
+                    if (D_800AA948 >= 0x200) {
+                        break;
+                    }
+                } else if (D_800AA948 >= 0x100) {
+                    D_800AA948 = 0x1F0;
+                }
+            }
+            clut = GetClut(D_800AA944, D_800AA948);
+            n = D_800AFB74++;
+            D_801C51D4[n] = clut;
+            rect.w = count;
+            rect.x = D_800AA944;
+            rect.y = D_800AA948;
+            rect.h = 1;
+            LoadImage(&rect, (unsigned long *) buf);
+            DrawSync(0);
+            D_800AA944 += count;
+            if (src >= end) {
+                break;
+            }
+            count = *src++;
+        } while (count != 0);
+    }
+    return 0;
+}
 
 s32 func_8001AA4C(s32 arg0, s32 arg1) {
     s32 bank;
@@ -1252,24 +1370,20 @@ s32 func_8001AC18(s32 arg0, s32 arg1) {
     return 1;
 }
 
-/* 89 %: the loop invariants (id << 16, id | 0x8000, the table base) are set up in another order and the second loop keeps -1 and 0x8000 in saved registers */
-#ifdef NON_MATCHING
 void func_8001AD1C(Unk1AD1C *bank, s32 addr, s16 id) {
     u32 i;
     s32 slot;
-    s16 id2;
 
     i = 0;
     if (bank->unk_4 != 0) {
-        id2 = id | 0x8000;
         do {
             slot = func_80019B08(addr, 0x100, 0x100, id);
             if (slot == -1) {
                 func_8001B5E8(5);
             }
             addr += 0x10000;
-            D_801D876C[slot * 2] = id2;
-            D_801D876C[slot * 2 + 1] = id2;
+            D_801D876C[slot * 2] = (u16) id | 0x8000;
+            D_801D876C[slot * 2 + 1] = (u16) id | 0x8000;
             i++;
         } while (i < bank->unk_4);
     }
@@ -1280,15 +1394,12 @@ void func_8001AD1C(Unk1AD1C *bank, s32 addr, s16 id) {
             if (slot == -1) {
                 func_8001B5E8(6);
             }
-            addr += 0x8000;
             D_801D876C[slot] = id;
+            addr += 0x8000;
             i++;
         } while (i < bank->unk_8);
     }
 }
-#else
-INCLUDE_ASM("asm/main/nonmatchings/main", func_8001AD1C);
-#endif
 
 INCLUDE_ASM("asm/main/nonmatchings/main", func_8001AE70);
 

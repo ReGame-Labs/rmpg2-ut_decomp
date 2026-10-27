@@ -26,7 +26,7 @@ typedef struct Unk1C542C {
 
 /* A 0x10-byte record of the table at 0x801F9AE4 (func_8001B350): a use count and the slot it holds. */
 typedef struct Unk1F9AE4 {
-    u8 pad_0[0x4];
+    s32 unk_0;
     s16 unk_4;
     u8 pad_6[0x2];
     s32 unk_8;
@@ -116,6 +116,9 @@ extern s32 D_801F991C;
 extern s32 D_8007A71C;                  /* the music to restart after the XA track */
 void cdload_stop_xa(s32 mode);
 void func_80063744(void);
+u16 func_8001B3C4(SpriteFrame *frame, s32 base, s32 mode);
+extern u16 D_800AFB54[];                /* per bank: its first CLUT's index in D_801C51D4 */
+extern u16 D_801C51D4[];                /* the CLUT ids func_8001A870 loaded */
 extern u16 D_801D370C;
 extern u16 D_801FA730;                  /* the calls func_800205AC ran this frame */
 extern s32 D_801F9A2C;
