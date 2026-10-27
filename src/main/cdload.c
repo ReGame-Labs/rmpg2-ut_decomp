@@ -35,8 +35,6 @@ s32 func_8006C8F8(s32);
 s16 func_8006EC18(void);
 s32 cdload_load_bank(s32, s32, s32, s32, s32, s32, s32);
 
-extern u8 D_801FA8A0[7];
-extern s32 D_801FB49C[3];
 
 /* The loaded file: its index, its data (the read buffer) and the read position (the fopen/fread emulation). */
 extern s32 D_801FB4AC;
@@ -56,8 +54,7 @@ extern s32 D_801FB4A8;
 extern s32 D_801FB4B8;
 
 extern s32 D_80085264[];
-extern u16 D_801D8728;
-extern u16 D_801FA960;
+extern u16 D_801D8728;   /* not in game.h: read unsigned here and in game_8001781C, signed in game_8003CD08 */
 extern u16 D_801FA964;
 
 extern u8 D_80085274[];
@@ -160,39 +157,39 @@ s32 cdload_get_next_player(s32 arg0) {
 }
 
 void func_80061068(s32 *arg0, s16 arg1, s16 arg2) {
-    Unk800AA248Node *node;
-    Body *saved;
+    ObjectDef *def;
+    GameObject *saved;
 
-    saved = D_800AA248.unk_20;
-    node = func_8001D110();
-    D_800AA248.unk_3C = node;
-    node->unk_10.h.i = arg1;
-    node->unk_14.h.i = arg2;
-    node->unk_20 = 0x7000;
-    node->unk_28 = arg0;
-    node->unk_00 = *arg0;
+    saved = D_800AA248.cur_obj;
+    def = func_8001D110();
+    D_800AA248.new_def = def;
+    def->pos_x.s.hi = arg1;
+    def->pos_y.s.hi = arg2;
+    def->flags = 0x7000;
+    def->anim = arg0;
+    def->id = *arg0;
     func_8001DCB4();
-    D_800AA248.unk_20 = saved;
+    D_800AA248.cur_obj = saved;
 }
 
 void func_800610E8(void) {
 }
 
 void func_800610F0(void) {
-    D_800AA268.p->unk_80 = *D_800AA268.p->unk_5C;
+    D_800AA268.p->unk_80 = *D_800AA268.p->arg.w;
 }
 
 void func_80061110(void) {
-    D_800AA268.p->unk_18.w = 0x02000000;
+    D_800AA268.p->pos_y.w = 0x02000000;
     func_800415B4();
 }
 
 void func_8006113C(void) {
-    D_800AA268.p->unk_90->unk_010.h.hi = 1;
+    D_800AA268.p->owner.monster->unk_010.u.hi = 1;
 }
 
 void func_80061158(void) {
-    D_800AA268.p->unk_90->unk_010.h.hi = 0;
+    D_800AA268.p->owner.monster->unk_010.u.hi = 0;
 }
 
 s32 func_80061170(s32 index) {
@@ -376,7 +373,7 @@ s32 cdload_city_file_index(s32 which) {
     if (D_801D8728 != 0) {
         p = (u8 *)(D_801FA964 + offset);
     } else {
-        p = (u8 *)(D_801FA960 + offset);
+        p = (u8 *)((u16) D_801FA960 + offset);   /* an unsigned read here (lhu); game.h declares it s16 */
     }
     file = *p;
     pair = (file - 0x54) * 2;
