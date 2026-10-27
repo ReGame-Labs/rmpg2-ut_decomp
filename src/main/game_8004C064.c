@@ -356,14 +356,11 @@ void func_8004C80C(void) {
     D_800AA248.cur_obj->owner.monster->unk_150 = 0x1E;
 }
 
-#ifdef NON_MATCHING
-/* 81%: the speed-limit switch is a jump table in the original (7 entries); here GCC emits compares */
 void func_8004C83C(void) {
-    GameObject *obj = D_800AA248.cur_obj;
-    Monster *m = obj->owner.monster;
+    Monster *m = D_800AA268.p->owner.monster;
+    GameObject *obj;
     u16 action;
     s32 speed;
-    s32 vel;
     s32 pc;
 
     if (m->unk_150 != 0) {
@@ -380,50 +377,54 @@ void func_8004C83C(void) {
         case 7:
         case 8:
             speed -= 0x2000;
-clamp:
-            if (m->unk_150 == 0) {
-                if (m->unk_168 != 7) {
-                    if (speed < 0) {
-                        speed = 0;
-                    }
-                } else if (speed > 0) {
-                    speed = 0;
-                }
-            }
-            if (m->unk_152 == 0) {
-                if (m->unk_150 == 0) {
-                    if (speed > 0x14000) {
-                        speed = 0x14000;
-                    } else if (speed < -0x14000) {
-                        speed = -0x14000;
-                    }
-                } else if (speed > 0x12000) {
-                    speed = 0x12000;
-                } else if (speed < -0x12000) {
-                    speed = -0x12000;
-                }
-            } else if (speed > 0x8000) {
-                speed = 0x8000;
-            } else if (speed < -0x8000) {
-                speed = -0x8000;
-            }
-            m->unk_100 = speed;
             break;
         case 2:
         case 3:
         case 4:
             speed += 0x2000;
-            goto clamp;
+            break;
+        case 5:
+        default:
+            goto skip;
         }
+        if (m->unk_150 == 0) {
+            if (m->unk_168 != 7) {
+                if (speed < 0) {
+                    speed = 0;
+                }
+            } else if (speed > 0) {
+                speed = 0;
+            }
+        }
+        if (m->unk_152 == 0) {
+            if (m->unk_150 == 0) {
+                if (speed > 0x14000) {
+                    speed = 0x14000;
+                } else if (speed < -0x14000) {
+                    speed = -0x14000;
+                }
+            } else if (speed > 0x12000) {
+                speed = 0x12000;
+            } else if (speed < -0x12000) {
+                speed = -0x12000;
+            }
+        } else if (speed > 0x8000) {
+            speed = 0x8000;
+        } else if (speed < -0x8000) {
+            speed = -0x8000;
+        }
+        m->unk_100 = speed;
     }
+skip:
     if (m->unk_0D0 & 4) {
         if (m->dir != 1 && m->dir != 8 && m->dir != 2) {
-            vel = obj->vel_y.w;
-            if ((u32) (vel + 0x28000) <= 0x58000 && m->unk_1AA < 2) {
+            speed = D_800AA248.cur_obj->vel_y.w;
+            if ((u32) (speed + 0x28000) <= 0x58000 && m->unk_1AA < 2) {
                 m->unk_1AA = 2;
-                if (vel >= 0) {
-                    obj->vel_y.w = 0;
+                if (speed >= 0) {
+                    D_800AA248.cur_obj->vel_y.w = 0;
                 }
+                obj = D_800AA248.cur_obj;
                 pc = *obj->arg.w;
                 obj->anim = pc;
                 obj->script.pc = pc;
@@ -431,9 +432,6 @@ clamp:
         }
     }
 }
-#else
-INCLUDE_ASM("asm/main/nonmatchings/game_8004C064", func_8004C83C);
-#endif
 
 void func_8004CA70(void) {
     Monster *m = D_800AA248.cur_obj->owner.monster;
@@ -877,16 +875,23 @@ void func_8004D614(void) {
 }
 
 #ifdef NON_MATCHING
-/* 68%: the hit-box test against the projectile's frame; the loop keeps two pointers (record and record + 0x36) as givs */
+/* 91.12%: 91%: the box test with the monster's edges loaded first (m_bottom, m_right, m_left, m_top, as in pickup's
+ * func_8003B9C8); the original keeps m in a0 and loads the object's y before the flip test */
 u16 func_8004D6F8(Monster *m, Ai **out) {
     u16 n;
     Ai *p;
     GameObject *o;
     SpriteFrame *f;
     s16 x;
-    s32 left;
-    s32 right;
-    s32 top;
+    s32 t;
+    s16 left;
+    s16 right;
+    s16 top;
+    s16 bottom;
+    s16 m_left;
+    s16 m_top;
+    s16 m_right;
+    s16 m_bottom;
 
     n = D_801D870C;
     p = D_801D85C8;
@@ -894,9 +899,10 @@ u16 func_8004D6F8(Monster *m, Ai **out) {
         do {
             if ((u32) (p->action - 9) < 0x5C && p->unk_34.u.hi == 0) {
                 o = p->obj;
-                x = o->pos_x.s.hi;
+                t = o->pos_x.s.hi;
+                x = t;
                 f = o->frame;
-                if (x < D_801F9AC8.s.hi && x < D_801F9AC8.s.hi - 0x50) {
+                if (t < D_801F9AC8.s.hi && t < D_801F9AC8.s.hi - 0x50) {
                     x += (D_801D8864.w + 1) >> 16;
                 }
                 if (o->flags & 0x10) {
@@ -906,9 +912,13 @@ u16 func_8004D6F8(Monster *m, Ai **out) {
                     left = x - f->origin.u.lo;
                     right = f->size.u.lo + left;
                 }
-                top = o->pos_y.s.hi - f->origin.u.hi;
-                if (left < m->unk_11C && (s16) m->unk_118 < (s16) right && (s16) top < (s16) m->unk_11E &&
-                    (s16) m->unk_11A < (s16) (top + f->size.u.hi)) {
+                top = o->pos_y.u.hi - f->origin.u.hi;
+                bottom = top + f->size.u.hi;
+                m_bottom = m->unk_11E;
+                m_right = m->unk_11C;
+                m_left = m->unk_118;
+                m_top = m->unk_11A;
+                if (left < m_right && m_left < right && top < m_bottom && m_top < bottom) {
                     m->unk_18A = 1;
                     *out = p;
                     return 1;

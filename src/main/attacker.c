@@ -248,30 +248,33 @@ void func_80044204(Attacker *a) {
     func_8003EB5C(D_800953BC, D_800AA248.cur_obj);
 }
 
-#ifdef NON_MATCHING
-/* 85%: the original keeps the address of D_800AA248 and the value of D_801E1C84 live across the search loop (no reload at the found slot), with the counter in a0; the loop form that does that is not found yet */
 s32 func_80044240(u16 kind, s16 x, s16 y, u16 flags, s32 vel_x, u16 state) {
     GameObject *saved;
     Attacker *a;
     u16 n;
     ObjectDef *def;
+    u16 count;
 
     saved = D_800AA248.cur_obj;
-    if (kind != 0 && D_801E1C84 < 4) {
+    if (kind != 0 && (count = D_801E1C84) < 4) {
         a = D_801FA8A8;
         n = 4;
-        do {
+        for (;;) {
             if (a->type == 0) {
                 goto found;
             }
             a++;
-        } while (--n != 0);
-        D_800AA248.cur_obj = saved;
+            if (--n == 0) {
+                D_800AA248.cur_obj = saved;
+                break;
+            }
+        }
     }
     return 1;
 
 found:
-    D_801E1C84++;
+    count++;
+    D_801E1C84 = count;
     func_800455CC(a);
     a->type = kind;
     def = func_8001D110();
@@ -284,15 +287,12 @@ found:
     D_800AA248.cur_obj->pos_x.s.hi = x;
     D_800AA248.cur_obj->pos_y.s.hi = y;
     D_800AA248.cur_obj->vel_x.w = 0;
-    a->state = state;
     a->obj = D_800AA248.cur_obj;
+    a->state = state;
     D_800AA248.cur_obj->owner.attacker = a;
     D_800AA248.cur_obj = saved;
     return 0;
 }
-#else
-INCLUDE_ASM("asm/main/nonmatchings/attacker", func_80044240);
-#endif
 
 void func_800443AC(s32 vel) {
     if (func_8001EB10(0x190, 0) & 1) {
@@ -1543,36 +1543,31 @@ void func_80046EC0(Attacker *a) {
 void func_80046F60(void) {
 }
 
-#ifdef NON_MATCHING
-/* 84%: the search is the while condition (right shape); the original keeps a second pointer to unk_20 as a giv and hoists the constant 1 before the loop */
 void func_80046F68(Monster *m) {
     Attacker *a;
     u16 n;
-    s32 dx;
     GameObject *o;
     GameObject *saved;
     s16 x;
 
     a = D_801FA8A8;
+    saved = D_800AA268.p;
     n = 4;
-    saved = D_800AA248.cur_obj;
     if (D_801E1C84 != 0) {
-        x = m->obj->pos_x.s.hi;
-        while ((o = a->obj) == NULL || a->type == 0 || (o->unk_6C & 0x80) ||
-               (dx = o->pos_x.s.hi - x, dx < 0 ? -dx : dx) > ((s16) o->size.u.lo >> 1) - 1) {
-            a++;
-            if (--n == 0) {
-                goto end;
+        o = m->obj;
+        x = o->pos_x.s.hi;
+        do {
+            o = a->obj;
+            if (o != NULL && a->type != 0 && !(o->unk_6C & 0x80) &&
+                abs(o->pos_x.s.hi - x) <= ((s16)o->size.u.lo >> 1) - 1) {
+                a->unk_20 = 1;
+                break;
             }
-        }
-        a->unk_20 = 1;
+            a++;
+        } while (--n != 0);
     }
-end:
-    D_800AA248.cur_obj = saved;
+    D_800AA268.p = saved;
 }
-#else
-INCLUDE_ASM("asm/main/nonmatchings/attacker", func_80046F68);
-#endif
 
 #ifdef NON_MATCHING
 /* 93.31%: 93%: registers only: the x distance lands in x's register (a1; v1 in the original) and the half sizes

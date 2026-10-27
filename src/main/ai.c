@@ -154,49 +154,53 @@ void func_80041684(Ai *ai) {
     func_800416AC(D_8007E8D8, ai);
 }
 
-/* 77%: the two switches' dispatch and the default path differ in layout */
-#ifdef NON_MATCHING
 void func_800416AC(const AiHandler *handlers, Ai *ai) {
-    s16 hit;
+    u16 hit;
 
     switch (ai->action) {
     case 0xA:
         func_80041928(handlers, ai);
-        return;
+        break;
     case 0xB:
         func_80041A3C(handlers, ai);
-        return;
+        break;
     case 0x32:
+        func_80041B2C(handlers, ai);
+        break;
     case 0x33:
         func_80041B2C(handlers, ai);
-        return;
+        break;
     case 0x36:
+        func_80041DA8(handlers, ai);
+        break;
     case 0x37:
         func_80041DA8(handlers, ai);
-        return;
+        break;
     case 0x3B:
+        func_80041C0C(handlers, ai);
+        break;
     case 0x3C:
         func_80041C0C(handlers, ai);
-        return;
+        break;
     case 0x1E:
         func_80041DE4(handlers, ai);
-        return;
+        break;
     case 0xF2:
         func_80042008(handlers, ai);
-        return;
+        break;
     case 0x46:
         func_80041E54(handlers, ai);
-        return;
+        break;
     case 0x4D:
         if (handlers == D_8007E930) {
             func_800420F8(handlers, ai);
         }
-        return;
+        break;
     case 0x4C:
         if (handlers == D_8007E930) {
             func_80042134(handlers, ai);
         }
-        return;
+        break;
     default:
         hit = func_8003DC3C(ai);
         if (hit != 0) {
@@ -204,25 +208,18 @@ void func_800416AC(const AiHandler *handlers, Ai *ai) {
             return;
         }
         func_80042238(ai);
-        switch (ai->action) {
-        case 0x15:
+        if (ai->action == 0x15) {
             func_80041988(handlers, ai);
-            return;
-        case 0x16:
+        } else if (ai->action == 0x16) {
             func_800419C4(handlers, ai);
-            return;
-        case 0x17:
+        } else if (ai->action == 0x17) {
             func_80041A00(handlers, ai);
-            return;
-        default:
+        } else {
             func_8003DB74(ai);
-            return;
         }
+        break;
     }
 }
-#else
-INCLUDE_ASM("asm/main/nonmatchings/ai", func_800416AC);
-#endif
 
 void func_80041928(const AiHandler *handlers, Ai *ai) {
     if (ai->state != 0) {
