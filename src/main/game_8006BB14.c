@@ -370,15 +370,12 @@ void func_8006ED5C(void) {
     }
 }
 
-extern SoundHooks *D_80087130;
-extern SoundHooks *D_80087134;
-
 void func_8006EDAC(void) {
     if (D_80087110 != 0) {
         func_800700A8();
         func_80070444();
-        D_80087130->unk_04(D_801FDF20);
-        D_80087134->unk_04(D_801FDF20);
+        D_80087130[0][1](D_801FDF20);
+        D_80087130[1][1](D_801FDF20);
         func_8006ED5C();
         D_80087110 = 0;
     }
@@ -390,10 +387,8 @@ INCLUDE_ASM("asm/main/nonmatchings/game_8006BB14", func_8006F0D8);
 
 INCLUDE_ASM("asm/main/nonmatchings/game_8006BB14", func_8006F634);
 
-u8 *func_80076C8C(s32, s32 *);
-
 void func_8006F8F8(SoundChannel *ch, SoundTrack *track) {
-    s32 seq;
+    u8 *seq;
 
     ch->unk_4C = track->unk_00->unk_10;
     ch->unk_1A = track->unk_00->unk_0E;

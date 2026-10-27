@@ -44,6 +44,11 @@ case "$ver" in
     2.91.66) aspsx=2.81 ;; 2.95.2) aspsx=2.86 ;;
     *) echo "cc_psx.sh: unknown GCC version $ver" >&2; exit 2 ;;
 esac
+# GCC 2.7.2 leaves a division's checks to the assembler (`div $2,$2,$3`, the macro form), and ASPSX expands it with
+# the divide-by-zero and overflow breaks the original's 2.7.2 code has (break 7, break 6); 2.8.x emits the checks
+# itself.
+div_flags=()
+[[ "$ver" == 2.7.2 ]] && div_flags=(--expand-div)
 case "$out" in
     /tmp/*) trap 'rm -f "$out.i" "$out.s" "$out.m.s"' EXIT ;;
 esac
@@ -57,7 +62,7 @@ gcc="$T/gcc/$ver"
 # defined in this file for $gp. --data-in-c drops it: the object then holds its .bss/.sbss itself, in definition
 # order. maspsx then makes a global's .sbss symbol local, so the globals (cc1's `.comm`, not `.lcomm`) get their
 # .globl back.
-"$T/venv/bin/python" "$T/ext/maspsx/maspsx.py" --aspsx-version="$aspsx" -G"$g" "${comm[@]}" \
+"$T/venv/bin/python" "$T/ext/maspsx/maspsx.py" --aspsx-version="$aspsx" -G"$g" "${comm[@]}" "${div_flags[@]}" \
     < "$out.s" > "$out.m.s"
 if [[ ${#comm[@]} -eq 0 ]]; then
     sed -n 's/^[[:space:]]*\.comm[[:space:]]\{1,\}\([A-Za-z_.$][A-Za-z0-9_.$]*\),.*/\t.globl\t\1/p' "$out.s" >> "$out.m.s"
