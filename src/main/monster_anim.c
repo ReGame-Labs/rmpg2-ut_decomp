@@ -41,7 +41,7 @@ BuildingPart *func_8002ED30(u16, BuildingItem *);
 u16 func_8002F558(Building *);
 void func_8003089C(u16, Monster *);
 u16 func_8004F7A4(Building *u);         /* defined with a u8 * and an s32 result in game_8004E574 */
-s32 func_8005BC20(s16, s16, s32, s32, GameObject *, s32);
+s32 func_8005BC20(s16 x, s16 y, s32 w, s32 h, GameObject *obj, u16 flags);
 void func_80053C50(s32, Monster *);
 u16 func_8005D198(void);                /* defined as s32 in bonus.c; the callers here mask a u16 */
 void func_80054374(s32, Monster *);
@@ -68,7 +68,7 @@ void func_8005883C();
 void func_80058984(Monster *);
 void func_8004EF28(void);
 s32 *func_8001B660(void *id);
-s16 func_8005B8C8(s16 x, s16 y, s32 kind, s32 half_w, s32 half_h);
+u16 func_8005B8C8(s16 x, s16 y, s32 kind, s32 half_w, s32 half_h);
 void func_8005CAA4(GameObject *b, Monster *e);
 void func_8005CC54(GameObject *b, Monster *e);
 void func_8005CEC4(GameObject *b, Monster *skip);
@@ -316,7 +316,56 @@ s32 func_80057F98(u16 kind, Monster *e) {
     return 0;
 }
 
-INCLUDE_ASM("asm/main/nonmatchings/monster_anim", func_800580F8);
+extern s32 D_800844B8[];
+extern s32 D_800844D4[];
+extern s32 D_800844F0[];
+extern s32 D_8008450C[];
+extern s32 D_80084528[];
+extern s32 D_80084560[];
+extern s32 D_8008457C[];
+
+void func_800580F8(Monster *e) {
+    s32 *script;
+
+    e->skip_building = 0;
+    D_800AA248.unk_24 = e->dir;
+    if (e->climb_side == 0) {
+        if (e->unk_168 == 7) {
+            if (e->dir < 7) {
+                script = D_8008450C;
+            } else if (e->dir >= 2 && e->dir < 5) {
+                script = D_80084560;
+            } else {
+                script = D_80084528;
+            }
+        } else if (e->dir < 3) {
+            script = D_8008450C;
+        } else if (e->dir < 6) {
+            script = D_80084528;
+        } else {
+            script = D_8008457C;
+        }
+    } else {
+        if (e->climb_side == 2) {
+            if (e->dir == 3) {
+                script = D_800844D4;
+            } else {
+                script = D_800844B8;
+            }
+        } else if (e->climb_side == 1) {
+            if (e->dir == 7) {
+                script = D_800844F0;
+            } else {
+                script = D_800844B8;
+            }
+        } else {
+            script = D_80084528;
+        }
+        e->skip_building = e->climb_building;
+    }
+    e->action = 2;
+    func_80057B94(e, script);
+}
 
 extern s32 D_800845D0[];
 
@@ -536,9 +585,96 @@ void func_800586AC(Monster *e) {
     func_80057C38(n, e, D_8008481C);
 }
 
-INCLUDE_ASM("asm/main/nonmatchings/monster_anim", func_80058734);
+extern s32 D_80084838[];
+extern s32 D_80084870[];
+extern s32 D_80084A68[];
 
-INCLUDE_ASM("asm/main/nonmatchings/monster_anim", func_8005883C);
+/* K&R definitions: func_80058944 calls this one and the next without the monster, still in a0. */
+void func_80058734(e)
+    Monster *e;
+{
+    s32 *script;
+    u16 t;
+    u16 kind;
+
+    D_800AA268.p->flags &= 0xFFEF;
+    e->action = 6;
+    script = D_80084838;
+    if (e->dir != 0) {
+        e->unk_13E = 0x1A4;
+        func_800589DC(e, script);
+        return;
+    }
+    t = e->unk_13E;
+    if (t > 0xF0) {
+    walk:
+        kind = e->dir;
+        if (kind != 0) {
+            func_80057C38(kind, e, script);
+        } else {
+            func_80057B94(e, D_80084A68);
+        }
+        return;
+    }
+    if (t < 0x94) {
+        if (t == 0) {
+            e->unk_13E = 0x1A4;
+        }
+        goto walk;
+    }
+    if (t == 0xF0) {
+        e->unk_17A ^= 1;
+    }
+    if (e->unk_17A == 0) {
+        func_80057C38(0, e, script);
+    } else {
+        func_80057B94(e, D_80084870);
+    }
+}
+
+extern s32 D_80084854[];
+
+void func_8005883C(e)
+    Monster *e;
+{
+    s32 *script;
+    u16 t;
+    u16 kind;
+
+    D_800AA268.p->flags |= 0x10;
+    e->action = 6;
+    script = D_80084854;
+    if (e->dir != 0) {
+        e->unk_13E = 0x1A4;
+        func_800589DC(e, script);
+        return;
+    }
+    t = e->unk_13E;
+    if (t > 0xF0) {
+    walk:
+        kind = e->dir;
+        if (kind != 0) {
+            func_80057C38(kind, e, script);
+        } else {
+            func_80057B94(e, D_80084A68);
+        }
+        return;
+    }
+    if (t < 0x94) {
+        if (t == 0) {
+            e->unk_13E = 0x1A4;
+        }
+        goto walk;
+    }
+    if (t == 0xF0) {
+        e->unk_17A ^= 1;
+    }
+    if (e->unk_17A == 0) {
+        func_80057C38(0, e, script);
+    } else {
+        func_80057B94(e, D_80084870);
+    }
+}
 
 void func_80058944(Monster *e) {
     if (e->climb_side == 2) {
@@ -1398,7 +1534,65 @@ void func_8005B8A4(Monster *e) {
     func_80057B94(e, D_8008514C);
 }
 
-INCLUDE_ASM("asm/main/nonmatchings/monster_anim", func_8005B8C8);
+u16 func_8005B8C8(s16 x, s16 y, s32 kind, s32 half_w, s32 half_h) {
+    Building *u;
+    s16 left;
+    s16 right;
+    s16 top;
+    s16 bottom;
+    s16 i;
+    s16 end;
+    s16 start;
+    s32 step;
+    u16 hits;
+
+    if (D_800AA2DC != 0) {
+        return 0;
+    }
+    hits = 0;
+    u = D_801D3DC8;
+    if (u == NULL) {                    /* the original tests the array's address */
+        return 0;
+    }
+    left = x - half_w;
+    right = x + half_w;
+    top = y - half_h;
+    bottom = y + half_h;
+    if (left < 0) {
+        left += D_801D8866;
+    } else if (left > (s16)D_801D8866) {
+        left -= D_801D8866;
+    }
+    if (right < 0) {
+        right += D_801D8866;
+    } else if (right > (s16)D_801D8866) {
+        right -= D_801D8866;
+    }
+    if (kind & 0x10) {
+        start = D_801E29A4;
+        end = 0;
+        step = -1;
+    } else {
+        start = 0;
+        end = D_801E29A4;
+        step = 1;
+    }
+    i = start;
+    if (i != end) {
+        do {
+            if (u->state == 0
+                && (((s16)u->unk_004 <= left && left <= u->unk_00E) || ((s16)u->unk_004 <= right && right <= u->unk_00E)
+                    || (left <= (s16)u->unk_004 && (s16)u->unk_004 <= right) || (left <= u->unk_00E && u->unk_00E <= right))
+                && (((s16)u->unk_074 <= top && top <= (s16)u->unk_006) || ((s16)u->unk_074 <= bottom && bottom <= (s16)u->unk_006)
+                    || (top <= (s16)u->unk_074 && (s16)u->unk_074 <= bottom) || (top <= (s16)u->unk_006 && (s16)u->unk_006 <= bottom))) {
+                hits |= 1 << i;
+            }
+            i += step;
+            u++;
+        } while (i != end);
+    }
+    return hits;
+}
 
 void func_8005BB04(Monster *e, s16 want, s16 max, Building *u) {
     s16 i;

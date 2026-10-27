@@ -272,7 +272,8 @@ typedef struct Monster {
     /* 0x16A */ u8 unk_16A[0x02];
     /* 0x16C */ GameObject *unk_16C;
     /* 0x170 */ u16 unk_170;
-    /* 0x172 */ u8 unk_172[0x0A];
+    /* 0x172 */ u8 unk_172[0x08];
+    /* 0x17A */ u16 unk_17A;
     /* 0x17C */ s32 unk_17C;
     /* 0x180 */ struct Monster *attacker;      /* the monster that hit it last (func_8005421C) */
     /* 0x184 */ u16 unk_184;
