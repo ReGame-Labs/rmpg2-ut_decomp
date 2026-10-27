@@ -236,7 +236,26 @@ void func_8005E3CC(void) {
     }
 }
 
-INCLUDE_ASM("asm/main/nonmatchings/game_8005D198", func_8005E4E4);
+s32 func_8005E4E4(void) {
+    switch (D_800AA2DC) {
+    case 1:
+        return 4;
+    case 2:
+    case 4:
+    case 0x40:
+    case 0x80:
+    case 0x100:
+    case 0x1000:
+    case 0x2000:
+    case 0x4000:
+        return 1;
+    case 8:
+    case 0x10:
+    case 0x20:
+        return 2;
+    }
+    return 0;
+}
 
 s32 func_8005E5C8(void) {
     switch (D_800AA2DC) {
@@ -255,9 +274,47 @@ INCLUDE_ASM("asm/main/nonmatchings/game_8005D198", func_8005E60C);
 
 INCLUDE_ASM("asm/main/nonmatchings/game_8005D198", func_8005EE54);
 
-INCLUDE_ASM("asm/main/nonmatchings/game_8005D198", func_8005F12C);
+void func_8005F12C(void) {
+    Monster *e;
+    s32 i;
 
-INCLUDE_ASM("asm/main/nonmatchings/game_8005D198", func_8005F208);
+    D_8007BD78.flags |= 0x80;
+    D_8007BD78.unk_04 = D_801FB49C[0];
+    for (i = 0; i < (s32) D_801D8740; i++) {
+        e = &D_801E0B78[func_80025DF8(D_801FB49C[i])];
+        if (e->unk_058 & 1) {
+            e->unk_1B0 = 3;
+            e->unk_1B2 = 1;
+            e->obj->pos_x.s.hi = 0x82 - i * 0x28;
+        }
+    }
+}
+
+s32 func_8005F208(void) {
+    switch (D_800AA2DC) {
+    case 1:
+    case 2:
+    case 4:
+        return 0;
+    case 8:
+    case 0x10:
+    case 0x20:
+        return 1;
+    case 0x40:
+    case 0x80:
+    case 0x100:
+        return 2;
+    case 0x200:
+    case 0x400:
+    case 0x800:
+        return 3;
+    case 0x1000:
+    case 0x2000:
+    case 0x4000:
+        return 4;
+    }
+    return -1;
+}
 
 INCLUDE_ASM("asm/main/nonmatchings/game_8005D198", func_8005F33C);
 
@@ -392,7 +449,58 @@ void func_80060A7C(s32 id, u32 color, s32 mode) {
     }
 }
 
-INCLUDE_ASM("asm/main/nonmatchings/game_8005D198", func_80060BA8);
+void func_80060BA8(void) {
+    Monster *e;
+    u16 state;
+    s32 i;
+
+    if (D_800AA2DC & 0x7000) {
+        for (i = 0; i < (s32) D_801D8740; i++) {
+            e = &D_801E0B78[func_80025DF8(D_801FB49C[i])];
+            if (e->unk_008.w <= 0x40000 && e->unk_184 == 0) {
+                e->unk_008.w = 0;
+                if (e->unk_1B0 != 0 || (state = e->action) == 0x23 || state == 0xF || state == 0x17) {
+                    if (e->action != 0x23) {
+                        e->action = 0x1D;
+                    }
+                } else {
+                    switch (e->action) {
+                    case 0x1C:
+                    case 0x39:
+                        e->action = 0x5B;
+                        break;
+                    case 0xA:
+                    case 0x1D:
+                    case 0x24:
+                    case 0x2F:
+                        e->action = 0x59;
+                        break;
+                    case 0xB:
+                    case 0x22:
+                    case 0x23:
+                        e->action = 0x5A;
+                        break;
+                    case 0x28:
+                        e->action = 0x5C;
+                        break;
+                    case 0x3A:
+                        e->action = 0x5E;
+                        break;
+                    case 0x1E:
+                    case 0x29:
+                        e->action = 0x5D;
+                        break;
+                    default:
+                        e->action = 0x59;
+                        return;
+                    }
+                }
+                e->unk_0DC = 0;
+                e->unk_184 = 1;
+            }
+        }
+    }
+}
 
 void func_80060D44(Monster *e) {
     switch (D_801FA8A0[e->id - 1]) {

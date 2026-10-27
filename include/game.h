@@ -211,7 +211,10 @@ typedef struct Monster {
     /* 0x10A */ s16 unk_10A;                   /* an x range: 0x10A..0x10E */
     /* 0x10C */ s16 unk_10C;
     /* 0x10E */ s16 unk_10E;
-    /* 0x110 */ u8 unk_110[0x08];
+    /* 0x110 */ s16 unk_110;                   /* a second box: 0x110..0x116 (func_80053854) */
+    /* 0x112 */ u16 unk_112;
+    /* 0x114 */ s16 unk_114;
+    /* 0x116 */ u16 unk_116;
     /* 0x118 */ u16 unk_118;                   /* the hit box: left, top, right, bottom */
     /* 0x11A */ u16 unk_11A;
     /* 0x11C */ s16 unk_11C;

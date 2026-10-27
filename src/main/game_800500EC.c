@@ -1011,7 +1011,29 @@ void func_8005382C(u16 kind) {
     D_800AA268.p->unk_8C = D_8007BE0C[kind];
 }
 
+#ifdef NON_MATCHING
+/* 82.4 %: the original keeps the wrapped x in t0 and loads the boxes' y bounds (0x10A, 0x10E, 0x112, 0x116) with lhu, comparing them shifted; here they are loaded signed */
+s32 func_80053854(s16 x, s16 y, Monster *m) {
+    s16 px;
+
+    px = x;
+    if (m->unk_0DC == 0 || m->action == 0x37) {
+        return 0;
+    }
+    if (x < D_801F9ACA) {
+        px = x + ((D_801D8864.w + 1) >> 16);
+    }
+    if (px >= m->unk_108 && y >= m->unk_10A && m->unk_10C >= px && m->unk_10E >= y) {
+        return 1;
+    }
+    if (px >= m->unk_110 && y >= (s16) m->unk_112 && m->unk_114 >= px && (s16) m->unk_116 >= y) {
+        return 2;
+    }
+    return 0;
+}
+#else
 INCLUDE_ASM("asm/main/nonmatchings/game_800500EC", func_80053854);
+#endif
 
 INCLUDE_ASM("asm/main/nonmatchings/game_800500EC", func_80053970);
 
