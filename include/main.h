@@ -95,7 +95,7 @@ typedef struct Unk1AD1C {
 } Unk1AD1C;
 
 /* The word at 0x801F9A30, a vertical speed (0x20000, 0x80000, -0x20000). A one-member struct: GCC 2.8 keeps its
- * stores in order with the stores into D_801D3D64 only then (func_80028160). */
+ * stores in order with the stores into D_801D3D64 only then (main_reset_camera_y). */
 typedef struct Unk1F9A30 {
     s32 unk_0;
 } Unk1F9A30;

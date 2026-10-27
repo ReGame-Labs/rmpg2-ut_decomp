@@ -272,8 +272,8 @@ void func_80026E0C(Monster *arg0);
 void func_80026F58(Monster *arg0);
 void func_80027FC8(void);
 void func_80028140(u16 arg0, Monster *arg1, u16 arg2);
-void func_800284D8(void);
-void func_80028508(void);
+void main_start_scroll_down(void);
+void main_start_scroll_up(void);
 void func_8002994C(void);
 void func_80029B54(void);
 void func_80029CF8(void);
@@ -370,7 +370,7 @@ void func_8002503C(Building *, GameObject *);
 void func_800252CC(Building *);
 void func_80025124(Building *);
 void func_80024E08(Building *);
-void func_800258C8(void);
+void main_set_building_sides(void);
 extern u8 D_80082E94[];
 s32 bonus_get_round_kind(void);
 u16 func_80029B80(void);
@@ -449,7 +449,7 @@ void monster_anim_update_bomb(Monster *);
 extern u8 D_800105A8[];
 extern s16 D_800AA300[11][8][8];
 void func_8001F61C(u8 *, s16, s16, s32, s32, s32 *, s32, s32);
-u16 func_80025C54(void *);
+u16 main_check_bonus_round(void *);
 extern void (*D_8007BE20[])(Monster *);
 void func_80023E30(Npc *);
 void main_set_frame(s32, s32, GameObject *);
@@ -5325,7 +5325,7 @@ u16 func_800249B8(s32 arg0) {
 
     result = arg0;
     if (D_801D8728 == 0) {
-        if (func_80025C54(NULL) == 1) {
+        if (main_check_bonus_round(NULL) == 1) {
             result = 0x200;
         } else if (D_801FA984[0] != 0 && D_801FA984[1] != 0 && D_801FA984[2] != 0 && D_801FA960 < 0x4B) {
             D_801E1CAC = 0x4B;
@@ -5454,7 +5454,7 @@ void main_create_buildings(void) {
     } while (e->unk_0 != NULL);
     D_801E29A4 = n;
     D_801E1E40 = n;
-    func_800258C8();
+    main_set_building_sides();
 }
 
 #ifdef NON_MATCHING
@@ -5869,7 +5869,100 @@ void func_80025898(BuildingItem *arg0) {
     }
 }
 
-INCLUDE_ASM("asm/main/nonmatchings/main", func_800258C8);
+void main_set_building_sides(void) {
+    Building *b;
+    Building *o;
+    u32 pri;
+    u16 i;
+    u16 n;
+    u16 side;
+    u16 ol;
+    u16 bl;
+    u16 br;
+    u16 orr;
+
+    b = D_801D3DC8;
+    i = D_801E29A4;
+    if (i == 0) {
+        return;
+    }
+    pri = b->priority;
+    while (pri != 0x200) {
+        b++;
+        if (--i == 0) {
+            break;
+        }
+        pri = b->priority;
+    }
+    if (pri != 0x200) {
+        return;
+    }
+    n = D_801E29A4;
+again:
+    o = D_801D3DC8;
+    do {
+        if (pri < o->priority) {
+            ol = o->left;
+            bl = b->left;
+            br = b->right;
+            orr = o->right;
+            if ((s16) ol > (s16) bl || (s16) orr <= (s16) br) {
+                if ((s16) ol < (s16) bl) {
+                    if ((s16) bl < (s16) orr) {
+                        side = o->unk_000;
+                        if (side >= b->unk_000) {
+                            side = -1;
+                        } else if (side == 1) {
+                            side = 4;
+                        } else {
+                            side++;
+                        }
+                        b->left_side = side;
+                        if ((s16) orr - (s16) bl > 0x28) {
+                            b->unk_026 = side;
+                        }
+                    }
+                } else if ((s16) ol < (s16) br) {
+                    if ((s16) orr >= (s16) br || (s16) br - (s16) orr < 0x14) {
+                        side = o->unk_000;
+                        if (side >= b->unk_000) {
+                            side = -1;
+                        } else if (side == 1) {
+                            side = 4;
+                        } else {
+                            side++;
+                        }
+                        b->right_side = side;
+                        if ((s16) br - (s16) ol > 0x28) {
+                            b->unk_026 = side;
+                        }
+                    }
+                }
+            } else {
+                side = o->unk_000;
+                if (side >= b->unk_000) {
+                    side = -1;
+                } else if (side == 1) {
+                    side = 4;
+                } else {
+                    side++;
+                }
+                b->left_side = side;
+                b->right_side = side;
+                b->unk_026 = side;
+            }
+        }
+        o++;
+    } while (--n != 0);
+    n = D_801E29A4;
+    while (b->unk_01E != n) {
+        b++;
+        pri = b->priority;
+        if (pri == 0x200) {
+            goto again;
+        }
+    }
+}
 
 void func_80025B10(void) {
     if (D_801E1E40 == 0) {
@@ -5919,7 +6012,41 @@ void *func_80025C08(void *list) {
     return table[index];
 }
 
-INCLUDE_ASM("asm/main/nonmatchings/main", func_80025C54);
+u16 main_check_bonus_round(void *arg0) {
+    s16 level = D_801FA960 % 25;
+    switch (level) {
+    case 4:
+        D_800AA2DC |= 1 << (D_801D8740 - 1);
+        break;
+    case 9:
+        D_800AA2DC |= 1 << (D_801D8740 + 2);
+        break;
+    case 14:
+        D_800AA2DC |= 1 << (D_801D8740 + 8);
+        break;
+    case 19:
+        if (D_801D8740 >= 2) {
+            D_800AA2DC |= 1 << (D_801D8740 + 5);
+        } else {
+            D_800AA2DC |= 1 << (D_801D8740 - 1);
+        }
+        break;
+    case 23:
+        if (D_801D8740 >= 2) {
+            D_800AA2DC |= 1 << (D_801D8740 + 11);
+        } else {
+            D_800AA2DC |= 1 << (D_801D8740 + 8);
+        }
+        break;
+    }
+    if (D_800AA2DC != 0) {
+        D_801D8728 = D_801D8740;
+        D_801FA964 = bonus_get_round_kind();
+        D_801D3780 = 99;
+        return 1;
+    }
+    return 0;
+}
 
 s32 func_80025DF8(s32 id) {
     s32 i;
@@ -6236,7 +6363,74 @@ void func_80026F98(Monster *arg0) {
 INCLUDE_ASM("asm/main/nonmatchings/main", func_80026F98);
 #endif
 
-INCLUDE_ASM("asm/main/nonmatchings/main", func_8002703C);
+extern s16 D_80084278;
+
+void main_use_full_meter(Monster *m) {
+    u16 action;
+    s16 n;
+
+    if ((m->unk_0D0 & 8) && (D_800AA2DC == 0 || (D_800AA2DC & 0x7000)) && m->meter.w == 0x440000) {
+        switch (m->id) {
+        case 1:
+        case 2:
+            if (m->obj->pos_y.w == 0xE10000 && m->action < 2) {
+                goto end_power;
+            }
+            break;
+        case 3:
+        case 4:
+        case 7:
+            if (m->action < 2) {
+                if (m->id == 3) {
+                    m->meter.w = 0;
+                }
+                goto end_power;
+            }
+            break;
+        case 5:
+            if (m->action != 0x63 && D_80084278 == 0
+                && (m->action < 2 || m->action == 5 || m->action == 6 || m->action == 2 || m->action == 0x19)) {
+                action = m->action;
+                if (action == 1 || action == 5 || action == 6 || action == 0) {
+                    func_800531C0(m);
+                    m->unk_05C = m->action;
+                    m->action = 0x63;
+                } else if (action == 2 || action == 0x19) {
+                    if (m->obj->vel_y.s.hi != 0) {
+                        m->unk_05C = action;
+                        m->action = 0x63;
+                    }
+                }
+                if (m->action == 0x63) {
+                    if ((m->unk_01A & 0xF) != 0) {
+                        n = (m->unk_01A & 0xF) - 1;
+                        m->unk_01A &= 0xFFF0;
+                        m->unk_01A |= n;
+                        if (n < 3 && m->extra[n + 2] != NULL) {
+                            func_8001E4B0(m->extra[n + 2]);
+                            m->extra[n + 2] = NULL;
+                        }
+                        if (!(m->unk_01A & 0xF)) {
+                            m->meter.w = 0;
+                        }
+                    } else {
+                        m->meter.w = 0;
+                    }
+                }
+            }
+            break;
+        case 6:
+            if (m->action < 2 || m->action == 5 || m->action == 6) {
+            end_power:
+                func_800531C0(m);
+                m->action = 0x63;
+                m->unk_188 = 0;
+                m->extra[0] = NULL;
+            }
+            break;
+        }
+    }
+}
 
 u16 func_800272B0(Monster *monster) {
     u16 *p;
@@ -6363,7 +6557,93 @@ void func_800273F4(Monster *monster, s32 arg1) {
 INCLUDE_ASM("asm/main/nonmatchings/main", func_800273F4);
 #endif
 
-INCLUDE_ASM("asm/main/nonmatchings/main", func_800275F8);
+extern s16 D_801D3DB2[];
+s32 func_80027878(Monster *m);
+
+void main_move_monster(Monster *m) {
+    GameObject *obj;
+    s32 vx;
+    s32 vel;
+    s16 dir;
+    s32 y;
+    s32 t;
+
+    if (m->action == 0x53 || m->action == 0x57) {
+        return;
+    }
+    obj = m->obj;
+    D_800AA268.p = obj;
+    vel = vx = obj->vel_x.w;
+    if (vx != 0) {
+        if ((u16) m->unk_1C8 != 0) {
+            goto clamp;
+        }
+        if (m->action == 0x37 || m->action == 0x2F) {
+            goto clamp;
+        }
+        if (m->action == 2) {
+            vel >>= 1;
+        } else {
+            vel >>= 2;
+        }
+        vel = -vel;
+        if (vel > 0x10000) {
+            vel = 0x10000;
+        } else if (vel < -0x10000) {
+            vel = -0x10000;
+        }
+    }
+    vel += vx;
+    if (m->unk_100 != 0) {
+        vel += m->unk_100;
+    } else if (vx >= -0x800 && vx <= 0x800) {
+        m->unk_100 = 0;
+        obj->vel_x.w = 0;
+        goto vertical;
+    }
+clamp:
+    t = *(D_801D3D98 + D_801FA8A0[m->id - 1]);
+    if (vel >= 0) {
+        dir = 1;
+        if (t > 0x16C0000 && t <= 0x1C20000) {
+            vel = 0;
+        }
+    } else {
+        dir = -1;
+        if (t < 0x200000 || t > 0x1C1FFFF) {
+            vel = 0;
+        }
+    }
+    *(D_801D3DB2 + D_801FA8A0[m->id - 1]) = dir;
+    t = obj->pos_x.w;
+    if (vel > 0x58000) {
+        vel = 0x58000;
+    } else if (vel < -0x58000) {
+        vel = -0x58000;
+    }
+    obj->vel_x.w = vel;
+    t += vel;
+    t &= D_801D8864.w;
+    obj->pos_x.w = t;
+vertical:
+    if (obj->vel_y.w != 0 || m->unk_104 != 0) {
+        if ((u16) func_80027878(m) == 0) {
+            vel = obj->vel_y.w;
+            t = m->unk_104 + vel;
+            if (t > 0xC0000) {
+                t = 0xC0000;
+            }
+            obj->vel_y.w = t;
+            if (t != 0) {
+                y = obj->pos_y.w + t;
+                if (m->climb_side == 0 && y > 0xE0FFFF && m->action != 0x1F) {
+                    y = 0xE10000;
+                }
+                obj->pos_y.w = y;
+            }
+        }
+    }
+}
 
 s32 func_80027878(Monster *m) {
     GameObject *obj;
@@ -6739,16 +7019,179 @@ void func_80028140(u16 arg0, Monster *arg1, u16 arg2) {
     arg1->unk_0CE = 0;
 }
 
-void func_80028160(void) {
+void main_reset_camera_y(void) {
     D_801D3D64.unk_26 = 0;
     D_801F9A30.unk_0 = 0;
     D_801D3D64.unk_28 = 0;
     D_801F9ACC.w = 0;
 }
 
-INCLUDE_ASM("asm/main/nonmatchings/main", func_80028184);
+#ifdef NON_MATCHING
+/* 98.40%: 98.4 %: flags and the D_801D3D64 pointer swap s0/s1; d = vel2 loads vel2 straight into d where the
+ * original loads it into v0 and copies it */
+extern u16 D_801D3700;
+extern s32 D_8007BD7C;
+extern s32 D_801D3D90;
+extern s16 D_801FA724;
+extern s16 D_801FA728;
+extern s16 D_801FA9A8;
+void func_80028B1C(void);
+void func_800288B0(s32 *vel2, s32 *vel1);
+void func_80029D5C(s32, s32);
 
-void func_800284D8(void) {
+void func_80028184(void) {
+    s32 flags;
+    s32 vel2;
+    s32 vel1;
+    s32 speed;
+    s32 x;
+    s32 d;
+    s32 cam;
+    Unk1D3D64 *scroll;
+
+    flags = func_8005E4E4();
+    if (flags == 1 || D_801D8740 == 0 || D_801D3700 != 0 || D_801E1CB0 != 0
+        || (scroll = &D_801D3D64)->unk_24 != 0) {
+        main_reset_camera_y();
+        return;
+    }
+    if (flags & 2) {
+        func_80029D5C(flags, D_8007BD7C);
+        return;
+    }
+    func_80028B1C();
+    func_800288B0(&vel2, &vel1);
+    x = D_801FA9A8;
+    speed = scroll->unk_26 << 16;
+    if (speed != 0) {
+        if (speed > 0) {
+            d = vel2;
+            if (vel1 >= d) {
+                d = vel1;
+            }
+            if (x >= 0xD3) {
+                d += 0x10000;
+                if (d < speed) {
+                    d = speed;
+                }
+            } else if (x >= 0xBF) {
+                goto clamp_right;
+            } else {
+                goto stop;
+            }
+        } else {
+            d = vel2;
+            if (vel1 <= d) {
+                d = vel1;
+            }
+            if (x < 0xBE) {
+                d -= 0x10000;
+                if (d > speed) {
+                    d = speed;
+                }
+            } else if (x < 0xD3) {
+                goto clamp_left;
+            } else {
+                goto stop;
+            }
+        }
+    } else {
+        if (D_801D8740 < 2) {
+            if (x > 0x12C) {
+                goto right;
+            }
+            if (x < 0x64) {
+                goto left;
+            }
+            goto stop;
+        }
+        if (x > 0xF0) {
+            if (vel2 >= 0) {
+                x = D_801FA724;
+                if (x >= 0x12C) {
+                    goto right;
+                }
+            }
+            if (vel1 < 0) {
+                goto stop;
+            }
+            x = D_801FA728;
+            if (x < 0x12C) {
+                goto stop;
+            }
+        right:
+            d = vel2;
+            if (vel1 >= d) {
+                d = vel1;
+            }
+            D_801D3D90 = d;
+            if (x > 0x12C) {
+                d += 0x10000;
+            } else if (x < 0xDD) {
+                d = 0x10000;
+            } else {
+            clamp_right:
+                if (d < 0x10000) {
+                    d = 0x10000;
+                }
+            }
+        } else if (x < 0xA0) {
+            if (vel2 <= 0) {
+                x = D_801FA724;
+                if (x < 0x65) {
+                    goto left;
+                }
+            }
+            if (vel1 > 0) {
+                goto stop;
+            }
+            x = D_801FA728;
+            if (x >= 0x65) {
+                goto stop;
+            }
+        left:
+            d = vel2;
+            if (vel1 <= d) {
+                d = vel1;
+            }
+            D_801D3D90 = d;
+            if (x < 0x64) {
+                d -= 0x10000;
+            } else if (x >= 0xB4) {
+                d = -0x10000;
+            } else {
+            clamp_left:
+                if (d > -0x10000) {
+                    d = -0x10000;
+                }
+            }
+        } else {
+        stop:
+            scroll->unk_26 = 0;
+            scroll->unk_2C = 0;
+            goto done;
+        }
+    }
+    if (!(flags & 4)) {
+        cam = D_801F9AC8.w;
+        if (d < 0) {
+            d = -d & 0xFFFF0000;
+            d = -d;
+        } else {
+            d &= 0xFFFF0000;
+        }
+        cam += d;
+        D_801D3D8A = d >> 16;
+        D_801F9AC8.w = cam & D_801D8864.w;
+    }
+done:
+    main_update_camera_y();
+}
+#else
+INCLUDE_ASM("asm/main/nonmatchings/main", func_80028184);
+#endif
+
+void main_start_scroll_down(void) {
     s32 var_v1;
 
     var_v1 = 0x20000;
@@ -6759,14 +7202,215 @@ void func_800284D8(void) {
     D_801D3D8C = 2;
 }
 
-void func_80028508(void) {
+void main_start_scroll_up(void) {
     D_801F9A30.unk_0 = 0xFFFE0000;
     D_801D3D8C = 1;
 }
 
-INCLUDE_ASM("asm/main/nonmatchings/main", func_80028524);
+extern u16 D_801D3700;
+extern s16 D_801D3DBE;
 
+void main_update_camera_y(void) {
+    s32 *p;
+    s32 y;
+    s32 max;                /* the lowest player's y; the camera's y below, as in the original */
+    s32 min;                /* the highest player's y */
+    u16 maxi;
+    u16 mini;
+    Monster *mon;
+    GameObject *obj;
+
+    max = -1;
+    maxi = 1;
+    mini = 1;
+    min = 0x77770000;
+    p = D_801D3DA8;
+    y = *p++;
+    if (y != 0) {
+        max = y;
+        min = max;
+    }
+    y = *p++;
+    if (y != 0) {
+        if (y >= max) {
+            maxi = 2;
+            max = y;
+        }
+        if (y <= min) {
+            mini = 2;
+            min = y;
+        }
+    }
+    y = *p;
+    if (y != 0) {
+        if (y >= max) {
+            maxi = 3;
+            max = y;
+        }
+        if (y <= min) {
+            mini = 3;
+            min = y;
+        }
+    }
+    D_801D3D64.unk_30 = max;
+    D_801D3D64.unk_34 = min;
+    if (D_801D3D64.unk_28 == 0) {
+        if (D_801E28C8 != 0) {
+        high:
+            if (min > 0x87FFFF && max > 0xEFFFFF) {
+                mon = &D_801E0B78[func_80025DF8(maxi)];
+                obj = mon->obj;
+                if (obj->vel_y.w > 0) {
+                    goto rise;
+                }
+            }
+            if (min > 0xA7FFFF && max <= 0xDFFFFF) {
+                return;
+            }
+            goto rise;
+        } else if (D_801E1CB0 != 0 || D_801D3700 != 0
+                   || ((Fixed *) &D_801D3D64.unk_58)->u.hi != 0) {   /* D_801D3DBE, read through the block */
+            max = D_801F9ACC.w;
+            if (max == 0) {
+                return;
+            }
+            D_801D3DBE = 1;
+        rise:
+            main_start_scroll_down();
+        } else {
+            if (max <= 0xF00000 && min <= 0x700000) {
+                mon = &D_801E0B78[func_80025DF8(mini)];
+                obj = mon->obj;
+                if (obj->vel_y.w < 0) {
+                    goto sink;
+                }
+            }
+            if (max > 0xB80000 || min > 0x800000) {
+                goto high;
+            }
+        sink:
+            main_start_scroll_up();
+        }
+    } else if (D_801D3D64.unk_28 == 1) {
+        if (min <= 0x77FFFF && max <= 0xEFFFFF) {
+            max = D_801F9ACC.w + D_801F9A30.unk_0;
+            D_801F9ACC.w = max;
+            if (max > -0x14C0000) {
+                return;
+            }
+            max = -0x14C0000;
+            D_801F9ACC.w = max;
+        }
+        goto stop;
+    } else if (D_801D3D64.unk_28 == 2) {
+        if (((Fixed *) &D_801D3D64.unk_58)->u.hi == 0 && (max <= 0xC00000 || min <= 0x800000)) {
+            goto stop;
+        }
+        max = D_801F9ACC.w + D_801F9A30.unk_0;
+        D_801F9ACC.w = max;
+        if (max > 0) {
+            goto zero;
+        }
+        if (max <= 0xFFE7FFF) {     /* always, max being <= 0 here: the original's constant */
+            return;
+        }
+        mon = &D_801E0B78[func_80025DF8(mini)];
+        obj = mon->obj;
+        if (obj->pos_x.s.hi >= 0x71) {
+            return;
+        }
+        goto zero;
+    stop:
+        if (D_801F9ACC.w >= 0) {
+        zero:
+            D_801F9ACC.w = 0;
+        }
+        D_801F9A30.unk_0 = 0;
+        D_801D3D8C = 0;
+    }
+}
+
+#ifdef NON_MATCHING
+/* 96.69%: 96.7 %: each case's load of m1->obj sits before the second call's li a0 (the original has li a0 first, so
+ * its three tails cross-jump from the load); then x1/x2 get a3/a2 instead of t1/t0 */
+extern s16 D_801D8844;
+extern s16 D_801FA724;
+extern s16 D_801FA728;
+extern s16 D_801FA9A8;
+s16 func_80028ADC(s32, s32);
+
+void func_800288B0(s32 *vel2, s32 *vel1) {
+    Monster *m1;
+    Monster *m2;
+    GameObject *o1;
+    GameObject *o2;
+    s32 left;
+    s32 width;
+    u16 x1;
+    u16 x2;
+    s32 result;
+    u16 cam;
+
+    switch (D_801D8844) {
+    case 1:
+        m1 = &D_801E0B78[func_80025DF8(1)];
+        o1 = m1->obj;
+        m2 = &D_801E0B78[func_80025DF8(2)];
+        break;
+    case 2:
+        m1 = &D_801E0B78[func_80025DF8(1)];
+        o1 = m1->obj;
+        m2 = &D_801E0B78[func_80025DF8(3)];
+        break;
+    default:
+        m1 = &D_801E0B78[func_80025DF8(2)];
+        o1 = m1->obj;
+        m2 = &D_801E0B78[func_80025DF8(3)];
+        break;
+    }
+    o2 = m2->obj;
+    if (o2 == NULL) {
+        o2 = o1;
+    }
+    if (o1 == NULL) {
+        o1 = o2;
+    }
+    x1 = o1->pos_x.s.hi;
+    x2 = o2->pos_x.s.hi;
+    width = (s16) D_801D8866 + 1;
+    cam = D_801F9ACA;
+    left = (s16) D_801D8866 - 399;
+    if (D_801F9ACA >= left) {
+        if ((s16) x1 <= left) {
+            x1 += width;
+        }
+        if ((s16) x2 <= left) {
+            x2 += width;
+        }
+    }
+    x1 -= cam;
+    x2 -= cam;
+    if (m1->action == 0x37 || m1->action == 0x26 || (u16) m1->unk_1C8 != 0 || m1->id == 0) {
+        result = (s16) x2;
+        *vel2 = o2->vel_x.w;
+        *vel1 = 0;
+    } else {
+        *vel1 = o1->vel_x.w;
+        if ((u16) m2->unk_1C8 != 0 || m2->action == 0x37 || m2->action == 0x26 || m2->id == 0) {
+            *vel2 = 0;
+            result = (s16) x1;
+        } else {
+            *vel2 = o2->vel_x.w;
+            D_801FA724 = x2;
+            D_801FA728 = x1;
+            result = func_80028ADC((s16) x2, (s16) x1);
+        }
+    }
+    D_801FA9A8 = result;
+}
+#else
 INCLUDE_ASM("asm/main/nonmatchings/main", func_800288B0);
+#endif
 
 /* 91.3 %: the result is computed from a copy of the larger value (move v0,a2) in the original; the C computes it in place */
 #ifdef NON_MATCHING
@@ -6811,7 +7455,117 @@ void func_80029170(void) {
     D_801D3D64.unk_5E = 0;
 }
 
+#ifdef NON_MATCHING
+/* 95.49%: 95.5 %: the original keeps 0x37 from the first compare in a2 and stores it (m->action = 0x37), the C
+ * loads it again (one instruction more); action - 9 is computed before the 0x34 test, the original after it */
+s32 func_800291DC(Monster *m, GameObject *obj) {
+    u16 action;
+    u16 next;
+    u16 i;
+    Monster *other;
+    u16 id;
+
+    if (!(m->unk_058 & 1) || m->unk_046 != 0) {
+        return 0;
+    }
+    if (m->action == 0x37 || m->action == 0x26) {
+        if (m->lives == 0) {
+            if ((u16) m->unk_05E == 0) {
+                return 0;
+            }
+            func_8005D1BC((s32) m, m->id);
+            m->unk_058 &= ~1;
+            D_801FA8A0[m->id - 1] = 0;
+            m->id = 0;
+            D_8007A7D4 |= 1;
+            building_clear_monster(m);
+            m->unk_046 = 1;
+            D_8007A7D4 &= ~1;
+            if (m->obj != NULL) {
+                func_8001E4B0(m->obj);
+                m->obj = NULL;
+            }
+            main_free_kind((u16) (m->id + 0x790));
+            m->unk_178 = 0;
+            cdload_sort_players();
+            return 1;
+        }
+    } else if (m->action == 0x60) {
+        m->health.w = 0;
+        return 0;
+    } else {
+        if (m->health.w > 0xFFFF) {
+            return 0;
+        }
+        if (m->action == 0x63 || m->action == 0x2A || m->action == 0x47) {
+            return 0;
+        }
+        m->health.w = 0;
+        if (m->lives == 0) {
+            if (m->unk_18E == 0) {
+                if (m->climb_side != 0) {
+                    m->action = 0xF;
+                } else if (obj->pos_y.u.hi < 0xE1 || obj->pos_y.u.hi >= 0xF9) {
+                    m->action = 0xF;
+                    func_8001F724(0x72);
+                } else {
+                    next = m->action;
+                    action = next - 9;
+                    if (next == 0x34 || next == 0x35) {
+                        m->action = 0x26;
+                    } else if (action < 6) {
+                        return 0;
+                    } else {
+                        m->action = 0x37;
+                    }
+                    m->unk_0DC = 0;
+                    m->unk_0E4 = 0;
+                    m->unk_0E6 = 0;
+                    func_8001F724(0x72);
+                    if (D_801F9ACC.w != 0) {
+                        id = m->id;
+                        i = 7;
+                        do {
+                            if (id != i) {
+                                other = &D_801E0B78[i];
+                                if ((other->unk_058 & 1) && other->climb_side != 0) {
+                                    other->action = 0xF;
+                                }
+                            }
+                        } while (--i != 0);
+                    }
+                }
+            } else {
+                m->health.w = 0x50000;
+            }
+            return 0;
+        }
+    }
+    m->health.w = 0x440000;
+    m->unk_018 = 1;
+    m->unk_14C = 0;
+    m->unk_040 = 0;
+    m->lives--;
+    func_8001F724(0x14);
+    func_8001F724(0x72);
+    action = m->action;
+    if (action == 0x26) {
+        next = 0x34;
+    } else if (action == 0x37) {
+        next = 0xE;
+    } else if (m->climb_side != 0 || obj->pos_y.s.hi < 0xE1 || obj->pos_y.s.hi >= 0xF9) {
+        next = 0xF;
+    } else if (action >= 0x34 && action <= 0x35) {
+        return 0;
+    } else {
+        next = 0xA;
+    }
+    m->action = next;
+    return 0;
+}
+#else
 INCLUDE_ASM("asm/main/nonmatchings/main", func_800291DC);
+#endif
 
 void main_apply_health(Monster *arg0) {
     s32 old;
@@ -7071,7 +7825,137 @@ void func_80029D1C(void) {
     }
 }
 
+#ifdef NON_MATCHING
+/* 91.81%: 91.8 %: a first draft, the logic complete; registers differ from the start (the original keeps mode in s5
+ * and sx in s6), the screen x is computed into a2 and copied to sx, and the dy, dx sums still reassociate */
+extern s32 D_8007BD7C;
+void func_8005E214(void);
+
+void func_80029D5C(s32 mode, s32 player) {
+    Monster *m;
+    s32 bonus;
+    s32 boost;
+    u16 camx;
+    u16 camy;
+    u16 sx;
+    u16 ox;
+    u16 oy;
+    u16 right;
+    u16 edge;
+    u16 dx;
+    u16 dy;
+    u16 x;
+    s32 flags;
+
+    sx = 0;
+    boost = 0;
+    m = NULL;
+    dx = 0;
+    dy = 0;
+    bonus = 0;
+    if (D_800AA2DC != 0) {
+        bonus = bonus_get_round_kind();
+    }
+    camx = D_801F9ACA;
+    camy = D_801F9ACE;
+    if (mode == 2) {
+        if (D_8007BD7C <= 0) {
+            return;
+        }
+        m = &D_801E0B78[func_80025DF8(player)];
+        right = camx + 0x131;
+        edge = right;
+        ox = m->obj->pos_x.u.hi;
+        oy = m->obj->pos_y.u.hi;
+        if ((s16) D_801D8866 < (s16) right) {
+            edge = right - D_801D8866;
+        }
+        x = ox;
+        if ((s16) camx < (s16) ox && (s16) ox < (s16) edge) {
+            x = ox - camx;
+        }
+        sx = x;
+        if (m->action == 2 || m->action == 0x19) {
+            boost = 2;
+        } else {
+            boost = 0;
+        }
+        if ((s16) x >= 0x132) {
+            dx = m->obj->vel_x.u.hi + boost;
+            if ((s16) x - 0x131 < (s16) dx) {
+                dx = x - 0x131;
+            }
+            D_8007BD78.flags |= 2;
+        } else if ((s16) x < 0x5A) {
+            dx = m->obj->vel_x.u.hi - boost;
+            if ((s16) dx < (s16) x - 0x5A) {
+                dx = x - 0x5A;
+            }
+        }
+        flags = D_8007BD78.flags;
+        if (flags & 0x200) {
+            if (D_801F9AC8.s.hi <= 0 || (D_801F9AC8.s.hi = D_801F9AC8.u.hi - 5) <= 0) {
+                D_801F9AC8.s.hi = 0;
+                D_8007BD78.flags = flags & ~0x200;
+                func_8005E214();
+            }
+        }
+        oy -= 0xE1;
+        if (((s16) camy - (s16) oy >= 0x6F || (D_8007BD78.flags & 4)) && m->action != 2 && m->action != 0x2C) {
+            dy = camy - 0x6E;
+            dy = oy - dy;
+            D_8007BD78.flags |= 4;
+            if ((s16) dy < -4) {
+                dy = -4;
+            } else if ((s16) dy == 0) {
+                D_8007BD78.flags &= ~4;
+            }
+        } else if ((s16) oy - ((s16) camy - 0x32) > 0) {
+            dy = camy - 0x32;
+            dy = oy - dy;
+            if ((s16) dy >= 5) {
+                dy = 4;
+            }
+            if (-(s16) camy < (s16) dy) {
+                dy = -camy;
+            }
+        }
+    }
+    if (D_8007BD78.flags & 3) {
+        if ((s16) sx < 0xAB) {
+            dx -= 5;
+            dx -= boost;
+        } else if ((s16) sx >= 0xBE) {
+            dx += 5;
+            dx = boost + dx;
+        } else {
+            dx = m->obj->vel_x.s.hi;
+            if (dx == 0) {
+                D_8007BD78.flags &= ~3;
+            }
+        }
+    }
+    if (bonus == 1 && (s16) dx < 0) {
+        dx = 0;
+    }
+    x = D_801F9AC8.u.hi + dx;
+    D_801F9AC8.u.hi = x;
+    D_801F9ACC.u.hi += dy;
+    if ((s16) D_801D8866 < (s16) x) {
+        D_801F9AC8.s.hi = x - D_801D8866;
+    } else if ((s16) x < 0) {
+        D_801F9AC8.s.hi = x + D_801D8866;
+    }
+    if (D_801F9ACC.s.hi > 0) {
+        D_801F9ACC.s.hi = 0;
+    }
+    if (D_801F9AC8.s.hi >= 0x667) {
+        D_801F9AC8.s.hi = 0x666;
+    }
+}
+#else
 INCLUDE_ASM("asm/main/nonmatchings/main", func_80029D5C);
+#endif
 
 void func_8002A1AC(Monster *m, s16 count) {
     GameObject *saved;

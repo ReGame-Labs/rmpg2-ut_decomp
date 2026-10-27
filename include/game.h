@@ -169,7 +169,7 @@ typedef struct Monster {
                                                 * (func_8004C0E0); full, monster 5 gets its extra sprites */
     /* 0x014 */ Fixed meter_shown;             /* eased towards meter by 1/16 a frame (bonus_update_bars); meter_bar
                                                 * shows it */
-    /* 0x018 */ u8 unk_018[0x02];
+    /* 0x018 */ u16 unk_018;
     /* 0x01A */ u16 unk_01A;
     /* 0x01C */ u16 unk_01C;                   /* a countdown set from a random draw */
     /* 0x01E */ u16 unk_01E;                   /* its id at spawn */
@@ -268,7 +268,7 @@ typedef struct Monster {
     /* 0x146 */ s16 unk_146;
     /* 0x148 */ u16 unk_148;
     /* 0x14A */ u16 unk_14A;                   /* the last of the countdowns */
-    /* 0x14C */ u8 unk_14C[0x04];
+    /* 0x14C */ s32 unk_14C;
     /* 0x150 */ s16 unk_150;
     /* 0x152 */ u16 unk_152;
     /* 0x154 */ u8 unk_154[0x0C];
@@ -650,7 +650,9 @@ typedef struct Unk1D3D64 {
     /* 0x28 */ s16 unk_28;
     /* 0x2A */ u8 unk_2A[0x02];
     /* 0x2C */ s32 unk_2C;
-    /* 0x30 */ u8 unk_30[0x28];
+    /* 0x30 */ s32 unk_30;
+    /* 0x34 */ s32 unk_34;                     /* D_801D3D98[0] */
+    /* 0x38 */ u8 unk_38[0x20];
     /* 0x58 */ s32 unk_58;
     /* 0x5C */ u16 unk_5C;
     /* 0x5E */ u16 unk_5E;
