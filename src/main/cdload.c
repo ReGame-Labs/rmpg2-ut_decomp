@@ -112,6 +112,11 @@ s32 func_800614B0(s32 handle);
 s32 func_80061774(s32 handle, s32 spuAddr, s32 size);
 s32 func_800613FC(s32 index, s32 mode);
 s32 func_8006301C(s32 index, s32 spuAddr);
+s32 func_80061ACC(u8 *src, u8 *dst);
+s32 func_80061B4C(u8 *src, u8 *dst);
+s32 func_80061D10(u8 *src, u8 *dst);
+s32 func_80061F90(u8 *src, u8 *dst);
+void func_800621F8(u8 *bits, u8 *table, u32 dims);
 extern s16 D_80085304[];
 
 /* Lists the players of the monsters in D_801FB49C, sorted, 99 for none. */
@@ -192,7 +197,67 @@ s32 func_80061170(s32 index) {
     return D_80089DA0[index];
 }
 
-INCLUDE_ASM("asm/main/nonmatchings/cdload", cdload_read_file);
+/* Reads file `index` of the file table into buf, retrying until its checksum is right; returns its size. */
+s32 cdload_read_file(s32 index, u8 *buf) {
+    u8 param[8];
+    s32 size;
+    u32 sectors;
+    s32 tries;
+    s32 err;
+
+retry:
+    for (;;) {
+        size = D_80089DA0[index];
+        sectors = (u32)(size + 0x7FF) >> 11;
+        if (D_801E28EC != 0 || D_801D3710 != 0) {
+            func_800630E8(1);
+        }
+        if (cdload_wait_sync() == 0) {
+            CdReset(0);
+        }
+        tries = 5;
+        do {
+            param[0] = CdlModeSpeed;
+            param[1] = 1;
+            err = CdControl(CdlSetmode, param, NULL) == 0;
+            if (!err && cdload_wait_sync() == 0) {
+                err = 1;
+            }
+            VSync(3);
+            if (!err && CdControl(CdlSetloc, (u8 *)&D_80089820[index], param) == 0) {
+                err = 1;
+            }
+            if (!err && cdload_wait_sync() == 0) {
+                err = 1;
+            }
+            if (!err && CdRead(sectors, (u32 *)buf, 0x80) == 0) {
+                err = 1;
+            }
+            if (!err && cdload_wait_read_sync() == 0) {
+                err = 1;
+            }
+            if (!err) {
+                if (cdload_checksum(buf, size) == D_80010000[index]) {
+                    return size;
+                }
+                err = 2;
+            }
+            CdReset(0);
+            tries--;
+            cdload_wait_sync();
+        } while (tries != 0);
+        VSync(3);
+        if (err) {
+            goto retry;
+        }
+        if (CdControl(CdlSetloc, (u8 *)D_80089820, param) == 0) {
+            err = 1;
+        }
+        if (!err) {
+            cdload_wait_sync();
+        }
+    }
+}
 
 s32 cdload_wait_sync(void) {
     u8 result[8];
@@ -417,7 +482,36 @@ void cdload_load_city_table(s32 index) {
     D_8008527C = index;
 }
 
+/* Unpacks a packed file into dst by the method in the low nibble of its byte 3; returns the unpacked size. */
+/* 84.8%: dst is kept in a3 in the original (a1 here), which moves every case's argument setup */
+#ifdef NON_MATCHING
+s32 func_800619A4(u8 *dst, s32 arg1, u8 *src) {
+    s32 size;
+    u32 dims;
+
+    switch (((s8 *)src)[3] & 0xF) {
+    case 0:
+        size = *(u32 *)src & 0xFFFFFF;
+        memcpy(dst, src + 4, size);
+        return size;
+    case 1:
+        return func_80061ACC(src, dst);
+    case 2:
+        return func_80061B4C(src, dst);
+    case 3:
+        return func_80061D10(src, dst);
+    case 4:
+        return func_80061F90(src, dst);
+    case 5:
+        func_800621F8(src + ((s32 *)src)[1], src + 12, ((u32 *)src)[2]);
+        dims = ((u32 *)src)[2];
+        return ((dims & 0xFFFF) + 3 & ~3) * ((dims >> 16) + 1 & ~1);
+    }
+    return 0;
+}
+#else
 INCLUDE_ASM("asm/main/nonmatchings/cdload", func_800619A4);
+#endif
 
 s32 func_80061ACC(u8 *src, u8 *dst) {
     s8 *in;
@@ -449,9 +543,183 @@ s32 func_80061ACC(u8 *src, u8 *dst) {
 
 INCLUDE_ASM("asm/main/nonmatchings/cdload", func_80061B4C);
 
-INCLUDE_ASM("asm/main/nonmatchings/cdload", func_80061D10);
+/* Takes the next 6-bit symbol of the stream: four per three bytes, most significant first. */
+#define CDLOAD_GET6(x)                                      \
+    switch (phase++) {                                      \
+    case 0:                                                 \
+        b0 = *in++;                                         \
+        b1 = *in++;                                         \
+        b2 = *in++;                                         \
+        x = b0 >> 2;                                        \
+        break;                                              \
+    case 1:                                                 \
+        x = (b1 >> 4) | ((b0 << 4) & 0x30);                 \
+        break;                                              \
+    case 2:                                                 \
+        x = ((b1 << 2) & 0x3C) | (b2 >> 6);                 \
+        break;                                              \
+    case 3:                                                 \
+        x = b2 & 0x3F;                                      \
+        phase = 0;                                          \
+        break;                                              \
+    }
 
-INCLUDE_ASM("asm/main/nonmatchings/cdload", func_80061F90);
+/* Unpacks a 6-bit RLE stream: a symbol below 32 repeats the next one that many times plus one, a symbol from 32
+ * copies that many minus 31 symbols; the top two bits of byte 3 count the padding symbols at the end. */
+/* Takes the next 6-bit symbol of the stream: four per three bytes, most significant first. */
+#define CDLOAD_GET6(x)                                      \
+    switch (phase++) {                                      \
+    case 0:                                                 \
+        b0 = *src++;                                         \
+        b1 = *src++;                                         \
+        b2 = *src++;                                         \
+        x = b0 >> 2;                                        \
+        break;                                              \
+    case 1:                                                 \
+        x = (b1 >> 4) | ((b0 << 4) & 0x30);                 \
+        break;                                              \
+    case 2:                                                 \
+        x = ((b1 << 2) & 0x3C) | (b2 >> 6);                 \
+        break;                                              \
+    case 3:                                                 \
+        x = b2 & 0x3F;                                      \
+        phase = 0;                                          \
+        break;                                              \
+    }
+
+/* Unpacks a 6-bit RLE stream: a symbol below 32 repeats the next one that many times plus one, a symbol from 32
+ * copies that many minus 31 symbols; the top two bits of byte 3 count the padding symbols at the end. */
+/* Takes the next 6-bit symbol of the stream: four per three bytes, most significant first. */
+#define CDLOAD_GET6(x)                                      \
+    switch (phase++) {                                      \
+    case 0:                                                 \
+        b0 = *src++;                                         \
+        b1 = *src++;                                         \
+        b2 = *src++;                                         \
+        x = b0 >> 2;                                        \
+        break;                                              \
+    case 1:                                                 \
+        x = (b1 >> 4) | ((b0 << 4) & 0x30);                 \
+        break;                                              \
+    case 2:                                                 \
+        x = ((b1 << 2) & 0x3C) | (b2 >> 6);                 \
+        break;                                              \
+    case 3:                                                 \
+        x = b2 & 0x3F;                                      \
+        phase = 0;                                          \
+        break;                                              \
+    }
+
+/* Unpacks a 6-bit RLE stream: a symbol below 32 repeats the next one that many times plus one, a symbol from 32
+ * copies that many minus 31 symbols; the top two bits of byte 3 count the padding symbols at the end. */
+s32 func_80061D10(u8 *src, u8 *dst) {
+    u8 *start;
+    s32 count;
+    s32 phase;
+    s32 code;
+    s32 value;
+    u32 b0;
+    u32 b1;
+    u32 b2;
+
+    start = dst;
+    code = 0;
+    value = code;
+    b0 = code;
+    b1 = code;
+    b2 = code;
+    count = (*(u32 *)src & 0xFFFFFF) - 4;
+    count = count + count / 3 - (src[3] >> 6);
+    src += 4;
+    phase = code;
+    while (count > 0) {
+        CDLOAD_GET6(code);
+        if (code < 32) {
+            CDLOAD_GET6(value);
+            count -= 2;
+            for (; code >= 0; code--) {
+                *dst++ = value;
+            }
+        } else {
+            code -= 32;
+            count -= code + 2;
+            for (; code >= 0; code--) {
+                CDLOAD_GET6(*dst++);
+            }
+        }
+    }
+    return dst - start;
+}
+
+/* Puts a 4-bit value into the output, two per byte, low nibble first. */
+#define CDLOAD_PUT4(x)              \
+    acc |= (x) << (half * 4);       \
+    half ^= 1;                      \
+    if (half == 0) {                \
+        *dst++ = acc;               \
+        acc = 0;                    \
+    }
+
+/* Unpacks a 4-bit RLE stream: 0x80 | n is n + 7 zeros, 0x0v n a run of n v, 0x1v-0x6v one to six v, 0x7n n + 3
+ * nibbles packed two per byte, high first. */
+s32 func_80061F90(u8 *src, u8 *dst) {
+    u8 *start;
+    u8 *end;
+    s32 half;
+    u8 acc;
+    s32 n;
+    u8 c;
+
+    start = dst;
+    end = dst + ((s32)(*(u32 *)src & 0xFFFFFF) >> 1);
+    src += 4;
+    half = 0;
+    acc = half;
+    while (dst < end) {
+        c = *src++;
+        if (c & 0x80) {
+            s32 zeros;
+
+            for (zeros = (c & 0x7F) + 7; zeros > 0; zeros--) {
+                CDLOAD_PUT4(0);
+            }
+        } else {
+            n = c >> 4;
+            c &= 0xF;
+            switch (n) {
+            case 0:
+                for (n = *src++; n > 0; n--) {
+                    CDLOAD_PUT4(c);
+                }
+                break;
+            case 7:
+                for (n = c + 3; n > 0; n--) {
+                    c = *src++;
+                    CDLOAD_PUT4(c >> 4);
+                    if (--n == 0) {
+                        break;
+                    }
+                    CDLOAD_PUT4(c & 0xF);
+                }
+                break;
+            case 6:
+                CDLOAD_PUT4(c);
+            case 5:
+                CDLOAD_PUT4(c);
+            case 4:
+                CDLOAD_PUT4(c);
+            case 3:
+                CDLOAD_PUT4(c);
+            case 2:
+                CDLOAD_PUT4(c);
+            case 1:
+                CDLOAD_PUT4(c);
+                break;
+            }
+        }
+    }
+    return dst - start;
+}
 
 INCLUDE_ASM("asm/main/nonmatchings/cdload", func_800621F8);
 
