@@ -335,7 +335,7 @@ typedef struct GameState {
     /* 0x1C */ ObjectDef *unk_1C;
     /* 0x20 */ GameObject *cur_obj;            /* the object being updated (D_800AA268) */
     /* 0x24 */ s32 unk_24;                     /* D_800AA26C */
-    /* 0x28 */ s32 *unk_28;
+    /* 0x28 */ s32 unk_28;                     /* a counter (func_8003C3B0: the items left in the building) */
     /* 0x2C */ s32 unk_2C;
     /* 0x30 */ s32 *unk_30;
     /* 0x34 */ void *unk_34;
