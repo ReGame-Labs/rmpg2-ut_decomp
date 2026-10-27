@@ -1963,16 +1963,12 @@ void func_80053DEC(void) {
     D_800AA248.cur_obj = b;
 }
 
-#ifdef NON_MATCHING
-/* 95.71%: 95.7 %: the registers and the branch order match with sx an s16, but then (s16) x is not sign-extended
- * (the original's sll/sra); with sx an s32 the extension comes back and y and the flip flag swap s3/s4 */
 void func_80053EA8(void) {
     GameObject *obj;
     Monster *m;
     ObjectDef *def;
     u16 x;
     s32 y;
-    s16 sx;
     s16 flip;
 
     obj = D_800AA268.p;
@@ -1981,7 +1977,8 @@ void func_80053EA8(void) {
     m = obj->owner.monster;
     func_8001F724(0x61);
     if ((u32) (m->climb_side - 1) < 2) {
-        sx = (s16) x;
+        s32 sx = (s16) x;
+
         y = y - 0x13;
         flip = obj->flags & 0x10;
         if (!flip) {
@@ -1991,6 +1988,8 @@ void func_80053EA8(void) {
         }
         flip = (flip == 0) * 0x10;
     } else {
+        s32 sx;
+
         y = y - 0x20;
         flip = obj->flags & 0x10;
         sx = (s16) x;
@@ -2013,9 +2012,6 @@ void func_80053EA8(void) {
     obj->unk_9C = m->id;
     D_800AA248.cur_obj = obj;
 }
-#else
-INCLUDE_ASM("asm/main/nonmatchings/monster", func_80053EA8);
-#endif
 
 void func_80053FDC(void) {
     GameObject *b;
