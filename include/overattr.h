@@ -114,7 +114,8 @@ typedef struct { u32 pixels[32]; } CardIcon;  /* a 16x16 4-bit icon frame */
 /* A menu: record 0 holds the item count, a parent menu and the cursor, the items start at record 2. */
 typedef struct MenuRecord {
     /* 0x00 */ s32 unk_00;             /* record 0: the item count; an item: its TextMessage */
-    /* 0x04 */ struct MenuRecord *sub; /* record 0: another menu, whose item at the cursor is lit too */
+    /* 0x04 */ struct MenuRecord *sub; /* record 0: another menu, whose item at the cursor is lit too; an item:
+                                        * its action, a void (*)(void) (func_8009C1CC) */
     /* 0x08 */ s16 kind;               /* an item: the kind of its objects; record 0: the cursor */
     /* 0x0A */ u8 unk_0A[0x02];
 } MenuRecord;
@@ -150,8 +151,6 @@ extern s16 D_800A9898;
 extern s16 D_800A9868;                 /* the format screen's state */
 extern s16 D_800A9858;
 extern u16 D_801E28B8;                 /* the memory card's slot */
-extern u8 D_8009811C[];                /* "CARD SLOT 1", "CARD SLOT 1A": func_800A0CC0's literals */
-extern u8 D_80098128[];
 extern s16 D_800A9810[6];              /* the listed saves' text y */
 extern s16 D_800A9820[6];              /* their text x */
 extern s16 D_800A9830[6];              /* their slot */
@@ -175,6 +174,8 @@ extern GameObject *D_800A9808[2];      /* the two volume bars */
 extern GameObject *D_800A92F8[2];      /* their markers */
 extern u8 D_800A9890[6];                /* a name being entered, 5 letters */
 extern TextMessage *D_800A6F48[5];      /* the name entry's letters */
+extern u8 *D_8007A69C[7];               /* the names that unlock something (func_8009C1CC) */
+extern void (*D_800A6F5C[7])(void);     /* what each unlocks */
 /* The player bars (func_8009E8B8): three per player, in D_801E28F4[player * 3 + 31..33]. */
 extern s16 D_800A734C[];                /* their lengths, by player * 3 + bar */
 extern s16 D_800A92E0[];                /* the lengths shown */
@@ -202,14 +203,10 @@ extern s16 D_800A9850[];
 extern u16 D_800A8FC4[];                /* per monster: its sound when chosen */
 extern u16 D_8007C144[];
 extern s16 D_800A92A0;                 /* the format question's state: 0 ask, 3 answer, 4 format */
-extern u8 D_80098100[];                /* rodata literals shared by the memory-card screens */
 extern u8 D_80098260[];                /* "YES" */
 extern u8 D_80098264[];                /* "NO" */
 void func_80018C14(void);
 void func_800A1F8C(void);
-extern u8 D_800980E8[];                /* "ACCESSING MEMORY CARD" */
-extern u8 D_8009814C[];                /* "THERE IS NO MEMORY CARD" */
-extern u8 D_80098164[];                /* "INSERTED IN MEMORY" */
 extern s16 D_801FA958;
 extern s16 D_800A9880;
 s32 func_800A1B60(void);               /* the first used save slot, -1 for none */
@@ -218,8 +215,23 @@ s32 func_800A1258(void);
 extern TextMessage D_800A6400;
 extern s16 D_800A9848;                 /* the delete question's answer: 0 yes, 1 no */
 extern s16 D_801F9AB8;
+extern s16 D_801D3778;
+/* The controls screen (func_8009CA68): per player, the button layout's pictures and labels. */
+extern u16 *D_8007A7C0[];               /* the layouts: [4..7] the buttons 0x10, 0x20, 0x40, 0x80 */
+extern TextMessage D_800A6718;
+extern TextMessage D_800A6738;
+extern TextMessage D_800A6758;
+extern TextMessage D_800A6778;
+extern s32 D_800A6F7C[4];
+extern s16 D_800A6F8C[3];
+extern s16 D_800A6F94[];
+extern s16 D_800A6FAC[3];
+extern s16 D_800A6FB4[4];
+extern s16 D_800A6FBC[3];
+extern s16 D_801E0D64;
+void func_800A1434(s32 slot);           /* loads a saved game from the save file's slot */
 extern u16 D_801D883C;                 /* saved with the game (func_800A28DC) */
-extern u16 D_801E1CA8;
+extern s32 D_801E1CA8;
 extern s16 D_801D8728;
 s32 func_800A28A0(s32 id);             /* the slot of a save number, -1 for none */                /* per player: the shift of its pad bits */
 void func_80020BA0(s32, u16, GameObject *);
@@ -249,7 +261,7 @@ typedef struct {
     /* 0x04 */ u16 unk_04;
     /* 0x06 */ u16 unk_06;
     /* 0x08 */ u16 unk_08;
-    /* 0x0A */ u16 unk_0A;
+    /* 0x0A */ s16 unk_0A;              /* D_801E1CA8 */
     /* 0x0C */ u16 monster[3];         /* per player: the monster's number (func_800A28DC) */
     /* 0x12 */ u16 unk_12[3];
     /* 0x18 */ s32 health[3];
@@ -339,6 +351,7 @@ void func_800A0CC0(void);
 void func_8009F968(OverattrPlacement *p, s32 n, s32 color);
 void func_8009E3C0(s32 kind, s32 value);
 void func_8009E40C(void *list, s32 selected);
+void func_8009E190(void *list, s32 selected, s32 lit, s32 normal);
 void func_8009E4D4(void);
 void func_8009CE5C(void);
 void func_8009D0B0(void);

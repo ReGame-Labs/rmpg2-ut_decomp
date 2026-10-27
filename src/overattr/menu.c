@@ -302,7 +302,68 @@ void func_8009C1AC(void) {
     func_800A0CC0();
 }
 
-INCLUDE_ASM("asm/overattr/nonmatchings/menu", func_8009C1CC);
+void func_8009C1CC(void) {
+    MenuRecord *menu = D_800A92C0;
+    s32 i;
+
+    if ((D_800A9220 & 0x401004) && D_801F9944 == 0) {
+        D_800A9860 = 0x708;
+        if (--D_800A92D0 < 0) {
+            D_800A92D0 = D_800A9840 - 1;
+        }
+        func_8009E190(menu, D_800A92D0, (s16) D_801E2A44, D_801F9AAC);
+        D_801F9944 = 0xB;
+        D_801D872C /= 2;
+        func_8001F724(0x1E);
+    } else if ((D_800A9220 & 0x802008) && D_801F9944 == 0) {
+        D_800A9860 = 0x708;
+        if (++D_800A92D0 >= D_800A9840) {
+            D_800A92D0 = 0;
+        }
+        func_8009E190(D_800A92C0, D_800A92D0, (s16) D_801E2A44, D_801F9AAC);
+        D_801F9944 = 0xB;
+        D_801D872C /= 2;
+        func_8001F724(0x1E);
+    } else if ((D_800A9220 & 0x01304C13) && D_801F9944 == 0) {
+        D_800A9860 = 0x708;
+        ((void (*)(void)) D_800A92C0[D_800A92D0 + 2].sub)();
+        D_801F9944 = 0xB;
+        D_801D872C /= 2;
+        if (D_800A92D0 == 5) {
+            return;
+        }
+    } else if ((D_800A9220 & 0x04010040) && D_801F9944 == 0) {
+        D_800A9860 = 0x708;
+        if (menu->sub != NULL) {
+            D_800A92D8 = menu->sub;
+            D_800A9800 = 1;
+            D_800A9870 = menu->kind;
+            func_8001F724(3);
+            func_8009E4D4();
+            D_801F9944 = 0xB;
+            D_801D872C /= 2;
+            return;
+        }
+    }
+    for (i = 0; i < 5; i++) {
+        D_800A6F48[i]->text[0] = D_800A9890[i];
+        func_8001E450(i + 0x421);
+        func_8001ED54((TextMessage *) D_800A92C0[i + 2].unk_00);
+    }
+    func_8009E190(D_800A92C0, D_800A92D0, (s16) D_801E2A44, D_801F9AAC);
+    for (i = 0; i < 7; i++) {
+        if (strcmp(D_800A9890, D_8007A69C[i]) == 0) {
+            D_800A6F5C[i]();
+            func_8001F724(3);
+            D_800A92D8 = menu->sub;
+            D_800A9800 = 1;
+            D_800A9870 = menu->kind;
+            func_8001F724(3);
+            func_8009E4D4();
+        }
+    }
+    func_80018C14();
+}
 
 INCLUDE_RODATA("asm/overattr/nonmatchings/menu", D_80097F58);
 
@@ -439,7 +500,73 @@ s32 func_8009C828(void) {
     return 1;
 }
 
+#ifdef NON_MATCHING
+/* 81.21%: the shape is the original's (size 0x2A4, original 0x2C8); the loops' registers differ: the original
+ * spills i, &D_800A6FBC[i] and i * 2, and steps the picture table's index as (k - 4) * 4. */
+void func_8009CA68(void) {
+    u16 *cfg[3];
+    s32 i;
+    s32 k;
+    s32 n;
+    s32 j;
+    s32 obj;
+    s32 kind;
+    s32 end;
+    s16 *base;
+
+    for (i = 0; i < 3; i++) {
+        if (D_800A92A8[i] != D_801D8800[i]) {
+            D_800A92A8[i] = D_801D8800[i];
+            obj = i * 4;
+            base = &D_800A6FBC[i];
+            cfg[i] = D_8007A7C0[D_801D8800[i]];
+            kind = *base;
+            end = kind + 4;
+            n = 0;
+            for (; kind < end; kind++) {
+                func_8001E450(kind);
+            }
+            for (k = 4, j = 0; k < 8; k++, j++) {
+                switch (cfg[i][k]) {
+                case 0x10:
+                    D_800A6718.x = D_800A6FAC[i];
+                    D_800A6718.y = D_800A6FB4[n];
+                    D_800A6718.kind = *base + n;
+                    func_8001ED54(&D_800A6718);
+                    break;
+                case 0x20:
+                    D_800A6738.x = D_800A6FAC[i];
+                    D_800A6738.y = D_800A6FB4[n];
+                    D_800A6738.kind = *base + n;
+                    func_8001ED54(&D_800A6738);
+                    break;
+                case 0x40:
+                    D_800A6758.x = D_800A6FAC[i];
+                    D_800A6758.y = D_800A6FB4[n];
+                    D_800A6758.kind = *base + n;
+                    func_8001ED54(&D_800A6758);
+                    break;
+                case 0x80:
+                    D_800A6778.x = D_800A6FAC[i];
+                    D_800A6778.y = D_800A6FB4[n];
+                    D_800A6778.kind = *base + n;
+                    func_8001ED54(&D_800A6778);
+                    break;
+                default:
+                    continue;
+                }
+                func_80020BA0(D_800A6F7C[j], D_801E28F4[obj]->flags, D_801E28F4[obj]);
+                D_801E28F4[obj]->pos_x.s.hi = D_800A6F8C[i];
+                D_801E28F4[obj]->pos_y.s.hi = D_800A6F94[obj];
+                n++;
+                obj++;
+            }
+        }
+    }
+}
+#else
 INCLUDE_ASM("asm/overattr/nonmatchings/menu", func_8009CA68);
+#endif
 
 void func_8009CD30(void) {
     s32 i;
@@ -1313,7 +1440,7 @@ void func_8009F2F8(void) {
 }
 
 #ifdef NON_MATCHING
-/* 80.38%: 80.4 %: the loop's invariants differ: the original keeps %hi(D_800A9860) in fp and D_800A8F00 in s7, and
+/* 80.38%: the loop's invariants differ: the original keeps %hi(D_800A9860) in fp and D_800A8F00 in s7, and
  * steps a pointer at the record's unk_08 (s0 = D_800A8FD4 + 8); this C hoists D_800A8FD4 itself and reaches the
  * records from it. */
 void func_8009F554(s32 unused, s32 *timer) {
@@ -1578,21 +1705,112 @@ void func_8009FEE4(void) {
 
 INCLUDE_ASM("asm/overattr/nonmatchings/menu", func_8009FF38);
 
-INCLUDE_RODATA("asm/overattr/nonmatchings/menu", D_800980E8);
+void func_800A0CC0(void) {
+    s32 status;
+    MenuRecord *menu = D_800A92C0;
 
-INCLUDE_RODATA("asm/overattr/nonmatchings/menu", D_80098100);
-
-INCLUDE_RODATA("asm/overattr/nonmatchings/menu", D_8009811C);
-
-INCLUDE_RODATA("asm/overattr/nonmatchings/menu", D_80098128);
-
-INCLUDE_ASM("asm/overattr/nonmatchings/menu", func_800A0CC0);
-
-INCLUDE_RODATA("asm/overattr/nonmatchings/menu", D_8009814C);
-
-INCLUDE_RODATA("asm/overattr/nonmatchings/menu", D_80098164);
-
-INCLUDE_RODATA("asm/overattr/nonmatchings/menu", jtbl_80098178);
+    switch (D_800A9878) {
+    case 0:
+        func_8001F61C("ACCESSING MEMORY CARD", 0xC8, 0x5A, 1, D_801F9AAC, D_8007ABCC, 0, 0x400);
+        D_801E29BC = 0xA;
+        D_800A9878 = 0xC;
+        break;
+    case 12:
+        if (D_801E29BC-- > 0) {
+            break;
+        }
+        status = card_get_status();
+        func_8001E450(0x400);
+        if (status == 2) {
+            D_801E29BC = 0x96;
+            D_800A9878 = 1;
+            func_8001F61C("THE MEMORY CARD IN MEMORY", 0xC8, 0x5A, 1, D_801F9AAC, D_8007ABCC, 0, 0x400);
+            if (D_801E28B8 == 0) {
+                func_8001F61C("CARD SLOT 1", 0xC8, 0x78, 1, D_801F9AAC, D_8007ABCC, 0, 0x400);
+            } else {
+                func_8001F61C("CARD SLOT 1A", 0xC8, 0x78, 1, D_801F9AAC, D_8007ABCC, 0, 0x400);
+            }
+            func_8001F61C("IS NOT FORMATTED", 0xC8, 0x96, 1, D_801F9AAC, D_8007ABCC, 0, 0x400);
+        }
+        if (status == 1) {
+            D_801E29BC = 0x96;
+            D_800A9878 = status;
+            func_8001F61C("THERE IS NO MEMORY CARD", 0xC8, 0x5A, 0, D_801F9AAC, D_8007ABCC, 0, 0x400);
+            func_8001F61C("INSERTED IN MEMORY", 0xC8, 0x78, 0, D_801F9AAC, D_8007ABCC, 0, 0x400);
+            if (D_801E28B8 == 0) {
+                func_8001F61C("CARD SLOT 1", 0xC8, 0x96, 0, D_801F9AAC, D_8007ABCC, 0, 0x400);
+            } else {
+                func_8001F61C("CARD SLOT 1A", 0xC8, 0x96, 0, D_801F9AAC, D_8007ABCC, 0, 0x400);
+            }
+        }
+        if (status == 0) {
+            D_801E29BC = 3;
+            D_800A9878 = 2;
+            func_800A32CC();
+        }
+        break;
+    case 1:
+        if (D_801E29BC > 0) {
+            D_801E29BC--;
+        } else {
+            func_8009DCC0();
+        }
+        break;
+    case 2:
+        if (D_801E29BC-- > 0) {
+            break;
+        }
+        D_801E29BC = 0x5DC;
+        status = card_read_save(&D_800A9300);
+        D_800A9878 = 3;
+        D_801D3780 = 0xA;
+        func_8001E450(0x400);
+        if (status != 0) {
+            card_init_save(&D_800A9300);
+            D_800A9840 = 0;
+        } else {
+            D_800A9840 = func_800A1258();
+        }
+        break;
+    case 3:
+        if ((D_800A9220 & 0x100401) && D_801F9944 == 0) {
+            if (--D_800A92D0 < 0) {
+                D_800A92D0 = D_800A9840;
+            }
+            D_801F9944 = 0xB;
+            D_801D872C /= 2;
+            func_8001F724(0x1E);
+        } else if ((D_800A9220 & 0x200802) && D_801F9944 == 0) {
+            if (++D_800A92D0 > D_800A9840) {
+                D_800A92D0 = 0;
+            }
+            D_801F9944 = 0xB;
+            D_801D872C /= 2;
+            func_8001F724(0x1E);
+        } else if ((D_800A9220 & 0x01004010) && D_801F9944 == 0) {
+            if (D_800A92D0 == D_800A9840) {
+                func_8009DCC0();
+                break;
+            }
+            D_801D3778 = 0x1E;
+            D_801E0D64 = 1;
+            func_800A1434(D_800A9830[D_800A92D0]);
+            D_801F9944 = 0xB;
+            D_801D872C /= 2;
+        } else if ((D_800A9220 & 0x04010040) && D_801F9944 == 0 && menu[0].sub != NULL) {
+            D_800A92D8 = menu[0].sub;
+            D_800A9800 = 1;
+            D_800A9870 = menu[0].kind;
+            func_8001F724(3);
+            func_8009E4D4();
+            D_801F9944 = 0xB;
+            D_801D872C /= 2;
+        }
+        func_8009E310((s16) D_801E2A44, D_801F9AAC);
+        func_80018C14();
+        break;
+    }
+}
 
 #ifdef NON_MATCHING
 /* 81.7 %: the city names' address is hoisted into s7 (a frame 8 bytes larger); the original reloads it. */
@@ -1641,7 +1859,56 @@ s32 func_800A1258(void) {
 INCLUDE_ASM("asm/overattr/nonmatchings/menu", func_800A1258);
 #endif
 
-INCLUDE_ASM("asm/overattr/nonmatchings/menu", func_800A1434);
+void func_800A1434(s32 slot) {
+    s32 i;
+    Monster *m;
+
+    D_801FA958 = D_800A9300.slots[slot].unk_00;
+    D_801FA960 = D_800A9300.slots[slot].city;
+    D_801D883C = D_800A9300.slots[slot].unk_04;
+    D_801FA964 = D_800A9300.slots[slot].unk_06;
+    D_801D8728 = D_800A9300.slots[slot].unk_08;
+    D_801E1CA8 = D_800A9300.slots[slot].unk_0A;
+    D_801D36FC = D_800A9300.slots[slot].mode;
+    D_801E289C = D_800A9300.slots[slot].unk_66;
+    D_801FA984[0] = D_800A9300.slots[slot].unk_50[0];
+    D_801FA984[1] = D_800A9300.slots[slot].unk_50[1];
+    D_801FA984[2] = D_800A9300.slots[slot].unk_50[2];
+    D_801FA984[3] = D_800A9300.slots[slot].unk_50[3];
+    for (i = 0; i < 7; i++) {
+        m = &D_801E0B78[i + 1];
+        m->action = 0;
+        m->unk_01C = 0;
+        m->unk_1CC = 0;
+        m->id = 0;
+        m->unk_058 = 0;
+        D_801F9A44[i] = D_800A9300.slots[slot].unk_58[i];
+        D_801FA8A0[i] = D_800A9300.slots[slot].unk_49[i];
+    }
+    for (i = 0; i < 3; i++) {
+        m = &D_801E0B78[func_80025DF8(i + 1)];
+        m->id = D_800A9300.slots[slot].monster[i];
+        m->unk_004 = D_800A9300.slots[slot].unk_12[i];
+        m->unk_002 = D_800A9300.slots[slot].unk_12[i];
+        m->health.w = D_800A9300.slots[slot].health[i];
+        m->meter.w = D_800A9300.slots[slot].meter[i];
+        m->unk_038 = D_800A9300.slots[slot].unk_30[i];
+        D_801D8800[i] = D_800A9300.slots[slot].unk_46[i];
+    }
+    D_801E1CB4 = D_800A9300.slots[slot].unk_42;
+    D_8007A7D4 &= ~1;
+    D_8007A694 = D_800A9300.slots[slot].unk_3E;
+    D_801E2150 = D_800A9300.slots[slot].unk_40;
+    D_8007A68A = D_800A9300.slots[slot].unk_44;
+    D_8007A68C = D_800A9300.slots[slot].unk_68;
+    D_801F9ABC = D_800A9300.slots[slot].unk_6A;
+    D_8007A686 = D_800A9300.slots[slot].unk_6C;
+    D_8007A688 = D_800A9300.slots[slot].unk_6E;
+    D_8007A68E = D_800A9300.slots[slot].unk_70;
+    D_8007C974 = D_800A9300.slots[slot].unk_72;
+    func_80062DA8((u8) D_801E1CB4);
+    func_80062D88((u8) D_801E2150);
+}
 
 void func_800A1720(void) {
     D_801D885C = 0x44;
@@ -1678,7 +1945,7 @@ void func_800A1804(void) {
     switch (D_800A92A0) {
     case 0:
         if (D_801E29BC == 5) {
-            func_8001F61C(D_800980E8, 0xC8, 0x5A, 1, D_801F9AAC, D_8007ABCC, 0, 0x400);
+            func_8001F61C("ACCESSING MEMORY CARD", 0xC8, 0x5A, 1, D_801F9AAC, D_8007ABCC, 0, 0x400);
         }
         if (D_801E29BC-- > 0) {
             break;
@@ -1694,12 +1961,12 @@ void func_800A1804(void) {
         if (status == 1) {
             D_801E29BC = 0x96;
             D_800A92A0 = status;
-            func_8001F61C(D_8009814C, 0xC8, 0x5A, 0, D_801F9AAC, D_8007ABCC, 0, 0x400);
-            func_8001F61C(D_80098164, 0xC8, 0x78, 0, D_801F9AAC, D_8007ABCC, 0, 0x400);
+            func_8001F61C("THERE IS NO MEMORY CARD", 0xC8, 0x5A, 0, D_801F9AAC, D_8007ABCC, 0, 0x400);
+            func_8001F61C("INSERTED IN MEMORY", 0xC8, 0x78, 0, D_801F9AAC, D_8007ABCC, 0, 0x400);
             if (D_801E28B8 == 0) {
-                func_8001F61C(D_8009811C, 0xC8, 0x96, 0, D_801F9AAC, D_8007ABCC, 0, 0x400);
+                func_8001F61C("CARD SLOT 1", 0xC8, 0x96, 0, D_801F9AAC, D_8007ABCC, 0, 0x400);
             } else {
-                func_8001F61C(D_80098128, 0xC8, 0x96, 0, D_801F9AAC, D_8007ABCC, 0, 0x400);
+                func_8001F61C("CARD SLOT 1A", 0xC8, 0x96, 0, D_801F9AAC, D_8007ABCC, 0, 0x400);
             }
             break;
         }
@@ -1779,7 +2046,7 @@ s32 func_800A1B60(void) {
 void func_800A1B9C(void) {
     switch (D_800A92A0) {
     case 0:
-        func_8001F61C(D_80098100, 0xC8, 0x2D, 1, D_801F9AAC, D_8007AD4C, 0, 0x400);
+        func_8001F61C("THE MEMORY CARD IN MEMORY", 0xC8, 0x2D, 1, D_801F9AAC, D_8007AD4C, 0, 0x400);
         if (D_801E28B8 == 0) {
             func_8001F61C("CARD SLOT 1 IS", 0xC8, 0x41, 1, D_801F9AAC, D_8007AD4C, 0, 0x400);
         } else {
@@ -1859,9 +2126,9 @@ void func_800A1F8C(void) {
         func_8001F61C("FORMATTING THE MEMORY", 0xC8, 0x5A, 1, D_801F9AAC, D_8007ABCC, 0, 0x400);
         func_8001F61C("CARD IN MEMORY", 0xC8, 0x78, 1, D_801F9AAC, D_8007ABCC, 0, 0x400);
         if (D_801E28B8 == 0) {
-            func_8001F61C(D_8009811C, 0xC8, 0x96, 1, D_801F9AAC, D_8007ABCC, 0, 0x400);
+            func_8001F61C("CARD SLOT 1", 0xC8, 0x96, 1, D_801F9AAC, D_8007ABCC, 0, 0x400);
         } else {
-            func_8001F61C(D_80098128, 0xC8, 0x96, 1, D_801F9AAC, D_8007ABCC, 0, 0x400);
+            func_8001F61C("CARD SLOT 1A", 0xC8, 0x96, 1, D_801F9AAC, D_8007ABCC, 0, 0x400);
         }
         break;
     case 2:
@@ -2106,12 +2373,12 @@ void func_800A28DC(void) {
         break;
     case 8:
         if (D_801E29BC == 0xB4) {
-            func_8001F61C(D_8009814C, 0xC8, 0x5A, 1, D_801F9AAC, D_8007ABCC, 0, 0x400);
-            func_8001F61C(D_80098164, 0xC8, 0x78, 1, D_801F9AAC, D_8007ABCC, 0, 0x400);
+            func_8001F61C("THERE IS NO MEMORY CARD", 0xC8, 0x5A, 1, D_801F9AAC, D_8007ABCC, 0, 0x400);
+            func_8001F61C("INSERTED IN MEMORY", 0xC8, 0x78, 1, D_801F9AAC, D_8007ABCC, 0, 0x400);
             if (D_801E28B8 == 0) {
-                func_8001F61C(D_8009811C, 0xC8, 0x96, 1, D_801F9AAC, D_8007ABCC, 0, 0x400);
+                func_8001F61C("CARD SLOT 1", 0xC8, 0x96, 1, D_801F9AAC, D_8007ABCC, 0, 0x400);
             } else {
-                func_8001F61C(D_80098128, 0xC8, 0x96, 1, D_801F9AAC, D_8007ABCC, 0, 0x400);
+                func_8001F61C("CARD SLOT 1A", 0xC8, 0x96, 1, D_801F9AAC, D_8007ABCC, 0, 0x400);
             }
         }
         if (D_801E29BC-- < 0) {
@@ -2121,7 +2388,7 @@ void func_800A28DC(void) {
         break;
     case 9:
         if (D_801E29BC == 0xB4) {
-            func_8001F61C(D_80098100, 0xC8, 0x5A, 1, D_801F9AAC, D_8007ABCC, 0, 0x400);
+            func_8001F61C("THE MEMORY CARD IN MEMORY", 0xC8, 0x5A, 1, D_801F9AAC, D_8007ABCC, 0, 0x400);
             if (D_801E28B8 == 0) {
                 func_8001F61C("CARD SLOT 1 IS FULL", 0xC8, 0x78, 1, D_801F9AAC, D_8007ABCC, 0, 0x400);
             } else {
