@@ -142,8 +142,6 @@ void func_8002AD84(void) {
     } while (var_s2 < 0x50);
 }
 
-/* 88 %: the sky's daylight colours; the original holds D_801FAC80's %hi in a0 and 0x80 in a1 (swapped here) and loads the three colour bytes before the store to D_801FB41C, one nop less */
-#ifdef NON_MATCHING
 void func_8002ADE8(void) {
     D_801FAC80->unk_74 = 0xA0;
     D_801FAC80->unk_75 = 0xA0;
@@ -163,12 +161,9 @@ void func_8002ADE8(void) {
     D_801FAC80->unk_B0 = 0xA0;
     D_801FAC80->unk_B1 = 0xA0;
     D_801FAC80->unk_B2 = 0x80;
-    D_801FB41C = ((((D_801FB41C >> 16) & 0xFF) + 0x20) << 16) | ((((D_801FB41C >> 8) & 0xFF) + 0x20) << 8) | ((D_801FB41C & 0xFF) + 0x20);
     D_801FA9A4 = (D_801FAC80->unk_98 << 16) | (D_801FAC80->unk_99 << 8) | D_801FAC80->unk_9A;
+    D_801FB41C = ((((D_801FB41C >> 16) & 0xFF) + 0x20) << 16) | ((((D_801FB41C >> 8) & 0xFF) + 0x20) << 8) | ((D_801FB41C & 0xFF) + 0x20);
 }
-#else
-INCLUDE_ASM("asm/main/nonmatchings/building", func_8002ADE8);
-#endif
 
 void building_update_sky(void) {
     s32 i;
@@ -1540,9 +1535,6 @@ void *func_8002DAAC(u16 which, u16 n, BuildingItem *rec) {
 
 
 
-#ifdef NON_MATCHING
-/* 92 %: the original lays the `v == 0` and `v == n` outcomes out of line after an inlined `return result` for the 2;
- * the same statements in every nesting tried keep them in line. */
 s32 func_8002DB3C(u16 which, u16 n, BuildingItem *rec) {
     BuildingPart *g;
     s32 result;
@@ -1570,10 +1562,10 @@ s32 func_8002DB3C(u16 which, u16 n, BuildingItem *rec) {
         } else {
             v = g->unk_06;
             if (v != 0) {
-                if (v != n && v < 5) {
-                    result = 2;
-                } else {
+                if (v == n || v >= 5) {
                     result = 1;
+                } else {
+                    result = 2;
                 }
             } else {
                 result = 3;
@@ -1584,9 +1576,6 @@ s32 func_8002DB3C(u16 which, u16 n, BuildingItem *rec) {
     }
     return result;
 }
-#else
-INCLUDE_ASM("asm/main/nonmatchings/building", func_8002DB3C);
-#endif
 
 void func_8002DBF4(u16 which, u16 n, Monster *a, BuildingItem *rec) {
     GameObject *saved;

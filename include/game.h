@@ -528,7 +528,7 @@ typedef struct BuildingBlock {
     /* 0x1E */ s16 unk_1E;                     /* the top y */
 } BuildingBlock;
 
-/* One of a building item's three parts; a behaviour slot takes one free part (Ai.unk_10.part, func_8003E1C8). */
+/* One of a building item's three parts; a behaviour slot takes one free part (Ai.unk_10.part, actor_pick_building_part). */
 typedef struct BuildingPart {
     /* 0x00 */ GameObject *unk_00;
     /* 0x04 */ u16 unk_04;                     /* its side: 1 left, 2 right, else the middle (func_8003E59C) */

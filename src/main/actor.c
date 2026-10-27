@@ -54,7 +54,7 @@ void func_8003DAA0(Ai *ai);
 s16 func_8003DCC8(Ai *ai);
 void func_8003DD44(Ai *ai);
 void func_8003DF34(Ai *ai);
-BuildingItem *func_8003E1C8(BuildingPart **part, Ai *ai);   /* the second argument is not used */
+BuildingItem *actor_pick_building_part(BuildingPart **part, Ai *ai);   /* the second argument is not used */
 extern s16 D_8007DEC0[][8]; /* by item count - 3: 8 item numbers to pick from */
 extern s16 D_8007DFA0;      /* the last building picked */
 extern u16 D_801FA93C;      /* the picked part's side */
@@ -708,7 +708,7 @@ void func_8003DD70(Ai *ai) {
         D_800AA248.cur_obj->pos_y.w = 0x02000000;
         return;
     }
-    item = func_8003E1C8(&part, ai);
+    item = actor_pick_building_part(&part, ai);
     if (item == NULL) {
         ai->timer = 0xF0;
         return;
@@ -828,7 +828,7 @@ void func_8003DFD4(void) {
 /* Picks a free part of a standing building for a behaviour slot: a random building (not the last one picked in the
  * modes of D_800AA2DC & 0xE00), then up to 5 random sides, then up to 7 items from the side's limit (or a random
  * row of D_8007DEC0 by item count). Returns the item and the part in *part, or NULL. */
-BuildingItem *func_8003E1C8(BuildingPart **part, Ai *ai) {
+BuildingItem *actor_pick_building_part(BuildingPart **part, Ai *ai) {
     Building *b;
     BuildingItem *item;
     BuildingPart *p;

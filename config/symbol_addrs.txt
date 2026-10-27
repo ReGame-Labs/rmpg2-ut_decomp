@@ -414,6 +414,7 @@ pickup_collect = 0x8003BAB0; // type:func  (m) hands every pickup the monster to
 npc_update_aim = 0x80039EC4; // type:func  (npc) when the countdown ends, the slope to the nearest player picks the aim 0..2 (unk_24) and a new aim starts D_8007DB04[old * 3 + new]
 
 // actor (src/main/actor.c): the actors of the level's list and the behaviour slots around the current object.
+actor_pick_building_part = 0x8003E1C8; // type:func  (&part, ai) a random free part of a standing building for a behaviour slot, its item or NULL
 actor_take_hit = 0x8003F74C; // type:func  (player, actor) what the player's hit does, by the actor's kind and state
 
 // ai (src/main/ai.c): the behaviour slots' action dispatcher and state handlers.
