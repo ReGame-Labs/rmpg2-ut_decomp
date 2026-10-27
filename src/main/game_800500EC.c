@@ -999,26 +999,24 @@ u16 func_80053AC4(s16 a, s16 b, s16 c, s16 d, Monster *e) {
 }
 
 #ifdef NON_MATCHING
-/* 93 %: the fifth argument and the x copy swap t0/t1, and the first bound's subtraction is scheduled before the second load */
+/* 99.6 %: (ay - dy) and (ay + dy) land in v1/v0 here; the original computes each into a0, ay's own register */
 s32 func_80053B30(s16 x, s16 y, s16 dx, s16 dy, Monster *e) {
     s16 px;
-    s16 lo_x;
-    s16 lo_y;
-    s16 hi_x;
-    s16 hi_y;
+    u16 ax;
+    u16 ay;
 
     px = x;
     if (x < D_801F9ACA) {
         px = x + ((D_801D8864.w + 1) >> 16);
     }
-    lo_x = e->unk_108 - dx;
-    lo_y = e->unk_10A - dy;
-    if (px < lo_x || y < lo_y) {
+    ax = e->unk_108;
+    ay = e->unk_10A;
+    if (px < (s16) (ax - dx) || y < (s16) (ay - dy)) {
         return 0;
     }
-    hi_x = e->unk_10C + dx;
-    hi_y = e->unk_10E + dy;
-    if (hi_x < px || hi_y < y) {
+    ax = e->unk_10C;
+    ay = e->unk_10E;
+    if ((s16) (ax + dx) < px || (s16) (ay + dy) < y) {
         return 0;
     }
     return 1;
@@ -1333,7 +1331,6 @@ void func_80054608(u16 kind, Monster *e, Building *u) {
 
 #ifdef NON_MATCHING
 /* 89 %: the count is loaded into its own register at once, and i steps as ++i != n (addiu/move/andi) in the original */
-
 Building *func_80054728(u16 n) {
     Building *city;
     u16 i;
@@ -1753,7 +1750,38 @@ void func_80055948(Monster *e, Building *u) {
     }
 }
 
-INCLUDE_ASM("asm/main/nonmatchings/game_800500EC", func_80055970);
+void func_80055970(Monster *e, Building *city) {
+    Building *start;
+    GameState *g;
+    u16 kind;
+
+    if (!(D_800AA2DC & 0x38)) {
+        kind = city->unk_008;
+        start = city;
+        if (city == D_801D3DC8) {
+            city = &D_801D3DC8[D_801E29A4 - 1];
+        } else {
+            city--;
+        }
+        if (kind < city->unk_008 || city->unk_014 >= 0xB) {
+            func_80055B68(e, start);
+            return;
+        }
+        g = &D_800AA248;
+        if (!func_80056378(g->unk_0C, city)) {
+            func_80055AB8(e, city, start);
+            return;
+        }
+        if (func_800573EC(e, city, e->unk_1B2) == 1) {
+            e->unk_104 = 0;
+            g->cur_obj->vel_y.w = 0;
+            return;
+        }
+        func_800560A8(e, city);
+        e->action = 0xD;
+        g->unk_14 = 0xD;
+    }
+}
 
 void func_80055AB8(Monster *e, Building *city, Building *start) {
     if (func_800562E4(D_800AA248.unk_0C, city) == 0) {
@@ -1775,7 +1803,7 @@ void func_80055B68(Monster *e, Building *city) {
     u16 kind;
 
     kind = city->unk_008;
-    if (city == &D_801D3DC8[(s16) D_801E29A4 - 1]) {
+    if (city == &D_801D3DC8[D_801E29A4 - 1]) {
         city = D_801D3DC8;
     } else {
         city++;
@@ -2012,7 +2040,36 @@ void func_800567E8(Monster *e, Building *city) {
     func_8005478C(e);
 }
 
-INCLUDE_ASM("asm/main/nonmatchings/game_800500EC", func_80056840);
+u16 func_80056840(Monster *e) {
+    Building *city;
+    s32 d;
+
+    D_800AA248.unk_0C = e->unk_0F4;
+    D_800AA248.unk_10 = D_800AA248.cur_obj->pos_y.w;
+    D_800AA248.unk_10 -= (&D_801F9AC8)[1].w; /* FAKE: the camera y (D_801F9ACC) read as the word after the camera x: the original loads it after the state stores, as a member of the camera record would be (game.h declares it a scalar) */
+    if ((u32) (D_800AA248.unk_10 - 0x580000) > 0xB00000) {
+        return 0;
+    }
+    D_800AA248.unk_10 = D_800AA248.cur_obj->pos_y.s.hi;
+    D_800AA248.unk_40 = D_801E29A4;
+    if (D_801E29A4 == 0) {
+        return 0;
+    }
+    D_800AA248.unk_04 = 0;
+    city = D_801D3DC8;
+    do {
+        D_800AA248.unk_04++;
+        if (city->unk_014 < 9) {
+            d = (s16) city->unk_004 - e->unk_0F4;
+            if ((d < 0 ? -d : d) < 0x15 && (e->unk_1BE == 0 || city->unk_01E != e->unk_1BE) &&
+                (u16) func_80056990(e, city) == 1) {
+                return 1;
+            }
+        }
+        city++;
+    } while (--D_800AA248.unk_40 != 0);
+    return 0;
+}
 
 s32 func_80056990(Monster *e, Building *u) {
     u16 n;
@@ -2059,7 +2116,36 @@ u16 func_80056A44(Monster *e, Building *city) {
     return i;
 }
 
-INCLUDE_ASM("asm/main/nonmatchings/game_800500EC", func_80056AC8);
+u16 func_80056AC8(Monster *e) {
+    Building *city;
+    s32 d;
+
+    D_800AA248.unk_0C = e->unk_0F4;
+    D_800AA248.unk_10 = D_800AA248.cur_obj->pos_y.w;
+    D_800AA248.unk_10 -= (&D_801F9AC8)[1].w; /* FAKE: the camera y (D_801F9ACC) read as the word after the camera x: the original loads it after the state stores, as a member of the camera record would be (game.h declares it a scalar) */
+    if ((u32) (D_800AA248.unk_10 - 0x580000) > 0xB00000) {
+        return 0;
+    }
+    D_800AA248.unk_10 = D_800AA248.cur_obj->pos_y.s.hi;
+    D_800AA248.unk_40 = D_801E29A4;
+    if (D_801E29A4 == 0) {
+        return 0;
+    }
+    D_800AA248.unk_04 = 0;
+    city = D_801D3DC8;
+    do {
+        D_800AA248.unk_04++;
+        if (city->unk_014 < 9) {
+            d = (s16) city->unk_00E - e->unk_0F4;
+            if ((d < 0 ? -d : d) < 0x15 && (e->unk_1BE == 0 || city->unk_01E != e->unk_1BE) &&
+                (u16) func_80056C18(e, city) == 1) {
+                return 1;
+            }
+        }
+        city++;
+    } while (--D_800AA248.unk_40 != 0);
+    return 0;
+}
 
 s32 func_80056C18(Monster *e, Building *u) {
     u16 n;
