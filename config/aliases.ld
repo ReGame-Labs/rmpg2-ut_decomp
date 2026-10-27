@@ -12,3 +12,5 @@ D_8008E6AC_1 = D_8008E6AC;
 D_8008E6AC_2 = D_8008E6AC;
 D_8008E6AC_3 = D_8008E6AC;
 D_8008E6AC_4 = D_8008E6AC;
+/* func_8003047C (game_8002A330): the animation for the random draws 0-1 and 3, one table at 0x8001214C. */
+D_8001214C_alt = D_8001214C;

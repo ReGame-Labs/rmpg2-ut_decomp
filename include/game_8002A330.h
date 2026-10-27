@@ -185,6 +185,7 @@ extern u8 D_80093E30[];
 extern u8 D_80093EF8[];
 extern u8 D_80093F10[];
 extern u8 D_80093F44[];
+extern u8 D_80097E30[];
 extern u16 D_801D37C0;
 extern s32 D_801D857C;
 
@@ -193,14 +194,16 @@ typedef struct UnkStructPair {  /* provisional: s16 pairs: D_801D8804 (func_8003
     s16 unk_02;
 } UnkStructPair;
 
-typedef struct UnkStructFEA4 {  /* provisional: func_8002FEA4's and func_800305C8's argument */
-    u8 pad_00[0x2];
+typedef struct UnkStructFEA4 {  /* provisional: func_8002FEA4's and func_800305C8's argument, the owner of func_8003047C's object */
+    u16 unk_00;
     u16 unk_02;
     s16 unk_04;
     u16 unk_06;
     u16 unk_08;
     u8 pad_0A[0x4];
     s16 unk_0E;
+    u8 pad_10[0x4];
+    u16 unk_14;
 } UnkStructFEA4;
 
 
@@ -259,7 +262,7 @@ void func_8002E5F4(u16, BuildingItem *);
 void func_8003C894(void **);
 void func_8002E614(u16, BuildingItem *);
 void func_8002ED28(void);
-void func_80030698(s32, Building *, BuildingItem *);
+void func_80030698(s16, Building *, BuildingItem *);
 void func_8001E4B0(void *);
 void func_80025B7C(BuildingItem *);
 void func_8002F9BC(void);
@@ -522,7 +525,7 @@ extern UnkStructPair D_8007CE08[];
 extern UnkStructPair D_8007CE34[];
 void func_8002EE14(s16, BuildingItem *);
 void func_80030E04(s32, BuildingItem *);
-void func_8002FD24(Building *, Building *);
+void func_8002FD24(BuildingItem *, Building *);
 s32 func_8002DB3C(u16, u16, BuildingItem *);
 void func_80034418(Building *);
 void func_8002F898(Building *, BuildingItem *);
@@ -566,7 +569,7 @@ extern s32 D_80011E10[];
 extern s32 D_80011E90[];
 
 
-extern u8 D_8007CAFC[];
+extern s32 D_8007CAFC[];
 extern s32 D_8007CD40[];
 extern s16 D_801F9A38;
 extern s32 D_801FB41C;
@@ -590,4 +593,19 @@ extern s32 D_801E1E34[2];
 void func_8003197C(void *, s32, s32 *);
 void func_80053C50(s32, Monster *);
 void func_8002BAEC(Monster *);
+extern Anim D_80011F58;
+extern Anim D_80011F90;
+extern s32 D_80012110[];
+extern s32 D_8001214C[];
+extern s32 D_8001214C_alt[];   /* another name for D_8001214C (config/aliases.ld) */
+extern s32 D_800121AC[];
+extern s32 D_80012204[];
+extern s32 D_80012264[];
+extern s32 D_800122B4[];
+extern s32 D_8001231C[];
+void func_8003DAA0(Ai *);
+u16 func_8003E79C(GameObject *, s32);
+u16 func_8004B6C4(GameObject *, s16, s32);
+extern u8 D_80084268[];
+void func_8001B054(GameObject *);
 #endif /* GAME_8002A330_H */
