@@ -394,7 +394,7 @@ void func_8005189C(Monster *e) {
         return;
     }
     D_800AA268.p->pos_y.s.hi = 0xE1;
-    if (D_801D8740 < 2 || D_801F9ACC == 0 || D_801F9ACC > 0xFFF00000U) {
+    if (D_801D8740 < 2 || D_801F9ACC.w == 0 || D_801F9ACC.w > 0xFFF00000U) {
         if ((u16) func_80031714(e) == 1) {
             e->action = 0x35;
             D_800AA268.p->pos_y.s.hi = 0xED;
@@ -424,7 +424,7 @@ void func_8005199C(Monster *e) {
 }
 
 void func_80051A08(Monster *e) {
-    if (D_800AA268.p->vel_y.w <= 0 && D_800AA268.p->pos_y.w <= (s32) D_801F9ACC) {
+    if (D_800AA268.p->vel_y.w <= 0 && D_800AA268.p->pos_y.w <= (s32) D_801F9ACC.w) {
         D_800AA268.p->vel_y.w = 0;
     }
 }
@@ -474,7 +474,7 @@ void func_80051B38(Monster *e) {
                     func_8003EF64(e);
                     func_80046F68(e);
                     func_8004D488(e);
-                    if (D_801D8740 < 2 || D_801F9ACC == 0 || D_801F9ACC > 0xFFE00000) {
+                    if (D_801D8740 < 2 || D_801F9ACC.w == 0 || D_801F9ACC.w > 0xFFE00000) {
                         func_80051A80(e);
                         return;
                     }
@@ -653,7 +653,7 @@ void func_8005222C(Monster *e) {
     e->climb_building = 0;
     if (D_800AA268.p->pos_y.s.hi >= 0xE1) {
         D_800AA268.p->pos_y.s.hi = 0xE1;
-        if (D_801D8740 < 2 || D_801F9ACC == 0 || D_801F9ACC > 0xFFF00000) {
+        if (D_801D8740 < 2 || D_801F9ACC.w == 0 || D_801F9ACC.w > 0xFFF00000) {
             if ((u16) func_80031714(e) == 1) {
                 e->action = 0x35;
                 D_800AA268.p->pos_y.s.hi = 0xED;
@@ -675,7 +675,7 @@ void func_800522F8(Monster *e) {
     b = D_800AA268.p;
     if (b->vel_y.w > 0 && b->pos_y.s.hi >= 0xE1) {
         b->pos_y.s.hi = 0xE1;
-        if (D_801D8740 < 2 || D_801F9ACC == 0 || D_801F9ACC > 0xFFF00000) {
+        if (D_801D8740 < 2 || D_801F9ACC.w == 0 || D_801F9ACC.w > 0xFFF00000) {
             if ((u16) func_80031714(e) == 1) {
                 e->action = 0x35;
                 D_800AA268.p->pos_y.s.hi = 0xED;
@@ -689,7 +689,7 @@ void func_800523B8(Monster *e) {
     e->climb_side = 0;
     e->climb_building = 0;
     if (D_800AA268.p->pos_y.s.hi >= 0xE1) {
-        if (D_801D8740 < 2 || D_801F9ACC == 0 || D_801F9ACC > 0xFFF00000) {
+        if (D_801D8740 < 2 || D_801F9ACC.w == 0 || D_801F9ACC.w > 0xFFF00000) {
             if ((u16)func_80031714(e) == 1) {
                 func_800524AC(e);
                 e->action = 0x35;
@@ -785,7 +785,7 @@ void func_800526A4(Monster *e) {
     func_8003EF64(e);
     func_80046F68(e);
     func_8004D488(e);
-    if (D_801D8740 < 2 || D_801F9ACC == 0 || D_801F9ACC > 0xFFE00000) {
+    if (D_801D8740 < 2 || D_801F9ACC.w == 0 || D_801F9ACC.w > 0xFFE00000) {
         func_8005262C(e);
     } else {
         func_80052798(e);
@@ -878,7 +878,7 @@ void func_80052ADC(Monster *e) {
     func_8003EF64(e);
     func_80046F68(e);
     func_8004D488(e);
-    if (D_801D8740 < 2 || D_801F9ACC == 0 || D_801F9ACC > 0xFFE80000U) {
+    if (D_801D8740 < 2 || D_801F9ACC.w == 0 || D_801F9ACC.w > 0xFFE80000U) {
         func_8005262C(e);
         return;
     }
@@ -2171,7 +2171,7 @@ u16 func_80056840(Monster *e) {
 
     D_800AA248.unk_0C = e->front_x;
     D_800AA248.unk_10 = D_800AA248.cur_obj->pos_y.w;
-    D_800AA248.unk_10 -= (&D_801F9AC8)[1].w; /* FAKE: the camera y (D_801F9ACC) read as the word after the camera x: the original loads it after the state stores, as a member of the camera record would be (game.h declares it a scalar) */
+    D_800AA248.unk_10 -= D_801F9ACC.w;
     if ((u32) (D_800AA248.unk_10 - 0x580000) > 0xB00000) {
         return 0;
     }
@@ -2249,7 +2249,7 @@ u16 func_80056AC8(Monster *e) {
 
     D_800AA248.unk_0C = e->front_x;
     D_800AA248.unk_10 = D_800AA248.cur_obj->pos_y.w;
-    D_800AA248.unk_10 -= (&D_801F9AC8)[1].w; /* FAKE: the camera y (D_801F9ACC) read as the word after the camera x: the original loads it after the state stores, as a member of the camera record would be (game.h declares it a scalar) */
+    D_800AA248.unk_10 -= D_801F9ACC.w;
     if ((u32) (D_800AA248.unk_10 - 0x580000) > 0xB00000) {
         return 0;
     }

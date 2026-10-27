@@ -1197,7 +1197,7 @@ void func_80049650(Throw *t) {
             D_800AA268.p->pos_x.s.hi = x;
         }
         D_800AA268.p->flags |= 0x20;
-    } else if (D_801F9ACC + cur->pos_y.w > 0xD8FFFF) {
+    } else if (D_801F9ACC.w + cur->pos_y.w > 0xD8FFFF) {
         cur->pos_y.w = 0xCF0000;
         D_800AA248.cur_obj->flags &= ~0x20;
         func_8001E698(D_800AA248.cur_obj, D_80095678);

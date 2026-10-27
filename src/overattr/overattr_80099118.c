@@ -151,7 +151,7 @@ void func_800996CC(void) {
     s32 id;
 
     D_801F9AC8.w = 0;
-    D_801F9ACC = 0;
+    D_801F9ACC.w = 0;
     func_8001A420();
     func_80017B24();
     func_8001AC18(0xA, 0x17);
@@ -350,7 +350,7 @@ s32 func_8009AE40(s32 *step) {
         }
         t++;
         D_801F9AC8.w = x << 16;
-        D_801F9ACC = y << 16;
+        D_801F9ACC.w = y << 16;
         if (t >= 0xC9) {
             func_80062E44();
             return 0;

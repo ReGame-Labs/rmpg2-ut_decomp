@@ -1061,7 +1061,7 @@ void func_8009F968(OverattrPlacement *p, s32 n, s32 color) {
     OverattrPlacement *q;
 
     D_801F9AC8.w = 0;
-    D_801F9ACC = 0;
+    D_801F9ACC.w = 0;
     q = p;
     for (i = 0; i < n; i++) {
         func_80099138(q++)->colour = color;

@@ -739,7 +739,10 @@ extern s16 D_801F9A44[];
 extern s16 D_801F9AB0;
 extern s16 D_801F9ABC;
 extern s16 D_801F9ACA;                   /* the camera x's integer half */
-extern s32 D_801F9ACC;
+extern Fixed D_801F9ACC;                 /* the camera's y: the screen's top edge (16.16). A Fixed like the x, read
+                                         * through .w: func_80056840 loads it after its stores into D_800AA248, which
+                                         * only a member access allows. Not one record with D_801F9AC8: func_800210C8
+                                         * addresses the two as separate symbols */
 extern u16 D_801FA734;
 extern s16 D_801FA890;
 extern s16 D_801FA960;
