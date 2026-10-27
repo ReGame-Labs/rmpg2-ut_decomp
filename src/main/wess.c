@@ -90,6 +90,10 @@ extern s32 D_801FDEB0;
 extern s32 (*D_801FDF34)(s32, s32, s32);
 extern void (*D_801FDF3C)(s32);
 extern s32 D_800870F4;
+extern u8 D_800870F0;                  /* the effects' master volume */
+extern u8 D_800870F1;                  /* the music's master volume */
+extern u8 D_800870F2;                  /* the panning: 0 none, 1 stereo, 2 reversed */
+extern s16 D_801FDBD8;                 /* D_801FDB58[0x40], the centre, by its own name */
 extern u8 D_800870F3;
 extern s32 D_8008710C;
 extern s32 D_80087110;
@@ -337,7 +341,102 @@ s32 func_8006C1F4(void) {
     return D_800870F4;
 }
 
-INCLUDE_ASM("asm/main/nonmatchings/wess", func_8006C204);
+extern s32 D_801FD964;
+extern s32 D_801FD968;
+extern s32 D_801FD96C;
+extern s32 D_801FD970;
+extern SoundChannel *D_801FD974;
+extern s16 D_801FD978;
+
+void func_8006C204(SoundNote *v) {
+    s32 root;
+
+    D_801FDA98.voice = 1 << v->unk_00.b[2];
+    D_801FDA98.mask = 0x600E3;
+    D_801FD974 = &D_801FDA74[v->unk_00.b[3]];
+    if (D_801FD974->unk_0C != 0) {
+        if (D_801FDC58[v->unk_00.b[2]] == 0) {
+            SpuSetReverbVoice(1, D_801FDA98.voice);
+            D_801FDC58[v->unk_00.b[2]] = 0x7F;
+        }
+    } else if (D_801FDC58[v->unk_00.b[2]] != 0) {
+        SpuSetReverbVoice(0, D_801FDA98.voice);
+        D_801FDC58[v->unk_00.b[2]] = 0;
+    }
+    if (D_800870F2 != 0) {
+        D_801FD978 = D_801FD974->unk_0E + v->unk_08->pan - 0x40;
+        if (D_801FD978 > 0x7F) {
+            D_801FD978 = 0x7F;
+        }
+        if (D_801FD978 < 0) {
+            D_801FD978 = 0;
+        }
+    } else {
+        D_801FD978 = 0x40;
+    }
+    if (D_800870F8 != 0) {
+        if (D_801FD974->unk_00.b[3] == 0) {
+            D_801FD970 = (D_801FDAD8[v->unk_06] * D_801FDAD8[v->unk_08->volume] * D_801FDAD8[D_801FD974->unk_0D] *
+                          D_801FDAD8[D_800870F0]) >> 21;
+        } else {
+            D_801FD970 = (D_801FDAD8[v->unk_06] * D_801FDAD8[v->unk_08->volume] * D_801FDAD8[D_801FD974->unk_0D] *
+                          D_801FDAD8[D_800870F1]) >> 21;
+        }
+    } else if (D_801FD974->unk_00.b[3] == 0) {
+        D_801FD970 = (v->unk_06 * v->unk_08->volume * D_801FD974->unk_0D * D_800870F0) >> 21;
+    } else {
+        D_801FD970 = (v->unk_06 * v->unk_08->volume * D_801FD974->unk_0D * D_800870F1) >> 21;
+    }
+    if (D_801FD970 != 0) {
+        if (D_800870FC != 0) {
+            if (D_800870F2 == 0) {
+                D_801FDA98.volume.left = (D_801FDBD8 * (D_801FD970 + 1)) >> 7;
+                D_801FDA98.volume.right = (D_801FDBD8 * (D_801FD970 + 1)) >> 7;
+            } else if (D_800870F2 == 1) {
+                D_801FDA98.volume.left = ((s16)D_801FDB58[0x7F - D_801FD978] * (D_801FD970 + 1)) >> 7;
+                D_801FDA98.volume.right = ((s16)D_801FDB58[D_801FD978] * (D_801FD970 + 1)) >> 7;
+            } else {
+                D_801FDA98.volume.right = ((s16)D_801FDB58[0x7F - D_801FD978] * (D_801FD970 + 1)) >> 7;
+                D_801FDA98.volume.left = ((s16)D_801FDB58[D_801FD978] * (D_801FD970 + 1)) >> 7;
+            }
+        } else if (D_800870F2 == 0) {
+            D_801FDA98.volume.left = D_801FD970 << 6;
+            D_801FDA98.volume.right = D_801FD970 << 6;
+        } else if (D_800870F2 == 1) {
+            D_801FDA98.volume.left = ((D_801FD970 << 7) * (0x80 - D_801FD978)) >> 7;
+            D_801FDA98.volume.right = ((D_801FD970 << 7) * (D_801FD978 + 1)) >> 7;
+        } else {
+            D_801FDA98.volume.right = ((D_801FD970 << 7) * (0x80 - D_801FD978)) >> 7;
+            D_801FDA98.volume.left = ((D_801FD970 << 7) * (D_801FD978 + 1)) >> 7;
+        }
+    } else {
+        D_801FDA98.volume.left = 0;
+        D_801FDA98.volume.right = 0;
+    }
+    if (D_801FD974->unk_06 == 0) {
+        D_801FDA98.note = v->unk_05 << 8;
+    } else if (D_801FD974->unk_06 > 0) {
+        D_801FD964 = D_801FD974->unk_06 * v->unk_08->bend_up + 0x20;
+        D_801FD968 = D_801FD964 >> 13;
+        D_801FD96C = (D_801FD964 & 0x1FFF) >> 6;
+        D_801FDA98.note = ((v->unk_05 + D_801FD968) << 8) | D_801FD96C;
+    } else {
+        D_801FD964 = 0x20 - D_801FD974->unk_06 * v->unk_08->bend_down;
+        D_801FD968 = (D_801FD964 >> 13) + 1;
+        D_801FD96C = 0x80 - ((D_801FD964 & 0x1FFF) >> 6);
+        if (D_801FD96C == 0x80) {
+            D_801FD96C = 0;
+            D_801FD968 = D_801FD964 >> 13;
+        }
+        D_801FDA98.note = ((v->unk_05 - D_801FD968) << 8) | (D_801FD96C & 0x7F);
+    }
+    root = (v->unk_08->root << 8) | v->unk_08->fine;
+    D_801FDA98.sample_note = root;
+    D_801FDA98.addr = v->unk_0C->unk_08;
+    D_801FDA98.adsr1 = v->unk_08->unk_0C;
+    D_801FDA98.adsr2 = v->unk_08->unk_0E;
+    SpuSetKeyOnWithAttr(&D_801FDA98);
+}
 
 s32 func_8006C8B4(s32 n) {
     return D_801FDA90[n].unk_04;
@@ -539,9 +638,157 @@ void func_8006D17C(void) {
 void func_8006D184(void) {
 }
 
-INCLUDE_ASM("asm/main/nonmatchings/wess", func_8006D18C);
+extern s32 D_801FD9E0;
+extern s32 D_801FD9E4;
+extern s32 D_801FD9E8;
+extern SoundNote *D_801FD9EC;
+extern s16 D_801FD9F0;
+extern u8 D_801FD9F4;
 
-INCLUDE_ASM("asm/main/nonmatchings/wess", func_8006D6E4);
+void func_8006D18C(SoundChannel *ch) {
+    D_801FD9F4 = ch->unk_34[1];
+    if (ch->unk_0D != D_801FD9F4) {
+        ch->unk_0D = D_801FD9F4;
+        D_801FD9E0 = ch->unk_11;
+        if (D_801FD9E0 != 0) {
+            D_801FD9EC = D_801FDA78;
+            D_801FD9E4 = D_801FDA7C;
+            while (--D_801FD9E4 != -1) {
+                if ((D_801FD9EC->unk_00.w & 1) && D_801FD9EC->unk_00.b[3] == ch->unk_00.b[1]) {
+                    if (D_800870F2 != 0) {
+                        D_801FD9F0 = ch->unk_0E + D_801FD9EC->unk_08->pan - 0x40;
+                        if (D_801FD9F0 > 0x7F) {
+                            D_801FD9F0 = 0x7F;
+                        }
+                        if (D_801FD9F0 < 0) {
+                            D_801FD9F0 = 0;
+                        }
+                    } else {
+                        D_801FD9F0 = 0x40;
+                    }
+                    if (D_800870F8 != 0) {
+                        if (ch->unk_00.b[3] == 0) {
+                            D_801FD9E8 = (D_801FDAD8[D_801FD9EC->unk_06] * D_801FDAD8[D_801FD9EC->unk_08->volume] *
+                                          D_801FDAD8[ch->unk_0D] * D_801FDAD8[D_800870F0]) >> 21;
+                        } else {
+                            D_801FD9E8 = (D_801FDAD8[D_801FD9EC->unk_06] * D_801FDAD8[D_801FD9EC->unk_08->volume] *
+                                          D_801FDAD8[ch->unk_0D] * D_801FDAD8[D_800870F1]) >> 21;
+                        }
+                    } else if (ch->unk_00.b[3] == 0) {
+                        D_801FD9E8 = (D_801FD9EC->unk_06 * D_801FD9EC->unk_08->volume * ch->unk_0D * D_800870F0) >> 21;
+                    } else {
+                        D_801FD9E8 = (D_801FD9EC->unk_06 * D_801FD9EC->unk_08->volume * ch->unk_0D * D_800870F1) >> 21;
+                    }
+                    D_801FDA98.voice = 1 << D_801FD9EC->unk_00.b[2];
+                    D_801FDA98.mask = 3;
+                    if (D_801FD9E8 != 0) {
+                        if (D_800870FC != 0) {
+                            if (D_800870F2 == 0) {
+                                D_801FDA98.volume.left = (D_801FDBD8 * (D_801FD9E8 + 1)) >> 7;
+                                D_801FDA98.volume.right = (D_801FDBD8 * (D_801FD9E8 + 1)) >> 7;
+                            } else if (D_800870F2 == 1) {
+                                D_801FDA98.volume.left = ((s16)D_801FDB58[0x7F - D_801FD9F0] * (D_801FD9E8 + 1)) >> 7;
+                                D_801FDA98.volume.right = ((s16)D_801FDB58[D_801FD9F0] * (D_801FD9E8 + 1)) >> 7;
+                            } else {
+                                D_801FDA98.volume.right = ((s16)D_801FDB58[0x7F - D_801FD9F0] * (D_801FD9E8 + 1)) >> 7;
+                                D_801FDA98.volume.left = ((s16)D_801FDB58[D_801FD9F0] * (D_801FD9E8 + 1)) >> 7;
+                            }
+                        } else if (D_800870F2 == 0) {
+                            D_801FDA98.volume.left = D_801FD9E8 << 6;
+                            D_801FDA98.volume.right = D_801FD9E8 << 6;
+                        } else if (D_800870F2 == 1) {
+                            D_801FDA98.volume.left = ((D_801FD9E8 << 7) * (0x80 - D_801FD9F0)) >> 7;
+                            D_801FDA98.volume.right = ((D_801FD9E8 << 7) * (D_801FD9F0 + 1)) >> 7;
+                        } else {
+                            D_801FDA98.volume.right = ((D_801FD9E8 << 7) * (0x80 - D_801FD9F0)) >> 7;
+                            D_801FDA98.volume.left = ((D_801FD9E8 << 7) * (D_801FD9F0 + 1)) >> 7;
+                        }
+                    } else {
+                        D_801FDA98.volume.left = 0;
+                        D_801FDA98.volume.right = 0;
+                    }
+                    SpuSetVoiceAttr(&D_801FDA98);
+                    if (--D_801FD9E0 == 0) {
+                        break;
+                    }
+                }
+                D_801FD9EC++;
+            }
+        }
+    }
+}
+
+extern s32 D_801FD9F8;
+extern s32 D_801FD9FC;
+extern s32 D_801FDA00;
+extern SoundNote *D_801FDA04;
+extern s16 D_801FDA08;
+extern u8 D_801FDA0C;
+
+void func_8006D6E4(SoundChannel *ch) {
+    D_801FDA0C = ch->unk_34[1];
+    if (ch->unk_0E != D_801FDA0C) {
+        ch->unk_0E = D_801FDA0C;
+        if (D_800870F2 != 0) {
+            D_801FD9F8 = ch->unk_11;
+            if (D_801FD9F8 != 0) {
+                D_801FDA04 = D_801FDA78;
+                D_801FD9FC = D_801FDA7C;
+                while (--D_801FD9FC != -1) {
+                    if ((D_801FDA04->unk_00.w & 1) && D_801FDA04->unk_00.b[3] == ch->unk_00.b[1]) {
+                        D_801FDA08 = ch->unk_0E + D_801FDA04->unk_08->pan - 0x40;
+                        if (D_801FDA08 > 0x7F) {
+                            D_801FDA08 = 0x7F;
+                        }
+                        if (D_801FDA08 < 0) {
+                            D_801FDA08 = 0;
+                        }
+                        if (D_800870F8 != 0) {
+                            if (ch->unk_00.b[3] == 0) {
+                                D_801FDA00 = (D_801FDAD8[D_801FDA04->unk_06] * D_801FDAD8[D_801FDA04->unk_08->volume] *
+                                              D_801FDAD8[ch->unk_0D] * D_801FDAD8[D_800870F0]) >> 21;
+                            } else {
+                                D_801FDA00 = (D_801FDAD8[D_801FDA04->unk_06] * D_801FDAD8[D_801FDA04->unk_08->volume] *
+                                              D_801FDAD8[ch->unk_0D] * D_801FDAD8[D_800870F1]) >> 21;
+                            }
+                        } else if (ch->unk_00.b[3] == 0) {
+                            D_801FDA00 = (D_801FDA04->unk_06 * D_801FDA04->unk_08->volume * ch->unk_0D * D_800870F0) >> 21;
+                        } else {
+                            D_801FDA00 = (D_801FDA04->unk_06 * D_801FDA04->unk_08->volume * ch->unk_0D * D_800870F1) >> 21;
+                        }
+                        D_801FDA98.voice = 1 << D_801FDA04->unk_00.b[2];
+                        D_801FDA98.mask = 3;
+                        if (D_801FDA00 != 0) {
+                            if (D_800870FC != 0) {
+                                if (D_800870F2 == 1) {
+                                    D_801FDA98.volume.left = ((s16)D_801FDB58[0x7F - D_801FDA08] * (D_801FDA00 + 1)) >> 7;
+                                    D_801FDA98.volume.right = ((s16)D_801FDB58[D_801FDA08] * (D_801FDA00 + 1)) >> 7;
+                                } else {
+                                    D_801FDA98.volume.right = ((s16)D_801FDB58[0x7F - D_801FDA08] * (D_801FDA00 + 1)) >> 7;
+                                    D_801FDA98.volume.left = ((s16)D_801FDB58[D_801FDA08] * (D_801FDA00 + 1)) >> 7;
+                                }
+                            } else if (D_800870F2 == 1) {
+                                D_801FDA98.volume.left = ((D_801FDA00 << 7) * (0x80 - D_801FDA08)) >> 7;
+                                D_801FDA98.volume.right = ((D_801FDA00 << 7) * (D_801FDA08 + 1)) >> 7;
+                            } else {
+                                D_801FDA98.volume.right = ((D_801FDA00 << 7) * (0x80 - D_801FDA08)) >> 7;
+                                D_801FDA98.volume.left = ((D_801FDA00 << 7) * (D_801FDA08 + 1)) >> 7;
+                            }
+                        } else {
+                            D_801FDA98.volume.left = 0;
+                            D_801FDA98.volume.right = 0;
+                        }
+                        SpuSetVoiceAttr(&D_801FDA98);
+                        if (--D_801FD9F8 == 0) {
+                            break;
+                        }
+                    }
+                    D_801FDA04++;
+                }
+            }
+        }
+    }
+}
 
 void func_8006DBC0(SoundChannel *ch) {
     u8 n;
@@ -1007,9 +1254,6 @@ void func_8006EDAC(void) {
     }
 }
 
-#ifdef NON_MATCHING
-/* 89.12%: the size sums: the original reads D_8008715C, D_80087160 and D_8008716C before the driver's stores and
- * the loop's sums in other registers; the rest is the original's (size 0x2A4, original 0x2A8). */
 extern s32 D_8001709C;
 extern s32 D_80087108;
 extern s32 D_80087164;
@@ -1020,6 +1264,9 @@ extern SoundSeqTable D_801FDEBC;
 extern SoundBank D_801FDEE0;
 extern SoundDriver D_801FDEFC;
 
+#ifdef NON_MATCHING
+/* 89.12%: the size sums: the original reads D_8008715C, D_80087160 and D_8008716C before the driver's stores and
+ * the loop's sums in other registers; the rest is the original's (size 0x2A4, original 0x2A8). */
 s32 wess_module_size(s32 name) {
     u8 *mem;
     u32 i;
@@ -1092,7 +1339,135 @@ s32 wess_module_size(s32 name) {
 INCLUDE_ASM("asm/main/nonmatchings/wess", wess_module_size);
 #endif
 
+#ifdef NON_MATCHING
+/* 98.58%: register choice only: the loop counters get a1 (the original's a2), the fill pointer a0 (a1), so
+ * the loop's other temporaries shift by one register */
+extern s32 D_80087120;
+extern s32 D_80087124;
+
+s32 func_8006F0D8(s32 name, s32 buf, s32 size) {
+    u8 *mem;
+    s32 i;
+    u32 j;
+    s32 len;
+    u8 *idx;
+    s32 count;
+
+    if (D_80087110 != 0) {
+        func_8006EDAC();
+    }
+    if (buf == 0) {
+        D_80087118 = 1;
+        D_8008711C = func_80070434(size);
+        if (D_8008711C == 0) {
+            return D_80087110;
+        }
+    } else {
+        D_80087118 = 0;
+        D_8008711C = buf;
+    }
+    D_80087124 = size;
+    func_8006EBDC((u8 *)D_8008711C, size);
+    if (func_8006EC48() == 0 || name == 0) {
+        func_8006ED5C();
+        return D_80087110;
+    }
+    D_80087108 = func_80070868(name);
+    if (D_80087108 == 0) {
+        func_8006EBA4(1);
+        func_8006ED5C();
+        return D_80087110;
+    }
+    size = 0x20;
+    D_801FDEFC.unk_00 = &D_80087188;
+    D_801FDF20 = &D_801FDEFC;
+    D_801FDEFC.unk_0C = &D_801FDEBC;
+    D_801FDEFC.unk_14 = &D_801FDEE0;
+    D_801FDEFC.unk_07[0] = D_80087158;
+    if (func_80070898(&D_801FDEBC, size, D_80087108) != size) {
+        goto read_error;
+    }
+    if (D_801FDF20->unk_0C->magic != D_8001709C || D_801FDF20->unk_0C->version != 2) {
+        goto error;
+    }
+    size = 0x18;
+    if (func_80070898(&D_801FDEE0, size, D_80087108) != size) {
+        goto read_error;
+    }
+    mem = (u8 *)D_8008711C;
+    mem += (s32)mem & 1;
+    mem += (s32)mem & 2;
+    mem += (s32)mem & 4;
+    D_801FDF20->unk_14->unk_18 = mem;
+    len = D_801FDF20->unk_0C->unk_18;
+    mem += len;
+    if (D_801FDF20->unk_0C->unk_08[8] == 0) {
+        if (len != func_80070898(D_801FDF20->unk_14->unk_18, len, D_80087108)) {
+        read_error:
+            func_8006EBA4(2);
+        error:
+            func_8006ED5C();
+            return 0;
+        }
+        func_800708EC(D_80087108);
+    } else {
+        func_800708EC(D_80087108);
+        if (func_800703D8(D_801FDF20->unk_0C->unk_08[8], name, 0x38, (s32)D_801FDF20->unk_14->unk_18,
+                          D_801FDF20->unk_0C->unk_18) < 0) {
+            return 0;
+        }
+    }
+    D_801FDF20->unk_18 = (SoundSeqStat *)mem;
+    mem += D_8008715C * sizeof(SoundSeqStat);
+    D_801FDF20->unk_1C = (SoundChannel *)mem;
+    mem += D_80087160 * sizeof(SoundChannel);
+    D_801FDF20->unk_20 = (SoundNote *)mem;
+    mem += D_801FDF20->unk_07[0] * sizeof(SoundNote);
+    for (i = 0; i < D_801FDF20->unk_07[0]; i++) {
+        D_801FDF20->unk_20[i].unk_00.b[1] = 1;
+        D_801FDF20->unk_20[i].unk_00.b[2] = i;
+    }
+    D_801FDF20->unk_10 = (SoundHandler *)mem;
+    mem += D_8008716C * sizeof(SoundHandler);
+    D_801FDF20->unk_0A = D_80087170;
+    for (j = 0; j < D_8008715C; j++) {
+        D_801FDF20->unk_18[j].unk_10 = mem;
+        mem += D_80087164;
+        mem += (s32)mem & 1;
+        mem += (s32)mem & 2;
+        D_801FDF20->unk_18[j].unk_14 = mem;
+        mem += D_80087168;
+        mem += (s32)mem & 1;
+        mem += (s32)mem & 2;
+        idx = mem;
+        D_801FDF20->unk_18[j].unk_0C = mem;
+        count = D_801FDF20->unk_0A;
+        mem += count;
+        mem += (s32)mem & 1;
+        mem += (s32)mem & 2;
+        while (--count != -1) {
+            *idx++ = 0xFF;
+        }
+    }
+    D_801FDF20->unk_0B = D_80087174;
+    for (j = 0; j < D_80087160; j++) {
+        D_801FDF20->unk_1C[j].unk_00.b[1] = j;
+        D_801FDF20->unk_1C[j].unk_3C = (u8 **)mem;
+        mem += D_801FDF20->unk_0B * 4;
+        D_801FDF20->unk_1C[j].unk_44 = (u8 **)mem;
+    }
+    mem += (s32)mem & 1;
+    mem += (s32)mem & 2;
+    D_80087130[0][0](D_801FDF20);
+    D_80087130[1][0](D_801FDF20);
+    D_80087120 = (s32)mem;
+    D_80087110 = 1;
+    func_80070454();
+    return 1;
+}
+#else
 INCLUDE_ASM("asm/main/nonmatchings/wess", func_8006F0D8);
+#endif
 
 void wess_init_channel(SoundChannel *ch, SoundTrack *track, SoundTrackOpts *opts) {
     s32 mask;
@@ -1181,7 +1556,8 @@ void wess_set_channel_data(SoundChannel *ch, SoundTrack *track) {
 #ifdef NON_MATCHING
 /* 98.90%: the channel's address adds the base to the index (addu s1,v1,v0), the original the index to the base, and
  * the slot pointer is reloaded from the stack one instruction earlier; the index forms &p[i], p + i, p += i give
- * the same. */
+ * the same. An integer sum, (SoundChannel *)((s32)i * sizeof(SoundChannel) + (s32)D_801FDF20->unk_1C), gives the
+ * original's addu (98.95%); no form of the track's address moves the reload. */
 s32 wess_start_sequence(SoundSlot *slot, s32 n, s32 arg2, s32 arg3, SoundTrackOpts *opts) {
     u8 seq;
     u8 max;
@@ -1380,8 +1756,6 @@ void func_8006FED8(s32 set_rate, s32 rate) {
 void func_800700A8(void) {
     func_8006FED8(0, 0);
 }
-
-extern u8 D_800870F0;
 
 void func_800700CC(u8 volume) {
     u8 seqs;

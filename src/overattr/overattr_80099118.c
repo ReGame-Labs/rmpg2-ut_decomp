@@ -545,7 +545,7 @@ void func_8009A238(void) {
 }
 
 #ifdef NON_MATCHING
-/* 99.62%: 99.62 %: the map pointer p gets s2 and the music s1, the original's the other way round (the dot loop's x
+/* 99.62%: the map pointer p gets s2 and the music s1, the original's the other way round (the dot loop's x
  * pointer, a giv, outranks p for s1); everything else matches */
 void func_8009A708(void) {
     OverattrPlacement *p;

@@ -55,7 +55,7 @@ typedef struct SoundChannel {
     /* 0x38 */ s32 *unk_38;         /* the labels: offsets from unk_30 */
     /* 0x3C */ u8 **unk_3C;         /* the return stack's base */
     /* 0x40 */ u8 **unk_40;         /* a return stack: popped by func_80077F2C */
-    /* 0x44 */ u8 unk_44[0x4];
+    /* 0x44 */ u8 **unk_44;         /* the return stack's end */
     /* 0x48 */ s32 unk_48;
     /* 0x4C */ s32 unk_4C;
 } SoundChannel;
@@ -192,14 +192,18 @@ extern SoundDriver *D_801FDF20;
 /* A patch map of the sound bank, 16 bytes: what a note of a patch plays (the voice's unk_08). */
 typedef struct SoundPatchmap {
     /* 0x00 */ u8 unk_00;           /* the voice's priority */
-    /* 0x01 */ u8 unk_01[0x5];
+    /* 0x01 */ u8 unk_01;
+    /* 0x02 */ u8 volume;           /* 0..0x7F */
+    /* 0x03 */ s8 pan;              /* added to the channel's pan, 0x40 the centre */
+    /* 0x04 */ u8 root;             /* the sample's root note (SpuVoiceAttr.sample_note's high byte) */
+    /* 0x05 */ u8 fine;             /* and its fine tuning (the low byte) */
     /* 0x06 */ u8 unk_06;           /* the lowest note it plays */
     /* 0x07 */ u8 unk_07;           /* the highest note */
     /* 0x08 */ s8 bend_down;        /* the pitch bend's range down, in semitones (wess_pitch_mod) */
     /* 0x09 */ s8 bend_up;          /* and up */
     /* 0x0A */ s16 unk_0A;          /* its sample (SoundEntry) */
-    /* 0x0C */ u16 unk_0C;
-    /* 0x0E */ u16 unk_0E;          /* the release: bit 5 linear/exponential, bits 0-4 the rate */
+    /* 0x0C */ u16 unk_0C;          /* the voice's ADSR word 1 (func_8006C204) */
+    /* 0x0E */ u16 unk_0E;          /* ADSR word 2; the release: bit 5 linear/exponential, bits 0-4 the rate */
 } SoundPatchmap;
 
 /* A patch of the sound bank, 4 bytes: a run of patch maps. */
