@@ -1136,8 +1136,6 @@ void func_800494B4(Throw *t) {
     } while (--i != 0);
 }
 
-#ifdef NON_MATCHING
-/* 99.25%: registers only: the original gives x a0, the counter a1 and the object a2 (here a2, a0, a1) */
 /* A pair per throw kind (D_8007F39C): the vertical speed it gets back when it lands, and the height it lands at. */
 typedef struct {
     /* 0x00 */ s32 unk_0;
@@ -1175,7 +1173,9 @@ void func_80049650(Throw *t) {
             m = &D_801E0B78[i];
             if (m->unk_058 & 1) {
                 o = m->obj;
-                if (x == 0 || (D_800AA248.cur_obj->unk_08.w & 1)) {
+                if (x == 0) {
+                    x = o->pos_x.s.hi;
+                } else if (D_800AA248.cur_obj->unk_08.w & 1) {
                     x = o->pos_x.s.hi;
                 }
             }
@@ -1194,9 +1194,6 @@ void func_80049650(Throw *t) {
         D_800AA248.cur_obj->unk_88 = 0;
     }
 }
-#else
-INCLUDE_ASM("asm/main/nonmatchings/throw", func_80049650);
-#endif
 
 extern s32 D_80091A20[];
 extern s32 D_800919D4[];
@@ -1276,8 +1273,6 @@ void func_800499F4(Throw *t) {
     }
 }
 
-#ifdef NON_MATCHING
-/* 99.7 %: register names only: the original keeps the object in a0 and the camera's x in a1, here the other way round */
 void func_80049B9C(Throw *t) {
     Monster *m;
     GameObject *o;
@@ -1299,12 +1294,11 @@ void func_80049B9C(Throw *t) {
         D_800AA248.cur_obj->vel_y.w = (D_800AA248.cur_obj->vel_y.w >> 2) - D_800AA248.cur_obj->vel_y.w;
         o = D_800AA248.cur_obj;
         if (o->vel_x.w == 0) {
-            if (o->pos_x.w > D_801F9AC8.w) {
-                d = o->pos_x.w - D_801F9AC8.w;
-            } else {
+            d = o->pos_x.w;
+            if (d <= D_801F9AC8.w) {
                 d = D_801D8864.w + 1;
-                d -= D_801F9AC8.w;
             }
+            d -= D_801F9AC8.w;
             o->vel_x.w = (d <= 0xC80000) ? 0x20000 : -0x20000;
         }
     }
@@ -1322,9 +1316,6 @@ void func_80049B9C(Throw *t) {
         }
     } while (--i != 0);
 }
-#else
-INCLUDE_ASM("asm/main/nonmatchings/throw", func_80049B9C);
-#endif
 
 void func_80049D90(Throw *t) {
     s32 vel;

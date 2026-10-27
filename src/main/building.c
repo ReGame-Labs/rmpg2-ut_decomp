@@ -1828,9 +1828,6 @@ void func_8002E614(u16 which, BuildingItem *rec) {
     }
 }
 
-#ifdef NON_MATCHING
-/* 98.89%: the statements are right; the original loads rec->building into v1 (here v0) both times, so the field
- * load reuses it and the constant 9 goes into v0 in a delay slot */
 s32 *func_8002E658(u16 which, BuildingItem *rec) {
     GameObject *saved;
     ObjectDef *def;
@@ -1839,11 +1836,13 @@ s32 *func_8002E658(u16 which, BuildingItem *rec) {
     Ai *ai;
     u16 x;
     u16 y;
+    Building *bld;
 
     saved = D_800AA248.cur_obj;
     D_800AA248.new_def = func_8001D110();
     def = D_800AA248.new_def;
-    def->unk_24 = rec->building->unk_06C;
+    bld = rec->building;
+    def->unk_24 = bld->unk_06C;
     def->anim = &D_80011D48;
     def->id = D_80011D48.id;
     obj = rec->obj;
@@ -1877,7 +1876,8 @@ s32 *func_8002E658(u16 which, BuildingItem *rec) {
         D_800AA248.cur_obj = saved;
         return (s32 *) ai;
     }
-    if (rec->building->state != 9) {
+    bld = rec->building;
+    if (bld->state != 9) {
         D_800AA248.unk_00 = func_8001EB10(0x8000, 0) & 0x3F;
         if ((u32) D_800AA248.unk_00 >= 0x20) {
             def->anim = &D_80011F10;
@@ -1892,9 +1892,6 @@ s32 *func_8002E658(u16 which, BuildingItem *rec) {
     D_800AA268.p = saved;
     return (s32 *) ai;
 }
-#else
-INCLUDE_ASM("asm/main/nonmatchings/building", func_8002E658);
-#endif
 
 void func_8002E854(Building *b) {
     GameObject *saved;
