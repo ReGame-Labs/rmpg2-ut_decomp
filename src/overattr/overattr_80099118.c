@@ -544,9 +544,6 @@ void func_8009A238(void) {
     func_8001F724(0x4E);
 }
 
-#ifdef NON_MATCHING
-/* 99.62%: the map pointer p gets s2 and the music s1, the original's the other way round (the dot loop's x
- * pointer, a giv, outranks p for s1); everything else matches */
 void func_8009A708(void) {
     OverattrPlacement *p;
     s32 music;
@@ -601,7 +598,9 @@ void func_8009A708(void) {
     D_801D3D7C = 0;
     SetDispMask(1);
     do {
-        obj = func_80099138(p++);
+        /* Class B: the inner loop counts the map pointer's references twice, so it gets s1 before the dot loop's
+         * x pointer (statement orders, loop forms and a fresh pointer per loop leave p and the music swapped). */
+        LOOP_BLOCK(obj = func_80099138(p++););
         obj->unk_6C &= ~0x20;
         i++;
     } while (i < 16);
@@ -745,9 +744,6 @@ void func_8009A708(void) {
         } while (i < 3);
     }
 }
-#else
-INCLUDE_ASM("asm/overattr/nonmatchings/overattr_80099118", func_8009A708);
-#endif
 
 s32 func_8009AE40(s32 *step) {
     s32 t;

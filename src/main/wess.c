@@ -78,8 +78,8 @@ extern SoundPatch *D_801FDA88;
 extern SoundPatchmap *D_801FDA8C;
 extern u8 *D_801FDA94;
 extern s32 D_80087158;
-extern s32 D_8008715C;
-extern s32 D_80087160;
+extern u32 D_8008715C;
+extern u32 D_80087160;
 extern s32 D_801FD97C;
 extern u8 D_801FDC58[];
 extern s32 D_801FDE9C;
@@ -1264,14 +1264,10 @@ extern SoundSeqTable D_801FDEBC;
 extern SoundBank D_801FDEE0;
 extern SoundDriver D_801FDEFC;
 
-#ifdef NON_MATCHING
-/* 89.12%: the size sums: the original reads D_8008715C, D_80087160 and D_8008716C before the driver's stores and
- * the loop's sums in other registers; the rest is the original's (size 0x2A4, original 0x2A8). */
 s32 wess_module_size(s32 name) {
     u8 *mem;
-    u32 i;
+    s32 i;
     s32 n;
-    SoundDriver *drv;
 
     if (name == 0) {
         return 0;
@@ -1303,19 +1299,18 @@ s32 wess_module_size(s32 name) {
         return 0;
     }
     func_800708EC(D_80087108);
-    drv = D_801FDF20;
     mem = (u8 *) 8;
-    drv->unk_14->unk_18 = mem;
-    drv->unk_0A = D_80087170;
-    mem += drv->unk_0C->unk_18;
-    drv->unk_18 = (SoundSeqStat *) mem;
+    D_801FDF20->unk_14->unk_18 = mem;
+    mem += D_801FDF20->unk_0C->unk_18;
+    D_801FDF20->unk_18 = (SoundSeqStat *) mem;
     mem += D_8008715C * sizeof(SoundSeqStat);
-    drv->unk_1C = (SoundChannel *) mem;
+    D_801FDF20->unk_1C = (SoundChannel *) mem;
     mem += D_80087160 * sizeof(SoundChannel);
-    drv->unk_20 = (SoundNote *) mem;
-    mem += drv->unk_07[0] * sizeof(SoundNote);
-    drv->unk_10 = (SoundHandler *) mem;
+    D_801FDF20->unk_20 = (SoundNote *) mem;
+    mem += D_801FDF20->unk_07[0] * sizeof(SoundNote);
+    D_801FDF20->unk_10 = (SoundHandler *) mem;
     mem += D_8008716C * sizeof(SoundHandler);
+    D_801FDF20->unk_0A = D_80087170;
     for (i = 0; i < D_8008715C; i++) {
         mem += D_80087164;
         mem += (s32) mem & 1;
@@ -1335,20 +1330,16 @@ s32 wess_module_size(s32 name) {
     mem += (s32) mem & 2;
     return (s32) mem;
 }
-#else
-INCLUDE_ASM("asm/main/nonmatchings/wess", wess_module_size);
-#endif
 
 #ifdef NON_MATCHING
-/* 98.58%: register choice only: the loop counters get a1 (the original's a2), the fill pointer a0 (a1), so
- * the loop's other temporaries shift by one register */
+/* 99.85%: the module data's size gets s1 when it is loaded (the original loads it into a1, the read call's
+ * argument, and copies it to s1 in the call's delay slot) */
 extern s32 D_80087120;
 extern s32 D_80087124;
 
 s32 wess_load_module(s32 name, s32 buf, s32 size) {
     u8 *mem;
     s32 i;
-    u32 j;
     s32 len;
     u8 *idx;
     s32 count;
@@ -1430,18 +1421,18 @@ s32 wess_load_module(s32 name, s32 buf, s32 size) {
     D_801FDF20->unk_10 = (SoundHandler *)mem;
     mem += D_8008716C * sizeof(SoundHandler);
     D_801FDF20->unk_0A = D_80087170;
-    for (j = 0; j < D_8008715C; j++) {
-        D_801FDF20->unk_18[j].unk_10 = mem;
+    for (i = 0; i < D_8008715C; i++) {
+        D_801FDF20->unk_18[i].unk_10 = mem;
         mem += D_80087164;
         mem += (s32)mem & 1;
         mem += (s32)mem & 2;
-        D_801FDF20->unk_18[j].unk_14 = mem;
+        D_801FDF20->unk_18[i].unk_14 = mem;
         mem += D_80087168;
         mem += (s32)mem & 1;
         mem += (s32)mem & 2;
         idx = mem;
-        D_801FDF20->unk_18[j].unk_0C = mem;
         count = D_801FDF20->unk_0A;
+        D_801FDF20->unk_18[i].unk_0C = mem;
         mem += count;
         mem += (s32)mem & 1;
         mem += (s32)mem & 2;
@@ -1450,11 +1441,11 @@ s32 wess_load_module(s32 name, s32 buf, s32 size) {
         }
     }
     D_801FDF20->unk_0B = D_80087174;
-    for (j = 0; j < D_80087160; j++) {
-        D_801FDF20->unk_1C[j].unk_00.b[1] = j;
-        D_801FDF20->unk_1C[j].unk_3C = (u8 **)mem;
+    for (i = 0; i < D_80087160; i++) {
+        D_801FDF20->unk_1C[i].unk_00.b[1] = i;
+        D_801FDF20->unk_1C[i].unk_3C = (u8 **)mem;
         mem += D_801FDF20->unk_0B * 4;
-        D_801FDF20->unk_1C[j].unk_44 = (u8 **)mem;
+        D_801FDF20->unk_1C[i].unk_44 = (u8 **)mem;
     }
     mem += (s32)mem & 1;
     mem += (s32)mem & 2;
