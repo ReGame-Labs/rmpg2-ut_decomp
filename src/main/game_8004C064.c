@@ -721,23 +721,17 @@ void func_8004D194(void) {
     }
 }
 
-#ifdef NON_MATCHING
-/* 95.53%: 95.5%: the original copies n into floor in the n test's delay slot and repeats the andi of floor on both
- * paths; here the copy lands in the unk_1BC test's delay slot */
 s32 func_8004D264(s16 *side, Monster *m, s32 bld) {
     u16 floor;
     s32 part;
-    u16 n;
     s16 s;
 
     floor = m->climb_floor;
     part = bld + 0x98;
     if (floor != 0) {
-        n = floor - 1;
-        if (n != 0) {
-            floor = n;
+        if (--floor != 0) {
             if (m->unk_1BC != 0) {
-                floor = n + 1;
+                floor++;
             }
             part += floor * 0x54;
         }
@@ -749,9 +743,6 @@ s32 func_8004D264(s16 *side, Monster *m, s32 bld) {
     *side = s;
     return part;
 }
-#else
-INCLUDE_ASM("asm/main/nonmatchings/game_8004C064", func_8004D264);
-#endif
 
 void func_8004D2D4(void) {
     D_800AA248.cur_obj->owner.monster->action = 6;
@@ -1107,15 +1098,14 @@ void func_8004DD78(GameObject *obj, Monster *m, Monster *other) {
     func_8005417C(m);
 }
 
-#ifdef NON_MATCHING
-/* 98%: the other monster's object is reread after the action test in the original (one register less) */
 void func_8004DDFC(void) {
     Monster *m = D_800AA248.cur_obj->owner.monster;
     u16 id = m->id;
     Monster *other;
     GameObject *o;
     u16 i;
-    s16 hit;
+    u16 hit;
+    s16 act;
     u16 side;
     u16 kind;
 
@@ -1137,16 +1127,19 @@ void func_8004DDFC(void) {
                         }
                         m->unk_18A = 1;
                         if (other->action == 0x4D) {
-                            if (m->unk_18E != 0 || other->unk_18E != 0 || m->climb_side != 0 || other->climb_side != 0 ||
-                                other->obj->pos_y.s.hi < 0xE1 ||
-                                (other->obj->flags & 0x10) != (D_800AA248.cur_obj->flags & 0x10)) {
-                                other->action = 0x4F;
-                                D_800AA248.result = 1;
-                                return;
+                            if (m->unk_18E == 0 && other->unk_18E == 0) {
+                                o = other->obj;
+                                if (m->climb_side == 0 && other->climb_side == 0 && o->pos_y.s.hi >= 0xE1 &&
+                                    (o->flags & 0x10) == (D_800AA248.cur_obj->flags & 0x10)) {
+                                    func_8004DAB0(o, m, other);
+                                    return;
+                                }
                             }
-                            func_8004DAB0(other->obj, m, other);
+                            other->action = 0x4F;
+                            D_800AA248.result = 1;
                             return;
                         }
+                        act = hit;
                         func_800634D4(other, 5);
                         if (D_8007A68A != 0) {
                             func_80053C50(0x20000, other);
@@ -1158,7 +1151,7 @@ void func_8004DDFC(void) {
                             return;
                         }
                         side = other->climb_side;
-                        if ((u32) (side - 1) < 2) {
+                        if (side == 1 || side == 2) {
                             func_8004DB28(o, m, other);
                             return;
                         }
@@ -1178,14 +1171,14 @@ void func_8004DDFC(void) {
                                     if (m->unk_142 == 0) {
                                         kind = other->unk_0E4;
                                         if (kind == 0) {
-                                            hit = 0x3A;
+                                            act = 0x3A;
                                             func_800540D0(m);
                                         } else if (other->unk_0E6 == 0) {
                                             other->unk_0E6 = kind;
-                                            hit = 0xB;
+                                            act = 0xB;
                                             func_8005417C(m);
                                         }
-                                        other->action = hit;
+                                        other->action = act;
                                         other->unk_0E4 = m->id;
                                         func_800634D4(other, 5);
                                         func_8004FC00(1, m);
@@ -1233,9 +1226,6 @@ void func_8004DDFC(void) {
     } while (--i != 0);
     D_800AA2C0 = 0;
 }
-#else
-INCLUDE_ASM("asm/main/nonmatchings/game_8004C064", func_8004DDFC);
-#endif
 
 void func_8004E264(void) {
     if (D_800AA248.cur_obj->pos_y.s.hi < 0xE1) {

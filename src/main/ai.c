@@ -13,6 +13,7 @@ void func_8003E788(Ai *ai);
 u16 func_8003E79C(void);
 u16 func_8004B6C4(GameObject *, s16, s32);
 void func_8004E99C(void);
+s32 abs(s32 x);                 /* GCC's builtin: inlined */
 
 void func_800416AC(const AiHandler *handlers, Ai *ai);
 void func_80041928(const AiHandler *handlers, Ai *ai);
@@ -495,16 +496,12 @@ void func_80042210(Ai *ai) {
     func_800416AC(D_8007E9E0, ai);
 }
 
-#ifdef NON_MATCHING
-/* 98.12%: 98.1%: far = tx reloads the halfword (lhu) where the original copies tx in the delay slot of the distance
- * test (move v1,a1); func_8004E99C takes no arguments */
 void func_80042238(Ai *ai) {
     GameObject *target;
     s16 tx;
     s16 x;
     s16 far;
     s16 near;
-    s32 dist;
 
     if (ai->target != NULL) {
         target = ai->target->obj;
@@ -512,15 +509,11 @@ void func_80042238(Ai *ai) {
             ai->target = NULL;
             return;
         }
-        tx = ((s16 *)&target->pos_x.w)[1];
-        x = ((s16 *)&D_800AA248.cur_obj->pos_x.w)[1];
+        tx = target->pos_x.s.hi;
+        x = D_800AA248.cur_obj->pos_x.s.hi;
         near = x;
-        dist = tx - x;
-        if (dist < 0) {
-            dist = -dist;
-        }
         far = tx;
-        if (dist >= 0x1C3) {
+        if (abs(tx - x) >= 0x1C3) {
             if (D_801F9ACA >= tx) {
                 far += (D_801D8864.w + 1) >> 16;
             } else {
@@ -533,9 +526,6 @@ void func_80042238(Ai *ai) {
         }
     }
 }
-#else
-INCLUDE_ASM("asm/main/nonmatchings/ai", func_80042238);
-#endif
 
 void func_80042358(void) {
     func_8003EB5C(D_8008E6AC, D_800AA248.cur_obj);

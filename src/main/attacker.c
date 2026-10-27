@@ -1575,7 +1575,7 @@ INCLUDE_ASM("asm/main/nonmatchings/attacker", func_80046F68);
 #endif
 
 #ifdef NON_MATCHING
-/* 92.97%: 93%: registers only: the x distance lands in x's register (a1; v1 in the original) and the half sizes
+/* 93.31%: 93%: registers only: the x distance lands in x's register (a1; v1 in the original) and the half sizes
  * swap v1/a1 */
 void func_80047028(Monster *m) {
     Attacker *a = D_801FA8A8;
@@ -1588,6 +1588,8 @@ void func_80047028(Monster *m) {
     s32 half;
     u16 w;
     s32 e;
+    s32 half2;
+    s32 t2;
     s16 px;
     s16 py;
 
@@ -1619,19 +1621,19 @@ void func_80047028(Monster *m) {
                         goto next;
                     }
                 }
-                half = (s16)obj->size.u.hi >> 1;
-                t = (s16)(obj->pos_y.u.hi - half) - py;
-                if (t < 0) {
-                    t = -t;
+                half2 = (s16)obj->size.u.hi >> 1;
+                t2 = (s16)(obj->pos_y.u.hi - half2) - py;
+                if (t2 < 0) {
+                    t2 = -t2;
                 }
-                d = t;
-                half += 4;
-                if (half < d) {
+                d = t2;
+                half2 += 4;
+                if (half2 < d) {
                     e = d - 4;
                     if (e < 0) {
                         e = -e;
                     }
-                    if (half < e) {
+                    if (half2 < e) {
                         goto next;
                     }
                 }
