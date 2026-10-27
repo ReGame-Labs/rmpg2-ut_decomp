@@ -5,8 +5,6 @@
 #include "game.h"
 #include "monster.h"
 
-#ifdef NON_MATCHING
-/* 83.5%: the original copies e to a3 and builds &D_800AA248 in a0 (the clamped action in v1); here e stays in a0 and the action takes a3 */
 void monster_dispatch_action(Monster *e, GameObject *obj) {
     s16 x;
     s16 half;
@@ -24,14 +22,11 @@ void monster_dispatch_action(Monster *e, GameObject *obj) {
     if (state >= 0x68) {
         state = 0x67;
     }
-    D_800AA248.unk_0C = x;
     D_800AA248.action = state;
+    D_800AA248.unk_0C = x;
     D_800AA248.cur_obj = obj;
     D_8007F8FC[state](e);
 }
-#else
-INCLUDE_ASM("asm/main/nonmatchings/monster", monster_dispatch_action);
-#endif
 
 void func_80050190(Monster *e) {
     if (!(e->buttons & 4)) {
