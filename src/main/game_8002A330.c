@@ -239,10 +239,50 @@ INCLUDE_ASM("asm/main/nonmatchings/game_8002A330", func_8002B3AC);
 void func_8002B640(void) {
     D_800AA248.cur_obj->pos_x.s.hi = (((D_801F9ACA - 400) & (D_801D8864.w >> 16)) + func_8001EA78() % 800) & D_801D8864.w;
     D_800AA248.cur_obj->pos_y.s.hi = -100;
-    func_8003EB5C(D_80097E30, D_800AA248.cur_obj);
+    func_8003EB5C(&D_80097E30, D_800AA248.cur_obj);
 }
 
+/* x */
+#ifdef NON_MATCHING
+void func_8002B6E8(s32 i) {
+    GameObject **slot;
+    GameObject *obj;
+    ObjectDef *def;
+    s32 mask;
+    s32 dy;
+
+    mask = ((s16 *) func_80025C08(D_800838A0))[1];
+    if (D_801FB19C[i] != 0) {
+        D_801FB19C[i]--;
+        return;
+    }
+    slot = &D_801FB2DC[i];
+    if (*slot == NULL) {
+        def = func_8001D110();
+        def->anim = &D_80097E30;
+        def->id = D_80097E30.id;
+        def->unk_1C = 2;
+        def->flags = 0x1005;
+        D_800AA284 = def;
+        obj = func_8001DCB4();
+        obj->pos_x.s.hi = (((D_801F9ACA - 400) & mask) + func_8001EA78() % 800) & mask;
+        obj->pos_y.s.hi = D_801F9ACE - ((func_8001EA78() & 0x1F) + 50);
+        obj->vel_x.w = 8;
+        *slot = obj;
+        return;
+    }
+    obj = *slot;
+    if (obj->pos_y.s.hi >= 0xD8) {
+        obj->pos_y.s.hi = 0xDD;
+        func_8003EB5C(D_80097E64, obj);
+    } else {
+        obj->pos_x.u.hi = (obj->pos_x.u.hi + obj->vel_x.u.lo) & mask;
+        obj->pos_y.u.hi += obj->vel_x.u.lo;
+    }
+}
+#else
 INCLUDE_ASM("asm/main/nonmatchings/game_8002A330", func_8002B6E8);
+#endif
 
 void func_8002B878(void) {
     s32 i;
@@ -657,7 +697,62 @@ void func_8002C858(Building *arg0) {
     func_8002C6A0();
 }
 
-INCLUDE_ASM("asm/main/nonmatchings/game_8002A330", func_8002C8B4);
+void func_8002C8B4(Building *b) {
+    GameObject *saved;
+    Monster *m;
+
+    saved = D_800AA248.cur_obj;
+    if (b->unk_090 != NULL) {
+        b->unk_014 = 4;
+    }
+    if (b->unk_014 != 0x10) {
+        if (b->unk_032 >= 1 && b->unk_032 <= 7 && b->unk_058 == 1 && (m = &D_801E0B78[b->unk_032])->unk_142 != 0) {
+            func_8002C7D0(b);
+            D_800AA248.cur_obj = saved;
+            return;
+        }
+        if (b->unk_010 >= b->unk_012) {
+            if (b->unk_014 < 2) {
+                func_8002C7D0(b);
+                D_800AA268.p = saved;
+                return;
+            }
+        } else if (b->unk_014 == 0) {
+            b->unk_032 = 0;
+            D_800AA268.p = saved;
+            return;
+        }
+        switch (b->unk_014) {
+        case 5:
+            if (b->unk_058 != 3) {
+                func_8002C75C(b);
+            } else {
+                func_8002F100(b);
+            }
+            D_800AA268.p = saved;
+            return;
+        case 7:
+            if (b->unk_058 != 3) {
+                func_8002C814(b);
+            } else {
+                func_8002F100(b);
+            }
+            break;
+        case 8:
+            func_8002C738(b);
+            break;
+        case 4:
+            func_8002C858(b);
+            break;
+        default:
+            b->unk_032 = 0;
+            D_800AA268.p = saved;
+            return;
+        }
+    }
+    b->unk_032 = 0;
+    D_800AA268.p = saved;
+}
 
 void func_8002CA8C(void) {
     GameObject *saved = D_800AA248.cur_obj;
@@ -2094,13 +2189,38 @@ void func_800300F4(void) {
     func_80030114();
 }
 
-INCLUDE_ASM("asm/main/nonmatchings/game_8002A330", func_80030114);
+void func_80030114(GameObject *obj, Building *b) {
+    Monster *m;
+    u16 i;
+    s32 x;
 
-s32 func_80030268(s16 arg0, s32 arg1, UnkStruct8 *arg2) {
+    if (b->unk_080 != 0) {
+        i = 7;
+        do {
+            m = &D_801E0B78[i];
+            if ((m->unk_058 & 1) && m->unk_1B0 == 0 && m->action < 2 && m->unk_13C == 0 &&
+                m->obj->pos_y.s.hi == 0xE1) {
+                x = obj->pos_x.s.hi;
+                D_800AA248.unk_00 = x;
+                if (b->unk_080 == 3) {
+                    D_800AA248.unk_00 = x + 5;
+                    D_800AA248.unk_08 = 10;
+                } else {
+                    D_800AA248.unk_08 = 30;
+                }
+                if ((u16) func_80030268(D_800AA248.unk_00, (s16) D_800AA248.unk_08, m) != 0) {
+                    func_800302AC(b->unk_080, m);
+                }
+            }
+        } while (--i != 0);
+    }
+}
+
+s32 func_80030268(s16 arg0, s32 arg1, Monster *arg2) {
     s32 var_v1;
 
-    if (arg2->unk_DC != 0) {
-        var_v1 = arg2->unk_F4 - arg0;
+    if (arg2->unk_0DC != 0) {
+        var_v1 = arg2->unk_0F4 - arg0;
         if (var_v1 < 0) {
             var_v1 = -var_v1;
         }

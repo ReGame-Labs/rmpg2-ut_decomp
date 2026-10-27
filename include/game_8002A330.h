@@ -186,7 +186,7 @@ extern u8 D_80093E30[];
 extern u8 D_80093EF8[];
 extern u8 D_80093F10[];
 extern u8 D_80093F44[];
-extern u8 D_80097E30[];
+extern Anim D_80097E30;
 extern u16 D_801D37C0;
 extern s32 D_801D857C;
 
@@ -218,12 +218,6 @@ typedef struct UnkStruct15 {  /* provisional: func_800300A0's first argument */
     s16 unk_1A;
 } UnkStruct15;
 
-typedef struct UnkStruct8 {  /* provisional: func_80030268's third argument */
-    u8 pad_00[0xDC];
-    u16 unk_DC;
-    u8 pad_DE[0x16];
-    s16 unk_F4;
-} UnkStruct8;
 
 
 s32 * func_80025C08(void *);
@@ -481,8 +475,8 @@ void func_80025898(BuildingItem *);
 void func_8003CD08(void *);
 void func_8003D60C(Building *);
 s32 func_8001EA78();
-extern s32 D_801FB19C[0x50];
-extern s32 D_801FB2DC[0x50];
+extern s32 D_801FB19C[0x50];          /* per weather sprite: a delay before it starts */
+extern GameObject *D_801FB2DC[0x50];   /* per weather sprite: its object */
 void func_80025BBC(Building *);
 void func_8001EDB0();
 void func_8001F39C(void *);
@@ -642,4 +636,9 @@ typedef struct Unk801FB190 {
 extern Unk801FB190 D_801FB190;
 extern GameObject *D_801FB194;
 u32 func_8001EAC4(s32);   /* a random number 1..range */
+void func_8002F100(Building *);
+extern s16 D_801F9ACE;   /* the camera y's integer half (D_801F9ACC) */
+extern u8 D_80097E64[];
+s32 func_80030268(s16, s32, Monster *);
+void func_800302AC(u16, Monster *);
 #endif /* GAME_8002A330_H */

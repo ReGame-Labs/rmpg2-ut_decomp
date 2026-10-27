@@ -227,7 +227,7 @@ typedef struct Monster {
     /* 0x134 */ u8 unk_134[0x04];
     /* 0x138 */ u16 unk_138;
     /* 0x13A */ u8 unk_13A[0x02];
-    /* 0x13C */ s16 unk_13C;
+    /* 0x13C */ u16 unk_13C;
     /* 0x13E */ u16 unk_13E;
     /* 0x140 */ u16 unk_140;
     /* 0x142 */ u16 unk_142;                   /* nonzero: the vibration presets 0-3 run twice as strong and long */
