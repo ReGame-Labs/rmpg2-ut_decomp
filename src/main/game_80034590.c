@@ -118,7 +118,7 @@ void func_800369F8(NpcS *npc);
 u16 func_80037574(s16 x, s16 y, GameObject *mover);
 u16 func_8003761C(s16 x, s16 y, Monster *player, NpcS *npc);
 void func_800376E0(NpcS *npc);
-void func_80037960(NpcS *npc, s32 arg1);
+void func_80037960(NpcS *npc, GameObject *obj);
 void func_80037BB4(NpcS *npc);
 void func_80037C1C(NpcS *npc);
 void func_80037CA0(NpcS *npc);
@@ -1405,7 +1405,62 @@ INCLUDE_ASM("asm/main/nonmatchings/game_80034590", func_800376E0);
 
 INCLUDE_ASM("asm/main/nonmatchings/game_80034590", func_800377B4);
 
-INCLUDE_ASM("asm/main/nonmatchings/game_80034590", func_80037960);
+void func_80037960(NpcS *npc, GameObject *obj) {
+    s16 x;
+    u16 y;
+    SpriteFrame *f;
+    s16 a;
+    s16 b;
+    u16 v;
+    u16 h;
+
+    x = obj->pos_x.s.hi;
+    if (x < D_801F9ACA) {
+        x += (D_801D8864.w + 1) >> 16;
+    }
+    f = obj->frame;
+    y = obj->pos_y.u.hi;
+    v = f->unk_10;
+    h = f->unk_12;
+    if (obj->flags & 0x10) {
+        v = -v;
+    }
+    a = v + x;
+    npc->unk_3E = a;
+    npc->unk_44 = h + y;
+    v = f->unk_14;
+    h = f->unk_16;
+    if (obj->flags & 0x10) {
+        v = -v;
+    }
+    b = v + x;
+    npc->unk_40 = b;
+    npc->unk_42 = h + y;
+    if (obj->flags & 0x10) {
+        npc->unk_40 = a;
+        npc->unk_3E = b;
+    }
+    v = f->unk_18;
+    h = f->unk_1A;
+    if (obj->flags & 0x10) {
+        v = -v;
+    }
+    a = v + x;
+    npc->unk_46 = a;
+    npc->unk_4C = h + y;
+    v = f->unk_1C;
+    h = f->unk_1E;
+    if (obj->flags & 0x10) {
+        v = -v;
+    }
+    b = v + x;
+    npc->unk_48 = b;
+    npc->unk_4A = h + y;
+    if (obj->flags & 0x10) {
+        npc->unk_48 = a;
+        npc->unk_46 = b;
+    }
+}
 
 void func_80037A88(NpcS *npc) {
     D_800AA248.cur_obj = npc->unk_0;
