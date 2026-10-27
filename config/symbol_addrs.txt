@@ -22,8 +22,20 @@ main_create_box = 0x8001EB9C; // type:func
 main_draw_lists = 0x8001F848; // type:func
 main_step_anim = 0x8002075C; // type:func
 main_set_frame = 0x80020BA0; // type:func
+main_approach_xy = 0x80023474; // type:func  (npc) speed from D_8007B9A0 towards the target height and x, 1 once there
+main_approach_x = 0x80023620; // type:func  (npc) speed from D_8007B9A0 towards the target x, 1 once within 0x60..0x70
+main_follow_monster = 0x80023764; // type:func  (npc) turns to and follows its monster (unk_10), 1 once within 0x60
+main_approach_y = 0x80023B20; // type:func  (npc) climbs or dives to target_y - 0x6C, 1 once within 11
+main_unwrap_target_x = 0x80024418; // type:func  (x out, cur out, npc) the target x and the object's x on the same side of the level's wrap
+main_place_attached = 0x80024530; // type:func  (obj, npc) puts the object at the current object's fourth frame point, mirrored with it
 main_wrap_layer_x = 0x800247E4; // type:func
 main_scroll_layers = 0x8002488C; // type:func
+main_create_buildings = 0x80024C2C; // type:func
+main_update_screen_pos = 0x80027908; // type:func
+main_reset_screen_pos = 0x80027B20; // type:func
+main_update_priority = 0x80027B78; // type:func
+main_update_boxes = 0x80027CB8; // type:func
+main_apply_health = 0x80029510; // type:func
 main_count_monsters = 0x8002958C; // type:func
 
 // The Psy-Q library objects (config/main.yaml's psyq/ units), function by function (tools/psyq_match.py
@@ -422,9 +434,14 @@ pickup_test_touch = 0x8003B9C8; // type:func  (obj, m) 1 when the object's box m
 pickup_collect = 0x8003BAB0; // type:func  (m) hands every pickup the monster touches to it
 
 // npc (src/main/npc.c), the per-kind handlers of the pickups (D_801FA9BC) and of the non-player characters (D_801FAC9C)
+npc_create_throw = 0x80039358; // type:func  (m, kind 1..3, throw kind, t) a falling throw from the frame's third point, speeds D_8007DAC8
+npc_update_throw = 0x8003956C; // type:func  (t) falls with Throw.unk_0C and hits the monsters
 npc_update_aim = 0x80039EC4; // type:func  (npc) when the countdown ends, the slope to the nearest player picks the aim 0..2 (unk_24) and a new aim starts D_8007DB04[old * 3 + new]
+npc_create_shot = 0x8003A5A0; // type:func  (kind, throw kind, t, alt) a straight shot from the frame's third or fourth point, speeds D_8007DB28
+npc_update_shot = 0x8003A744; // type:func  (t) flies straight and hits the monsters
 
 // actor (src/main/actor.c): the actors of the level's list and the behaviour slots around the current object.
+actor_pick_building_part = 0x8003E1C8; // type:func  (&part, ai) a random free part of a standing building for a behaviour slot, its item or NULL
 actor_take_hit = 0x8003F74C; // type:func  (player, actor) what the player's hit does, by the actor's kind and state
 
 // ai (src/main/ai.c): the behaviour slots' action dispatcher and state handlers.
@@ -441,6 +458,8 @@ monster_update_climb = 0x8005086C; // type:func  (e) the climbing speed by direc
 monster_start_jump = 0x800524B4; // type:func  (e) action 0x2C, the upward speed by direction
 monster_test_boxes = 0x80053854; // type:func  (x, y, m) 1 or 2 when the point is in its first or second box, else 0
 monster_test_hit_box = 0x80053970; // type:func  (e, m) 1 or 2 when e's hit box overlaps m's first or second box, else 0
+monster_test_point = 0x80053B30; // type:func  (x, y, dx, dy, e) 1 when the point is in e's box grown by dx and dy, x wrapped by the level width
+monster_test_box_x = 0x80053BE8; // type:func  (x, e) 1 when x is within e's box horizontally, wrapped by the level width
 monster_get_building = 0x80054728; // type:func  (n) building n of the ring, 1-based, NULL for 0
 monster_grab_building = 0x800547EC; // type:func  (e) a building wall in reach of its front, grabbed from that side
 monster_test_left_side = 0x800561CC; // type:func  (x, city) near the building's left wall and that side free, then the probe y is 0xE0
@@ -450,6 +469,9 @@ monster_find_wall = 0x80056CCC; // type:func  (e) a building wall within 0x14 of
 monster_find_floor = 0x80056F38; // type:func  (e, city) climb_floor from its height and the building's floor table
 
 // monster_anim (src/main/monster_anim.c), the monsters' animation scripts and the box tests against buildings, pickups and characters
+monster_anim_update_projectile = 0x8005A2F4; // type:func  (e, k) monster 5's projectile e->extra[k], D_80084278 its state bits - 1 flying, 2 hit a building, 4 the flying frames to start, else its throw frames
+monster_anim_update_bomb = 0x8005A964; // type:func  (e) monster 7's bomb e->extra[0] - dropped or thrown, bounces three times, explodes on the buildings and characters near
+monster_anim_update_special = 0x8005AE28; // type:func  (e) action 0x63 in D_8007BE20 - the monster's special move by id, 1 and 2 charge through soldiers, monsters and buildings for 300 frames
 monster_anim_find_buildings = 0x8005B8C8; // type:func  (x, y, flags, half_w, half_h) the mask of the standing buildings whose box overlaps, flags 0x10 numbers them from the last
 monster_anim_test_box = 0x8005BC20; // type:func  (x, y, half_w, half_h, obj, how) 1 when the box overlaps the object's, how 1 its frame's box, 2 its size on one side by the facing, 4 a quarter of its width either side
 
@@ -463,10 +485,16 @@ bonus_update_lives = 0x8005D9BC; // type:func  (e) the portrait and the two live
 bonus_update_bars = 0x8005DBC4; // type:func  (old, e, value) eases the shown health and meter towards their values
 bonus_add_icon = 0x8005DD48; // type:func  (e) an icon for its pickup kind (unk_056) in a free slot of unk_098, after the others
 bonus_update_icons = 0x8005DF2C; // type:func  (e) closes the gaps between the slot icons, frees spent ones, blinks the last frames
+bonus_check_round_end = 0x8005E60C; // type:func  each frame of a bonus round - the end test by round kind, the winner into D_801FB468, then the counters
 bonus_start_round = 0x8005EE54; // type:func  the bonus round of D_800AA2DC - its timer (D_8007BD8C) and flags
+bonus_get_round_kind = 0x8005F208; // type:func  the kind of the bonus round D_800AA2DC (0 to 4, three rounds each), -1 for none
 bonus_create_counter = 0x8005F33C; // type:func  (kind, n) the digit sprites of player n's tally, n 4 the round's timer
+bonus_update_counters = 0x8005F5B8; // type:func  (kind) the round timer each second, kind 2 the players' tallies, kind 3 redraws them
+bonus_save_health = 0x8005F9FC; // type:func  each player's health into unk_17C, lives shown as they are
+bonus_restore_health = 0x8005FA8C; // type:func  each player's health back from unk_17C
 bonus_award_places = 0x8005FB14; // type:func  the round's end - each player's awards by place
 bonus_give_awards = 0x8005FEF4; // type:func  (player, awards) bits 1 and 2 extra lives, 4 health, 8 meter, each with its icon
+bonus_update_awards = 0x80060524; // type:func  the BONUS AWARDS screen - its box, the LIFE, HEALTH and POWER lines sliding in, cleared at the end
 
 // cdload (src/main/cdload.c), the CD file reader and the overlay loader (docs/DISC_LAYOUT.md "The file table" and
 // "Overlays"). Files are read by index into the file table, checksummed and retried.
@@ -512,7 +540,10 @@ D_8008525C = 0x8008525C;
 D_7FFFFF = 0x007FFFFF; // ignore:true
 
 // wess (src/main/wess.c), the driver's API, the SPU command set, the voices, the sequence loader
+wess_start_voice = 0x8006C204; // type:func  keys a voice on with its reverb, volume and pan, pitch bend, sample and ADSR
 wess_pitch_mod = 0x8006CF14; // type:func  the pitch bend command every voice of the channel, by its patch map's ranges
+wess_volume_mod = 0x8006D18C; // type:func  the volume command, every voice of the channel
+wess_pan_mod = 0x8006D6E4; // type:func  the pan command, every voice of the channel
 wess_report_error = 0x8006E4BC; // type:func  calls the error callback D_801FDEA8
 wess_sequence_count = 0x8006E4F4; // type:func  the number of sequences in the file
 wess_valid_sequence = 0x8006E504; // type:func  1 for a sequence number in range
@@ -524,6 +555,7 @@ wess_load_sequence_table = 0x8006E8B4; // type:func  reads the sequence table, p
 wess_sequence_size = 0x8006EA50; // type:func  the memory a sequence needs, 0 when loaded
 wess_load_sequence = 0x8006EB08; // type:func  loads a sequence that is not loaded yet
 wess_module_size = 0x8006EE30; // type:func  the memory the module's tables need
+wess_load_module = 0x8006F0D8; // type:func  reads the module into memory and lays out the driver's tables
 wess_init_channel = 0x8006F634; // type:func  sets a channel up from its track's settings and the caller's overrides
 wess_set_channel_data = 0x8006F8F8; // type:func  the channel's sequence data and labels
 wess_start_sequence = 0x8006F96C; // type:func  a free sequence record and a channel per track, returns the record + 1 or 0

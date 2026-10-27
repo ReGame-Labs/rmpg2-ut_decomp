@@ -33,7 +33,7 @@ typedef struct Unk1F9AE4 {
     s32 unk_C;
 } Unk1F9AE4;
 
-/* An entry of the building lists func_80025C08 returns (func_80024C2C): the definition, then the placement. */
+/* An entry of the building lists func_80025C08 returns (main_create_buildings): the definition, then the placement. */
 typedef struct Unk24C2C {
     BuildingDef *unk_0;
     s32 unk_4;
@@ -46,6 +46,25 @@ typedef struct Unk24C2C {
     u16 unk_14;
     u8 pad_16[0x2];
 } Unk24C2C;
+
+/* An entry of the list at 0x8007BA40 (func_800252CC), ended by a NULL def: for the buildings made from def, what
+ * to set to 1. code 0xFFFF: every item's parts (func_800253F0 0); 0xFFF0..0xFFFE: the three parts of item
+ * 0xFFFF - code; 0x1FFFD..0x1FFFF: func_800253F0's selector 0x20000 - code; else the s16 at Building + code + 0xAC. */
+typedef struct BuildingPatch {
+    BuildingDef *def;
+    s32 code;
+} BuildingPatch;
+
+/* A monster frame's boxes, the signed bytes from SpriteFrame + 0x0C (main_update_boxes): offsets from the object's
+ * position, x mirrored when it faces left. box2, box: Monster.box2_*, box_*; hit: hit_*; point: Monster.pos (less
+ * the frame's origin), 0 none. */
+typedef struct FrameBoxes {
+    s8 box2[4];
+    s8 box[4];
+    s8 hit[4];
+    s8 point[2];
+} FrameBoxes;
+#define FRAME_BOXES(frame) ((FrameBoxes *) &(frame)->unk_0C)
 
 /* An 8-byte record of the two 20-entry tables at 0x801FA738 and 0x801FA7EC. */
 typedef struct UnkFA738 {
@@ -126,5 +145,9 @@ extern u16 D_801FA730;                  /* the calls func_800205AC ran this fram
 extern s32 D_801F9A2C;
 s32 func_8001E59C(GameObject *sprite, s32 image);
 extern s32 D_800AA2A8;                  /* D_800AA248.unk_60 by its own name */
+
+/* The Npc chain's speeds (main_approach_x, main_approach_xy): (vel_x, vel_y) pairs by direction, its bits 1 and 2 for x,
+ * 4 and 8 for y. */
+extern s32 D_8007B9A0[];
 
 #endif /* MAIN_H */

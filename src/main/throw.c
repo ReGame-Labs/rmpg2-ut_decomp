@@ -21,7 +21,7 @@ extern s32 D_80091B60[];
 extern s32 D_8008C810[];
 extern s32 D_8008C828[];
 void func_8004A93C(Monster *m);
-u16 func_80053BE8(s16 x, Monster *m);
+u16 monster_test_box_x(s16 x, Monster *m);
 extern s32 D_80091788[];
 extern s32 D_800917D0[];
 extern s32 D_8009192C[];
@@ -1136,8 +1136,6 @@ void func_800494B4(Throw *t) {
     } while (--i != 0);
 }
 
-#ifdef NON_MATCHING
-/* 99.25%: registers only: the original gives x a0, the counter a1 and the object a2 (here a2, a0, a1) */
 /* A pair per throw kind (D_8007F39C): the vertical speed it gets back when it lands, and the height it lands at. */
 typedef struct {
     /* 0x00 */ s32 unk_0;
@@ -1175,7 +1173,9 @@ void func_80049650(Throw *t) {
             m = &D_801E0B78[i];
             if (m->unk_058 & 1) {
                 o = m->obj;
-                if (x == 0 || (D_800AA248.cur_obj->unk_08.w & 1)) {
+                if (x == 0) {
+                    x = o->pos_x.s.hi;
+                } else if (D_800AA248.cur_obj->unk_08.w & 1) {
                     x = o->pos_x.s.hi;
                 }
             }
@@ -1194,9 +1194,6 @@ void func_80049650(Throw *t) {
         D_800AA248.cur_obj->unk_88 = 0;
     }
 }
-#else
-INCLUDE_ASM("asm/main/nonmatchings/throw", func_80049650);
-#endif
 
 extern s32 D_80091A20[];
 extern s32 D_800919D4[];
@@ -1276,8 +1273,6 @@ void func_800499F4(Throw *t) {
     }
 }
 
-#ifdef NON_MATCHING
-/* 99.7 %: register names only: the original keeps the object in a0 and the camera's x in a1, here the other way round */
 void func_80049B9C(Throw *t) {
     Monster *m;
     GameObject *o;
@@ -1299,12 +1294,11 @@ void func_80049B9C(Throw *t) {
         D_800AA248.cur_obj->vel_y.w = (D_800AA248.cur_obj->vel_y.w >> 2) - D_800AA248.cur_obj->vel_y.w;
         o = D_800AA248.cur_obj;
         if (o->vel_x.w == 0) {
-            if (o->pos_x.w > D_801F9AC8.w) {
-                d = o->pos_x.w - D_801F9AC8.w;
-            } else {
+            d = o->pos_x.w;
+            if (d <= D_801F9AC8.w) {
                 d = D_801D8864.w + 1;
-                d -= D_801F9AC8.w;
             }
+            d -= D_801F9AC8.w;
             o->vel_x.w = (d <= 0xC80000) ? 0x20000 : -0x20000;
         }
     }
@@ -1322,9 +1316,6 @@ void func_80049B9C(Throw *t) {
         }
     } while (--i != 0);
 }
-#else
-INCLUDE_ASM("asm/main/nonmatchings/throw", func_80049B9C);
-#endif
 
 void func_80049D90(Throw *t) {
     s32 vel;
@@ -1595,7 +1586,7 @@ void func_8004A698(Throw *t) {
                             D_800AA248.cur_obj->flags |= 0x800;
                             goto sound;
                         }
-                        if (D_800AA248.cur_obj->vel_x.w != 0 && func_80053BE8(D_800AA248.cur_obj->pos_x.s.hi, m) != 0) {
+                        if (D_800AA248.cur_obj->vel_x.w != 0 && monster_test_box_x(D_800AA248.cur_obj->pos_x.s.hi, m) != 0) {
                             D_800AA248.cur_obj->vel_x.w >>= 1;
                         }
                     }
@@ -1708,16 +1699,16 @@ u16 func_8004A9B0(m, a, kind, b, c)
         r = func_8004A51C(a, kind, t);
         break;
     case 7:
-        r = func_80039358(m, a, kind, t);
+        r = npc_create_throw(m, a, kind, t);
         break;
     case 9:
         r = func_80047DEC(a, kind, b, c, t);
         break;
     case 21:
-        r = func_8003A5A0(a, kind, t, 0);
+        r = npc_create_shot(a, kind, t, 0);
         break;
     case 22:
-        r = func_8003A5A0(a, kind, t, 1);
+        r = npc_create_shot(a, kind, t, 1);
         break;
     case 18:
         r = func_800481FC(a, kind, t);
@@ -1794,7 +1785,7 @@ void func_8004AD18(Throw *t) {
         break;
     case 21:
     case 22:
-        func_8003A744(t);
+        npc_update_shot(t);
         break;
     case 17:
         func_8004A044(t);
@@ -1803,7 +1794,7 @@ void func_8004AD18(Throw *t) {
         func_800494B4(t);
         break;
     case 7:
-        func_8003956C(t);
+        npc_update_throw(t);
         break;
     }
 }
@@ -2244,7 +2235,119 @@ void func_8004BAC0(void) {
     func_8006353C(7);
 }
 
+#ifdef NON_MATCHING
+/* 99.86%: 99.86%: registers only: the original keeps the object (npc->obj) in a1 and &D_800AA248 in a0, here the
+ * other way round (their global priorities are 0.25 and 0.235) */
+void func_8003831C(void);
+extern Anim D_8008AA58;
+extern Anim D_8008AA78;
+extern Anim D_8008AAA8;
+extern Anim D_8008AAD8;
+extern Anim D_8008AAF0;
+
+void func_8004BBC8(Npc *npc) {
+    D_800AA248.cur_obj = npc->obj;
+    switch (npc->action) {
+    case 3:
+    case 5:
+        func_8001F724(5);
+        D_800AA248.cur_obj->vel_x.w = D_800AA248.cur_obj->vel_y.w = 0;
+        D_800AA248.cur_obj->priority = 0x1300;
+        npc->action = 4;
+        npc->unk_1C = 0x12;
+        func_8003EB5C(&D_8008A7A4, D_800AA248.cur_obj);
+        func_8004BFE0();
+        break;
+    case 4:
+        if (npc->unk_1C == 0) {
+            npc->unk_1C = 0xBE;
+            npc->action = 0x33;
+            D_800AA248.cur_obj->pos_y.w = 0x2000000;
+            D_800AA248.cur_obj->pos_x.w = 0x2000000;
+            func_8003831C();
+        } else {
+            npc->unk_1C--;
+        }
+        break;
+    case 1:
+        D_800AA248.cur_obj->pos_y.w = 0x1900000;
+    case 0x64:
+        if (npc->unk_1C == 0) {
+            goto enter;
+        }
+        npc->unk_1C--;
+        break;
+    case 0x33:
+        break;
+    default:
+        switch (npc->state) {
+        case 0:
+            D_800AA248.cur_obj->pos_y.w += D_800AA248.cur_obj->vel_y.w;
+            if (D_800AA248.cur_obj->pos_y.s.hi < 0xFB) {
+                npc->state = 2;
+                npc->unk_1C = 1;
+                func_8003EB5C(&D_8008AAA8, D_800AA248.cur_obj);
+            }
+            break;
+        case 1:
+            D_800AA248.cur_obj->pos_y.w += D_800AA248.cur_obj->vel_y.w;
+            if (D_800AA248.cur_obj->pos_y.s.hi >= 0x154) {
+            enter:
+                npc->kind = 3;
+                npc->state = 0;
+                npc->unk_20 = 0;
+                D_800AA248.cur_obj->pos_x.s.hi = D_801D87B0 + 0xA;
+                D_800AA248.cur_obj->pos_y.w = 0x1540000;
+                D_800AA248.cur_obj->vel_y.w = -0x8000;
+                npc->action = 2;
+                func_8003EB5C(&D_8008AAD8, D_800AA248.cur_obj);
+            }
+            break;
+        case 2:
+            D_800AA248.cur_obj->pos_y.w += D_800AA248.cur_obj->vel_y.w;
+            if (D_800AA248.cur_obj->pos_y.s.hi < 0xF1) {
+                D_800AA248.cur_obj->pos_y.w = 0xF00000;
+            }
+            if (npc->unk_1C == 0) {
+                npc->state = 4;
+                D_800AA248.cur_obj->vel_x.w = npc->unk_20 != 0 ? -0x8000 : 0x8000;
+                D_800AA248.cur_obj->vel_y.w = 0;
+                func_8003EB5C(&D_8008AA58, D_800AA248.cur_obj);
+            }
+            break;
+        case 3:
+            D_800AA248.cur_obj->pos_y.w += D_800AA248.cur_obj->vel_y.w;
+            if (npc->unk_1C == 0) {
+                npc->state = 1;
+                D_800AA248.cur_obj->vel_y.w = 0x8000;
+                func_8003EB5C(&D_8008AAF0, D_800AA248.cur_obj);
+            }
+            break;
+        default:
+            if (D_800AA248.cur_obj->vel_x.w <= 0) {
+                D_800AA248.cur_obj->pos_x.w += D_800AA248.cur_obj->vel_x.w;
+                if (D_800AA248.cur_obj->pos_x.s.hi < D_801D87B0) {
+                    goto turn;
+                }
+            } else {
+                D_800AA248.cur_obj->pos_x.w += D_800AA248.cur_obj->vel_x.w;
+                if (D_800AA248.cur_obj->pos_x.s.hi > D_801D376C) {
+                turn:
+                    D_800AA248.cur_obj->vel_x.w = 0;
+                    D_800AA248.cur_obj->vel_y.w = 0x8000;
+                    npc->state = 3;
+                    npc->unk_1C = 1;
+                    func_8003EB5C(&D_8008AA78, D_800AA248.cur_obj);
+                }
+            }
+            break;
+        }
+        break;
+    }
+}
+#else
 INCLUDE_ASM("asm/main/nonmatchings/throw", func_8004BBC8);
+#endif
 
 void func_8004BFE0(void) {
     ObjectDef *def = func_8001D110();

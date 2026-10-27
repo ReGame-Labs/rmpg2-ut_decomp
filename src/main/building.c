@@ -142,8 +142,6 @@ void func_8002AD84(void) {
     } while (var_s2 < 0x50);
 }
 
-/* 88 %: the sky's daylight colours; the original holds D_801FAC80's %hi in a0 and 0x80 in a1 (swapped here) and loads the three colour bytes before the store to D_801FB41C, one nop less */
-#ifdef NON_MATCHING
 void func_8002ADE8(void) {
     D_801FAC80->unk_74 = 0xA0;
     D_801FAC80->unk_75 = 0xA0;
@@ -163,12 +161,9 @@ void func_8002ADE8(void) {
     D_801FAC80->unk_B0 = 0xA0;
     D_801FAC80->unk_B1 = 0xA0;
     D_801FAC80->unk_B2 = 0x80;
-    D_801FB41C = ((((D_801FB41C >> 16) & 0xFF) + 0x20) << 16) | ((((D_801FB41C >> 8) & 0xFF) + 0x20) << 8) | ((D_801FB41C & 0xFF) + 0x20);
     D_801FA9A4 = (D_801FAC80->unk_98 << 16) | (D_801FAC80->unk_99 << 8) | D_801FAC80->unk_9A;
+    D_801FB41C = ((((D_801FB41C >> 16) & 0xFF) + 0x20) << 16) | ((((D_801FB41C >> 8) & 0xFF) + 0x20) << 8) | ((D_801FB41C & 0xFF) + 0x20);
 }
-#else
-INCLUDE_ASM("asm/main/nonmatchings/building", func_8002ADE8);
-#endif
 
 void building_update_sky(void) {
     s32 i;
@@ -525,7 +520,7 @@ void building_spawn_monster(Monster *m) {
         func_8005E124(m, 0x7A0);
         return;
     }
-    switch (func_8005F208()) {
+    switch (bonus_get_round_kind()) {
     case 2:
         bonus_create_counter(1, D_801FA8A0[m->id - 1]);
         bonus_create_lives(m);
@@ -1326,7 +1321,128 @@ void func_8002D448(Monster *m, Building *b) {
     func_8003089C(mode, m);
 }
 
+#ifdef NON_MATCHING
+/* 92.52%: 92.5%: the control flow and the shared restore at the end are the original's; the original keeps rec in
+ * t0 (here a2, so F65C's move a2 is gone, 2 instructions short) and allocates m/saved/next/p0/p1 differently */
+void func_8002D844(BuildingPart *p0, BuildingPart *p1, Monster *a, BuildingPart *p2, BuildingItem *rec);
+
+void func_8002D5B8(Monster *m, BuildingItem *rec) {
+    GameObject *saved;
+    Building *b;
+    BuildingItem *next;
+    BuildingItem *prev;
+    BuildingPart *p0;
+    BuildingPart *p1;
+    BuildingPart *p2;
+    s32 side;
+    u16 n;
+    u16 r;
+    u16 l;
+    u16 both;
+
+    saved = D_800AA268.p;
+    if (m->icon_timers[1] != 0) {
+        func_80030E04(m, rec);
+        goto end;
+    }
+    b = rec->building;
+    if (b->unk_070 == rec || b->state != 0) {
+        goto end;
+    }
+    if (rec->unk_04 < 2) {
+        goto single;
+    }
+    b->unk_02C = rec->unk_04;
+    side = 1;
+    if (m->obj->flags & 0x10) {
+        side = 2;
+    }
+    b->unk_02E = side;
+    b->state = 2;
+    if (b->unk_02E == 1) {
+        p0 = &rec->unk_0C;
+        p1 = &rec->unk_24;
+    } else {
+        p0 = &rec->unk_24;
+        p1 = &rec->unk_0C;
+    }
+    p2 = NULL;
+    if (b->kind != 2) {
+        p2 = &rec->unk_3C;
+    }
+    n = rec->unk_06;
+    if (n == 0) {
+    place:
+        func_8002D844(p0, p1, m, p2, rec);
+        goto end;
+    }
+    if (n == 2) {
+        goto end;
+    }
+    if (b->unk_012 < 0x23) {
+        goto collapse;
+    }
+    next = rec + 1;
+    prev = rec - 1;
+    r = next->unk_06;
+    l = prev->unk_06;
+    both = r | l;
+    if (both == 0) {
+        if (!(func_8001EB10(0x8000, 0) & 1)) {
+            goto go_next;
+        }
+        goto go_prev;
+    }
+    if (both == 3 && n == 1) {
+        goto collapse;
+    }
+    if (r & l) {
+        goto collapse;
+    }
+    if (l == 0) {
+        goto go_prev;
+    }
+go_next:
+    rec = next;
+    if (b->unk_070 == next) {
+        func_8002F5B0(m, b);
+        goto end;
+    }
+    p0 = (BuildingPart *)((BuildingItem *)p0 + 1);
+    p1 = (BuildingPart *)((BuildingItem *)p1 + 1);
+    if (p2 != NULL) {
+        p2 = (BuildingPart *)((BuildingItem *)p2 + 1);
+    }
+    goto place;
+go_prev:
+    rec = prev;
+    if (prev->unk_04 == 1) {
+    single:
+        if (rec->unk_06 == 0) {
+            func_8002FAA4(m, rec);
+            D_800AA268.p = saved;
+            return;
+        }
+        rec++;
+        if (rec->unk_06 == 0) {
+            func_8002D1F4(m, rec);
+        }
+        goto end;
+    }
+    p0 = (BuildingPart *)((BuildingItem *)p0 - 1);
+    p1 = (BuildingPart *)((BuildingItem *)p1 - 1);
+    if (p2 != NULL) {
+        p2 = (BuildingPart *)((BuildingItem *)p2 - 1);
+    }
+    goto place;
+collapse:
+    func_8002F65C(b, (s32)m, rec);
+end:
+    D_800AA268.p = saved;
+}
+#else
 INCLUDE_ASM("asm/main/nonmatchings/building", func_8002D5B8);
+#endif
 
 void func_8002D844(BuildingPart *p0, BuildingPart *p1, Monster *a, BuildingPart *p2, BuildingItem *rec) {
     GameObject *saved;
@@ -1419,9 +1535,6 @@ void *func_8002DAAC(u16 which, u16 n, BuildingItem *rec) {
 
 
 
-#ifdef NON_MATCHING
-/* 92 %: the original lays the `v == 0` and `v == n` outcomes out of line after an inlined `return result` for the 2;
- * the same statements in every nesting tried keep them in line. */
 s32 func_8002DB3C(u16 which, u16 n, BuildingItem *rec) {
     BuildingPart *g;
     s32 result;
@@ -1449,10 +1562,10 @@ s32 func_8002DB3C(u16 which, u16 n, BuildingItem *rec) {
         } else {
             v = g->unk_06;
             if (v != 0) {
-                if (v != n && v < 5) {
-                    result = 2;
-                } else {
+                if (v == n || v >= 5) {
                     result = 1;
+                } else {
+                    result = 2;
                 }
             } else {
                 result = 3;
@@ -1463,9 +1576,6 @@ s32 func_8002DB3C(u16 which, u16 n, BuildingItem *rec) {
     }
     return result;
 }
-#else
-INCLUDE_ASM("asm/main/nonmatchings/building", func_8002DB3C);
-#endif
 
 void func_8002DBF4(u16 which, u16 n, Monster *a, BuildingItem *rec) {
     GameObject *saved;
@@ -1828,9 +1938,6 @@ void func_8002E614(u16 which, BuildingItem *rec) {
     }
 }
 
-#ifdef NON_MATCHING
-/* 98.89%: the statements are right; the original loads rec->building into v1 (here v0) both times, so the field
- * load reuses it and the constant 9 goes into v0 in a delay slot */
 s32 *func_8002E658(u16 which, BuildingItem *rec) {
     GameObject *saved;
     ObjectDef *def;
@@ -1839,11 +1946,13 @@ s32 *func_8002E658(u16 which, BuildingItem *rec) {
     Ai *ai;
     u16 x;
     u16 y;
+    Building *bld;
 
     saved = D_800AA248.cur_obj;
     D_800AA248.new_def = func_8001D110();
     def = D_800AA248.new_def;
-    def->unk_24 = rec->building->unk_06C;
+    bld = rec->building;
+    def->unk_24 = bld->unk_06C;
     def->anim = &D_80011D48;
     def->id = D_80011D48.id;
     obj = rec->obj;
@@ -1877,7 +1986,8 @@ s32 *func_8002E658(u16 which, BuildingItem *rec) {
         D_800AA248.cur_obj = saved;
         return (s32 *) ai;
     }
-    if (rec->building->state != 9) {
+    bld = rec->building;
+    if (bld->state != 9) {
         D_800AA248.unk_00 = func_8001EB10(0x8000, 0) & 0x3F;
         if ((u32) D_800AA248.unk_00 >= 0x20) {
             def->anim = &D_80011F10;
@@ -1892,9 +2002,6 @@ s32 *func_8002E658(u16 which, BuildingItem *rec) {
     D_800AA268.p = saved;
     return (s32 *) ai;
 }
-#else
-INCLUDE_ASM("asm/main/nonmatchings/building", func_8002E658);
-#endif
 
 void func_8002E854(Building *b) {
     GameObject *saved;
@@ -3403,8 +3510,8 @@ void func_800315D8(void) {
 }
 
 #ifdef NON_MATCHING
-/* 86.21%: only the first lines differ: the original materializes the lists' address (s1) before the call's
- * argument, every spelling tried gives the argument first */
+/* 92.42%: 92.4%: only the prologue's order differs: the original computes lists (s1) before the call's argument
+ * (a0) */
 void func_80031690(void) {
     GameObject **lists;
     UnkStruct18 *r;
@@ -3414,7 +3521,7 @@ void func_80031690(void) {
     D_801D37BC = r->unk_00;
     D_801D37C0 = r->unk_02;
     D_801D857C = r->unk_04;
-    if (r->unk_04 != 0) {
+    if (D_801D857C != 0) {
         func_8003197C(r->unk_0C, r->unk_04, &lists[0]);
         func_8003197C(r->unk_18, r->unk_08, &lists[1]);
     }
@@ -3433,7 +3540,7 @@ s32 func_80031714(Monster *m) {
     u16 px;
     s32 hit;
 
-    if (func_8005F208() == 1) {
+    if (bonus_get_round_kind() == 1) {
         x = m->obj->pos_x.s.hi;
         for (i = 0; i < 4; i++) {
             if (x >= D_8007D0A8[i][0] && x <= D_8007D0A8[i][1]) {
@@ -3674,26 +3781,18 @@ void func_80031FD4(s32 arg0, Ai *arg1) {
     }
 }
 
-#ifdef NON_MATCHING
-/* 94.5 %: the original puts `move a0, v1` (the call's first argument) in the jal's delay slot, after the two stores;
- * every form tried schedules it before them. */
 void func_80032008(s16 arg0, s32 arg1, Ai *arg2) {
-    s16 var_v0;
-
     if (arg0 != -1) {
         arg2->state = 9;
-        var_v0 = 0x32;
+        arg2->unk_0C = 0;
+        arg2->action = 0x32;
     } else {
         arg2->state = 0x10;
-        var_v0 = 0x33;
+        arg2->unk_0C = 0;
+        arg2->action = 0x33;
     }
-    arg2->unk_0C = 0;
-    arg2->action = var_v0;
     func_80032630(arg1, arg2);
 }
-#else
-INCLUDE_ASM("asm/main/nonmatchings/building", func_80032008);
-#endif
 
 void func_80032064(s32 arg0, Ai *arg1) {
     s16 var_v0;
