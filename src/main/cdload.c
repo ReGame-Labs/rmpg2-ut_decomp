@@ -157,7 +157,7 @@ void func_800610E8(void) {
 }
 
 void func_800610F0(void) {
-    D_800AA268.p->unk_80 = *D_800AA268.p->arg.w;
+    D_800AA268.p->priority = *D_800AA268.p->arg.w;
 }
 
 void func_80061110(void) {
@@ -166,11 +166,11 @@ void func_80061110(void) {
 }
 
 void func_8006113C(void) {
-    D_800AA268.p->owner.monster->unk_010.u.hi = 1;
+    D_800AA268.p->owner.monster->meter.u.hi = 1;
 }
 
 void func_80061158(void) {
-    D_800AA268.p->owner.monster->unk_010.u.hi = 0;
+    D_800AA268.p->owner.monster->meter.u.hi = 0;
 }
 
 s32 func_80061170(s32 index) {

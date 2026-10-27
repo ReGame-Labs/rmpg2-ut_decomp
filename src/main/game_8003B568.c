@@ -129,9 +129,9 @@ void func_8003B6E0(void) {
         obj->pos_x.u.hi = item->unk_06;
         obj->pos_y.u.hi = item->unk_08;
         obj->flags |= item->unk_0A;
-        obj->unk_80 = item->unk_0C;
+        obj->priority = item->unk_0C;
         if (r->unk_06 != 0x17) {
-            obj->unk_80 = obj->pos_y.u.hi + 0xF23;
+            obj->priority = obj->pos_y.u.hi + 0xF23;
         }
         obj->kind = 0x71A;
         if (item->unk_0E == -1) {
@@ -143,7 +143,7 @@ void func_8003B6E0(void) {
             func_800380C0(obj);
         }
         if (r->unk_06 >= 0xD && r->unk_06 < 0x12) {
-            obj->unk_80 += 2;
+            obj->priority += 2;
             D_800AA248.new_def = func_8001D110();
             def = D_800AA248.new_def;
             def->id = D_8007DB60[r->unk_06 - 0xD];
@@ -155,7 +155,7 @@ void func_8003B6E0(void) {
             }
             r->unk_40 = func_8001DCB4();
             r->unk_40->flags = obj->flags;
-            r->unk_40->unk_80 = obj->unk_80 + 1;
+            r->unk_40->priority = obj->priority + 1;
             r->unk_40->kind = 0x71A;
             r->unk_40->pos_x.u.hi = obj->pos_x.u.hi;
             r->unk_40->pos_y.u.hi = obj->pos_y.u.hi;
@@ -336,16 +336,16 @@ s32 func_8003BE34(UnkStructB1 *rec) {
     D_800AA248.cur_obj->pos_x.w &= D_801D8864.w;
     if (rec->unk_3E != 0) {
         if (D_800AA248.cur_obj->unk_6C & 0x80) {
-            D_800AA248.unk_78 = 1;
+            D_800AA248.result = 1;
             return 1;
         }
-        D_800AA248.unk_78 = 0;
+        D_800AA248.result = 0;
         return 0;
     }
     if (!(D_800AA248.cur_obj->unk_6C & 0x80)) {
         rec->unk_3E = 1;
     }
-    D_800AA248.unk_78 = 0;
+    D_800AA248.result = 0;
     return 0;
 }
 

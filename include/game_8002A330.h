@@ -195,23 +195,6 @@ typedef struct UnkStructPair {  /* provisional: s16 pairs: D_801D8804 (func_8003
     s16 unk_02;
 } UnkStructPair;
 
-typedef struct UnkStructFEA4 {  /* provisional: func_8002FEA4's and func_800305C8's argument, the owner of func_8003047C's object */
-    u16 unk_00;
-    u16 unk_02;
-    s16 unk_04;
-    u16 unk_06;
-    u16 unk_08;
-    u8 pad_0A[0x4];
-    s16 unk_0E;
-    u8 pad_10[0x4];
-    u16 unk_14;
-} UnkStructFEA4;
-
-
-typedef struct UnkStruct14 {  /* provisional */
-    GameObject *unk_00;
-    u16 unk_04;
-} UnkStruct14;
 
 typedef struct UnkStruct15 {  /* provisional: func_800300A0's first argument */
     u8 pad_00[0x1A];
@@ -230,7 +213,7 @@ void func_8002EB00();
 void func_8002C19C(Building *arg0);
 void func_8002ED90(Building *);
 void func_8002C1E8(Building *arg0);
-void func_8002FEA4(UnkStructFEA4 *);
+void func_8002FEA4(Building *);
 void func_8002C228(Building *arg0);
 void func_8002E854();
 void func_80030B5C(Building *);
@@ -554,7 +537,7 @@ extern s32 D_80011E68[];
 extern s32 D_80011ED0[];
 extern s32 D_80011ED8[];
 extern s32 D_80012068[];
-void func_800305C8(s32 *, s16, GameObject *, UnkStructFEA4 *);
+void func_800305C8(s32 *, s16, GameObject *, Building *);
 void func_8002DE08(u16, s16, s32, BuildingItem *);
 void *func_8002DAAC(u16, u16, BuildingItem *);
 void func_80030754(BuildingPart *, s16, s32, BuildingItem *);

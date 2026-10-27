@@ -211,9 +211,9 @@ void func_8003CEA0(Anim *anim, GameObject *mover) {
     Actor *actor;
     GameObject *o;
 
-    if (mover->unk_48 != (s32) anim) {
-        if (*(u16 *)&mover->unk_80 == 0) {
-            mover->unk_80 = ((AnimFrame *)func_8003D1F8(mover->owner.ai->unk_10.actor))->unk_8 - 1;
+    if (mover->anim != (s32) anim) {
+        if (*(u16 *)&mover->priority == 0) {
+            mover->priority = ((AnimFrame *)func_8003D1F8(mover->owner.ai->unk_10.actor))->unk_8 - 1;
         }
         func_80024964(0, mover);
         func_8001E698(mover, anim);
@@ -409,7 +409,7 @@ void func_8003D490(Actor *actor) {
 
 void func_8003D4AC(Ai *ai) {
     ai->action = 6;
-    D_800AA248.cur_obj->unk_80 = 0xF00;
+    D_800AA248.cur_obj->priority = 0xF00;
     if (ai->unk_10.order->unk_4 == 2) {
         D_800AA248.cur_obj->flags |= 0x10;
     }
@@ -439,7 +439,7 @@ void func_8003D51C(Ai *ai) {
 }
 
 void func_8003D58C(Anim *anim) {
-    if (D_800AA248.cur_obj->unk_48 != (s32) anim) {
+    if (D_800AA248.cur_obj->anim != (s32) anim) {
         func_8001E698(D_800AA248.cur_obj, anim);
     }
 }
@@ -527,7 +527,7 @@ void func_8003D9D8(Ai *ai) {
     if (ai->state != 5) {
         ai->state = 5;
         func_8003DF34(ai);
-        D_800AA248.cur_obj->unk_80 = 0x390;
+        D_800AA248.cur_obj->priority = 0x390;
         func_8001E39C(D_800AA248.cur_obj);
         func_8001E2F8(D_800AA248.cur_obj);
     }
@@ -690,7 +690,7 @@ void func_8003E630(Ai *ai) {
             break;
         }
     } while (--n != 0);
-    ai->unk_14 = (Monster *)player;
+    ai->target = (Monster *)player;
     ai->unk_04 = i;
 }
 
@@ -714,7 +714,7 @@ void func_8003E6A4(Ai *ai) {
     ai->state = 0;
     ai->unk_10.order = NULL;
     ai->unk_1C.order = 0;
-    ai->unk_14 = NULL;
+    ai->target = NULL;
     ai->unk_38 = 0;
     ai->unk_0C = 0;
     ((s16 *)&mover->pos_x.w)[1] = -0x190;
@@ -749,11 +749,11 @@ s32 func_8003E79C(void) {
         }
     }
     func_80030338(D_800AA248.cur_obj);
-    D_800AA248.unk_78 = 0;
+    D_800AA248.result = 0;
     return 0;
 inside:
     D_800AA248.unk_4C = 0;
-    D_800AA248.unk_78 = 1;
+    D_800AA248.result = 1;
     return 1;
 }
 
@@ -827,15 +827,15 @@ void func_8003EB40(void) {
 }
 
 u16 func_8003EB5C(Anim *anim, GameObject *mover) {
-    if ((s32) anim == mover->unk_48) {
+    if ((s32) anim == mover->anim) {
         D_800AA248.unk_7A = 1;
         mover->flags |= 0x800;
     } else {
-        mover->unk_48 = (s32) anim;
-        mover->script_pc = (s32) anim;
+        mover->anim = (s32) anim;
+        mover->script.pc = (s32) anim;
         mover->unk_4C = 0;
         mover->unk_4D = 0;
-        mover->unk_64 = 0;
+        mover->unk_64.w = 0;
         mover->flags |= 0x800;
         D_800AA248.unk_7A = 0;
     }
@@ -1275,7 +1275,7 @@ void func_8004022C(void) {
     p = (Anim **)D_800AA248.cur_obj->arg.h;
     func_8004003C(D_800AA248.cur_obj->flags ^ 0x10, D_800AA248.cur_obj->owner.ai);
     if (D_800AA248.unk_0C != 0) {
-        D_800AA248.cur_obj->script_pc = (s32) *p;
+        D_800AA248.cur_obj->script.pc = (s32) *p;
     }
 }
 
@@ -1285,7 +1285,7 @@ void func_80040294(void) {
     p = (Anim **)D_800AA248.cur_obj->arg.h;
     func_8004003C(D_800AA248.cur_obj->flags ^ 0x10, D_800AA248.cur_obj->owner.ai);
     if (abs(D_800AA248.unk_00) < 0x4B) {
-        D_800AA248.cur_obj->script_pc = (s32) *p;
+        D_800AA248.cur_obj->script.pc = (s32) *p;
     }
 }
 
@@ -1302,7 +1302,7 @@ void func_80040314(Monster *player) {
     mover = player->obj;
     effect->pos_x.s.hi = ((u16 *)&mover->pos_x.w)[1];
     effect->pos_y.s.hi = ((u16 *)&mover->pos_y.w)[1] | 0xC000;
-    effect->flags = *(u16 *)&mover->unk_80 - 1;
+    effect->flags = *(u16 *)&mover->priority - 1;
     D_800AA248.cur_obj = func_8001DCB4();
     D_800AA248.cur_obj->owner.monster = player;
     D_800AA248.cur_obj = saved;
@@ -1582,7 +1582,7 @@ void func_80040D68(Actor *actor) {
                 x = ((u16 *)&D_800AA248.cur_obj->unk_1C.u.lo)[0];
                 y = ((u16 *)&D_800AA248.cur_obj->unk_1C.u.lo)[1];
                 func_8004155C(2, actor);
-                frame = func_8001A784(*(s32 *)D_800AA248.cur_obj->unk_48);
+                frame = func_8001A784(*(s32 *)D_800AA248.cur_obj->anim);
                 x = frame->unk_8 - x;
                 ((u16 *)&D_800AA248.cur_obj->pos_x.w)[1] += x;
                 y = frame->unk_A - y;

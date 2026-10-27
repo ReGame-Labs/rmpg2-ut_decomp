@@ -232,8 +232,8 @@ void func_8004415C(Attacker *a) {
         if (D_800AA248.unk_4C != 0) {
             a->state = 0x1E;
             func_8001E698(D_800AA248.cur_obj, D_8009540C);
-            if ((u16) D_800AA248.cur_obj->unk_80 < 0x390) {
-                D_800AA248.cur_obj->unk_80 = 0x390;
+            if ((u16) D_800AA248.cur_obj->priority < 0x390) {
+                D_800AA248.cur_obj->priority = 0x390;
                 func_8001E39C(D_800AA248.cur_obj);
                 func_8001E2F8(D_800AA248.cur_obj);
             }
@@ -549,7 +549,7 @@ void func_80044B28(Attacker *a) {
     }
     if (a->unk_0A != 0) {
         func_800443AC(0xFFFE0000);
-        D_800AA248.cur_obj->unk_80 = D_800AA248.cur_obj->pos_y.s.hi + 0xF23;
+        D_800AA248.cur_obj->priority = D_800AA248.cur_obj->pos_y.s.hi + 0xF23;
         a->state = 0x19;
         a->unk_0A = 0;
         if (a->type == 9) {
@@ -709,7 +709,7 @@ void func_80045084(void) {
 }
 
 void func_800450F8(void) {
-    D_800AA248.cur_obj->unk_80 = 0x1001;
+    D_800AA248.cur_obj->priority = 0x1001;
 }
 
 void func_8004510C(Attacker *a) {
@@ -837,7 +837,7 @@ void func_800454BC(void) {
 }
 
 void func_80045530(void) {
-    D_800AA248.cur_obj->unk_80 = D_800AA248.cur_obj->pos_y.s.hi + 0xF23;
+    D_800AA248.cur_obj->priority = D_800AA248.cur_obj->pos_y.s.hi + 0xF23;
 }
 
 void func_80045550(void) {

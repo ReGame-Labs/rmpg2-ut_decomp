@@ -28,20 +28,20 @@ void func_8005D20C(Monster *e) {
     x2 = x + 0xA6;
     s->pos_x.s.hi = x2;
     s->pos_y.s.hi = 0x18;
-    s->unk_80 = 0x501;
+    s->priority = 0x501;
     s->kind = e->id + 0x790;
-    e->unk_070 = s;
+    e->health_bar = s;
     s = func_8001EB9C(0, 0, 0, 2, 0xFF00FF);
     s->pos_x.s.hi = x2;
     s->pos_y.s.hi = 0x22;
-    s->unk_80 = 0x501;
+    s->priority = 0x501;
     s->kind = e->id + 0x790;
-    e->unk_06C = s;
+    e->meter_bar = s;
     func_8001D110()->id = 0x4F000992;
     s = func_8001DCB4();
     s->pos_x.s.hi = x + 0x96;
     s->pos_y.s.hi = 0x1D;
-    s->unk_80 = 0x500;
+    s->priority = 0x500;
     s->unk_6C |= 0x20;
     s->kind = e->id + 0x790;
     D_800AA248.cur_obj = saved;
@@ -93,7 +93,7 @@ Monster *func_8005D918(Monster *skip) {
             e = &D_801E0B78[i];
             if (skip != e && e->id != 0) {
                 v = e->unk_004;
-                if (v > 0 && best < v && (v != 1 || e->unk_008.w > 0x10FFFF)) {
+                if (v > 0 && best < v && (v != 1 || e->health.w > 0x10FFFF)) {
                     best = e->unk_004;
                     found = e;
                 }
@@ -283,8 +283,8 @@ void func_8005F12C(void) {
     for (i = 0; i < (s32) D_801D8740; i++) {
         e = &D_801E0B78[func_80025DF8(D_801FB49C[i])];
         if (e->unk_058 & 1) {
-            e->unk_1B0 = 3;
-            e->unk_1B2 = 1;
+            e->climb_side = 3;
+            e->climb_building = 1;
             e->obj->pos_x.s.hi = 0x82 - i * 0x28;
         }
     }
@@ -327,7 +327,7 @@ void func_8005F9FC(void) {
     for (i = 0; i < (s32) D_801D8740; i++) {
         e = &D_801E0B78[func_80025DF8(D_801FB49C[i])];
         e->unk_0F0 = 0;
-        e->unk_17C = e->unk_008.w;
+        e->unk_17C = e->health.w;
         e->unk_002 = e->unk_004;
     }
 }
@@ -339,7 +339,7 @@ void func_8005FA8C(void) {
     for (i = 0; i < (s32) D_801D8740; i++) {
         e = &D_801E0B78[func_80025DF8(D_801FB49C[i])];
         e->unk_0F0 = 0;
-        e->unk_008.w = e->unk_17C;
+        e->health.w = e->unk_17C;
     }
 }
 
@@ -457,9 +457,9 @@ void func_80060BA8(void) {
     if (D_800AA2DC & 0x7000) {
         for (i = 0; i < (s32) D_801D8740; i++) {
             e = &D_801E0B78[func_80025DF8(D_801FB49C[i])];
-            if (e->unk_008.w <= 0x40000 && e->unk_184 == 0) {
-                e->unk_008.w = 0;
-                if (e->unk_1B0 != 0 || (state = e->action) == 0x23 || state == 0xF || state == 0x17) {
+            if (e->health.w <= 0x40000 && e->unk_184 == 0) {
+                e->health.w = 0;
+                if (e->climb_side != 0 || (state = e->action) == 0x23 || state == 0xF || state == 0x17) {
                     if (e->action != 0x23) {
                         e->action = 0x1D;
                     }

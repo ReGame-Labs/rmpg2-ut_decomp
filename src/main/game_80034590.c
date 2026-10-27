@@ -235,7 +235,7 @@ void func_80034670(void) {
     y = ((u16 *)&D_800AA248.cur_obj->pos_y.w)[1];
     effect->anim = &D_8008A538;
     effect->pos_y.s.hi = y;
-    effect->flags = *(u16 *)&D_800AA248.cur_obj->unk_80 + 1;
+    effect->flags = *(u16 *)&D_800AA248.cur_obj->priority + 1;
     effect->id = D_8008A538.id;
     func_8001DCB4();
     D_800AA248.cur_obj = saved;
@@ -260,7 +260,7 @@ void func_800346FC(UnkStructB1 *npc) {
     }
     effect->pos_y.s.hi = ((s16 *)&mover->pos_y.w)[1] - 0x19;
     effect->anim = table;
-    effect->flags = *(u16 *)&mover->unk_80 + 1;
+    effect->flags = *(u16 *)&mover->priority + 1;
     effect->id = table->id;
     func_8001DCB4();
     func_8001E4B0(npc->unk_40);
@@ -277,7 +277,7 @@ void func_800347E4(UnkStructB1 *npc, Anim *def) {
     effect->pos_x.s.hi = ((u16 *)&D_800AA248.cur_obj->pos_x.w)[1];
     effect->pos_y.s.hi = ((u16 *)&D_800AA248.cur_obj->pos_y.w)[1];
     effect->anim = def;
-    effect->flags = *(u16 *)&D_800AA248.cur_obj->unk_80 + 1;
+    effect->flags = *(u16 *)&D_800AA248.cur_obj->priority + 1;
     effect->id = def->id;
     func_8001DCB4();
     if (npc->unk_40 != NULL) {
@@ -339,7 +339,7 @@ void func_80034A38(UnkStructB1 *npc) {
     func_80034B68(0x30000);
     D_800AA248.cur_obj->vel_y.w = -0xB0000;
     D_800AA248.cur_obj->pos_x.w += D_800AA248.cur_obj->vel_x.w;
-    D_800AA248.cur_obj->unk_80 = 0x4000;
+    D_800AA248.cur_obj->priority = 0x4000;
     npc->unk_08 = 6;
     func_8003EB5C(D_8008A4F4, D_800AA248.cur_obj);
 }
@@ -389,7 +389,7 @@ void func_80034C34(void) {
 }
 
 void func_80034C54(GameObject *mover) {
-    mover->unk_48 = (s32) D_8007D45C[mover->unk_68.u.lo];
+    mover->anim = (s32) D_8007D45C[mover->unk_68.u.lo];
 }
 
 void func_80034C74(void) {
@@ -438,7 +438,7 @@ void func_80034DAC(UnkStructB1 *npc) {
         effect->pos_x.s.hi = ((u16 *)&D_800AA248.cur_obj->pos_x.w)[1];
         effect->pos_y.s.hi = ((u16 *)&D_800AA248.cur_obj->pos_y.w)[1] - 0x14;
         effect->anim = &D_8008A7A4;
-        effect->flags = (u16)D_800AA248.cur_obj->unk_80 + 1;
+        effect->flags = (u16)D_800AA248.cur_obj->priority + 1;
         effect->id = D_8008A7A4.id;
         func_8001DCB4();
         func_8003C080();
@@ -473,7 +473,7 @@ void func_80034E48(UnkStructB1 *npc) {
         D_800AA248.new_def = effect;
         effect->anim = def;
         effect->id = def->id;
-        effect->flags = (u16)mover->unk_80;
+        effect->flags = (u16)mover->priority;
         spawned = func_8001DCB4();
         *slot = spawned;
         spawned->flags = mover->flags;
@@ -590,7 +590,7 @@ void func_800352A0(UnkStructB1 *npc) {
     func_8001F724(5);
     D_800AA248.cur_obj->vel_x.w = 0;
     D_800AA248.cur_obj->vel_y.w = 0;
-    D_800AA248.cur_obj->unk_80 = 0x4000;
+    D_800AA248.cur_obj->priority = 0x4000;
     npc->unk_08 = 4;
     npc->unk_1C = 0xF;
     func_8003EB5C(D_8008A448, D_800AA248.cur_obj);
@@ -679,7 +679,7 @@ void func_80035590(UnkStructB1 *npc) {
     func_8001F724(5);
     D_800AA248.cur_obj->vel_x.w = 0;
     D_800AA248.cur_obj->vel_y.w = 0;
-    D_800AA248.cur_obj->unk_80 = 0x4000;
+    D_800AA248.cur_obj->priority = 0x4000;
     npc->unk_08 = 4;
     npc->unk_1C = 0xF;
     func_8003EB5C(D_8008A9D4, D_800AA248.cur_obj);
@@ -829,7 +829,7 @@ void func_80035B6C(UnkStructB1 *npc) {
     func_8001F724(5);
     D_800AA248.cur_obj->vel_x.w = 0;
     D_800AA248.cur_obj->vel_y.w = 0;
-    D_800AA248.cur_obj->unk_80 = 0x1300;
+    D_800AA248.cur_obj->priority = 0x1300;
     npc->unk_08 = 4;
     npc->unk_1C = 0x12;
     func_8003EB5C(D_8008AA28, D_800AA248.cur_obj);
@@ -925,7 +925,7 @@ void func_80035EBC(UnkStructB1 *npc) {
         func_8001F724(5);
         D_800AA248.cur_obj->vel_x.w = 0;
         D_800AA248.cur_obj->vel_y.w = 0;
-        D_800AA248.cur_obj->unk_80 = 0x1300;
+        D_800AA248.cur_obj->priority = 0x1300;
         npc->unk_08 = 4;
         npc->unk_1C = 0x12;
         func_8004BFE0();
@@ -1090,7 +1090,7 @@ void func_80036440(NpcS *npc, s32 depth) {
     mover = func_8001EB9C(0, 0, 0, 0, 0xFFFFFF);
     mover->unk_40.w = -0x3E7;
     d = depth - 1;
-    mover->unk_80 = d;
+    mover->priority = d;
     mover->flags = (mover->flags & ~0x20) | 0x400;
     mover->unk_6C |= 0x2000;
     npc->unk_70 = mover;
@@ -1155,7 +1155,7 @@ void func_8003684C(void) {
         obj->pos_x.u.hi = item->unk_06;
         obj->pos_y.u.hi = item->unk_08;
         obj->flags |= item->unk_0A;
-        obj->unk_80 = item->unk_0C;
+        obj->priority = item->unk_0C;
         obj->kind = 0x713;
         if (item->unk_0E == -1) {
             npc->unk_1C = func_8001EB10(0xC8, 0x64);
@@ -1165,7 +1165,7 @@ void func_8003684C(void) {
         if (npc->unk_6 == 0x11 || npc->unk_6 == 0x12) {
             func_80036440(npc, item->unk_0C);
         } else {
-            obj->unk_80 = obj->pos_y.u.hi + 0xF23;
+            obj->priority = obj->pos_y.u.hi + 0xF23;
         }
         item++;
         npc++;
@@ -1532,7 +1532,7 @@ void func_80037CF4(NpcS *npc) {
     func_80034B68(0x58000);
     D_800AA248.cur_obj->vel_y.w = -0x65529;
     D_800AA248.cur_obj->pos_x.w += D_800AA248.cur_obj->vel_x.w;
-    D_800AA248.cur_obj->unk_80 = 0x4000;
+    D_800AA248.cur_obj->priority = 0x4000;
     npc->unk_8 = 0xD;
     func_8003EB5C(D_8008A398, D_800AA248.cur_obj);
 }
@@ -1623,7 +1623,7 @@ void func_800380C0(GameObject *mover) {
     } else {
         mover->pos_y.w = 0xE30000;
     }
-    mover->unk_80 = ((u16 *)&mover->pos_y.w)[1] + 0xF23;
+    mover->priority = ((u16 *)&mover->pos_y.w)[1] + 0xF23;
 }
 
 void func_800380F0(NpcS *npc) {
@@ -1750,7 +1750,7 @@ void func_800384E8(NpcS *npc) {
 }
 
 void func_80038528(NpcS *npc) {
-    switch (npc->unk_64->unk_0CC) {
+    switch (npc->unk_64->dir) {
     case 6:
     case 7:
     case 8:
@@ -1905,7 +1905,7 @@ void func_80038920(NpcS *npc) {
     } else {
         row = *(D_8007DA78 + (npc->unk_2C & 3));
         anim = row[which];
-        if (anim != (u8 *)D_800AA268.p->unk_48) {
+        if (anim != (u8 *)D_800AA268.p->anim) {
             func_8003EB5C(anim, D_800AA268.p);
             return;
         }
@@ -1955,7 +1955,7 @@ void func_80038AE8(NpcS *npc) {
     Monster *player;
 
     player = npc->unk_64;
-    if ((player == NULL || player->unk_0CC == 0 || player->unk_0CC == 5 || player->unk_0CC == 1) && npc->unk_2A == 4) {
+    if ((player == NULL || player->dir == 0 || player->dir == 5 || player->dir == 1) && npc->unk_2A == 4) {
         if (npc->unk_C != 0) {
             func_8003EB5C(D_8007DA68[npc->unk_2E & 3], D_800AA268.p);
         }
@@ -1966,7 +1966,7 @@ void func_80038AE8(NpcS *npc) {
     }
     if (D_800AA268.p->vel_x.w == 0) {
         npc->unk_C = 0;
-        if (player != NULL && player->unk_0CC != 0 && player->unk_0CC != 5 && player->unk_0CC != 1) {
+        if (player != NULL && player->dir != 0 && player->dir != 5 && player->dir != 1) {
             npc->unk_8 = 0x32;
             func_80038528(npc);
             return;
@@ -2139,7 +2139,7 @@ void func_800398D4(npc)
     mover = D_800AA248.cur_obj;
     effect = func_8001D110();
     D_800AA248.new_def = effect;
-    effect->flags = (u16)mover->unk_80 + 1;
+    effect->flags = (u16)mover->priority + 1;
     effect->pos_y.s.hi = npc->unk_5E - 0xA;
     effect->pos_x.s.hi = npc->unk_5C;
     effect->id = 0x4F0035F6;
@@ -2363,7 +2363,7 @@ void func_8003A328(NpcS *npc, s32 arg1) {
         effect->pos_x.s.hi = ((u16 *)&D_800AA248.cur_obj->pos_x.w)[1];
         effect->pos_y.s.hi = ((u16 *)&D_800AA248.cur_obj->pos_y.w)[1] - 0x19;
         effect->anim = def;
-        effect->flags = (u16)D_800AA248.cur_obj->unk_80 + 1;
+        effect->flags = (u16)D_800AA248.cur_obj->priority + 1;
         effect->id = def->id;
         func_8001DCB4();
         npc->unk_1C = 3;
@@ -2438,7 +2438,7 @@ void func_8003A904(NpcS *npc) {
 INCLUDE_ASM("asm/main/nonmatchings/game_80034590", func_8003A98C);
 
 void func_8003AA7C(NpcS *npc) {
-    D_800AA248.cur_obj->unk_80 = 0x4000;
+    D_800AA248.cur_obj->priority = 0x4000;
     npc->unk_8 = 2;
     npc->unk_1C = 0x3C;
     func_8003EB5C(D_800956D0, D_800AA248.cur_obj);
@@ -2453,7 +2453,7 @@ void func_8003AAF8(NpcS *npc) {
     s32 offset;
 
     if (npc->unk_1C == 0) {
-        D_800AA248.cur_obj->unk_80 = 0x50;
+        D_800AA248.cur_obj->priority = 0x50;
         if (D_800AA248.cur_obj->flags & 0x10) {
             offset = 0x1CC0000;
         } else {

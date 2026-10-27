@@ -1,6 +1,6 @@
 /* Commands of the monsters' animation scripts: each function runs one command on the object being updated
  * (D_800AA248.cur_obj, whose owner is the Monster), with its operands at cur_obj->arg; the ones that set
- * cur_obj->script_pc are branches. Named after its first function until the rest is understood.
+ * cur_obj->script.pc are branches. Named after its first function until the rest is understood.
  * The boundaries and their evidence: config/main.yaml (docs/MATCHING.md "Splitting a target into files"). */
 #include "common.h"
 #include "game.h"
@@ -46,7 +46,7 @@ void func_8004E574(void) {
     } else {
         s = D_8007F710;
     }
-    s += m->unk_0CC;
+    s += m->dir;
     m->unk_100 = s->speed;
     D_800AA248.cur_obj->vel_y.w = s->vel_y;
     m->unk_104 = 0x4000;
@@ -80,7 +80,7 @@ void func_8004E658(void) {
     } else {
         s = D_8007F7A0;
     }
-    s += m->unk_0CC;
+    s += m->dir;
     m->unk_100 = s->speed;
     D_800AA248.cur_obj->vel_y.w = s->vel_y;
     m->unk_104 = 0x4000;
@@ -95,7 +95,7 @@ void func_8004E658(void) {
 /* 97%: register names only (the level state's address in a1, the monster in a0) */
 void func_8004E6F0(void) {
     Monster *m = D_800AA248.cur_obj->owner.monster;
-    SpeedPair *s = &D_8007F878[m->unk_0CC];
+    SpeedPair *s = &D_8007F878[m->dir];
 
     m->unk_100 = s->speed;
     D_800AA248.cur_obj->vel_y.w = s->vel_y;
@@ -114,7 +114,7 @@ INCLUDE_ASM("asm/main/nonmatchings/game_8004E574", func_8004E6F0);
 /* 97%: as func_8004E6F0 */
 void func_8004E764(void) {
     Monster *m = D_800AA248.cur_obj->owner.monster;
-    SpeedPair *s = &D_8007F830[m->unk_0CC];
+    SpeedPair *s = &D_8007F830[m->dir];
 
     m->unk_100 = s->speed;
     D_800AA248.cur_obj->vel_y.w = s->vel_y;
@@ -145,7 +145,7 @@ void func_8004E83C(void) {
 
     if (D_801D36FC != 0x240) {
         m = D_800AA248.cur_obj->owner.monster;
-        if (m->unk_008.w <= 0x190000 && m->unk_004 == 0 && m->unk_0F6 == 0) {
+        if (m->health.w <= 0x190000 && m->unk_004 == 0 && m->unk_0F6 == 0) {
             m->unk_0F6 = 1;
             m->action = 0x1E;
         }
@@ -164,13 +164,13 @@ void func_8004E8B8(void) {
     void *bld;
     u16 kind;
 
-    if (m->unk_1B0 == 2) {
+    if (m->climb_side == 2) {
         D_800AA248.cur_obj->flags |= 0x10;
-    } else if (m->unk_1B0 == 1) {
+    } else if (m->climb_side == 1) {
         D_800AA248.cur_obj->flags &= ~0x10;
     }
     y = D_800AA248.cur_obj->pos_y.s.hi;
-    bld = func_80054728(m->unk_1B2);
+    bld = func_80054728(m->climb_building);
     if (bld != NULL) {
         kind = *(u16 *) ((u8 *) bld + 8);
         if (kind != 0x300) {
@@ -217,13 +217,13 @@ void func_8004EAA8(void) {
 
 void func_8004EAC0(void) {
     if (D_800AA248.cur_obj->unk_6C & 0x80) {
-        D_800AA248.cur_obj->script_pc = *D_800AA248.cur_obj->arg.w;
+        D_800AA248.cur_obj->script.pc = *D_800AA248.cur_obj->arg.w;
     }
 }
 
 void func_8004EAFC(void) {
     if (D_800AA248.cur_obj->owner.monster->unk_138 != 0) {
-        D_800AA248.cur_obj->script_pc = *D_800AA248.cur_obj->arg.w;
+        D_800AA248.cur_obj->script.pc = *D_800AA248.cur_obj->arg.w;
     }
 }
 
@@ -244,12 +244,12 @@ void func_8004EB5C(void) {
 void func_8004EB88(void) {
     Monster *m = D_800AA248.cur_obj->owner.monster;
 
-    if (m->unk_1B0 == 1) {
+    if (m->climb_side == 1) {
         func_80056488(m);
     } else {
         func_800564D8(m);
     }
-    m->unk_1B0 = 3;
+    m->climb_side = 3;
     m->action = 0;
 }
 
@@ -260,13 +260,13 @@ void func_8004EBE8(void) {
     Building *b;
     u16 i;
 
-    if (m->unk_1B0 == 1) {
+    if (m->climb_side == 1) {
         func_80056488(m);
     } else {
         func_800564D8(m);
     }
     func_80056560(m);
-    bld = m->unk_1B2;
+    bld = m->climb_building;
     if (bld != 0) {
         n = D_801E29A4;
         b = D_801D3DC8;
@@ -298,7 +298,7 @@ void func_8004ECDC(void) {
 
 void func_8004ED44(void) {
     if (D_800AA248.cur_obj->owner.monster->obj->vel_y.w <= 0) {
-        D_800AA248.cur_obj->script_pc = *D_800AA248.cur_obj->arg.w;
+        D_800AA248.cur_obj->script.pc = *D_800AA248.cur_obj->arg.w;
     }
 }
 
@@ -310,10 +310,10 @@ void func_8004ED8C(void) {
     if (D_800AA2DC == 0 || !(D_8007BD78.flags & 0x40)) {
         m = saved->owner.monster;
         D_800AA248.cur_obj = m->obj;
-        if (m->unk_1B0 == 3 && m->unk_0EA == 4) {
+        if (m->climb_side == 3 && m->unk_0EA == 4) {
             b = D_801D3DC8;
             if (D_801E29A4 != 0) {
-                b += m->unk_1B2 - 1;
+                b += m->climb_building - 1;
                 m->unk_0FA = m->pos.s.lo;
                 m->unk_0FC = m->pos.s.hi;
                 if (b->unk_058 == 0) {
@@ -328,12 +328,12 @@ void func_8004ED8C(void) {
                 func_8005404C(m);
                 b->unk_032 = m->id;
                 m->unk_18A = 1;
-                D_800AA248.unk_78 = 1;
+                D_800AA248.result = 1;
                 D_800AA248.cur_obj = saved;
                 return;
             }
         }
-        D_800AA248.unk_78 = 0;
+        D_800AA248.result = 0;
         D_800AA248.cur_obj = saved;
     }
 }
@@ -373,12 +373,12 @@ void func_8004EFE8(void) {
     GameObject *o;
     u16 i;
 
-    if (D_800AA248.cur_obj->pos_y.s.hi == 0xE1 && m->unk_1B0 == 0 && m->unk_18E == 0) {
+    if (D_800AA248.cur_obj->pos_y.s.hi == 0xE1 && m->climb_side == 0 && m->unk_18E == 0) {
         i = 7;
         do {
             if (i != m->id) {
                 other = &D_801E0B78[i];
-                if (other->id != 0 && (other->unk_058 & 1) && other->unk_1B0 == 0 && other->unk_18E == 0) {
+                if (other->id != 0 && (other->unk_058 & 1) && other->climb_side == 0 && other->unk_18E == 0) {
                     o = other->obj;
                     if (o != NULL && !(o->unk_6C & 0x80)) {
                         if (other->unk_0DC != 0 && other->action == 3 && o->pos_y.s.hi == 0xE1 &&
@@ -439,7 +439,7 @@ void func_8004F1CC(void) {
 
 void func_8004F300(void) {
     if (*(u16 *) ((u8 *) D_800AA248.cur_obj->owner.p - 0x88) < 2) {
-        D_800AA248.cur_obj->script_pc = D_800AA248.cur_obj->unk_48;
+        D_800AA248.cur_obj->script.pc = D_800AA248.cur_obj->anim;
     }
 }
 
@@ -454,7 +454,7 @@ void func_8004F370(void) {
     u16 a;
     GameObject *o;
 
-    if ((m->unk_05C != 0x63 && m->obj->pos_y.s.hi < 0xC3) || m->unk_1B0 != 0) {
+    if ((m->unk_05C != 0x63 && m->obj->pos_y.s.hi < 0xC3) || m->climb_side != 0) {
         a = m->unk_05C;
         m->action = a;
         if (a == 2) {
@@ -515,12 +515,12 @@ void func_8004F47C(void) {
         D_800AA248.new_def = def;
         def->pos_x.s.hi = m->pos.s.lo;
         def->pos_y.s.hi = m->pos.s.hi;
-        def->flags = saved->unk_80 + 1;
+        def->flags = saved->priority + 1;
         def->id = 0x4F00000C;
         D_800AA248.cur_obj = func_8001DCB4();
         m->unk_16C = D_800AA248.cur_obj;
     }
-    D_800AA248.cur_obj->unk_80 = saved->unk_80 + 1;
+    D_800AA248.cur_obj->priority = saved->priority + 1;
     func_80020BA0(*arg, D_800AA248.cur_obj->flags, D_800AA248.cur_obj);
     D_800AA248.cur_obj = saved;
 }
@@ -531,11 +531,11 @@ void func_8004F65C(void) {
     u8 *part;
     s16 y;
 
-    if ((u32) (m->unk_0EA - 1) >= 2 && m->unk_1B0 != 0 && m->unk_1B0 != 3 && m->unk_1B2 != 0) {
-        bld = func_80054728(m->unk_1B2);
+    if ((u32) (m->unk_0EA - 1) >= 2 && m->climb_side != 0 && m->climb_side != 3 && m->climb_building != 0) {
+        bld = func_80054728(m->climb_building);
         if (bld != NULL) {
             part = *(u8 **) ((u8 *) bld + 0x18);
-            if (part != NULL && *(s16 *) (part + 0x1C) == m->unk_1B0) {
+            if (part != NULL && *(s16 *) (part + 0x1C) == m->climb_side) {
                 y = m->pos.s.hi;
                 if (*(s16 *) (part + 0x1E) + 0xE >= y && y >= *(s16 *) (part + 0xE) - 0xE) {
                     m->unk_18A = 1;
@@ -559,7 +559,7 @@ void func_8004F754(void) {
         if (side == 4) {
             target = *arg;
         }
-        obj->script_pc = target;
+        obj->script.pc = target;
     }
 }
 
@@ -678,7 +678,7 @@ void func_8004FA80(void) {
     GameObject **p = D_800AA248.cur_obj->owner.monster->unk_1D0;
 
     if (p != NULL && (*p)->pos_y.s.hi < 0x150) {
-        D_800AA248.cur_obj->script_pc = *D_800AA248.cur_obj->arg.w;
+        D_800AA248.cur_obj->script.pc = *D_800AA248.cur_obj->arg.w;
     }
 }
 
@@ -716,7 +716,7 @@ void func_8004FB8C(void) {
     if (D_801D37BC == 0 && D_801FA98C != 0) {
         x = obj->pos_x.s.hi;
         if (x >= D_801FA98C && D_801FA990 >= x) {
-            obj->script_pc = *obj->arg.w;
+            obj->script.pc = *obj->arg.w;
         }
     }
 }
@@ -736,7 +736,7 @@ void func_8004FC2C(void) {
     GameObject *saved = D_800AA248.cur_obj;
     Monster *m = saved->owner.monster;
     s32 x = (u16) saved->pos_x.s.hi;
-    u16 side = m->unk_1B0;
+    u16 side = m->climb_side;
     u16 y = saved->pos_y.s.hi;
     s32 flip;
     ObjectDef *def;
@@ -790,7 +790,7 @@ void func_8004FD44(void) {
     ObjectDef *def;
     GameObject *obj;
 
-    if (m->unk_1B0 == 2) {
+    if (m->climb_side == 2) {
         x += 4;
         y -= 0x28;
         flip = 0x10;
@@ -819,7 +819,7 @@ void func_8004FE28(void) {
     GameObject *saved = D_800AA248.cur_obj;
     Monster *m = saved->owner.monster;
     s32 top = (u16) saved->pos_y.s.hi - saved->size.u.hi;
-    u16 side = m->unk_1B0;
+    u16 side = m->climb_side;
     s32 dx;
     s32 y;
     s32 flip;
@@ -867,7 +867,7 @@ INCLUDE_ASM("asm/main/nonmatchings/game_8004E574", func_8004FE28);
 void func_8004FF3C(void) {
     GameObject *saved = D_800AA248.cur_obj;
     Monster *m = saved->owner.monster;
-    u16 side = m->unk_1B0;
+    u16 side = m->climb_side;
     u16 ea;
     void *bld;
     s32 r;
@@ -878,7 +878,7 @@ void func_8004FF3C(void) {
         if (ea != 4) {
             if (ea != 3) {
                 if (ea != side) {
-                    bld = func_80054728(m->unk_1B2);
+                    bld = func_80054728(m->climb_building);
                     if (bld != NULL) {
                         m->unk_0FA = m->pos.s.lo;
                         m->unk_0FC = m->pos.s.hi;
@@ -906,7 +906,7 @@ void func_8004FF3C(void) {
 void func_80050044(void) {
     Monster *m = D_800AA248.cur_obj->owner.monster;
 
-    switch (m->unk_0CC) {
+    switch (m->dir) {
     case 7:
         m->unk_100 -= 0x2000;
         break;

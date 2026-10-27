@@ -4,7 +4,7 @@
 #include "game_80034590.h"
 
 void func_8003EB5C(u8 *table, GameObject *mover);
-u16 func_8004A468(void);
+u16 func_8004A468(Ai *ai);    /* defined returning s32: its callers take the low half */
 
 extern u8 D_80096D44[];
 extern u8 D_80096D84[];
@@ -119,10 +119,10 @@ void func_80043278(void) {
     func_8003EB5C(D_8008C8BC, D_800AA248.cur_obj);
 }
 
-void func_800432A4(void) {
+void func_800432A4(Ai *ai) {
     u8 *tbl;
 
-    switch (func_8004A468()) {
+    switch (func_8004A468(ai)) {
     case 0:
         tbl = D_8008C8C8;
         break;
@@ -142,10 +142,10 @@ void func_800432A4(void) {
     func_8003EB5C(tbl, D_800AA248.cur_obj);
 }
 
-void func_80043338(void) {
+void func_80043338(Ai *ai) {
     u8 *tbl;
 
-    switch (func_8004A468()) {
+    switch (func_8004A468(ai)) {
     case 0:
         tbl = D_8008CAF8;
         break;
@@ -174,10 +174,10 @@ void func_80043338(void) {
     func_8003EB5C(tbl, D_800AA248.cur_obj);
 }
 
-void func_800433F0(void) {
+void func_800433F0(Ai *ai) {
     u8 *tbl;
 
-    switch (func_8004A468()) {
+    switch (func_8004A468(ai)) {
     case 0:
         tbl = D_8008CE78;
         break;
@@ -254,10 +254,10 @@ void func_8004368C(void) {
     func_8003EB5C(D_8008D75C, D_800AA248.cur_obj);
 }
 
-void func_800436B8(void) {
+void func_800436B8(Ai *ai) {
     u8 *tbl;
 
-    switch (func_8004A468()) {
+    switch (func_8004A468(ai)) {
     case 1:
         tbl = D_8008D768;
         break;
@@ -283,10 +283,10 @@ void func_800436B8(void) {
     func_8003EB5C(tbl, D_800AA248.cur_obj);
 }
 
-void func_80043768(void) {
+void func_80043768(Ai *ai) {
     u8 *tbl;
 
-    switch (func_8004A468()) {
+    switch (func_8004A468(ai)) {
     case 1:
         tbl = D_8008D7F4;
         break;
@@ -312,10 +312,10 @@ void func_80043768(void) {
     func_8003EB5C(tbl, D_800AA248.cur_obj);
 }
 
-void func_80043818(void) {
+void func_80043818(Ai *ai) {
     u8 *tbl;
 
-    switch (func_8004A468()) {
+    switch (func_8004A468(ai)) {
     case 1:
         tbl = D_8008D8A4;
         break;
@@ -417,8 +417,8 @@ void func_80043BE0(void) {
     func_8003EB5C(D_8008E6AC, D_800AA248.cur_obj);
 }
 
-void func_80043C0C(void) {
-    switch (func_8004A468()) {
+void func_80043C0C(Ai *ai) {
+    switch (func_8004A468(ai)) {
     case 0:
         func_8003EB5C(D_8008E6AC, D_800AA248.cur_obj);
         break;
@@ -437,8 +437,8 @@ void func_80043C0C(void) {
     }
 }
 
-void func_80043CC0(void) {
-    switch (func_8004A468()) {
+void func_80043CC0(Ai *ai) {
+    switch (func_8004A468(ai)) {
     case 0:
         func_8003EB5C(D_8008E6AC, D_800AA248.cur_obj);
         break;
@@ -457,8 +457,8 @@ void func_80043CC0(void) {
     }
 }
 
-void func_80043D74(void) {
-    switch (func_8004A468()) {
+void func_80043D74(Ai *ai) {
+    switch (func_8004A468(ai)) {
     case 0:
         func_8003EB5C(D_8008E6AC, D_800AA248.cur_obj);
         break;
