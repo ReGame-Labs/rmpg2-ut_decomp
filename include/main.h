@@ -17,7 +17,7 @@
 /* A 0x14-byte record of the 1024-entry table at 0x801C542C. */
 typedef struct Unk1C542C {
     s16 unk_0;              /* -1 when free */
-    u8 pad_2[0x2];
+    u16 unk_2;
     s32 unk_4;              /* the VRAM position: x in 0x80 steps (bank) and 0x10 steps (column) */
     s32 unk_8;              /* the VRAM y: bit 8 picks the lower half, bits 5-7 the row */
     s32 unk_C;              /* width */
@@ -26,7 +26,7 @@ typedef struct Unk1C542C {
 
 /* A 0x10-byte record of the table at 0x801F9AE4 (func_8001B350): a use count and the slot it holds. */
 typedef struct Unk1F9AE4 {
-    u8 pad_0[0x4];
+    Fixed unk_0;            /* the frame word for objects in this slot: the tpage in u.hi */
     s16 unk_4;
     u8 pad_6[0x2];
     s32 unk_8;
@@ -95,7 +95,7 @@ typedef struct Unk1AD1C {
 } Unk1AD1C;
 
 /* The word at 0x801F9A30, a vertical speed (0x20000, 0x80000, -0x20000). A one-member struct: GCC 2.8 keeps its
- * stores in order with the stores into D_801D3D64 only then (func_80028160). */
+ * stores in order with the stores into D_801D3D64 only then (main_reset_camera_y). */
 typedef struct Unk1F9A30 {
     s32 unk_0;
 } Unk1F9A30;
@@ -124,6 +124,27 @@ typedef struct NpcStep {
     s32 vel_y;
     Anim *anim;
 } NpcStep;
+
+/* Data the functions below 0x80020D20 read (also declared in building.h). */
+extern s16 D_801F9A38;
+extern DrawState D_801CA474[2];         /* the frames' double buffer (D_801FAC80 points to one) */
+extern s32 D_801E28EC;                  /* an XA track is playing */
+extern s32 D_801E0D48;                  /* the XA track's frame count */
+extern s32 D_801E2A48;                  /* the XA track's length */
+extern s32 D_801F991C;
+extern s32 D_8007A71C;                  /* the music to restart after the XA track */
+void cdload_stop_xa(s32 mode);
+void func_80063744(void);
+s32 main_alloc_vram_slot(SpriteFrame *frame, s32 base, u16 mode);
+s32 cdload_unpack(u8 *dst, s32 arg1, u8 *src, s32 arg3);   /* cdload.c reads three; the callers here pass a fourth */
+extern s32 D_8007A710;                  /* the most of the unpack buffer ever used */
+extern u16 D_800AFB54[];                /* per bank: its first CLUT's index in D_801C51D4 */
+extern u16 D_801C51D4[];                /* the CLUT ids main_load_cluts loaded */
+extern u16 D_801D370C;
+extern u16 D_801FA730;                  /* the calls func_800205AC ran this frame */
+extern s32 D_801F9A2C;
+s32 func_8001E59C(GameObject *sprite, s32 image);
+extern s32 D_800AA2A8;                  /* D_800AA248.unk_60 by its own name */
 
 /* The Npc chain's speeds (main_approach_x, main_approach_xy): (vel_x, vel_y) pairs by direction, its bits 1 and 2 for x,
  * 4 and 8 for y. */
