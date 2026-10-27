@@ -83,9 +83,9 @@ void func_8004F370(void);
 extern s16 D_80084278;                  /* the projectile's state bits (monster_anim_update_projectile) */
 extern Building *D_801FB45C;            /* the building the projectile hit */
 extern u8 D_50003464[];
-void func_8005C578(GameObject *b, Monster *e);
-void func_8005C71C(GameObject *b, Monster *e);
-void func_8005C958(GameObject *b, Monster *skip);
+void monster_anim_blast_npcs(GameObject *b, Monster *e);
+void monster_anim_blast_pickups(GameObject *b, Monster *e);
+void monster_anim_blast_monsters(GameObject *b, Monster *skip);
 extern u16 D_801FB460;                  /* the buildings the bomb hit (a mask by index) */
 extern u16 D_801FB462;                  /* the buildings monster 1's special move has hit (config/aliases.ld) */
 extern s32 D_80011B60;                  /* the explosion's animation */
@@ -1748,9 +1748,9 @@ void monster_anim_update_bomb(Monster *e) {
             if (--obj->unk_54.w == 0) {
                 func_8001F724(5);
                 func_80029118(0xB, 0x12);
-                func_8005C578(obj, e);
-                func_8005C71C(obj, e);
-                func_8005C958(obj, e);
+                monster_anim_blast_npcs(obj, e);
+                monster_anim_blast_pickups(obj, e);
+                monster_anim_blast_monsters(obj, e);
                 if ((D_801FB460 = monster_anim_find_buildings(obj->pos_x.s.hi, obj->pos_y.s.hi, 1, 0x3C, 0x64)) != 0) {
                     for (i = 0; i < 13; i++) {
                         if ((D_801FB460 >> i) & 1) {
@@ -2002,8 +2002,8 @@ void monster_anim_update_special(Monster *e) {
         if (e->unk_188 < 5) {
             func_80059710(e, 5, 4);
         }
-        func_8005C578(e->obj, e);
-        func_8005C71C(e->obj, e);
+        monster_anim_blast_npcs(e->obj, e);
+        monster_anim_blast_pickups(e->obj, e);
         hits = monster_anim_find_buildings(e->obj->pos_x.s.hi, e->obj->pos_y.s.hi, 1, 0x3C, 0x64);
         if (hits != 0) {
             for (j = 0; j < 13; j++) {
@@ -2371,7 +2371,7 @@ s16 func_8005C3C8(GameObject *b, Monster *skip) {
     return 0;
 }
 
-void func_8005C578(GameObject *b, Monster *e) {
+void monster_anim_blast_npcs(GameObject *b, Monster *e) {
     u16 n;
     Npc *npc;
     GameObject *obj;
@@ -2414,7 +2414,7 @@ void func_8005C578(GameObject *b, Monster *e) {
     } while (--n != 0);
 }
 
-void func_8005C71C(GameObject *b, Monster *e) {
+void monster_anim_blast_pickups(GameObject *b, Monster *e) {
     u16 n;
     Pickup *r;
     u16 x;
@@ -2424,7 +2424,7 @@ void func_8005C71C(GameObject *b, Monster *e) {
     if (n == 0) {
         return;
     }
-    /* Both arms are the same (the facing test with a zero offset; see func_8005C578). */
+    /* Both arms are the same (the facing test with a zero offset; see monster_anim_blast_npcs). */
     if (!(b->flags & 0x10)) {
         x = b->pos_x.s.hi;
     } else {
@@ -2467,12 +2467,12 @@ void func_8005C71C(GameObject *b, Monster *e) {
     } while (--n != 0);
 }
 
-void func_8005C958(GameObject *b, Monster *skip) {
+void monster_anim_blast_monsters(GameObject *b, Monster *skip) {
     Monster *e;
     u16 x;
     s16 i;
 
-    /* Both arms are the same (the facing test with a zero offset; see func_8005C578). */
+    /* Both arms are the same (the facing test with a zero offset; see monster_anim_blast_npcs). */
     if (!(b->flags & 0x10)) {
         x = b->pos_x.u.hi;
     } else {

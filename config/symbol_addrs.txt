@@ -463,6 +463,9 @@ monster_anim_update_bomb = 0x8005A964; // type:func  (e) monster 7's bomb e->ext
 monster_anim_update_special = 0x8005AE28; // type:func  (e) action 0x63 in D_8007BE20 - the monster's special move by id, 1 and 2 charge through soldiers, monsters and buildings for 300 frames
 monster_anim_find_buildings = 0x8005B8C8; // type:func  (x, y, flags, half_w, half_h) the mask of the standing buildings whose box overlaps, flags 0x10 numbers them from the last
 monster_anim_test_box = 0x8005BC20; // type:func  (x, y, half_w, half_h, obj, how) 1 when the box overlaps the object's, how 1 its frame's box, 2 its size on one side by the facing, 4 a quarter of its width either side
+monster_anim_blast_npcs = 0x8005C578; // type:func  (obj, e) the soldiers in the 60 by 100 half-box around obj are hit by e (the bomb explosion, the ground pound)
+monster_anim_blast_pickups = 0x8005C71C; // type:func  (obj, e) the same for the pickups and the throwable characters
+monster_anim_blast_monsters = 0x8005C958; // type:func  (obj, skip) the same for the other monsters, knocked down (action 0xA)
 
 // bonus (src/main/bonus.c): the bonus rounds and the status panel.
 bonus_create_bars = 0x8005D20C; // type:func  (e) the health and meter bars and the panel frame
