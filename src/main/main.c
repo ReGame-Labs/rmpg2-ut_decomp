@@ -7128,7 +7128,137 @@ void func_80029D1C(void) {
     }
 }
 
+#ifdef NON_MATCHING
+/* 91.81%: 91.8 %: a first draft, the logic complete; registers differ from the start (the original keeps mode in s5
+ * and sx in s6), the screen x is computed into a2 and copied to sx, and the dy, dx sums still reassociate */
+extern s32 D_8007BD7C;
+void func_8005E214(void);
+
+void func_80029D5C(s32 mode, s32 player) {
+    Monster *m;
+    s32 bonus;
+    s32 boost;
+    u16 camx;
+    u16 camy;
+    u16 sx;
+    u16 ox;
+    u16 oy;
+    u16 right;
+    u16 edge;
+    u16 dx;
+    u16 dy;
+    u16 x;
+    s32 flags;
+
+    sx = 0;
+    boost = 0;
+    m = NULL;
+    dx = 0;
+    dy = 0;
+    bonus = 0;
+    if (D_800AA2DC != 0) {
+        bonus = func_8005F208();
+    }
+    camx = D_801F9ACA;
+    camy = D_801F9ACE;
+    if (mode == 2) {
+        if (D_8007BD7C <= 0) {
+            return;
+        }
+        m = &D_801E0B78[func_80025DF8(player)];
+        right = camx + 0x131;
+        edge = right;
+        ox = m->obj->pos_x.u.hi;
+        oy = m->obj->pos_y.u.hi;
+        if ((s16) D_801D8866 < (s16) right) {
+            edge = right - D_801D8866;
+        }
+        x = ox;
+        if ((s16) camx < (s16) ox && (s16) ox < (s16) edge) {
+            x = ox - camx;
+        }
+        sx = x;
+        if (m->action == 2 || m->action == 0x19) {
+            boost = 2;
+        } else {
+            boost = 0;
+        }
+        if ((s16) x >= 0x132) {
+            dx = m->obj->vel_x.u.hi + boost;
+            if ((s16) x - 0x131 < (s16) dx) {
+                dx = x - 0x131;
+            }
+            D_8007BD78.flags |= 2;
+        } else if ((s16) x < 0x5A) {
+            dx = m->obj->vel_x.u.hi - boost;
+            if ((s16) dx < (s16) x - 0x5A) {
+                dx = x - 0x5A;
+            }
+        }
+        flags = D_8007BD78.flags;
+        if (flags & 0x200) {
+            if (D_801F9AC8.s.hi <= 0 || (D_801F9AC8.s.hi = D_801F9AC8.u.hi - 5) <= 0) {
+                D_801F9AC8.s.hi = 0;
+                D_8007BD78.flags = flags & ~0x200;
+                func_8005E214();
+            }
+        }
+        oy -= 0xE1;
+        if (((s16) camy - (s16) oy >= 0x6F || (D_8007BD78.flags & 4)) && m->action != 2 && m->action != 0x2C) {
+            dy = camy - 0x6E;
+            dy = oy - dy;
+            D_8007BD78.flags |= 4;
+            if ((s16) dy < -4) {
+                dy = -4;
+            } else if ((s16) dy == 0) {
+                D_8007BD78.flags &= ~4;
+            }
+        } else if ((s16) oy - ((s16) camy - 0x32) > 0) {
+            dy = camy - 0x32;
+            dy = oy - dy;
+            if ((s16) dy >= 5) {
+                dy = 4;
+            }
+            if (-(s16) camy < (s16) dy) {
+                dy = -camy;
+            }
+        }
+    }
+    if (D_8007BD78.flags & 3) {
+        if ((s16) sx < 0xAB) {
+            dx -= 5;
+            dx -= boost;
+        } else if ((s16) sx >= 0xBE) {
+            dx += 5;
+            dx = boost + dx;
+        } else {
+            dx = m->obj->vel_x.s.hi;
+            if (dx == 0) {
+                D_8007BD78.flags &= ~3;
+            }
+        }
+    }
+    if (bonus == 1 && (s16) dx < 0) {
+        dx = 0;
+    }
+    x = D_801F9AC8.u.hi + dx;
+    D_801F9AC8.u.hi = x;
+    D_801F9ACC.u.hi += dy;
+    if ((s16) D_801D8866 < (s16) x) {
+        D_801F9AC8.s.hi = x - D_801D8866;
+    } else if ((s16) x < 0) {
+        D_801F9AC8.s.hi = x + D_801D8866;
+    }
+    if (D_801F9ACC.s.hi > 0) {
+        D_801F9ACC.s.hi = 0;
+    }
+    if (D_801F9AC8.s.hi >= 0x667) {
+        D_801F9AC8.s.hi = 0x666;
+    }
+}
+#else
 INCLUDE_ASM("asm/main/nonmatchings/main", func_80029D5C);
+#endif
 
 void func_8002A1AC(Monster *m, s16 count) {
     GameObject *saved;
