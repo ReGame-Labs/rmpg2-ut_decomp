@@ -22,7 +22,7 @@ typedef union Fixed {
 
 struct Monster;
 struct Attacker;
-struct UnkStruct2;
+struct BuildingItem;
 struct Npc;
 struct Actor;
 struct Ai;
@@ -110,7 +110,7 @@ typedef struct GameObject {
                    void *p;
                    struct Monster *monster;
                    struct Attacker *attacker;
-                   struct UnkStruct2 *item;
+                   struct BuildingItem *item;
                    struct Npc *npc;
                    struct Actor *actor;
                    struct Ai *ai;
@@ -404,5 +404,116 @@ typedef struct Ai {
 
 extern Ai D_801D85C8[];
 extern u16 D_801D870C;
+
+struct Building;
+struct UnkStruct14;
+
+/* The definition a building is made from (Building.def). */
+typedef struct BuildingDef {
+    /* 0x00 */ Fixed unk_00;                   /* the kind in u.lo (4: not a building, func_80025124) */
+    /* 0x04 */ u16 unk_04;
+    /* 0x06 */ u8 unk_06[0x02];
+    /* 0x08 */ s32 unk_08;                     /* copied into the building record (unk_05C..) */
+    /* 0x0C */ s32 unk_0C;
+    /* 0x10 */ s32 unk_10;
+    /* 0x14 */ s32 unk_14;
+    /* 0x18 */ s32 unk_18;
+} BuildingDef;
+
+/* What Building.unk_018 points to. */
+typedef struct BuildingBlock {
+    /* 0x00 */ GameObject *unk_00;             /* moved with the building */
+    /* 0x04 */ u8 unk_04[0x04];
+    /* 0x08 */ u16 unk_08;                     /* hit points? zero: destroyed */
+    /* 0x0A */ u16 unk_0A;                     /* the item it belongs to (BuildingItem.unk_04) */
+    /* 0x0C */ u8 unk_0C[0x02];
+    /* 0x0E */ s16 unk_0E;                     /* the bottom y */
+    /* 0x10 */ s16 unk_10;                     /* set when hit */
+    /* 0x12 */ u8 unk_12[0x0A];
+    /* 0x1C */ s16 unk_1C;
+    /* 0x1E */ s16 unk_1E;                     /* the top y */
+} BuildingBlock;
+
+/* One of a building item's three parts. */
+typedef struct BuildingPart {
+    /* 0x00 */ GameObject *unk_00;
+    /* 0x04 */ u16 unk_04;
+    /* 0x06 */ u16 unk_06;
+    /* 0x08 */ GameObject **unk_08;
+    /* 0x0C */ struct UnkStruct14 *unk_0C;
+    /* 0x10 */ GameObject *unk_10;
+    /* 0x14 */ s16 unk_14;
+    /* 0x16 */ s16 unk_16;
+} BuildingPart;
+
+/* One of a building's 15 items: a sprite each. */
+typedef struct BuildingItem {
+    /* 0x00 */ GameObject *obj;                /* its sprite */
+    /* 0x04 */ u16 unk_04;
+    /* 0x06 */ u16 unk_06;
+    /* 0x08 */ struct Building *building;      /* the building it is part of */
+    /* 0x0C */ BuildingPart unk_0C;
+    /* 0x24 */ BuildingPart unk_24;
+    /* 0x3C */ BuildingPart unk_3C;
+} BuildingItem;                         /* 0x54 bytes */
+
+/* A building, 0x584 bytes: the array D_801D3DC8 (D_801E29A4 of them), set up by func_80025124 from a definition;
+ * a 0x98-byte head and 15 items. */
+typedef struct Building {
+    /* 0x000 */ u16 unk_000;                   /* the item count */
+    /* 0x002 */ u16 unk_002;
+    /* 0x004 */ u16 unk_004;                   /* x */
+    /* 0x006 */ u16 unk_006;
+    /* 0x008 */ u16 unk_008;
+    /* 0x00A */ s16 unk_00A;
+    /* 0x00C */ s16 unk_00C;
+    /* 0x00E */ s16 unk_00E;
+    /* 0x010 */ u16 unk_010;
+    /* 0x012 */ u16 unk_012;
+    /* 0x014 */ u16 unk_014;
+    /* 0x016 */ u16 unk_016;
+    /* 0x018 */ BuildingBlock *unk_018;
+    /* 0x01C */ u16 unk_01C;
+    /* 0x01E */ u16 unk_01E;                   /* its index + 1 */
+    /* 0x020 */ BuildingDef *def;              /* the definition it was made from */
+    /* 0x024 */ s16 unk_024;
+    /* 0x026 */ s16 unk_026;
+    /* 0x028 */ s16 unk_028;
+    /* 0x02A */ u16 unk_02A;
+    /* 0x02C */ s16 unk_02C;
+    /* 0x02E */ s16 unk_02E;
+    /* 0x030 */ u16 unk_030;
+    /* 0x032 */ u16 unk_032;
+    /* 0x034 */ u16 unk_034;
+    /* 0x036 */ u16 unk_036;
+    /* 0x038 */ u16 unk_038;
+    /* 0x03A */ u16 unk_03A[15];               /* one per item */
+    /* 0x058 */ u16 unk_058;
+    /* 0x05A */ u8 unk_05A[0x02];
+    /* 0x05C */ void *unk_05C;                 /* from the definition */
+    /* 0x060 */ void *unk_060;
+    /* 0x064 */ void *unk_064;
+    /* 0x068 */ s32 unk_068;
+    /* 0x06C */ u8 unk_06C[0x04];
+    /* 0x070 */ struct BuildingItem *unk_070;
+    /* 0x074 */ u16 unk_074;
+    /* 0x076 */ u16 unk_076;
+    /* 0x078 */ u16 unk_078;
+    /* 0x07A */ u16 unk_07A;
+    /* 0x07C */ u8 unk_07C[0x04];
+    /* 0x080 */ u16 unk_080;
+    /* 0x082 */ u16 unk_082;
+    /* 0x084 */ void *unk_084;
+    /* 0x088 */ u16 unk_088;
+    /* 0x08A */ u16 unk_08A;
+    /* 0x08C */ s32 unk_08C;
+    /* 0x090 */ s32 unk_090;
+    /* 0x094 */ s16 unk_094;                   /* claimed (func_8002F01C) */
+    /* 0x096 */ u8 unk_096[0x02];
+    /* 0x098 */ BuildingItem items[15];
+} Building;                             /* 0x584 bytes */
+
+extern Building D_801D3DC8[];
+extern u16 D_801E29A4;
 
 #endif /* GAME_H */

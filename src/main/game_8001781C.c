@@ -95,7 +95,6 @@ extern Unk1E2894 D_801E2894;
 extern GameObject D_801E28C0;
 extern s16 D_801E28DC;
 extern s16 D_801E2994;
-extern u16 D_801E29A4;
 extern GameObject D_801E29A8;
 extern s16 D_801E29B4;
 extern s16 D_801E29BC;
@@ -390,26 +389,25 @@ void func_8001E2F8(GameObject *arg0);
 void func_8005DBC4(s32, Unk29510 *, s32);
 void func_80029510(Unk29510 *arg0);
 void func_80024BB4(void);
-void func_80025B3C(Unk1D3DC8 *);
-void func_80025B7C(Unk1D3DC8Item *);
+void func_80025B3C(Building *);
+void func_80025B7C(BuildingItem *);
 void func_8003044C(void);
-extern Unk1D3DC8 D_801D3DC8[];
 void func_80024AEC(void);
 void func_8001E39C(void *);
 void func_80029C6C(Monster *arg0);
 extern s16 D_801F9914;
 void func_80026A6C(void);
 ObjectDef *func_8001D110(void);
-void func_8002503C(Unk1D3DC8 *, GameObject *);
-void func_800252CC(Unk1D3DC8 *);
-void func_80025124(Unk1D3DC8 *);
-void func_80024E08(Unk1D3DC8 *);
+void func_8002503C(Building *, GameObject *);
+void func_800252CC(Building *);
+void func_80025124(Building *);
+void func_80024E08(Building *);
 void func_800258C8(void);
 extern u8 D_80082E94[];
 s32 func_8005F208(void);
 u16 func_80029B80(void);
-extern Unk25124Def D_800135E8;
-extern Unk25124Def D_8001687C;
+extern BuildingDef D_800135E8;
+extern BuildingDef D_8001687C;
 extern u16 D_8007C124[];
 extern u16 D_8007C144[];
 extern u32 D_801E0D7C;
@@ -3403,7 +3401,7 @@ void func_80024AA0(void) {
 }
 
 void func_80024AEC(void) {
-    Unk1D3DC8 *block;
+    Building *block;
     u16 i;
     u16 j;
 
@@ -3444,8 +3442,8 @@ void func_80024C08(void *arg0) {
 #ifdef NON_MATCHING
 void func_80024C2C(void) {
     Unk24C2C *e;
-    Unk1D3DC8 *rec;
-    Unk25124Def *def;
+    Building *rec;
+    BuildingDef *def;
     s16 n;
     u16 type;
     s16 tile;
@@ -3456,15 +3454,15 @@ void func_80024C2C(void) {
     e = func_80025C08(D_80082E94);
     do {
         def = e->unk_0;
-        rec->unk_1E = ++n;
-        rec->unk_20 = def;
-        rec->unk_80 = e->unk_C;
-        rec->unk_7A = e->unk_A;
-        rec->unk_18 = e->unk_4;
-        rec->unk_8A = e->unk_8;
-        rec->unk_A = e->unk_14;
-        rec->unk_14 = 0;
-        rec->unk_8 = type = e->unk_12;
+        rec->unk_01E = ++n;
+        rec->def = def;
+        rec->unk_080 = e->unk_C;
+        rec->unk_07A = e->unk_A;
+        rec->unk_018 = e->unk_4;
+        rec->unk_08A = e->unk_8;
+        rec->unk_00A = e->unk_14;
+        rec->unk_014 = 0;
+        rec->unk_008 = type = e->unk_12;
         if (type != 0x200) {
             tile = 0xC5;
             if (type == 0x300) {
@@ -3473,20 +3471,20 @@ void func_80024C2C(void) {
         } else {
             tile = 0xCD;
         }
-        rec->unk_6 = tile;
-        rec->unk_4 = e->unk_10;
-        rec->unk_E = e->unk_10 + (s16) (def->unk_4 - 9);
-        if (def->unk_0.w != 4) {
-            rec->unk_5C = def->unk_8;
-            rec->unk_60 = def->unk_C;
-            rec->unk_64 = def->unk_10;
-            rec->unk_68 = def->unk_14;
-            rec->unk_8C = def->unk_18;
-            rec->unk_2 = def->unk_0.u.lo;
-            rec->unk_1C = func_8001EB10(0x1E, 0) % 2 + 1;
-            rec->unk_34 = 1;
-            rec->unk_36 = 1;
-            rec->unk_2A = 1;
+        rec->unk_006 = tile;
+        rec->unk_004 = e->unk_10;
+        rec->unk_00E = e->unk_10 + (s16) (def->unk_04 - 9);
+        if (def->unk_00.w != 4) {
+            rec->unk_05C = def->unk_08;
+            rec->unk_060 = def->unk_0C;
+            rec->unk_064 = def->unk_10;
+            rec->unk_068 = def->unk_14;
+            rec->unk_08C = def->unk_18;
+            rec->unk_002 = def->unk_00.u.lo;
+            rec->unk_01C = func_8001EB10(0x1E, 0) % 2 + 1;
+            rec->unk_034 = 1;
+            rec->unk_036 = 1;
+            rec->unk_02A = 1;
             func_80024E08(rec);
         } else {
             func_80025124(rec);
@@ -3506,56 +3504,56 @@ INCLUDE_ASM("asm/main/nonmatchings/game_8001781C", func_80024E08);
 
 INCLUDE_ASM("asm/main/nonmatchings/game_8001781C", func_8002503C);
 
-void func_80025124(Unk1D3DC8 *rec) {
-    Unk25124Def *def;
+void func_80025124(Building *rec) {
+    BuildingDef *def;
     ObjectDef *request;
     GameObject *sprite;
-    Unk1D3DC8Item *item;
+    BuildingItem *item;
     u16 kind;
 
-    def = rec->unk_20;
-    rec->unk_58 = 1;
-    rec->unk_5C = def->unk_C;
-    rec->unk_60 = def->unk_10;
-    rec->unk_2 = def->unk_0.u.lo;
+    def = rec->def;
+    rec->unk_058 = 1;
+    rec->unk_05C = def->unk_0C;
+    rec->unk_060 = def->unk_10;
+    rec->unk_002 = def->unk_00.u.lo;
     request = func_8001D110();
     request->unk_0C = 0x728;
-    request->pos_y.u.hi = rec->unk_6;
-    request->pos_x.u.hi = rec->unk_4;
-    kind = rec->unk_8;
+    request->pos_y.u.hi = rec->unk_006;
+    request->pos_x.u.hi = rec->unk_004;
+    kind = rec->unk_008;
     item = &rec->items[0];
-    if (def->unk_8 != 0) {
-        request->id = def->unk_8;
+    if (def->unk_08 != 0) {
+        request->id = def->unk_08;
         D_800AA284 = request;
         sprite = func_8001DCB4();
-        rec->items[0].unk_0 = sprite;
+        rec->items[0].obj = sprite;
         sprite->owner.p = item;
         sprite->unk_80 = kind;
-        item->unk_8 = rec;
-        item->unk_4 = 1;
-        rec->unk_0 = 1;
-        rec->unk_A = 0;
-        rec->unk_70 = item;
+        item->building = rec;
+        item->unk_04 = 1;
+        rec->unk_000 = 1;
+        rec->unk_00A = 0;
+        rec->unk_070 = item;
         if (def == &D_800135E8) {
-            rec->unk_74 = sprite->pos_y.u.hi - 0x5C;
+            rec->unk_074 = sprite->pos_y.u.hi - 0x5C;
             sprite->unk_70 = 0x72A;
-            rec->unk_58 = 2;
-            rec->unk_12 = 2;
+            rec->unk_058 = 2;
+            rec->unk_012 = 2;
             func_8002503C(rec, sprite);
         } else if (def == &D_8001687C) {
-            rec->unk_74 = sprite->pos_y.u.hi - 0x3E;
+            rec->unk_074 = sprite->pos_y.u.hi - 0x3E;
             sprite->unk_70 = 0x72A;
-            rec->unk_58 = 3;
-            rec->unk_12 = 0x7D;
+            rec->unk_058 = 3;
+            rec->unk_012 = 0x7D;
         } else {
-            rec->unk_12 = 5;
+            rec->unk_012 = 5;
             if ((D_800AA2DC != 0) && (func_8005F208() == 4)) {
                 u16 y = sprite->pos_y.u.hi;
 
-                rec->unk_58 = 0;
-                rec->unk_74 = y - 0x1F;
+                rec->unk_058 = 0;
+                rec->unk_074 = y - 0x1F;
             } else {
-                rec->unk_74 = sprite->pos_y.u.hi - 0x3E;
+                rec->unk_074 = sprite->pos_y.u.hi - 0x3E;
             }
         }
         func_800252CC(rec);
@@ -3564,18 +3562,18 @@ void func_80025124(Unk1D3DC8 *rec) {
 
 INCLUDE_ASM("asm/main/nonmatchings/game_8001781C", func_800252CC);
 
-void func_800253F0(Unk1D3DC8 *block, u32 which) {
+void func_800253F0(Building *block, u32 which) {
     u16 n;
-    Unk1D3DC8Item *item;
-    Unk1D3DC8Part *part;
+    BuildingItem *item;
+    BuildingPart *part;
 
-    n = block->unk_0;
+    n = block->unk_000;
     if (n != 0) {
         item = block->items;
         n--;
         if (n != 0) {
             do {
-                part = &item->unk_C;
+                part = &item->unk_0C;
                 if (which < 2) {
                     part->unk_14 = 1;
                 }
@@ -3732,27 +3730,27 @@ void func_80025B10(void) {
     }
 }
 
-void func_80025B3C(Unk1D3DC8 *block) {
+void func_80025B3C(Building *block) {
     if ((u32) block >= (u32) D_801D3DC8 && (u32) block < (u32) &D_801D3DC8[13]) {
         memset(block, 0, 0x98);
     }
 }
 
-void func_80025B7C(Unk1D3DC8Item *item) {
+void func_80025B7C(BuildingItem *item) {
     if ((u32) item >= (u32) D_801D3DC8 && (u32) item <= (u32) &D_801D3DC8[13]) {
-        memset(item, 0, sizeof(Unk1D3DC8Item));
+        memset(item, 0, sizeof(BuildingItem));
     }
 }
 
-void func_80025BBC(Unk1D3DC8 *block) {
+void func_80025BBC(Building *block) {
     s16 *p;
     u16 n;
 
-    p = block->unk_3A;
-    if (block->unk_38 == 0) {
-        n = block->unk_0;
-        block->unk_36 = 1;
-        block->unk_38 = n + 9;
+    p = block->unk_03A;
+    if (block->unk_038 == 0) {
+        n = block->unk_000;
+        block->unk_036 = 1;
+        block->unk_038 = n + 9;
         n--;
         do {
             *p++ = 1;
@@ -4505,7 +4503,7 @@ u16 func_80029B80(void) {
     s16 dist;
     s16 d;
     s16 cx;
-    Unk1D3DC8 *building;
+    Building *building;
 
     count = D_801E29A4;
     result = 0;
@@ -4514,8 +4512,8 @@ u16 func_80029B80(void) {
     if (count != 0) {
         building = D_801D3DC8;
         do {
-            if (building->unk_14 < 9) {
-                dist = func_8003FCD8((building->unk_4 + building->unk_E) >> 1, cx);
+            if (building->unk_014 < 9) {
+                dist = func_8003FCD8((building->unk_004 + building->unk_00E) >> 1, cx);
                 d = dist;
                 if (dist < 0) {
                     d = -d;

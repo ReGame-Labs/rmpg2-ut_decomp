@@ -34,7 +34,6 @@ extern u16 D_801D36FC;
 extern u16 D_801D37BC;
 extern u16 D_801FA98C;
 extern u16 D_801FA990;
-extern u16 D_801E29A4;
 extern u16 D_801F9ABC;
 extern u16 D_801D8866;
 extern s16 D_801F9ACA;
