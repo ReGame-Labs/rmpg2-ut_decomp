@@ -25,7 +25,7 @@ s32 func_80063F30(void);
 void func_800700CC(u8);
 void func_80063DF8(s32);
 void func_8006FC6C(void);
-void func_8006FC8C(s32, s32 *);
+void wess_start_sequence_with(s32, s32 *);
 void func_8006FEB4(s32);
 void func_800700A8(void);
 void func_8006BBA0(s32, s32);
@@ -114,12 +114,12 @@ extern s32 D_801F991C;
 extern s32 D_801FB4C0;
 
 
-s32 func_8006EE30(s32);
+s32 wess_module_size(s32);
 void func_8006F0D8(s32, void *, s32);
-s32 func_8006E804(SoundDriver *, s32);
-void func_8006E8B4(void *, s32, s32, void *, s32);
+s32 wess_sequence_header(SoundDriver *, s32);
+void wess_load_sequence_table(void *, s32, s32, void *, s32);
 SoundDriver *func_8006EC08(void);
-s32 func_8006E4F4(void);
+s32 wess_sequence_count(void);
 s32 func_80070298(s32, s32);
 s32 func_80070324(s32, s32, void *);
 void *cdload_alloc(s32 size);
@@ -963,13 +963,13 @@ void cdload_init_sound(void) {
     io.unk_28 = 1;
     io.unk_24 = 1;
     func_800706C0(&io);
-    size = func_8006EE30(0x4F);
+    size = wess_module_size(0x4F);
     func_8006F0D8(0x4F, cdload_alloc(size), size);
-    bank_size = func_8006E804(func_8006EC08(), 0x50);
+    bank_size = wess_sequence_header(func_8006EC08(), 0x50);
     buf = cdload_alloc(bank_size);
-    func_8006E8B4(func_8006EC08(), 0x50, 0, buf, bank_size);
-    seqs = cdload_alloc(func_80070298(0, func_8006E4F4()));
-    func_80070324(0, func_8006E4F4(), seqs);
+    wess_load_sequence_table(func_8006EC08(), 0x50, 0, buf, bank_size);
+    seqs = cdload_alloc(func_80070298(0, wess_sequence_count()));
+    func_80070324(0, wess_sequence_count(), seqs);
     D_801FB4C0 = 0x1010;
     cdload_reset_xa();
     func_80062EB0();
@@ -993,7 +993,7 @@ void func_80062DEC(s32 arg0, s32 arg1) {
 
     param[0] = 1;
     ((s8 *)param)[4] = arg1 / 2;
-    func_8006FC8C(arg0, param);
+    wess_start_sequence_with(arg0, param);
 }
 
 void func_80062E24(s32 arg0) {

@@ -453,6 +453,24 @@ D_8008525C = 0x8008525C;
 // compares equal. cdload_wait_read_sync counts from 0x800000.
 D_7FFFFF = 0x007FFFFF; // ignore:true
 
+// wess (src/main/wess.c), the driver's API, the SPU command set, the voices, the sequence loader
+wess_pitch_mod = 0x8006CF14; // type:func  the pitch bend command every voice of the channel, by its patch map's ranges
+wess_report_error = 0x8006E4BC; // type:func  calls the error callback D_801FDEA8
+wess_sequence_count = 0x8006E4F4; // type:func  the number of sequences in the file
+wess_valid_sequence = 0x8006E504; // type:func  1 for a sequence number in range
+wess_open_sequence_file = 0x8006E530; // type:func  opens the sequence file once, counts the users
+wess_close_sequence_file = 0x8006E59C; // type:func  closes it with its last user
+wess_read_sequence = 0x8006E5F0; // type:func  reads a sequence's data to dst and builds its track table, returns the bytes used
+wess_sequence_header = 0x8006E804; // type:func  reads the sequence file's header, returns the table's size
+wess_load_sequence_table = 0x8006E8B4; // type:func  reads the sequence table, packed or plain
+wess_sequence_size = 0x8006EA50; // type:func  the memory a sequence needs, 0 when loaded
+wess_load_sequence = 0x8006EB08; // type:func  loads a sequence that is not loaded yet
+wess_module_size = 0x8006EE30; // type:func  the memory the module's tables need
+wess_init_channel = 0x8006F634; // type:func  sets a channel up from its track's settings and the caller's overrides
+wess_set_channel_data = 0x8006F8F8; // type:func  the channel's sequence data and labels
+wess_start_sequence = 0x8006F96C; // type:func  a free sequence record and a channel per track, returns the record + 1 or 0
+wess_start_sequence_with = 0x8006FC8C; // type:func  starts a sequence with overrides
+
 // wess_spu: the SPU reverb attributes (an SpuReverbAttr)
 D_801FB530 = 0x801FB530; // size:0x14
 

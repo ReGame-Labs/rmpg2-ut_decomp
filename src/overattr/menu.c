@@ -3,7 +3,7 @@
 #include "overattr.h"
 #include "psyq/libc2.h"
 
-void func_8009B478(void) {
+void menu_update_fade(void) {
     GameObject *head;
     GameObject *obj;
 
@@ -257,7 +257,7 @@ void func_8009BF94(u8 *dst, s32 index) {
 
 #ifdef NON_MATCHING
 /* 99.3 %: the movie line's text address is in s3, the original's s1 (s1/s2 hold the colour's and the cursor's %hi). */
-void func_8009BFE8(void) {
+void menu_draw_cheats(void) {
     func_8009BF40(D_800A631E, D_801FA960);
     func_8001ECB4(D_800A6359, D_8007A684, 0);
     func_8001ECB4(D_800A6380, D_8007A686, 0);
@@ -295,36 +295,89 @@ void func_8009BFE8(void) {
     func_8001ED54(&D_800A63A8);
 }
 #else
-INCLUDE_ASM("asm/overattr/nonmatchings/menu", func_8009BFE8);
+INCLUDE_ASM("asm/overattr/nonmatchings/menu", menu_draw_cheats);
 #endif
 
 void func_8009C1AC(void) {
-    func_800A0CC0();
+    menu_update_load_screen();
 }
 
-INCLUDE_ASM("asm/overattr/nonmatchings/menu", func_8009C1CC);
+void menu_update_name_entry(void) {
+    MenuRecord *menu = D_800A92C0;
+    s32 i;
+
+    if ((D_800A9220 & 0x401004) && D_801F9944 == 0) {
+        D_800A9860 = 0x708;
+        if (--D_800A92D0 < 0) {
+            D_800A92D0 = D_800A9840 - 1;
+        }
+        menu_light_items(menu, D_800A92D0, (s16) D_801E2A44, D_801F9AAC);
+        D_801F9944 = 0xB;
+        D_801D872C /= 2;
+        func_8001F724(0x1E);
+    } else if ((D_800A9220 & 0x802008) && D_801F9944 == 0) {
+        D_800A9860 = 0x708;
+        if (++D_800A92D0 >= D_800A9840) {
+            D_800A92D0 = 0;
+        }
+        menu_light_items(D_800A92C0, D_800A92D0, (s16) D_801E2A44, D_801F9AAC);
+        D_801F9944 = 0xB;
+        D_801D872C /= 2;
+        func_8001F724(0x1E);
+    } else if ((D_800A9220 & 0x01304C13) && D_801F9944 == 0) {
+        D_800A9860 = 0x708;
+        ((void (*)(void)) D_800A92C0[D_800A92D0 + 2].sub)();
+        D_801F9944 = 0xB;
+        D_801D872C /= 2;
+        if (D_800A92D0 == 5) {
+            return;
+        }
+    } else if ((D_800A9220 & 0x04010040) && D_801F9944 == 0) {
+        D_800A9860 = 0x708;
+        if (menu->sub != NULL) {
+            D_800A92D8 = menu->sub;
+            D_800A9800 = 1;
+            D_800A9870 = menu->kind;
+            func_8001F724(3);
+            menu_fade_out();
+            D_801F9944 = 0xB;
+            D_801D872C /= 2;
+            return;
+        }
+    }
+    for (i = 0; i < 5; i++) {
+        D_800A6F48[i]->text[0] = D_800A9890[i];
+        main_free_kind(i + 0x421);
+        func_8001ED54((TextMessage *) D_800A92C0[i + 2].unk_00);
+    }
+    menu_light_items(D_800A92C0, D_800A92D0, (s16) D_801E2A44, D_801F9AAC);
+    for (i = 0; i < 7; i++) {
+        if (strcmp(D_800A9890, D_8007A69C[i]) == 0) {
+            D_800A6F5C[i]();
+            func_8001F724(3);
+            D_800A92D8 = menu->sub;
+            D_800A9800 = 1;
+            D_800A9870 = menu->kind;
+            func_8001F724(3);
+            menu_fade_out();
+        }
+    }
+    func_80018C14();
+}
 
 INCLUDE_RODATA("asm/overattr/nonmatchings/menu", D_80097F58);
 
-INCLUDE_RODATA("asm/overattr/nonmatchings/menu", D_80098094);
-
-#ifdef NON_MATCHING
-/* 99.7 %: the name and the cursor are addressed in the original's order only in the second block: the first loads
- * the cursor's %hi before the name's (a scheduling tie). With this C the "AEIOU" goes in place of D_80098094. */
-void func_8009C5A4(void) {
-    u8 c;
-    u8 *p;
+void menu_edit_name(void) {
 
     if ((D_800A9220 & 0x100401) && D_801F9944 == 0) {
         D_800A9860 = 0x708;
         func_8001F724(0x1E);
-        p = &D_800A9890[D_800A92D0];
-        if (*p == '9') {
-            *p = 'B';
-        } else if (*p == 'Z') {
-            *p = '0';
+        if (D_800A9890[D_800A92D0] == '9') {
+            D_800A9890[D_800A92D0] = 'B';
+        } else if (D_800A9890[D_800A92D0] == 'Z') {
+            D_800A9890[D_800A92D0] = '0';
         } else {
-            *p = *p + 1;
+            D_800A9890[D_800A92D0]++;
         }
         if (strchr("AEIOU", D_800A9890[D_800A92D0]) != NULL) {
             D_800A9890[D_800A92D0]++;
@@ -333,13 +386,12 @@ void func_8009C5A4(void) {
     if ((D_800A9220 & 0x200802) && D_801F9944 == 0) {
         D_800A9860 = 0x708;
         func_8001F724(0x1E);
-        p = &D_800A9890[D_800A92D0];
-        if (*p == 'B') {
-            *p = '9';
-        } else if (*p == '0') {
-            *p = 'Z';
+        if (D_800A9890[D_800A92D0] == 'B') {
+            D_800A9890[D_800A92D0] = '9';
+        } else if (D_800A9890[D_800A92D0] == '0') {
+            D_800A9890[D_800A92D0] = 'Z';
         } else {
-            *p = *p - 1;
+            D_800A9890[D_800A92D0]--;
         }
         if (strchr("AEIOU", D_800A9890[D_800A92D0]) != NULL) {
             D_800A9890[D_800A92D0]--;
@@ -353,9 +405,6 @@ void func_8009C5A4(void) {
         }
     }
 }
-#else
-INCLUDE_ASM("asm/overattr/nonmatchings/menu", func_8009C5A4);
-#endif
 
 void func_8009C7B0(void) {
     D_801F9ADC = 1;
@@ -388,7 +437,7 @@ void func_8009C810(void) {
     D_801F9ABC = 4;
 }
 
-s32 func_8009C828(void) {
+s32 menu_update_credits(void) {
     GameObject *obj;
     GameObject *next;
     GameObject *head;
@@ -404,7 +453,7 @@ s32 func_8009C828(void) {
         D_801D3D7C = 0;
         SetDispMask(1);
         func_8001F7F8(0xA);
-        func_8009F968(D_800A40FC, 4, 0x606060);
+        menu_place_objects(D_800A40FC, 4, 0x606060);
     }
     if (D_800A90F4[D_800A92B8] == -1) {
         if (D_800A9298 == 0) {
@@ -439,7 +488,73 @@ s32 func_8009C828(void) {
     return 1;
 }
 
-INCLUDE_ASM("asm/overattr/nonmatchings/menu", func_8009CA68);
+#ifdef NON_MATCHING
+/* 81.21%: the shape is the original's (size 0x2A4, original 0x2C8); the loops' registers differ: the original
+ * spills i, &D_800A6FBC[i] and i * 2, and steps the picture table's index as (k - 4) * 4. */
+void menu_draw_controls(void) {
+    u16 *cfg[3];
+    s32 i;
+    s32 k;
+    s32 n;
+    s32 j;
+    s32 obj;
+    s32 kind;
+    s32 end;
+    s16 *base;
+
+    for (i = 0; i < 3; i++) {
+        if (D_800A92A8[i] != D_801D8800[i]) {
+            D_800A92A8[i] = D_801D8800[i];
+            obj = i * 4;
+            base = &D_800A6FBC[i];
+            cfg[i] = D_8007A7C0[D_801D8800[i]];
+            kind = *base;
+            end = kind + 4;
+            n = 0;
+            for (; kind < end; kind++) {
+                main_free_kind(kind);
+            }
+            for (k = 4, j = 0; k < 8; k++, j++) {
+                switch (cfg[i][k]) {
+                case 0x10:
+                    D_800A6718.x = D_800A6FAC[i];
+                    D_800A6718.y = D_800A6FB4[n];
+                    D_800A6718.kind = *base + n;
+                    func_8001ED54(&D_800A6718);
+                    break;
+                case 0x20:
+                    D_800A6738.x = D_800A6FAC[i];
+                    D_800A6738.y = D_800A6FB4[n];
+                    D_800A6738.kind = *base + n;
+                    func_8001ED54(&D_800A6738);
+                    break;
+                case 0x40:
+                    D_800A6758.x = D_800A6FAC[i];
+                    D_800A6758.y = D_800A6FB4[n];
+                    D_800A6758.kind = *base + n;
+                    func_8001ED54(&D_800A6758);
+                    break;
+                case 0x80:
+                    D_800A6778.x = D_800A6FAC[i];
+                    D_800A6778.y = D_800A6FB4[n];
+                    D_800A6778.kind = *base + n;
+                    func_8001ED54(&D_800A6778);
+                    break;
+                default:
+                    continue;
+                }
+                main_set_frame(D_800A6F7C[j], D_801E28F4[obj]->flags, D_801E28F4[obj]);
+                D_801E28F4[obj]->pos_x.s.hi = D_800A6F8C[i];
+                D_801E28F4[obj]->pos_y.s.hi = D_800A6F94[obj];
+                n++;
+                obj++;
+            }
+        }
+    }
+}
+#else
+INCLUDE_ASM("asm/overattr/nonmatchings/menu", menu_draw_controls);
+#endif
 
 void func_8009CD30(void) {
     s32 i;
@@ -474,7 +589,7 @@ void func_8009CE5C(void) {
     }
 }
 
-void func_8009CEC8(void) {
+void menu_draw_options(void) {
     main_free_kind(0x442);
     main_free_kind(0x443);
     main_free_kind(0x402);
@@ -546,7 +661,7 @@ void func_8009D140(void) {
         D_801D3780 = 5;
         func_8001EC74(D_800A92C0[D_800A92D0 + 2].kind, D_801D885C);
         func_8001F724(3);
-        func_8009E40C(D_800A92C0, D_800A92D0);
+        menu_fade_others(D_800A92C0, D_800A92D0);
         D_800A9878 = 0;
     }
 }
@@ -557,7 +672,7 @@ void func_8009D20C(void) {
         D_801D3780 = 5;
         func_8001EC74(D_800A92C0[D_800A92D0 + 2].kind, D_801D885C);
         func_8001F724(3);
-        func_8009E40C(D_800A92C0, D_800A92D0);
+        menu_fade_others(D_800A92C0, D_800A92D0);
         D_801FA984[0] = 0;
         D_801FA984[1] = 0;
         D_801FA984[2] = 0;
@@ -575,7 +690,7 @@ void func_8009D31C(void) {
         D_801D3780 = 5;
         func_8001EC74(D_800A92C0[D_800A92D0 + 2].kind, D_801D885C);
         func_8001F724(3);
-        func_8009E40C(D_800A92C0, D_800A92D0);
+        menu_fade_others(D_800A92C0, D_800A92D0);
         D_801FA984[0] = 0;
         D_801FA984[1] = 0;
         D_801FA984[2] = 0;
@@ -593,7 +708,7 @@ void func_8009D42C(void) {
         D_801D3780 = 5;
         func_8001EC74(D_800A92C0[D_800A92D0 + 2].kind, D_801D885C);
         func_8001F724(3);
-        func_8009E40C(D_800A92C0, D_800A92D0);
+        menu_fade_others(D_800A92C0, D_800A92D0);
         D_801FA984[0] = 0;
         D_801FA984[1] = 0;
         D_801FA984[2] = 0;
@@ -615,7 +730,7 @@ void func_8009D504(void) {
         D_801D3780 = 5;
         func_8001EC74(D_800A92C0[D_800A92D0 + 2].kind, D_801D885C);
         func_8001F724(3);
-        func_8009E40C(D_800A92C0, D_800A92D0);
+        menu_fade_others(D_800A92C0, D_800A92D0);
     }
 }
 
@@ -627,7 +742,7 @@ void func_8009D5E4(void) {
         D_801D3780 = 5;
         func_8001EC74(D_800A92C0[D_800A92D0 + 2].kind, D_801D885C);
         func_8001F724(3);
-        func_8009E40C(D_800A92C0, D_800A92D0);
+        menu_fade_others(D_800A92C0, D_800A92D0);
         D_800A9878 = 0;
     }
 }
@@ -642,7 +757,7 @@ void func_8009D6B0(void) {
         D_801D3780 = 5;
         func_8001EC74(D_800A92C0[D_800A92D0 + 2].kind, D_801D885C);
         func_8001F724(3);
-        func_8009E40C(D_800A92C0, D_800A92D0);
+        menu_fade_others(D_800A92C0, D_800A92D0);
     }
     for (i = 0; i < 5; i++) {
         D_800A6F48[i]->text[0] = 'B';
@@ -651,23 +766,21 @@ void func_8009D6B0(void) {
     D_800A9890[5] = 0;
 }
 
-#ifdef NON_MATCHING
-/* 99.6 %: the slot counter and the giv of D_800A92B0 swap s5/s6 (declaration orders, loop forms and pointer
- * variables tried). */
-void func_8009D7B4(void) {
+void menu_start_player_select(void) {
     s32 n;
     s32 i;
     s32 j;
     ObjectDef *def;
 
-    if ((D_800A9220 & 0x01004010) && (n = 0, D_801F9944 == 0)) {
+    if ((D_800A9220 & 0x01004010) && D_801F9944 == 0) {
+        n = 0;
         D_800A92D8 = D_800A7200;
         D_800A9870 = 0;
         D_801E2148 = 6;
         D_801D3780 = 5;
         func_8001EC74(D_800A92C0[D_800A92D0 + 2].kind, D_801D885C);
         func_8001F724(3);
-        func_8009E40C(D_800A92C0, D_800A92D0);
+        menu_fade_others(D_800A92C0, D_800A92D0);
         for (i = 0; i < 3; i++) {
             D_800A92A8[i] = -1;
             D_800A92B0[i] = i;
@@ -683,9 +796,6 @@ void func_8009D7B4(void) {
         }
     }
 }
-#else
-INCLUDE_ASM("asm/overattr/nonmatchings/menu", func_8009D7B4);
-#endif
 
 void func_8009D948(void) {
     ObjectDef *def;
@@ -697,7 +807,7 @@ void func_8009D948(void) {
         D_801D3780 = 5;
         func_8001EC74(D_800A92C0[D_800A92D0 + 2].kind, D_801D885C);
         func_8001F724(3);
-        func_8009E40C(D_800A92C0, D_800A92D0);
+        menu_fade_others(D_800A92C0, D_800A92D0);
         D_800AA248.new_def = def = func_8001D110();
         def->id = 0x4A002FBA;
         def->pos_x.w = 0x1F40000;
@@ -734,7 +844,7 @@ void func_8009DB38(void) {
         D_801D3780 = 5;
         func_8001EC74(D_800A92C0[D_800A92D0 + 2].kind, D_801D885C);
         func_8001F724(3);
-        func_8009E40C(D_800A92C0, D_800A92D0);
+        menu_fade_others(D_800A92C0, D_800A92D0);
     }
 }
 
@@ -746,11 +856,11 @@ void func_8009DBFC(void) {
         D_801D3780 = 5;
         func_8001EC74(D_800A92C0[D_800A92D0 + 2].kind, D_801D885C);
         func_8001F724(3);
-        func_8009E40C(D_800A92C0, D_800A92D0);
+        menu_fade_others(D_800A92C0, D_800A92D0);
     }
 }
 
-void func_8009DCC0(void) {
+void menu_back(void) {
     MenuRecord *menu;
 
     menu = D_800A92C0;
@@ -759,7 +869,7 @@ void func_8009DCC0(void) {
         D_800A92D8 = menu[0].sub;
         D_800A9870 = menu[0].kind;
         func_8001F724(3);
-        func_8009E4D4();
+        menu_fade_out();
     }
 }
 
@@ -771,7 +881,7 @@ void func_8009DD3C(void) {
         D_801D3780 = 5;
         func_8001EC74(D_800A92C0[D_800A92D0 + 2].kind, D_801D885C);
         func_8001F724(3);
-        func_8009E40C(D_800A92C0, D_800A92D0);
+        menu_fade_others(D_800A92C0, D_800A92D0);
     }
 }
 
@@ -785,10 +895,10 @@ void func_8009DE00(void) {
         D_800A92D8 = menu[0].sub;
         D_800A9870 = menu[0].kind;
         func_8001F724(3);
-        func_8009E4D4();
+        menu_fade_out();
     }
     for (i = 0; i < 12; i++) {
-        func_8009E3C0(0x400, 0x808080);
+        menu_set_colour(0x400, 0x808080);
     }
 }
 
@@ -816,7 +926,7 @@ void func_8009DF60(void) {
     }
 }
 
-s16 func_8009DF98(void *list, s32 selected, s32 lit, s32 normal) {
+s16 menu_draw(void *list, s32 selected, s32 lit, s32 normal) {
     MenuRecord *menu;
     MenuRecord *item;
     GameObject *head;
@@ -838,7 +948,7 @@ s16 func_8009DF98(void *list, s32 selected, s32 lit, s32 normal) {
         D_800AA2EC = D_801D885C;
         func_8001ED54((TextMessage *) menu->sub[i].unk_00);
         kind = menu->sub[i].kind;
-        func_8009E3C0(kind, 0);
+        menu_set_colour(kind, 0);
         head = &D_801E28C0;
         obj = head->next;
         if (obj != head) {
@@ -877,7 +987,7 @@ s32 func_8009E114(s32 kind, s32 y) {
     return done;
 }
 
-void func_8009E190(void *list, s32 selected, s32 lit, s32 normal) {
+void menu_light_items(void *list, s32 selected, s32 lit, s32 normal) {
     MenuRecord *menu;
     s32 i;
 
@@ -922,7 +1032,7 @@ void func_8009E310(s32 lit, s32 normal) {
     }
 }
 
-void func_8009E3C0(s32 kind, s32 value) {
+void menu_set_colour(s32 kind, s32 value) {
     GameObject *head;
     GameObject *obj;
 
@@ -939,24 +1049,24 @@ void func_8009E3C0(s32 kind, s32 value) {
     }
 }
 
-void func_8009E40C(void *list, s32 selected) {
+void menu_fade_others(void *list, s32 selected) {
     MenuRecord *menu;
     s32 i;
 
     menu = list;
     for (i = 2; i <= menu[0].unk_00 + 1; i++) {
         if (selected != i - 2) {
-            func_8009E3C0(menu[i].kind, 0x808080);
+            menu_set_colour(menu[i].kind, 0x808080);
         }
     }
     if (menu[0].sub != NULL) {
         i = menu[0].kind;
-        func_8009E3C0(menu[0].sub[i + 2].kind, 0x808080);
+        menu_set_colour(menu[0].sub[i + 2].kind, 0x808080);
     }
     D_800A9888 = 1;
 }
 
-void func_8009E4D4(void) {
+void menu_fade_out(void) {
     GameObject *head;
     GameObject *obj;
 
@@ -975,16 +1085,16 @@ void func_8009E4D4(void) {
     D_801D3780 = 8;
 }
 
-void func_8009E540(MenuRecord *menu) {
+void menu_fade_in(MenuRecord *menu) {
     s32 i;
 
     for (i = 2; i <= menu[0].unk_00 + 1; i++) {
-        func_8009E3C0(menu[i].kind, 0);
+        menu_set_colour(menu[i].kind, 0);
     }
     D_800A9888 = 2;
 }
 
-void func_8009E5BC(void) {
+void menu_create_player_slots(void) {
     ObjectDef *def;
     u8 *anim;
     s32 i;
@@ -1046,17 +1156,384 @@ void func_8009E7D4(s16 n) {
     D_800AA248.cur_obj = saved;
 }
 
-INCLUDE_ASM("asm/overattr/nonmatchings/menu", func_8009E8B8);
+void menu_create_player_bars(s16 player, s16 flag) {
+    s32 x;
+    s32 y;
+    u8 *anim;
+    s32 bx;
+    s32 by;
+    GameObject *bar0;
+    GameObject *bar1;
+    GameObject *bar2;
+    ObjectDef *def;
 
-INCLUDE_ASM("asm/overattr/nonmatchings/menu", func_8009EB74);
+    y = 0x190000;
+    anim = NULL;
+    x = ((player - 1) * 0x78 + 0x9C) << 16;
+    if (flag != 0) {
+        y = -0x200000;
+        anim = D_800A747C;
+    }
+    bx = (x + 0x90000) >> 16;
+    by = y >> 16;
+    bar0 = main_create_box(bx, by - 1, D_800A734C[player * 3], 7, 0xFF0000);
+    *(D_801E28F4 + player * 3 + 31) = bar0;
+    bar0->priority = 0x1F1;
+    bar0->anim = (s32) anim;
+    bar0->flags |= 0x400;
+    bar1 = main_create_box(bx, by + 9, D_800A734C[player * 3 + 1], 7, 0xFF00);
+    *(D_801E28F4 + player * 3 + 32) = bar1;
+    bar1->priority = 0x1F1;
+    bar1->anim = (s32) anim;
+    bar1->flags |= 0x400;
+    bar2 = main_create_box(bx, by + 19, D_800A734C[player * 3 + 2], 7, 0xFFFF);
+    *(D_801E28F4 + player * 3 + 33) = bar2;
+    bar2->priority = 0x1F1;
+    bar2->anim = (s32) anim;
+    bar2->flags |= 0x400;
+    D_800A98A0[player * 3] = D_800A92E0[player * 3] = D_800A734C[player * 3];
+    D_800A98A0[player * 3 + 1] = D_800A92E0[player * 3 + 1] = D_800A734C[player * 3 + 1];
+    D_800A98A0[player * 3 + 2] = D_800A92E0[player * 3 + 2] = D_800A734C[player * 3 + 2];
+    D_800AA248.new_def = def = func_8001D110();
+    def->id = 0x4A001DD6;
+    def->pos_x.w = x;
+    def->pos_y.w = y;
+    def->flags = 0x1F2;
+    def->unk_06 |= 0x20;
+    D_800AA248.cur_obj = func_8001DCB4();
+    *(D_801E28F4 + player + 16) = D_800AA248.cur_obj;
+    D_800AA248.cur_obj->anim = (s32) D_800A7444;
+    D_800AA248.cur_obj->unk_4D = 0;
+    if (flag != 0) {
+        D_800AA248.cur_obj->anim = (s32) D_800A7454;
+    }
+}
 
-INCLUDE_ASM("asm/overattr/nonmatchings/menu", func_8009EE5C);
+void menu_create_player_monster(s16 player, s16 flag) {
+    ObjectDef *def;
+    GameObject *obj;
+    s32 x;
 
-INCLUDE_ASM("asm/overattr/nonmatchings/menu", func_8009F2F8);
+    D_800A8FD4[player].unk_08 = 0xB;
+    D_800A8FD4[player].unk_04 = player;
+    D_800A8FD4[player].unk_06 = 0;
+    D_800AA244[player] = 0;
+    D_800AA2CC[player] = 0;
+    def = D_800AA248.new_def = func_8001D110();
+    def->id = D_800A8EE4[D_800A8FD4[player].unk_04];
+    def->pos_x.w = ((player - 1) * 0x78 + 0xCD) << 16;
+    def->pos_y.w = 0xBE0000;
+    def->flags = 0x1F4;
+    def->unk_06 |= 0x20;
+    D_800AA248.cur_obj = func_8001DCB4();
+    *(D_801E28F4 + player + 13) = D_800AA248.cur_obj;
+    D_800AA248.cur_obj->anim = D_800A8F00[player];
+    D_800AA248.cur_obj->unk_4D = 0;
+    if (player == 6) {
+        if (D_801F9ABC == 0) {
+            D_800AA248.cur_obj->unk_74 = D_800A900C;
+        } else if (D_801F9ABC == 3) {
+            D_800AA248.cur_obj->unk_74 = 7;
+        } else {
+            D_800AA248.cur_obj->unk_74 = 8;
+        }
+    } else {
+        D_800AA248.cur_obj->unk_74 = D_800A8FF4[player];
+    }
+    def->id = D_800A8FA8[D_800A8FD4[player].unk_04];
+    def->flags = 0x258;
+    def->unk_06 |= 0x20;
+    D_800AA248.cur_obj = func_8001DCB4();
+    *(D_801E28F4 + player + 19) = D_800AA248.cur_obj;
+    main_set_frame(D_800A8FA8[D_800A8FD4[player].unk_04], D_800AA248.cur_obj->flags, D_800AA248.cur_obj);
+    x = (player - 1) * 0x78 + 0xC8;
+    D_800AA248.cur_obj->pos_x.w = (x - (s16) D_800AA248.cur_obj->frame->size.u.lo / 2) << 16;
+    D_800AA248.cur_obj->pos_y.w = 0xC80000;
+    D_800A9850[player] = 1;
+    if (flag != 0) {
+        obj = *(D_801E28F4 + player + 13);
+        obj->anim = D_800A8F00[player + 0x1C];
+        obj->pos_y.w = -0x140000;
+    }
+}
 
-INCLUDE_ASM("asm/overattr/nonmatchings/menu", func_8009F554);
+GameObject *menu_animate(GameObject *obj, s32 player) {
+    s32 op;
+    s32 arg;
+    s32 id;
+    s32 x;
+    s32 frames;
+    GameObject *name;
 
-void func_8009F968(OverattrPlacement *p, s32 n, s32 color) {
+    if (obj != NULL) {
+        obj->pos_y.w += obj->vel_y.w;
+        obj->vel_y.w += obj->unk_64.w;
+        if (player < 3) {
+            obj->pos_y.s.hi += D_800AA2CC[player];
+        }
+        if (obj->unk_4D == 0) {
+            do {
+                op = ((s32 *) obj->anim)[0];
+                arg = ((s32 *) obj->anim)[1];
+                switch (op) {
+                case 0:
+                    obj->anim = arg;
+                    break;
+                case 1:
+                    obj->priority = arg;
+                    obj->anim += 8;
+                    break;
+                case 2:
+                    obj->vel_y.w = arg;
+                    obj->unk_64.w = ((s32 *) obj->anim)[2];
+                    obj->anim += 12;
+                    break;
+                case 3:
+                    if (obj->pos_y.s.hi > 0xBE) {
+                        obj->pos_y.w = 0xBE0000;
+                        obj->vel_y.w = 0;
+                        obj->unk_64.w = 0;
+                        obj->anim += 4;
+                    } else {
+                        obj->anim -= 8;
+                    }
+                    break;
+                case 4:
+                    if (obj->pos_y.s.hi > 0x15E) {
+                        obj->pos_y.w = -0x140000;
+                        obj->vel_y.w = 0;
+                        obj->unk_64.w = 0;
+                        obj->anim = D_800A8F00[D_800A8FD4[player].unk_04 + 0x1C];
+                        obj->unk_4D = 0;
+                        name = *(D_801E28F4 + player + 19);
+                        if (D_800A8FD4[player].unk_04 == 6) {
+                            if (D_801F9ABC == 0) {
+                                obj->unk_74 = D_800A8FF4[D_800A8FD4[player].unk_04];
+                                D_800A92E0[player * 3] = D_800A734C[D_800A8FD4[player].unk_04 * 3];
+                                D_800A92E0[player * 3 + 1] = D_800A734C[D_800A8FD4[player].unk_04 * 3 + 1];
+                                D_800A92E0[player * 3 + 2] = D_800A734C[D_800A8FD4[player].unk_04 * 3 + 2];
+                                main_set_frame(D_800A8FA8[D_800A8FD4[player].unk_04], name->flags, name);
+                            } else if (D_801F9ABC == 3) {
+                                obj->unk_74 = 7;
+                                D_800A92E0[player * 3] = D_800A734C[21];
+                                D_800A92E0[player * 3 + 1] = D_800A734C[22];
+                                D_800A92E0[player * 3 + 2] = D_800A734C[23];
+                                main_set_frame(0x4F003EB2, name->flags, name);
+                            } else {
+                                obj->unk_74 = 8;
+                                D_800A92E0[player * 3] = D_800A734C[24];
+                                D_800A92E0[player * 3 + 1] = D_800A734C[25];
+                                D_800A92E0[player * 3 + 2] = D_800A734C[26];
+                                main_set_frame(0x4F003EB0, name->flags, name);
+                            }
+                        } else {
+                            obj->unk_74 = D_800A8FF4[D_800A8FD4[player].unk_04];
+                            D_800A92E0[player * 3] = D_800A734C[D_800A8FD4[player].unk_04 * 3];
+                            D_800A92E0[player * 3 + 1] = D_800A734C[D_800A8FD4[player].unk_04 * 3 + 1];
+                            D_800A92E0[player * 3 + 2] = D_800A734C[D_800A8FD4[player].unk_04 * 3 + 2];
+                            main_set_frame(D_800A8FA8[D_800A8FD4[player].unk_04], name->flags, name);
+                        }
+                        x = (player - 1) * 0x78 + 0xC8;
+                        name->pos_x.w = (x - (s16) name->frame->size.u.lo / 2) << 16;
+                    } else {
+                        obj->anim -= 8;
+                    }
+                    break;
+                case 5:
+                    obj->anim -= 8;
+                    break;
+                case 7:
+                    D_800AA244[player] = arg;
+                    obj->anim += 8;
+                    break;
+                case 8:
+                    D_800AA2CC[player] = arg;
+                    obj->pos_y.s.hi += arg;
+                    obj->anim += 8;
+                    func_8009E7D4(player);
+                    func_8001F724(5);
+                    func_8001F724(0x44);
+                    break;
+                case 10:
+                    func_8001F724(arg);
+                    obj->anim += 8;
+                    break;
+                case 9:
+                    func_8001E4B0(obj);
+                    return NULL;
+                }
+            } while (op < 0xB);
+            id = ((s32 *) obj->anim)[0];
+            frames = ((s32 *) obj->anim)[1];
+            if (id != 0xDEAD) {
+                main_set_frame(id, obj->flags, obj);
+            }
+            obj->unk_4D = frames;
+            obj->anim += 8;
+        } else {
+            obj->unk_4D--;
+        }
+    }
+    return obj;
+}
+
+void menu_update_player_select(void) {
+    s32 i;
+    s32 j;
+    s32 d;
+    GameObject *obj;
+
+    for (i = 0; i < 3; i++) {
+        for (j = 0; j < 3; j++) {
+            d = (D_800A92E0[i * 3 + j] - D_800A98A0[i * 3 + j]) >> 3;
+            if (d != 0) {
+                D_800A98A0[i * 3 + j] += d;
+            } else {
+                D_800A98A0[i * 3 + j] = D_800A92E0[i * 3 + j];
+            }
+            if (*(D_801E28F4 + i * 3 + j + 31) != NULL) {
+                (*(D_801E28F4 + i * 3 + j + 31))->unk_40.w = D_800A98A0[i * 3 + j];
+            }
+        }
+    }
+    for (i = 0; i < 3; i++) {
+        menu_animate(*(D_801E28F4 + i + 13), i);
+    }
+    for (i = 0; i < 3; i++) {
+        menu_animate(*(D_801E28F4 + i + 22), i);
+        menu_animate(*(D_801E28F4 + i + 28), i);
+        menu_animate(*(D_801E28F4 + i + 25), i);
+        menu_animate(*(D_801E28F4 + i + 16), 0xFF);
+        for (j = 0; j < 3; j++) {
+            obj = *(D_801E28F4 + i * 3 + j + 31);
+            if (obj != NULL && obj->anim != 0) {
+                menu_animate(obj, 0xFF);
+            }
+        }
+        D_801E28F8[i] = menu_animate(D_801E28F8[i], i);
+    }
+    for (i = 0; i < 3; i++) {
+        if (D_800AA2CC[i] != 0) {
+            if (D_800AA2CC[i] < 0) {
+                D_800AA2CC[i]++;
+            }
+            D_800AA2CC[i] = -D_800AA2CC[i];
+        }
+    }
+}
+
+#ifdef NON_MATCHING
+/* 80.38%: the loop's invariants differ: the original keeps %hi(D_800A9860) in fp and D_800A8F00 in s7, and
+ * steps a pointer at the record's unk_08 (s0 = D_800A8FD4 + 8); this C hoists D_800A8FD4 itself and reaches the
+ * records from it. */
+void menu_choose_monsters(s32 unused, s32 *timer) {
+    s32 i;
+    OverattrPlayer *rec;
+    s32 j;
+    s32 found;
+    s16 m;
+    s32 monster;
+    u32 pad;
+    GameObject *obj;
+
+    for (i = 0; i < 3; i++) {
+        rec = &D_800A8FD4[i];
+        monster = rec->unk_04;
+        pad = (u32) func_80099118() >> D_8007C144[i];
+        obj = *(D_801E28F4 + i + 13);
+        if (obj == NULL) {
+            continue;
+        }
+        if (rec->unk_08 != 0) {
+            rec->unk_08--;
+        } else if (rec->unk_06 != 0) {
+            if ((pad & 0x10) && D_800AA244[i] == 1) {
+                D_800A9860 = 0x708;
+                obj->unk_4D = 0;
+                obj->anim = D_800A8F00[rec->unk_04 + 0xE];
+                rec->unk_06 = 0;
+                D_800AA244[i] = 0;
+                D_801FA8A0[rec->unk_04] = 0;
+                *timer = 0xE10;
+            }
+        } else if ((pad & 0x110) && D_800AA244[i] == 0) {
+            found = 0;
+            D_800A9860 = 0x708;
+            for (j = 0; j < 3; j++) {
+                if (D_800A8FD4[j].unk_04 == rec->unk_04 && D_800A8FD4[j].unk_06 == 1 && j != i) {
+                    found = 1;
+                }
+            }
+            rec->unk_08 = 0xB;
+            if (found == 0) {
+                rec->unk_06 = 1;
+                D_801FA8A0[rec->unk_04] = i + 1;
+                func_8001F724(D_800A8FC4[rec->unk_04]);
+                obj->unk_4D = 0;
+                obj->anim = D_800A8F00[rec->unk_04 + 0x23];
+            }
+            *timer = 0xE10;
+        } else if ((pad & 0xA) && D_800AA244[i] == 0) {
+            D_800A9860 = 0x708;
+            do {
+                found = 0;
+                if (rec->unk_04 != 6) {
+                    m = rec->unk_04 + 1;
+                } else {
+                    m = 0;
+                }
+                rec->unk_04 = m;
+                if (D_801F9A44[m] != 0) {
+                    found = 1;
+                }
+                for (j = 0; j < 3; j++) {
+                    if (D_800A8FD4[j].unk_04 == m && D_800A8FD4[j].unk_06 == 1 && j != i) {
+                        found = 1;
+                        break;
+                    }
+                }
+            } while (found);
+            func_8001F724(0x2D);
+            rec->unk_08 = 0xB;
+            obj->unk_4D = 0;
+            obj->anim = D_800A8F00[monster + 0x15];
+            *timer = 0xE10;
+        } else if (((pad & 4) || (pad & 1)) && D_800AA244[i] == 0) {
+            D_800A9860 = 0x708;
+            do {
+                found = 0;
+                if (rec->unk_04 != 0) {
+                    m = rec->unk_04 - 1;
+                } else {
+                    m = 6;
+                }
+                rec->unk_04 = m;
+                if (D_801F9A44[m] != 0) {
+                    found = 1;
+                }
+                for (j = 0; j < 3; j++) {
+                    if (D_800A8FD4[j].unk_04 == m && D_800A8FD4[j].unk_06 == 1 && j != i) {
+                        found = 1;
+                        break;
+                    }
+                }
+            } while (found);
+            func_8001F724(0x2D);
+            rec->unk_08 = 0xB;
+            obj->unk_4D = 0;
+            obj->anim = D_800A8F00[monster + 0x15];
+            *timer = 0xE10;
+        } else if (pad & 0x40) {
+            func_8001F724(3);
+            *timer = 1;
+        }
+    }
+}
+#else
+INCLUDE_ASM("asm/overattr/nonmatchings/menu", menu_choose_monsters);
+#endif
+
+void menu_place_objects(OverattrPlacement *p, s32 n, s32 color) {
     s32 i;
     OverattrPlacement *q;
 
@@ -1132,7 +1609,7 @@ void func_8009FB78(void) {
     }
 }
 
-void func_8009FC74(void) {
+void menu_update_title(void) {
     s32 state;
 
     func_80019268();
@@ -1156,7 +1633,7 @@ void func_8009FC74(void) {
         func_8001AC18(0xA, 0x29);
         func_8001F760();
         D_801CA45C = 2;
-        func_8009F968(D_800A7384, 4, 0x808080);
+        menu_place_objects(D_800A7384, 4, 0x808080);
         D_801E29BC = 0x708;
         D_800A92C8 = 0x3C;
         D_801D3D7C = 0;
@@ -1191,7 +1668,7 @@ void func_8009FC74(void) {
     D_801E29BC--;
 }
 
-void func_8009FEE4(void) {
+void menu_free_objects(void) {
     GameObject *head;
     GameObject *obj;
     GameObject *next;
@@ -1211,25 +1688,116 @@ void func_8009FEE4(void) {
 
 INCLUDE_ASM("asm/overattr/nonmatchings/menu", func_8009FF38);
 
-INCLUDE_RODATA("asm/overattr/nonmatchings/menu", D_800980E8);
+void menu_update_load_screen(void) {
+    s32 status;
+    MenuRecord *menu = D_800A92C0;
 
-INCLUDE_RODATA("asm/overattr/nonmatchings/menu", D_80098100);
-
-INCLUDE_RODATA("asm/overattr/nonmatchings/menu", D_8009811C);
-
-INCLUDE_RODATA("asm/overattr/nonmatchings/menu", D_80098128);
-
-INCLUDE_ASM("asm/overattr/nonmatchings/menu", func_800A0CC0);
-
-INCLUDE_RODATA("asm/overattr/nonmatchings/menu", D_8009814C);
-
-INCLUDE_RODATA("asm/overattr/nonmatchings/menu", D_80098164);
-
-INCLUDE_RODATA("asm/overattr/nonmatchings/menu", jtbl_80098178);
+    switch (D_800A9878) {
+    case 0:
+        func_8001F61C("ACCESSING MEMORY CARD", 0xC8, 0x5A, 1, D_801F9AAC, D_8007ABCC, 0, 0x400);
+        D_801E29BC = 0xA;
+        D_800A9878 = 0xC;
+        break;
+    case 12:
+        if (D_801E29BC-- > 0) {
+            break;
+        }
+        status = card_get_status();
+        main_free_kind(0x400);
+        if (status == 2) {
+            D_801E29BC = 0x96;
+            D_800A9878 = 1;
+            func_8001F61C("THE MEMORY CARD IN MEMORY", 0xC8, 0x5A, 1, D_801F9AAC, D_8007ABCC, 0, 0x400);
+            if (D_801E28B8 == 0) {
+                func_8001F61C("CARD SLOT 1", 0xC8, 0x78, 1, D_801F9AAC, D_8007ABCC, 0, 0x400);
+            } else {
+                func_8001F61C("CARD SLOT 1A", 0xC8, 0x78, 1, D_801F9AAC, D_8007ABCC, 0, 0x400);
+            }
+            func_8001F61C("IS NOT FORMATTED", 0xC8, 0x96, 1, D_801F9AAC, D_8007ABCC, 0, 0x400);
+        }
+        if (status == 1) {
+            D_801E29BC = 0x96;
+            D_800A9878 = status;
+            func_8001F61C("THERE IS NO MEMORY CARD", 0xC8, 0x5A, 0, D_801F9AAC, D_8007ABCC, 0, 0x400);
+            func_8001F61C("INSERTED IN MEMORY", 0xC8, 0x78, 0, D_801F9AAC, D_8007ABCC, 0, 0x400);
+            if (D_801E28B8 == 0) {
+                func_8001F61C("CARD SLOT 1", 0xC8, 0x96, 0, D_801F9AAC, D_8007ABCC, 0, 0x400);
+            } else {
+                func_8001F61C("CARD SLOT 1A", 0xC8, 0x96, 0, D_801F9AAC, D_8007ABCC, 0, 0x400);
+            }
+        }
+        if (status == 0) {
+            D_801E29BC = 3;
+            D_800A9878 = 2;
+            func_800A32CC();
+        }
+        break;
+    case 1:
+        if (D_801E29BC > 0) {
+            D_801E29BC--;
+        } else {
+            menu_back();
+        }
+        break;
+    case 2:
+        if (D_801E29BC-- > 0) {
+            break;
+        }
+        D_801E29BC = 0x5DC;
+        status = card_read_save(&D_800A9300);
+        D_800A9878 = 3;
+        D_801D3780 = 0xA;
+        main_free_kind(0x400);
+        if (status != 0) {
+            card_init_save(&D_800A9300);
+            D_800A9840 = 0;
+        } else {
+            D_800A9840 = menu_list_saves();
+        }
+        break;
+    case 3:
+        if ((D_800A9220 & 0x100401) && D_801F9944 == 0) {
+            if (--D_800A92D0 < 0) {
+                D_800A92D0 = D_800A9840;
+            }
+            D_801F9944 = 0xB;
+            D_801D872C /= 2;
+            func_8001F724(0x1E);
+        } else if ((D_800A9220 & 0x200802) && D_801F9944 == 0) {
+            if (++D_800A92D0 > D_800A9840) {
+                D_800A92D0 = 0;
+            }
+            D_801F9944 = 0xB;
+            D_801D872C /= 2;
+            func_8001F724(0x1E);
+        } else if ((D_800A9220 & 0x01004010) && D_801F9944 == 0) {
+            if (D_800A92D0 == D_800A9840) {
+                menu_back();
+                break;
+            }
+            D_801D3778 = 0x1E;
+            D_801E0D64 = 1;
+            menu_load_slot(D_800A9830[D_800A92D0]);
+            D_801F9944 = 0xB;
+            D_801D872C /= 2;
+        } else if ((D_800A9220 & 0x04010040) && D_801F9944 == 0 && menu[0].sub != NULL) {
+            D_800A92D8 = menu[0].sub;
+            D_800A9800 = 1;
+            D_800A9870 = menu[0].kind;
+            func_8001F724(3);
+            menu_fade_out();
+            D_801F9944 = 0xB;
+            D_801D872C /= 2;
+        }
+        func_8009E310((s16) D_801E2A44, D_801F9AAC);
+        func_80018C14();
+        break;
+    }
+}
 
 #ifdef NON_MATCHING
 /* 81.7 %: the city names' address is hoisted into s7 (a frame 8 bytes larger); the original reloads it. */
-s32 func_800A1258(void) {
+s32 menu_list_saves(void) {
     char buf[0x18];
     s32 limit;
     s32 n;
@@ -1271,12 +1839,61 @@ s32 func_800A1258(void) {
     }
 }
 #else
-INCLUDE_ASM("asm/overattr/nonmatchings/menu", func_800A1258);
+INCLUDE_ASM("asm/overattr/nonmatchings/menu", menu_list_saves);
 #endif
 
-INCLUDE_ASM("asm/overattr/nonmatchings/menu", func_800A1434);
+void menu_load_slot(s32 slot) {
+    s32 i;
+    Monster *m;
 
-void func_800A1720(void) {
+    D_801FA958 = D_800A9300.slots[slot].unk_00;
+    D_801FA960 = D_800A9300.slots[slot].city;
+    D_801D883C = D_800A9300.slots[slot].unk_04;
+    D_801FA964 = D_800A9300.slots[slot].unk_06;
+    D_801D8728 = D_800A9300.slots[slot].unk_08;
+    D_801E1CA8 = D_800A9300.slots[slot].unk_0A;
+    D_801D36FC = D_800A9300.slots[slot].mode;
+    D_801E289C = D_800A9300.slots[slot].unk_66;
+    D_801FA984[0] = D_800A9300.slots[slot].unk_50[0];
+    D_801FA984[1] = D_800A9300.slots[slot].unk_50[1];
+    D_801FA984[2] = D_800A9300.slots[slot].unk_50[2];
+    D_801FA984[3] = D_800A9300.slots[slot].unk_50[3];
+    for (i = 0; i < 7; i++) {
+        m = &D_801E0B78[i + 1];
+        m->action = 0;
+        m->unk_01C = 0;
+        m->unk_1CC = 0;
+        m->id = 0;
+        m->unk_058 = 0;
+        D_801F9A44[i] = D_800A9300.slots[slot].unk_58[i];
+        D_801FA8A0[i] = D_800A9300.slots[slot].unk_49[i];
+    }
+    for (i = 0; i < 3; i++) {
+        m = &D_801E0B78[func_80025DF8(i + 1)];
+        m->id = D_800A9300.slots[slot].monster[i];
+        m->unk_004 = D_800A9300.slots[slot].unk_12[i];
+        m->unk_002 = D_800A9300.slots[slot].unk_12[i];
+        m->health.w = D_800A9300.slots[slot].health[i];
+        m->meter.w = D_800A9300.slots[slot].meter[i];
+        m->unk_038 = D_800A9300.slots[slot].unk_30[i];
+        D_801D8800[i] = D_800A9300.slots[slot].unk_46[i];
+    }
+    D_801E1CB4 = D_800A9300.slots[slot].unk_42;
+    D_8007A7D4 &= ~1;
+    D_8007A694 = D_800A9300.slots[slot].unk_3E;
+    D_801E2150 = D_800A9300.slots[slot].unk_40;
+    D_8007A68A = D_800A9300.slots[slot].unk_44;
+    D_8007A68C = D_800A9300.slots[slot].unk_68;
+    D_801F9ABC = D_800A9300.slots[slot].unk_6A;
+    D_8007A686 = D_800A9300.slots[slot].unk_6C;
+    D_8007A688 = D_800A9300.slots[slot].unk_6E;
+    D_8007A68E = D_800A9300.slots[slot].unk_70;
+    D_8007C974 = D_800A9300.slots[slot].unk_72;
+    func_80062DA8((u8) D_801E1CB4);
+    func_80062D88((u8) D_801E2150);
+}
+
+void menu_update_save_screen(void) {
     D_801D885C = 0x44;
     if (D_800A9898 == 1) {
         D_800A9898 = 0;
@@ -1284,16 +1901,16 @@ void func_800A1720(void) {
     }
     switch (D_800A98B8) {
     case 0:
-        func_800A1804();
+        menu_check_card();
         break;
     case 6:
-        func_800A1B9C();
+        menu_ask_format();
         break;
     case 1:
-        func_800A2138();
+        menu_delete_save();
         break;
     case 2:
-        func_800A28DC();
+        menu_write_save();
         break;
     case 5:
         D_801D3780++;
@@ -1305,9 +1922,100 @@ void func_800A1720(void) {
     }
 }
 
-INCLUDE_ASM("asm/overattr/nonmatchings/menu", func_800A1804);
+void menu_check_card(void) {
+    s32 status;
 
-s32 func_800A1B60(void) {
+    switch (D_800A92A0) {
+    case 0:
+        if (D_801E29BC == 5) {
+            func_8001F61C("ACCESSING MEMORY CARD", 0xC8, 0x5A, 1, D_801F9AAC, D_8007ABCC, 0, 0x400);
+        }
+        if (D_801E29BC-- > 0) {
+            break;
+        }
+        status = card_get_status();
+        main_free_kind_masked(0x400, -0x100);
+        if (status == 2) {
+            D_800A9898 = 1;
+            D_800A92A0 = 0;
+            D_800A98B8 = 6;
+            break;
+        }
+        if (status == 1) {
+            D_801E29BC = 0x96;
+            D_800A92A0 = status;
+            func_8001F61C("THERE IS NO MEMORY CARD", 0xC8, 0x5A, 0, D_801F9AAC, D_8007ABCC, 0, 0x400);
+            func_8001F61C("INSERTED IN MEMORY", 0xC8, 0x78, 0, D_801F9AAC, D_8007ABCC, 0, 0x400);
+            if (D_801E28B8 == 0) {
+                func_8001F61C("CARD SLOT 1", 0xC8, 0x96, 0, D_801F9AAC, D_8007ABCC, 0, 0x400);
+            } else {
+                func_8001F61C("CARD SLOT 1A", 0xC8, 0x96, 0, D_801F9AAC, D_8007ABCC, 0, 0x400);
+            }
+            break;
+        }
+        if (status == 0) {
+            D_801E29BC = 0x1E;
+            D_800A92A0 = 2;
+            func_800A32CC();
+            break;
+        }
+        /* fallthrough: an unexpected status gives up as case 1 does */
+    case 1:
+        if (D_801E29BC > 0) {
+            D_801E29BC--;
+        } else {
+            main_free_kind_masked(0x400, -0x100);
+            D_801D3780 -= 2;
+        }
+        break;
+    case 2:
+        if (D_801E29BC == 30) {
+            D_801E29BC--;
+        } else if (D_801E29BC == 29) {
+            D_801E29BC--;
+            if (card_read_save(&D_800A9300) == 0) {
+                if (D_801FA958 != -1 || menu_find_used_slot() >= 0) {
+                    D_800A9858 = 0;
+                    D_800A9898 = 1;
+                    D_800A92A0 = 5;
+                } else {
+                    D_800A9898 = 1;
+                    D_800A92A0 = 0xA;
+                }
+            } else {
+                card_init_save(&D_800A9300);
+                if (menu_find_used_slot() >= 0) {
+                    D_800A9858 = 0;
+                    D_800A9898 = 1;
+                    D_800A92A0 = 5;
+                } else {
+                    D_800A9898 = 1;
+                    D_800A92A0 = 0xA;
+                }
+            }
+        }
+        break;
+    case 5:
+        if (D_801E29BC > 0) {
+            D_801E29BC--;
+        } else {
+            D_800A9858 = 0;
+            D_800A9898 = 1;
+            D_800A98B8 = 2;
+        }
+        break;
+    case 10:
+        if (D_801E29BC > 0) {
+            D_801E29BC--;
+        } else {
+            D_800A98B8 = 1;
+            D_800A9880 = 0;
+        }
+        break;
+    }
+}
+
+s32 menu_find_used_slot(void) {
     s32 i;
 
     for (i = 0; i < 6; i++) {
@@ -1318,13 +2026,72 @@ s32 func_800A1B60(void) {
     return -1;
 }
 
-INCLUDE_ASM("asm/overattr/nonmatchings/menu", func_800A1B9C);
+void menu_ask_format(void) {
+    switch (D_800A92A0) {
+    case 0:
+        func_8001F61C("THE MEMORY CARD IN MEMORY", 0xC8, 0x2D, 1, D_801F9AAC, D_8007AD4C, 0, 0x400);
+        if (D_801E28B8 == 0) {
+            func_8001F61C("CARD SLOT 1 IS", 0xC8, 0x41, 1, D_801F9AAC, D_8007AD4C, 0, 0x400);
+        } else {
+            func_8001F61C("CARD SLOT 1A IS", 0xC8, 0x41, 1, D_801F9AAC, D_8007AD4C, 0, 0x400);
+        }
+        func_8001F61C("NOT FORMATTED", 0xC8, 0x55, 1, D_801F9AAC, D_8007AD4C, 0, 0x400);
+        func_8001F61C("DO YOU WANT TO FORMAT", 0xC8, 0x6E, 1, D_801F9AAC, D_8007ABCC, 0, 0x400);
+        func_8001F61C("THE MEMORY CARD ?", 0xC8, 0x8C, 1, D_801F9AAC, D_8007ABCC, 0, 0x400);
+        func_8001F61C(D_80098260, 0xC8, 0xAA, 1, D_801F9AAC, D_8007AD4C, 0, 0x405);
+        func_8001F61C(D_80098264, 0xC8, 0xBE, 1, D_801F9AAC, D_8007AD4C, 0, 0x406);
+        D_800A92A0 = 3;
+        D_800A92D0 = 1;
+        break;
+    case 3:
+        if (D_801F9944 != 0) {
+            D_801F9944--;
+        }
+        func_80019268();
+        D_800A9250 = D_800A9220;
+        D_800A9220 = D_801E0D7C & 0x3FFFFFFF;
+        if ((D_800A9220 & 0x100401) && D_801F9944 == 0) {
+            D_801F9944 = 0xB;
+            D_800A92D0 ^= 1;
+            D_801D872C /= 2;
+            func_8001F724(0x1E);
+        } else if ((D_800A9220 & 0x200802) && D_801F9944 == 0) {
+            D_801F9944 = 0xB;
+            D_800A92D0 ^= 1;
+            D_801D872C /= 2;
+            func_8001F724(0x1E);
+        } else if ((D_800A9220 & 0x01004010) && D_801F9944 == 0) {
+            D_801F9944 = 0x15;
+            if (D_800A92D0 == 1) {
+                main_free_kind_masked(0x400, -0x100);
+                D_801D3780 -= 2;
+                return;
+            }
+            card_init_save(&D_800A9300);
+            D_800A92A0 = 4;
+            D_800A9868 = 0;
+            D_800A9898 = 1;
+        }
+        if (D_800A92D0 == 0) {
+            func_8001EC74(0x405, (s16) D_801E2A44);
+            func_8001EC74(0x406, D_801F9AAC);
+        } else {
+            func_8001EC74(0x405, D_801F9AAC);
+            func_8001EC74(0x406, (s16) D_801E2A44);
+        }
+        break;
+    case 4:
+        menu_format_card();
+        break;
+    }
+    func_80018C14();
+}
 
 INCLUDE_RODATA("asm/overattr/nonmatchings/menu", D_80098260);
 
 INCLUDE_RODATA("asm/overattr/nonmatchings/menu", D_80098264);
 
-void func_800A1F8C(void) {
+void menu_format_card(void) {
     s32 state;
     s32 status;
 
@@ -1342,9 +2109,9 @@ void func_800A1F8C(void) {
         func_8001F61C("FORMATTING THE MEMORY", 0xC8, 0x5A, 1, D_801F9AAC, D_8007ABCC, 0, 0x400);
         func_8001F61C("CARD IN MEMORY", 0xC8, 0x78, 1, D_801F9AAC, D_8007ABCC, 0, 0x400);
         if (D_801E28B8 == 0) {
-            func_8001F61C(D_8009811C, 0xC8, 0x96, 1, D_801F9AAC, D_8007ABCC, 0, 0x400);
+            func_8001F61C("CARD SLOT 1", 0xC8, 0x96, 1, D_801F9AAC, D_8007ABCC, 0, 0x400);
         } else {
-            func_8001F61C(D_80098128, 0xC8, 0x96, 1, D_801F9AAC, D_8007ABCC, 0, 0x400);
+            func_8001F61C("CARD SLOT 1A", 0xC8, 0x96, 1, D_801F9AAC, D_8007ABCC, 0, 0x400);
         }
         break;
     case 2:
@@ -1362,9 +2129,123 @@ void func_800A1F8C(void) {
     }
 }
 
-INCLUDE_ASM("asm/overattr/nonmatchings/menu", func_800A2138);
+void menu_delete_save(void) {
+    switch (D_800A9880) {
+    case 0:
+        D_801F9AAC = 0x47;
+        D_801E2A44 = 0x45;
+        D_801D885C = 0x44;
+        D_801F9AB8 = 0;
+        func_8001F61C("THERE IS NO FREE SAVE", 0xC8, 0x3C, 0, D_801F9AAC, D_8007ABCC, 0, 0x400);
+        func_8001F61C("GAME SLOT.", 0xC8, 0x5A, 0, D_801F9AAC, D_8007ABCC, 0, 0x400);
+        func_8001F61C("DELETE A SLOT TO SAVE", 0xC8, 0x78, 0, D_801F9AAC, D_8007ABCC, 0, 0x400);
+        func_8001F61C("THIS NEW GAME.", 0xC8, 0x96, 0, D_801F9AAC, D_8007ABCC, 0, 0x400);
+        D_801E29BC = 0x96;
+        D_800A9880 = 0xB;
+        break;
+    case 11:
+        if (D_801E29BC-- < 0) {
+            main_free_kind(0x400);
+            D_800A9880 = 3;
+            D_800A9840 = menu_list_saves();
+            D_800AA2EC = (s16) D_801E2A44;
+            func_8001F61C("DELETE GAMES", 0xC8, 0x20, 0, D_801D885C, D_8007ABCC, 0, 0x400);
+            func_8001ED54(&D_800A6400);
+            func_8009FB78();
+        }
+        break;
+    case 3:
+        if (D_801F9944 != 0) {
+            D_801F9944--;
+        }
+        func_80019268();
+        D_800A9250 = D_800A9220;
+        D_800A9220 = D_801E0D7C & 0x3FFFFFFF;
+        if ((D_800A9220 & 0x100401) && D_801F9944 == 0) {
+            if (--D_800A92D0 < 0) {
+                D_800A92D0 = D_800A9840;
+            }
+            D_801F9944 = 0xB;
+            D_801D872C /= 2;
+            func_8001F724(0x1E);
+        } else if ((D_800A9220 & 0x200802) && D_801F9944 == 0) {
+            if (++D_800A92D0 > D_800A9840) {
+                D_800A92D0 = 0;
+            }
+            D_801F9944 = 0xB;
+            D_801D872C /= 2;
+            func_8001F724(0x1E);
+        } else if ((D_800A9220 & 0x01004010) && D_801F9944 == 0) {
+            if (D_800A92D0 == D_800A9840) {
+                main_free_kind_masked(0x400, -0x100);
+                D_801F9944 = 0xB;
+                D_801D3780 -= 2;
+                D_801D872C /= 2;
+                return;
+            }
+            D_800A9848 = 1;
+            D_800A9880 = 0xD;
+            main_free_kind_masked(0x400, -0x100);
+            D_801F9944 = 0xB;
+            D_801D872C /= 2;
+        } else if ((D_800A9220 & 0x04010040) && D_801F9944 == 0) {
+            func_8001F724(3);
+            menu_back();
+            D_801F9944 = 0xB;
+            D_801D872C /= 2;
+        }
+        func_8009E310((s16) D_801E2A44, D_801F9AAC);
+        break;
+    case 13:
+        func_8001F61C("ARE YOU SURE?", 0xC8, 0x50, 1, D_801D885C, D_8007ABCC, 0, 0x400);
+        func_8001F61C(D_80098260, 0xC8, 0x6E, 1, D_801F9AAC, D_8007AD4C, 0, 0x405);
+        func_8001F61C(D_80098264, 0xC8, 0x82, 1, (s16) D_801E2A44, D_8007AD4C, 0, 0x406);
+        D_800A9880 = 0xE;
+        break;
+    case 14:
+        if (D_801F9944 != 0) {
+            D_801F9944--;
+        }
+        func_80019268();
+        D_800A9250 = D_800A9220;
+        D_800A9220 = D_801E0D7C & 0x3FFFFFFF;
+        if ((D_800A9220 & 0x100401) && D_801F9944 == 0) {
+            D_801F9944 = 0xB;
+            D_800A9848 ^= 1;
+            D_801D872C /= 2;
+            func_8001F724(0x1E);
+        } else if ((D_800A9220 & 0x200802) && D_801F9944 == 0) {
+            D_801F9944 = 0xB;
+            D_800A9848 ^= 1;
+            D_801D872C /= 2;
+            func_8001F724(0x1E);
+        } else if ((D_800A9220 & 0x01004010) && D_801F9944 == 0) {
+            if (D_800A9848 == 0) {
+                D_800A9858 = 0;
+                D_800A9898 = 1;
+                D_800A98B8 = 2;
+                D_800A9300.unk_204[D_800A9830[D_800A92D0]] = 1;
+            } else {
+                main_free_kind_masked(0x550, -0x100);
+                main_free_kind_masked(0x400, -0x100);
+                D_801D3780 -= 2;
+            }
+            D_801F9944 = 0xB;
+            D_801D872C /= 2;
+        }
+        if (D_800A9848 == 0) {
+            func_8001EC74(0x405, (s16) D_801E2A44);
+            func_8001EC74(0x406, D_801F9AAC);
+        } else {
+            func_8001EC74(0x405, D_801F9AAC);
+            func_8001EC74(0x406, (s16) D_801E2A44);
+        }
+        break;
+    }
+    func_80018C14();
+}
 
-s32 func_800A28A0(s32 id) {
+s32 menu_find_save(s32 id) {
     s32 i;
 
     for (i = 0; i < 6; i++) {
@@ -1375,15 +2256,152 @@ s32 func_800A28A0(s32 id) {
     return -1;
 }
 
-INCLUDE_RODATA("asm/overattr/nonmatchings/menu", D_8009833C);
+void menu_write_save(void) {
+    s32 slot;
+    s32 i;
+    s32 status;
+    Monster *m;
+    u8 buf[24];
 
-INCLUDE_ASM("asm/overattr/nonmatchings/menu", func_800A28DC);
+    switch (D_800A9858) {
+    case 0:
+        if (D_801FA958 != -1) {
+            slot = menu_find_save(D_801FA958);
+            if (slot == -1) {
+                D_801E29BC = 0x78;
+                D_800A9858 = 0xF;
+                break;
+            }
+        } else {
+            slot = menu_find_used_slot();
+        }
+        D_800A9300.unk_204[slot] = 0;
+        D_800A9300.slots[slot].unk_00 = D_800A9300.unk_200++;
+        sprintf(buf, "%s", D_8007C704[D_801FA960]);
+        D_800A9300.slots[slot].unk_04 = D_801D883C;
+        D_800A9300.slots[slot].city = D_801FA960;
+        D_800A9300.slots[slot].unk_06 = D_801FA964;
+        D_800A9300.slots[slot].unk_08 = D_801D8728;
+        D_800A9300.slots[slot].unk_0A = D_801E1CA8;
+        D_800A9300.slots[slot].mode = D_801D36FC;
+        D_800A9300.slots[slot].unk_66 = D_801E289C;
+        D_800A9300.slots[slot].unk_50[0] = D_801FA984[0];
+        D_800A9300.slots[slot].unk_50[1] = D_801FA984[1];
+        D_800A9300.slots[slot].unk_50[2] = D_801FA984[2];
+        D_800A9300.slots[slot].unk_50[3] = D_801FA984[3];
+        for (i = 0; i < 3; i++) {
+            m = &D_801E0B78[func_80025DF8(i + 1)];
+            D_800A9300.slots[slot].monster[i] = m->id;
+            D_800A9300.slots[slot].unk_12[i] = m->unk_004;
+            D_800A9300.slots[slot].health[i] = m->health.w;
+            D_800A9300.slots[slot].meter[i] = m->meter.w;
+            D_800A9300.slots[slot].unk_30[i] = m->unk_038;
+            D_800A9300.slots[slot].unk_46[i] = D_801D8800[i];
+        }
+        for (i = 0; i < 7; i++) {
+            D_800A9300.slots[slot].unk_58[i] = D_801F9A44[i];
+            D_800A9300.slots[slot].unk_49[i] = D_801FA8A0[i];
+        }
+        D_800A9300.slots[slot].unk_3E = D_8007A694;
+        D_800A9300.slots[slot].unk_40 = D_801E2150;
+        D_800A9300.slots[slot].unk_42 = D_801E1CB4;
+        D_800A9300.slots[slot].unk_44 = D_8007A68A;
+        D_800A9300.slots[slot].unk_68 = D_8007A68C;
+        D_800A9300.slots[slot].unk_6A = D_801F9ABC;
+        D_800A9300.slots[slot].unk_6C = D_8007A686;
+        D_800A9300.slots[slot].unk_6E = D_8007A688;
+        D_800A9300.slots[slot].unk_70 = D_8007A68E;
+        D_800A9300.slots[slot].unk_72 = D_8007C974;
+        D_800A9300.checksum = card_calc_checksum(&D_800A9300);
+        func_8001F61C("SAVING GAME", 0xC8, 0x5A, 1, D_801F9AAC, D_8007ABCC, 0, 0x400);
+        D_800A9858 = 0xB;
+        D_801E29BC = 0x1E;
+        break;
+    case 11:
+        if (D_801E29BC-- < 0) {
+            D_800A9858 = 5;
+            D_801E29BC = 0xB4;
+        }
+        break;
+    case 5:
+        status = card_write_save(&D_800A9300);
+        if (status == 0) {
+            D_800A9898 = 1;
+            D_800A9858 = 6;
+        }
+        if (status == 2) {
+            D_800A9898 = 1;
+            D_800A98B8 = 6;
+        }
+        if (status == 1) {
+            D_800A9898 = 1;
+            D_800A9858 = 8;
+        }
+        if (status == 3) {
+            D_800A9898 = 1;
+            D_800A9858 = 9;
+        }
+        break;
+    case 6:
+        if (D_801E29BC == 0xB4) {
+            D_801FA958 = D_800A9300.unk_200 - 1;
+            func_8001F61C("GAME SAVED", 0xC8, 0x5A, 1, D_801F9AAC, D_8007ABCC, 0, 0x400);
+            sprintf(buf, "%s", D_8007C704[D_801FA960]);
+            func_8001F61C(buf, 0xC8, 0x78, 1, D_801F9AAC, D_8007AD4C, 0, 0x400);
+        }
+        if (D_801E29BC-- < 0) {
+            D_800A9898 = 1;
+            D_800A98B8 = 5;
+        }
+        break;
+    case 8:
+        if (D_801E29BC == 0xB4) {
+            func_8001F61C("THERE IS NO MEMORY CARD", 0xC8, 0x5A, 1, D_801F9AAC, D_8007ABCC, 0, 0x400);
+            func_8001F61C("INSERTED IN MEMORY", 0xC8, 0x78, 1, D_801F9AAC, D_8007ABCC, 0, 0x400);
+            if (D_801E28B8 == 0) {
+                func_8001F61C("CARD SLOT 1", 0xC8, 0x96, 1, D_801F9AAC, D_8007ABCC, 0, 0x400);
+            } else {
+                func_8001F61C("CARD SLOT 1A", 0xC8, 0x96, 1, D_801F9AAC, D_8007ABCC, 0, 0x400);
+            }
+        }
+        if (D_801E29BC-- < 0) {
+            main_free_kind_masked(0x400, -0x100);
+            D_801D3780 -= 2;
+        }
+        break;
+    case 9:
+        if (D_801E29BC == 0xB4) {
+            func_8001F61C("THE MEMORY CARD IN MEMORY", 0xC8, 0x5A, 1, D_801F9AAC, D_8007ABCC, 0, 0x400);
+            if (D_801E28B8 == 0) {
+                func_8001F61C("CARD SLOT 1 IS FULL", 0xC8, 0x78, 1, D_801F9AAC, D_8007ABCC, 0, 0x400);
+            } else {
+                func_8001F61C("CARD SLOT 1A IS FULL", 0xC8, 0x78, 1, D_801F9AAC, D_8007ABCC, 0, 0x400);
+            }
+        }
+        if (D_801E29BC-- < 0) {
+            main_free_kind_masked(0x400, -0x100);
+            D_801D3780 -= 2;
+        }
+        break;
+    case 15:
+        if (D_801E29BC == 0xB4) {
+            func_8001F61C("A NEW MEMORY CARD", 0xC8, 0x5A, 1, D_801F9AAC, D_8007ABCC, 0, 0x400);
+            func_8001F61C("HAS BEEN DETECTED", 0xC8, 0x78, 1, D_801F9AAC, D_8007ABCC, 0, 0x400);
+        }
+        if (D_801E29BC-- < 0) {
+            D_801FA958 = -1;
+            main_free_kind_masked(0x400, -0x100);
+            D_801D3780 -= 2;
+        }
+        break;
+    }
+}
 
 void func_800A309C(void) {
     D_801D3780 += 1;
 }
 
-void func_800A30B4(void) {
+void menu_load_newest_save(void) {
     s32 limit;
     s32 slot;
     s32 best;

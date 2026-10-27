@@ -157,7 +157,7 @@ void func_800996CC(void) {
     func_8001AC18(0xA, 0x17);
     func_8001F7F8(0x8001);
     D_800A9230 = 1;
-    func_8009F968(D_800A73C4, 4, 0x606060);
+    menu_place_objects(D_800A73C4, 4, 0x606060);
     best = 0;
     b = 1;
     c = 1;
@@ -319,7 +319,7 @@ s32 func_8009AE40(s32 *step) {
         obj = D_801E28F4[0];
         for (i = 0, p = D_801E2904; i < 3; i++, p++) {
             if (*p != NULL) {
-                func_8009EE5C(*p, 0xFF);
+                menu_animate(*p, 0xFF);
             }
         }
         x1 = D_801E28F8[1]->pos_x.s.hi;
