@@ -710,7 +710,7 @@ extern s16 D_801F9944;
 extern s16 D_801F9ADC;
 extern s16 D_801FA964;
 extern u16 D_801FA968;
-extern s16 D_801FA984[4];                /* per player: playing (the save copies a fourth word, func_800A28DC) */
+extern s16 D_801FA984[4];                /* per player: playing (the save copies a fourth word, menu_write_save) */
 extern u8 D_800937E8[];
 extern u8 D_800938AC[];
 extern u8 D_80095678[];

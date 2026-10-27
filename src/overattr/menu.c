@@ -3,7 +3,7 @@
 #include "overattr.h"
 #include "psyq/libc2.h"
 
-void func_8009B478(void) {
+void menu_update_fade(void) {
     GameObject *head;
     GameObject *obj;
 
@@ -257,7 +257,7 @@ void func_8009BF94(u8 *dst, s32 index) {
 
 #ifdef NON_MATCHING
 /* 99.3 %: the movie line's text address is in s3, the original's s1 (s1/s2 hold the colour's and the cursor's %hi). */
-void func_8009BFE8(void) {
+void menu_draw_cheats(void) {
     func_8009BF40(D_800A631E, D_801FA960);
     func_8001ECB4(D_800A6359, D_8007A684, 0);
     func_8001ECB4(D_800A6380, D_8007A686, 0);
@@ -295,14 +295,14 @@ void func_8009BFE8(void) {
     func_8001ED54(&D_800A63A8);
 }
 #else
-INCLUDE_ASM("asm/overattr/nonmatchings/menu", func_8009BFE8);
+INCLUDE_ASM("asm/overattr/nonmatchings/menu", menu_draw_cheats);
 #endif
 
 void func_8009C1AC(void) {
-    func_800A0CC0();
+    menu_update_load_screen();
 }
 
-void func_8009C1CC(void) {
+void menu_update_name_entry(void) {
     MenuRecord *menu = D_800A92C0;
     s32 i;
 
@@ -311,7 +311,7 @@ void func_8009C1CC(void) {
         if (--D_800A92D0 < 0) {
             D_800A92D0 = D_800A9840 - 1;
         }
-        func_8009E190(menu, D_800A92D0, (s16) D_801E2A44, D_801F9AAC);
+        menu_light_items(menu, D_800A92D0, (s16) D_801E2A44, D_801F9AAC);
         D_801F9944 = 0xB;
         D_801D872C /= 2;
         func_8001F724(0x1E);
@@ -320,7 +320,7 @@ void func_8009C1CC(void) {
         if (++D_800A92D0 >= D_800A9840) {
             D_800A92D0 = 0;
         }
-        func_8009E190(D_800A92C0, D_800A92D0, (s16) D_801E2A44, D_801F9AAC);
+        menu_light_items(D_800A92C0, D_800A92D0, (s16) D_801E2A44, D_801F9AAC);
         D_801F9944 = 0xB;
         D_801D872C /= 2;
         func_8001F724(0x1E);
@@ -339,7 +339,7 @@ void func_8009C1CC(void) {
             D_800A9800 = 1;
             D_800A9870 = menu->kind;
             func_8001F724(3);
-            func_8009E4D4();
+            menu_fade_out();
             D_801F9944 = 0xB;
             D_801D872C /= 2;
             return;
@@ -350,7 +350,7 @@ void func_8009C1CC(void) {
         func_8001E450(i + 0x421);
         func_8001ED54((TextMessage *) D_800A92C0[i + 2].unk_00);
     }
-    func_8009E190(D_800A92C0, D_800A92D0, (s16) D_801E2A44, D_801F9AAC);
+    menu_light_items(D_800A92C0, D_800A92D0, (s16) D_801E2A44, D_801F9AAC);
     for (i = 0; i < 7; i++) {
         if (strcmp(D_800A9890, D_8007A69C[i]) == 0) {
             D_800A6F5C[i]();
@@ -359,7 +359,7 @@ void func_8009C1CC(void) {
             D_800A9800 = 1;
             D_800A9870 = menu->kind;
             func_8001F724(3);
-            func_8009E4D4();
+            menu_fade_out();
         }
     }
     func_80018C14();
@@ -367,7 +367,7 @@ void func_8009C1CC(void) {
 
 INCLUDE_RODATA("asm/overattr/nonmatchings/menu", D_80097F58);
 
-void func_8009C5A4(void) {
+void menu_edit_name(void) {
 
     if ((D_800A9220 & 0x100401) && D_801F9944 == 0) {
         D_800A9860 = 0x708;
@@ -437,7 +437,7 @@ void func_8009C810(void) {
     D_801F9ABC = 4;
 }
 
-s32 func_8009C828(void) {
+s32 menu_update_credits(void) {
     GameObject *obj;
     GameObject *next;
     GameObject *head;
@@ -453,7 +453,7 @@ s32 func_8009C828(void) {
         D_801D3D7C = 0;
         SetDispMask(1);
         func_8001F7F8(0xA);
-        func_8009F968(D_800A40FC, 4, 0x606060);
+        menu_place_objects(D_800A40FC, 4, 0x606060);
     }
     if (D_800A90F4[D_800A92B8] == -1) {
         if (D_800A9298 == 0) {
@@ -491,7 +491,7 @@ s32 func_8009C828(void) {
 #ifdef NON_MATCHING
 /* 81.21%: the shape is the original's (size 0x2A4, original 0x2C8); the loops' registers differ: the original
  * spills i, &D_800A6FBC[i] and i * 2, and steps the picture table's index as (k - 4) * 4. */
-void func_8009CA68(void) {
+void menu_draw_controls(void) {
     u16 *cfg[3];
     s32 i;
     s32 k;
@@ -553,7 +553,7 @@ void func_8009CA68(void) {
     }
 }
 #else
-INCLUDE_ASM("asm/overattr/nonmatchings/menu", func_8009CA68);
+INCLUDE_ASM("asm/overattr/nonmatchings/menu", menu_draw_controls);
 #endif
 
 void func_8009CD30(void) {
@@ -589,7 +589,7 @@ void func_8009CE5C(void) {
     }
 }
 
-void func_8009CEC8(void) {
+void menu_draw_options(void) {
     func_8001E450(0x442);
     func_8001E450(0x443);
     func_8001E450(0x402);
@@ -661,7 +661,7 @@ void func_8009D140(void) {
         D_801D3780 = 5;
         func_8001EC74(D_800A92C0[D_800A92D0 + 2].kind, D_801D885C);
         func_8001F724(3);
-        func_8009E40C(D_800A92C0, D_800A92D0);
+        menu_fade_others(D_800A92C0, D_800A92D0);
         D_800A9878 = 0;
     }
 }
@@ -672,7 +672,7 @@ void func_8009D20C(void) {
         D_801D3780 = 5;
         func_8001EC74(D_800A92C0[D_800A92D0 + 2].kind, D_801D885C);
         func_8001F724(3);
-        func_8009E40C(D_800A92C0, D_800A92D0);
+        menu_fade_others(D_800A92C0, D_800A92D0);
         D_801FA984[0] = 0;
         D_801FA984[1] = 0;
         D_801FA984[2] = 0;
@@ -690,7 +690,7 @@ void func_8009D31C(void) {
         D_801D3780 = 5;
         func_8001EC74(D_800A92C0[D_800A92D0 + 2].kind, D_801D885C);
         func_8001F724(3);
-        func_8009E40C(D_800A92C0, D_800A92D0);
+        menu_fade_others(D_800A92C0, D_800A92D0);
         D_801FA984[0] = 0;
         D_801FA984[1] = 0;
         D_801FA984[2] = 0;
@@ -708,7 +708,7 @@ void func_8009D42C(void) {
         D_801D3780 = 5;
         func_8001EC74(D_800A92C0[D_800A92D0 + 2].kind, D_801D885C);
         func_8001F724(3);
-        func_8009E40C(D_800A92C0, D_800A92D0);
+        menu_fade_others(D_800A92C0, D_800A92D0);
         D_801FA984[0] = 0;
         D_801FA984[1] = 0;
         D_801FA984[2] = 0;
@@ -730,7 +730,7 @@ void func_8009D504(void) {
         D_801D3780 = 5;
         func_8001EC74(D_800A92C0[D_800A92D0 + 2].kind, D_801D885C);
         func_8001F724(3);
-        func_8009E40C(D_800A92C0, D_800A92D0);
+        menu_fade_others(D_800A92C0, D_800A92D0);
     }
 }
 
@@ -742,7 +742,7 @@ void func_8009D5E4(void) {
         D_801D3780 = 5;
         func_8001EC74(D_800A92C0[D_800A92D0 + 2].kind, D_801D885C);
         func_8001F724(3);
-        func_8009E40C(D_800A92C0, D_800A92D0);
+        menu_fade_others(D_800A92C0, D_800A92D0);
         D_800A9878 = 0;
     }
 }
@@ -757,7 +757,7 @@ void func_8009D6B0(void) {
         D_801D3780 = 5;
         func_8001EC74(D_800A92C0[D_800A92D0 + 2].kind, D_801D885C);
         func_8001F724(3);
-        func_8009E40C(D_800A92C0, D_800A92D0);
+        menu_fade_others(D_800A92C0, D_800A92D0);
     }
     for (i = 0; i < 5; i++) {
         D_800A6F48[i]->text[0] = 'B';
@@ -766,7 +766,7 @@ void func_8009D6B0(void) {
     D_800A9890[5] = 0;
 }
 
-void func_8009D7B4(void) {
+void menu_start_player_select(void) {
     s32 n;
     s32 i;
     s32 j;
@@ -780,7 +780,7 @@ void func_8009D7B4(void) {
         D_801D3780 = 5;
         func_8001EC74(D_800A92C0[D_800A92D0 + 2].kind, D_801D885C);
         func_8001F724(3);
-        func_8009E40C(D_800A92C0, D_800A92D0);
+        menu_fade_others(D_800A92C0, D_800A92D0);
         for (i = 0; i < 3; i++) {
             D_800A92A8[i] = -1;
             D_800A92B0[i] = i;
@@ -807,7 +807,7 @@ void func_8009D948(void) {
         D_801D3780 = 5;
         func_8001EC74(D_800A92C0[D_800A92D0 + 2].kind, D_801D885C);
         func_8001F724(3);
-        func_8009E40C(D_800A92C0, D_800A92D0);
+        menu_fade_others(D_800A92C0, D_800A92D0);
         D_800AA248.new_def = def = func_8001D110();
         def->id = 0x4A002FBA;
         def->pos_x.w = 0x1F40000;
@@ -844,7 +844,7 @@ void func_8009DB38(void) {
         D_801D3780 = 5;
         func_8001EC74(D_800A92C0[D_800A92D0 + 2].kind, D_801D885C);
         func_8001F724(3);
-        func_8009E40C(D_800A92C0, D_800A92D0);
+        menu_fade_others(D_800A92C0, D_800A92D0);
     }
 }
 
@@ -856,11 +856,11 @@ void func_8009DBFC(void) {
         D_801D3780 = 5;
         func_8001EC74(D_800A92C0[D_800A92D0 + 2].kind, D_801D885C);
         func_8001F724(3);
-        func_8009E40C(D_800A92C0, D_800A92D0);
+        menu_fade_others(D_800A92C0, D_800A92D0);
     }
 }
 
-void func_8009DCC0(void) {
+void menu_back(void) {
     MenuRecord *menu;
 
     menu = D_800A92C0;
@@ -869,7 +869,7 @@ void func_8009DCC0(void) {
         D_800A92D8 = menu[0].sub;
         D_800A9870 = menu[0].kind;
         func_8001F724(3);
-        func_8009E4D4();
+        menu_fade_out();
     }
 }
 
@@ -881,7 +881,7 @@ void func_8009DD3C(void) {
         D_801D3780 = 5;
         func_8001EC74(D_800A92C0[D_800A92D0 + 2].kind, D_801D885C);
         func_8001F724(3);
-        func_8009E40C(D_800A92C0, D_800A92D0);
+        menu_fade_others(D_800A92C0, D_800A92D0);
     }
 }
 
@@ -895,10 +895,10 @@ void func_8009DE00(void) {
         D_800A92D8 = menu[0].sub;
         D_800A9870 = menu[0].kind;
         func_8001F724(3);
-        func_8009E4D4();
+        menu_fade_out();
     }
     for (i = 0; i < 12; i++) {
-        func_8009E3C0(0x400, 0x808080);
+        menu_set_colour(0x400, 0x808080);
     }
 }
 
@@ -926,7 +926,7 @@ void func_8009DF60(void) {
     }
 }
 
-s16 func_8009DF98(void *list, s32 selected, s32 lit, s32 normal) {
+s16 menu_draw(void *list, s32 selected, s32 lit, s32 normal) {
     MenuRecord *menu;
     MenuRecord *item;
     GameObject *head;
@@ -948,7 +948,7 @@ s16 func_8009DF98(void *list, s32 selected, s32 lit, s32 normal) {
         D_800AA2EC = D_801D885C;
         func_8001ED54((TextMessage *) menu->sub[i].unk_00);
         kind = menu->sub[i].kind;
-        func_8009E3C0(kind, 0);
+        menu_set_colour(kind, 0);
         head = &D_801E28C0;
         obj = head->next;
         if (obj != head) {
@@ -987,7 +987,7 @@ s32 func_8009E114(s32 kind, s32 y) {
     return done;
 }
 
-void func_8009E190(void *list, s32 selected, s32 lit, s32 normal) {
+void menu_light_items(void *list, s32 selected, s32 lit, s32 normal) {
     MenuRecord *menu;
     s32 i;
 
@@ -1032,7 +1032,7 @@ void func_8009E310(s32 lit, s32 normal) {
     }
 }
 
-void func_8009E3C0(s32 kind, s32 value) {
+void menu_set_colour(s32 kind, s32 value) {
     GameObject *head;
     GameObject *obj;
 
@@ -1049,24 +1049,24 @@ void func_8009E3C0(s32 kind, s32 value) {
     }
 }
 
-void func_8009E40C(void *list, s32 selected) {
+void menu_fade_others(void *list, s32 selected) {
     MenuRecord *menu;
     s32 i;
 
     menu = list;
     for (i = 2; i <= menu[0].unk_00 + 1; i++) {
         if (selected != i - 2) {
-            func_8009E3C0(menu[i].kind, 0x808080);
+            menu_set_colour(menu[i].kind, 0x808080);
         }
     }
     if (menu[0].sub != NULL) {
         i = menu[0].kind;
-        func_8009E3C0(menu[0].sub[i + 2].kind, 0x808080);
+        menu_set_colour(menu[0].sub[i + 2].kind, 0x808080);
     }
     D_800A9888 = 1;
 }
 
-void func_8009E4D4(void) {
+void menu_fade_out(void) {
     GameObject *head;
     GameObject *obj;
 
@@ -1085,16 +1085,16 @@ void func_8009E4D4(void) {
     D_801D3780 = 8;
 }
 
-void func_8009E540(MenuRecord *menu) {
+void menu_fade_in(MenuRecord *menu) {
     s32 i;
 
     for (i = 2; i <= menu[0].unk_00 + 1; i++) {
-        func_8009E3C0(menu[i].kind, 0);
+        menu_set_colour(menu[i].kind, 0);
     }
     D_800A9888 = 2;
 }
 
-void func_8009E5BC(void) {
+void menu_create_player_slots(void) {
     ObjectDef *def;
     u8 *anim;
     s32 i;
@@ -1156,7 +1156,7 @@ void func_8009E7D4(s16 n) {
     D_800AA248.cur_obj = saved;
 }
 
-void func_8009E8B8(s16 player, s16 flag) {
+void menu_create_player_bars(s16 player, s16 flag) {
     s32 x;
     s32 y;
     u8 *anim;
@@ -1209,7 +1209,7 @@ void func_8009E8B8(s16 player, s16 flag) {
     }
 }
 
-void func_8009EB74(s16 player, s16 flag) {
+void menu_create_player_monster(s16 player, s16 flag) {
     ObjectDef *def;
     GameObject *obj;
     s32 x;
@@ -1257,7 +1257,7 @@ void func_8009EB74(s16 player, s16 flag) {
     }
 }
 
-GameObject *func_8009EE5C(GameObject *obj, s32 player) {
+GameObject *menu_animate(GameObject *obj, s32 player) {
     s32 op;
     s32 arg;
     s32 id;
@@ -1377,7 +1377,7 @@ GameObject *func_8009EE5C(GameObject *obj, s32 player) {
     return obj;
 }
 
-void func_8009F2F8(void) {
+void menu_update_player_select(void) {
     s32 i;
     s32 j;
     s32 d;
@@ -1397,20 +1397,20 @@ void func_8009F2F8(void) {
         }
     }
     for (i = 0; i < 3; i++) {
-        func_8009EE5C(*(D_801E28F4 + i + 13), i);
+        menu_animate(*(D_801E28F4 + i + 13), i);
     }
     for (i = 0; i < 3; i++) {
-        func_8009EE5C(*(D_801E28F4 + i + 22), i);
-        func_8009EE5C(*(D_801E28F4 + i + 28), i);
-        func_8009EE5C(*(D_801E28F4 + i + 25), i);
-        func_8009EE5C(*(D_801E28F4 + i + 16), 0xFF);
+        menu_animate(*(D_801E28F4 + i + 22), i);
+        menu_animate(*(D_801E28F4 + i + 28), i);
+        menu_animate(*(D_801E28F4 + i + 25), i);
+        menu_animate(*(D_801E28F4 + i + 16), 0xFF);
         for (j = 0; j < 3; j++) {
             obj = *(D_801E28F4 + i * 3 + j + 31);
             if (obj != NULL && obj->anim != 0) {
-                func_8009EE5C(obj, 0xFF);
+                menu_animate(obj, 0xFF);
             }
         }
-        D_801E28F8[i] = func_8009EE5C(D_801E28F8[i], i);
+        D_801E28F8[i] = menu_animate(D_801E28F8[i], i);
     }
     for (i = 0; i < 3; i++) {
         if (D_800AA2CC[i] != 0) {
@@ -1426,7 +1426,7 @@ void func_8009F2F8(void) {
 /* 80.38%: the loop's invariants differ: the original keeps %hi(D_800A9860) in fp and D_800A8F00 in s7, and
  * steps a pointer at the record's unk_08 (s0 = D_800A8FD4 + 8); this C hoists D_800A8FD4 itself and reaches the
  * records from it. */
-void func_8009F554(s32 unused, s32 *timer) {
+void menu_choose_monsters(s32 unused, s32 *timer) {
     s32 i;
     OverattrPlayer *rec;
     s32 j;
@@ -1530,10 +1530,10 @@ void func_8009F554(s32 unused, s32 *timer) {
     }
 }
 #else
-INCLUDE_ASM("asm/overattr/nonmatchings/menu", func_8009F554);
+INCLUDE_ASM("asm/overattr/nonmatchings/menu", menu_choose_monsters);
 #endif
 
-void func_8009F968(OverattrPlacement *p, s32 n, s32 color) {
+void menu_place_objects(OverattrPlacement *p, s32 n, s32 color) {
     s32 i;
     OverattrPlacement *q;
 
@@ -1609,7 +1609,7 @@ void func_8009FB78(void) {
     }
 }
 
-void func_8009FC74(void) {
+void menu_update_title(void) {
     s32 state;
 
     func_80019268();
@@ -1633,7 +1633,7 @@ void func_8009FC74(void) {
         func_8001AC18(0xA, 0x29);
         func_8001F760();
         D_801CA45C = 2;
-        func_8009F968(D_800A7384, 4, 0x808080);
+        menu_place_objects(D_800A7384, 4, 0x808080);
         D_801E29BC = 0x708;
         D_800A92C8 = 0x3C;
         D_801D3D7C = 0;
@@ -1668,7 +1668,7 @@ void func_8009FC74(void) {
     D_801E29BC--;
 }
 
-void func_8009FEE4(void) {
+void menu_free_objects(void) {
     GameObject *head;
     GameObject *obj;
     GameObject *next;
@@ -1688,7 +1688,7 @@ void func_8009FEE4(void) {
 
 INCLUDE_ASM("asm/overattr/nonmatchings/menu", func_8009FF38);
 
-void func_800A0CC0(void) {
+void menu_update_load_screen(void) {
     s32 status;
     MenuRecord *menu = D_800A92C0;
 
@@ -1736,7 +1736,7 @@ void func_800A0CC0(void) {
         if (D_801E29BC > 0) {
             D_801E29BC--;
         } else {
-            func_8009DCC0();
+            menu_back();
         }
         break;
     case 2:
@@ -1752,7 +1752,7 @@ void func_800A0CC0(void) {
             card_init_save(&D_800A9300);
             D_800A9840 = 0;
         } else {
-            D_800A9840 = func_800A1258();
+            D_800A9840 = menu_list_saves();
         }
         break;
     case 3:
@@ -1772,12 +1772,12 @@ void func_800A0CC0(void) {
             func_8001F724(0x1E);
         } else if ((D_800A9220 & 0x01004010) && D_801F9944 == 0) {
             if (D_800A92D0 == D_800A9840) {
-                func_8009DCC0();
+                menu_back();
                 break;
             }
             D_801D3778 = 0x1E;
             D_801E0D64 = 1;
-            func_800A1434(D_800A9830[D_800A92D0]);
+            menu_load_slot(D_800A9830[D_800A92D0]);
             D_801F9944 = 0xB;
             D_801D872C /= 2;
         } else if ((D_800A9220 & 0x04010040) && D_801F9944 == 0 && menu[0].sub != NULL) {
@@ -1785,7 +1785,7 @@ void func_800A0CC0(void) {
             D_800A9800 = 1;
             D_800A9870 = menu[0].kind;
             func_8001F724(3);
-            func_8009E4D4();
+            menu_fade_out();
             D_801F9944 = 0xB;
             D_801D872C /= 2;
         }
@@ -1797,7 +1797,7 @@ void func_800A0CC0(void) {
 
 #ifdef NON_MATCHING
 /* 81.7 %: the city names' address is hoisted into s7 (a frame 8 bytes larger); the original reloads it. */
-s32 func_800A1258(void) {
+s32 menu_list_saves(void) {
     char buf[0x18];
     s32 limit;
     s32 n;
@@ -1839,10 +1839,10 @@ s32 func_800A1258(void) {
     }
 }
 #else
-INCLUDE_ASM("asm/overattr/nonmatchings/menu", func_800A1258);
+INCLUDE_ASM("asm/overattr/nonmatchings/menu", menu_list_saves);
 #endif
 
-void func_800A1434(s32 slot) {
+void menu_load_slot(s32 slot) {
     s32 i;
     Monster *m;
 
@@ -1893,7 +1893,7 @@ void func_800A1434(s32 slot) {
     func_80062D88((u8) D_801E2150);
 }
 
-void func_800A1720(void) {
+void menu_update_save_screen(void) {
     D_801D885C = 0x44;
     if (D_800A9898 == 1) {
         D_800A9898 = 0;
@@ -1901,16 +1901,16 @@ void func_800A1720(void) {
     }
     switch (D_800A98B8) {
     case 0:
-        func_800A1804();
+        menu_check_card();
         break;
     case 6:
-        func_800A1B9C();
+        menu_ask_format();
         break;
     case 1:
-        func_800A2138();
+        menu_delete_save();
         break;
     case 2:
-        func_800A28DC();
+        menu_write_save();
         break;
     case 5:
         D_801D3780++;
@@ -1922,7 +1922,7 @@ void func_800A1720(void) {
     }
 }
 
-void func_800A1804(void) {
+void menu_check_card(void) {
     s32 status;
 
     switch (D_800A92A0) {
@@ -1974,7 +1974,7 @@ void func_800A1804(void) {
         } else if (D_801E29BC == 29) {
             D_801E29BC--;
             if (card_read_save(&D_800A9300) == 0) {
-                if (D_801FA958 != -1 || func_800A1B60() >= 0) {
+                if (D_801FA958 != -1 || menu_find_used_slot() >= 0) {
                     D_800A9858 = 0;
                     D_800A9898 = 1;
                     D_800A92A0 = 5;
@@ -1984,7 +1984,7 @@ void func_800A1804(void) {
                 }
             } else {
                 card_init_save(&D_800A9300);
-                if (func_800A1B60() >= 0) {
+                if (menu_find_used_slot() >= 0) {
                     D_800A9858 = 0;
                     D_800A9898 = 1;
                     D_800A92A0 = 5;
@@ -2015,7 +2015,7 @@ void func_800A1804(void) {
     }
 }
 
-s32 func_800A1B60(void) {
+s32 menu_find_used_slot(void) {
     s32 i;
 
     for (i = 0; i < 6; i++) {
@@ -2026,7 +2026,7 @@ s32 func_800A1B60(void) {
     return -1;
 }
 
-void func_800A1B9C(void) {
+void menu_ask_format(void) {
     switch (D_800A92A0) {
     case 0:
         func_8001F61C("THE MEMORY CARD IN MEMORY", 0xC8, 0x2D, 1, D_801F9AAC, D_8007AD4C, 0, 0x400);
@@ -2081,7 +2081,7 @@ void func_800A1B9C(void) {
         }
         break;
     case 4:
-        func_800A1F8C();
+        menu_format_card();
         break;
     }
     func_80018C14();
@@ -2091,7 +2091,7 @@ INCLUDE_RODATA("asm/overattr/nonmatchings/menu", D_80098260);
 
 INCLUDE_RODATA("asm/overattr/nonmatchings/menu", D_80098264);
 
-void func_800A1F8C(void) {
+void menu_format_card(void) {
     s32 state;
     s32 status;
 
@@ -2129,7 +2129,7 @@ void func_800A1F8C(void) {
     }
 }
 
-void func_800A2138(void) {
+void menu_delete_save(void) {
     switch (D_800A9880) {
     case 0:
         D_801F9AAC = 0x47;
@@ -2147,7 +2147,7 @@ void func_800A2138(void) {
         if (D_801E29BC-- < 0) {
             func_8001E450(0x400);
             D_800A9880 = 3;
-            D_800A9840 = func_800A1258();
+            D_800A9840 = menu_list_saves();
             D_800AA2EC = (s16) D_801E2A44;
             func_8001F61C("DELETE GAMES", 0xC8, 0x20, 0, D_801D885C, D_8007ABCC, 0, 0x400);
             func_8001ED54(&D_800A6400);
@@ -2190,7 +2190,7 @@ void func_800A2138(void) {
             D_801D872C /= 2;
         } else if ((D_800A9220 & 0x04010040) && D_801F9944 == 0) {
             func_8001F724(3);
-            func_8009DCC0();
+            menu_back();
             D_801F9944 = 0xB;
             D_801D872C /= 2;
         }
@@ -2245,7 +2245,7 @@ void func_800A2138(void) {
     func_80018C14();
 }
 
-s32 func_800A28A0(s32 id) {
+s32 menu_find_save(s32 id) {
     s32 i;
 
     for (i = 0; i < 6; i++) {
@@ -2256,7 +2256,7 @@ s32 func_800A28A0(s32 id) {
     return -1;
 }
 
-void func_800A28DC(void) {
+void menu_write_save(void) {
     s32 slot;
     s32 i;
     s32 status;
@@ -2266,14 +2266,14 @@ void func_800A28DC(void) {
     switch (D_800A9858) {
     case 0:
         if (D_801FA958 != -1) {
-            slot = func_800A28A0(D_801FA958);
+            slot = menu_find_save(D_801FA958);
             if (slot == -1) {
                 D_801E29BC = 0x78;
                 D_800A9858 = 0xF;
                 break;
             }
         } else {
-            slot = func_800A1B60();
+            slot = menu_find_used_slot();
         }
         D_800A9300.unk_204[slot] = 0;
         D_800A9300.slots[slot].unk_00 = D_800A9300.unk_200++;
@@ -2401,7 +2401,7 @@ void func_800A309C(void) {
     D_801D3780 += 1;
 }
 
-void func_800A30B4(void) {
+void menu_load_newest_save(void) {
     s32 limit;
     s32 slot;
     s32 best;

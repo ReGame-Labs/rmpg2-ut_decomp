@@ -27,7 +27,7 @@ void func_80070414(void);
 void func_80070444(void);
 void func_800700A8(void);
 void func_8006ED5C(void);
-void func_8006E4BC(s32);
+void wess_report_error(s32);
 u16 func_8007050C(void);
 u32 func_80070588(s16 ips, s16 ppq, s16 qpm);
 void func_8006CD78(SoundChannel *ch);
@@ -36,14 +36,14 @@ void func_80076D5C(SoundChannel *ch);
 void func_8006C204(SoundNote *v);
 void func_8006DD48(SoundNote *v, SoundChannel *ch, SoundPatchmap *map, SoundEntry *sample, u8 note, u8 velocity);
 void func_8006DDE4(SoundNote *v);
-s32 func_8006E504(s32 n);
-s32 func_8006E5F0(s32 n, s32 dst);
+s32 wess_valid_sequence(s32 n);
+s32 wess_read_sequence(s32 n, s32 dst);
 void func_80078A40(s32 n, s32 arg1);
-s32 func_8006EA50(s32 n);
-s32 func_8006E530(void);
-void func_8006E59C(void);
+s32 wess_sequence_size(s32 n);
+s32 wess_open_sequence_file(void);
+void wess_close_sequence_file(void);
 s32 func_800703D8(u8 a, s32 b, s32 c, s32 d, s32 e);
-s32 func_8006EB08(s32, s32);
+s32 wess_load_sequence(s32, s32);
 s32 func_80070578(void);
 void func_80063D04(void);
 void func_80078088(void);
@@ -489,7 +489,7 @@ extern s32 D_801FD9D4;
 extern SoundNote *D_801FD9D8;
 extern s16 D_801FD9DC;
 
-void func_8006CF14(SoundChannel *ch) {
+void wess_pitch_mod(SoundChannel *ch) {
     u8 *p;
     s16 v;
 
@@ -723,28 +723,28 @@ void func_8006E3B8(SoundChannel *ch) {
     }
 }
 
-void func_8006E4BC(s32 arg0) {
+void wess_report_error(s32 arg0) {
     if (D_801FDEA8 != NULL) {
         D_801FDEA8(D_801FDEAC, arg0);
     }
 }
 
-s32 func_8006E4F4(void) {
+s32 wess_sequence_count(void) {
     return D_801FDEA0;
 }
 
-s32 func_8006E504(s32 n) {
+s32 wess_valid_sequence(s32 n) {
     if (n < 0 || n >= D_801FDEA0) {
         return 0;
     }
     return 1;
 }
 
-s32 func_8006E530(void) {
+s32 wess_open_sequence_file(void) {
     if (D_801FDEA4 == 0) {
         D_801FDEB0 = func_80070868(D_801FDE9C);
         if (D_801FDEB0 == 0) {
-            func_8006E4BC(1);
+            wess_report_error(1);
             return 0;
         }
     }
@@ -752,7 +752,7 @@ s32 func_8006E530(void) {
     return 1;
 }
 
-void func_8006E59C(void) {
+void wess_close_sequence_file(void) {
     if (D_801FDEA4 == 1) {
         func_800708EC(D_801FDEB0);
     }
@@ -761,7 +761,7 @@ void func_8006E59C(void) {
     }
 }
 
-s32 func_8006E5F0(s32 n, s32 dst) {
+s32 wess_read_sequence(s32 n, s32 dst) {
     SoundSlot *slot;
     s32 tracks;
     s32 start;
@@ -772,7 +772,7 @@ s32 func_8006E5F0(s32 n, s32 dst) {
 
     start = dst;
     if (D_801FDEB8 != 0) {
-        if (!func_8006E504(n)) {
+        if (!wess_valid_sequence(n)) {
             return 0;
         }
         slot = &D_801FDE98->unk_0C->unk_20[n];
@@ -789,20 +789,20 @@ s32 func_8006E5F0(s32 n, s32 dst) {
         dst += slot->unk_04;
         offset = slot->unk_08 + D_801FDEB4;
         if (slot->method == 0) {
-            if (func_8006E530() == 0) {
-                func_8006E4BC(1);
+            if (wess_open_sequence_file() == 0) {
+                wess_report_error(1);
                 return 0;
             }
             if (func_800708C4(D_801FDEB0, offset, 0) != 0) {
-                func_8006E4BC(3);
+                wess_report_error(3);
                 return 0;
             }
             size = slot->unk_04;
             if (size != func_80070898(p, size, D_801FDEB0)) {
-                func_8006E4BC(2);
+                wess_report_error(2);
                 return 0;
             }
-            func_8006E59C();
+            wess_close_sequence_file();
         } else if (func_800703D8(slot->method, D_801FDE9C, offset, (s32) p, slot->unk_04) < 0) {
             return 0;
         }
@@ -818,32 +818,32 @@ s32 func_8006E5F0(s32 n, s32 dst) {
     return dst - start;
 }
 
-s32 func_8006E804(SoundDriver *drv, s32 name) {
+s32 wess_sequence_header(SoundDriver *drv, s32 name) {
     s32 r;
 
     r = 0;
     D_801FDE9C = name;
     D_801FDE98 = drv;
     if (drv != NULL) {
-        if (func_8006E530() == 0) {
-            func_8006E4BC(1);
+        if (wess_open_sequence_file() == 0) {
+            wess_report_error(1);
             return 0;
         }
         if (func_800708C4(D_801FDEB0, 0, 0) != 0) {
-            func_8006E4BC(3);
+            wess_report_error(3);
             return 0;
         }
         if (func_80070898(&D_801FDE78, 32, D_801FDEB0) != 32) {
-            func_8006E4BC(2);
+            wess_report_error(2);
             return 0;
         }
         r = D_801FDE78.size;
-        func_8006E59C();
+        wess_close_sequence_file();
     }
     return r;
 }
 
-s32 func_8006E8B4(SoundDriver *drv, s32 name, s32 keep, SoundSlot *table) {
+s32 wess_load_sequence_table(SoundDriver *drv, s32 name, s32 keep, SoundSlot *table) {
     s32 r;
     s32 n;
 
@@ -852,17 +852,17 @@ s32 func_8006E8B4(SoundDriver *drv, s32 name, s32 keep, SoundSlot *table) {
     D_801FDE9C = name;
     D_801FDE98 = drv;
     if (drv != NULL) {
-        if (func_8006E530() == 0) {
-            func_8006E4BC(1);
+        if (wess_open_sequence_file() == 0) {
+            wess_report_error(1);
             return 0;
         }
         if (func_800708C4(D_801FDEB0, 0, 0) != 0) {
-            func_8006E4BC(3);
+            wess_report_error(3);
             return 0;
         }
         n = 32;
         if (func_80070898(&D_801FDE78, n, D_801FDEB0) != n) {
-            func_8006E4BC(2);
+            wess_report_error(2);
             return 0;
         }
         r = D_801FDE78.size;
@@ -871,7 +871,7 @@ s32 func_8006E8B4(SoundDriver *drv, s32 name, s32 keep, SoundSlot *table) {
         if (D_801FDE78.method == 0) {
             n = D_801FDE78.size;
             if (n != func_80070898(D_801FDE98->unk_0C->unk_20, n, D_801FDEB0)) {
-                func_8006E4BC(2);
+                wess_report_error(2);
                 return 0;
             }
             D_801FDEB4 = D_801FDE78.size + 32;
@@ -882,21 +882,21 @@ s32 func_8006E8B4(SoundDriver *drv, s32 name, s32 keep, SoundSlot *table) {
             D_801FDEB4 = D_801FDE78.packed_size + 32;
         }
         if (keep != 1) {
-            func_8006E59C();
+            wess_close_sequence_file();
         }
         D_801FDEB8 = 1;
     }
     return r;
 }
 
-s32 func_8006EA50(s32 n) {
+s32 wess_sequence_size(s32 n) {
     s32 size;
     SoundSlot *slot;
     s32 tracks;
 
     size = 0;
     if (D_801FDEB8 != 0) {
-        if (!func_8006E504(n)) {
+        if (!wess_valid_sequence(n)) {
             return 0;
         }
         slot = &D_801FDE98->unk_0C->unk_20[n];
@@ -913,16 +913,16 @@ s32 func_8006EA50(s32 n) {
     return size;
 }
 
-s32 func_8006EB08(s32 n, s32 dst) {
+s32 wess_load_sequence(s32 n, s32 dst) {
     s32 size;
 
     size = 0;
     if (D_801FDEB8 != 0) {
-        if (!func_8006E504(n)) {
+        if (!wess_valid_sequence(n)) {
             return 0;
         }
         if (D_801FDE98->unk_0C->unk_20[n].unk_0C == 0) {
-            size = func_8006E5F0(n, dst);
+            size = wess_read_sequence(n, dst);
         }
     }
     return size;
@@ -960,7 +960,7 @@ s32 func_8006EC58(void) {
 }
 
 s32 func_8006EC68(s32 n) {
-    if (n < 0 || n >= func_8006E4F4()) {
+    if (n < 0 || n >= wess_sequence_count()) {
         return 0;
     }
     return D_801FDF20->unk_0C->unk_20[n].unk_0C != 0;
@@ -1020,7 +1020,7 @@ extern SoundSeqTable D_801FDEBC;
 extern SoundBank D_801FDEE0;
 extern SoundDriver D_801FDEFC;
 
-s32 func_8006EE30(s32 name) {
+s32 wess_module_size(s32 name) {
     u8 *mem;
     u32 i;
     s32 n;
@@ -1089,12 +1089,12 @@ s32 func_8006EE30(s32 name) {
     return (s32) mem;
 }
 #else
-INCLUDE_ASM("asm/main/nonmatchings/wess", func_8006EE30);
+INCLUDE_ASM("asm/main/nonmatchings/wess", wess_module_size);
 #endif
 
 INCLUDE_ASM("asm/main/nonmatchings/wess", func_8006F0D8);
 
-void func_8006F634(SoundChannel *ch, SoundTrack *track, SoundTrackOpts *opts) {
+void wess_init_channel(SoundChannel *ch, SoundTrack *track, SoundTrackOpts *opts) {
     s32 mask;
 
     ch->unk_00.w |= 1;
@@ -1167,7 +1167,7 @@ void func_8006F634(SoundChannel *ch, SoundTrack *track, SoundTrackOpts *opts) {
     }
 }
 
-void func_8006F8F8(SoundChannel *ch, SoundTrack *track) {
+void wess_set_channel_data(SoundChannel *ch, SoundTrack *track) {
     u8 *seq;
 
     ch->unk_4C = track->unk_00->unk_10;
@@ -1182,7 +1182,7 @@ void func_8006F8F8(SoundChannel *ch, SoundTrack *track) {
 /* 98.90%: the channel's address adds the base to the index (addu s1,v1,v0), the original the index to the base, and
  * the slot pointer is reloaded from the stack one instruction earlier; the index forms &p[i], p + i, p += i give
  * the same. */
-s32 func_8006F96C(SoundSlot *slot, s32 n, s32 arg2, s32 arg3, SoundTrackOpts *opts) {
+s32 wess_start_sequence(SoundSlot *slot, s32 n, s32 arg2, s32 arg3, SoundTrackOpts *opts) {
     u8 seq;
     u8 max;
     u8 i;
@@ -1218,8 +1218,8 @@ s32 func_8006F96C(SoundSlot *slot, s32 n, s32 arg2, s32 arg3, SoundTrackOpts *op
         if (!(ch->unk_00.w & 1)) {
             track = &slot->unk_0C[started];
             ch->unk_00.b[2] = seq;
-            func_8006F634(ch, track, opts);
-            func_8006F8F8(ch, track);
+            wess_init_channel(ch, track, opts);
+            wess_set_channel_data(ch, track);
             if (arg3 != 0) {
                 ch->unk_00.w |= 0xC;
             } else {
@@ -1258,15 +1258,15 @@ s32 func_8006F96C(SoundSlot *slot, s32 n, s32 arg2, s32 arg3, SoundTrackOpts *op
     return 0;
 }
 #else
-INCLUDE_ASM("asm/main/nonmatchings/wess", func_8006F96C);
+INCLUDE_ASM("asm/main/nonmatchings/wess", wess_start_sequence);
 #endif
 
 void func_8006FC6C(s32 n) {
     func_80078A40(n, 0);
 }
 
-void func_8006FC8C(s32 n, SoundTrackOpts *opts) {
-    func_8006F96C(&D_801FDF20->unk_0C->unk_20[n], n, 0, 0, opts);
+void wess_start_sequence_with(s32 n, SoundTrackOpts *opts) {
+    wess_start_sequence(&D_801FDF20->unk_0C->unk_20[n], n, 0, 0, opts);
 }
 
 void func_8006FCD4(s32 n, s32 set_rate, s32 rate) {
@@ -1447,7 +1447,7 @@ s32 func_80070298(s32 first, s32 count) {
             return 0;
         }
         while (--count != -1) {
-            done += func_8006EA50(seq);
+            done += wess_sequence_size(seq);
             seq++;
         }
     }
@@ -1459,14 +1459,14 @@ s32 func_80070324(s32 first, s32 count, s32 dst) {
 
     done = 0;
     if (D_801FDEB8 != 0) {
-        if (func_8006E530() == 0 || count == 0) {
+        if (wess_open_sequence_file() == 0 || count == 0) {
             return 0;
         }
         while (--count != -1) {
-            done += func_8006EB08(first, dst + done);
+            done += wess_load_sequence(first, dst + done);
             first++;
         }
-        func_8006E59C();
+        wess_close_sequence_file();
     }
     return done;
 }
