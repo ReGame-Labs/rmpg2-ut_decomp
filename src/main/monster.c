@@ -2262,30 +2262,31 @@ void func_80054608(u16 kind, Monster *e, Building *u) {
     }
 }
 
-#ifdef NON_MATCHING
-/* 89.00%: 89 %: the count loads into v0 and moves to a2 (the original loads it into a2 at once), and i steps as ++i
- * != n (addiu/move/andi) */
 Building *monster_get_building(u16 n) {
     Building *city;
     u16 i;
     u16 count;
 
-    if (n == 0 || *(s16 *) &D_801E29A4 == 0 /* the original tests it as an s16: other units read it u16 */) {
+    /* The original tests the count as an s16; other units read it u16. */
+    if (n == 0 || *(s16 *) &D_801E29A4 == 0) {
         return NULL;
     }
-    count = D_801E29A4;
     city = D_801D3DC8;
-    for (i = 1; i != n; i++) {
-        city++;
-        if (--count == 0) {
-            break;
+    count = D_801E29A4;
+    i = 1;
+    if (i != n) {
+        while (1) {
+            city++;
+            if (--count == 0) {
+                break;
+            }
+            if (++i == n) {
+                break;
+            }
         }
     }
     return city;
 }
-#else
-INCLUDE_ASM("asm/main/nonmatchings/monster", monster_get_building);
-#endif
 
 void func_8005478C(Monster *e) {
     Building *obj;
