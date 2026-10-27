@@ -502,7 +502,7 @@ extern u16 D_8007CFE8[];
 extern UnkStructPair D_8007CE08[];
 extern UnkStructPair D_8007CE34[];
 void func_8002EE14(s16, BuildingItem *);
-void func_80030E04(s32, BuildingItem *);
+void func_80030E04(Monster *, BuildingItem *);
 void func_8002FD24(BuildingItem *, Building *);
 s32 func_8002DB3C(u16, u16, BuildingItem *);
 void func_80034418(Building *);
@@ -572,8 +572,20 @@ extern GameObject *D_801E1E34[2];
 void func_8003197C(u16 *, s32, GameObject **);
 void func_80053C50(s32, Monster *);
 void func_8002BAEC(Monster *);
+extern Anim D_80011D48;   /* func_8002E658's sprite at a part's point */
+extern Anim D_80011F10;   /* its second sprite, 8 pixels lower right, half the time */
+extern Anim D_80016890;   /* func_8002F100's three stages */
+extern Anim D_800168B8;
+extern Anim D_800168D8;
+extern Anim D_80016964;
+extern Anim D_80016A78;
+extern GameObject *D_801FB448;   /* a box (func_8001EB9C) whose width func_8002F100 sets from Building.unk_010 */
+GameObject *func_8001EB9C(s32 x, s32 y, s32 w, s32 h, s32 colour);
+void func_80029118(s16, u16);
 extern Anim D_80011F58;
 extern Anim D_80011F90;
+extern Anim D_80011FC8;   /* the sprite func_80030E04 puts at x + 0x28 on a kind-2 building */
+extern Anim D_80012018;   /* the same at x + 0x3C on the others */
 extern s32 D_80012110[];
 extern s32 D_8001214C[];
 extern s32 D_8001214C_alt[];   /* another name for D_8001214C (config/aliases.ld) */

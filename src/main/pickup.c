@@ -351,15 +351,16 @@ s32 func_8003BE34(Pickup *rec) {
 }
 
 
-#ifdef NON_MATCHING
-/* 98.8 %: the first test's second range check masks `st - 0xD` to 16 bits (andi) in the original; the same
- * expression in a local, in the field, or as a switch with case ranges drops the mask. */
 void func_8003BF34(GameObject *obj, Pickup *b, u16 x) {
     u8 *anim = NULL;
     u16 flags;
     GameObject *o;
 
-    if ((u32) (b->unk_06 - 0x16) < 2U || ((b->unk_06 - 0xD) & 0xFFFF) < 5U) {
+    if (b->unk_06 == 0x16 || b->unk_06 == 0x17) {
+        b->unk_0A = 1;
+        return;
+    }
+    if (b->unk_06 >= 0xD && b->unk_06 < 0x12) {
         b->unk_0A = 1;
         return;
     }
@@ -393,9 +394,6 @@ void func_8003BF34(GameObject *obj, Pickup *b, u16 x) {
         o->flags = obj->flags;
     }
 }
-#else
-INCLUDE_ASM("asm/main/nonmatchings/pickup", func_8003BF34);
-#endif
 
 void func_8003C080(void) {
     (D_800AA248.cur_obj->owner.item)->unk_06 = 0;
@@ -517,7 +515,8 @@ void func_8003C344(void) {
 }
 
 #ifdef NON_MATCHING
-/* 98.84 %: the statements are right; the original hoists the constant 1 of the D_801D8748 test, the call and the in-use store into one pseudo that reload rematerialises in a3 (here t0 and separate constants), so the frame's reloads use a3 too */
+/* 98.84%: the statements are right; the original reloads the spilled list pointer and the constant 1 of the
+ * D_801D8748 test into a3 (here t0), so reload_cse drops the call's li a3,1 */
 void func_8003C3B0(void) {
     SpawnItem *list;
     SpawnItem *item;
@@ -550,7 +549,7 @@ void func_8003C3B0(void) {
             do {
                 p = func_8003C67C(u, rec);
                 if (p != NULL) {
-                    if (p->unk_14 != 0) {
+                    if ((u16)p->unk_14 != 0) {
                         def->flags = 0;
                     } else {
                         q = func_8003D1F8((s32)p);

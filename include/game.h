@@ -341,7 +341,7 @@ typedef struct ObjectDef {
     /* 0x18 */ u8 unk_18[0x04];
     /* 0x1C */ s32 unk_1C;
     /* 0x20 */ s32 flags;
-    /* 0x24 */ u8 unk_24[0x04];
+    /* 0x24 */ s32 unk_24;
     /* 0x28 */ void *anim;                     /* the animation data */
 } ObjectDef;
 
@@ -546,7 +546,7 @@ typedef struct Building {
     /* 0x060 */ void *unk_060;
     /* 0x064 */ void *unk_064;
     /* 0x068 */ SpriteFrame **frames;          /* from the definition: the items' frames, by item kind - 2 */
-    /* 0x06C */ u8 unk_06C[0x04];
+    /* 0x06C */ s32 unk_06C;
     /* 0x070 */ struct BuildingItem *unk_070;
     /* 0x074 */ u16 unk_074;
     /* 0x076 */ u16 unk_076;
