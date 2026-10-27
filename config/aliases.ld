@@ -19,3 +19,6 @@ D_8008E6AC_4 = D_8008E6AC;
 D_8001214C_alt = D_8001214C;
 /* func_8002BE78 (building.c): two building definitions compared one after the other, one address 0x80011BA4. */
 D_80011BA4_alt = D_80011BA4;
+/* func_800214D8 (main.c): the animation for an object low on the screen and for the others, one table at
+ * 0x8008AE08. */
+D_8008AE08_alt = D_8008AE08;

@@ -13,7 +13,7 @@ s32 func_8001EB10(s32 range, s32 arg1);                     /* a random number *
 void func_8001E4B0(GameObject *obj);                        /* free an object */
 void func_8001F724(u16);
 void func_8001F7CC(s32 sound, s32 variant);
-void func_80020BA0(s32, u16 flags, GameObject *obj);
+void main_set_frame(s32, u16 flags, GameObject *obj);
 s32 func_8002CD24(u16, Monster *m, s32);
 void func_8002CE74(u16, Monster *m, s32);
 void func_8002CFAC(Monster *m, Building *b);
@@ -176,7 +176,7 @@ void func_8004C3A8(void) {
     GameObject *saved = D_800AA248.cur_obj;
     Monster *m = saved->owner.monster;
 
-    func_80020BA0(*saved->arg.w, saved->flags, saved);
+    main_set_frame(*saved->arg.w, saved->flags, saved);
     if (m->id == 7) {
         D_800AA248.cur_obj->unk_74 = D_801F9ABC;
     } else {
@@ -876,7 +876,7 @@ void func_8004D614(void) {
 
 #ifdef NON_MATCHING
 /* 91.12%: the box test with the monster's edges loaded first (m_bottom, m_right, m_left, m_top, as in pickup's
- * func_8003B9C8); the original keeps m in a0 and loads the object's y before the flip test */
+ * pickup_test_touch); the original keeps m in a0 and loads the object's y before the flip test */
 u16 func_8004D6F8(Monster *m, Ai **out) {
     u16 n;
     Ai *p;

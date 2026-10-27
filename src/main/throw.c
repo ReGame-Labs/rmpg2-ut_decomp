@@ -1149,7 +1149,7 @@ void func_800494B4(Throw *t) {
 }
 
 #ifdef NON_MATCHING
-/* 98 %: register names only: the x found and the counter take a0 and a1 in the original, a1 and a0 here */
+/* 99.25%: registers only: the original gives x a0, the counter a1 and the object a2 (here a2, a0, a1) */
 /* A pair per throw kind (D_8007F39C): the vertical speed it gets back when it lands, and the height it lands at. */
 typedef struct {
     /* 0x00 */ s32 unk_0;
@@ -1160,7 +1160,6 @@ extern ThrowLanding D_8007F39C[];
 
 void func_80049650(Throw *t) {
     u16 x;
-    ThrowLanding *l;
     Monster *m;
     GameObject *o;
     s32 v;
@@ -1181,8 +1180,8 @@ void func_80049650(Throw *t) {
         if (cur->pos_y.w > D_8007F39C[cur->unk_08.w].unk_4) {
             return;
         }
-        i = 7;
         x = 0;
+        i = 7;
         cur->unk_88 = D_8007F39C[cur->unk_08.w].unk_0;
         do {
             m = &D_801E0B78[i];
