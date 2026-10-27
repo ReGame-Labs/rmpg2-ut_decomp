@@ -111,7 +111,8 @@ extern OverattrPlacement D_800A73C4[4];
 typedef struct { u32 colors[8]; } CardClut;   /* the save icon's 16-colour CLUT, two per word */
 typedef struct { u32 pixels[32]; } CardIcon;  /* a 16x16 4-bit icon frame */
 
-/* A menu: record 0 holds the item count, a parent menu and the cursor, the items start at record 2. */
+/* A menu: record 0 holds the item count, a parent menu and the cursor; record 1's sub is the menu's function, a
+ * void (*)(void) run when it opens and every frame (func_8009FF38); the items start at record 2. */
 typedef struct MenuRecord {
     /* 0x00 */ s32 unk_00;             /* record 0: the item count; an item: its TextMessage */
     /* 0x04 */ struct MenuRecord *sub; /* record 0: another menu, whose item at the cursor is lit too; an item:
@@ -380,6 +381,15 @@ extern OverattrPlacement D_800A40B4[2];  /* the current city's marker, a visited
 extern s32 D_800A43DC[];                /* per monster: its icon's sprite */
 extern s32 D_800A43F8[];                /* its animation */
 extern s32 D_800A4414[];                /* its unk_74 */
+
+/* The menus' state machine (func_8009FF38). */
+extern OverattrPlacement D_800A7404[4];  /* the player select's pictures */
+extern u16 D_800A6FC4[];                /* per player number: its bit in D_801E0D64 */
+extern s32 D_800A9290;                  /* the player select's frames left */
+extern s16 D_800A92B2;                  /* D_800A92B0[1] and [2], reached as symbols of their own */
+extern s16 D_800A92B4;
+extern s16 D_801E1CA4;
+void func_800991BC(void);               /* clears the screen's objects */
 
 /* overattr_80099118.c */
 GameObject *func_80099138(OverattrPlacement *p);
