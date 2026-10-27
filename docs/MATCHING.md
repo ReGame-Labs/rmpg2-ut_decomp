@@ -26,7 +26,7 @@ scripts/build.sh                  # splat + ninja; must end "build passed" (also
 | `tools/cc_psx.sh` | The one compile path: cpp → cc1 (`-O2`) → maspsx → GNU as. ninja, the permuter and the scripts all use it. `-V`, `-G`, `-D`, `--data-in-c` |
 | m2c (`tools/ext/m2c`) | First draft: `m2c.py --target mipsel-gcc-c --context <ctx.h> asm/<t>/nonmatchings/<unit>/<func>.s` |
 | `tools/compiler_id.py` | m2c drafts of a whole target, compiled with every GCC, scored; the exact ones are free matches |
-| `tools/unit_diff.py <unit> [func] [-t <target>] [-D NON_MATCHING]` | Scores one C unit against the original per function and data section, no ninja, parallel-safe; with a function, a side-by-side instruction diff |
+| `tools/unit_diff.py <unit> [func] [-t <target>] [-D NON_MATCHING]` | Checks one C unit against the original as the link would write it, per function and data section, and says whether the unit links to the original bytes; no ninja, parallel-safe; with a function, a side-by-side instruction diff |
 | objdiff (`tools/bin/objdiff-cli`) | Per-function diff and the progress report (`objdiff.json`) |
 | asm-differ (`tools/ext/asm-differ/diff.py -mw <func>`) | Live terminal diff |
 | decomp-permuter (`tools/ext/decomp-permuter`) | Random source mutations scored against the target; a hint, never the answer |
@@ -46,6 +46,8 @@ GCC 2.8.1's sources, for reading why the compiler chose something:
 - Names and sizes: `config/symbol_addrs.txt` (the executable) and `config/<overlay>.symbols.txt` (`name = 0x80012345;
   // type:func`, `size:0x34` for structs).
 - After a symbol-file change splat can keep stale `asm/<t>/nonmatchings/*.s`: delete `asm/<t>` or run `build.sh --check`.
+- A constant built with `lui` + `addiu`/`ori` that spimdisasm pairs into a symbol of its own (`D_7FFFFF`, `D_12D00`)
+  makes the matching C score below 100 %: list it in the symbol file with `// ignore:true` and the pair stays numbers.
 - Several names for one address (the original's distinct symbols that the link placed together): splat takes one
   name per address, so the extra names go in `config/aliases.ld` as `other_name = name;` lines, a linker-script
   fragment the executable's link reads; the C uses the names the original did.
@@ -56,9 +58,16 @@ GCC 2.8.1's sources, for reading why the compiler chose something:
 1. **Draft** with m2c (or take the `compiler_id.py` draft) and replace the `INCLUDE_ASM` in `src/<t>/<unit>.c`.
    m2c misreads arguments of calls through function pointers (check `a2`/`a3` and stack stores in the asm) and its
    store order is not source order.
-2. **Score** with `tools/unit_diff.py <unit> <func>`. A near-100% "label-only" difference can hide a real one (a
-   missing `default:`), and unit_diff does not check function order within the file, which the link needs: only the
-   build proves a match.
+2. **Score** with `tools/unit_diff.py <unit> <func>`. A C function is `OK` when its size is the original's and every
+   instruction is the original's word once linked (relocations and branch targets resolved to addresses, the names
+   `config/aliases.ld` gives one address included), its jump table too; `OK (by address)` when objdiff scores it
+   below 100% while the linked words are the same (a relocation naming another symbol for the same address, a
+   constant the original's asm has as a symbol). A function that differs shows
+   objdiff's score (the number to raise) and what differs: its size, the first differing instruction, its jump
+   table. The last line says whether the unit links to the original bytes: every function at its original offset
+   with its original size, the bytes between them, the data sections the C provides; the exit status says the
+   same. The build stays the proof: unit_diff sees one unit, not the .bss the C defines, the other units or a
+   symbol-file change.
 3. **Iterate on natural C**: types, struct fields, statement order, a variable per job (the patterns below). Look for
    an already matched sibling first.
 4. **Stop** after about 30-45 minutes on one function: put the C under `#ifdef NON_MATCHING` with the `INCLUDE_ASM` in

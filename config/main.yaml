@@ -87,7 +87,9 @@ segments:
       - [0x1DD8, .rodata, game_8005D198]       # 0x800115D8 jtbl_800115D8 (func_80060BA8): parity flips
       - [0x1E9C, rodata, rodata_8001169C]     # 0x8001169C const tables and strings of data-only objects (used from .data and from code all over); linked after game_8005D198
       - [0x7290, .rodata, cdload]              # 0x80016A90 jtbl_80016A90 (func_800619A4), jtbl_80016AA8 (func_80061F90)
-      - [0x72C8, rodata, rodata_80016AC8]     # 0x80016AC8 the overlay region's address, twice (D_80016AC8/D_80016ACC: a data-only object), D_80016AD0, then the libraries' .rodata with the sound driver's strings among them
+      - [0x72C8, rodata, rodata_80016AC8]     # 0x80016AC8 the overlay region's address, twice (D_80016AC8/D_80016ACC: a data-only object)
+      - [0x72D0, .rodata, game_800633EC]       # 0x80016AD0 the port masks {1, 2, 4}: the initializer of func_800633EC's local array (GCC puts it in the object's .rodata)
+      - [0x72DC, rodata, rodata_80016ADC]     # 0x80016ADC the libraries' .rodata, with the sound driver's strings among them
       - [0x7F58, asm, crt0]                   # 0x80017758 Psy-Q 2MBYTE.OBJ: the entry point (0x80017760), calls main
       - [0x801C, c, game_8001781C]            # 0x8001781C main first; one object's .rodata parity from jtbl_800105B0 to jtbl_80010768 (func_8002703C): no split inside
       - [0x1AB30, c, game_8002A330]           # 0x8002A330 parity flip between func_8002703C and func_8002C4B8; .data 0x8007C934-0x8007CFD0 is used by func_8002A330-func_8002C0F8 only, after func_80027FD0's tables: placed at its first user (weak: anywhere after func_80027FD0)
@@ -104,7 +106,7 @@ segments:
       - [0x48494, c, game_80057C94]           # 0x80057C94 the data-only objects at 0x8007FC84-0x8008434C are linked between the file of func_80050BBC and the file of func_80057C94 (its .data starts at 0x8008434C, used by func_80057C94-func_8005B8A4): a boundary exists in between; placed at the first user (weak position)
       - [0x4D998, c, game_8005D198]           # 0x8005D198 parity flip between func_8005AE28 and func_80060BA8; func_8005AE28-func_8005D0D8 are tied by calls, func_8005D364-func_8005FB14 by the config tables D_8008427C-D_8008433C (weak position: func_8005D198-func_8005D364)
       - [0x5173C, c, cdload]                  # 0x80060F3C the CD file reader and the overlay loader (docs/DISC_LAYOUT.md): func_80060F3C-func_80061158 use D_801FB49C next to its other state, func_80061170 the file sizes; its .data 0x80085264-0x80085328 follows func_8005B8A4's in link order; func_800619A4-func_80062868 and func_80062C10-func_800632E8 (the stream reader with the second sector buffer) may be files of their own (no evidence)
-      - [0x53BEC, c, game_800633EC]           # 0x800633EC sound setup: func_800633EC-func_800638B0 call each other, .data 0x80085328 (func_800635F4) follows cdload's; D_80016AD0 may be its const table
+      - [0x53BEC, c, game_800633EC]           # 0x800633EC the controllers' vibration: func_800633EC-func_80063A2C call each other and share D_801FB4C4; .data 0x80085308 (func_800634D4, func_8006353C) follows cdload's last (D_80085304, func_8006301C); .rodata 0x80016AD0 is its local array's initializer. GCC 2.8.1 like its neighbours before it: all 12 match with it, the 2.7.2 drafts score lower; the 2.7.2 code starts with the next game object (game_80063A88)
       - [0x54278, asm, psyq/libapi/c57]         # 0x80063A78 InitHeap; the InitHeap stub crt0 calls, placed between game objects
       - [0x54288, c, game_80063A88]           # 0x80063A88 game code: the SPU setup (SpuInit, SpuSetReverbModeParam...), linked after the first library object; .data 0x800853C0-0x800853F4
       - [0x547A8, asm, psyq/libcd/c_011]        # 0x80063FA8 StCdInterrupt
@@ -247,8 +249,8 @@ segments:
       - [0x700FC, data, game_800500EC]        # 0x8007F8FC D_8007F8FC (func_800500EC) to D_8007FBAC (func_80050BBC): the end of the first .data run
       - [0x70484, data, data_8007FC84]        # 0x8007FC84 data-only objects: the screens' tables (500-byte records and 16-byte descriptors, used from code all over) and the config tables D_8008427C-D_8008433C (game_8005D198)
       - [0x74B4C, data, game_80057C94]        # 0x8008434C D_8008434C (func_80057D4C) to D_80085168 (func_8005B880), then unreferenced pieces to cdload's first
-      - [0x75A64, data, cdload]               # 0x80085264 D_80085264 (func_800615FC), the loaded-overlay state, jtbl_80085280 (func_80061B4C), D_80085300 (func_80062C10)
-      - [0x75B28, data, game_800633EC]        # 0x80085328 D_80085328 (func_800635F4)
+      - [0x75A64, data, cdload]               # 0x80085264 D_80085264 (func_800615FC), the loaded-overlay state, jtbl_80085280 (func_80061B4C), D_80085300 (func_80062C10), D_80085304 (func_8006301C)
+      - [0x75B08, data, game_800633EC]        # 0x80085308 D_80085308 (func_800634D4, func_8006353C: the vibration presets), D_80085328 (func_800635F4)
       - [0x75BC0, data, game_80063A88]        # 0x800853C0 D_800853C0-D_800853F0 (the SPU setup's state)
       - [0x75BF4, data, data_800853F4]        # 0x800853F4 the Psy-Q libraries' .data in link order (libcd first, libcard last), with the sound driver's among them
       - [0x790DC, data, data_800888DC]        # 0x800888DC data-only objects linked after the libraries: the file table (D_80089820, D_80089DA0), the per-screen and per-monster tables
