@@ -686,14 +686,14 @@ extern Anim D_8009556C;
 extern s16 D_800AA2EC;
 extern u16 D_801D36FC;                   /* the game mode */
 extern u16 D_801D376C;                   /* the screen's right edge, in pixels */
-extern s16 D_801D37B8;
+extern u16 D_801D37B8;
 extern u16 D_801D37BC;
 extern s16 D_801D3D8A;                   /* D_801D3D64.unk_26 */
 extern s32 D_801D3D98[];
 extern u16 D_801D8738;
 extern u16 D_801D8740;
 extern u16 D_801D87B0;                   /* the screen's left edge, in pixels */
-extern s16 D_801D87B4;
+extern u16 D_801D87B4;
 extern u16 D_801D8866;                   /* the level width's integer half */
 extern s16 D_801E0D4C;
 extern u8 D_801E0D98[];                  /* D_801E0B78[1] */

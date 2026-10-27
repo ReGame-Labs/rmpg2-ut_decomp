@@ -167,20 +167,20 @@ void func_80047554(void *anim, Attacker *at) {
     D_800AA248.cur_obj = saved;
 }
 
-#ifdef NON_MATCHING
-/* 99.6 %: the wrap's 'and' takes the mask as its first operand (and v1,v1,v0); the sum first moves the object to v1 instead of a0 */
-void func_80044204(Attacker *a);
-
 void func_800475F4(Attacker *at) {
     GameObject *saved;
     GameObject *obj;
     s32 vel;
+    s32 x;
 
     obj = at->obj;
     saved = D_800AA248.cur_obj;
     D_800AA248.cur_obj = obj;
     vel = obj->vel_x.w;
-    obj->pos_x.w = D_801D8864.w & (obj->pos_x.w + vel);
+    x = obj->pos_x.w;
+    x += vel;
+    x &= D_801D8864.w;
+    obj->pos_x.w = x;
     vel = D_800AA248.cur_obj->vel_y.w + 0x6500;
     D_800AA248.cur_obj->vel_y.w = vel;
     D_800AA248.cur_obj->pos_y.w += vel;
@@ -190,9 +190,6 @@ void func_800475F4(Attacker *at) {
     }
     D_800AA248.cur_obj = saved;
 }
-#else
-INCLUDE_ASM("asm/main/nonmatchings/game_8004750C", func_800475F4);
-#endif
 
 void func_800476A8(void) {
     u8 *slot;
@@ -2202,25 +2199,25 @@ void func_8004B80C(void) {
 INCLUDE_ASM("asm/main/nonmatchings/game_8004750C", func_8004B80C);
 #endif
 
-#ifdef NON_MATCHING
-/* 91%: the original loads pos_x, vel_x and vel_y before the level width, then adds; the loop's exit tests are laid out the same */
 void func_8004B990(void) {
     u16 n = D_801D8710;
     ThrowRec *rec = D_801F9A54;
     GameObject *saved = D_800AA248.cur_obj;
     GameObject *obj;
-    s32 vy;
+    s32 v;
 
     obj = rec->thrown;
     if (obj != NULL) {
         do {
-            obj->pos_x.w = (obj->pos_x.w + obj->vel_x.w) & D_801D8864.w;
-            vy = obj->vel_y.w + obj->unk_88;
-            if (vy > 0xD0000) {
-                vy = 0xD0000;
+            v = obj->pos_x.w + obj->vel_x.w;
+            v &= D_801D8864.w;
+            obj->pos_x.w = v;
+            v = obj->vel_y.w + obj->unk_88;
+            if (v > 0xD0000) {
+                v = 0xD0000;
             }
-            obj->vel_y.w = vy;
-            obj->pos_y.w += vy;
+            obj->vel_y.w = v;
+            obj->pos_y.w += v;
             if (obj->pos_y.w > 0xDC0000) {
                 obj->pos_y.w = 0xDC0000;
                 obj->unk_88 = 0;
@@ -2238,9 +2235,6 @@ void func_8004B990(void) {
     }
     D_800AA248.cur_obj = saved;
 }
-#else
-INCLUDE_ASM("asm/main/nonmatchings/game_8004750C", func_8004B990);
-#endif
 
 void func_8004BAC0(void) {
     s32 i;

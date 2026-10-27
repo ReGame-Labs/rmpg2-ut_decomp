@@ -1061,14 +1061,13 @@ void func_8004DC08(Monster *m, Monster *other) {
 INCLUDE_ASM("asm/main/nonmatchings/game_8004C064", func_8004DC08);
 #endif
 
-#ifdef NON_MATCHING
-/* 79%: the order of the stores around the random call */
 void func_8004DC7C(Monster *m, Monster *other) {
     s16 action;
 
-    action = 0x1C;
     if (func_8001EB10(0xF, 0) & 1) {
         action = 0x39;
+    } else {
+        action = 0x1C;
     }
     other->action = action;
     other->unk_0E4 = m->id;
@@ -1077,9 +1076,6 @@ void func_8004DC7C(Monster *m, Monster *other) {
     D_800AA2C0 = 1;
     func_800540D0(m);
 }
-#else
-INCLUDE_ASM("asm/main/nonmatchings/game_8004C064", func_8004DC7C);
-#endif
 
 void func_8004DCFC(GameObject *obj, Monster *m, Monster *other) {
     s32 vel;

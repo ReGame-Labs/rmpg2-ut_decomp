@@ -510,8 +510,6 @@ void func_8004F470(s32 arg0, Monster *m) {
     m->action = 0xA;
 }
 
-#ifdef NON_MATCHING
-/* 95%: the definition's id is stored after its y; the C stores it before */
 void func_8004F47C(void) {
     GameObject *saved = D_800AA248.cur_obj;
     Monster *m = saved->owner.monster;
@@ -538,8 +536,8 @@ void func_8004F47C(void) {
         D_800AA248.new_def = def;
         def->pos_x.s.hi = m->pos.s.lo;
         def->pos_y.s.hi = m->pos.s.hi;
-        def->id = 0x4F00000C;
         def->flags = saved->unk_80 + 1;
+        def->id = 0x4F00000C;
         D_800AA248.cur_obj = func_8001DCB4();
         m->unk_16C = D_800AA248.cur_obj;
     }
@@ -547,9 +545,6 @@ void func_8004F47C(void) {
     func_80020BA0(*arg, D_800AA248.cur_obj->flags, D_800AA248.cur_obj);
     D_800AA248.cur_obj = saved;
 }
-#else
-INCLUDE_ASM("asm/main/nonmatchings/game_8004E574", func_8004F47C);
-#endif
 
 void func_8004F65C(void) {
     Monster *m = D_800AA248.cur_obj->owner.monster;

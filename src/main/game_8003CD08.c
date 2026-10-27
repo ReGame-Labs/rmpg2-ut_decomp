@@ -739,26 +739,23 @@ void func_8003E788(Ai *ai) {
     ai->unk_10.order = NULL;
 }
 
-#ifdef NON_MATCHING
-/* 73.78 %: the success block is placed after the fail block in the original (an if/else whose fail arm is the fallthrough) and the result is copied through v1 before the store */
 s32 func_8003E79C(void) {
     s16 x;
 
     if (D_801D37B8 != 0) {
-        x = ((s16 *)&D_800AA248.cur_obj->pos_x.w)[1];
+        x = D_800AA248.cur_obj->pos_x.s.hi;
         if (x >= D_801D37B8 && x <= D_801D87B4) {
-            D_800AA248.unk_4C = 0;
-            D_800AA248.unk_78 = 1;
-            return 1;
+            goto inside;
         }
     }
     func_80030338(D_800AA248.cur_obj);
     D_800AA248.unk_78 = 0;
     return 0;
+inside:
+    D_800AA248.unk_4C = 0;
+    D_800AA248.unk_78 = 1;
+    return 1;
 }
-#else
-INCLUDE_ASM("asm/main/nonmatchings/game_8003CD08", func_8003E79C);
-#endif
 
 void func_8003E830(void) {
     if (D_801FA960 >= 0x5E && D_801FA960 != 0x63 && D_801D8728 == 0) {
@@ -1128,8 +1125,6 @@ s16 func_8003FCD8(s32 arg0, s32 arg1) {
     return r;
 }
 
-#ifdef NON_MATCHING
-/* 89.39 %: the right shape and calls; the original keeps three copies of the facing test (the v >= 2 one is not cross-jumped into the last one) and the neg path jumps into the first */
 void func_8003FD30(Actor *actor) {
     u16 v;
 
@@ -1142,10 +1137,10 @@ void func_8003FD30(Actor *actor) {
             func_8003FE70(actor);
         }
     } else if (v >= 2) {
-        if (D_800AA268.p->flags & 0x10) {
-            func_8003FE70(actor);
-        } else {
+        if (!(D_800AA268.p->flags & 0x10)) {
             func_8003FE40(actor);
+        } else {
+            func_8003FE70(actor);
         }
     } else if (D_800AA248.unk_00 < 0) {
         actor->unk_10 = 2;
@@ -1163,9 +1158,6 @@ void func_8003FD30(Actor *actor) {
         }
     }
 }
-#else
-INCLUDE_ASM("asm/main/nonmatchings/game_8003CD08", func_8003FD30);
-#endif
 
 void func_8003FE14(Actor *actor) {
     actor->unk_E = 0;
@@ -1434,15 +1426,14 @@ void func_80040900(Actor *actor) {
     func_800415B4();
 }
 
-#ifdef NON_MATCHING
-/* 97.05 %: register names only (the mover in v0, the sum in a1) */
 void func_80040930(Actor *actor) {
     GameObject *mover;
     s32 v;
 
     mover = actor->unk_0;
     D_800AA248.cur_obj = mover;
-    v = (mover->vel_x.w + mover->pos_x.w) & D_801D8864.w;
+    v = mover->vel_x.w + mover->pos_x.w;
+    v &= D_801D8864.w;
     mover->pos_x.w = v;
     v = D_800AA248.cur_obj->vel_y.w + 0x6500;
     D_800AA248.cur_obj->vel_y.w = v;
@@ -1452,9 +1443,6 @@ void func_80040930(Actor *actor) {
         func_800415B4();
     }
 }
-#else
-INCLUDE_ASM("asm/main/nonmatchings/game_8003CD08", func_80040930);
-#endif
 
 #ifdef NON_MATCHING
 /* 96.48 %: register names only, as func_80040930 */
