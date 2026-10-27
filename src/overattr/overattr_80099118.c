@@ -34,11 +34,186 @@ void func_800991BC(void) {
     D_801FA88C = 0;
 }
 
-INCLUDE_ASM("asm/overattr/nonmatchings/overattr_80099118", func_800991EC);
+void func_800991EC(void) {
+    s32 i;
+    s32 done;
+    Monster *m;
+    u8 *name;
+    Monster *winner;
 
-INCLUDE_ASM("asm/overattr/nonmatchings/overattr_80099118", func_8009951C);
+    done = 1;
+    i = 0;
+    do {
+        m = &D_801E0B78[func_80025DF8(i + 1)];
+        if (m->id != 0) {
+            if ((u32) m->unk_0A4[0]->unk_64 < m->unk_020) {
+                m->unk_0A4[0]->unk_64++;
+                done = 0;
+                if ((u32) m->unk_0A4[0]->script_pc < 0x46) {
+                    m->unk_0A4[0]->script_pc = m->unk_0A4[0]->unk_64 * 2 + 0xB;
+                    m->unk_0A4[0]->pos_y.s.hi = 0xCC - m->unk_0A4[0]->script_pc;
+                }
+            }
+            if ((u32) m->unk_0A4[1]->unk_64 < m->unk_024) {
+                m->unk_0A4[1]->unk_64++;
+                done = 0;
+                if ((u32) m->unk_0A4[1]->script_pc < 0x46) {
+                    m->unk_0A4[1]->script_pc = m->unk_0A4[1]->unk_64 * 2 + 0xB;
+                    m->unk_0A4[1]->pos_y.s.hi = 0xCC - m->unk_0A4[1]->script_pc;
+                }
+            }
+            if ((u32) m->unk_0A4[2]->unk_64 < m->unk_026) {
+                m->unk_0A4[2]->unk_64++;
+                done = 0;
+                if ((u32) m->unk_0A4[2]->script_pc < 0x46) {
+                    m->unk_0A4[2]->script_pc = m->unk_0A4[2]->unk_64 * 2 + 0xB;
+                    m->unk_0A4[2]->pos_y.s.hi = 0xCC - m->unk_0A4[2]->script_pc;
+                }
+            }
+        }
+        i++;
+    } while (i < 3);
+    if (--D_801E29BC == 0) {
+        D_801D3780++;
+        func_8001E450(0x400);
+    }
+    if (done == 1 && D_800A9230 == done) {
+        D_800A9230 = 0;
+        if (D_801D8740 >= 2) {
+            winner = D_800A9258;
+            if (winner->id == 7 && D_801F9ABC != 0) {
+                if (D_801F9ABC == 3) {
+                    name = "??????";
+                } else {
+                    name = "NOOB MYUKUS";
+                }
+            } else {
+                name = D_8007F8E0[winner->id - 1];
+            }
+            func_8001F61C(name, 0xC8, 0x64, 1, D_801F9AAC, D_8007ABCC, 0, 0x400);
+            func_8001F61C("WINS", 0xC8, 0x8C, 1, D_801F9AAC, D_8007ABCC, 0, 0x400);
+        }
+        i = 0;
+        do {
+            i++;
+            m = &D_801E0B78[func_80025DF8(i)];
+            if (m->id != 0) {
+                m->unk_020 = 0;
+                m->unk_024 = 0;
+                m->unk_026 = 0;
+            }
+        } while (i < 3);
+    }
+}
 
-INCLUDE_ASM("asm/overattr/nonmatchings/overattr_80099118", func_800996CC);
+void func_8009951C(void) {
+    s32 i;
+    s32 x;
+    Monster *m;
+
+    for (i = 0; i < 3; i++) {
+        m = &D_801E0B78[func_80025DF8(i + 1)];
+        if (m->id != 0) {
+            m->unk_0A4[0] = func_8001EB9C(0, 0, 0x10, 1, 0xFF00);
+            x = i * 0x78;
+            m->unk_0A4[0]->pos_x.s.hi = x + 0x2D;
+            m->unk_0A4[0]->pos_y.s.hi = 0xCC;
+            m->unk_0A4[0]->unk_80 = 0x19;
+            m->unk_0A4[0]->flags |= 0x400;
+            m->unk_0A4[0]->unk_64 = 0;
+            m->unk_0A4[1] = func_8001EB9C(0, 0, 0x10, 1, 0xFFFF);
+            m->unk_0A4[1]->pos_x.s.hi = x + 0x48;
+            m->unk_0A4[1]->pos_y.s.hi = 0xCC;
+            m->unk_0A4[1]->unk_80 = 0x19;
+            m->unk_0A4[1]->flags |= 0x400;
+            m->unk_0A4[1]->unk_64 = 0;
+            m->unk_0A4[2] = func_8001EB9C(0, 0, 0x10, 1, 0xFF00FF);
+            m->unk_0A4[2]->pos_x.s.hi = x + 0x65;
+            m->unk_0A4[2]->pos_y.s.hi = 0xCC;
+            m->unk_0A4[2]->unk_80 = 0x19;
+            m->unk_0A4[2]->flags |= 0x400;
+            m->unk_0A4[2]->unk_64 = 0;
+        }
+    }
+}
+
+void func_800996CC(void) {
+    s16 scores[3];
+    s16 best;
+    u16 c;
+    s16 a = 1;             /* the weights of the three tallies, by city */
+    u16 b;
+    s32 i;
+    s32 j;
+    Monster *m;
+    OverattrPlacement *p;
+    GameObject *obj;
+    s32 id;
+
+    D_801F9AC8.w = 0;
+    D_801F9ACC = 0;
+    func_8001A420();
+    func_80017B24();
+    func_8001AC18(0xA, 0x17);
+    func_8001F7F8(0x8001);
+    D_800A9230 = 1;
+    func_8009F968(D_800A73C4, 4, 0x606060);
+    best = 0;
+    b = 1;
+    c = 1;
+    switch (D_801FA960 % 3) {
+    case 0:
+        a = 1;
+        b = 4;
+        break;
+    case 1:
+        a = 2;
+        b = 1;
+        break;
+    case 2:
+        a = 1;
+        b = 1;
+        c = 3;
+        break;
+    }
+    for (i = 0; i < 3; i++) {
+        scores[i] = 0;
+        m = &D_801E0B78[func_80025DF8(i + 1)];
+        id = m->id;
+        if (id != 0) {
+            p = D_800A353C;
+            for (j = 0; j < 2; j++) {
+                func_80099138(p++)->pos_x.s.hi = i * 0x78 + 0x1E;
+            }
+            func_80099138(&D_800A355C)->pos_x.s.hi = i * 0x78 + 0x23;
+            scores[i] = m->unk_020 * a + b * m->unk_026 + c * m->unk_024;
+            if (best < scores[i]) {
+                best = scores[i];
+                D_800A9258 = m;
+            }
+        }
+    }
+    for (i = 0; i < 3; i++) {
+        m = &D_801E0B78[func_80025DF8(i + 1)];
+        id = m->id;
+        if (id != 0) {
+            if (D_800A9258 == m) {
+                p = &D_800A344C[id];
+            } else {
+                p = &D_800A34BC[id];
+            }
+            obj = func_80099138(p);
+            obj->pos_x.s.hi = i * 0x78 + 0x4B;
+            if (D_801F9ABC == 3 && id == 7) {
+                obj->unk_74 = 0xF;
+            } else if (D_801F9ABC == 4 && id == 7) {
+                obj->unk_74 = 0x10;
+            }
+        }
+    }
+    func_8009951C();
+    D_801E29BC = 0x1E0;
+}
 
 void func_800999F8(u32 which) {
     switch (which) {
@@ -94,27 +269,24 @@ INCLUDE_ASM("asm/overattr/nonmatchings/overattr_80099118", func_8009A708);
 
 INCLUDE_ASM("asm/overattr/nonmatchings/overattr_80099118", func_8009AE40);
 
-#ifdef NON_MATCHING
-/* 98.4 %: the counter and the pointer swap s0/s1. */
 void func_8009B0F0(void) {
     s32 i;
     OverattrPlacement *p;
 
     func_8001A420();
-    i = 0;
     func_80017B24();
     func_8001AC18(0xA, 0x28);
     D_801D3D7C = 0;
     SetDispMask(1);
+    i = 0;
     p = D_800A4430;
     do {
         func_80099138(p++);
-        i++;
+        /* Class B: the inner loop counts the counter's references twice, so it gets s0 before the pointer (every
+         * statement order, loop form and fresh variable leaves the two swapped). */
+        LOOP_BLOCK(i++;);
     } while (i < 4);
 }
-#else
-INCLUDE_ASM("asm/overattr/nonmatchings/overattr_80099118", func_8009B0F0);
-#endif
 
 u8 *func_8009B160(s16 n) {
     return func_80025C08(D_800A49D4)->text[n];

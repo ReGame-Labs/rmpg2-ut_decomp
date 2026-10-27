@@ -317,8 +317,6 @@ void card_init_save(CardSave *save) {
     save->checksum = card_calc_checksum(save);
 }
 
-#ifdef NON_MATCHING
-/* 99.2 %: the punctuation table's address and the index swap v0/v1. */
 s16 card_ascii_to_sjis(u8 c) {
     s32 run;
     u8 skip;
@@ -344,16 +342,14 @@ s16 card_ascii_to_sjis(u8 c) {
         return 0;
     }
     if (skip != 0) {
+        u16 *punct = D_800A340C;
         first = skip + 0x1F;
-        code = D_800A340C[c - first];
+        code = punct[c - first];
     } else {
         code = D_800A3400[run].sjis + c - D_800A3400[run].ascii;
     }
     return ((code & 0xFF) << 8) | ((code & 0xFF00) >> 8);
 }
-#else
-INCLUDE_ASM("asm/overattr/nonmatchings/card", card_ascii_to_sjis);
-#endif
 
 void card_string_to_sjis(s16 *dst, u8 *src) {
     while (*src != 0) {

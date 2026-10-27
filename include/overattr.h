@@ -18,6 +18,7 @@ void func_8001EC74(s32 kind, s32 value); /* sets unk_74 of every object of a kin
 void func_8001A420(void);
 void func_80017B24(void);
 void func_8001AC18(s32, s32);
+void func_8001F7F8(s32 id);
 /* What func_80025C08 picks from the list D_800A49D4: the three texts func_8009B19C prints. */
 typedef struct {
     u8 *text[3];
@@ -31,6 +32,12 @@ void func_8001E8C0(s32 kind, s32 arg1);
 void func_8001F61C(u8 *text, s16 x, s16 y, s32 spacing, s32 arg4, s32 *glyphs, s32 kind, s32 arg7); /* draws a text */
 
 extern s32 D_8007ABCC[];               /* a font's glyphs */
+GameObject *func_8001EB9C(s32 x, s32 y, s32 w, s32 h, s32 colour); /* creates a coloured box */
+s32 func_80025DF8(s32 player);          /* the monster number of a player */
+extern u8 *D_8007F8E0[];               /* the monsters' names, by number - 1 */
+extern Monster *D_800A9258;             /* the round's winner (func_800996CC) */
+extern s32 D_800A9230;
+extern s16 D_801E29BC;
 extern s16 D_801F9AAC;                 /* the printer's normal colour */
 
 void func_8001F724(u16 id);            /* plays a sound or a music by id; 0xFFFF stops */
@@ -76,6 +83,11 @@ typedef struct {
 } OverattrPlacement;
 
 extern OverattrPlacement D_800A4430[4];
+extern OverattrPlacement D_800A344C[];  /* the winner's portrait, by monster number */
+extern OverattrPlacement D_800A34BC[];  /* the others' portraits, by monster number */
+extern OverattrPlacement D_800A353C[2];
+extern OverattrPlacement D_800A355C;
+extern OverattrPlacement D_800A73C4[4];
 
 typedef struct { u32 colors[8]; } CardClut;   /* the save icon's 16-colour CLUT, two per word */
 typedef struct { u32 pixels[32]; } CardIcon;  /* a 16x16 4-bit icon frame */
@@ -208,6 +220,7 @@ void card_string_to_sjis(s16 *dst, u8 *src);
 /* overattr_80099118.c */
 GameObject *func_80099138(OverattrPlacement *p);
 void func_800A0CC0(void);
+void func_8009F968(OverattrPlacement *p, s32 n, s32 color);
 void func_8009E3C0(s32 kind, s32 value);
 void func_8009E40C(void *list, s32 selected);
 void func_8009E4D4(void);
