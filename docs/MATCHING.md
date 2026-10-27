@@ -28,13 +28,13 @@ scripts/build.sh                  # splat + ninja; must end "build passed" (also
 | m2c (`tools/ext/m2c`) | By hand: `m2c.py --target mipsel-gcc-c --context <ctx.h> asm/<t>/nonmatchings/<unit>/<func>.s` (`draft.py --context` prints a unit's) |
 | `tools/compiler_id.py` | m2c drafts of a whole target, compiled with every GCC, scored; the exact ones are free matches |
 | `tools/unit_diff.py <unit> [func] [-t <target>] [-D NON_MATCHING]` | Checks one C unit against the original as the link would write it, per function and data section, and says whether the unit links to the original bytes; no ninja, parallel-safe; with a function, a side-by-side instruction diff |
-| `tools/variant.py get/put/try/perm <func> [file]` | The loop's scorer: puts C in place of a function in a copy of its unit and scores it with unit_diff's comparison (`put`), ranks variants (`try`), compiles every order of marked lines (`perm`); writes the unit only to keep a candidate, as C when it matches or as a WIP block (`--wip`) |
+| `tools/variant.py get/put/try/perm <func> [file]` | The loop's scorer: puts C in place of a function in a copy of its unit and scores it with unit_diff's comparison (`put`), ranks variants (`try`), compiles every order of marked lines (`perm`); writes the unit only to keep a candidate, as C when it matches or as a WIP block (`--wip`); `-s` the aligned diff, `--dump` cc1's register allocation |
 | objdiff (`tools/bin/objdiff-cli`) | Per-function diff and the progress report (`objdiff.json`) |
 | asm-differ (`tools/ext/asm-differ/diff.py -mw <func>`) | Live terminal diff |
 | decomp-permuter (`tools/ext/decomp-permuter`) | Random source mutations scored against the target; a hint, never the answer |
 | `tools/split_case_sizes.py asm/<t>/X.s` | `size:` lines that merge switch-case pieces spimdisasm split off as `jlabel` functions |
 | `tools/psyq_match.py` | Psy-Q library objects by signature (`--symbols` writes their names); `--functions` names the functions of the config's `psyq/` units one by one |
-| cc1 dump flags | `-dL` (loop.c hoisting decisions), `-dl`/`-dg` (local/global allocation priorities) |
+| cc1 dump flags | `-dL` (loop.c hoisting decisions), `-dl`/`-dg` (local/global allocation priorities); `variant.py --dump`, `cc_psx.sh --cc1 -dL -S` |
 
 GCC 2.8.1's sources, for reading why the compiler chose something:
 `https://raw.githubusercontent.com/gcc-mirror/gcc/releases/gcc-2.8.1/gcc/<file>.c` (`sched.c`, `loop.c`, `local-alloc.c`,
@@ -69,9 +69,19 @@ GCC 2.8.1's sources, for reading why the compiler chose something:
    `a2`/`a3` and stack stores in the asm) and its store order is not source order.
 2. **Score** with `tools/variant.py put <func> <file.c>`. It puts the C in place of the function (its `INCLUDE_ASM`,
    its C or its WIP block) in a copy of the unit under `build/variant/`, compiles the unit as the build does and
-   checks it with `unit_diff.py`'s comparison; `-s` adds the side-by-side diff. The unit's file changes only when
-   the C matches: the function passes and the whole unit links to the original bytes. `variant.py get <func>` prints
-   a function's C (a WIP's C), the start of a variants file.
+   checks it with `unit_diff.py`'s comparison; `-s` adds the side-by-side diff, aligned (difflib) so that an
+   inserted or missing instruction shows as one line (`>` only in the C, `<` only in the original) and branch
+   targets and relocated fields compare through the alignment, as linked; `-C N` lines of context (`-1` all). The
+   unit's file changes only when the C matches: the function passes and the whole unit links to the original bytes.
+   `variant.py get <func>` prints a function's C (a WIP's C), the start of a variants file. Declarations put above
+   the function that the unit already has before it are left out, so putting a function again does not repeat them.
+   - `--dump` (with `put`, `try`, `perm`, `get`) shows why a value landed in its register: cc1's `-dl`/`-dg` of the
+     candidate, per pseudo of the function its refs, live length (insns), priority, place in global-alloc's order
+     and hard register, then local-alloc's block-local pseudos, then the variables' registers (`-g`). Global-alloc
+     takes the pseudos by priority = floor_log2(refs) × refs / live length, each into a register it prefers
+     (`prefers`) when free, else the first free one (an `s` register for a pseudo crossing a call): more refs or a
+     shorter life move a value up. `--dump L` (`c`, `lg`, `loop,combine`, ...) also prints those dumps' text of the
+     function.
    - A C function is `OK` when its size is the original's and every instruction is the original's word once linked
      (relocations and branch targets resolved to addresses, the names `config/aliases.ld` gives one address
      included), its jump table too; `OK (by address)` when objdiff scores it below 100% while the linked words are
@@ -229,8 +239,9 @@ Each pattern below matched at least one GCC 2.8.1 function. Try them before sear
 - cse doesn't merge `(x + 1) * 8 - 1` with `x * 8`.
 
 ### Register allocation
-- Global allocation priority is `floor_log2(refs) × refs / live_length` (`-dl`/`-dg` print it); references inside a
-  loop count twice. Code repeated per case or branch and merged later by cross-jumping still counts.
+- Global allocation priority is `floor_log2(refs) × refs / live_length` (`-dl`/`-dg` print it, `variant.py --dump` per
+  pseudo); references inside a loop count twice. Code repeated per case or branch and merged later by cross-jumping
+  still counts.
 - Give each job its own variable: one per loop, one per switch case (block-local), one per branch when branches swap
   fields, fresh block-locals for intermediates. Yet the original also reuses counters and flags across loops: try a
   rename search over both directions.

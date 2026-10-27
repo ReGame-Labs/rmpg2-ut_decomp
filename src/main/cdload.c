@@ -118,7 +118,7 @@ s32 wess_module_size(s32);
 void wess_load_module(s32, void *, s32);
 s32 wess_sequence_header(SoundDriver *, s32);
 void wess_load_sequence_table(void *, s32, s32, void *, s32);
-SoundDriver *func_8006EC08(void);
+SoundDriver *wess_get_driver(void);
 s32 wess_sequence_count(void);
 s32 func_80070298(s32, s32);
 s32 func_80070324(s32, s32, void *);
@@ -803,7 +803,155 @@ s32 cdload_unpack_rle4(u8 *src, u8 *dst) {
     return dst - start;
 }
 
+#ifdef NON_MATCHING
+/* 78.10%: 78.1 %: the shape of cdload_unpack_vlc8 with the depth-bit byte reader per pixel; the original spills two
+ * more values (a 0x60 frame, here 0x50) and keeps the header in t3 */
+void cdload_unpack_vlc(VlcHeader *hdr, u32 *in, u32 dims, u8 *dst) {
+    VlcTable *t;
+    u32 cur;
+    u32 next;
+    s32 left;
+    s32 x;
+    s32 n;
+    s32 k;
+    u8 *values;
+    u8 *pix;
+    u8 *row2;
+    s32 w;
+    s32 words;
+    s32 count;
+    s32 col;
+    s32 skip;
+    s32 rows;
+    s32 depth;
+    s32 stride;
+    u32 c;
+    u32 c2;
+    s32 bleft;
+    VlcLens *lens;
+    VlcRunLens *run_lens;
+    VlcBases *bases;
+    VlcRunBases *run_bases;
+
+    cur = *in++;
+    next = *in++;
+    left = 26;
+    rows = hdr->rows;
+    t = &hdr->tables[cur >> 26];
+    depth = t->depth;
+    cur <<= 6;
+    if (depth == 8) {
+        cdload_unpack_vlc8(hdr, in - 2, dims, dst);
+        return;
+    }
+    run_lens = (VlcRunLens *)0x1F80001A;
+    bases = (VlcBases *)0x1F800020;
+    run_bases = (VlcRunBases *)0x1F800054;
+    lens = (VlcLens *)0x1F800000;
+    *lens = t->lens;
+    values = (u8 *)&hdr->tables[hdr->count] + t->values;
+    *bases = t->bases;
+    w = dims & 0xFFFF;
+    *run_lens = t->run_lens;
+    *run_bases = t->run_bases;
+    count = (w / 4) * (((s32)dims >> 16) / rows);
+    words = w / 4;
+    stride = rows * (depth * 4) / 8;
+    col = 0;
+    skip = (rows - 1) * w;
+    do {
+        n = 4;
+        x = 0;
+        if (left < n) {
+            x = cur >> (32 - n);
+            cur = next;
+            next = *in++;
+            n -= left;
+            left = 32;
+        }
+        x |= cur >> (32 - n);
+        left -= n;
+        cur <<= n;
+        if (x >= 13) {
+            k = x - 13;
+            n = run_lens->len[k];
+            x = 0;
+            if (left < n) {
+                x = cur >> (32 - n);
+                cur = next;
+                next = *in++;
+                n -= left;
+                left = 32;
+            }
+            x |= cur >> (32 - n);
+            left -= n;
+            cur <<= n;
+            x += run_bases->base[k];
+            count = count - 1 - x;
+            for (; x >= 0; x--) {
+                col++;
+                *(s32 *)dst = 0;
+                *(s32 *)(dst + w) = 0;
+                dst += 4;
+                if (col == words) {
+                    dst += skip;
+                    col = 0;
+                }
+            }
+        } else {
+            k = x;
+            n = lens->len[k];
+            x = 0;
+            if (left < n) {
+                n -= left;
+                left = 32;
+                x = cur >> (32 - lens->len[k]);
+                cur = next;
+                next = *in++;
+            }
+            x |= cur >> (32 - n);
+            left -= n;
+            cur <<= n;
+            pix = values + (x + bases->base[k]) * stride;
+            c = *pix++;
+            c2 = *pix++;
+            bleft = 8;
+#define VLC_PIXEL(out)                  \
+            n = depth;                  \
+            x = 0;                      \
+            if (bleft < n) {            \
+                x = c >> (8 - n);       \
+                c = c2;                 \
+                c2 = *pix++;            \
+                n -= bleft;             \
+                bleft = 8;              \
+            }                           \
+            out = x | (c >> (8 - n));   \
+            bleft -= n;                 \
+            c = (u8)(c << n);
+            VLC_PIXEL(dst[0]);
+            VLC_PIXEL(dst[1]);
+            VLC_PIXEL(dst[2]);
+            VLC_PIXEL(dst[3]);
+            row2 = dst + w;
+            VLC_PIXEL(row2[0]);
+            VLC_PIXEL(row2[1]);
+            VLC_PIXEL(row2[2]);
+            VLC_PIXEL(row2[3]);
+#undef VLC_PIXEL
+            col++;
+            dst += 4;
+            if (col == words) {
+                dst += skip;
+                col = 0;
+            }
+            count--;
+        }
+    } while (count > 0);
+}
+#else
 INCLUDE_ASM("asm/main/nonmatchings/cdload", cdload_unpack_vlc);
+#endif
 
 #ifdef NON_MATCHING
 /* 95.82%: registers (cur/next/left take t1/t8/t0 for the original's t0/t7/t2) and the count/skip setup
@@ -965,9 +1113,9 @@ void cdload_init_sound(void) {
     func_800706C0(&io);
     size = wess_module_size(0x4F);
     wess_load_module(0x4F, cdload_alloc(size), size);
-    bank_size = wess_sequence_header(func_8006EC08(), 0x50);
+    bank_size = wess_sequence_header(wess_get_driver(), 0x50);
     buf = cdload_alloc(bank_size);
-    wess_load_sequence_table(func_8006EC08(), 0x50, 0, buf, bank_size);
+    wess_load_sequence_table(wess_get_driver(), 0x50, 0, buf, bank_size);
     seqs = cdload_alloc(func_80070298(0, wess_sequence_count()));
     func_80070324(0, wess_sequence_count(), seqs);
     D_801FB4C0 = 0x1010;

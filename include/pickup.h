@@ -23,7 +23,7 @@ typedef struct SpawnItem {
 /* The eight 0x58-byte records of D_801FA9BC (D_801E29B0 in use), made from the spawn list D_8007DDA4 by
  * pickup_spawn_all: each with an object, a kind (unk_06, 1..0x1C) and a state (unk_08: 1 new, 2 live, 3 taken).
  * pickup_update runs the kind's handler (building_update_pickup for 1..19 in building.c, the others in the first part of
- * npc.c); the pickup checks (pickup_collect, func_8005BF54, func_8005C71C, func_8005CC54) hand one to the
+ * npc.c); the pickup checks (pickup_collect, func_8005BF54, monster_anim_blast_pickups, func_8005CC54) hand one to the
  * monster that touches it (unk_54). Their head is the behaviour records' (game.h, Ai), and matches the 0x78-byte Npc up to 0x38. */
 typedef struct Pickup {
     /* 0x00 */ GameObject *obj;
