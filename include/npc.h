@@ -117,6 +117,19 @@ typedef struct Npc {
 extern Npc D_801FAC9C[6];
 extern u16 D_801D8730;                   /* how many of D_801FAC9C are live */
 
+/* The speeds of the throws npc.c makes (func_80039358), by kind 1..3: the object's velocity and the Throw's vertical
+ * acceleration (Throw.unk_0C). */
+typedef struct NpcThrowSpeed {
+    s32 vel_x;
+    s32 vel_y;
+    s32 accel_y;
+} NpcThrowSpeed;
+
+extern NpcThrowSpeed D_8007DAC8[];
+extern Anim D_80095F80;
+extern Anim D_80095FA4;
+extern Anim D_80095FC8;
+
 /* The throw kinds npc.c makes (func_8004A9B0 calls the first two) and runs (func_8004AD18's handlers). */
 u16 func_80039358(Monster *m, u16 a, u16 kind, Throw *t);
 u16 func_8003A5A0(u16 a, u16 kind, Throw *t, s32 alt);

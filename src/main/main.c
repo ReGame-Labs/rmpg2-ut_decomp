@@ -4190,8 +4190,8 @@ void func_80023CFC(Npc *npc) {
 }
 
 #ifdef NON_MATCHING
-/* 95.32%: the first test's registers: the original keeps 0x2FFFFF in v1 and the difference in a0 (C: a0 and v0, as
- * func_80023CB8 compiles the same test); the rest matches */
+/* 98.63%: the absolute values: the original copies the difference into a0 before negating (move a0,v0), the C
+ * negates v1 in the first branch and drops the copy in the second */
 void func_80023E30(Npc *npc) {
     GameObject *obj;
     s32 vx;
@@ -4202,7 +4202,8 @@ void func_80023E30(Npc *npc) {
         return;
     }
     obj = D_800AA268.p;
-    if (obj->pos_y.w - D_801F9ACC.w <= 0x2FFFFF) {
+    d = obj->pos_y.w - D_801F9ACC.w;
+    if (d <= 0x2FFFFF) {
         vx = obj->vel_x.w;
         if (vx != 0) {
             if (vx > 0) {
