@@ -483,13 +483,14 @@ void cdload_load_city_table(s32 index) {
 }
 
 /* Unpacks a packed file into dst by the method in the low nibble of its byte 3; returns the unpacked size. */
-/* 84.8%: dst is kept in a3 in the original (a1 here), which moves every case's argument setup */
+/* 85.7%: dst is kept in a3 in the original (a1 here: something keeps a1 live, maybe a used second parameter), which
+ * moves every case's argument setup */
 #ifdef NON_MATCHING
 s32 func_800619A4(u8 *dst, s32 arg1, u8 *src) {
     s32 size;
     u32 dims;
 
-    switch (((s8 *)src)[3] & 0xF) {
+    switch ((*(s32 *)src >> 24) & 0xF) {
     case 0:
         size = *(u32 *)src & 0xFFFFFF;
         memcpy(dst, src + 4, size);
@@ -544,70 +545,24 @@ s32 func_80061ACC(u8 *src, u8 *dst) {
 INCLUDE_ASM("asm/main/nonmatchings/cdload", func_80061B4C);
 
 /* Takes the next 6-bit symbol of the stream: four per three bytes, most significant first. */
-#define CDLOAD_GET6(x)                                      \
-    switch (phase++) {                                      \
-    case 0:                                                 \
-        b0 = *in++;                                         \
-        b1 = *in++;                                         \
-        b2 = *in++;                                         \
-        x = b0 >> 2;                                        \
-        break;                                              \
-    case 1:                                                 \
-        x = (b1 >> 4) | ((b0 << 4) & 0x30);                 \
-        break;                                              \
-    case 2:                                                 \
-        x = ((b1 << 2) & 0x3C) | (b2 >> 6);                 \
-        break;                                              \
-    case 3:                                                 \
-        x = b2 & 0x3F;                                      \
-        phase = 0;                                          \
-        break;                                              \
-    }
-
-/* Unpacks a 6-bit RLE stream: a symbol below 32 repeats the next one that many times plus one, a symbol from 32
- * copies that many minus 31 symbols; the top two bits of byte 3 count the padding symbols at the end. */
-/* Takes the next 6-bit symbol of the stream: four per three bytes, most significant first. */
-#define CDLOAD_GET6(x)                                      \
-    switch (phase++) {                                      \
-    case 0:                                                 \
-        b0 = *src++;                                         \
-        b1 = *src++;                                         \
-        b2 = *src++;                                         \
-        x = b0 >> 2;                                        \
-        break;                                              \
-    case 1:                                                 \
-        x = (b1 >> 4) | ((b0 << 4) & 0x30);                 \
-        break;                                              \
-    case 2:                                                 \
-        x = ((b1 << 2) & 0x3C) | (b2 >> 6);                 \
-        break;                                              \
-    case 3:                                                 \
-        x = b2 & 0x3F;                                      \
-        phase = 0;                                          \
-        break;                                              \
-    }
-
-/* Unpacks a 6-bit RLE stream: a symbol below 32 repeats the next one that many times plus one, a symbol from 32
- * copies that many minus 31 symbols; the top two bits of byte 3 count the padding symbols at the end. */
-/* Takes the next 6-bit symbol of the stream: four per three bytes, most significant first. */
-#define CDLOAD_GET6(x)                                      \
-    switch (phase++) {                                      \
-    case 0:                                                 \
-        b0 = *src++;                                         \
-        b1 = *src++;                                         \
-        b2 = *src++;                                         \
-        x = b0 >> 2;                                        \
-        break;                                              \
-    case 1:                                                 \
-        x = (b1 >> 4) | ((b0 << 4) & 0x30);                 \
-        break;                                              \
-    case 2:                                                 \
-        x = ((b1 << 2) & 0x3C) | (b2 >> 6);                 \
-        break;                                              \
-    case 3:                                                 \
-        x = b2 & 0x3F;                                      \
-        phase = 0;                                          \
-        break;                                              \
+#define CDLOAD_GET6(x)                          \
+    switch (phase++) {                          \
+    case 0:                                     \
+        b0 = *src++;                            \
+        b1 = *src++;                            \
+        b2 = *src++;                            \
+        x = b0 >> 2;                            \
+        break;                                  \
+    case 1:                                     \
+        x = (b1 >> 4) | ((b0 << 4) & 0x30);     \
+        break;                                  \
+    case 2:                                     \
+        x = ((b1 << 2) & 0x3C) | (b2 >> 6);     \
+        break;                                  \
+    case 3:                                     \
+        x = b2 & 0x3F;                          \
+        phase = 0;                              \
+        break;                                  \
     }
 
 /* Unpacks a 6-bit RLE stream: a symbol below 32 repeats the next one that many times plus one, a symbol from 32
