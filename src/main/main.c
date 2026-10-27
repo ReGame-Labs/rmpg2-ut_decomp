@@ -494,6 +494,9 @@ extern s16 D_801FA7E4[];
 extern void (*D_8007C14C[])(Monster *);
 extern void (*D_8007C170[])(Monster *);
 extern void (*D_8007C194[])(Monster *);
+extern u16 D_801E1E44;
+extern u16 D_801F9AD4;
+extern u16 D_801E29C4;
 /* decls:end */
 
 /* main: config/aliases.ld gives it its name (GCC 2.8.1 would start a function named main with a call to __main). */
@@ -1679,7 +1682,7 @@ void func_8001D0C0(void) {
 
 ObjectDef *func_8001D110(void) {
     func_8001D15C(&D_801CA430, &D_8007AB34, 0x2C);
-    D_800AA248.unk_1C = &D_801CA430;
+    D_800AA248.unk_1C.def = &D_801CA430;
     D_800AA248.new_def = &D_801CA430;
     return &D_801CA430;
 }
@@ -5335,7 +5338,54 @@ void func_80029510(Monster *arg0) {
 INCLUDE_ASM("asm/main/nonmatchings/main", func_80029510);
 #endif
 
-INCLUDE_ASM("asm/main/nonmatchings/main", func_8002958C);
+void func_8002958C(void) {
+    Monster *m;
+    s32 i;
+    u16 result;
+
+    D_800AA248.unk_0C = 0;
+    D_800AA248.unk_10 = 0;
+    D_800AA248.action = 0;
+    D_800AA248.unk_1C.n = 0;
+    D_800AA248.unk_24 = 0;
+    D_800AA248.unk_08 = 7;
+    do {
+        m = &D_801E0B78[D_800AA248.unk_08];
+        if (m->unk_058 & 1) {
+            if (m->action == 0x37 || m->action == 0x26) {
+                if (m->unk_01C != 0) {
+                    D_800AA248.unk_10++;
+                    continue;
+                }
+                D_800AA248.unk_24++;
+            }
+            D_800AA248.unk_0C++;
+            if (m->unk_01C != 0 || m->action == 0x1F) {
+                D_800AA248.unk_10++;
+            } else if (m->action == 0) {
+                D_800AA248.action++;
+            } else if (m->action == 0x2C) {
+                D_800AA248.unk_1C.n++;
+            }
+        }
+    } while (--D_800AA248.unk_08 != 0);
+    i = 0;
+    D_801D8740 = D_800AA248.unk_0C;
+    result = 0;
+    D_801E1CB0 = D_800AA248.unk_10;
+    D_801E1E44 = D_800AA248.action;
+    D_801F9AD4 = D_800AA248.unk_1C.n;
+    D_801E29C4 = D_800AA248.unk_24;
+    while (i < D_801D8740) {
+        m = &D_801E0B78[func_80025DF8(D_801FB49C[i])];
+        if (m->unk_004 != 0 || m->health.s.hi != 0) {
+            result = D_801D8740;
+            break;
+        }
+        i++;
+    }
+    D_801D8740 = result;
+}
 
 void func_800297B4(void) {
     Monster *monster;

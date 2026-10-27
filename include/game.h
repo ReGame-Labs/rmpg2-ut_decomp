@@ -358,7 +358,10 @@ typedef struct GameState {
     /* 0x14 */ s32 action;                     /* the monster's action, clamped, before the dispatch (func_800500EC;
                                                 * D_800AA25C) */
     /* 0x18 */ s32 unk_18;                     /* the argument of the current actor's handler (D_800AA260) */
-    /* 0x1C */ ObjectDef *unk_1C;
+    /* 0x1C */ union {
+                   ObjectDef *def;
+                   s32 n;                   /* a count (func_8002958C) */
+               } unk_1C;
     /* 0x20 */ GameObject *cur_obj;            /* the object being updated (D_800AA268) */
     /* 0x24 */ s32 unk_24;                     /* D_800AA26C */
     /* 0x28 */ s32 unk_28;                     /* a counter (func_8003C3B0: the items left in the building) */
