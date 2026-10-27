@@ -163,7 +163,7 @@ typedef struct Monster {
     /* 0x00C */ Fixed health_shown;            /* eased towards health by 1/16 a frame; health_bar shows it */
     /* 0x010 */ Fixed meter;                   /* a second meter, 0..0x44 (16.16): a projectile's hit raises it
                                                 * (func_8004C0E0); full, monster 5 gets its extra sprites */
-    /* 0x014 */ Fixed meter_shown;             /* eased towards meter by 1/16 a frame (func_8005DBC4); meter_bar
+    /* 0x014 */ Fixed meter_shown;             /* eased towards meter by 1/16 a frame (bonus_update_bars); meter_bar
                                                 * shows it */
     /* 0x018 */ u8 unk_018[0x02];
     /* 0x01A */ u16 unk_01A;
@@ -195,8 +195,8 @@ typedef struct Monster {
     /* 0x066 */ u8 unk_066[0x02];
     /* 0x068 */ GameObject *obj;               /* its body */
     /* 0x06C */ GameObject *meter_bar;         /* status bars: boxes whose width (unk_40.w) is the value shown, */
-    /* 0x070 */ GameObject *health_bar;        /* at most 0x44 (func_8005D20C, func_8005DBC4) */
-    /* 0x074 */ GameObject *unk_074;               /* its portrait in the status panel (func_8005D9BC) */
+    /* 0x070 */ GameObject *health_bar;        /* at most 0x44 (bonus_create_bars, bonus_update_bars) */
+    /* 0x074 */ GameObject *unk_074;               /* its portrait in the status panel (bonus_update_lives) */
     /* 0x078 */ GameObject *unk_078[2];            /* the lives' digit sprites */
     /* 0x080 */ GameObject *unk_080[6];        /* the score's digit sprites */
     /* 0x098 */ GameObject *unk_098;
@@ -234,7 +234,7 @@ typedef struct Monster {
     /* 0x0FE */ u8 unk_0FE[0x02];
     /* 0x100 */ s32 unk_100;                   /* a horizontal speed, 16.16 */
     /* 0x104 */ s32 unk_104;                   /* a vertical acceleration, 16.16 */
-    /* 0x108 */ s16 box_x0;                    /* two boxes, (x0, y0)-(x1, y1): func_80053854 says which one a */
+    /* 0x108 */ s16 box_x0;                    /* two boxes, (x0, y0)-(x1, y1): monster_test_boxes says which one a */
     /* 0x10A */ s16 box_y0;                    /* point is in */
     /* 0x10C */ s16 box_x1;
     /* 0x10E */ s16 box_y1;
@@ -267,7 +267,7 @@ typedef struct Monster {
     /* 0x150 */ s16 unk_150;
     /* 0x152 */ s16 unk_152;
     /* 0x154 */ u8 unk_154[0x0C];
-    /* 0x160 */ GameObject *unk_160;               /* an object it is carried by: func_80050774 places it there */
+    /* 0x160 */ GameObject *unk_160;               /* an object it is carried by: monster_follow_holder places it there */
     /* 0x164 */ s16 unk_164;
     /* 0x166 */ u16 unk_166;
     /* 0x168 */ u16 unk_168;
@@ -288,7 +288,7 @@ typedef struct Monster {
     /* 0x1AC */ u16 unk_1AC;
     /* 0x1AE */ u16 unk_1AE;
     /* 0x1B0 */ u16 climb_side;                /* 0: not on a building; 1, 2: the side it climbs; 3 (func_80054D74) */
-    /* 0x1B2 */ u16 climb_building;            /* the building, 1-based (func_80054728) */
+    /* 0x1B2 */ u16 climb_building;            /* the building, 1-based (monster_get_building) */
     /* 0x1B4 */ u16 climb_floor;               /* the building's item it is at */
     /* 0x1B6 */ u8 unk_1B6[0x06];
     /* 0x1BC */ u16 unk_1BC;
@@ -358,7 +358,7 @@ typedef struct GameState {
     /* 0x0C */ s32 unk_0C;                     /* D_800AA254; scratch: monster.c's probe x, func_8004003C's "a
                                                 * player is in play", func_800297B4's count */
     /* 0x10 */ s32 unk_10;                     /* D_800AA258; scratch: monster.c's probe y, func_800297B4's count */
-    /* 0x14 */ s32 action;                     /* the monster's action, clamped, before the dispatch (func_800500EC;
+    /* 0x14 */ s32 action;                     /* the monster's action, clamped, before the dispatch (monster_dispatch_action;
                                                 * D_800AA25C) */
     /* 0x18 */ s32 unk_18;                     /* the argument of the current actor's handler (D_800AA260) */
     /* 0x1C */ ObjectDef *unk_1C;
@@ -721,7 +721,7 @@ extern Fixed D_801F9AC8;                 /* the camera's x: the screen's left ed
 extern s16 D_8007A68A;
 extern u16 D_8007A696;
 extern u16 D_8007A7D4;
-extern s16 D_8007C976;                   /* the weather, drawn by func_8002A3A4: 1 rain (it slows climbing, func_8005086C), 2 another */
+extern s16 D_8007C976;                   /* the weather, drawn by func_8002A3A4: 1 rain (it slows climbing, monster_update_climb), 2 another */
 extern s32 D_8007AD4C[];
 extern s32 *D_80085114[];
 extern Anim D_8008A7A4;

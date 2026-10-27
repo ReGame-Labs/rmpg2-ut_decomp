@@ -27,7 +27,7 @@ void func_8005404C(Monster *m);
 void func_800540D0(Monster *m);
 void func_8005417C(Monster *m);
 void func_80054374(s32, Monster *m);
-Building *func_80054728(u16);
+Building *monster_get_building(u16);
 void func_8005E0E8(Monster *m);
 s32 func_8005F208();                                        /* called with 0, 1 or 2 arguments */
 void func_800634D4(Monster *, u32);
@@ -653,7 +653,7 @@ void func_8004CFE8(void) {
         if (side != 0 && side != 3) {
             ea = m->unk_0EA;
             if ((u32) (ea - 3) >= 2 && ea != side) {
-                b = func_80054728(m->climb_building);
+                b = monster_get_building(m->climb_building);
                 if (b != NULL) {
                     m->unk_0FA = m->pos.s.lo;
                     m->unk_0FC = m->pos.s.hi;
@@ -705,7 +705,7 @@ void func_8004D194(void) {
 
     if (D_800AA2DC == 0 || !(D_8007BD78.flags & 0x40)) {
         m = saved->owner.monster;
-        b = func_80054728(m->climb_building);
+        b = monster_get_building(m->climb_building);
         if (b != NULL) {
             if (m->climb_side != 3) {
                 m->unk_0FA = m->pos.s.lo;

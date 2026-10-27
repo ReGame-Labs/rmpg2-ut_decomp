@@ -19,7 +19,7 @@ void func_8005D1BC(s32 arg0, s32 n) {
     func_8001E450((u16)(n + 0x7A0));
 }
 
-void func_8005D20C(Monster *e) {
+void bonus_create_bars(Monster *e) {
     GameObject *saved;
     GameObject *s;
     s32 x;
@@ -55,7 +55,7 @@ INCLUDE_ASM("asm/main/nonmatchings/bonus", func_8005D364);
 #ifdef NON_MATCHING
 /* 92.10%: 92.1 %: the first block's schedule: the original stores new_def through the copy of &D_800AA248 (s5) and
  * orders the definition's stores unk_06, id, pos_y, flags around the table read */
-void func_8005D644(Monster *e) {
+void bonus_create_score(Monster *e) {
     GameObject *saved;
     ObjectDef *def;
     s32 x;
@@ -91,10 +91,10 @@ void func_8005D644(Monster *e) {
     D_800AA268.p = saved;
 }
 #else
-INCLUDE_ASM("asm/main/nonmatchings/bonus", func_8005D644);
+INCLUDE_ASM("asm/main/nonmatchings/bonus", bonus_create_score);
 #endif
 
-void func_8005D7D8(Monster *e) {
+void bonus_update_score(Monster *e) {
     GameObject *saved;
     GameObject *digit;
     s32 v;
@@ -122,7 +122,7 @@ void func_8005D7D8(Monster *e) {
     }
 }
 
-Monster *func_8005D918(Monster *skip) {
+Monster *bonus_find_most_lives(Monster *skip) {
     Monster *e;
     Monster *found;
     s16 best;
@@ -146,7 +146,7 @@ Monster *func_8005D918(Monster *skip) {
     return found;
 }
 
-void func_8005D9BC(Monster *e) {
+void bonus_update_lives(Monster *e) {
     GameObject *saved;
     GameObject *face;
     s32 i;
@@ -160,7 +160,7 @@ void func_8005D9BC(Monster *e) {
     }
     face = e->unk_074;
     if (e->unk_1CC == 1) {
-        if (func_8005D918(e) != NULL) {
+        if (bonus_find_most_lives(e) != NULL) {
             func_8005E124(e, 0x7A0);
             func_8005E124(e, 0x7A8);
             func_8005E19C(e, 0x798);
@@ -197,7 +197,7 @@ void func_8005D9BC(Monster *e) {
     D_800AA268.p = saved;
 }
 
-void func_8005DBC4(s32 old, Monster *m, s32 value) {
+void bonus_update_bars(s32 old, Monster *m, s32 value) {
     s32 v; /* FAKE: one scratch for the colour bits and the eased meter: a variable live in two blocks keeps the
             * load of D_801D3D80 out of the shift's register */
 

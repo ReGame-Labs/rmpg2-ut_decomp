@@ -5,7 +5,7 @@
 
 #include "game.h"
 
-/* A point of a sprite frame: the frames carry one per monster id from SpriteFrame.unk_10 on (func_80050774). */
+/* A point of a sprite frame: the frames carry one per monster id from SpriteFrame.unk_10 on (monster_follow_holder). */
 typedef struct FramePoint {
     u16 x;
     u16 y;
@@ -75,7 +75,7 @@ void func_80053C50(s32, Monster *);
 void func_80053D68(s32, Monster *);
 void func_8005417C(Monster *);
 void func_8005421C(Monster *);
-Building *func_80054728(u16);
+Building *monster_get_building(u16);
 void func_80054A18();
 void func_80054CF8(Monster *, Building *);
 void func_80054D74(u16, Monster *, Building *);
@@ -113,7 +113,7 @@ void func_80056CCC(Monster *);
 void func_80056E2C(Monster *, Building *);
 void func_80056E78(Monster *);
 void func_80056EB8(Monster *, Building *);
-void func_80056F38(Monster *, Building *);
+void monster_find_floor(Monster *, Building *);
 s32 func_800571D0(Monster *, BuildingBlock *);
 u16 func_80057300(u16, Monster *, Building *, u16);
 u16 func_800573C8(Monster *, Building *);
@@ -128,7 +128,7 @@ u16 func_80057A08(Monster *);
 u16 func_80057AD8(Monster *, Building *, u16);
 void func_800580F8(void *);
 void func_80058F78(Monster *);
-Monster *func_8005D918(void);
+Monster *bonus_find_most_lives(void);
 s32 func_8005E4E4(void);
 void func_80060F3C(void);
 void func_800634B0(Monster *, s32);
