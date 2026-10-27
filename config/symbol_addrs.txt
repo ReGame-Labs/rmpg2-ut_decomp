@@ -518,7 +518,10 @@ D_8008525C = 0x8008525C;
 D_7FFFFF = 0x007FFFFF; // ignore:true
 
 // wess (src/main/wess.c), the driver's API, the SPU command set, the voices, the sequence loader
+wess_start_voice = 0x8006C204; // type:func  keys a voice on with its reverb, volume and pan, pitch bend, sample and ADSR
 wess_pitch_mod = 0x8006CF14; // type:func  the pitch bend command every voice of the channel, by its patch map's ranges
+wess_volume_mod = 0x8006D18C; // type:func  the volume command, every voice of the channel
+wess_pan_mod = 0x8006D6E4; // type:func  the pan command, every voice of the channel
 wess_report_error = 0x8006E4BC; // type:func  calls the error callback D_801FDEA8
 wess_sequence_count = 0x8006E4F4; // type:func  the number of sequences in the file
 wess_valid_sequence = 0x8006E504; // type:func  1 for a sequence number in range
@@ -530,6 +533,7 @@ wess_load_sequence_table = 0x8006E8B4; // type:func  reads the sequence table, p
 wess_sequence_size = 0x8006EA50; // type:func  the memory a sequence needs, 0 when loaded
 wess_load_sequence = 0x8006EB08; // type:func  loads a sequence that is not loaded yet
 wess_module_size = 0x8006EE30; // type:func  the memory the module's tables need
+wess_load_module = 0x8006F0D8; // type:func  reads the module into memory and lays out the driver's tables
 wess_init_channel = 0x8006F634; // type:func  sets a channel up from its track's settings and the caller's overrides
 wess_set_channel_data = 0x8006F8F8; // type:func  the channel's sequence data and labels
 wess_start_sequence = 0x8006F96C; // type:func  a free sequence record and a channel per track, returns the record + 1 or 0

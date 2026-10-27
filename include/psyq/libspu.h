@@ -88,4 +88,6 @@ s32 SpuSetReverbVoice(s32 on_off, u32 voice_bit);
 
 void SpuGetAllKeysStatus(char *status);
 
+void SpuSetKeyOnWithAttr(SpuVoiceAttr *attr);
+
 #endif /* PSYQ_LIBSPU_H */

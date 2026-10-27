@@ -115,7 +115,7 @@ extern s32 D_801FB4C0;
 
 
 s32 wess_module_size(s32);
-void func_8006F0D8(s32, void *, s32);
+void wess_load_module(s32, void *, s32);
 s32 wess_sequence_header(SoundDriver *, s32);
 void wess_load_sequence_table(void *, s32, s32, void *, s32);
 SoundDriver *func_8006EC08(void);
@@ -964,7 +964,7 @@ void cdload_init_sound(void) {
     io.unk_24 = 1;
     func_800706C0(&io);
     size = wess_module_size(0x4F);
-    func_8006F0D8(0x4F, cdload_alloc(size), size);
+    wess_load_module(0x4F, cdload_alloc(size), size);
     bank_size = wess_sequence_header(func_8006EC08(), 0x50);
     buf = cdload_alloc(bank_size);
     wess_load_sequence_table(func_8006EC08(), 0x50, 0, buf, bank_size);
