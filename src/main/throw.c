@@ -1699,16 +1699,16 @@ u16 func_8004A9B0(m, a, kind, b, c)
         r = func_8004A51C(a, kind, t);
         break;
     case 7:
-        r = func_80039358(m, a, kind, t);
+        r = npc_create_throw(m, a, kind, t);
         break;
     case 9:
         r = func_80047DEC(a, kind, b, c, t);
         break;
     case 21:
-        r = func_8003A5A0(a, kind, t, 0);
+        r = npc_create_shot(a, kind, t, 0);
         break;
     case 22:
-        r = func_8003A5A0(a, kind, t, 1);
+        r = npc_create_shot(a, kind, t, 1);
         break;
     case 18:
         r = func_800481FC(a, kind, t);
@@ -1785,7 +1785,7 @@ void func_8004AD18(Throw *t) {
         break;
     case 21:
     case 22:
-        func_8003A744(t);
+        npc_update_shot(t);
         break;
     case 17:
         func_8004A044(t);
@@ -1794,7 +1794,7 @@ void func_8004AD18(Throw *t) {
         func_800494B4(t);
         break;
     case 7:
-        func_8003956C(t);
+        npc_update_throw(t);
         break;
     }
 }

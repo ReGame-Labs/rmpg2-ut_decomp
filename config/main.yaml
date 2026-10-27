@@ -238,7 +238,7 @@ segments:
       - [0x6AE74, asm, psyq/libcard/a75]        # 0x8007A674 StartCARD2
       - [0x6AE84, data, main]                 # 0x8007A684 to the first piece used by building only; holds globals used from everywhere (D_8007BD78, D_8007AD4C) and two used by bonus only (D_8007ABCC, D_8007BD8C)
       - [0x6D134, data, building]             # 0x8007C934 D_8007C934 (func_8002A330) to D_8007D3FC (func_80031C8C)
-      - [0x6DC48, data, npc]                  # 0x8007D448 D_8007D448 (func_80034E48) to D_8007DB28 (func_8003A5A0)
+      - [0x6DC48, data, npc]                  # 0x8007D448 D_8007D448 (func_80034E48) to D_8007DB28 (npc_create_shot)
       - [0x6E360, data, pickup]               # 0x8007DB60 D_8007DB60 (func_8003B6E0) to D_8007DDD4 (func_8003C934)
       - [0x6E644, data, actor]                # 0x8007DE44 D_8007DE44 (func_8003D71C) to D_8007E398 (func_8003F150)
       - [0x6EEC8, data, ai]                   # 0x8007E6C8 D_8007E6C8 (func_80042170) to D_8007E9E0 (func_80042210); game_80043118 has no .data of its own
