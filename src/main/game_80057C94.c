@@ -1432,14 +1432,14 @@ u16 func_8005BF54(GameObject *b, Monster *e) {
         return 0;
     }
     if (!(b->flags & 0x10)) {
-        x = b->pos_x.u.hi + ((Fixed *)&b->unk_2C)->u.lo;
+        x = b->pos_x.u.hi + b->unk_2C.u.lo;
     } else {
-        x = b->pos_x.u.hi - ((Fixed *)&b->unk_2C)->u.lo;
+        x = b->pos_x.u.hi - b->unk_2C.u.lo;
     }
     do {
         if (!(r->unk_00->unk_6C & 0x80) && r->unk_08 == 2 && r->unk_06 != 0 && r->unk_06 < 0x1D) {
             if (r->unk_06 >= 0xD && r->unk_06 < 0x12 && r->unk_40 != NULL
-                && func_8005BC20(x, b->pos_y.s.hi, (s16) ((Fixed *)&b->unk_2C)->u.lo >> 1, (s16) ((Fixed *)&b->unk_2C)->u.hi >> 1, r->unk_40, 1) != 0) {
+                && func_8005BC20(x, b->pos_y.s.hi, (s16) b->unk_2C.u.lo >> 1, (s16) b->unk_2C.u.hi >> 1, r->unk_40, 1) != 0) {
                 e->unk_024++;
                 func_80054374(0x28, e);
                 r->unk_54 = e;
@@ -1453,7 +1453,7 @@ u16 func_8005BF54(GameObject *b, Monster *e) {
                 func_800346FC(r);
                 return 1;
             }
-            if (func_8005BC20(x, b->pos_y.s.hi, (s16) ((Fixed *)&b->unk_2C)->u.lo >> 1, (s16) ((Fixed *)&b->unk_2C)->u.hi >> 1, r->unk_00, 1) != 0) {
+            if (func_8005BC20(x, b->pos_y.s.hi, (s16) b->unk_2C.u.lo >> 1, (s16) b->unk_2C.u.hi >> 1, r->unk_00, 1) != 0) {
                 e->unk_024++;
                 func_80054374(0x28, e);
                 r->unk_08 = 3;
@@ -1486,9 +1486,9 @@ u16 func_8005C1F8(GameObject *b, Monster *e) {
         return 0;
     }
     if (!(b->flags & 0x10)) {
-        x = b->pos_x.u.hi + ((Fixed *)&b->unk_2C)->u.lo;
+        x = b->pos_x.u.hi + b->unk_2C.u.lo;
     } else {
-        x = b->pos_x.u.hi - ((Fixed *)&b->unk_2C)->u.lo;
+        x = b->pos_x.u.hi - b->unk_2C.u.lo;
     }
     do {
         obj = npc->unk_0;
@@ -1496,7 +1496,7 @@ u16 func_8005C1F8(GameObject *b, Monster *e) {
             if (!(obj->unk_6C & 0x80)) {
                 action = npc->unk_8;
                 if ((u16)action != 4 && (u16)action != 5 && (u16)action != 6 && (u16)action != 0x14 && (u16)action != 0x33 && (u16)action != 3 && (u16)action != 0x64 && (u16)action != 0x63
-                    && func_8005BC20(x, b->pos_y.s.hi, (s16) ((Fixed *)&b->unk_2C)->u.lo >> 1, ((Fixed *)&b->unk_2C)->s.hi, obj, 1) != 0) {
+                    && func_8005BC20(x, b->pos_y.s.hi, (s16) b->unk_2C.u.lo >> 1, b->unk_2C.s.hi, obj, 1) != 0) {
                     e->unk_024++;
                     func_80054374(0x28, e);
                     npc->unk_8 = 3;
@@ -1521,14 +1521,14 @@ u16 func_8005C3C8(GameObject *b, Monster *skip) {
     s16 i;
 
     if (!(b->flags & 0x10)) {
-        x = b->pos_x.u.hi + ((Fixed *)&b->unk_2C)->u.lo;
+        x = b->pos_x.u.hi + b->unk_2C.u.lo;
     } else {
-        x = b->pos_x.u.hi - ((Fixed *)&b->unk_2C)->u.lo;
+        x = b->pos_x.u.hi - b->unk_2C.u.lo;
     }
     for (i = 0; i < (s32) D_801D8740; i++) {
         e = &D_801E0B78[func_80025DF8(D_801FB49C[i])];
         if (skip != e && e->action < 7) {
-            if (func_8005BC20(x, b->pos_y.s.hi, (s16) ((Fixed *)&b->unk_2C)->u.lo >> 1, (s16) ((Fixed *)&b->unk_2C)->u.hi >> 1, e->obj, 4) != 0) {
+            if (func_8005BC20(x, b->pos_y.s.hi, (s16) b->unk_2C.u.lo >> 1, (s16) b->unk_2C.u.hi >> 1, e->obj, 4) != 0) {
                 func_8001F724(0x14);
                 if (D_8007A68A != 0) {
                     func_80053C50(0x28000, e);
