@@ -584,10 +584,10 @@ extern Anim D_80096560;
 s32 func_8001E2B8(GameObject *);
 void func_8002A1AC(Monster *, s32);
 void bonus_create_bars(Monster *);
-void func_8005D364(Monster *);
+void bonus_create_lives(Monster *);
 void bonus_create_score(Monster *);
 void func_8005E124(Monster *, s32);
-void func_8005F33C(s32, u8);
+void bonus_create_counter(s32, u8);
 extern Anim D_80011D48;   /* func_8002E658's sprite at a part's point */
 extern Anim D_80011F10;   /* its second sprite, 8 pixels lower right, half the time */
 extern Anim D_80016890;   /* func_8002F100's three stages */

@@ -520,23 +520,23 @@ void building_spawn_monster(Monster *m) {
     }
     if (D_800AA2DC == 0) {
         bonus_create_bars(m);
-        func_8005D364(m);
+        bonus_create_lives(m);
         bonus_create_score(m);
         func_8005E124(m, 0x7A0);
         return;
     }
     switch (func_8005F208()) {
     case 2:
-        func_8005F33C(1, D_801FA8A0[m->id - 1]);
-        func_8005D364(m);
+        bonus_create_counter(1, D_801FA8A0[m->id - 1]);
+        bonus_create_lives(m);
         break;
     case 3:
-        func_8005F33C(2, D_801FA8A0[m->id - 1]);
-        func_8005D364(m);
+        bonus_create_counter(2, D_801FA8A0[m->id - 1]);
+        bonus_create_lives(m);
         break;
     case 4:
         bonus_create_bars(m);
-        func_8005D364(m);
+        bonus_create_lives(m);
         break;
     }
 }
@@ -1058,7 +1058,7 @@ void func_8002CBF4(Monster *m) {
     s32 *anim;
 
     if (func_8001A3AC() >= 0x46) {
-        body = m->unk_098;
+        body = m->unk_098[0];
         r = func_8001D110();
         D_800AA248.new_def = r;
         if (m->unk_058 == 3) {

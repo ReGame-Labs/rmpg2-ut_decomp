@@ -39,7 +39,102 @@ void func_80050190(Monster *e) {
     }
 }
 
+#ifdef NON_MATCHING
+/* 82.67%: 82.7 %: the original stores D_800AA26C before the speed load and keeps the speed in a0; its unk_168 == 7
+ * arm jumps into the other arm's three bodies (stop, stop with 0xC, walk), which here stay separate */
+void func_800501B0(Monster *e) {
+    s32 *speeds;
+    s32 speed;
+    u16 dir;
+    u16 act;
+    s16 x;
+    u16 side;
+
+    if (e->unk_18E == 0 || e->dir == 0) {
+        D_800AA268.p->vel_y.w = 0;
+        e->unk_104 = 0;
+        if (e->id == 7 && D_801F9ABC != 0) {
+            if (D_801F9ABC == 3) {
+                speeds = D_8007FAE4;
+            } else {
+                speeds = D_8007FA9C;
+            }
+        } else {
+            speeds = D_8007FB08[e->id - 1];
+        }
+        dir = e->dir;
+        D_800AA26C = dir;
+        speed = speeds[dir];
+        if (D_8007C976 == 2) {
+            if (speed > 0x6000) {
+                speed -= 0x1000;
+            } else if (speed < -0x6000) {
+                speed += 0x1000;
+            }
+        }
+        if (e->unk_168 == 7) {
+            if (e->dir < 2 || e->dir == 5) {
+                e->unk_100 = 0;
+                act = 0;
+                D_800AA268.p->vel_x.w = 0;
+            } else if (e->dir < 5) {
+                e->unk_100 = 0;
+                act = 0xC;
+                D_800AA268.p->vel_x.w = 0;
+            } else {
+                act = 1;
+                e->unk_100 = speed;
+            }
+        } else {
+            if (e->dir < 2 || e->dir == 5) {
+                e->unk_100 = 0;
+                act = 0;
+                D_800AA268.p->vel_x.w = 0;
+            } else if (e->dir < 6) {
+                act = 1;
+                e->unk_100 = speed;
+            } else {
+                e->unk_100 = 0;
+                act = 0xC;
+                D_800AA268.p->vel_x.w = 0;
+            }
+        }
+        D_800AA248.action = act;
+        e->action = act;
+        D_800AA248.unk_08 = e->climb_side;
+        if (D_800AA248.unk_08 != 0) {
+            func_8005520C(e);
+        } else if ((u16) (e->dir - 4) < 3 && e->health.w > 0xFFFF) {
+            monster_grab_building(e);
+        }
+        e->action = D_800AA25C;
+        if (e->action == 0 && D_801E1E44 >= 2) {
+            func_80050E88(e);
+        }
+        if (e->unk_18E == 0 && e->climb_side == 0 && D_801D37BC == 0 && D_800AA268.p->pos_y.s.hi >= 0xE1 &&
+            D_801FA98C != 0) {
+            x = D_800AA268.p->pos_x.s.hi;
+            if (x >= D_801FA98C && x <= D_801FA990) {
+                if (x - D_801FA98C < 0x21) {
+                    side = 7;
+                } else if (D_801FA990 - x < 0x21) {
+                    side = 3;
+                } else {
+                    e->action = 0x35;
+                    return;
+                }
+                if (e->unk_168 != side) {
+                    e->action = 0x3D;
+                }
+            }
+        }
+    } else {
+        func_80050B40(e);
+    }
+}
+#else
 INCLUDE_ASM("asm/main/nonmatchings/monster", func_800501B0);
+#endif
 
 void func_800504B4(Monster *e) {
     D_800AA248.unk_24 = e->dir;
@@ -277,7 +372,73 @@ void func_80050B40(Monster *e) {
     }
 }
 
-INCLUDE_ASM("asm/main/nonmatchings/monster", func_80050BBC);
+void func_80050BBC(e)
+Monster *e;
+{
+    GameObject *obj;
+    s32 dir;
+    s32 *p;
+    s32 v;
+
+    obj = D_800AA268.p = e->obj;
+    dir = e->dir;
+    if (!(obj->unk_6C & 0x80)) {
+        if (dir != 0) {
+            if (e->unk_168 == 7) {
+                if (dir < 5 && dir != 1) {
+                    e->action = 0xC;
+                }
+            } else if (dir >= 6) {
+                e->action = 0xC;
+            }
+        }
+        if (D_801FA734 == 0 && D_801F9ACC.w < 0) {
+            goto still;
+        }
+        dir = e->dir;
+    } else {
+    still:
+        dir = 1;
+        if (obj->vel_y.w < 0) {
+            obj->vel_y.w = 0;
+        }
+    }
+    p = &D_8007FBAC[dir].unk_1A0;
+    e->unk_1A0 = *p++;
+    e->unk_1A4 = *p++;
+    e->unk_100 = *p++;
+    e->unk_104 = *p++;
+    e->unk_198 = *p++;
+    e->unk_19C = *p;
+    v = e->unk_198;
+    if (v == -1) {
+        v = obj->vel_x.w;
+        if (abs(abs(v) - 0xA000) > 0xA000) {
+            if (v > 0) {
+                v = -0xA000;
+            } else if (v < 0) {
+                v = 0xA000;
+            }
+        } else {
+            obj->vel_x.w = 0;
+        }
+        e->unk_198 = v;
+    }
+    v = e->unk_19C;
+    if (v == -1) {
+        v = obj->vel_y.w;
+        if (abs(abs(v) - 0xA000) > 0xA000) {
+            if (v > 0) {
+                v = -0xA000;
+            } else if (v < 0) {
+                v = 0xA000;
+            }
+        } else {
+            obj->vel_y.w = 0;
+        }
+        e->unk_19C = v;
+    }
+}
 
 void func_80050DAC(Monster *e) {
     func_80050E58(e);
@@ -313,7 +474,95 @@ void func_80050E58(Monster *e) {
     }
 }
 
+#ifdef NON_MATCHING
+/* 98.60%: 98.6 %: register allocation only: the original gives obj s0, m s1, i s2, e s3; here m s0, obj s1, e s2, i
+ * s3 (global-alloc priorities) */
+void func_80050E88(Monster *e) {
+    Monster *m;
+    GameObject *obj;
+    u16 i;
+    s16 y;
+    s16 d;
+    s32 ad;
+    s16 dist;
+    u16 act;
+
+    if (D_800AA2DC != 0 && (D_8007BD78.flags & 0x100)) {
+        return;
+    }
+    y = D_800AA268.p->pos_y.s.hi;
+    if (y >= 0xE2) {
+        return;
+    }
+    i = 7;
+    do {
+        if (i == e->id) {
+            continue;
+        }
+        m = &D_801E0B78[i];
+        if (!(m->unk_058 & 1)) {
+            continue;
+        }
+        if (m->action != 0) {
+            continue;
+        }
+        obj = m->obj;
+        if (y != obj->pos_y.s.hi) {
+            continue;
+        }
+        if ((D_800AA268.p->flags & 0x10) != (obj->flags & 0x10)) {
+            d = func_8003FCD8(obj->pos_x.s.hi, D_800AA268.p->pos_x.s.hi);
+            ad = (s16) abs(d);
+            if (ad < 0x21) {
+                if (obj->flags & 0x10) {
+                    if (d > 0) {
+                        act = 0x1C;
+                        e->action = act;
+                        m->action = act;
+                        return;
+                    }
+                } else if (d < 0) {
+                    act = 0x1C;
+                    e->action = act;
+                    m->action = act;
+                    return;
+                }
+                if (ad < 0x19) {
+                    act = 0xB;
+                    e->action = act;
+                    m->action = act;
+                    return;
+                }
+            }
+        } else {
+            dist = func_8003FCD8(obj->pos_x.s.hi, D_800AA268.p->pos_x.s.hi);
+            ad = (s16) abs(dist);
+            if (ad < 0x19) {
+                if (obj->flags & 0x10) {
+                    if (dist > 0) {
+                        m->action = 0x1C;
+                        e->action = 0xB;
+                        return;
+                    }
+                    e->action = 0x1C;
+                    m->action = 0xB;
+                    return;
+                }
+                if (dist < 0) {
+                    m->action = 0x1C;
+                    e->action = 0xB;
+                    return;
+                }
+                e->action = 0x1C;
+                m->action = 0xB;
+                return;
+            }
+        }
+    } while (--i != 0);
+}
+#else
 INCLUDE_ASM("asm/main/nonmatchings/monster", func_80050E88);
+#endif
 
 void func_800510BC(Monster *a, Monster *b) {
     GameObject *body;
@@ -442,7 +691,68 @@ void func_80051410(Monster *e, Monster *e2) {
     func_800510E8(e);
 }
 
+#ifdef NON_MATCHING
+/* 76.08%: 76 %: the logic is the original's; its block layout differs: the original places the four call-and-return
+ * tails (func_80051410, func_800511B4, func_80051248, func_800511F8) before the loop, after the climb_side tests */
+void func_800514CC(Monster *e) {
+    Monster *m;
+    u16 i;
+
+    if (e->pos.s.lo != 0 && (e->climb_side == 0 || e->climb_side == 3)) {
+        i = 7;
+        do {
+            m = &D_801E0B78[i];
+            if (m != e && (m->unk_058 & 1) && m->unk_0DC != 0 && m->action != 0x37) {
+                D_800AA248.unk_08 = monster_test_hit_box(e, m);
+                if (D_800AA248.unk_08 != 0) {
+                    m->attacker = e;
+                    if (m->action == 0x4D) {
+                        func_80051410(e, m);
+                        return;
+                    }
+                    func_800634D4(m, 5);
+                    if (D_8007A68A != 0) {
+                        func_80053C50(0x30000, m);
+                    }
+                    if (m->unk_18E != 0) {
+                        func_800511B4(e, m);
+                        return;
+                    }
+                    if (e->unk_164 != 0) {
+                        func_80051248(e, m);
+                        return;
+                    }
+                    if (m->climb_side != 0 || m->obj->pos_y.s.hi != 0xE1) {
+                        func_80051150(e, m);
+                        return;
+                    }
+                    if ((D_800AA248.cur_obj->flags & 0x10) == (m->obj->flags & 0x10)) {
+                        func_800511F8(e, m);
+                        return;
+                    }
+                    if (D_800AA248.unk_08 != 1 || e->action != 4 || e->unk_104 != 0) {
+                        func_800512CC(e, m);
+                        return;
+                    }
+                    m->action = 0x28;
+                    func_8004FC00(2, e);
+                    func_800540D0(e);
+                    func_800510E8(e);
+                    return;
+                }
+            }
+        } while (--i != 0);
+        if (e->unk_18A != 0 || (func_80036A20(e), e->unk_18A != 0) || (pickup_collect(e), e->unk_18A != 0) ||
+            (func_8004D38C(e), e->unk_18A != 0) || (func_8003F114(e), e->unk_18A != 0) ||
+            (func_80047028(e), e->unk_18A != 0)) {
+            func_800634D4(e, 3);
+        }
+    }
+    func_800510E8(e);
+}
+#else
 INCLUDE_ASM("asm/main/nonmatchings/monster", func_800514CC);
+#endif
 
 void func_800517C0(Monster *e) {
     e->unk_104 = 0x4000;
@@ -547,7 +857,7 @@ void func_80051B38(Monster *e) {
     vy = D_800AA248.cur_obj->vel_y.w;
     if (vy > 0) {
         if (e->health.w != 0) {
-            if (D_800AA248.action == 0x4E || (func_80056598(), D_800AA248.action == 2)) {
+            if (D_800AA248.action == 0x4E || (monster_find_roof(), D_800AA248.action == 2)) {
                 if (D_800AA248.cur_obj->pos_y.s.hi < 0xE1) {
                     func_8005199C(e);
                     return;
@@ -642,7 +952,7 @@ void func_80051E80(Monster *e) {
             if (m->unk_0DC == 0 || m->action == 0x37) {
                 continue;
             }
-            D_800AA248.unk_08 = (u16) func_80053970(e, m);
+            D_800AA248.unk_08 = (u16) monster_test_hit_box(e, m);
             if (D_800AA248.unk_08 == 0) {
                 continue;
             }
@@ -845,7 +1155,7 @@ void func_80052520(Monster *e) {
     e->climb_side = 0;
     e->climb_building = 0;
     if ((u16) (e->dir - 4) < 3) {
-        func_80056CCC(e);
+        monster_find_wall(e);
         if (e->action != 0x2C) {
             func_800531C0(e);
             return;
@@ -876,7 +1186,7 @@ void func_8005262C(Monster *e) {
 
 void func_800526A4(Monster *e) {
     if (e->health.w != 0) {
-        func_80056598();
+        monster_find_roof();
         if (e->action != 0x2C) {
             func_800531C0(e);
             return;
@@ -974,7 +1284,7 @@ done:
     e->unk_104 = 0x4000;
     e->climb_side = 0;
     e->climb_building = 0;
-    func_80056CCC(e);
+    monster_find_wall(e);
     if (e->action == 0x2C) {
         if (D_800AA268.p->vel_y.w > 0) {
             func_80052ADC(e);
@@ -1030,7 +1340,7 @@ s32 func_80052A68(Monster *e) {
 void func_80052ADC(Monster *e) {
     u16 state;
 
-    func_80056598();
+    monster_find_roof();
     state = e->action;
     if (state != 0x2C) {
         func_800531C0(e);
@@ -1149,7 +1459,100 @@ void func_80052E70(Monster *e) {
 void func_80052E94(void) {
 }
 
+#ifdef NON_MATCHING
+/* 98.78%: 98.8 %: one instruction short: the original copies func_8001D110's result into a1 (move a1,v0) and builds
+ * the definition through a1; here it stays in v0 */
+void func_80052E9C(Monster *e) {
+    s32 *speeds;
+    s32 speed;
+    u16 dir;
+    Building *city;
+    Building *u;
+    ObjectDef *def;
+    u16 x;
+    s16 i;
+
+    switch (e->id) {
+    case 3:
+        speeds = D_8007FB08[e->id - 1];
+        dir = e->dir;
+        D_800AA248.unk_24 = dir;
+        speed = speeds[dir];
+        if (e->unk_168 == 7) {
+            if (e->dir < 2 || e->dir == 5) {
+                e->unk_100 = 0;
+                D_800AA248.cur_obj->vel_x.w = 0;
+            } else if (e->dir < 5) {
+                D_800AA248.cur_obj->flags &= ~0x10;
+                e->unk_168 = 7;
+                e->unk_100 = 0;
+                D_800AA248.cur_obj->vel_x.w = 0;
+            } else {
+                e->unk_100 = speed;
+            }
+        } else {
+            if (e->dir < 2 || e->dir == 5) {
+                e->unk_100 = 0;
+                D_800AA248.cur_obj->vel_x.w = 0;
+            } else if (e->dir >= 6) {
+                D_800AA248.cur_obj->flags |= 0x10;
+                e->unk_168 = 3;
+                e->unk_100 = 0;
+                D_800AA248.cur_obj->vel_x.w = 0;
+            } else {
+                e->unk_100 = speed;
+            }
+        }
+        if (e->climb_side == 3) {
+            u = monster_get_building(e->climb_building);
+            x = D_800AA268.p->pos_x.s.hi;
+            if (u->state >= 4 || (s16) x < (s16) u->unk_004 || u->unk_00E < (s16) x) {
+                e->climb_side = 0;
+            }
+        } else if (D_800AA248.cur_obj->pos_y.s.hi != 0xE1) {
+            D_800AA248.cur_obj->pos_y.w += 0x18000;
+            if (D_800AA248.cur_obj->pos_y.w > 0xE10000) {
+                D_800AA248.cur_obj->pos_y.w = 0xE10000;
+            }
+        }
+        break;
+    case 5:
+        monster_find_roof(e);
+        func_8005A0F0();
+        break;
+    case 4:
+        if (e->obj->vel_y.s.hi > 0) {
+            city = D_801D3DC8;
+            D_800AA248.unk_0C = e->front_x;
+            D_800AA248.unk_10 = e->obj->pos_y.s.hi;
+            for (i = 0; i < (s16) D_801E29A4; i++) {
+                func_80054608(city->unk_008, e, city);
+                city++;
+            }
+            if (e->action == 0) {
+                func_80059D2C();
+                func_8001F724(5);
+                def = func_8001D110();
+                D_800AA284.p = def;
+                def->flags = 0x1006;
+                def->anim = &D_80016A30;
+                def->id = D_80016A30.id;
+                def->pos_y.w = e->obj->pos_y.w - 0x50000;
+                def->pos_x.w = e->obj->pos_x.w;
+                func_8001DCB4();
+            }
+        }
+        break;
+    case 1:
+    case 2:
+    case 6:
+    case 7:
+        break;
+    }
+}
+#else
 INCLUDE_ASM("asm/main/nonmatchings/monster", func_80052E9C);
+#endif
 
 void func_800531C0(Monster *e) {
     D_800AA248.cur_obj->vel_x.w = 0;
@@ -1160,9 +1563,194 @@ void func_800531C0(Monster *e) {
     e->unk_104 = 0;
 }
 
-INCLUDE_ASM("asm/main/nonmatchings/monster", func_80053204);
+#ifdef NON_MATCHING
+/* 93.60%: 93.6 %: the bump and the direction switch match; the position tail is func_800535E4's: the original
+ * reloads the camera x (D_801F9AC8) for the clamped values and the second bound, here it stays in a register */
+void func_80053204(Monster *e) {
+    GameObject *shadow;
+    Monster *m;
+    GameObject *a;
+    GameObject *b;
+    s32 v;
+    s32 d;
 
+    if (e->unk_218 != NULL) {
+        func_80053804((s32) e->unk_218, e);
+        return;
+    }
+    m = e->unk_200;
+    if (m != NULL) {
+        a = D_800AA268.p;
+        b = m->obj;
+        if ((a->pos_x.w == b->pos_x.w && a->pos_y.w > b->pos_y.w) || a->pos_x.w >= b->pos_x.w) {
+            if (a->pos_y.w > b->pos_y.w) {
+                e->unk_208 = 0x40000;
+                e->unk_210 = -0x8000;
+            } else {
+                e->unk_208 = -0x40000;
+                e->unk_210 = 0x8000;
+            }
+            e->unk_20C = -0x80000;
+            e->unk_214 = 0x8000;
+            e->action = 0x58;
+            e->unk_200 = 0;
+            return;
+        }
+    }
+    shadow = e->unk_1FC;
+    e->unk_200 = 0;
+    switch (e->dir) {
+    case 3:
+        D_800AA248.cur_obj->vel_x.w = 0x87000;
+        D_800AA248.cur_obj->vel_y.w = 0;
+        e->action = 0x50;
+        break;
+    case 2:
+        D_800AA248.cur_obj->vel_x.w = 0x77000;
+        D_800AA248.cur_obj->vel_y.w = 0x1A000;
+        e->action = 0x52;
+        break;
+    case 4:
+        D_800AA248.cur_obj->vel_x.w = 0x77000;
+        D_800AA248.cur_obj->vel_y.w = -0x1A000;
+        e->action = 0x51;
+        break;
+    case 7:
+        D_800AA248.cur_obj->vel_x.w = 0x7000;
+        D_800AA248.cur_obj->vel_y.w = 0;
+        e->action = 0x50;
+        break;
+    case 8:
+        D_800AA248.cur_obj->vel_x.w = 0x17000;
+        D_800AA248.cur_obj->vel_y.w = 0x1A000;
+        e->action = 0x52;
+        break;
+    case 6:
+        D_800AA248.cur_obj->vel_x.w = 0x17000;
+        D_800AA248.cur_obj->vel_y.w = -0x1A000;
+        e->action = 0x51;
+        break;
+    case 5:
+        D_800AA248.cur_obj->vel_x.w = 0x47000;
+        D_800AA248.cur_obj->vel_y.w = -0x34000;
+        e->action = 0x51;
+        break;
+    case 1:
+        D_800AA248.cur_obj->vel_x.w = 0x47000;
+        D_800AA248.cur_obj->vel_y.w = 0x34000;
+        e->action = 0x52;
+        break;
+    default:
+        D_800AA248.cur_obj->vel_x.w = 0x47000;
+        D_800AA248.cur_obj->vel_y.w = 0;
+        e->action = 0x50;
+        break;
+    }
+    v = D_800AA268.p->pos_x.w;
+    v += D_801D3780 != 0 ? 0x40000 : D_800AA268.p->vel_x.w;
+    if (v <= D_801F9AC8.w) {
+        v += D_801D8864.w;
+    }
+    if (D_801D3780 == 0) {
+        if (v < D_801F9AC8.w + 0x500000) {
+            v = D_801F9AC8.w + 0x500000;
+        } else if (D_801F9AC8.w + 0x1400000 < v) {
+            v = D_801F9AC8.w + 0x1400000;
+        }
+    }
+    v &= D_801D8864.w;
+    D_800AA248.cur_obj->pos_x.w = v;
+    shadow->pos_x.w = v;
+    v = D_800AA248.cur_obj->pos_y.w;
+    v += D_801D3780 != 0 ? 0x18000 : D_800AA248.cur_obj->vel_y.w;
+    if (D_801D3780 == 0) {
+        if (v < -0x370000) {
+            v = -0x370000;
+        } else if (v > 0x820000) {
+            v = 0x820000;
+        }
+    }
+    D_800AA248.cur_obj->pos_y.w = v;
+    shadow->pos_y.w = v;
+    shadow->priority = D_800AA248.cur_obj->priority - 1;
+}
+#else
+INCLUDE_ASM("asm/main/nonmatchings/monster", func_80053204);
+#endif
+
+#ifdef NON_MATCHING
+/* 84.95%: 85 %: the original keeps the camera x of the wrap test for the first clamp's compare but reloads it for
+ * the clamped values (ours reuses it), and stores unk_20C/unk_208 before the abs branches (ours in the delay slot) */
+void func_800535E4(Monster *e) {
+    GameObject *shadow;
+    s32 v;
+    s32 step;
+
+    v = e->unk_20C;
+    step = e->unk_214;
+    shadow = e->unk_1FC;
+    e->unk_200 = 0;
+    e->unk_218 = 0;
+    v += step;
+    e->unk_20C = v;
+    if (v < 0) {
+        v = -v;
+    }
+    if (step < 0) {
+        step = -step;
+    }
+    if (step >= v) {
+        e->unk_214 = 0;
+    }
+    D_800AA248.cur_obj->vel_x.w = e->unk_20C;
+    v = e->unk_208;
+    step = e->unk_210;
+    v += step;
+    e->unk_208 = v;
+    if (v < 0) {
+        v = -v;
+    }
+    if (step < 0) {
+        step = -step;
+    }
+    if (step >= v) {
+        e->unk_210 = 0;
+    }
+    D_800AA248.cur_obj->vel_y.w = e->unk_208;
+    if ((e->unk_210 | e->unk_214) == 0) {
+        e->action = 0x50;
+    }
+    v = D_800AA248.cur_obj->pos_x.w;
+    v += D_801D3780 != 0 ? 0x40000 : D_800AA248.cur_obj->vel_x.w;
+    if (v <= D_801F9AC8.w) {
+        v += D_801D8864.w;
+    }
+    if (D_801D3780 == 0) {
+        if (v < D_801F9AC8.w + 0x500000) {
+            v = D_801F9AC8.w + 0x500000;
+        } else if (D_801F9AC8.w + 0x1400000 < v) {
+            v = D_801F9AC8.w + 0x1400000;
+        }
+    }
+    v &= D_801D8864.w;
+    D_800AA248.cur_obj->pos_x.w = v;
+    shadow->pos_x.w = v;
+    v = D_800AA248.cur_obj->pos_y.w;
+    v += D_801D3780 == 0 ? D_800AA248.cur_obj->vel_y.w : 0x18000;
+    if (D_801D3780 == 0) {
+        if (v < -0x370000) {
+            v = -0x370000;
+        } else if (v > 0x820000) {
+            v = 0x820000;
+        }
+    }
+    D_800AA248.cur_obj->pos_y.w = v;
+    shadow->pos_y.w = v;
+    shadow->priority = D_800AA248.cur_obj->priority - 1;
+}
+#else
 INCLUDE_ASM("asm/main/nonmatchings/monster", func_800535E4);
+#endif
 
 void func_80053804(s32 unused, Monster *e) {
     /* LOOP_BLOCK class A2: the plain statements give the original's order only with -fno-schedule-insns
@@ -1178,10 +1766,10 @@ void func_8005382C(u16 kind) {
     D_800AA268.p->unk_8C = D_8007BE0C[kind];
 }
 
-#ifdef NON_MATCHING
-/* 82.4 %: the original keeps the wrapped x in t0 and loads the boxes' y bounds (0x10A, 0x10E, 0x112, 0x116) with lhu, comparing them shifted; here they are loaded signed */
 s32 monster_test_boxes(s16 x, s16 y, Monster *m) {
     s16 px;
+    s16 bx;
+    s16 by;
 
     px = x;
     if (m->unk_0DC == 0 || m->action == 0x37) {
@@ -1190,19 +1778,75 @@ s32 monster_test_boxes(s16 x, s16 y, Monster *m) {
     if (x < D_801F9ACA) {
         px = x + ((D_801D8864.w + 1) >> 16);
     }
-    if (px >= m->box_x0 && y >= m->box_y0 && m->box_x1 >= px && m->box_y1 >= y) {
+    bx = m->box_x0;
+    by = m->box_y0;
+    if (px >= bx && y >= by) {
+        bx = m->box_x1;
+        by = m->box_y1;
+        if (bx >= px && by >= y) {
+            return 1;
+        }
+    }
+    bx = m->box2_x0;
+    by = m->box2_y0;
+    if (px >= bx && y >= by) {
+        bx = m->box2_x1;
+        by = m->box2_y1;
+        if (bx >= px && by >= y) {
+            return 2;
+        }
+    }
+    return 0;
+}
+
+u16 monster_test_hit_box(Monster *e, Monster *m) {
+    s16 left;
+    u16 top;
+    u16 right;
+    u16 bottom;
+    s32 w;
+    s16 x0;
+    s16 y0;
+    s16 x1;
+    s16 y1;
+
+    if (m->unk_0DC == 0) {
+        return 0;
+    }
+    if (D_800AA2DC & 0x7000) {
+        if (e->climb_side != 0) {
+            if (m->climb_side == 0) {
+                return 0;
+            }
+        } else if (m->climb_side != 0) {
+            return 0;
+        }
+    }
+    right = e->unk_11C;
+    left = e->unk_118;
+    top = e->unk_11A;
+    bottom = e->unk_11E;
+    if (left < D_801F9ACA) {
+        w = (D_801D8864.w + 1) >> 16;
+        left += w;
+        right += w;
+    }
+    x0 = m->box_x0;
+    y0 = m->box_y0;
+    x1 = m->box_x1;
+    y1 = m->box_y1;
+    if (left < x1 && (s16) right > x0 && (s16) top < y1 && (s16) bottom > y0) {
         return 1;
     }
-    if (px >= m->box2_x0 && y >= (s16) m->box2_y0 && m->box2_x1 >= px && (s16) m->box2_y1 >= y) {
+    x0 = m->box2_x0;
+    y0 = m->box2_y0;
+    x1 = m->box2_x1;
+    y1 = m->box2_y1;
+    if (left < x1 && (s16) right > x0 && (s16) top < y1 && (s16) bottom > y0) {
         return 2;
     }
     return 0;
 }
-#else
-INCLUDE_ASM("asm/main/nonmatchings/monster", monster_test_boxes);
-#endif
-
-INCLUDE_ASM("asm/main/nonmatchings/monster", func_80053970);
 
 u16 func_80053AC4(s16 a, s16 b, s16 c, s16 d, Monster *e) {
     if (e->unk_0DC == 0 || e->action == 0x37) {
@@ -1654,7 +2298,64 @@ void func_8005478C(Monster *e) {
     }
 }
 
-INCLUDE_ASM("asm/main/nonmatchings/monster", func_800547EC);
+void monster_grab_building(Monster *e) {
+    Building *city;
+    u16 x;
+    u16 cx;
+    s16 d;
+    s32 ad;
+    s32 w;
+    s16 n;
+
+    if (e->unk_18E != 0) {
+        return;
+    }
+    city = D_801D3DC8;
+    x = e->front_x;
+    D_800AA248.unk_40 = n = D_801E29A4;
+    if (n == 0) {
+        return;
+    }
+    D_800AA248.unk_04 = 0;
+    do {
+        D_800AA248.unk_04++;
+        if (city->state < 9) {
+            cx = city->unk_004;
+            d = x - cx;
+            ad = abs(d);
+            w = D_801D8864.w >> 16;
+            if (ad > w / 2) {
+                if ((s16) cx < (s16) x) {
+                    cx++;
+                    cx += w;
+                }
+                d = x - cx;
+            }
+            if ((u16) (d + 0x32) < 0xFA) {
+                if (d < 0x32 && monster_test_left_side(x, city) == 1) {
+                    if (func_80057AD8(e, city, 1) != 0) {
+                        continue;
+                    }
+                    if (func_800575F0(0, e, city, D_800AA248.unk_04) == 0) {
+                        func_800564C0(e, city);
+                        func_80055FBC(e, city);
+                        return;
+                    }
+                } else {
+                    if (func_80057AD8(e, city, 2) != 0) {
+                        continue;
+                    }
+                    if (monster_test_right_side(x, city) == 1 && func_80057300(0, e, city, D_800AA248.unk_04) == 0) {
+                        func_80056510(e, city);
+                        func_800560A8(e, city);
+                        return;
+                    }
+                }
+            }
+        }
+        city++;
+    } while (--D_800AA248.unk_40 != 0);
+}
 
 void func_80054A18(Monster *e) {
     func_800578E0(e, monster_get_building(e->climb_building));
@@ -2122,7 +2823,75 @@ void func_80055B68(Monster *e, Building *city) {
     }
 }
 
-INCLUDE_ASM("asm/main/nonmatchings/monster", func_80055CA8);
+void func_80055CA8(Monster *e) {
+    Building *city;
+    u16 v;
+    u16 action;
+
+    D_800AA248.cur_obj->pos_x.s.hi &= D_801D8866;
+    D_800AA248.action = e->action;
+    if (D_800AA248.action == 0 || e->action == 0xB || e->action == 0x1C) {
+        e->unk_168 = (D_800AA268.p->flags & 0x10) ? 7 : 3;
+    }
+    if (e->action != 2 && e->action != 0x4E) {
+        e->unk_166 = 0;
+    }
+    v = e->unk_0DE;
+    if ((s16) e->unk_0DE != 0) {
+        v = 0;
+        if (e->action != 3 && e->action != 0x11) {
+            e->unk_0DE = 0;
+        }
+    }
+    e->unk_1DE = v;
+    D_800AA248.unk_08 = e->climb_side;
+    if (D_800AA248.unk_08 == 0 || e->unk_18E != 0) {
+        if (e->unk_0DC != 0 || (D_800AA2DC != 0 && (D_8007BD78.flags & 0x100))) {
+            e->climb_floor = 0;
+            e->climb_building = 0;
+            if (D_800AA248.cur_obj->vel_y.w == 0 && e->unk_104 == 0) {
+                action = e->action;
+                D_800AA248.action = action;
+                if (action != 2 && action != 0x11 && action != 0x4E) {
+                    if (e->action == 0x37) {
+                        if (e->unk_1CC != 4 && e->unk_1CC != 1) {
+                            D_800AA248.cur_obj->pos_y.w = 0xDD0000;
+                        }
+                    } else if (e->unk_18E != 0) {
+                        e->climb_side = 0;
+                    } else {
+                        D_800AA248.cur_obj->pos_y.w = 0xE10000;
+                        e->unk_1DE = 1;
+                    }
+                }
+            }
+        }
+    } else {
+        D_800AA248.unk_10 = D_800AA248.cur_obj->pos_y.s.hi;
+        D_800AA248.cur_obj = e->obj;
+        city = monster_get_building(e->climb_building);
+        monster_find_floor(e, city);
+        if (D_800AA248.unk_08 == 1) {
+            if (D_800AA248.action != 0x10 && D_800AA248.action != 0xD) {
+                func_800564C0(e, city);
+            }
+        } else if (D_800AA248.unk_08 == 2) {
+            if (D_800AA248.action != 0x10 && D_800AA248.action != 0xD) {
+                func_80056510(e, city);
+            }
+        } else if (D_800AA248.unk_08 == 3) {
+            if (D_800AA248.action != 0x10) {
+                func_80056560(e);
+            }
+        }
+    }
+    if (D_800AA248.action != 0xC) {
+        e->unk_168 = (D_800AA248.cur_obj->flags & 0x10) ? 7 : 3;
+    }
+    if (e->unk_16C != NULL) {
+        func_800544D8(e, e->unk_16C, e->obj);
+    }
+}
 
 void func_80055FBC(Monster *e, Building *city) {
     u16 target;
@@ -2345,7 +3114,46 @@ void func_80056560(Monster *e) {
     D_800AA268.p->pos_y.s.hi = monster_get_building(e->climb_building)->unk_074 + 8;
 }
 
-INCLUDE_ASM("asm/main/nonmatchings/monster", func_80056598);
+u16 monster_find_roof(e)
+Monster *e;
+{
+    Building *city;
+    u16 hit;
+    s16 n;
+
+    D_800AA248.unk_08 = e->climb_side;
+    D_800AA248.unk_0C = e->front_x;
+    city = D_801D3DC8;
+    D_800AA248.unk_10 = D_800AA248.cur_obj->pos_y.s.hi;
+    n = D_801E29A4;
+    D_800AA248.unk_40 = n;
+    if (n == 0) {
+        return 0;
+    }
+    D_800AA248.unk_04 = 0;
+    do {
+        D_800AA248.unk_04++;
+        if (city->state < 9 && (u16) (e->front_x - city->unk_004 + 0x32) < 0xFA) {
+            hit = func_80056708(e, city);
+            if (hit == 1) {
+                func_800567E8(e, city);
+                if (city->unk_058 == 0) {
+                    if (D_800AA248.unk_24 == 1) {
+                        func_8002D144(e, city);
+                    }
+                } else {
+                    func_8002CFAC(e, city);
+                    if (city->unk_058 - 2 >= 2U) {
+                        monster_start_jump(e);
+                    }
+                }
+                return 1;
+            }
+        }
+        city++;
+    } while (--D_800AA248.unk_40 != 0);
+    return 0;
+}
 
 s32 func_80056708(Monster *e, Building *u) {
     GameState *g;
@@ -2517,7 +3325,40 @@ s32 func_80056C18(Monster *e, Building *u) {
     return 0;
 }
 
-INCLUDE_ASM("asm/main/nonmatchings/monster", func_80056CCC);
+u16 monster_find_wall(Monster *e) {
+    Building *city;
+    s32 d;
+    s32 d2;
+    s16 n;
+
+    D_800AA248.unk_0C = e->front_x;
+    D_800AA248.unk_10 = D_800AA248.cur_obj->pos_y.w;
+    D_800AA248.unk_10 -= D_801F9ACC.w;
+    if ((u32) (D_800AA248.unk_10 - 0x580000) > 0xB00000) {
+        return 0;
+    }
+    D_800AA248.unk_10 = D_800AA248.cur_obj->pos_y.s.hi;
+    n = D_801E29A4;
+    D_800AA248.unk_40 = n;
+    if (n == 0) {
+        return 0;
+    }
+    D_800AA248.unk_04 = 0;
+    city = D_801D3DC8;
+    do {
+        D_800AA248.unk_04++;
+        d = (s16) city->unk_00E - e->front_x;
+        if ((d < 0 ? -d : d) < 0x15 && (u16) func_80056C18(e, city) == 1) {
+            return 1;
+        }
+        d2 = (s16) city->unk_004 - e->front_x;
+        if ((d2 < 0 ? -d2 : d2) < 0x15 && (u16) func_80056990(e, city) == 1) {
+            return 1;
+        }
+        city++;
+    } while (--D_800AA248.unk_40 != 0);
+    return 0;
+}
 
 void func_80056E2C(Monster *e, Building *city) {
     u16 n;

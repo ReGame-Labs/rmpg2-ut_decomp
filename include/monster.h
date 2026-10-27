@@ -11,6 +11,17 @@ typedef struct FramePoint {
     u16 y;
 } FramePoint;
 
+/* A motion preset (D_8007FBAC, by direction): the Monster words it is copied into. */
+typedef struct MonsterMotion {
+    s32 unk_1A0;
+    s32 unk_1A4;
+    s32 unk_100;
+    s32 unk_104;
+    s32 unk_198;
+    s32 unk_19C;
+} MonsterMotion;
+
+s32 abs(s32);                           /* GCC's builtin: inlined */
 s32 func_8001B660(s32);
 ObjectDef *func_8001D110(void);
 void *func_8001DCB4(void);
@@ -21,7 +32,10 @@ s32 func_8001EA78(void);
 void func_8001F724(u16);
 s32 func_80025DF8(s32);
 void func_80029118(s16, u16);
+void func_8002CFAC(Monster *, Building *);
+void func_8002D144(Monster *, Building *);
 void building_clear_monster(Monster *);
+s16 func_8003FCD8(s32, s32);             /* a horizontal distance */
 void func_80031280(Monster *, Building *);
 GameObject **func_80031420(u16, Building *);
 s32 func_80031714(Monster *);
@@ -48,7 +62,7 @@ void func_8004F470(Monster *, Monster *);
 void func_8004F65C(void);
 void func_8004F7F4(GameObject *, Monster *, Monster *, GameObject *);
 void func_8004FC00(s32, Monster *);
-void func_80050BBC(void);
+void func_80050BBC();
 void func_80050E58(Monster *);
 void func_800510E8(Monster *);
 void func_80051330(Monster *, Monster *);
@@ -69,11 +83,13 @@ void func_80052E44(Monster *);
 void func_80052E70(Monster *);
 void func_800531C0(Monster *);
 void func_8005382C(u16);
-u16 func_80053970(Monster *, Monster *);
+u16 monster_test_hit_box(Monster *, Monster *);
 s32 func_80053B30(s16, s16, s16, s16, Monster *);
 void func_80053C50(s32, Monster *);
+void func_800540D0(Monster *);
 void func_80053D68(s32, Monster *);
 void func_8005417C(Monster *);
+void func_80054608(u16, Monster *, Building *);
 void func_8005421C(Monster *);
 Building *monster_get_building(u16);
 void func_80054A18();
@@ -81,6 +97,7 @@ void func_80054CF8(Monster *, Building *);
 void func_80054D74(u16, Monster *, Building *);
 void func_80054E1C(Monster *);
 void func_80054F18(Monster *);
+void func_8005520C(Monster *);
 void func_80055014(Monster *);
 void func_80055110(Monster *);
 void func_80055454(Monster *, Building *);
@@ -97,19 +114,22 @@ void func_80056050(Monster *, Building *);
 void func_800560A8(Monster *, Building *);
 void func_80056134(Monster *, Building *);
 void func_8005618C(Monster *, Building *);
+u16 monster_test_left_side(s16, Building *);
+u16 monster_test_right_side(s16, Building *);
 u16 func_800562E4(s16, Building *);
 u16 func_80056378(s16, Building *);
 void func_8005640C(Monster *, Building *);
 void func_800564C0(Monster *, Building *);
 void func_80056510(Monster *, Building *);
+void func_80056560(Monster *);
 void func_80056528(Monster *);
-void func_80056598(void);
+u16 monster_find_roof();
 u16 func_80056840(Monster *);
 s32 func_80056990(Monster *, Building *);
 u16 func_80056A44(Monster *, Building *);
 s32 func_80056C18(Monster *, Building *);
 u16 func_80056AC8(Monster *);
-void func_80056CCC(Monster *);
+u16 monster_find_wall(Monster *);
 void func_80056E2C(Monster *, Building *);
 void func_80056E78(Monster *);
 void func_80056EB8(Monster *, Building *);
@@ -128,6 +148,8 @@ u16 func_80057A08(Monster *);
 u16 func_80057AD8(Monster *, Building *, u16);
 void func_800580F8(void *);
 void func_80058F78(Monster *);
+void func_80059D2C(void);
+void func_8005A0F0(void);
 Monster *bonus_find_most_lives(void);
 s32 func_8005E4E4(void);
 void cdload_sort_players(void);
@@ -136,9 +158,13 @@ void func_800634D4(Monster *, u32);
 
 extern s32 D_800123BC;
 extern u16 D_8007BE0C[];
+extern s32 D_8007FA9C[];                /* walking speeds by direction: monster 7's (two sets) */
+extern s32 D_8007FAE4[];
+extern s32 *D_8007FB08[];               /* walking speeds by direction, per monster id - 1 */
 extern s32 D_8007FB24[];                /* climbing speeds by direction: monster 7's (two sets) */
 extern s32 D_8007FB6C[];
 extern s32 *D_8007FB90[];               /* climbing speeds by direction, per monster id - 1 */
+extern MonsterMotion D_8007FBAC[];      /* by Monster.dir */
 extern s16 D_8007FD04[];
 extern s16 D_8007FD24[];
 extern s16 D_8007FD44[];
@@ -154,6 +180,8 @@ extern u16 D_801D3DC2;
 extern Building D_801D48D0;
 extern s16 D_801F9924;
 extern Anim D_8008C7A4;
+extern Anim D_80016A30;
+extern u16 D_801E1E44;
 extern u16 D_801E28C8;
 extern u16 D_801E2A54;
 
