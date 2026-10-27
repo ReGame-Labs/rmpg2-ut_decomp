@@ -40,7 +40,7 @@ typedef struct GameObject {
     /* 0x72 */ u8 unk_72[0x02];
     /* 0x74 */ u16 unk_74;
     /* 0x76 */ u8 unk_76[0x02];
-    /* 0x78 */ s32 unk_78;             /* a colour, 0xBBGGRR */
+    /* 0x78 */ u32 unk_78;             /* a colour, 0xBBGGRR (0x808080 normal); -1 left alone by the fades */
     /* 0x7C */ u8 unk_7C[0x04];
     /* 0x80 */ s16 unk_80;
 } GameObject;
@@ -90,6 +90,8 @@ void func_8001E4B0(GameObject *obj);   /* frees an object */
 void func_8001F61C(u8 *text, s16 x, s16 y, s32 spacing, s32 arg4, s32 *glyphs, s32 kind, s32 arg7); /* draws a text */
 
 extern s32 D_8007ABCC[];               /* a font's glyphs */
+extern s32 D_8007AD4C[];               /* another font */
+extern GameObject *D_801D373C[2];      /* the SELECT and BACK buttons */
 extern s16 D_801F9AAC;                 /* the printer's normal colour */
 
 void func_8001F724(u16 id);            /* plays a sound or a music by id; 0xFFFF stops */
@@ -204,7 +206,8 @@ extern s16 D_800A9870;                  /* the cursor in the next menu */
 extern s16 D_800A9878;
 extern s32 D_800A9228;                 /* the player slot before the last move */
 extern u8 D_800A74E4[];                /* an animation script */
-extern s16 D_800A92B0[3];
+extern s16 D_800A92B0[3];              /* per player: the selection's state, 3 done */
+extern u8 D_801D8800[3];               /* per player: a choice, 0..4 */
 extern s16 D_800A9840;
 extern s16 D_800A9800;
 extern GameObject *D_800A9808[2];      /* the two volume bars */

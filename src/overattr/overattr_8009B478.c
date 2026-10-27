@@ -2,7 +2,47 @@
 #include "common.h"
 #include "overattr.h"
 
-INCLUDE_ASM("asm/overattr/nonmatchings/overattr_8009B478", func_8009B478);
+void func_8009B478(void) {
+    GameObject *head;
+    GameObject *obj;
+
+    head = &D_801E28C0;
+    switch (D_800A9888) {
+    case 1:
+        obj = head->next;
+        if (obj != head) {
+            do {
+                if ((obj->flags & 0x100) && obj->unk_78 != -1) {
+                    if (obj->unk_78 != 0) {
+                        obj->unk_78 -= 0x40404;
+                    } else {
+                        obj->unk_78 = 0;
+                        D_800A9888 = 0;
+                    }
+                }
+                obj = obj->next;
+            } while (obj != head);
+        }
+        break;
+    case 2:
+        obj = head->next;
+        if (obj != head) {
+            do {
+                if ((obj->flags & 0x100) && obj->unk_78 != -1) {
+                    if (obj->unk_78 <= 0x80807F) {
+                        obj->unk_78 += 0x40404;
+                    } else {
+                        obj->unk_78 = 0x808080;
+                        D_800A9888 = 0;
+                        obj->flags &= ~0x500;
+                    }
+                }
+                obj = obj->next;
+            } while (obj != head);
+        }
+        break;
+    }
+}
 
 void func_8009B598(void) {
     if ((D_800A9220 & 0x401004) && D_801F9944 == 0) {
@@ -300,7 +340,31 @@ INCLUDE_ASM("asm/overattr/nonmatchings/overattr_8009B478", func_8009C828);
 
 INCLUDE_ASM("asm/overattr/nonmatchings/overattr_8009B478", func_8009CA68);
 
-INCLUDE_ASM("asm/overattr/nonmatchings/overattr_8009B478", func_8009CD30);
+void func_8009CD30(void) {
+    s32 i;
+
+    for (i = 0; i < 3; i++) {
+        if (D_800A92B0[i] != 3) {
+            if ((D_800A9220 & (4 << (i * 10))) && D_801F9944 == 0) {
+                D_800A9860 = 0x708;
+                if (D_801D8800[i] == 0) {
+                    D_801D8800[i] = 4;
+                } else {
+                    D_801D8800[i]--;
+                }
+                func_8001F724(0x1E);
+            } else if ((D_800A9220 & (8 << (i * 10))) && D_801F9944 == 0) {
+                D_800A9860 = 0x708;
+                if (D_801D8800[i] == 4) {
+                    D_801D8800[i] = 0;
+                } else {
+                    D_801D8800[i]++;
+                }
+                func_8001F724(0x1E);
+            }
+        }
+    }
+}
 
 void func_8009CE5C(void) {
     if (D_800A9808[0] != NULL) {
@@ -712,11 +776,69 @@ void func_8009F968(OverattrPlacement *p, s32 n, s32 color) {
     }
 }
 
-INCLUDE_RODATA("asm/overattr/nonmatchings/overattr_8009B478", D_800980CC);
+void func_8009F9E0(void) {
+    ObjectDef *def;
+    GameObject *head;
+    GameObject *obj;
 
-INCLUDE_ASM("asm/overattr/nonmatchings/overattr_8009B478", func_8009F9E0);
+    D_800AA248.new_def = def = func_8001D110();
+    def->id = 0x4F002808;
+    def->pos_x.v = 0x320000;
+    def->pos_y.v = 0xD70000;
+    def->flags = 0x1FE;
+    def->unk_06 |= 0x20;
+    D_801D373C[0] = func_8001DCB4();
+    D_801D373C[0]->kind = 0x550;
+    D_801D373C[0]->unk_78 = 0x808080;
+    D_800AA248.new_def = def = func_8001D110();
+    def->id = 0x4F00280A;
+    def->pos_x.v = 0x10E0000;
+    def->pos_y.v = 0xD70000;
+    def->flags = 0x1FE;
+    def->unk_06 |= 0x20;
+    D_801D373C[1] = func_8001DCB4();
+    D_801D373C[1]->kind = 0x550;
+    D_801D373C[1]->unk_78 = 0x808080;
+    func_8001F61C("SELECT", 0x4B, 0xD6, 1, 0x46, D_8007AD4C, 1, 0x550);
+    func_8001F61C("BACK", 0x127, 0xD6, 1, 0x46, D_8007AD4C, 1, 0x550);
+    head = &D_801E28C0;
+    obj = head->next;
+    if (obj != head) {
+        do {
+            if (obj->kind == 0x550) {
+                obj->unk_78 = 0x808080;
+            }
+            obj = obj->next;
+        } while (obj != head);
+    }
+}
 
-INCLUDE_ASM("asm/overattr/nonmatchings/overattr_8009B478", func_8009FB78);
+void func_8009FB78(void) {
+    ObjectDef *def;
+    GameObject *head;
+    GameObject *obj;
+
+    D_800AA248.new_def = def = func_8001D110();
+    def->pos_x.v = 0x320000;
+    def->pos_y.v = 0xD70000;
+    def->id = 0x4F002808;
+    def->flags = 0x1FE;
+    def->unk_06 |= 0x20;
+    D_801D373C[0] = func_8001DCB4();
+    D_801D373C[0]->kind = 0x550;
+    D_801D373C[0]->unk_78 = 0x808080;
+    func_8001F61C("SELECT", 0x4B, 0xD6, 1, 0x46, D_8007AD4C, 1, 0x550);
+    head = &D_801E28C0;
+    obj = head->next;
+    if (obj != head) {
+        do {
+            if (obj->kind == 0x550) {
+                obj->unk_78 = 0x808080;
+            }
+            obj = obj->next;
+        } while (obj != head);
+    }
+}
 
 INCLUDE_ASM("asm/overattr/nonmatchings/overattr_8009B478", func_8009FC74);
 
