@@ -226,7 +226,7 @@ typedef struct Monster {
     /* 0x0EA */ u16 unk_0EA;
     /* 0x0EC */ u16 unk_0EC;
     /* 0x0EE */ s16 unk_0EE;
-    /* 0x0F0 */ s32 unk_0F0;                   /* a change to its health, applied once (func_80029510) */
+    /* 0x0F0 */ s32 unk_0F0;                   /* a change to its health, applied once (main_apply_health) */
     /* 0x0F4 */ s16 front_x;                   /* its front: pos_x plus or minus half its width, by its facing */
     /* 0x0F6 */ u16 unk_0F6;
     /* 0x0F8 */ u8 unk_0F8[0x02];
@@ -517,10 +517,10 @@ typedef struct BuildingDef {
 /* What Building.unk_018 points to. */
 typedef struct BuildingBlock {
     /* 0x00 */ GameObject *unk_00;             /* moved with the building */
-    /* 0x04 */ u8 unk_04[0x04];
+    /* 0x04 */ s32 unk_04;
     /* 0x08 */ u16 unk_08;                     /* hit points? zero: destroyed */
     /* 0x0A */ u16 unk_0A;                     /* the item it belongs to (BuildingItem.unk_04) */
-    /* 0x0C */ u8 unk_0C[0x02];
+    /* 0x0C */ s16 unk_0C;
     /* 0x0E */ s16 unk_0E;                     /* the bottom y */
     /* 0x10 */ s16 unk_10;                     /* set when hit */
     /* 0x12 */ u8 unk_12[0x0A];
