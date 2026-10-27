@@ -446,7 +446,6 @@ extern u16 D_801FB188;
 void func_8002A1AC(Monster *, s16);
 void func_8005A2F4(Monster *, s32);
 void func_8005A964(Monster *);
-extern u8 D_800105A8[];
 extern s16 D_800AA300[11][8][8];
 void func_8001F61C(u8 *, s16, s16, s32, s32, s32 *, s32, s32);
 u16 func_80025C54(void *);
@@ -729,38 +728,34 @@ void func_8001802C(s32 player) {
     }
 }
 
-#ifdef NON_MATCHING
-/* 80.2 %: register allocation around the two constants 0x4F002808 and 0x7000 */
 void func_800180E4(void) {
     ObjectDef *request;
+    GameObject *obj;
+    GameObject *head;
     GameObject *sprite;
-    s32 kind;
 
-    kind = 0x7000;
     request = func_8001D110();
     D_800AA284.p = request;
     request->pos_x.w = 0xA00000;
     request->pos_y.w = 0xD70000;
     request->id = 0x4F002808;
-    request->flags = kind;
+    request->flags = 0x7000;
     request->unk_06 |= 0x20;
-    sprite = func_8001DCB4(kind);
-    D_801D373C[0] = sprite;
-    sprite->kind = 0x550;
-    func_8001F61C(D_800105A8, 0xB9, 0xD6, 1, 0x46, D_8007AD4C, 1, 0x550);
-    sprite = D_801E28C0.next;
-    if (sprite != &D_801E28C0) {
+    obj = func_8001DCB4();
+    D_801D373C[0] = obj;
+    obj->kind = 0x550;
+    func_8001F61C("SELECT", 0xB9, 0xD6, 1, 0x46, D_8007AD4C, 1, 0x550);
+    head = &D_801E28C0;
+    sprite = head->next;
+    if (sprite != head) {
         do {
             if (sprite->kind == 0x550) {
                 sprite->colour = 0x808080;
             }
             sprite = sprite->next;
-        } while (sprite != &D_801E28C0);
+        } while (sprite != head);
     }
 }
-#else
-INCLUDE_ASM("asm/main/nonmatchings/main", func_800180E4);
-#endif
 
 void func_800181D0(void) {
     s32 bit;
@@ -1377,14 +1372,13 @@ s32 func_8001B660(s32 id) {
     return D_801FA7EC[(u32) id >> 28].unk_0 + (((u32) id << 4) >> 4);
 }
 
-#ifdef NON_MATCHING
-/* 95.7 %: the two registers of the first sum are swapped and the monster table's base address is formed before the first call instead of after it. */
 void func_8001B694(void) {
-    u16 sum;
+    u16 step;
+    Monster *m;
 
-    sum = D_801F9950 + D_801D37B4;
-    D_801D37B4 = sum;
-    if ((s16) sum > 0) {
+    step = D_801F9950;
+    D_801D37B4 += step;
+    if ((s16) D_801D37B4 > 0) {
         D_801D37B4 = 0;
     }
     if (D_801D3D64.unk_1A != 0) {
@@ -1394,21 +1388,21 @@ void func_8001B694(void) {
     if ((s16) D_801E0D38 >= 0x3C) {
         D_801E0D38 = 0;
         if ((D_801FA968 == 0) && (D_801D36FC == 0x150)) {
-            if (D_801E0B78[func_80025DF8(1)].id != 0) {
+            m = &D_801E0B78[func_80025DF8(1)];
+            if (m->id != 0) {
                 D_801FA95C += 1;
             }
-            if (D_801E0B78[func_80025DF8(2)].id != 0) {
+            m = &D_801E0B78[func_80025DF8(2)];
+            if (m->id != 0) {
                 D_801FA99C += 1;
             }
-            if (D_801E0B78[func_80025DF8(3)].id != 0) {
+            m = &D_801E0B78[func_80025DF8(3)];
+            if (m->id != 0) {
                 D_801FA994 += 1;
             }
         }
     }
 }
-#else
-INCLUDE_ASM("asm/main/nonmatchings/main", func_8001B694);
-#endif
 
 void func_8001B7F4(void) {
     u16 temp_v1;
@@ -1524,8 +1518,6 @@ void func_8001BB88(GameObject *arg0) {
 void func_8001BBA8(Monster *monster, s32 index) {
 }
 
-#ifdef NON_MATCHING
-/* 96.1 %: the constant 0x0A0041C8 is formed in another register and its two halves are not spread around the other stores. */
 void func_8001BBB0(void) {
     ObjectDef *temp_v0;
 
@@ -1552,7 +1544,7 @@ void func_8001BBB0(void) {
             temp_v0->pos_y.w = 0x1E0000;
             temp_v0->flags = 0x14;
             temp_v0->unk_06 |= 0x20;
-            func_8001DCB4(0x14);
+            func_8001DCB4();
             D_801E29BC = 2;
             D_801CA468 = func_8002A300();
             func_800A30B4();
@@ -1587,9 +1579,6 @@ block_4:
     cdload_load_overlay(0);
     D_801D3770 = 1;
 }
-#else
-INCLUDE_ASM("asm/main/nonmatchings/main", func_8001BBB0);
-#endif
 
 s16 func_8001BDBC(void) {
     return D_801CA468;
@@ -2744,7 +2733,56 @@ void func_8001F9BC(GameObject *head, GameObject *end) {
 
 INCLUDE_ASM("asm/main/nonmatchings/main", func_8001F9DC);
 
+#ifdef NON_MATCHING
+/* 78.53%: 78.5 %: the loop body matches; the original keeps the list address in a2 with a copy in s1 across
+ * func_80020704, copies the two hoisted %hi values into other saved registers after the call, and stores unk_34
+ * between the terminator and unk_28. Runs the calls queued at D_801E2154: words of a handler address and its
+ * object, 0 or -1 ends */
+void func_800205AC(void) {
+    s32 *list;
+    s32 *p;
+
+    list = (s32 *) D_801E2154;
+    D_801D370C = D_800AA248.unk_38;
+    D_800AA248.unk_38 = 0x10;
+    D_800AA248.unk_2C = 0x807F;
+    D_800AA248.dir = 0x08000800;
+    D_801FA730 = 0;
+    D_800AA248.unk_28.p = list;
+    D_800AA248.unk_10 = (s16) D_801F9950;
+    if (D_801D8584 != NULL) {
+        func_80020704();
+    }
+    *D_800AA248.unk_28.p++ = 0;
+    D_800AA248.unk_34 = &D_801F9A2C;
+    D_801FB188 = 1;
+    p = list;
+    for (;;) {
+        s32 fn;
+
+        D_800AA248.unk_00 = *p++;
+        if (D_800AA248.unk_00 == 0) {
+            break;
+        }
+        if (D_800AA248.unk_00 == -1) {
+            break;
+        }
+        fn = D_800AA248.unk_00 & 0x8FFFFFFC;
+        D_800AA248.unk_00 = fn;
+        D_801FA730++;
+        D_800AA248.cur_obj = (GameObject *) *p++;
+        D_800AA248.unk_30 = p;
+        if ((fn & 0x80000000) != (fn & 0xFF000000)) {
+            func_8001B5E8(0x13);
+        }
+        ((void (*)(void)) D_800AA248.unk_00)();
+        p = D_800AA248.unk_30;
+    }
+    D_801FB188 = 0;
+}
+#else
 INCLUDE_ASM("asm/main/nonmatchings/main", func_800205AC);
+#endif
 
 void func_80020704(void) {
     for (D_800AA248.cur_obj = D_801D8584; D_800AA248.cur_obj != NULL; D_800AA248.cur_obj = D_800AA248.cur_obj->unk_40.obj) {

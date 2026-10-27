@@ -116,5 +116,8 @@ extern s32 D_801F991C;
 extern s32 D_8007A71C;                  /* the music to restart after the XA track */
 void cdload_stop_xa(s32 mode);
 void func_80063744(void);
+extern u16 D_801D370C;
+extern u16 D_801FA730;                  /* the calls func_800205AC ran this frame */
+extern s32 D_801F9A2C;
 
 #endif /* MAIN_H */
