@@ -2225,7 +2225,7 @@ u16 func_80057AD8(Monster *e, Building *city, u16 which) {
 
 void func_80057B40(void) {
     func_8001E878();
-    func_8001E698(D_800AA248.cur_obj, D_800AA248.unk_00);
+    func_8001E698(D_800AA248.cur_obj, (void *) D_800AA248.unk_00);
 }
 
 void func_80057B78(void) {

@@ -211,7 +211,7 @@ void func_8003CEA0(Anim *anim, GameObject *mover) {
     Actor *actor;
     GameObject *o;
 
-    if (mover->unk_48 != anim) {
+    if (mover->unk_48 != (s32) anim) {
         if (*(u16 *)&mover->unk_80 == 0) {
             mover->unk_80 = ((AnimFrame *)func_8003D1F8(mover->owner.ai->unk_10.actor))->unk_8 - 1;
         }
@@ -439,7 +439,7 @@ void func_8003D51C(Ai *ai) {
 }
 
 void func_8003D58C(Anim *anim) {
-    if (D_800AA248.cur_obj->unk_48 != anim) {
+    if (D_800AA248.cur_obj->unk_48 != (s32) anim) {
         func_8001E698(D_800AA248.cur_obj, anim);
     }
 }
@@ -835,12 +835,12 @@ void func_8003EB40(void) {
 }
 
 u16 func_8003EB5C(Anim *anim, GameObject *mover) {
-    if (anim == mover->unk_48) {
+    if ((s32) anim == mover->unk_48) {
         D_800AA248.unk_7A = 1;
         mover->flags |= 0x800;
     } else {
-        mover->unk_48 = anim;
-        mover->script_pc = anim;
+        mover->unk_48 = (s32) anim;
+        mover->script_pc = (s32) anim;
         mover->unk_4C = 0;
         mover->unk_4D = 0;
         mover->unk_64 = 0;
@@ -1288,7 +1288,7 @@ void func_8004022C(void) {
     p = (Anim **)D_800AA248.cur_obj->arg.h;
     func_8004003C(D_800AA248.cur_obj->flags ^ 0x10, D_800AA248.cur_obj->owner.ai);
     if (D_800AA248.unk_0C != 0) {
-        D_800AA248.cur_obj->script_pc = *p;
+        D_800AA248.cur_obj->script_pc = (s32) *p;
     }
 }
 
@@ -1298,7 +1298,7 @@ void func_80040294(void) {
     p = (Anim **)D_800AA248.cur_obj->arg.h;
     func_8004003C(D_800AA248.cur_obj->flags ^ 0x10, D_800AA248.cur_obj->owner.ai);
     if (abs(D_800AA248.unk_00) < 0x4B) {
-        D_800AA248.cur_obj->script_pc = *p;
+        D_800AA248.cur_obj->script_pc = (s32) *p;
     }
 }
 

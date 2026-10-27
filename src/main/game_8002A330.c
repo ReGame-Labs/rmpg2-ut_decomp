@@ -1889,7 +1889,7 @@ void func_80030FA4(void) {
     Building *temp_s1;
 
     temp_s0 = D_800AA248.cur_obj->owner.item;
-    temp_s2 = D_800AA248.cur_obj->unk_94.p;
+    temp_s2 = (s32) D_800AA248.cur_obj->unk_94.p;
     temp_s1 = temp_s0->building;
     if ((temp_s2 != 0) && (temp_s1 != NULL)) {
         if (((u16) temp_s1->unk_014) < 9U) {
@@ -1924,7 +1924,7 @@ void func_80031224(void) {
     Building *temp_v0;
 
     func_8001F724(5);
-    temp_v0 = func_8003D1F8(D_800AA248.cur_obj->owner.ai->unk_10.p);
+    temp_v0 = func_8003D1F8((s32) D_800AA248.cur_obj->owner.ai->unk_10.p);
     if (((u16) temp_v0->unk_014) < 3U) {
         temp_v0->unk_014 = 0xCU;
     }
@@ -1948,7 +1948,7 @@ void func_80031280(s32 arg0, Building *a) {
     }
     if (*t != NULL) {
         if (a->unk_058 != 0) {
-            func_8002CFAC(arg0, a);
+            func_8002CFAC((Monster *) arg0, a);
         } else {
             r = a->unk_070;
             if (r != NULL && r->obj != NULL && r->building != NULL) {

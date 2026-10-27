@@ -3484,8 +3484,8 @@ void func_80025124(Building *rec) {
 
     def = rec->def;
     rec->unk_058 = 1;
-    rec->unk_05C = def->unk_0C;
-    rec->unk_060 = def->unk_10;
+    rec->unk_05C = (void *) def->unk_0C;
+    rec->unk_060 = (void *) def->unk_10;
     rec->unk_002 = def->unk_00.u.lo;
     request = func_8001D110();
     request->unk_0C = 0x728;
@@ -3642,15 +3642,15 @@ void func_8002575C(BuildingItem *arg0) {
     s32 temp_a0_2;
     s32 temp_a0_3;
 
-    temp_a0 = arg0->unk_0C.unk_0C;
+    temp_a0 = (s32) arg0->unk_0C.unk_0C;
     if (temp_a0 != 0) {
         func_8003C894(temp_a0);
     }
-    temp_a0_2 = arg0->unk_24.unk_0C;
+    temp_a0_2 = (s32) arg0->unk_24.unk_0C;
     if (temp_a0_2 != 0) {
         func_8003C894(temp_a0_2);
     }
-    temp_a0_3 = arg0->unk_3C.unk_0C;
+    temp_a0_3 = (s32) arg0->unk_3C.unk_0C;
     if (temp_a0_3 != 0) {
         func_8003C894(temp_a0_3);
     }

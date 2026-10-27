@@ -386,7 +386,7 @@ void func_80034C34(void) {
 }
 
 void func_80034C54(GameObject *mover) {
-    mover->unk_48 = (Anim *)D_8007D45C[mover->unk_68.u.lo];
+    mover->unk_48 = (s32) D_8007D45C[mover->unk_68.u.lo];
 }
 
 void func_80034C74(void) {

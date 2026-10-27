@@ -980,7 +980,7 @@ void func_800596C0(Monster *e) {
 }
 
 void func_800596EC(Monster *e) {
-    func_80057B94(e, D_80085114);
+    func_80057B94(e, (s32 *) D_80085114);
 }
 
 INCLUDE_ASM("asm/main/nonmatchings/game_80057C94", func_80059710);
