@@ -23,8 +23,9 @@ typedef union SoundWord {
 } SoundWord;
 
 typedef struct SoundChannel {
-    /* 0x00 */ SoundWord unk_00;    /* flags (1 active, 4, 8 stopped, 0x10, 0x40 position moved, 0x80); byte 1 the
-                                     * channel's index, byte 2 its sequence's slot, byte 3 its command set */
+    /* 0x00 */ SoundWord unk_00;    /* flags (1 active, 2 muted, 4, 8 stopped, 0x10 timed, 0x20 looped, 0x40
+                                     * position moved, 0x80 the sustain pedal); byte 1 the channel's index, byte 2
+                                     * its sequence's slot, byte 3 its class (0 effects, 1 music) */
     /* 0x04 */ s16 unk_04;          /* set from a sequence byte (command 7) */
     /* 0x06 */ s16 unk_06;          /* set from a 16-bit sequence parameter (command 9) */
     /* 0x08 */ s32 unk_08;          /* the delay before the next command (a variable-length number) */
@@ -92,10 +93,18 @@ typedef struct SoundTrack {
     /* 0x08 */ u8 *unk_08;          /* the sequence data */
 } SoundTrack;
 
-/* What SoundDriver.unk_14 points to: a count at 0xC (func_8006EC18). */
+/* The sound bank's header (SoundDriver.unk_14): the counts of its four tables, packed one after the other from
+ * unk_18 (each 8-aligned): patches (4 bytes), patch maps (SoundPatchmap), samples (SoundEntry), drum maps. */
 typedef struct SoundBank {
-    /* 0x00 */ u8 unk_00[0xC];
-    /* 0x0C */ s16 unk_0C;
+    /* 0x00 */ s32 unk_00;
+    /* 0x04 */ s16 unk_04;          /* patches */
+    /* 0x06 */ s16 unk_06;
+    /* 0x08 */ s16 unk_08;          /* patch maps */
+    /* 0x0A */ s16 unk_0A;
+    /* 0x0C */ s16 unk_0C;          /* samples */
+    /* 0x0E */ s16 unk_0E;
+    /* 0x10 */ s32 unk_10[2];
+    /* 0x18 */ u8 *unk_18;
 } SoundBank;
 
 /* An 8-byte handler of the table SoundDriver.unk_10 points to: an id at 1 matched against the sequence's byte 1, a
@@ -122,7 +131,7 @@ typedef struct SoundSeqStat {
 
 /* The driver state (D_801FDF20; func_8006EC08 returns it; D_80087FA0 is the sequencer's copy). */
 struct SoundDriver {
-    /* 0x00 */ s32 unk_00;
+    /* 0x00 */ u32 *unk_00;         /* the current time */
     /* 0x04 */ u8 unk_04;           /* sequences active */
     /* 0x05 */ u8 unk_05;           /* channels active */
     /* 0x06 */ u8 unk_06;           /* voices active */
@@ -135,6 +144,7 @@ struct SoundDriver {
     /* 0x14 */ SoundBank *unk_14;
     /* 0x18 */ SoundSeqStat *unk_18;
     /* 0x1C */ SoundChannel *unk_1C;
+    /* 0x20 */ struct SoundNote *unk_20;
 };
 
 extern SoundDriver *D_801FDF20;
@@ -142,9 +152,21 @@ extern SoundDriver *D_801FDF20;
 /* A patch map of the sound bank, 16 bytes: what a note of a patch plays (the voice's unk_08). */
 typedef struct SoundPatchmap {
     /* 0x00 */ u8 unk_00;           /* the voice's priority */
-    /* 0x01 */ u8 unk_01[0xD];
+    /* 0x01 */ u8 unk_01[0x5];
+    /* 0x06 */ u8 unk_06;           /* the lowest note it plays */
+    /* 0x07 */ u8 unk_07;           /* the highest note */
+    /* 0x08 */ u8 unk_08[0x2];
+    /* 0x0A */ s16 unk_0A;          /* its sample (SoundEntry) */
+    /* 0x0C */ u16 unk_0C;
     /* 0x0E */ u16 unk_0E;          /* the release: bit 5 linear/exponential, bits 0-4 the rate */
 } SoundPatchmap;
+
+/* A patch of the sound bank, 4 bytes: a run of patch maps. */
+typedef struct SoundPatch {
+    /* 0x00 */ u8 unk_00;           /* the number of patch maps */
+    /* 0x01 */ u8 unk_01;
+    /* 0x02 */ s16 unk_02;          /* the first one */
+} SoundPatch;
 
 /* A 0x14-byte voice record (D_801FDA78 holds D_801FDA7C of them): flags in the low bits of the first word (1 on,
  * 2 released), the SPU voice in its byte 2, the channel's index in its byte 3, the note at 5, the velocity at 6, a
@@ -160,11 +182,12 @@ typedef struct SoundNote {
     /* 0x10 */ u32 unk_10;
 } SoundNote;
 
-/* An entry of the event queue D_80087100 points to (func_8006C084 appends them). */
+/* A music note cut by a pause, to be played again (func_8006C084 records them in the queue D_80087100 points to,
+ * func_8006BF80 replays them): the sequence, the channel, the note, the velocity, the patch map and the sample. */
 typedef struct SoundEvent {
     /* 0x00 */ s16 unk_00;
     /* 0x02 */ s16 unk_02;
-    /* 0x04 */ s8 unk_04;
+    /* 0x04 */ u8 unk_04;
     /* 0x05 */ u8 unk_05;
     /* 0x06 */ u8 unk_06[0x2];
     /* 0x08 */ s32 unk_08;
