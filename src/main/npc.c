@@ -1082,17 +1082,15 @@ void func_800363E4(void) {
     D_801E2A50 = n;
 }
 
-#ifdef NON_MATCHING
-/* 95.59 %: the scheduler loads unk_22 before the unk_40 store in the original (here after); the statements and types are right */
 void func_80036440(Npc *npc, s32 depth) {
     GameObject *mover;
     ObjectDef *effect;
     s32 d;
 
     mover = func_8001EB9C(0, 0, 0, 0, 0xFFFFFF);
-    mover->unk_40.w = -0x3E7;
     d = depth - 1;
     mover->priority = d;
+    mover->unk_40.w = -0x3E7;
     mover->flags = (mover->flags & ~0x20) | 0x400;
     mover->unk_6C |= 0x2000;
     npc->unk_70 = mover;
@@ -1106,9 +1104,6 @@ void func_80036440(Npc *npc, s32 depth) {
     npc->unk_74 = mover;
     func_8001BB68(mover);
 }
-#else
-INCLUDE_ASM("asm/main/nonmatchings/npc", func_80036440);
-#endif
 
 INCLUDE_ASM("asm/main/nonmatchings/npc", func_80036504);
 
@@ -1179,8 +1174,6 @@ void func_800369F8(Npc *npc) {
     D_801D8730 = 0;
 }
 
-/* 99.61%: the live count and the constant 1 swap saved registers (s4 and s3 in the original) */
-#ifdef NON_MATCHING
 void func_80036A20(Monster *player) {
     u16 n;
     Npc *npc;
@@ -1230,18 +1223,19 @@ void func_80036A20(Monster *player) {
                 break;
             case 0x11:
             case 0x12:
-                if (func_80036C30(player, npc, mover, 0x14) == 1) {
-                    return;
-                }
-                break;
+                /* Class B: the block's loop notes count the constant 1 twice, so it gets s3 before the live count
+                 * (return for break, case order and a fresh variable leave the two swapped). */
+                LOOP_BLOCK(
+                    if (func_80036C30(player, npc, mover, 0x14) == 1) {
+                        return;
+                    }
+                    break;
+                );
             }
         }
         npc++;
     } while (--n != 0);
 }
-#else
-INCLUDE_ASM("asm/main/nonmatchings/npc", func_80036A20);
-#endif
 
 INCLUDE_ASM("asm/main/nonmatchings/npc", func_80036C30);
 
@@ -1284,7 +1278,57 @@ void func_80037078(Monster *player, Npc *npc) {
     player->unk_18A = 1;
 }
 
+#ifdef NON_MATCHING
+/* 76.88%: 76.9 %: the case order and the calls are the original's; the original sign-extends x and y once (s1, s2)
+ * and keeps a copy of each (fp, s7) for the call to func_800372DC; here the shifted values stay live and x, y spill */
+u16 func_800372DC(s16 x, s16 y, Monster *player, Npc *npc, s32 arg4);
+u16 func_800374FC(s16 x, s16 y, Npc *npc, GameObject *mover);
+
+u16 func_8003712C(s16 x, s16 y, Monster *player) {
+    Npc *npc;
+    GameObject *obj;
+    u16 n;
+    u16 hit;
+
+    n = D_801D8730;
+    npc = D_801FAC9C;
+    if (n == 0) {
+        return 0;
+    }
+    do {
+        obj = npc->unk_0;
+        if (!(obj->unk_6C & 0x80) && (npc->unk_8 == 0x32 || npc->unk_8 == 2)) {
+            switch (npc->unk_6) {
+            case 0x42:
+                if (player->unk_18E != 1) {
+                    hit = func_800374FC(x, y, npc, obj);
+                } else {
+                    hit = func_80037574(x, y, obj);
+                }
+                if (hit == 1) {
+                    return func_8003761C(x, y, player, npc);
+                }
+                break;
+            case 0xF:
+            case 0x3E:
+                if (func_80037574(x, y, obj) == 1) {
+                    return func_8003761C(x, y, player, npc);
+                }
+                break;
+            case 0x12:
+                if (func_800372DC(x, y, player, npc, (s32)obj) == 1) {
+                    return func_8003761C(x, y, player, npc);
+                }
+                break;
+            }
+        }
+        npc++;
+    } while (--n != 0);
+    return 0;
+}
+#else
 INCLUDE_ASM("asm/main/nonmatchings/npc", func_8003712C);
+#endif
 
 #ifdef NON_MATCHING
 /* 99.85 %: the control flow and the saved registers are right; the first rectangle's x tests load the field into v1 (a0 in the original) */
@@ -1952,14 +1996,16 @@ void func_80038A2C(Npc *npc) {
 }
 
 #ifdef NON_MATCHING
-/* 96.62 %: register choices only, as func_80038920: the table entry's address is built in v1 in the original */
+/* 97.85%: 97.9 %: the order is right; the table base and the index swap v0 and v1 (the original builds the base in
+ * v0), in the shared call tail and at &D_800AA248 */
 void func_80038AE8(Npc *npc) {
     Monster *player;
+    GameObject *obj;
 
     player = npc->unk_64;
     if ((player == NULL || player->dir == 0 || player->dir == 5 || player->dir == 1) && npc->unk_2A == 4) {
         if (npc->unk_C != 0) {
-            func_8003EB5C(D_8007DA68[npc->unk_2E & 3], D_800AA268.p);
+           func_8003EB5C(D_8007DA68[npc->unk_2E & 3], D_800AA268.p);
         }
         return;
     }
@@ -1980,7 +2026,7 @@ void func_80038AE8(Npc *npc) {
         npc->unk_1C--;
     }
     D_800AA248.cur_obj->vel_x.w = 0;
-    func_8003EB5C(D_8007DA68[npc->unk_2E & 3], D_800AA248.cur_obj);
+   func_8003EB5C(*(D_8007DA68 + (npc->unk_2E & 3)), D_800AA248.cur_obj);
 }
 #else
 INCLUDE_ASM("asm/main/nonmatchings/npc", func_80038AE8);
@@ -2558,20 +2604,15 @@ void func_8003AA7C(Npc *npc) {
     ((s16 *)&D_800AA248.cur_obj->pos_y.w)[1] = 0x3C;
 }
 
-/* 93.12%: the original keeps the facing test as two arms joined by a jump, and rebuilds the address of D_800AA248 after the join (in s0); here the arms collapse into one conditional set and the address stays in one saved register throughout */
-#ifdef NON_MATCHING
 void func_8003AAF8(Npc *npc) {
-    s32 offset;
-
     if (npc->unk_1C == 0) {
         D_800AA248.cur_obj->priority = 0x50;
         if (D_800AA248.cur_obj->flags & 0x10) {
-            offset = 0x1CC0000;
+            D_800AA248.cur_obj->pos_x.s.hi = ((D_801F9AC8.w + 0x1CC0000) & D_801D8864.w) >> 16;
         } else {
-            offset = -0x3C0000;
+            D_800AA248.cur_obj->pos_x.s.hi = ((D_801F9AC8.w - 0x3C0000) & D_801D8864.w) >> 16;
         }
-        ((s16 *)&D_800AA248.cur_obj->pos_x.w)[1] = ((D_801F9AC8.w + offset) & D_801D8864.w) >> 16;
-        ((s16 *)&D_800AA248.cur_obj->pos_y.w)[1] = 0x46;
+        D_800AA248.cur_obj->pos_y.s.hi = 0x46;
         npc->unk_8 = 0x63;
         npc->unk_1C = (func_8001EA78() & 0x3F) + 0x78;
         func_8003EB5C(D_800956C4, D_800AA248.cur_obj);
@@ -2579,12 +2620,9 @@ void func_8003AAF8(Npc *npc) {
         npc->unk_C = 1;
     } else {
         npc->unk_1C--;
-        ((s16 *)&D_800AA268.p->pos_y.w)[1] = 0x258;
+        D_800AA268.p->pos_y.s.hi = 0x258;
     }
 }
-#else
-INCLUDE_ASM("asm/main/nonmatchings/npc", func_8003AAF8);
-#endif
 
 void func_8003ABE8(Npc *npc) {
     if (D_800AA248.cur_obj->flags & 0x10) {
@@ -2798,11 +2836,7 @@ void func_8003B294(Npc *npc) {
     }
 }
 
-/* 98.32%: the original rebuilds the address of D_800AA248 into s1 once the countdown reaches zero (the earlier one ends there) and keeps the facing speed in v0; here the first address lives on and the speed lands in v1 */
-#ifdef NON_MATCHING
 void func_8003B3C8(Npc *npc) {
-    s32 speed;
-
     D_800AA248.cur_obj = npc->unk_0;
     func_80020D20();
     func_8003AC74(npc);
@@ -2819,12 +2853,13 @@ void func_8003B3C8(Npc *npc) {
         func_80038800(npc);
         break;
     case 2:
-        speed = -0x70000;
-        if (!(D_800AA248.cur_obj->flags & 0x10)) {
-            speed = 0x70000;
+        if (D_800AA248.cur_obj->flags & 0x10) {
+            npc->unk_34 = -0x70000;
+            D_800AA248.cur_obj->vel_x.w = 0;
+        } else {
+            npc->unk_34 = 0x70000;
+            D_800AA248.cur_obj->vel_x.w = 0;
         }
-        npc->unk_34 = speed;
-        D_800AA248.cur_obj->vel_x.w = 0;
         if (--npc->unk_1C == 0) {
             if (!(D_800AA248.cur_obj->flags & 0x10)) {
                 if (func_80039C98(D_800AA248.cur_obj->pos_x.w, 0xC80000, -0xA0000) != 0) {
@@ -2845,6 +2880,3 @@ void func_8003B3C8(Npc *npc) {
         break;
     }
 }
-#else
-INCLUDE_ASM("asm/main/nonmatchings/npc", func_8003B3C8);
-#endif

@@ -1614,7 +1614,112 @@ void func_8005BB04(Monster *e, s16 want, s16 max, Building *u) {
     } while ((s32) e->unk_188 < want && i < max);
 }
 
+#ifdef NON_MATCHING
+/* 93.04%: 93.0 %: the shape is the original's (the frame box through copies, the flip in one variable); the
+ * registers differ from the object on (t3 in the original, here t2), and the original keeps the no-flag return 0 in
+ * the middle, after the &4 block */
+s32 func_8005BC20(s16 x, s16 y, s32 w, s32 h, GameObject *obj, u16 flags) {
+    SpriteFrame *frame;
+    s16 left;
+    s16 right;
+    s16 top;
+    s16 bottom;
+    s16 ox;
+    u16 oy;
+    u16 dx;
+    u16 dy;
+    s32 flip;
+    s16 fx0;
+    s16 fx1;
+    s16 fy0;
+    s16 x0;
+    s16 y0;
+    s16 x1;
+    s16 y1;
+
+    left = x - w;
+    right = x + w;
+    top = y - h;
+    bottom = y + h;
+    if (left < 0) {
+        left += D_801D8866;
+    } else if (left > (s16)D_801D8866) {
+        left -= D_801D8866;
+    }
+    if (right < 0) {
+        right += D_801D8866;
+    } else if (right > (s16)D_801D8866) {
+        right -= D_801D8866;
+    }
+    if (flags & 1) {
+        ox = obj->pos_x.s.hi;
+        frame = obj->frame;
+        if (ox < D_801F9ACA) {
+            ox += (D_801D8864.w + 1) >> 16;
+        }
+        dx = frame->unk_10;
+        flip = obj->flags & 0x10;
+        dy = frame->unk_12;
+        oy = obj->pos_y.u.hi;
+        if (flip) {
+            dx = -dx;
+        }
+        fx0 = dx + ox;
+        x0 = fx0;
+        fy0 = dy + oy;
+        y0 = fy0;
+        dx = frame->unk_14;
+        if (flip) {
+            dx = -dx;
+        }
+        fx1 = dx + ox;
+        x1 = fx1;
+        y1 = frame->unk_16 + oy;
+        if (flip) {
+            x0 = fx1;
+            x1 = fx0;
+        }
+        if (fy0 > 0xC3) {
+            y0 = 0xC3;
+        }
+    } else {
+        if (flags & 2) {
+            if (obj->flags & 0x10) {
+                x0 = obj->pos_x.s.hi;
+                x1 = x0 + obj->size.u.lo;
+            } else {
+                x1 = obj->pos_x.s.hi;
+                x0 = x1 - obj->size.u.lo;
+            }
+        } else if (flags & 4) {
+            x0 = obj->pos_x.s.hi - ((s16)obj->size.u.lo >> 2);
+            x1 = obj->pos_x.s.hi + ((s16)obj->size.u.lo >> 2);
+        } else {
+            return 0;
+        }
+        y0 = obj->pos_y.s.hi - obj->size.u.hi;
+        y1 = obj->pos_y.s.hi;
+    }
+    if (x0 < 0) {
+        x0 += D_801D8866;
+    } else if (x0 > (s16)D_801D8866) {
+        x0 -= D_801D8866;
+    }
+    if (x1 < 0) {
+        x1 += D_801D8866;
+    } else if (x1 > (s16)D_801D8866) {
+        x1 -= D_801D8866;
+    }
+    if ((x0 < left && left < x1) || (x0 < right && right < x1) || (left < x0 && x0 < right) || (left < x1 && x1 < right)) {
+        if ((y0 < top && top < y1) || (y0 < bottom && bottom < y1) || (top < y0 && y0 < bottom) || (top < y1 && y1 < bottom)) {
+            return 1;
+        }
+    }
+    return 0;
+}
+#else
 INCLUDE_ASM("asm/main/nonmatchings/monster_anim", func_8005BC20);
+#endif
 
 u16 func_8005BF54(GameObject *b, Monster *e) {
     u16 n;
