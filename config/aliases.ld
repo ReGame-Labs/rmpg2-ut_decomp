@@ -22,3 +22,5 @@ D_80011BA4_alt = D_80011BA4;
 /* func_800214D8 (main.c): the animation for an object low on the screen and for the others, one table at
  * 0x8008AE08. */
 D_8008AE08_alt = D_8008AE08;
+/* monster_anim_update_special (monster_anim.c): the second mask of buildings hit, reached as a symbol of its own after D_801FB460. */
+D_801FB462 = D_801FB460 + 2;
