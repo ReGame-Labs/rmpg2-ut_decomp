@@ -44,8 +44,6 @@ typedef struct UnkStructB2 {  /* provisional: a 0x30-byte record of the table at
 } UnkStructB2;
 
 extern UnkStructB2 D_801D3824[];
-extern u16 D_801D8738;
-extern u16 D_801E1C80;
 extern s16 D_801F9980;
 extern s16 D_801F9984;
 extern s16 D_801F9988;
@@ -69,11 +67,6 @@ void func_8003C0C8(void);
 void func_8003C0E0(void);
 void func_8003BD48(UnkStructB1 *);
 void func_8003BF34(GameObject *, UnkStructB1 *, u16);   /* the third argument is not used */
-extern u16 D_801D37BC;
-extern s16 D_801F9AB0;
-extern s16 D_801FA98C;
-extern s16 D_801FA990;
-extern s16 D_801FAC84;
 extern u8 D_8008A494[];
 extern u8 D_8008A4A0[];
 extern u8 D_8008A4B8[];
@@ -90,7 +83,6 @@ typedef struct UnkStructB4 {  /* provisional: 8-byte records of D_8007DDD4 (an a
 } UnkStructB4;
 extern UnkStructB4 D_8007DDD4[];
 void func_80054374(u16, Monster *);
-extern s16 D_801F9ACA;
 extern void (*D_8007DDB4[8])(void);
 s32 func_8003B9C8(GameObject *, Monster *);
 void func_8003CA28(UnkStructB1 *arg0);

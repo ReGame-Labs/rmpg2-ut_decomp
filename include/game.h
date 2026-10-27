@@ -5,6 +5,7 @@
  * unk_<offset> otherwise. Types local to one file stay in that file or its group's header. */
 
 #include "common.h"
+#include "psyq/libgpu.h"
 
 /* A 16.16 fixed-point value (positions, velocities), read whole or by its halves: the fraction at +0, the integer
  * part at +2 (little-endian), signed or unsigned as the code needs. */
@@ -19,6 +20,12 @@ typedef union Fixed {
         u16 hi;
     } u;
 } Fixed;
+
+/* An animation (the tables in .data from 0x8008AE40 on): a script whose first word is the sprite id an object made
+ * from it starts with (ObjectDef.id). */
+typedef struct Anim {
+    /* 0x00 */ s32 id;
+} Anim;
 
 struct Monster;
 struct Attacker;
@@ -352,6 +359,7 @@ typedef struct GameObjectRef {
 extern GameObjectRef D_800AA268;
 
 /* Other members of the state block by their own names. */
+extern s32 D_800AA250;                  /* unk_08 */
 extern s32 D_800AA260;                  /* unk_18 */
 extern ObjectDef *D_800AA284;           /* new_def */
 extern u16 D_800AA2C0;                  /* 1 when a hit landed this frame */
@@ -551,5 +559,97 @@ typedef struct Unk1D3D64 {
 } Unk1D3D64;
 
 extern Unk1D3D64 D_801D3D64;
+
+/* The frame's drawing state D_801FAC80 points to: the draw and display environments, two gouraud quads (the sky's
+ * gradient: their colour bytes at 0x74..0xB2), the ordering table at 0x154. */
+typedef struct DrawState {
+    /* 0x00 */ DRAWENV draw;
+    /* 0x5C */ DISPENV disp;
+    /* 0x70 */ u8 unk_70[0x04];
+    /* 0x74 */ u8 unk_74;
+    /* 0x75 */ u8 unk_75;
+    /* 0x76 */ u8 unk_76;
+    /* 0x77 */ u8 unk_77[0x5];
+    /* 0x7C */ u8 unk_7C;
+    /* 0x7D */ u8 unk_7D;
+    /* 0x7E */ u8 unk_7E;
+    /* 0x7F */ u8 unk_7F[0x5];
+    /* 0x84 */ u8 unk_84;
+    /* 0x85 */ u8 unk_85;
+    /* 0x86 */ u8 unk_86;
+    /* 0x87 */ u8 unk_87[0x5];
+    /* 0x8C */ u8 unk_8C;
+    /* 0x8D */ u8 unk_8D;
+    /* 0x8E */ u8 unk_8E;
+    /* 0x8F */ u8 unk_8F[0x9];
+    /* 0x98 */ u8 unk_98;
+    /* 0x99 */ u8 unk_99;
+    /* 0x9A */ u8 unk_9A;
+    /* 0x9B */ u8 unk_9B[0x5];
+    /* 0xA0 */ u8 unk_A0;
+    /* 0xA1 */ u8 unk_A1;
+    /* 0xA2 */ u8 unk_A2;
+    /* 0xA3 */ u8 unk_A3[0x5];
+    /* 0xA8 */ u8 unk_A8;
+    /* 0xA9 */ u8 unk_A9;
+    /* 0xAA */ u8 unk_AA;
+    /* 0xAB */ u8 unk_AB[0x5];
+    /* 0xB0 */ u8 unk_B0;
+    /* 0xB1 */ u8 unk_B1;
+    /* 0xB2 */ u8 unk_B2;
+    /* 0xB3 */ u8 unk_B3[0xA1];
+    /* 0x154 */ unsigned long ot[1];
+} DrawState;
+
+extern DrawState *D_801FAC80;
+
+/* Data shared by several files. */
+extern u8 D_800937E8[];
+extern u8 D_800938AC[];
+extern u8 D_80095678[];
+extern Fixed D_801D8864;                 /* the level's width minus one: a mask positions wrap with (16.16) */
+extern Fixed D_801F9AC8;                 /* the camera's x: the screen's left edge (16.16) */
+extern s16 D_8007A68A;
+extern u16 D_8007A696;
+extern u16 D_8007A7D4;
+extern s32 D_8007AD4C[];
+extern s32 *D_80085114[];
+extern Anim D_8008A7A4;
+extern u8 D_8008E6AC[];
+extern Anim D_8009556C;
+extern s16 D_800AA2EC;
+extern u16 D_801D36FC;
+extern u16 D_801D376C;                   /* the screen's right edge, in pixels */
+extern s16 D_801D37B8;
+extern u16 D_801D37BC;
+extern s16 D_801D3D8A;                   /* D_801D3D64.unk_26 */
+extern s32 D_801D3D98[];
+extern u16 D_801D8738;
+extern u16 D_801D8740;
+extern u16 D_801D87B0;                   /* the screen's left edge, in pixels */
+extern s16 D_801D87B4;
+extern u16 D_801D8866;                   /* the level width's integer half */
+extern s16 D_801E0D4C;
+extern u8 D_801E0D98[];                  /* D_801E0B78[1] */
+extern u16 D_801E1C80;
+extern s16 D_801E1E40;
+extern GameObject D_801E28C0;            /* the object list's sentinel head */
+extern u16 D_801E2A50;
+extern s16 D_801F9914;
+extern s16 D_801F9A44[];
+extern s16 D_801F9AB0;
+extern u16 D_801F9ABC;
+extern s16 D_801F9ACA;                   /* the camera x's integer half */
+extern s32 D_801F9ACC;
+extern u16 D_801FA734;
+extern s16 D_801FA890;
+extern s16 D_801FA960;
+extern u16 D_801FA98C;
+extern u16 D_801FA990;
+extern s32 D_801FA9A4;
+extern s16 D_801FAC84;
+extern s16 D_801FAC8C;
+extern s16 D_801FAC90;
+extern s32 D_801FB49C[];
 
 #endif /* GAME_H */

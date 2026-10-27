@@ -4,10 +4,9 @@
 #include "common.h"
 #include "game.h"
 
-/* The group's views of the shared records (game_80034590, game_8003CD08, game_8004160C, game_80043118). */
+/* Types of game_80034590, game_8003CD08, game_8004160C and game_80043118. */
 
-typedef struct Anim Anim;
-typedef struct AiOrder AiOrder;   /* animation data in the tables linked after the libraries; not read yet */
+typedef struct AiOrder AiOrder;
 
 /* What GameObject.unk_94 points at for some objects: a record holding another object (game_80034590). */
 typedef struct MoverTarget {
@@ -174,11 +173,5 @@ typedef struct NpcS {
     /* 0x64 */ Monster *unk_64;
     /* 0x68 */ u8 unk_68[0x10];
 } NpcS;
-
-/* What func_8001D110 returns and func_8001DCB4 takes: an effect to spawn, described by a table (unk_28, its first
- * word copied to unk_0) at a position (unk_12, unk_16). */
-typedef struct EffectDef {
-    /* 0x00 */ s32 unk_0;       /* copied into the effect's unk_0 */
-} EffectDef;
 
 #endif /* GAME_80034590_H */

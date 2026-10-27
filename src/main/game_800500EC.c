@@ -12,17 +12,10 @@ void func_8004D488(Monster *);
 void func_8004FC00(s32, Monster *);
 void func_800634D4(Monster *, s32);
 
-extern s32 D_800AA250;
-extern s16 D_801F9ACA;
 extern s32 D_8009547C;
 u16 func_8001EA78(void);
-extern s32 D_801D8864;
-extern s16 D_801D8866;
 extern s32 D_800AA258;
 extern s32 D_800AA25C;
-extern u16 D_801D8740;
-extern u32 D_801F9ACC;
-extern s16 D_8007A68A;
 void func_8004F7F4(GameObject *, Monster *, Monster *, GameObject *);
 void func_80051A08(Monster *);
 void func_800526A4(Monster *);
@@ -75,7 +68,6 @@ extern s32 D_800AA288;
 extern s32 D_800AA26C;
 void func_80029118(s32, s32);
 s32 func_8005E4E4(void);
-extern s16 D_801F9914;
 void func_8005618C(Monster *, Building *);
 void func_8005640C(Monster *, Building *);
 u16 func_800576B8(Monster *, Building *);
@@ -114,7 +106,6 @@ void func_8001E4B0(void *);
 void func_80051B38(Monster *);
 void func_80056840(Monster *);
 void func_80056AC8(Monster *);
-extern u16 D_8007A7D4;
 extern s16 D_801F9924;
 extern u16 D_801D3DC2;
 void func_80054D74(u16, Monster *, Building *);
@@ -126,9 +117,6 @@ void *func_8001DCB4(void);
 void func_8004F470(Monster *, Monster *);
 void func_80051330(Monster *, Monster *);
 void func_800513EC(Monster *, Monster *);
-extern s32 D_801D3D98[];
-extern u16 D_801FAC8C;
-extern u16 D_801FAC90;
 extern s32 D_800954CC;
 
 INCLUDE_ASM("asm/main/nonmatchings/game_800500EC", func_800500EC);
@@ -1057,7 +1045,7 @@ s32 func_80053B30(s16 x, s16 y, s16 dx, s16 dy, Monster *e) {
 
     px = x;
     if (x < D_801F9ACA) {
-        px = x + ((D_801D8864 + 1) >> 16);
+        px = x + ((D_801D8864.w + 1) >> 16);
     }
     lo_x = e->unk_108 - dx;
     lo_y = e->unk_10A - dy;
@@ -1081,7 +1069,7 @@ u16 func_80053BE8(s16 x, Monster *e) {
 
     v = x;
     if (x < D_801F9ACA) {
-        v = x + ((D_801D8864 + 1) >> 16);
+        v = x + ((D_801D8864.w + 1) >> 16);
     }
     if (v < e->unk_108) {
         return 0;

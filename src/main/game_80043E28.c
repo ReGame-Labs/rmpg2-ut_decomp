@@ -22,15 +22,13 @@ u16 func_8004B6C4(GameObject *obj, s32, s32);
 void func_8001E39C(GameObject *obj);
 void func_8001E2F8(GameObject *obj);
 
-extern s32 D_801D8864;
-extern s16 D_801F9AC8[];
 
 /* Animations (.data) */
-extern u8 D_8008E6AC[], D_800953BC[], D_800951A8[], D_800950EC[], D_80094EC0[], D_80094ECC[], D_80094ED8[],
+extern u8 D_800953BC[], D_800951A8[], D_800950EC[], D_80094EC0[], D_80094ECC[], D_80094ED8[],
     D_80094E1C[], D_80094E28[], D_80094E34[], D_80094E40[], D_80094EB0[], D_80094C9C[], D_80094CB0[], D_80094C10[],
     D_80094C2C[], D_80094C38[], D_80094BA8[], D_80094B54[], D_8009540C[], D_80095274[], D_80093418[], D_800951B4[],
     D_80093460[], D_80095204[], D_800933D4[], D_80095268[], D_8009346C[], D_80095388[], D_800933E0[], D_80095300[],
-    D_800938AC[], D_80095354[], D_800937E8[], D_80095348[], D_800950F8[], D_80095128[], D_80095064[], D_80095094[],
+    D_80095354[], D_80095348[], D_800950F8[], D_80095128[], D_80095064[], D_80095094[],
     D_80094FC0[], D_80095058[], D_80094F7C[], D_80094FB4[], D_80094EF0[], D_80094EFC[], D_80094F20[], D_80094DDC[],
     D_80094DE8[], D_80094CBC[], D_80094C4C[], D_80094C58[], D_80094C8C[], D_80094BC4[], D_80094BD0[], D_80094B9C[],
     D_80094B68[];
@@ -578,7 +576,7 @@ void func_80044BE0(Attacker *a) {
         }
         return;
     }
-    D_800AA248.cur_obj->pos_x.w = (D_800AA248.cur_obj->pos_x.w + D_800AA248.cur_obj->vel_x.w) & D_801D8864;
+    D_800AA248.cur_obj->pos_x.w = (D_800AA248.cur_obj->pos_x.w + D_800AA248.cur_obj->vel_x.w) & D_801D8864.w;
     if (D_800AA248.cur_obj->unk_6C & 0x80) {
         func_80044418(a);
     }
@@ -660,7 +658,7 @@ void func_80044F08(Attacker *a) {
     s32 vel;
 
     vel = D_800AA248.cur_obj->vel_x.w;
-    D_800AA248.cur_obj->pos_x.w = (D_800AA248.cur_obj->pos_x.w + vel) & D_801D8864;
+    D_800AA248.cur_obj->pos_x.w = (D_800AA248.cur_obj->pos_x.w + vel) & D_801D8864.w;
     vel = D_800AA248.cur_obj->vel_y.w + 0x8000;
     if (vel > 0x40000) {
         vel = 0x40000;
@@ -761,7 +759,7 @@ void func_8004523C(Attacker *a) {
     s32 vel;
 
     vel = D_800AA248.cur_obj->vel_x.w;
-    D_800AA248.cur_obj->pos_x.w = (D_800AA248.cur_obj->pos_x.w + vel) & D_801D8864;
+    D_800AA248.cur_obj->pos_x.w = (D_800AA248.cur_obj->pos_x.w + vel) & D_801D8864.w;
     vel = D_800AA248.cur_obj->vel_y.w + 0x8000;
     if (vel > 0x40000) {
         vel = 0x40000;
@@ -971,7 +969,7 @@ void func_8004595C(Attacker *a) {
         func_80047554(D_80094EF0, a);
         return;
     }
-    D_800AA248.cur_obj->pos_x.w = (D_800AA248.cur_obj->pos_x.w + D_800AA248.cur_obj->vel_x.w) & D_801D8864;
+    D_800AA248.cur_obj->pos_x.w = (D_800AA248.cur_obj->pos_x.w + D_800AA248.cur_obj->vel_x.w) & D_801D8864.w;
     if (func_80045AB0() == 1) {
         func_80044418(a);
         return;
@@ -1135,7 +1133,7 @@ void func_80045FCC(Attacker *a) {
         return;
     }
     D_800AA248.cur_obj->pos_x.w += D_800AA248.cur_obj->vel_x.w;
-    D_800AA248.cur_obj->pos_x.w &= D_801D8864;
+    D_800AA248.cur_obj->pos_x.w &= D_801D8864.w;
     if (func_80045AB0() == 1) {
         func_80044418(a);
         return;
@@ -1319,7 +1317,7 @@ void func_80046660(Attacker *a) {
         return;
     }
     D_800AA248.cur_obj->pos_x.w += D_800AA248.cur_obj->vel_x.w;
-    D_800AA248.cur_obj->pos_x.w &= D_801D8864;
+    D_800AA248.cur_obj->pos_x.w &= D_801D8864.w;
     if (func_80045AB0() == 1) {
         func_80044418(a);
         return;
@@ -1397,7 +1395,7 @@ void func_8004694C(Attacker *a) {
         return;
     }
     D_800AA248.cur_obj->pos_x.w += D_800AA248.cur_obj->vel_x.w;
-    D_800AA248.cur_obj->pos_x.w &= D_801D8864;
+    D_800AA248.cur_obj->pos_x.w &= D_801D8864.w;
     if (func_80045AB0() == 1) {
         func_80044418(a);
         return;
@@ -1472,7 +1470,7 @@ void func_80046C30(Attacker *a) {
         return;
     }
     D_800AA248.cur_obj->pos_x.w += D_800AA248.cur_obj->vel_x.w;
-    D_800AA248.cur_obj->pos_x.w &= D_801D8864;
+    D_800AA248.cur_obj->pos_x.w &= D_801D8864.w;
     if (func_80045AB0() == 1) {
         func_80044418(a);
         return;

@@ -26,7 +26,6 @@ extern ThrowSpeed D_8007F2A4[];
 int abs(int);
 void func_8004AE2C(void);
 u16 func_80053854(s16 x, s16 y, Monster *m);
-extern s16 D_801D3D8A;
 extern s32 D_80091B60[];
 extern s32 D_8008C810[];
 extern s32 D_8008C828[];
@@ -72,7 +71,6 @@ s16 func_8003FCD8(s16 x0, s16 x1);              /* a horizontal distance */
 extern s32 D_800916D8[];
 void func_8004B204(void);
 void func_8003EB5C(void *anim, GameObject *obj);
-extern s32 D_8008A7A4[];                 /* an animation: its first word is the sprite id */
 void func_8004B540(void);
 void func_8004B754(void);
 void func_8004B990(void);
@@ -120,18 +118,13 @@ typedef struct {
 } ThrowInit;
 
 extern ThrowInit D_8007F644[];
-extern s16 D_801FA960;
 extern s32 D_80096240[];               /* two animations, chosen by D_801FA960 (below 75 or not) */
 extern s32 D_80096258[];
 void func_8001E698(GameObject *obj, void *anim);
 u16 func_8004B660(Throw *t, GameObject *target, s16 range, u16 mode);
 
 extern ThrowRec D_801F9A54[];          /* 3 records */
-extern Fixed D_801F9AC8;             /* the camera's x */
-extern Fixed D_801D8864;             /* the level's width: positions wrap at it */
-extern u16 D_801D8740;
 extern u16 D_801D8710;
-extern u16 D_8007A696;
 extern u16 D_8007F28C[];
 extern u16 D_8007F298[];
 extern s32 D_80096150[];                 /* an animation: its first word is the sprite id */
@@ -140,12 +133,10 @@ GameObject *func_8001DCB4(void);
 extern u16 D_801E2A4C;
 extern u16 D_801E2A54;
 extern u16 D_801E1C8C;
-extern u16 D_801E1C80;
 extern u16 D_801E0D60;
 extern s16 D_801E28D0;
 extern s16 D_801E28F0;
 extern s32 D_801FA7D8;
-extern s16 D_801E0D4C;
 
 extern void (*D_8007F228[])(void);
 
@@ -1169,8 +1160,6 @@ typedef struct {
 } ThrowLanding;
 
 extern ThrowLanding D_8007F39C[];
-extern s32 D_801F9ACC;
-extern s32 D_80095678[];
 
 void func_80049650(Throw *t) {
     GameObject *cur;
@@ -2303,8 +2292,8 @@ void func_8004BFE0(void) {
     def->pos_x.s.hi = D_800AA248.cur_obj->pos_x.s.hi;
     def->pos_y.s.hi = D_800AA248.cur_obj->pos_y.s.hi - 0xA;
     def->flags = 0x4100;
-    def->anim = D_8008A7A4;
-    def->id = D_8008A7A4[0];
+    def->anim = &D_8008A7A4;
+    def->id = D_8008A7A4.id;
     saved = D_800AA248.cur_obj;
     func_8001DCB4();
     D_800AA248.cur_obj = saved;

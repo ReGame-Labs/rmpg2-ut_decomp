@@ -10,7 +10,6 @@ void func_80057B94(Monster *, s32 *);
 void func_80057BD4(u16, Monster *, s32 *);
 void func_80057C38(u16, Monster *, s32 *);
 
-extern s32 D_800AA250;
 Building *func_80054728(u16);
 void func_8004A90C(Monster *, Monster *);
 void func_8002CFAC(Monster *, Building *);
@@ -41,9 +40,6 @@ void func_8003089C(s32, Monster *);
 u16 func_8004F7A4(Building *, s16);
 s32 func_8005BC20(s16, s16, s32, s32, GameObject *, s32);
 void func_80053C50(s32, Monster *);
-extern s16 D_8007A68A;
-extern u16 D_801D8740;
-extern s32 D_801FB49C[];
 extern Building D_801D3844[];
 extern s32 D_80016A30;
 extern s32 D_80084F54[];
@@ -153,7 +149,6 @@ extern s32 D_80084FE0[];
 extern s32 D_80084FFC[];
 extern s32 D_800850C0[];
 extern s32 D_800850DC[];
-extern s32 D_80085114[];
 extern s32 D_80085130[];
 extern s32 D_8008514C[];
 extern s32 D_80085168[];
@@ -1232,9 +1227,6 @@ void func_8005D034(s32 x, s32 y, s32 flags) {
 
 #ifdef NON_MATCHING
 /* 75.6 %: the final test is a store-flag xor here, a branch in the original; the two limits swap a1/a2 */
-extern u16 D_801D37BC;
-extern u16 D_801FA98C;
-extern u16 D_801FA990;
 
 u16 func_8005D0D8(Monster *e) {
     s16 x;

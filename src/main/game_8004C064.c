@@ -33,14 +33,6 @@ s32 func_8005F208();                                        /* called with 0, 1 
 void func_800634D4(Monster *m, s32);
 void func_800635F4(s32, s32);
 
-extern s16 D_8007A68A;
-extern s32 D_801D8864;
-extern u16 D_801D37BC;
-extern u16 D_801D8866;
-extern s16 D_801F9AC8[];
-extern u16 D_801F9ABC;
-extern u16 D_801FA98C;
-extern u16 D_801FA990;
 
 void func_8004C0E0(Ai *p, Monster *m);
 void func_8004C1A0(Ai *p, Monster *m);
@@ -921,8 +913,8 @@ u16 func_8004D6F8(Monster *m, Ai **out) {
                 o = p->obj;
                 x = o->pos_x.s.hi;
                 f = o->frame;
-                if (x < D_801F9AC8[1] && x < D_801F9AC8[1] - 0x50) {
-                    x += (D_801D8864 + 1) >> 16;
+                if (x < D_801F9AC8.s.hi && x < D_801F9AC8.s.hi - 0x50) {
+                    x += (D_801D8864.w + 1) >> 16;
                 }
                 if (o->flags & 0x10) {
                     right = x + f->origin.u.lo;

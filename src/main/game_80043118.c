@@ -76,7 +76,6 @@ extern u8 D_8008E674[];
 extern u8 D_8008E5F4[];
 extern u8 D_8008E608[];
 extern u8 D_8008D6C0[];
-extern u8 D_8008E6AC[];
 /* The same empty table under the other names the original gave it, one per range class of func_8004A468 (the
  * link put them at one address: config/aliases.ld). */
 extern u8 D_8008E6AC_1[];

@@ -18,18 +18,14 @@ void func_8001C83C(void);
 extern s16 D_801CA464;
 extern s16 D_801D87C8;
 void func_80017758(void);
-extern s16 D_801F9A44[];
 extern s16 D_801F9ADC;
-extern s16 D_801F9ABC;
 extern u16 D_800AA2C8;
 void func_80017C04(void);
 u16 func_8001828C(void);
 void func_8001B858(void);
 extern u32 D_801FA894;
 extern s16 D_8007A692;
-extern u16 D_8007A696;
 extern s16 D_8007A698;
-extern u16 D_8007A7D4;
 extern u8 D_8007ED64[];
 extern u8 D_8007EFA4[];
 extern u8 D_8007F1E4[];
@@ -42,7 +38,6 @@ extern TextState D_801D8588;
 extern u32 D_801D8868[];
 extern u8 D_801FAF7C[];
 extern s16 D_800AA2D4;
-extern s16 D_800AA2EC;
 extern s32 D_800AA944;
 extern s32 D_800AA948;
 extern u16 D_800AFB74;
@@ -51,7 +46,6 @@ extern s32 D_801C51C4;
 extern u16 D_801CA42C;
 extern s16 D_801CA45C;
 extern s16 D_801CA468;
-extern u16 D_801D36FC;
 extern s16 D_801D3704;
 extern s16 D_801D3758;
 extern s32 D_801D375C;
@@ -67,9 +61,7 @@ extern GameObject *D_801D8584;
 extern s16 D_801D8708;
 extern u16 D_801D8720;
 extern u16 D_801E28C8;
-extern u16 D_801D8728;
-extern s16 D_801D8738;
-extern u16 D_801D8740;
+extern u16 D_801D8728;   /* not in game.h: this file reads it unsigned (lhu), game_8003CD08 signed (lh) */
 extern s16 D_801D8744;
 extern s32 D_801D8754;
 extern GameObject *D_801D8764;
@@ -78,10 +70,8 @@ extern s16 D_801D87FC;
 extern u8 D_801D8800[];
 extern s16 D_801D8848;
 extern s16 D_801D8854;
-extern s16 D_801E0D4C;
 extern s16 D_801E0D64;
 extern s32 D_801E0D6C;
-extern u8 D_801E0D98[];
 extern void *D_801E1C78;
 extern GameObject *D_801E1C7C;
 extern s16 D_801E1CA4;
@@ -89,16 +79,13 @@ extern s16 D_801E1CAC;
 extern u16 D_801E1CB0;
 extern s16 D_801E1CB4;
 extern s16 D_801E1E18;
-extern s16 D_801E1E40;
 extern s16 D_801E2150;
 extern Unk1E2894 D_801E2894;
-extern GameObject D_801E28C0;
 extern s16 D_801E28DC;
 extern s16 D_801E2994;
 extern GameObject D_801E29A8;
 extern s16 D_801E29B4;
 extern s16 D_801E29BC;
-extern u16 D_801E2A50;
 extern s16 D_801E2A68;
 extern s16 D_801F9918;
 extern u16 D_801F9950;
@@ -111,9 +98,7 @@ extern u16 D_801F9ACE;
 extern s16 D_801F9AD0;
 extern s16 D_801FA7E8[];
 extern s16 D_801FA938;
-extern s16 D_801FA960;
 extern s16 D_801FA964;
-extern s32 D_801FA9A4;
 extern s16 D_801FA9B8;
 extern s16 D_801FAC94;
 extern u16 D_801FAF6C;
@@ -313,7 +298,6 @@ extern u16 D_801FA898[];
 void func_80019268(void);
 extern s16 D_801D36F8;
 extern s16 D_801F9A34;
-extern s16 D_801FA890;
 s32 func_80017C80(s32 arg0);
 extern s16 D_801D3D7C;
 void func_80020CE4(s32 arg0, s32 arg1);
@@ -392,7 +376,6 @@ void func_8003044C(void);
 void func_80024AEC(void);
 void func_8001E39C(void *);
 void func_80029C6C(Monster *arg0);
-extern s16 D_801F9914;
 void func_80026A6C(void);
 ObjectDef *func_8001D110(void);
 void func_8002503C(Building *, GameObject *);
@@ -408,8 +391,6 @@ extern BuildingDef D_8001687C;
 extern u16 D_8007C124[];
 extern u16 D_8007C144[];
 extern u32 D_801E0D7C;
-extern s16 D_801D3D8A;
-extern u16 D_801FA734;
 extern Anim D_80093F78;
 extern Anim D_80093FAC;
 u16 func_80023C58(s16 arg0, Ai *ai);
@@ -432,7 +413,6 @@ extern u16 D_8007AB84[];
 void func_8001D6A0(void);
 extern s32 D_801E299C;
 extern s32 D_801FA974;
-extern Unk1FAC80 *D_801FAC80;
 Glyph *func_8001B128(u32);
 void func_8001EEA0(void);
 void func_8001EDE4(void);
@@ -459,8 +439,6 @@ extern Anim D_8008B358;
 extern Anim D_8008B458;
 extern Anim D_80097750;
 extern Anim D_80097850;
-extern s32 D_801D8864;
-extern s32 D_801F9AC8;
 s32 func_8003EB5C(Anim *, GameObject *);
 void func_800377B4(Ai *);
 u16 func_80023CB8(void);
@@ -474,7 +452,6 @@ void func_80023FAC(void);
 void func_800232D8(Ai *);
 extern u8 D_8007B080[];
 extern u16 D_801D8750;
-extern s32 D_801F9ACC;
 void func_80063270(void);
 void func_8003DAA0(Ai *);
 void func_8002075C(void);
@@ -485,11 +462,8 @@ void func_8002A1AC(Monster *, s32);
 void func_8005A2F4(Monster *, s32);
 void func_8005A964(Monster *);
 extern u8 D_800105A8[];
-extern s32 D_8007AD4C[];
 extern s16 D_800AA300[11][8][8];
 extern GameObject *D_801D373C;
-extern u16 D_801D8866;
-extern s16 D_801F9ACA;
 extern s16 D_801FA984[];
 void func_8001F61C(u8 *, s16, s16, s32, s32, s32 *, s32, s32);
 u16 func_80025C54(void *);
@@ -2901,24 +2875,24 @@ u16 func_80023114(void) {
 
     x = D_800AA268.p->pos_x.w;
     if (D_800AA268.p->vel_x.w < 0) {
-        if (D_801F9AC8 >= x) {
-            x += D_801D8864;
+        if (D_801F9AC8.w >= x) {
+            x += D_801D8864.w;
         }
-        x -= D_801F9AC8;
+        x -= D_801F9AC8.w;
         return x <= 0x480000;
     }
     if (D_800AA268.p->vel_x.w > 0) {
-        if (D_801F9AC8 >= x) {
-            d = x - D_801F9AC8;
+        if (D_801F9AC8.w >= x) {
+            d = x - D_801F9AC8.w;
             dist = d;
             if (d < 0) {
                 dist = -dist;
             }
             if (dist > 0xC7FFFF) {
-                x += D_801D8864;
+                x += D_801D8864.w;
             }
         }
-        d = x - D_801F9AC8;
+        d = x - D_801F9AC8.w;
         return (u32) (d + 0xFEA20000) <= 0x01C20000;
     }
     return 0;
@@ -3240,7 +3214,7 @@ void func_800242A0(void) {
 }
 
 void func_800242A8(void) {
-    D_800AA248.cur_obj->pos_x.w = D_801F9AC8 - 0x1BC0000;
+    D_800AA248.cur_obj->pos_x.w = D_801F9AC8.w - 0x1BC0000;
     D_800AA248.cur_obj->pos_y.w = 0x2000000;
 }
 

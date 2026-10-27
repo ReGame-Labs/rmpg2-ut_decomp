@@ -66,7 +66,7 @@ s32 func_8003B9C8(GameObject *obj, Monster *m) {
     x = (s16) obj->pos_x.u.hi;
     box = obj->frame;
     if (x < D_801F9ACA) {
-        x += (D_801D8864 + 1) >> 16;
+        x += (D_801D8864.w + 1) >> 16;
     }
     y = obj->pos_y.u.hi;
     flip = obj->flags & 0x10;
@@ -153,7 +153,7 @@ s32 func_8003BE34(UnkStructB1 *rec) {
     D_800AA248.cur_obj->pos_y.w += D_800AA248.cur_obj->vel_y.w;
     D_800AA248.cur_obj->vel_x.w += rec->unk_34;
     D_800AA248.cur_obj->pos_x.w += D_800AA248.cur_obj->vel_x.w;
-    D_800AA248.cur_obj->pos_x.w &= D_801D8864;
+    D_800AA248.cur_obj->pos_x.w &= D_801D8864.w;
     if (rec->unk_3E != 0) {
         if (D_800AA248.cur_obj->unk_6C & 0x80) {
             D_800AA248.unk_78 = 1;

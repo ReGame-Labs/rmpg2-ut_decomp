@@ -69,14 +69,6 @@ typedef struct Unk24C2C {
     u8 pad_16[0x2];
 } Unk24C2C;
 
-/* The frame's drawing state at D_801FAC80: the draw and display environments, the ordering table at 0x154. */
-typedef struct Unk1FAC80 {
-    DRAWENV draw;
-    DISPENV disp;
-    u8 pad_70[0xE4];
-    unsigned long ot[1];
-} Unk1FAC80;
-
 /* The object of func_80029510: a value at unk_8 clamped to 0x440000. */
 typedef struct Unk29510 {
     u8 pad_0[0x8];
@@ -115,9 +107,6 @@ typedef struct Unk1AD1C {
     u32 unk_4;
     u32 unk_8;
 } Unk1AD1C;
-
-/* An animation (the tables in .data from 0x8008AE40 on); opaque here. */
-typedef struct Anim Anim;
 
 /* A glyph of the font (func_8001B128 maps a packed glyph index to one): its size at unk_4/unk_6. */
 typedef struct Glyph {

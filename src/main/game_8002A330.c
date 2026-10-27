@@ -22,7 +22,7 @@ INCLUDE_ASM("asm/main/nonmatchings/game_8002A330", func_8002A3A4);
 /* 98.55 %: the sky gradient's colour bytes; the original materializes the colour table's address before the frame pointer's (the two lui/la swapped), every statement order tried keeps the pointer first */
 #ifdef NON_MATCHING
 void func_8002A4E8(void) {
-    UnkStructFrame *frame;
+    DrawState *frame;
     s32 colour;
 
     D_801FB41C = 0x808080;
@@ -2011,7 +2011,7 @@ INCLUDE_ASM("asm/main/nonmatchings/game_8002A330", func_80031714);
 INCLUDE_ASM("asm/main/nonmatchings/game_8002A330", func_8003197C);
 
 void func_80031A3C(void) {
-    D_801D8864 = *func_80025C08(D_800838A0);
+    D_801D8864.w = *func_80025C08(D_800838A0);
 }
 
 void func_80031A68(void) {

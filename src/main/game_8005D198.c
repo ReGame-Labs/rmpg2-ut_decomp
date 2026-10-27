@@ -17,26 +17,19 @@ void func_8005E124(Monster *, s32);
 void func_8005E19C(Monster *, s32);
 void func_800603FC(s32 *, s32, s32, s32, s32);
 s32 func_80025DF8(s32);
-extern s32 D_8007AD4C;
 extern s32 D_8007BD7C;
 extern s32 D_80089604[];
 extern s32 D_80089678[];
 extern s32 D_8008969C[];
 extern s32 D_800896C0[];
-extern s16 D_800AA2EC;
 extern s32 D_800842B4[];
-extern u16 D_801D8740;
-extern s32 D_801FB49C[];
 extern s32 D_80016A84;
-extern s16 D_801FA890;
-extern s16 D_801FA960;
 void func_8001F724(s32);
 GameObject *func_8001EB9C(s32, s32, s32, s32, s32);
 ObjectDef *func_8001D110(void);
 GameObject *func_8001DCB4(void);
 void func_80060A7C(s32, u32, s32);
 extern s16 D_8007A68C;
-extern GameObject D_801E28C0;
 extern s16 D_801FB468;
 extern s16 D_801FB46C;
 
@@ -183,7 +176,7 @@ void func_8005E214(void) {
             break;
         }
         if (table != NULL) {
-            func_8006036C(&D_8007AD4C, 0x9B, 0x50, 0x44, 0x402, table);
+            func_8006036C(D_8007AD4C, 0x9B, 0x50, 0x44, 0x402, table);
         }
     }
     D_800AA2EC = 0x47;

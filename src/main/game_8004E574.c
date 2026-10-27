@@ -30,20 +30,11 @@ void func_80056488(Monster *m);
 void func_800564D8(Monster *m);
 void func_80056560(Monster *m);
 
-extern u16 D_801D36FC;
-extern u16 D_801D37BC;
-extern u16 D_801FA98C;
-extern u16 D_801FA990;
-extern u16 D_801F9ABC;
-extern u16 D_801D8866;
-extern s16 D_801F9ACA;
 extern GameObject *D_801D874C;
 extern s16 D_801E289C;
 extern s32 D_80011B08[];
-extern s32 *D_80085114[];
-extern s16 D_801F9A44[];
 extern u8 D_801FA8A6;
-extern u8 D_80095628[], D_80095678[], D_8009556C[];
+extern u8 D_80095628[];
 
 void func_8004F7F4(GameObject *obj, Monster *m1, Monster *m2, GameObject *cur);
 
@@ -640,7 +631,7 @@ void func_8004F7F4(GameObject *obj, Monster *m1, Monster *m2, GameObject *cur) {
     cur->pos_x.s.hi = x;
     obj->pos_x.s.hi = x;
     def->flags = 0x5500;
-    def->anim = D_8009556C;
+    def->anim = &D_8009556C;
     def->id = 0x0100005E;
     def->pos_y.s.hi = cur->pos_y.s.hi;
     D_800AA284 = def;

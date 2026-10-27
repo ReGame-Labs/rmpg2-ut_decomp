@@ -31,9 +31,6 @@ void func_80042134(const AiHandler *handlers, Ai *ai);
 void func_80041AD0(s16 hit, const AiHandler *handlers, Ai *ai);
 void func_80042238(Ai *ai);
 
-extern s32 D_801D8864;
-extern s16 D_801FA960;
-extern s16 D_801F9ACA;
 extern const AiHandler D_8007E828[];
 extern const AiHandler D_8007E720[];
 extern const AiHandler D_8007E880[];
@@ -44,7 +41,6 @@ extern const AiHandler D_8007E778[];
 extern const AiHandler D_8007E7D0[];
 extern const AiHandler D_8007E988[];
 extern const AiHandler D_8007E9E0[];
-extern u8 D_8008E6AC[];
 extern u8 D_8008E6EC[];
 extern u8 D_8008E724[];
 extern u8 D_8008E730[];
@@ -427,7 +423,7 @@ void func_80041E54(const AiHandler *handlers, Ai *ai) {
         }
         D_800AA248.cur_obj->vel_x.w = vel;
     }
-    D_800AA248.cur_obj->pos_x.w = (vel + D_800AA248.cur_obj->pos_x.w) & D_801D8864;
+    D_800AA248.cur_obj->pos_x.w = (vel + D_800AA248.cur_obj->pos_x.w) & D_801D8864.w;
     if (D_800AA248.cur_obj->unk_6C & 0x80) {
         kind = 1;
         if (D_800AA248.cur_obj->flags & 0x10) {
@@ -465,7 +461,7 @@ INCLUDE_ASM("asm/main/nonmatchings/game_8004160C", func_80041E54);
 void func_80042008(const AiHandler *handlers, Ai *ai) {
     s32 vel;
 
-    D_800AA248.cur_obj->pos_x.w = (D_800AA248.cur_obj->pos_x.w - D_800AA248.cur_obj->vel_x.w) & D_801D8864;
+    D_800AA248.cur_obj->pos_x.w = (D_800AA248.cur_obj->pos_x.w - D_800AA248.cur_obj->vel_x.w) & D_801D8864.w;
     vel = D_800AA248.cur_obj->vel_y.w + D_800AA248.cur_obj->unk_88;
     if (vel > 0x60000) {
         vel = 0x60000;
@@ -552,9 +548,9 @@ void func_80042238(Ai *ai) {
         far = tx;
         if (dist >= 0x1C3) {
             if (D_801F9ACA >= tx) {
-                far += (D_801D8864 + 1) >> 16;
+                far += (D_801D8864.w + 1) >> 16;
             } else {
-                near += (D_801D8864 + 1) >> 16;
+                near += (D_801D8864.w + 1) >> 16;
             }
         }
         if ((far < near - 0xE && (D_800AA248.cur_obj->flags & 0x10)) ||

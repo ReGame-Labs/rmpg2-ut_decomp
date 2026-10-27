@@ -66,7 +66,7 @@ u16 func_80039958(NpcS *npc);
 void func_8003AAF8(NpcS *npc);
 void func_80039A58(NpcS *npc);
 void func_8003831C(void);
-void func_800347E4(Npc *npc, EffectDef *def);
+void func_800347E4(Npc *npc, Anim *def);
 void func_80036504(GameObject *a, GameObject *b, GameObject *c);
 void func_80035B6C(Npc *npc);
 void func_80035EBC(Npc *npc);
@@ -145,9 +145,8 @@ void func_8003AF40(NpcS *npc);
 void func_8003B1D0(NpcS *npc);
 
 extern u8 *D_8007D4C0[];           /* animations per kind */
-extern EffectDef *D_8007D50C[];
-extern EffectDef D_8008A7A4;
-extern EffectDef D_8008A538;
+extern Anim *D_8007D50C[];
+extern Anim D_8008A538;
 extern u8 D_8008A3E0[];
 extern u8 D_8008A414[];
 extern u8 D_8008A408[];
@@ -168,8 +167,6 @@ extern u8 D_8008A908[];
 extern u8 D_8008A938[];
 extern u8 D_8008A998[];
 extern u8 D_8008A9A4[];
-extern u16 D_801D376C;             /* the screen's right edge, in pixels */
-extern u16 D_801D87B0;             /* the screen's left edge, in pixels */
 extern void (*D_8007D558[])(void);  /* per kind */
 extern void (*D_8007D5A4[])(void);  /* per kind */
 extern u8 *D_8007D45C[];
@@ -185,14 +182,9 @@ extern u8 D_80095E24[];
 extern u8 D_80095E68[];
 extern u8 D_80095EAC[];
 extern u8 D_80095874[];
-extern s32 D_801D8864[];           /* [0]: the world's width minus one, a mask (16.16); the code reloads it across struct stores */
-extern s32 D_801F9AC8[];           /* [0]: the screen's left edge (16.16); reloaded across struct stores like D_801D8864 */
 extern u16 D_801D8730;              /* how many of D_801FAC9C are live */
-extern s16 D_801E2A50;
 extern Npc D_801FAC9C[6];
 extern GameObject *D_801FB44C[3];
-extern u16 D_801FA98C;
-extern u16 D_801FA990;
 extern u8 D_8008A9D4[];
 extern u8 D_8008AA40[];
 extern u8 D_8008AA34[];
@@ -200,15 +192,14 @@ extern u8 D_8008A9B0[];
 extern u8 D_8008A968[];
 extern u8 D_8008A914[];
 extern u8 D_8008A4F4[];
-extern EffectDef D_800960E0;
+extern Anim D_800960E0;
 extern s32 D_801E1E14;
 extern u8 D_800956C4[];
-extern s32 D_801D3D98[];
-extern EffectDef *D_8007D448[];
+extern Anim *D_8007D448[];
 extern u8 D_8008A59C[];
 extern u8 D_8008A620[];
-extern EffectDef D_8008A7E4;
-extern EffectDef D_8008A828;
+extern Anim D_8008A7E4;
+extern Anim D_8008A828;
 extern u8 D_800959D4[];
 extern u8 D_8009594C[];
 extern u8 D_80095800[];
@@ -242,14 +233,14 @@ void func_80034670(void) {
     effect->anim = &D_8008A538;
     effect->pos_y.s.hi = y;
     effect->flags = *(u16 *)&D_800AA248.cur_obj->unk_80 + 1;
-    effect->id = D_8008A538.unk_0;
+    effect->id = D_8008A538.id;
     func_8001DCB4();
     D_800AA248.cur_obj = saved;
 }
 
 void func_800346FC(Npc *npc) {
     GameObject *saved = D_800AA248.cur_obj;
-    EffectDef *table;
+    Anim *table;
     GameObject *mover;
     ObjectDef *effect;
 
@@ -267,14 +258,14 @@ void func_800346FC(Npc *npc) {
     effect->pos_y.s.hi = ((s16 *)&mover->pos_y.w)[1] - 0x19;
     effect->anim = table;
     effect->flags = *(u16 *)&mover->unk_80 + 1;
-    effect->id = table->unk_0;
+    effect->id = table->id;
     func_8001DCB4();
     func_8001E4B0(npc->unk_40);
     npc->unk_40 = NULL;
     D_800AA248.cur_obj = saved;
 }
 
-void func_800347E4(Npc *npc, EffectDef *def) {
+void func_800347E4(Npc *npc, Anim *def) {
     GameObject *saved = D_800AA248.cur_obj;
     ObjectDef *effect;
 
@@ -284,7 +275,7 @@ void func_800347E4(Npc *npc, EffectDef *def) {
     effect->pos_y.s.hi = ((u16 *)&D_800AA248.cur_obj->pos_y.w)[1];
     effect->anim = def;
     effect->flags = *(u16 *)&D_800AA248.cur_obj->unk_80 + 1;
-    effect->id = def->unk_0;
+    effect->id = def->id;
     func_8001DCB4();
     if (npc->unk_40 != NULL) {
         func_800346FC(npc);
@@ -445,7 +436,7 @@ void func_80034DAC(Npc *npc) {
         effect->pos_y.s.hi = ((u16 *)&D_800AA248.cur_obj->pos_y.w)[1] - 0x14;
         effect->anim = &D_8008A7A4;
         effect->flags = (u16)D_800AA248.cur_obj->unk_80 + 1;
-        effect->id = D_8008A7A4.unk_0;
+        effect->id = D_8008A7A4.id;
         func_8001DCB4();
         func_8003C080();
     }
@@ -458,7 +449,7 @@ void func_80034E48(Npc *npc) {
     GameObject **slot;
     GameObject *spawned;
     ObjectDef *effect;
-    EffectDef *def;
+    Anim *def;
     s32 kind;
     s32 i;
     s32 n;
@@ -478,7 +469,7 @@ void func_80034E48(Npc *npc) {
         effect = func_8001D110();
         D_800AA248.new_def = effect;
         effect->anim = def;
-        effect->id = def->unk_0;
+        effect->id = def->id;
         effect->flags = (u16)mover->unk_80;
         spawned = func_8001DCB4();
         *slot = spawned;
@@ -494,7 +485,7 @@ void func_80034E48(Npc *npc) {
         } else {
             offset = n * -step;
         }
-        ((s16 *)&spawned->pos_x.w)[1] = (((u16 *)&mover->pos_x.w)[1] + offset) & (D_801D8864[0] >> 16);
+        ((s16 *)&spawned->pos_x.w)[1] = (((u16 *)&mover->pos_x.w)[1] + offset) & (D_801D8864.w >> 16);
         ((u16 *)&spawned->pos_y.w)[1] = ((u16 *)&mover->pos_y.w)[1];
         n++;
         i++;
@@ -523,12 +514,12 @@ INCLUDE_ASM("asm/main/nonmatchings/game_80034590", func_80034E48);
 void func_80035040(void) {
     s32 i;
 
-    D_800AA248.cur_obj->pos_x.w = (D_800AA248.cur_obj->pos_x.w + D_800AA248.cur_obj->vel_x.w) & D_801D8864[0];
+    D_800AA248.cur_obj->pos_x.w = (D_800AA248.cur_obj->pos_x.w + D_800AA248.cur_obj->vel_x.w) & D_801D8864.w;
     for (i = 0; i < 3; i++) {
         GameObject *mover = D_801FB44C[i];
 
         if (mover != NULL) {
-            mover->pos_x.w = (mover->pos_x.w + D_800AA248.cur_obj->vel_x.w) & D_801D8864[0];
+            mover->pos_x.w = (mover->pos_x.w + D_800AA248.cur_obj->vel_x.w) & D_801D8864.w;
         }
     }
 }
@@ -570,7 +561,7 @@ void func_8003518C(Npc *npc) {
 void func_800351CC(Npc *npc) {
     npc->unk_6 = 0x1B;
     npc->unk_3E = 0;
-    D_800AA248.cur_obj->pos_x.w = D_801F9AC8[0] - 0x19A0000;
+    D_800AA248.cur_obj->pos_x.w = D_801F9AC8.w - 0x19A0000;
     D_800AA248.cur_obj->pos_y.w = 0x320000;
     if (!(D_800AA248.cur_obj->flags & 0x10)) {
         D_800AA248.cur_obj->vel_x.w = 0x50000;
@@ -659,7 +650,7 @@ void func_800354A4(npc)
     s32 speed;
 
     npc->unk_3E = 0;
-    D_800AA248.cur_obj->pos_x.w = D_801F9AC8[0] - 0x19A0000;
+    D_800AA248.cur_obj->pos_x.w = D_801F9AC8.w - 0x19A0000;
     D_800AA248.cur_obj->pos_y.w = 0x320000;
     speed = -0x50000;
     if (!(D_800AA248.cur_obj->flags & 0x10)) {
@@ -977,11 +968,11 @@ void func_80035FF0(void) {
 s32 func_80036028(void) {
     if (func_8001EB10(0xFF, 0) & 1) {
         D_800AA248.cur_obj->flags |= 0x10;
-        D_800AA248.cur_obj->pos_x.w = D_801F9AC8[0] + 0x2440000;
+        D_800AA248.cur_obj->pos_x.w = D_801F9AC8.w + 0x2440000;
         D_800AA248.cur_obj->vel_x.w = -0x32000;
     } else {
         D_800AA248.cur_obj->flags &= ~0x10;
-        D_800AA248.cur_obj->pos_x.w = D_801F9AC8[0] - 0x19A0000;
+        D_800AA248.cur_obj->pos_x.w = D_801F9AC8.w - 0x19A0000;
         D_800AA248.cur_obj->vel_x.w = 0x32000;
     }
     return D_800AA248.cur_obj->vel_x.w;
@@ -1174,8 +1165,8 @@ u16 func_80036FD0(s16 x, s16 y, GameObject *mover) {
     u16 w;
 
     pos = ((s16 *)&mover->pos_x.w)[1];
-    if ((s16)pos < ((s16 *)D_801F9AC8)[1]) {
-        pos += (D_801D8864[0] + 1) >> 16;
+    if ((s16)pos < D_801F9AC8.s.hi) {
+        pos += (D_801D8864.w + 1) >> 16;
     }
     w = mover->size.u.lo;
     dx = abs((s16)(pos - x));
@@ -1250,8 +1241,8 @@ u16 func_80037574(s16 x, s16 y, GameObject *mover) {
     u16 w;
 
     pos = ((s16 *)&mover->pos_x.w)[1];
-    if ((s16)pos < ((s16 *)D_801F9AC8)[1]) {
-        pos += (D_801D8864[0] + 1) >> 16;
+    if ((s16)pos < D_801F9AC8.s.hi) {
+        pos += (D_801D8864.w + 1) >> 16;
     }
     w = mover->size.u.lo;
     dx = abs((s16)(pos - x));
@@ -1333,7 +1324,7 @@ void func_80037BB4(NpcS *npc) {
         return;
     }
     npc->unk_1C--;
-    D_800AA248.cur_obj->vel_x.w = D_801F9AC8[0] - 0x19A0000;
+    D_800AA248.cur_obj->vel_x.w = D_801F9AC8.w - 0x19A0000;
     D_800AA248.cur_obj->vel_y.w = 0;
 }
 
@@ -1443,7 +1434,7 @@ void func_80038058(NpcS *npc) {
         return;
     }
     npc->unk_1C--;
-    D_800AA248.cur_obj->pos_x.w = D_801F9AC8[0] - 0x19A0000;
+    D_800AA248.cur_obj->pos_x.w = D_801F9AC8.w - 0x19A0000;
     D_800AA248.cur_obj->vel_y.w = 0;
 }
 
@@ -1709,7 +1700,7 @@ void func_80038838(NpcS *npc) {
         npc->unk_1C = (func_8001EA78() & 0xFF) + 0x12C;
         npc->unk_34 = 0;
         npc->unk_30 = 0;
-        ((s16 *)&D_800AA248.cur_obj->pos_x.w)[1] = D_801D8864[0] & func_8001EA78();
+        ((s16 *)&D_800AA248.cur_obj->pos_x.w)[1] = D_801D8864.w & func_8001EA78();
         func_80039A58(npc);
         return;
     }
@@ -1949,8 +1940,8 @@ void func_80039A58(NpcS *npc) {
 s32 func_80039B04(Monster *player, s32 x) {
     s32 pos = player->obj->pos_x.w;
 
-    if (abs(x - pos) > (D_801D8864[0] + 1) / 2) {
-        x += D_801D8864[0] + 1;
+    if (abs(x - pos) > (D_801D8864.w + 1) / 2) {
+        x += D_801D8864.w + 1;
     }
     return abs(x - pos);
 }
@@ -1967,8 +1958,8 @@ Monster *func_80039B60(s32 x) {
             s32 pos = D_801E0B78[slot].obj->pos_x.w;
             s32 dist;
 
-            if (pos < D_801F9AC8[0]) {
-                pos += D_801D8864[0];
+            if (pos < D_801F9AC8.w) {
+                pos += D_801D8864.w;
             }
             dist = abs(pos - x);
             if (dist < bestDist) {
@@ -1981,21 +1972,21 @@ Monster *func_80039B60(s32 x) {
 }
 
 s32 func_80039C40(s32 x, s32 left, s32 right) {
-    if (x < D_801F9AC8[0]) {
-        x += D_801D8864[0] + 1;
+    if (x < D_801F9AC8.w) {
+        x += D_801D8864.w + 1;
     }
-    if (x < D_801F9AC8[0] + left || D_801F9AC8[0] + (0x01900000 - right) < x) {
+    if (x < D_801F9AC8.w + left || D_801F9AC8.w + (0x01900000 - right) < x) {
         return 0;
     }
     return 1;
 }
 
 s32 func_80039C98(s32 x, s32 left, s32 right) {
-    if (x < D_801F9AC8[0]) {
-        x += D_801D8864[0] + 1;
+    if (x < D_801F9AC8.w) {
+        x += D_801D8864.w + 1;
     }
-    if ((D_801F9AC8[0] < x && x < D_801F9AC8[0] + left) ||
-        (D_801F9AC8[0] + (0x01900000 - right) < x && x < D_801F9AC8[0] + 0x01900000)) {
+    if ((D_801F9AC8.w < x && x < D_801F9AC8.w + left) ||
+        (D_801F9AC8.w + (0x01900000 - right) < x && x < D_801F9AC8.w + 0x01900000)) {
         return 1;
     }
     return 0;
@@ -2013,12 +2004,12 @@ void func_80039D04(NpcS *npc) {
         if (player != NULL) {
             px = player->obj->pos_x.w;
             d = abs(x - px);
-            if (d < (D_801D8864[0] + 1) / 2) {
+            if (d < (D_801D8864.w + 1) / 2) {
                 if ((x < px && (D_800AA248.cur_obj->flags & 0x10)) || (px < x && !(D_800AA248.cur_obj->flags & 0x10))) {
                     goto turn;
                 }
             }
-            if (d > (D_801D8864[0] + 1) / 2 &&
+            if (d > (D_801D8864.w + 1) / 2 &&
                 ((px < x && (D_800AA268.p->flags & 0x10)) || (x < px && !(D_800AA268.p->flags & 0x10)))) {
             turn:
                 npc->unk_1C = 0x3C;
@@ -2098,7 +2089,7 @@ INCLUDE_ASM("asm/main/nonmatchings/game_80034590", func_8003A218);
 
 void func_8003A328(NpcS *npc, s32 arg1) {
     GameObject *mover;
-    EffectDef *def;
+    Anim *def;
     ObjectDef *effect;
 
     mover = D_800AA248.cur_obj;
@@ -2118,7 +2109,7 @@ void func_8003A328(NpcS *npc, s32 arg1) {
         effect->pos_y.s.hi = ((u16 *)&D_800AA248.cur_obj->pos_y.w)[1] - 0x19;
         effect->anim = def;
         effect->flags = (u16)D_800AA248.cur_obj->unk_80 + 1;
-        effect->id = def->unk_0;
+        effect->id = def->id;
         func_8001DCB4();
         npc->unk_1C = 3;
         npc->unk_8 = 4;
@@ -2213,7 +2204,7 @@ void func_8003AAF8(NpcS *npc) {
         } else {
             offset = -0x3C0000;
         }
-        ((s16 *)&D_800AA248.cur_obj->pos_x.w)[1] = ((D_801F9AC8[0] + offset) & D_801D8864[0]) >> 16;
+        ((s16 *)&D_800AA248.cur_obj->pos_x.w)[1] = ((D_801F9AC8.w + offset) & D_801D8864.w) >> 16;
         ((s16 *)&D_800AA248.cur_obj->pos_y.w)[1] = 0x46;
         npc->unk_8 = 0x63;
         npc->unk_1C = (func_8001EA78() & 0x3F) + 0x78;
@@ -2287,13 +2278,13 @@ void func_8003AC74(NpcS *npc) {
             }
         }
         if (func_80039C40(x, 0x320000, 0x320000) != 0) {
-            if (x < D_801F9AC8[0]) {
-                x += D_801D8864[0] + 1;
+            if (x < D_801F9AC8.w) {
+                x += D_801D8864.w + 1;
             }
-            if (x < D_801F9AC8[0] + 0xBE0000 && (D_800AA268.p->flags & 0x10)) {
+            if (x < D_801F9AC8.w + 0xBE0000 && (D_800AA268.p->flags & 0x10)) {
                 func_8003EB5C(D_80095800, D_800AA268.p);
                 npc->unk_C = 0;
-            } else if (D_801F9AC8[0] + 0xD20000 < x && !(D_800AA268.p->flags & 0x10)) {
+            } else if (D_801F9AC8.w + 0xD20000 < x && !(D_800AA268.p->flags & 0x10)) {
                 func_8003EB5C(D_800957A4, D_800AA268.p);
                 npc->unk_C = 0;
             }

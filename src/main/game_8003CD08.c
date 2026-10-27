@@ -69,7 +69,7 @@ void func_8003ECF8(void);
 
 /* What an actor of a kind is made of: its effect, its kind, its handlers and animations (0x14 bytes, D_80082138[]). */
 typedef struct ActorDef {
-    /* 0x00 */ EffectDef *unk_0;
+    /* 0x00 */ Anim *unk_0;
     /* 0x04 */ u16 unk_4;
     /* 0x06 */ u8 unk_6[0x2];
     /* 0x08 */ void (**unk_8)(Actor *);
@@ -131,20 +131,11 @@ extern Anim D_80094AEC;
 extern Anim D_80094514;
 extern ActorDef D_80082138[];
 extern u8 D_8007FFB0[];
-extern u16 D_801D36FC;        /* the game mode */
-extern u16 D_801D37B8;
-extern u16 D_801D87B4;
-extern EffectDef D_8009556C;
-extern s16 D_801D8728;
 extern s16 D_801D8718;
+extern s16 D_801D8728;   /* not in game.h: this file reads it signed (lh), game_8001781C unsigned (lhu) */
 extern s16 D_801D871C;
-extern s32 D_801D8864;
-extern u16 D_801D8866;
-extern u16 D_801D8738;
 extern Actor D_801E1E48[];
-extern u16 D_801E1C80;
 extern u16 D_801E28A4;
-extern s16 D_801FA960;
 extern Anim D_80094350;
 extern Anim D_8008AAFC, D_8008AB4C, D_8008AB80, D_8008ABDC, D_8008AC04, D_8008AC2C, D_8008AC54, D_8008AC7C, D_8008AC98,
     D_8008ACA4, D_8008ACCC, D_8008ACF4, D_8008AD1C, D_8008AD44, D_8008AD60;
@@ -931,7 +922,7 @@ void func_8003ED4C(void) {
     ActorDef *def;
     ObjectDef *effect;
     ActorLink *link;
-    EffectDef *ed;
+    Anim *ed;
     u16 kind;
     u16 y;
 
@@ -955,7 +946,7 @@ void func_8003ED4C(void) {
         def = &D_80082138[kind];
         ed = def->unk_0;
         effect->anim = ed;
-        effect->id = ed->unk_0;
+        effect->id = ed->id;
         actor->unk_8 = 0;
         p++;
         actor->unk_6 = def->unk_4;
@@ -1320,7 +1311,7 @@ void func_80040314(Monster *player) {
     effect = func_8001D110();
     D_800AA248.new_def = effect;
     effect->anim = &D_8009556C;
-    effect->id = D_8009556C.unk_0;
+    effect->id = D_8009556C.id;
     mover = player->obj;
     effect->pos_x.s.hi = ((u16 *)&mover->pos_x.w)[1];
     effect->pos_y.s.hi = ((u16 *)&mover->pos_y.w)[1] | 0xC000;
@@ -1354,7 +1345,7 @@ void func_800405D8(Actor *actor) {
         func_8004155C(5, actor);
         func_80040B94(actor);
     } else {
-        mover->pos_x.w = (mover->vel_x.w + mover->pos_x.w) & D_801D8864;
+        mover->pos_x.w = (mover->vel_x.w + mover->pos_x.w) & D_801D8864.w;
     }
 }
 
@@ -1407,7 +1398,7 @@ void func_80040704(Actor *actor) {
         return;
     }
     v += D_800AA268.p->pos_x.w;
-    D_800AA268.p->pos_x.w = v & D_801D8864;
+    D_800AA268.p->pos_x.w = v & D_801D8864.w;
 }
 
 void func_80040824(Actor *actor) {
@@ -1456,7 +1447,7 @@ void func_80040930(Actor *actor) {
 
     mover = actor->unk_0;
     D_800AA248.cur_obj = mover;
-    v = (mover->vel_x.w + mover->pos_x.w) & D_801D8864;
+    v = (mover->vel_x.w + mover->pos_x.w) & D_801D8864.w;
     mover->pos_x.w = v;
     v = D_800AA248.cur_obj->vel_y.w + 0x6500;
     D_800AA248.cur_obj->vel_y.w = v;
@@ -1478,7 +1469,7 @@ void func_800409CC(Actor *actor) {
 
     mover = actor->unk_0;
     D_800AA248.cur_obj = mover;
-    mover->pos_x.w = (mover->pos_x.w + mover->vel_x.w) & D_801D8864;
+    mover->pos_x.w = (mover->pos_x.w + mover->vel_x.w) & D_801D8864.w;
     v = D_800AA248.cur_obj->vel_y.w + 0x6500;
     D_800AA248.cur_obj->vel_y.w = v;
     D_800AA248.cur_obj->pos_y.w += v;
@@ -1650,7 +1641,7 @@ void func_80040EA0(Actor *actor) {
     } else {
         actor->unk_16 = 1;
     }
-    D_800AA248.cur_obj->pos_x.w = D_801D8864 & (D_800AA248.cur_obj->vel_x.w + D_800AA248.cur_obj->pos_x.w);
+    D_800AA248.cur_obj->pos_x.w = D_801D8864.w & (D_800AA248.cur_obj->vel_x.w + D_800AA248.cur_obj->pos_x.w);
     if (actor->unk_30 == 0) {
         if (actor->unk_28 != 0) {
             actor->unk_30 = 0x3C;
@@ -1680,7 +1671,7 @@ void func_80040F84(Actor *actor) {
     } else {
         actor->unk_16 = 1;
     }
-    D_800AA248.cur_obj->pos_x.w = D_801D8864 & (D_800AA248.cur_obj->vel_x.w + D_800AA248.cur_obj->pos_x.w);
+    D_800AA248.cur_obj->pos_x.w = D_801D8864.w & (D_800AA248.cur_obj->vel_x.w + D_800AA248.cur_obj->pos_x.w);
     if (actor->unk_30 == 0) {
         if (actor->unk_28 != 0) {
             actor->unk_30 = 0x3C;
@@ -1714,7 +1705,7 @@ void func_800410AC(Actor *actor) {
     } else {
         actor->unk_16 = 1;
     }
-    D_800AA248.cur_obj->pos_x.w = D_801D8864 & (D_800AA248.cur_obj->vel_x.w + D_800AA248.cur_obj->pos_x.w);
+    D_800AA248.cur_obj->pos_x.w = D_801D8864.w & (D_800AA248.cur_obj->vel_x.w + D_800AA248.cur_obj->pos_x.w);
     if (actor->unk_30 == 0) {
         if (actor->unk_28 != 0) {
             actor->unk_32++;
@@ -1826,7 +1817,7 @@ void func_8004143C(Actor *actor) {
     mover = actor->unk_0;
     D_800AA248.cur_obj = mover;
     if (!(mover->unk_6C & 0x80)) {
-        mover->pos_x.w = (mover->vel_x.w + mover->pos_x.w) & D_801D8864;
+        mover->pos_x.w = (mover->vel_x.w + mover->pos_x.w) & D_801D8864.w;
         v = D_800AA248.cur_obj->vel_y.w + 0x4000;
         D_800AA248.cur_obj->pos_y.w += v;
         if (v >= 0 && ((s16 *)&D_800AA248.cur_obj->pos_y.w)[1] >= 0xDC) {
