@@ -131,7 +131,64 @@ void func_8002ADE8(void) {
 INCLUDE_ASM("asm/main/nonmatchings/game_8002A330", func_8002ADE8);
 #endif
 
+/* 99.7 %: the thunder flashes of the sky; only the register of the random draw's masked value differs (a0 in the original, v0 here) */
+#ifdef NON_MATCHING
+void func_8002AF28(void) {
+    s32 i;
+
+    if (D_8007C976 == 1) {
+        for (i = 0; i < 80; i++) {
+            func_8002B0E0(i);
+        }
+        if (D_8007C979 != 0) {
+            func_8002ADE8();
+            D_8007C979--;
+            return;
+        }
+        if (D_8007C97A != 0) {
+            D_8007C97A--;
+            return;
+        }
+        if (D_8007C978 != 0) {
+            D_8007C978--;
+        }
+        switch (D_8007C978) {
+        case 1:
+        case 2:
+        case 3:
+        case 4:
+            D_8007C979 = 1;
+            D_8007C97A = 1;
+            break;
+        case 5:
+            D_8007C979 = 4;
+            D_8007C97A = 1;
+            break;
+        default:
+            if ((func_8001EA78() & 0x1FF) == 9) {
+                D_8007C978 = 6;
+                D_8007C979 = (func_8001EA78() & 3) + 9;
+                D_8007C97A = 2;
+                func_8001F724((func_8001EA78() & 1) + 0x27);
+            }
+            break;
+        }
+    }
+    if (D_8007C976 == 2) {
+        if (D_801FA960 >= 100 && D_801D8728 == 0) {
+            for (i = 0; i < 40; i++) {
+                func_8002B6E8(i);
+            }
+        } else {
+            for (i = 0; i < 80; i++) {
+                func_8002B3AC(i);
+            }
+        }
+    }
+}
+#else
 INCLUDE_ASM("asm/main/nonmatchings/game_8002A330", func_8002AF28);
+#endif
 
 INCLUDE_ASM("asm/main/nonmatchings/game_8002A330", func_8002B0E0);
 
@@ -145,7 +202,29 @@ void func_8002B640(void) {
 
 INCLUDE_ASM("asm/main/nonmatchings/game_8002A330", func_8002B6E8);
 
-INCLUDE_ASM("asm/main/nonmatchings/game_8002A330", func_8002B878);
+void func_8002B878(void) {
+    s32 i;
+    s32 n;
+    s32 mode;
+
+    mode = 1;
+    n = 0;
+    for (i = 0; i < 7; i++) {
+        if (D_801FA8A0[i] != 0) {
+            n++;
+        }
+    }
+    if (n >= 3) {
+        mode = 0;
+    }
+    D_801D8740 = 0;
+    for (i = 0; i < 7; i++) {
+        if (D_801FA8A0[i] != 0 && func_8001AA4C(D_8007CDA4[i][0], D_8007CDA4[i][mode + 3]) != 0) {
+            func_8001AB30(D_8007CDA4[i][1], D_8007CDA4[i][2]);
+            D_801D8740++;
+        }
+    }
+}
 
 void func_8002B988(void) {
     s16 temp_v0;
@@ -1283,7 +1362,43 @@ void func_8002E614(u16 which, BuildingItem *rec) {
 
 INCLUDE_ASM("asm/main/nonmatchings/game_8002A330", func_8002E658);
 
-INCLUDE_ASM("asm/main/nonmatchings/game_8002A330", func_8002E854);
+void func_8002E854(Building *b) {
+    GameObject *saved;
+    GameObject *obj;
+    BuildingItem *rec;
+    s32 v;           /* the fall v, then the bottom y */
+    u16 n;
+
+    obj = b->unk_070->obj;
+    saved = D_800AA248.cur_obj;
+    D_800AA248.cur_obj = obj;
+    rec = b->items;
+    if (obj->vel_y.w == 0) {
+        v = 0x20000;
+        func_80030D14(b->unk_018);
+        b->unk_016 = 1;
+        n = b->unk_000 - 1;
+        if (b->unk_014 == 4) {
+            v = 0x40000;
+        }
+        rec = &b->items[1];
+        do {
+            func_80030B00(v, rec);
+            rec++;
+        } while (--n != 0);
+    } else {
+        rec += b->unk_016;
+        obj = rec->obj;
+        D_800AA248.cur_obj = obj;
+        v = obj->pos_y.s.hi - obj->unk_1C.s.hi + obj->size.s.hi;
+        if (obj->pos_y.s.hi >= 0x12D || v >= (s16) b->unk_006 - 8) {
+            func_800257F0(rec);
+            func_80025B7C(rec);
+            b->unk_016++;
+        }
+    }
+    D_800AA268.p = saved;
+}
 
 void func_8002E9A4(Building *arg0) {
     GameObject *temp_a0;
@@ -1332,9 +1447,56 @@ void func_8002E9F8(Building *a) {
     D_800AA268.p = saved;
 }
 
-INCLUDE_ASM("asm/main/nonmatchings/game_8002A330", func_8002EB00);
+void func_8002EB00(Building *b) {
+    BuildingItem *rec;
+    UnkStructPair *mid;
+    UnkStructPair *side;
+    u16 i;
 
-INCLUDE_ASM("asm/main/nonmatchings/game_8002A330", func_8002EBD8);
+    rec = b->items;
+    rec += b->unk_02C - 1;
+    i = b->unk_02A;
+    if (rec->building->unk_02E == 1) {
+        mid = D_8007CE60;
+        side = D_8007CF18;
+    } else {
+        mid = D_8007CEBC;
+        side = D_8007CF74;
+    }
+    mid += i - 1;
+    side += i - 1;
+    func_800309AC(side->unk_00, rec - 1);
+    func_800309AC(side->unk_00, rec + 1);
+    func_800309AC(mid->unk_00, rec);
+    b->unk_02A++;
+}
+
+void func_8002EBD8(Building *b) {
+    Building *o;
+    u16 n;
+    u16 kind;
+
+    n = D_801E29A4;
+    o = D_801D3DC8;
+    if (n != 0) {
+        if (b->unk_008 == 0x300) {
+            kind = 0x200;
+        } else if (b->unk_008 == 0x200) {
+            kind = 0x100;
+        } else {
+            return;
+        }
+        do {
+            if (o->unk_014 < 0x10 && o->unk_008 == kind && o->unk_00E > (s16) b->unk_004 &&
+                (b->unk_00E >= o->unk_00E || b->unk_00E >= (s16) o->unk_004)) {
+                o->unk_024 = 0;
+                o->unk_028 = 0;
+                o->unk_026 = 0;
+            }
+            o++;
+        } while (--n != 0);
+    }
+}
 
 void func_8002ECA0(Building *arg0) {
     u16 var_s1;
@@ -1787,7 +1949,49 @@ void func_8002FEA4(UnkStructFEA4 *a) {
     }
 }
 
+/* 91.8 %: a building's top sprite; the original keeps the kind == 2 arm as its own block (bne, then j with dx in the slot), this one threads it into a beq, and it stores the animation before the flags */
+#ifdef NON_MATCHING
+void func_8002FF74(void) {
+    GameObject *saved;
+    Building *b;
+    ObjectDef *def;
+    Anim **anim;
+    u16 dx;
+    u16 kind;
+
+    saved = D_800AA248.cur_obj;
+    b = saved->owner.p;
+    if (b->unk_008 == 0x300 && b->unk_080 != 0) {
+        def = func_8001D110();
+        D_800AA248.new_def = def;
+        kind = b->unk_002;
+        if (kind == 2) {
+            dx = 0x28;
+        } else {
+            dx = 0x3C;
+            if (kind != 3) {
+                D_800AA248.cur_obj = saved;
+                return;
+            }
+        }
+        def->pos_x.s.hi = dx + b->unk_004;
+        def->pos_y.s.hi = b->unk_006;
+        anim = D_8007CFD8;
+        if (b->unk_080 >= 1 && b->unk_080 <= 3) {
+            anim += b->unk_080;
+            def->anim = *anim;
+            def->flags = 0x38F;
+            def->id = (*anim)->id;
+            D_800AA248.cur_obj = func_8001DCB4();
+            b->unk_07C = D_800AA248.cur_obj;
+            func_800303DC(D_800AA248.cur_obj, b);
+        }
+    }
+    D_800AA268.p = saved;
+}
+#else
 INCLUDE_ASM("asm/main/nonmatchings/game_8002A330", func_8002FF74);
+#endif
 
 void func_800300A0(UnkStruct15 *arg0, Building *arg1) {
     if ((arg0 != NULL) && (arg1->unk_080 != 0)) {
@@ -1847,19 +2051,19 @@ void func_800302AC(u16 kind, Monster *m) {
 
 INCLUDE_ASM("asm/main/nonmatchings/game_8002A330", func_80030338);
 
-void func_800303DC(Building *a, GameObject *obj) {
+void func_800303DC(GameObject *obj, Building *b) {
     UnkStructPair *p;
     u16 n;
     s16 d;
 
-    if (obj->unk_80 != 2) {
+    if (b->unk_080 != 2) {
         p = D_801D8804;
         n = 13;
         do {
             if (p->unk_00 == 0) {
-                d = a->unk_016 - a->unk_01C;
+                d = obj->pos_x.u.hi - obj->unk_1C.u.lo;
                 p->unk_00 = d + 0x19;
-                p->unk_02 = d + (u16) a->unk_030 - 0x19;
+                p->unk_02 = d + obj->size.u.lo - 0x19;
                 return;
             }
             p++;
@@ -2354,7 +2558,21 @@ void func_8003149C(void) {
     } while (--n != 0);
 }
 
-INCLUDE_ASM("asm/main/nonmatchings/game_8002A330", func_800315D8);
+void func_800315D8(void) {
+    u16 *p;
+
+    p = (u16 *) func_80025C08(D_80083CE8);
+    D_801FA98C = *p++;
+    D_801FAC90 = *p++;
+    D_801FAC8C = *p++;
+    D_801FA990 = *p++;
+    D_801D87B0 = *p++;
+    D_801D376C = *p++;
+    D_801D37B8 = *p++;
+    D_801D87B4 = *p++;
+    D_801FAC84 = *p++;
+    D_801F9AB0 = *p++;
+}
 
 /* 83 %: the level's two lists; the original loads r->unk_04 after the two stores to D_801D37BC/D_801D37C0 (so they may alias it: likely fields of one struct, not scalars) and sets up D_801E1E34 before the call's argument */
 #ifdef NON_MATCHING

@@ -539,7 +539,7 @@ extern u8 D_80012394[];
 extern u8 D_8001236C_alt[];   /* another name for D_8001236C (config/aliases.ld) */
 extern UnkStructPair D_801D8804[14];
 extern u16 D_8007CFF8[];   /* a u16 table after a header word (func_8003089C) */
-void func_800303DC(Building *, GameObject *);
+void func_800303DC(GameObject *, Building *);
 void func_80030D74(void);
 void func_8002CFAC(Monster *, Building *);
 BuildingItem *func_8002CD24(u16, Monster *, BuildingItem *);
@@ -611,4 +611,22 @@ void func_8001B054(GameObject *);
 extern s16 D_8007C976;
 extern u32 D_801FB198;
 extern GameObject *D_801FB420;
+void func_800257F0(BuildingItem *);
+extern u8 D_80083CE8[];
+extern UnkStructPair D_8007CE60[];
+extern UnkStructPair D_8007CEBC[];
+extern UnkStructPair D_8007CF18[];
+extern UnkStructPair D_8007CF74[];
+extern u16 D_8007CDA4[7][5];
+s32 func_8001AA4C(s32, s32);
+void func_8001AB30(s32, s32);
+extern u8 D_8007C978;
+extern u8 D_8007C979;
+extern u8 D_8007C97A;
+extern s16 D_801D8728;
+void func_8002ADE8(void);
+void func_8002B0E0(s32);
+void func_8002B3AC(s32);
+void func_8002B6E8(s32);
+extern Anim *D_8007CFD8[];
 #endif /* GAME_8002A330_H */

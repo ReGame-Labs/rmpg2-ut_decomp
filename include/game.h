@@ -492,8 +492,8 @@ typedef struct Building {
     /* 0x026 */ s16 unk_026;
     /* 0x028 */ s16 unk_028;
     /* 0x02A */ u16 unk_02A;
-    /* 0x02C */ s16 unk_02C;
-    /* 0x02E */ s16 unk_02E;
+    /* 0x02C */ u16 unk_02C;
+    /* 0x02E */ u16 unk_02E;
     /* 0x030 */ u16 unk_030;
     /* 0x032 */ u16 unk_032;
     /* 0x034 */ u16 unk_034;
@@ -512,7 +512,7 @@ typedef struct Building {
     /* 0x076 */ u16 unk_076;
     /* 0x078 */ u16 unk_078;
     /* 0x07A */ u16 unk_07A;
-    /* 0x07C */ u8 unk_07C[0x04];
+    /* 0x07C */ GameObject *unk_07C;
     /* 0x080 */ u16 unk_080;
     /* 0x082 */ u16 unk_082;
     /* 0x084 */ void *unk_084;
