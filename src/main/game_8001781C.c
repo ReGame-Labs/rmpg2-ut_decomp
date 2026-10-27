@@ -236,7 +236,7 @@ void func_8001F7CC(s32 arg0, s32 arg1);
 void func_8001F9BC(void);
 void func_80020FC8(GameObject *arg0);
 void func_80021034(void);
-void func_8002107C(void);
+void func_8002107C(Ai *ai);
 void func_80022D58(Ai *arg0);
 void func_80023064(s32 arg0);
 void func_800232AC(s32 arg0);
@@ -454,6 +454,17 @@ u16 func_80025C54(void *);
 extern void (*D_8007BE20[])(Monster *);
 void func_80023E30(Ai *);
 void func_80020BA0(s32, s32, GameObject *);
+extern s16 D_8007A6F8[];
+extern s16 D_801F9AB8;
+extern s16 D_801FAC7C;
+extern u16 D_801E2A44;
+void func_8001B0D8(s32 *, s32);
+void func_8006036C(s32 *, s32, s32, s32, s32, u8 *);
+void func_800210C8(Ai *);
+extern Unk7B358 *D_8007B358[];
+extern Anim D_8008B744;
+extern Anim D_80097B3C;
+extern Unk7B358 *D_8007B348[];
 /* decls:end */
 
 /* main: config/aliases.ld gives it its name (GCC 2.8.1 would start a function named main with a call to __main). */
@@ -593,14 +604,47 @@ s32 func_80017C80(s32 arg0) {
 
 INCLUDE_ASM("asm/main/nonmatchings/game_8001781C", func_80017D8C);
 
-INCLUDE_ASM("asm/main/nonmatchings/game_8001781C", func_80017F14);
+void func_80017F14(s16 x, s16 y, GameObject *link, s32 script) {
+    GameObject *saved;
+    GameObject *obj;
+    ObjectDef *def;
+
+    saved = D_800AA248.cur_obj;
+    if (D_8007A698 == 0) {
+        def = func_8001D110();
+        def->pos_x.s.hi = x;
+        def->pos_y.s.hi = y;
+        def->flags = 0x6FFF;
+        obj = func_8001DCB4();
+        D_800AA248.cur_obj = obj;
+        obj->unk_40.obj = link;
+        D_800AA248.cur_obj->script_pc = script;
+        D_800AA248.cur_obj->colour = 0;
+        D_800AA248.cur_obj->flags |= 0x40C;
+        D_8007A698 = 1;
+        D_800AA248.cur_obj->unk_6C |= 0x20;
+        D_800AA248.cur_obj->kind = 0x7FE;
+    }
+    D_800AA248.cur_obj = saved;
+}
 
 void func_80018008(void) {
     func_8001E450(0x7FE);
     D_8007A698 = 0;
 }
 
-INCLUDE_ASM("asm/main/nonmatchings/game_8001781C", func_8001802C);
+void func_8001802C(s32 player) {
+    Monster *monster;
+    u16 *buttons;
+
+    D_801E0D7C = 0;
+    monster = &D_801E0B78[func_80025DF8(player + 1)];
+    if (monster->id != 0) {
+        buttons = &D_8007A7C0[D_801D8800[player]][6];
+        D_801E0D7C |= *buttons << D_8007C144[player];
+        monster->unk_0C8 = *buttons >> 4;
+    }
+}
 
 #ifdef NON_MATCHING
 /* 80.2 %: register allocation around the two constants 0x4F002808 and 0x7000 */
@@ -663,7 +707,7 @@ void func_800181D0(void) {
 
 INCLUDE_ASM("asm/main/nonmatchings/game_8001781C", func_8001828C);
 
-void func_80018BD4(s32 from, u16 to) {
+void func_80018BD4(s32 from, s32 to) {
     GameObject *head;
     GameObject *sprite;
 
@@ -679,7 +723,19 @@ void func_80018BD4(s32 from, u16 to) {
     }
 }
 
-INCLUDE_ASM("asm/main/nonmatchings/game_8001781C", func_80018C14);
+void func_80018C14(void) {
+    s16 prev;
+
+    if (--D_801FAC7C <= 0) {
+        prev = D_801F9AB8;
+        if (++D_801F9AB8 >= 10) {
+            D_801F9AB8 = 0;
+        }
+        D_801E2A44 = D_8007A6F8[D_801F9AB8];
+        func_80018BD4(D_8007A6F8[prev], D_8007A6F8[D_801F9AB8]);
+        D_801FAC7C = 4;
+    }
+}
 
 void func_80018CB0(void) {
     func_800193B8();
@@ -1592,7 +1648,21 @@ void func_8001D1C8(void) {
 
 INCLUDE_ASM("asm/main/nonmatchings/game_8001781C", func_8001D28C);
 
-INCLUDE_ASM("asm/main/nonmatchings/game_8001781C", func_8001D4B8);
+void func_8001D4B8(void) {
+    s16 phase;
+
+    D_801FA968 = 1;
+    D_801D36FC = 0x150;
+    phase = D_801E29BC % 60;
+    if (phase == 59) {
+        func_8006036C(D_8007AD4C, 0xA3, 0xD7, 0x44, 0x402, "DEMO");
+    } else if (phase == 30) {
+        func_8001E450(0x402);
+    }
+    func_8001C784();
+    D_801D36FC = 0x120;
+    D_801FA968 = 0;
+}
 
 INCLUDE_ASM("asm/main/nonmatchings/game_8001781C", func_8001D598);
 
@@ -2372,18 +2442,85 @@ void func_80021034(void) {
     }
 }
 
-void func_8002107C(void) {
+void func_8002107C(Ai *ai) {
     if (!(D_8007A696 & 4)) {
         func_8001F7CC(0x64, 4);
         D_8007A696 |= 4;
     }
 }
 
-INCLUDE_ASM("asm/main/nonmatchings/game_8001781C", func_800210C8);
+void func_800210C8(Ai *ai) {
+    Unk7B358 *start;
 
-INCLUDE_ASM("asm/main/nonmatchings/game_8001781C", func_800211F4);
+    D_800AA248.cur_obj->unk_6C &= 0xFFEF;
+    func_800377B4(ai);
+    start = D_8007B358[ai->unk_3A];
+    D_800AA248.cur_obj->pos_x.w = D_801F9AC8.w + start->x;
+    D_800AA248.cur_obj->pos_y.w = D_801F9ACC + start->y;
+    D_800AA248.cur_obj->vel_x.w = start->vel_x;
+    D_800AA248.cur_obj->vel_y.w = start->vel_y;
+    D_800AA248.cur_obj->flags &= 0xFFEF;
+    D_800AA248.cur_obj->flags |= start->flags;
+    D_800AA248.cur_obj->unk_80 = 0x4000;
+    ai->action = 2;
+    ai->unk_28.s.hi = 0;
+    ai->unk_0C = 0;
+    if (ai->kind == 0x11) {
+        func_8003EB5C(&D_80097340, D_800AA248.cur_obj);
+    } else {
+        func_8003EB5C(&D_8008AE40, D_800AA248.cur_obj);
+    }
+}
 
-INCLUDE_ASM("asm/main/nonmatchings/game_8001781C", func_80021384);
+void func_800211F4(Ai *ai) {
+    Unk7B358 *start;
+
+    if (D_801E1CB0 == 0) {
+        if (ai->unk_1C.s != 0) {
+            ai->unk_1C.s--;
+            func_800242A8();
+            return;
+        }
+        func_80024138(ai);
+        if (ai->unk_24 != 3) {
+            ai->unk_3A = func_8001EB10(7, 0) & 1;
+        } else {
+            ai->unk_3A = 1;
+        }
+        start = D_8007B348[ai->unk_3A];
+        D_800AA248.cur_obj->pos_x.w = start->x;
+        D_800AA248.cur_obj->pos_y.w = D_801F9ACC + start->y;
+        D_800AA248.cur_obj->vel_x.w = start->vel_x;
+        D_800AA248.cur_obj->vel_y.w = start->vel_y;
+        D_800AA248.cur_obj->flags &= 0xFFEF;
+        D_800AA248.cur_obj->flags |= start->flags;
+        D_800AA248.cur_obj->unk_6C |= 0x10;
+        D_800AA248.cur_obj->unk_80 = 0x50;
+        ai->action = 0x63;
+        ai->unk_22 = 0;
+        ai->unk_28.s.hi = 0;
+        ai->unk_0C = 0;
+        ai->unk_1C.s = 0x122;
+        func_8002107C(ai);
+        if (ai->kind == 0x11) {
+            func_8003EB5C(&D_80097DF0, D_800AA248.cur_obj);
+        } else {
+            func_8003EB5C(&D_8008B9C8, D_800AA248.cur_obj);
+        }
+    }
+}
+
+void func_80021384(Ai *ai) {
+    D_800AA248.cur_obj->pos_x.w += D_800AA248.cur_obj->vel_x.w;
+    D_800AA248.cur_obj->pos_y.w += D_800AA248.cur_obj->vel_y.w;
+    if (ai->unk_1C.s != 0) {
+        ai->unk_1C.s--;
+        return;
+    }
+    if (D_800AA248.cur_obj->unk_6C & 0x80) {
+        func_800210C8(ai);
+    }
+}
 
 INCLUDE_ASM("asm/main/nonmatchings/game_8001781C", func_80021418);
 
@@ -2406,7 +2543,38 @@ void func_80021644(Ai *ai) {
     }
 }
 
-INCLUDE_ASM("asm/main/nonmatchings/game_8001781C", func_800216C8);
+void func_800216C8(Ai *ai) {
+    Anim *anim;
+
+    if (ai->kind == 0x11) {
+        anim = &D_80097B3C;
+    } else {
+        anim = &D_8008B744;
+    }
+    if (D_800AA248.cur_obj->unk_48 != (s32) anim) {
+        D_800AA248.cur_obj->vel_x.w >>= 1;
+        ai->unk_1C.s = 0x40;
+        ai->unk_30.w = 0x1000;
+        func_8003EB5C(anim, D_800AA248.cur_obj);
+        return;
+    }
+    if (ai->unk_1C.s == 0) {
+        ai->action = 3;
+        return;
+    }
+    ai->unk_1C.s--;
+    D_800AA248.cur_obj->pos_x.w += D_800AA248.cur_obj->vel_x.w;
+    D_800AA248.cur_obj->vel_y.w += 0x1000;
+    if (D_800AA248.cur_obj->vel_y.w > 0x8000) {
+        D_800AA248.cur_obj->vel_y.w = 0x8000;
+    }
+    D_800AA248.cur_obj->pos_y.w += D_800AA248.cur_obj->vel_y.w;
+    if (D_800AA248.cur_obj->pos_y.s.hi >= 0xF1) {
+        ai->action = 3;
+        return;
+    }
+    func_80024508((GameObject *) ai);
+}
 
 void func_8002180C(Ai *ai) {
     Anim *anim;
@@ -2592,7 +2760,37 @@ void func_80021FDC(Ai *ai) {
 
 INCLUDE_ASM("asm/main/nonmatchings/game_8001781C", func_800220D0);
 
-INCLUDE_ASM("asm/main/nonmatchings/game_8001781C", func_800221BC);
+void func_800221BC(Ai *ai) {
+    s16 x;
+
+    if (D_800AA248.cur_obj->pos_y.s.hi < 0xF1) {
+        D_800AA248.cur_obj->vel_y.w = 0x18000;
+        ai->unk_22 = 0;
+        ai->unk_28.s.hi = 0;
+        if (ai->unk_0C != 0) {
+            if (ai->kind == 0x11) {
+                func_8003EB5C(&D_80097340, D_800AA248.cur_obj);
+            } else {
+                func_8003EB5C(&D_8008AE40, D_800AA248.cur_obj);
+            }
+        }
+    } else if (ai->unk_22 == 0) {
+        ai->unk_0C = 0;
+        D_800AA248.cur_obj->vel_x.w = 0;
+        D_800AA248.cur_obj->vel_y.w = 0;
+        ai->unk_30.w = 0;
+        ai->unk_22 = 0xB4;
+        if (D_801FA98C != 0) {
+            x = D_800AA248.cur_obj->pos_x.s.hi;
+            if (x >= D_801FA98C && D_801FA990 >= x) {
+                ai->unk_22 = 1;
+            }
+        }
+    } else if (--ai->unk_22 == 0) {
+        ai->unk_0C = 0;
+        ai->state++;
+    }
+}
 
 void func_800222E8(Ai *ai) {
     D_800AA248.cur_obj->vel_y.w = 0xFFFE8000;
@@ -2884,7 +3082,19 @@ u16 func_80023114(void) {
 INCLUDE_ASM("asm/main/nonmatchings/game_8001781C", func_80023114);
 #endif
 
-INCLUDE_ASM("asm/main/nonmatchings/game_8001781C", func_800231E4);
+u16 func_800231E4(Ai *ai) {
+    s16 x;
+    s16 limit;
+
+    func_800232D8(ai);
+    func_80024418(&x, &limit, ai);
+    if (D_800AA268.p->vel_x.w >= 0) {
+        x += 0x50;
+        return limit >= x;
+    }
+    x -= 0x50;
+    return x >= limit;
+}
 
 u16 func_8002326C(s16 x) {
     if (D_800AA268.p->flags & 0x10) {
