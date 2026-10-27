@@ -1343,7 +1343,8 @@ INCLUDE_ASM("asm/main/nonmatchings/npc", func_8003712C);
 #endif
 
 #ifdef NON_MATCHING
-/* 99.85 %: the control flow and the saved registers are right; the first rectangle's x tests load the field into v1 (a0 in the original) */
+/* 99.85%: 99.85 %: the first rectangle's lhu temporaries (global, they cross the beqz) take v1 first in global-
+ * alloc; the original's a0 needs v1 excluded: a v1 conflict or a v1 preference of the lower-priority s16 x (88) */
 u16 func_800372DC(s16 x, s16 y, Monster *player, Npc *npc, s32 arg4) {
     func_80037960(npc, arg4);
     if ((x >= npc->unk_3E || x >= (s16)(npc->unk_3E - 4)) && (x <= npc->unk_40 || x <= (s16)(npc->unk_40 + 4)) &&
@@ -1901,9 +1902,6 @@ void func_80038528(Npc *npc) {
     func_800385F4(npc);
 }
 
-#ifdef NON_MATCHING
-/* 99.77%: 99.8 %: the flags read in either arm stay in a1 in the original and only the andi lands in v0; here the
- * flags take v0 too */
 void func_800385F4(Npc *npc) {
     s32 speed;
     u16 n;
@@ -1913,17 +1911,15 @@ void func_800385F4(Npc *npc) {
         s32 idx;
 
         if (npc->unk_20 == 1) {
-            u16 flags;
-
             speed = 0x28000;
             npc->unk_22 = 0x14;
             if (npc->unk_64 == NULL) {
-                flags = npc->unk_54;
+                idx = npc->unk_54;
             } else {
                 speed = -0x28000;
-                flags = D_800AA248.cur_obj->flags;
+                idx = D_800AA248.cur_obj->flags;
             }
-            if (flags & 0x10) {
+            if (idx & 0x10) {
                 speed = -speed;
             }
         } else {
@@ -1941,7 +1937,8 @@ void func_800385F4(Npc *npc) {
         } else {
             table = D_8007DA68;
         }
-       table += idx; func_8003EB5C(*table, D_800AA268.p);
+        table += idx;
+        func_8003EB5C(*table, D_800AA268.p);
     }
     n = npc->unk_22 - 1;
     npc->unk_22 = n;
@@ -1951,9 +1948,6 @@ void func_800385F4(Npc *npc) {
         npc->action = 2;
     }
 }
-#else
-INCLUDE_ASM("asm/main/nonmatchings/npc", func_800385F4);
-#endif
 
 void func_80038754(Npc *npc) {
     Monster *player;
@@ -2009,8 +2003,6 @@ void func_80038838(Npc *npc) {
     func_8003831C();
 }
 
-#ifdef NON_MATCHING
-/* 98.73 %: register choices only: the original builds both table addresses in a0 and adds the row before the index (row + which * 4); here which * 4 + row */
 void func_80038920(Npc *npc) {
     u16 which;
     u8 *anim;
@@ -2021,11 +2013,13 @@ void func_80038920(Npc *npc) {
     }
     if (func_80039220(&which, npc) == 0) {
         if (npc->unk_0C != 0) {
-            func_8003EB5C(*(D_8007DA68 + (npc->unk_2E & 3)), D_800AA268.p);
+            row = D_8007DA68 + (npc->unk_2E & 3);
+            func_8003EB5C(*row, D_800AA268.p);
         }
     } else {
-        row = *(D_8007DA78 + (npc->unk_2C & 3));
-        anim = row[which];
+        row = D_8007DA78[npc->unk_2C & 3];
+        row += which;
+        anim = *row;
         if (anim != (u8 *)D_800AA268.p->anim) {
             func_8003EB5C(anim, D_800AA268.p);
             return;
@@ -2041,9 +2035,6 @@ void func_80038920(Npc *npc) {
         }
     }
 }
-#else
-INCLUDE_ASM("asm/main/nonmatchings/npc", func_80038920);
-#endif
 
 void func_80038A2C(Npc *npc) {
     u16 move = npc->unk_2A;
@@ -2070,17 +2061,15 @@ void func_80038A2C(Npc *npc) {
     func_80038920(npc);
 }
 
-#ifdef NON_MATCHING
-/* 97.85%: 97.9 %: the order is right; the table base and the index swap v0 and v1 (the original builds the base in
- * v0), in the shared call tail and at &D_800AA248 */
 void func_80038AE8(Npc *npc) {
     Monster *player;
-    GameObject *obj;
+    u8 **p;
 
     player = npc->unk_64;
     if ((player == NULL || player->dir == 0 || player->dir == 5 || player->dir == 1) && npc->unk_2A == 4) {
         if (npc->unk_0C != 0) {
-           func_8003EB5C(D_8007DA68[npc->unk_2E & 3], D_800AA268.p);
+            p = D_8007DA68 + (npc->unk_2E & 3);
+            func_8003EB5C(*p, D_800AA268.p);
         }
         return;
     }
@@ -2101,11 +2090,9 @@ void func_80038AE8(Npc *npc) {
         npc->unk_1C--;
     }
     D_800AA248.cur_obj->vel_x.w = 0;
-   func_8003EB5C(*(D_8007DA68 + (npc->unk_2E & 3)), D_800AA248.cur_obj);
+    p = D_8007DA68 + (npc->unk_2E & 3);
+    func_8003EB5C(*p, D_800AA248.cur_obj);
 }
-#else
-INCLUDE_ASM("asm/main/nonmatchings/npc", func_80038AE8);
-#endif
 
 u16 func_80038C1C(npc)
     Npc *npc;
@@ -2436,19 +2423,12 @@ u16 npc_create_throw(Monster *m, u16 a, u16 kind, Throw *t) {
     return 1;
 }
 
-#ifdef NON_MATCHING
-/* 96.36%: vy takes a0 where the original has a1 (the object pointer swaps with it); the original places the unk_98
- * = 2 block of the pos_y test after the loop's code (beqz to it), the C inline */
-
 void npc_update_throw(Throw *t) {
     GameObject *saved = D_800AA248.cur_obj;
     Monster *m;
     GameObject *body;
-    s32 vx;
-    s32 vy;
     u16 i;
-    s32 n;
-    u16 hit;
+    s32 v;
     Npc *npc;
 
     if (t->state == 0x10 || t->state == 1) {
@@ -2459,56 +2439,56 @@ void npc_update_throw(Throw *t) {
             t->state = 0x10;
             func_8003EB5C(D_80096018, D_800AA248.cur_obj);
         } else {
-            vx = saved->vel_x.w;
-            if (vx <= 0) {
+            v = saved->vel_x.w;
+            if (v <= 0) {
                 if (D_801D3D8A < 0) {
-                    vx += D_801D3D8A;
+                    v += D_801D3D8A;
                 }
             } else if (D_801D3D8A > 0) {
-                vx += D_801D3D8A;
+                v += D_801D3D8A;
             }
-            D_800AA248.cur_obj->pos_x.w = (D_800AA248.cur_obj->pos_x.w + vx) & D_801D8864.w;
-            vy = D_800AA248.cur_obj->vel_y.w + t->unk_0C;
-            if (vy > 0x90000) {
-                vy = 0x90000;
+            D_800AA248.cur_obj->pos_x.w = (D_800AA248.cur_obj->pos_x.w + v) & D_801D8864.w;
+            v = D_800AA248.cur_obj->vel_y.w + t->unk_0C;
+            if (v > 0x90000) {
+                v = 0x90000;
             }
-            D_800AA248.cur_obj->vel_y.w = vy;
-            D_800AA248.cur_obj->pos_y.w += vy;
+            D_800AA248.cur_obj->vel_y.w = v;
+            D_800AA248.cur_obj->pos_y.w += v;
             if (D_800AA248.cur_obj->pos_y.s.hi >= 0xD9) {
-                D_800AA268.p->unk_98 = (void *) 2;
-            } else {
-                i = 7;
-                do {
-                    m = &D_801E0B78[i];
-                    if ((m->unk_058 & 1) && !((body = m->obj)->unk_6C & 0x80)) {
-                        hit = monster_test_boxes(D_800AA248.cur_obj->pos_x.s.hi, D_800AA248.cur_obj->pos_y.s.hi, m);
-                        if (hit != 0) {
-                            func_80053C50(0x54000, m);
-                            func_8004EFAC();
-                            t->state = 0x10;
-                            D_800AA248.cur_obj->unk_98 = (void *) 1;
-                            if (body->pos_y.s.hi <= 0xE0) {
-                                m->action = 0xF;
-                            } else if ((D_800AA248.cur_obj->flags & 0x10) == (body->flags & 0x10)) {
-                                m->action = 0x22;
-                            } else {
-                                m->action = 0xA;
-                                func_800531C0(m);
-                            }
-                            goto end;
-                        }
-                    }
-                } while (--i != 0);
-                npc = t->thrower->owner.npc;
-                if (npc != NULL) {
-                    m = npc->unk_64;
-                    if ((m == NULL || D_800AA268.p->vel_y.w < -0x70000) && D_800AA268.p->vel_y.w >= 0) {
-                        n = D_800AA268.p->unk_8C - 1;
-                        if (n == 0) {
-                            D_800AA268.p->unk_98 = (void *) 2;
+                goto fall;
+            }
+            i = 7;
+            do {
+                m = &D_801E0B78[i];
+                if ((m->unk_058 & 1) && !((body = m->obj)->unk_6C & 0x80)) {
+                    v = monster_test_boxes(D_800AA248.cur_obj->pos_x.s.hi, D_800AA248.cur_obj->pos_y.s.hi, m);
+                    if (v != 0) {
+                        func_80053C50(0x54000, m);
+                        func_8004EFAC();
+                        t->state = 0x10;
+                        D_800AA248.cur_obj->unk_98 = (void *) 1;
+                        if (body->pos_y.s.hi <= 0xE0) {
+                            m->action = 0xF;
+                        } else if ((D_800AA248.cur_obj->flags & 0x10) == (body->flags & 0x10)) {
+                            m->action = 0x22;
                         } else {
-                            D_800AA268.p->unk_8C = n;
+                            m->action = 0xA;
+                            func_800531C0(m);
                         }
+                        goto end;
+                    }
+                }
+            } while (--i != 0);
+            npc = t->thrower->owner.npc;
+            if (npc != NULL) {
+                m = npc->unk_64;
+                if ((m == NULL || D_800AA268.p->vel_y.w < -0x70000) && D_800AA268.p->vel_y.w >= 0) {
+                    v = D_800AA268.p->unk_8C - 1;
+                    if (v == 0) {
+                    fall:
+                        D_800AA268.p->unk_98 = (void *) 2;
+                    } else {
+                        D_800AA268.p->unk_8C = v;
                     }
                 }
             }
@@ -2517,9 +2497,6 @@ void npc_update_throw(Throw *t) {
 end:
     D_800AA268.p = saved;
 }
-#else
-INCLUDE_ASM("asm/main/nonmatchings/npc", npc_update_throw);
-#endif
 
 void func_80039890(void) {
     Npc *npc = D_800AA248.cur_obj->owner.npc;
@@ -3073,8 +3050,9 @@ void func_8003ABE8(Npc *npc) {
     }
 }
 
-/* 99.86%: one register pair swapped: the right-edge test loads D_801F9AC8 into v1 and the constant into v0 in the original, the other way round here */
 #ifdef NON_MATCHING
+/* 99.85%: 99.85 %: the original ties the sum to the constant (op 2), so the tie with the reloaded D_801F9AC8 (op 1)
+ * failed: that load was not a block-local pseudo dying once */
 void func_8003AC74(Npc *npc) {
     s32 x;
     u16 t;

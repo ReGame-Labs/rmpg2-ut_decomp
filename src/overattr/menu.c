@@ -902,7 +902,7 @@ void func_8009DE00(void) {
     }
 }
 
-void func_8009DEA8(void *list, s32 selected) {
+void menu_free_others(void *list, s32 selected) {
     MenuRecord *menu;
     s32 i;
 
@@ -918,7 +918,7 @@ void func_8009DEA8(void *list, s32 selected) {
     }
 }
 
-void func_8009DF60(void) {
+void menu_free_all(void) {
     s32 i;
 
     for (i = 0x400; i < 0x4FF; i++) {
@@ -964,7 +964,7 @@ s16 menu_draw(void *list, s32 selected, s32 lit, s32 normal) {
     return menu->unk_00;
 }
 
-s32 func_8009E114(s32 kind, s32 y) {
+s32 menu_slide_kind(s32 kind, s32 y) {
     GameObject *head;
     GameObject *obj;
     s32 done;
@@ -1001,7 +1001,7 @@ void menu_light_items(void *list, s32 selected, s32 lit, s32 normal) {
     }
 }
 
-void func_8009E238(void *list, s32 lit, s32 normal) {
+void menu_light_choices(void *list, s32 lit, s32 normal) {
     MenuRecord *menu;
     s32 i;
 
@@ -1094,7 +1094,8 @@ void menu_fade_in(MenuRecord *menu) {
     D_800A9888 = 2;
 }
 
-void menu_create_player_slots(void) {
+/* func_8009FF38 passes D_801E1CA4, which this never reads. */
+void menu_create_player_slots(s32 unused) {
     ObjectDef *def;
     u8 *anim;
     s32 i;
@@ -1423,9 +1424,9 @@ void menu_update_player_select(void) {
 }
 
 #ifdef NON_MATCHING
-/* 80.38%: the loop's invariants differ: the original keeps %hi(D_800A9860) in fp and D_800A8F00 in s7, and
- * steps a pointer at the record's unk_08 (s0 = D_800A8FD4 + 8); this C hoists D_800A8FD4 itself and reaches the
- * records from it. */
+/* 89.18%: with the record pointer stepped the invariants and the record pointer at unk_08 are the original's; the
+ * original shifts the pad bits before it loads the slot's object and copies them to a1 for the later tests, and
+ * loads a new animation before the D_800A9860 store */
 void menu_choose_monsters(s32 unused, s32 *timer) {
     s32 i;
     OverattrPlayer *rec;
@@ -1436,10 +1437,9 @@ void menu_choose_monsters(s32 unused, s32 *timer) {
     u32 pad;
     GameObject *obj;
 
-    for (i = 0; i < 3; i++) {
-        rec = &D_800A8FD4[i];
+    for (i = 0, rec = D_800A8FD4; i < 3; i++, rec++) {
         monster = rec->unk_04;
-        pad = (u32) func_80099118() >> D_8007C144[i];
+        pad = (u32) tour_get_pressed() >> D_8007C144[i];
         obj = *(D_801E28F4 + i + 13);
         if (obj == NULL) {
             continue;
@@ -1541,11 +1541,11 @@ void menu_place_objects(OverattrPlacement *p, s32 n, s32 color) {
     D_801F9ACC.w = 0;
     q = p;
     for (i = 0; i < n; i++) {
-        func_80099138(q++)->colour = color;
+        tour_place_object(q++)->colour = color;
     }
 }
 
-void func_8009F9E0(void) {
+void menu_create_buttons(void) {
     ObjectDef *def;
     GameObject *head;
     GameObject *obj;
@@ -1582,7 +1582,7 @@ void func_8009F9E0(void) {
     }
 }
 
-void func_8009FB78(void) {
+void menu_create_select_button(void) {
     ObjectDef *def;
     GameObject *head;
     GameObject *obj;
@@ -1686,7 +1686,302 @@ void menu_free_objects(void) {
     }
 }
 
-INCLUDE_ASM("asm/overattr/nonmatchings/menu", func_8009FF38);
+s16 func_8009FF38(void) {
+    MenuRecord *menu;
+    MenuRecord *cur;                    /* the current menu, whose record 1 holds its per-frame function */
+    s32 i;
+    s32 all;
+    s32 bit;
+
+    D_800A6F78 = 0;
+    menu_update_fade();
+    func_80019268();
+    D_800A9250 = D_800A9220;
+    D_800A9220 = D_801E0D7C & 0x3FFFFFFF;
+    if (--D_800A9860 <= 0) {
+        func_80062E44();
+        D_801CA45C = 0;
+        return 0;
+    }
+    if (D_801F9944 != 0) {
+        D_801F9944--;
+    }
+    switch (D_801D3780) {
+    case 0:
+        for (i = 0; i < 7; i++) {
+            D_801FA8A0[i] = 0;
+        }
+        D_801E0D64 = 0;
+        D_801F9944 = 0xB;
+        func_80017B24();
+        func_8001A420();
+        func_8001A474();
+        func_8001AC18(0xA, 0x1C);
+        func_8001AA4C(0xB, 0x1D);
+        func_8001F760();
+        D_801D3780 = 1;
+    case 1:
+    main_menu:
+        menu_place_objects(D_800A73C4, 4, 0x404040);
+        D_800A92C0 = NULL;
+        D_801E0D64 = 0;
+        D_801F9944 = 0xB;
+        D_800A9888 = 0;
+        D_800A9870 = 0;
+        D_800A92D8 = D_800A6FCC;
+        D_801D885C = 0x44;
+        D_801E2A44 = 0x45;
+        D_801F9AAC = 0x47;
+        menu_create_buttons();
+        D_801D3780 = 6;
+        break;
+    case 6:
+        menu = D_800A92D8;
+        if (D_800A9800 == 0) {
+            menu->sub = D_800A92C0;
+            menu->kind = D_800A92D0;
+        }
+        D_800A92C0 = D_800A92D8;
+        D_800A92D0 = D_800A9870;
+        D_800A9840 = menu_draw(D_800A92D8, D_800A9870, (s16) D_801E2A44, D_801F9AAC);
+        if (menu == D_800A7200) {
+            menu_draw_controls();
+            for (i = 0; i < 12; i++) {
+                D_801E28F4[i]->kind = 0x400;
+                D_801E28F4[i]->flags |= 0x500;
+                D_801E28F4[i]->colour = 0;
+            }
+            for (i = 0; i < 3; i++) {
+                menu_set_colour(D_800A6FBC[i], 0);
+                menu_set_colour(D_800A6FBC[i] + 1, 0);
+                menu_set_colour(D_800A6FBC[i] + 2, 0);
+                menu_set_colour(D_800A6FBC[i] + 3, 0);
+            }
+        } else if (menu == D_800A7248) {
+            for (i = 0; i < 2; i++) {
+                D_800A92F8[i]->kind = 0x400;
+                D_800A92F8[i]->flags |= 0x500;
+                D_800A92F8[i]->colour = 0;
+                D_800A92F8[i]->pos_x.s.hi = 0x6E;
+                D_800A9808[i]->pos_x.s.hi = 0x7C;
+            }
+        }
+        cur = D_800A92C0;
+        D_801D3780 = 7;
+        if (cur[1].sub != NULL) {
+            ((void (*)(void)) cur[1].sub)();
+        }
+        menu_fade_in(D_800A92C0);
+        break;
+    case 7:
+        if (D_800A9888 == 0) {
+            D_801D3780 = 0xFF;
+        }
+        break;
+    case 8:
+        if (D_800A9888 == 0) {
+            menu_free_all();
+            D_801D3780 = 6;
+        }
+        break;
+    case 2:
+        menu_free_objects();
+        D_801FA958 = -1;
+        menu_place_objects(D_800A7404, 4, 0x808080);
+        menu_create_player_slots(D_801E1CA4);
+        for (i = 0; i < 3; i++) {
+            /* the player's picture, its slot object and its bar frame */
+            D_800A9850[i] = 0;
+            *(D_801E28F4 + 13 + i) = NULL;
+            *(D_801E28F4 + 1 + i) = NULL;
+            *(D_801E28F4 + 16 + i) = NULL;
+        }
+        for (i = 0; i < 3; i++) {
+            D_800A8FD4[i].unk_04 = i;
+            D_800A8FD4[i].unk_06 = 0;
+            D_800A8FD4[i].unk_08 = 0xB;
+            D_800AA244[i] = 0;
+            D_800AA2CC[i] = 0;
+        }
+        for (i = 0; i < 7; i++) {
+            D_801FA8A0[i] = 0;
+        }
+        D_801E0D64 = 0;
+        for (i = 0; i < D_8007A690; i++) {
+            menu_create_player_monster(i, 0);
+            menu_create_player_bars(i, 0);
+        }
+        D_801D3780 = 0xD;
+        D_800A9290 = 0xE10;
+        break;
+    case 0xD:
+        menu_create_buttons();
+        D_801D3780 = 3;
+        break;
+    case 3:
+        menu_update_player_select();
+        if (--D_800A9290 != 0) {
+            all = 1;
+            menu_choose_monsters(2, &D_800A9290);
+            D_801E0D64 = 0;
+            for (i = 0; i < 7; i++) {
+                if (D_801FA8A0[i] != 0) {
+                    D_801E0D64 |= D_800A6FC4[D_801FA8A0[i]];
+                }
+            }
+            for (i = 0; i < 3; i++) {
+                if (D_800A9850[i] == 1 && D_800AA244[i] != D_800A9850[i]) {
+                    all = 0;
+                }
+            }
+            if (all == 1) {
+                main_free_kind(0x401);
+                main_free_kind(0x402);
+                main_free_kind(0x403);
+                D_801D3780 = 4;
+                D_801D3778 = 0x3C;
+            } else {
+                D_801D872C = 0x32;
+            }
+        } else {
+            tour_clear_objects();
+            D_801E0D64 = 0;
+            D_801F9944 = 0xB;
+            menu_free_objects();
+            goto main_menu;
+        }
+        break;
+    case 4:
+        break;
+    case 5:
+        if (menu_slide_kind(D_800A92C0[D_800A92D0 + 2].kind, 0x200000) != 0) {
+            menu_free_others(D_800A92C0, D_800A92D0);
+            D_801D3780 = D_801E2148;
+        }
+        break;
+    case 0xFF:
+        if (D_800A92C0 == D_800A7200) {
+            D_801D3780 = 9;
+        } else if (D_800A92C0 == D_800A70A4) {
+            D_801D3780 = 0xA;
+        } else {
+            cur = D_800A92C0;
+            D_800A9800 = 0;
+            func_80018C14();
+            menu = cur;
+            if (cur[1].sub != NULL) {
+                ((void (*)(void)) cur[1].sub)();
+            }
+            if ((D_800A9220 & 0x100401) && D_801F9944 == 0) {
+                D_800A9860 = 0x708;
+                if (--D_800A92D0 < 0) {
+                    D_800A92D0 = D_800A9840 - 1;
+                }
+                menu_light_items(D_800A92C0, D_800A92D0, (s16) D_801E2A44, D_801F9AAC);
+                D_801F9944 = 0xB;
+                D_801D872C /= 2;
+                func_8001F724(0x1E);
+            } else if ((D_800A9220 & 0x200802) && D_801F9944 == 0) {
+                D_800A9860 = 0x708;
+                if (++D_800A92D0 >= D_800A9840) {
+                    D_800A92D0 = 0;
+                }
+                menu_light_items(D_800A92C0, D_800A92D0, (s16) D_801E2A44, D_801F9AAC);
+                D_801F9944 = 0xB;
+                D_801D872C /= 2;
+                func_8001F724(0x1E);
+            } else if ((D_800A9220 & 0x1C0701C) && D_801F9944 == 0) {
+                D_800A9860 = 0x708;
+                ((void (*)(void)) D_800A92C0[D_800A92D0 + 2].sub)();
+                D_801F9944 = 0xB;
+                D_801D872C /= 2;
+            } else if ((D_800A9220 & 0x4010040) && D_801F9944 == 0) {
+                D_800A9860 = 0x708;
+                if (D_800A92C0 == D_800A6FCC) {
+                    D_800A9860 = 0;
+                }
+                if (menu->sub != NULL) {
+                    D_800A92D8 = menu->sub;
+                    D_800A9800 = 1;
+                    D_800A9870 = menu->kind;
+                    func_8001F724(3);
+                    menu_fade_out();
+                    D_801F9944 = 0xB;
+                    D_801D872C /= 2;
+                }
+            }
+        }
+        break;
+    case 9:
+        cur = D_800A92C0;
+        D_800A9800 = 0;
+        menu = cur;
+        if (cur[1].sub != NULL) {
+            ((void (*)(void)) cur[1].sub)();
+        }
+        for (i = 0; i < 3; i++) {
+            bit = 1 << (i * 10);
+            if ((D_800A9220 & bit) && D_801F9944 == 0) {
+                D_800A9860 = 0x708;
+                if (D_800A92B0[i] == 3) {
+                    D_800A92B0[i] = i;
+                } else {
+                    D_800A92B0[i] = 3;
+                }
+                D_801F9944 = 0xB;
+                D_801D872C /= 2;
+                func_8001F724(0x1E);
+            } else if ((D_800A9220 & (2 << (i * 10))) && D_801F9944 == 0) {
+                D_800A9860 = 0x708;
+                if (D_800A92B0[i] == 3) {
+                    D_800A92B0[i] = i;
+                } else {
+                    D_800A92B0[i] = 3;
+                }
+                D_801F9944 = 0xB;
+                D_801D872C /= 2;
+                func_8001F724(0x1E);
+            }
+        }
+        menu_light_choices(D_800A92C0, (s16) D_801E2A44, D_801F9AAC);
+        func_80018C14();
+        if ((D_800A9220 & 0x1C0701C) && D_801F9944 == 0) {
+            D_800A9860 = 0x708;
+            if (D_800A9220 & 0x1C) {
+                ((void (*)(void)) D_800A92C0[D_800A92B0[0] + 2].sub)();
+            } else if (D_800A9220 & 0x7000) {
+                ((void (*)(void)) D_800A92C0[D_800A92B2 + 2].sub)();
+            } else if (D_800A9220 & 0x1C00000) {
+                ((void (*)(void)) D_800A92C0[D_800A92B4 + 2].sub)();
+            }
+            D_801F9944 = 0xB;
+            D_801D872C /= 2;
+        } else if ((D_800A9220 & 0x4010040) && D_801F9944 == 0) {
+            D_800A9860 = 0x708;
+            if (menu->sub != NULL) {
+                D_800A92D8 = menu->sub;
+                D_800A9800 = 1;
+                D_800A9870 = menu->kind;
+                func_8001F724(3);
+                menu_fade_out();
+                D_801F9944 = 0xB;
+                D_801D872C /= 2;
+                for (i = 0; i < 12; i++) {
+                    menu_set_colour(0x400, 0x808080);
+                }
+            }
+        }
+        break;
+    case 0xA:
+        cur = D_800A92C0;
+        D_800A9800 = 0;
+        if (cur[1].sub != NULL) {
+            ((void (*)(void)) cur[1].sub)();
+        }
+        break;
+    }
+    return D_800A6F78;
+}
 
 void menu_update_load_screen(void) {
     s32 status;
@@ -1796,7 +2091,9 @@ void menu_update_load_screen(void) {
 }
 
 #ifdef NON_MATCHING
-/* 81.7 %: the city names' address is hoisted into s7 (a frame 8 bytes larger); the original reloads it. */
+/* 83.19%: the city read as its own statement keeps the names' address in the loop, as in the original (frame 88);
+ * the original sets up sprintf's buffer and format before the three stores, and the counting loop's index and slot
+ * offset swap v1/a0 */
 s32 menu_list_saves(void) {
     char buf[0x18];
     s32 limit;
@@ -1806,6 +2103,7 @@ s32 menu_list_saves(void) {
     s32 y;
     s32 i;
     s32 count;
+    s32 city;
 
     limit = 10000000;
     n = 0;
@@ -1828,11 +2126,12 @@ s32 menu_list_saves(void) {
                 count++;
             }
         }
+        city = D_800A9300.slots[slot].city;
         D_800A9830[n] = slot;
         D_800A9820[n] = 0x20;
         D_800A9810[n] = y;
         y += 23;
-        sprintf(buf, "%s   %dP", D_8007C704[D_800A9300.slots[slot].city], count);
+        sprintf(buf, "%s   %dP", D_8007C704[city], count);
         func_8001F61C(buf, D_800A9820[n], D_800A9810[n], 1, D_801F9AAC, D_8007AD4C, 1, 0x450 + n);
         n++;
         limit = best;
@@ -2151,7 +2450,7 @@ void menu_delete_save(void) {
             D_800AA2EC = (s16) D_801E2A44;
             func_8001F61C("DELETE GAMES", 0xC8, 0x20, 0, D_801D885C, D_8007ABCC, 0, 0x400);
             func_8001ED54(&D_800A6400);
-            func_8009FB78();
+            menu_create_select_button();
         }
         break;
     case 3:

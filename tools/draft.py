@@ -7,7 +7,7 @@ the INCLUDE_ASM `__asm__` statements go. m2c then knows every type, struct field
 knows, so its draft names fields and types instead of guessing offsets.
 
   tools/venv/bin/python tools/draft.py func_8004874C            # print the draft
-  tools/venv/bin/python tools/draft.py func_80099B54 -t overattr -- --no-andor   # m2c options after --
+  tools/venv/bin/python tools/draft.py tour_update_selection -t overattr -- --no-andor   # m2c options after --
   tools/venv/bin/python tools/draft.py --sweep throw    # draft and score every INCLUDE_ASM function
 
 --sweep compiles each draft in place of its INCLUDE_ASM in a copy of the unit (tools/variant.py's scoring: the

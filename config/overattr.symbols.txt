@@ -11,6 +11,25 @@ card_init_save = 0x80098E8C; // type:func  the header (the title, the icon) and 
 card_ascii_to_sjis = 0x80098F98; // type:func  one character, as the big-endian Shift-JIS halfword of the save title
 card_string_to_sjis = 0x800990BC; // type:func
 
+// tour
+tour_get_pressed = 0x80099118; // type:func  the pad buttons down this frame and not the last
+tour_place_object = 0x80099138; // type:func  creates an object from a placement
+tour_clear_objects = 0x800991BC; // type:func  empties the screen's 19 object slots
+tour_update_results = 0x800991EC; // type:func  the results bars grow to the tallies, then the winner's name and WINS
+tour_create_bars = 0x8009951C; // type:func  per player the three results bars
+tour_init_results = 0x800996CC; // type:func  the results screen, the tallies weighted by the city, the winner
+tour_show_slot = 0x800999F8; // type:func  of the objects 9-11 the chosen slot's at the top, the other two off screen
+tour_move_slot_left = 0x80099A94; // type:func  the cursor to the nearest free slot on the left, 1 if it moved
+tour_move_slot_right = 0x80099AF0; // type:func  the cursor to the nearest free slot on the right, 1 if it moved
+tour_update_selection = 0x80099B54; // type:func  the choice among the three offered monsters, the chosen one sets the first city, idle back to the attract mode
+tour_init_selection = 0x8009A238; // type:func  the selection screen, the three offered monsters and the cursor on a free slot
+tour_init_map = 0x8009A708; // type:func  the tour map of the city's group, the visited cities' dots, the camera on the last city
+tour_update_map = 0x8009AE40; // type:func  the camera pans from the last city to the next one, or a new group's marker blinks, 0 at the end
+tour_create_time_screen = 0x8009B0F0; // type:func  clears the screen and places its four objects
+tour_get_goal_line = 0x8009B160; // type:func  line n of the round's goal (the list func_80025C08 picks)
+tour_print_goal = 0x8009B19C; // type:func  the round's goal, three lines
+tour_init_time_screen = 0x8009B23C; // type:func  the screen before a city, DAY n and its TIME of day, then the goal
+
 // menu
 menu_update_fade = 0x8009B478; // type:func  the fade D_800A9888 runs on the objects' colours
 menu_draw_cheats = 0x8009BFE8; // type:func  the cheat screen's five lines, the one under the cursor lit
@@ -21,8 +40,12 @@ menu_draw_controls = 0x8009CA68; // type:func  per player, the button layout's p
 menu_draw_options = 0x8009CEC8; // type:func  the options screen's lines by their values
 menu_start_player_select = 0x8009D7B4; // type:func  opens the player select and creates its 12 objects
 menu_back = 0x8009DCC0; // type:func  back to the parent menu
+menu_free_others = 0x8009DEA8; // type:func  frees a menu's items but the selected one, and the parent's lit item
+menu_free_all = 0x8009DF60; // type:func  frees every menu object kind, 0x400-0x4FE
 menu_draw = 0x8009DF98; // type:func  a menu's items, the selected one lit
+menu_slide_kind = 0x8009E114; // type:func  slides the objects of a kind towards a y, returns 1 once there
 menu_light_items = 0x8009E190; // type:func  the selected item lit, the others normal
+menu_light_choices = 0x8009E238; // type:func  the items the players' choices are on lit, the others normal
 menu_set_colour = 0x8009E3C0; // type:func  the colour of the objects of a kind, fading
 menu_fade_others = 0x8009E40C; // type:func  fades out every item but the selected one
 menu_fade_out = 0x8009E4D4; // type:func  fades out every menu object (kinds 0x400-0x4FF)
@@ -34,6 +57,8 @@ menu_animate = 0x8009EE5C; // type:func  runs an object's script (moves, waits, 
 menu_update_player_select = 0x8009F2F8; // type:func  the bars ease to their lengths, the select screen's objects animate
 menu_choose_monsters = 0x8009F554; // type:func  per player left and right pick a free monster, a button takes it or gives it back
 menu_place_objects = 0x8009F968; // type:func  creates n placements with a colour
+menu_create_buttons = 0x8009F9E0; // type:func  the SELECT and BACK buttons
+menu_create_select_button = 0x8009FB78; // type:func  the SELECT button alone
 menu_update_title = 0x8009FC74; // type:func  the title screen PRESS START, then the attract mode
 menu_free_objects = 0x8009FEE4; // type:func  frees every object
 menu_update_load_screen = 0x800A0CC0; // type:func  the load screen checks the card, reads the save, a slot to load

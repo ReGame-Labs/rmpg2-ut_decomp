@@ -1078,15 +1078,14 @@ void func_8002CBF4(Monster *m) {
     }
 }
 
-/* 98.98 %: only rec and r swap s1/s2 (the original gives rec, 7 uses over 40 insns, priority over r, 5 over 15: its r lives longer or rec has more uses); the reload of r->unk_06 for the argument comes from one call per arm */
-#ifdef NON_MATCHING
 BuildingItem *func_8002CD24(u16 idx, Monster *a, BuildingItem *rec) {
     Ai *q = NULL;
     BuildingPart *r;
     u16 k;
 
     if (rec->building->unk_070 == rec) {
-        func_8002CE74(idx, a, rec - 1);
+        rec--;
+        func_8002CE74(idx, a, rec);
     } else if (a->icon_timers[1] != 0) {
         func_80030E04(a, rec);
     } else {
@@ -1109,9 +1108,6 @@ BuildingItem *func_8002CD24(u16 idx, Monster *a, BuildingItem *rec) {
     }
     return (BuildingItem *) q;
 }
-#else
-INCLUDE_ASM("asm/main/nonmatchings/building", func_8002CD24);
-#endif
 
 void func_8002CE40(Ai *arg0, Monster *arg1) {
     if ((arg0->obj != 0) && ((u16) arg0->unk_04 >= 2U)) {
@@ -1871,8 +1867,10 @@ void func_8002E348(Monster *arg0, BuildingItem *rec) {
     }
 }
 
-/* 94.2 %: per part, the original fills the delay slot of the zero test from the else block (li v1,5 there, its store's 5 in v1), this one from the then block */
 #ifdef NON_MATCHING
+/* 94.22%: 94.2 %: the original's li v1,5 in the zero test's delay slot is the else block's constant, so either
+ * reorg predicted the branch taken (mostly_true_jump gives EQ not taken) or the 5 was a pseudo set before the
+ * branch (global, hence v1) */
 void func_8002E440(Monster *arg0, BuildingItem *rec) {
     BuildingPart *part;
     u16 n;
@@ -3219,8 +3217,9 @@ void func_80030D14(UnkStruct19 *p) {
 
 
 
-/* 98.6 %: the loop's pointer register is &p->items[0] in the original (negative offsets for unk_070 and state), &p->state here; count and n swap a1/a2 */
 #ifdef NON_MATCHING
+/* 98.63%: 98.63 %: combine_givs keeps the first giv of bl->giv, the last one found (the state access, +20); the
+ * original kept the items[0].obj access (+152), so it was found last, or the state access was not a giv */
 void building_count_standing(void) {
     u16 n = D_801E29A4;
     s16 count = 0;

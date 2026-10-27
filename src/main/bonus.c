@@ -50,9 +50,6 @@ void bonus_create_bars(Monster *e) {
     D_800AA248.cur_obj = saved;
 }
 
-#ifdef NON_MATCHING
-/* 99.46%: 99.5 %: register allocation only: the original gives the monster s7 and the frame s6, here the other way
- * round */
 void bonus_create_lives(Monster *e) {
     GameObject *saved;
     ObjectDef *def;
@@ -71,18 +68,23 @@ void bonus_create_lives(Monster *e) {
     D_800AA284.p = func_8001D110();
     def = D_800AA284.p;
     def->pos_x.s.hi = (D_801FA8A0[e->id - 1] - 2) * 0x78 + 0x96;
-    if (e->id == 7 && D_801F9ABC != 0) {
-        if (D_801F9ABC == 3) {
-            frame = 0x53;
-            def->id = 0x4F003EB2;
+    /* Class B: the block's loop notes count the frame's three sets twice, so it gets s6 before the monster, as
+     * in the original (the plain if, the set orders and the frame's type leave the two swapped); the same shape in
+     * bonus_create_lives and bonus_give_awards, a macro's block, likely. */
+    LOOP_BLOCK(
+        if (e->id == 7 && D_801F9ABC != 0) {
+            if (D_801F9ABC == 3) {
+                frame = 0x53;
+                def->id = 0x4F003EB2;
+            } else {
+                frame = 0x54;
+                def->id = 0x4F003EB0;
+            }
         } else {
-            frame = 0x54;
-            def->id = 0x4F003EB0;
+            def->id = D_8008427C[e->id - 1];
+            frame = 0xFFFF;
         }
-    } else {
-        def->id = D_8008427C[e->id - 1];
-        frame = 0xFFFF;
-    }
+    );
     y = dy + 0x30;
     def->pos_y.s.hi = y;
     def->flags = 0x4FF;
@@ -114,9 +116,6 @@ void bonus_create_lives(Monster *e) {
     }
     D_800AA268.p = saved;
 }
-#else
-INCLUDE_ASM("asm/main/nonmatchings/bonus", bonus_create_lives);
-#endif
 
 void bonus_create_score(Monster *e) {
     GameObject *saved;
@@ -842,8 +841,9 @@ s32 bonus_get_round_kind(void) {
 }
 
 #ifdef NON_MATCHING
-/* 98.16%: 98.2 %: register allocation: the original gives kind and i s2, x s3, here the other way round, and stores
- * pos_x before the id */
+/* 99.38%: 99.4 %: registers only: x and i swap s2/s3. The per-arm pos_x/id stores (merged by cross-jumping) give
+ * the original's store order; global-alloc then ranks x (16 refs over 114 insns, priority 0.56) above i (10 over
+ * 78, 0.38), so x takes s2 and i and kind share s3; the original allocates i (or kind) first */
 void bonus_create_counter(s32 kind, s32 n) {
     GameObject *saved;
     ObjectDef *def;
@@ -861,9 +861,14 @@ void bonus_create_counter(s32 kind, s32 n) {
         y = 0;
         v = 0;
         count = 3;
-        def->id = kind == 1 ? 0x4F00230A : 0x4F0021DE;
+        if (kind == 1) {
+            def->pos_x.s.hi = x;
+            def->id = 0x4F00230A;
+        } else {
+            def->pos_x.s.hi = x;
+            def->id = 0x4F0021DE;
+        }
         def->pos_y.s.hi = y + 0x30;
-        def->pos_x.s.hi = x;
         def->flags = 0x500;
         def->unk_06 |= 0x20;
         D_800AA268.p = func_8001DCB4();
@@ -904,8 +909,9 @@ INCLUDE_ASM("asm/main/nonmatchings/bonus", bonus_create_counter);
 #endif
 
 #ifdef NON_MATCHING
-/* 99.83%: 99.83 %: the rest is register allocation in case 2: the original gives the D_8007BD78 base s4 and the
- * inner loop's copy of &D_801FB49C[n] s5, here the other way */
+/* 99.83%: 99.83 %: global-alloc order in case 2: the inner loop's copy of &D_801FB49C[n] (5 refs over 34 insns,
+ * 0.29) outranks the D_8007BD78 base (14 over 170, 0.25), so the copy takes s4; the base needs 16 refs or a live
+ * length of 142 to come first (loop-variable, ++/+= and loop-bound forms tried) */
 void bonus_update_counters(s32 round) {
     Monster *m;
     GameObject *obj;
@@ -1019,8 +1025,11 @@ void bonus_restore_health(void) {
 }
 
 #ifdef NON_MATCHING
-/* 98.02%: 98 %: the score loop (0x200..0x800): loop.c hoists &D_80084314 into a saved register here; the original
- * rebuilds it each pass */
+/* 98.44%: 98.4 %: the score loop (0x200..0x800), loop.c: with the indexed search (as in the 0x08 loop) the inner
+ * loop's hoist of &D_8008433C makes the outer loop double its insn count (halved since already moved), so
+ * &D_80084314 stays in the loop as in the original; but the outer loop then hoists &D_8008433C itself (life 16, 18
+ * x 1 x 16 >= 112) where the original rebuilds it each pass. With a pointer search (p = D_8008433C) nothing doubles
+ * the count and &D_80084314 is hoisted (18 x 2 x 3 >= 52) (98.0 %) */
 void bonus_award_places(void) {
     Monster *m;
     s32 i;
@@ -1029,7 +1038,6 @@ void bonus_award_places(void) {
     s32 bestx;
     s16 x;
     u32 score;
-    u32 *p;
 
     D_8007BD78.flags |= 0x10000;
     switch (D_800AA2DC) {
@@ -1083,8 +1091,8 @@ void bonus_award_places(void) {
             func_80025DF8(D_801FB49C[i]);
             k = 0;
             score = D_8007BD78.unk_08[D_801FB49C[i] - 1];
-            for (p = D_8008433C; k < 4; k++, p++) {
-                if (score < *p) {
+            for (; k < 4; k++) {
+                if (score < D_8008433C[k]) {
                     break;
                 }
             }
@@ -1107,9 +1115,6 @@ void bonus_award_places(void) {
 INCLUDE_ASM("asm/main/nonmatchings/bonus", bonus_award_places);
 #endif
 
-#ifdef NON_MATCHING
-/* 99.68%: 99.7 %: register allocation only: the original gives frame s4 and the D_800AA248 base s5, here the other
- * way round */
 void bonus_give_awards(s32 player, s32 awards) {
     Monster *m;
     ObjectDef *def;
@@ -1137,15 +1142,20 @@ void bonus_give_awards(s32 player, s32 awards) {
         D_8007BD78.flags |= 0x4000000;
         break;
     }
-    if (m->id == 7 && D_801F9ABC != 0) {
-        if (D_801F9ABC == 3) {
-            frame = 0x53;
+    /* Class B: the block's loop notes count the frame's three sets twice, so it gets s4 before the D_800AA248 base, as
+     * in the original (the plain if, the set orders and the frame's type leave the two swapped); the same shape in
+     * bonus_create_lives and bonus_give_awards, a macro's block, likely. */
+    LOOP_BLOCK(
+        if (m->id == 7 && D_801F9ABC != 0) {
+            if (D_801F9ABC == 3) {
+                frame = 0x53;
+            } else {
+                frame = 0x54;
+            }
         } else {
-            frame = 0x54;
+            frame = 0xFFFF;
         }
-    } else {
-        frame = 0xFFFF;
-    }
+    );
     i = 0;
     if (awards & 1) {
         m->lives++;
@@ -1223,9 +1233,6 @@ void bonus_give_awards(s32 player, s32 awards) {
         func_80060A7C(kind, 0, 1);
     }
 }
-#else
-INCLUDE_ASM("asm/main/nonmatchings/bonus", bonus_give_awards);
-#endif
 
 void func_8006036C(s32 *glyphs, s32 x, s32 y, s32 n, s32 kind, u8 *text) {
     if (glyphs == D_8007ABCC) {
@@ -1301,25 +1308,25 @@ void bonus_update_awards(void) {
         box->unk_6C |= 0x20;
         D_8007BD78.unk_20 = 0;
         D_8007BD78.flags |= 0x800;
-        func_8006036C(D_8007AD4C, 0x78, 0x46, 0x44, 0x7D0, D_800115B0);
+        func_8006036C(D_8007AD4C, 0x78, 0x46, 0x44, 0x7D0, "BONUS AWARDS!!");
         D_8007BD78.unk_54 = 0x7D0;
         func_80060A7C(0x7D0, 0x404040, 1);
     }
     if (!(D_8007BD78.flags & 0x4000) && D_8007BD78.unk_20 > 0x3C) {
         D_8007BD78.flags |= 0x24000;
-        func_8006036C(D_8007AD4C, 0x6E, 0x69, 0x47, 0x7D1, D_800115C0);
+        func_8006036C(D_8007AD4C, 0x6E, 0x69, 0x47, 0x7D1, "LIFE");
         D_8007BD78.unk_58[2] = 0x7D1;
         func_80060A7C(0x7D1, 0x404040, 1);
     }
     if (!(D_8007BD78.flags & 0x1000) && D_8007BD78.unk_20 > 0x78) {
         D_8007BD78.flags |= 0x41000;
-        func_8006036C(D_8007AD4C, 0x6E, 0x82, 0x47, 0x7D2, D_800115C8);
+        func_8006036C(D_8007AD4C, 0x6E, 0x82, 0x47, 0x7D2, "HEALTH");
         D_8007BD78.unk_58[0] = 0x7D2;
         func_80060A7C(0x7D2, 0x404040, 1);
     }
     if (!(D_8007BD78.flags & 0x2000) && D_8007BD78.unk_20 > 0xB4) {
         D_8007BD78.flags |= 0x82000;
-        func_8006036C(D_8007AD4C, 0x6E, 0x9B, 0x47, 0x7D3, D_800115D0);
+        func_8006036C(D_8007AD4C, 0x6E, 0x9B, 0x47, 0x7D3, "POWER");
         D_8007BD78.unk_58[1] = 0x7D3;
         func_80060A7C(0x7D3, 0x404040, 1);
     }

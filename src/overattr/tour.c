@@ -1,13 +1,14 @@
-/* OVERLAYS/OVERATTR.BIN: the pad edges and the attract screens (config/overattr.yaml). */
+/* OVERLAYS/OVERATTR.BIN: the tour screens between cities: the results, the choice of a monster, the tour map and
+ * the day and time before a city (config/overattr.yaml). */
 #include "common.h"
 #include "overattr.h"
 #include "psyq/libgpu.h"
 
-s32 func_80099118(void) {
+s32 tour_get_pressed(void) {
     return (D_800A9220 ^ D_800A9250) & D_800A9220;
 }
 
-GameObject *func_80099138(OverattrPlacement *p) {
+GameObject *tour_place_object(OverattrPlacement *p) {
     ObjectDef *def;
     GameObject *obj;
 
@@ -22,7 +23,7 @@ GameObject *func_80099138(OverattrPlacement *p) {
     return obj;
 }
 
-void func_800991BC(void) {
+void tour_clear_objects(void) {
     u16 n;
     GameObject **p;
 
@@ -34,7 +35,7 @@ void func_800991BC(void) {
     D_801FA88C = 0;
 }
 
-void func_800991EC(void) {
+void tour_update_results(void) {
     s32 i;
     s32 done;
     Monster *m;
@@ -106,7 +107,7 @@ void func_800991EC(void) {
     }
 }
 
-void func_8009951C(void) {
+void tour_create_bars(void) {
     s32 i;
     s32 x;
     Monster *m;
@@ -137,7 +138,7 @@ void func_8009951C(void) {
     }
 }
 
-void func_800996CC(void) {
+void tour_init_results(void) {
     s16 scores[3];
     s16 best;
     u16 c;
@@ -183,9 +184,9 @@ void func_800996CC(void) {
         if (id != 0) {
             p = D_800A353C;
             for (j = 0; j < 2; j++) {
-                func_80099138(p++)->pos_x.s.hi = i * 0x78 + 0x1E;
+                tour_place_object(p++)->pos_x.s.hi = i * 0x78 + 0x1E;
             }
-            func_80099138(&D_800A355C)->pos_x.s.hi = i * 0x78 + 0x23;
+            tour_place_object(&D_800A355C)->pos_x.s.hi = i * 0x78 + 0x23;
             scores[i] = m->unk_020 * a + b * m->unk_026 + c * m->unk_024;
             if (best < scores[i]) {
                 best = scores[i];
@@ -202,7 +203,7 @@ void func_800996CC(void) {
             } else {
                 p = &D_800A34BC[id];
             }
-            obj = func_80099138(p);
+            obj = tour_place_object(p);
             obj->pos_x.s.hi = i * 0x78 + 0x4B;
             if (D_801F9ABC == 3 && id == 7) {
                 obj->unk_74 = 0xF;
@@ -211,11 +212,11 @@ void func_800996CC(void) {
             }
         }
     }
-    func_8009951C();
+    tour_create_bars();
     D_801E29BC = 0x1E0;
 }
 
-void func_800999F8(u32 which) {
+void tour_show_slot(u32 which) {
     switch (which) {
     case 0:
         D_801E28F4[9]->pos_y.w = 0x180000;
@@ -235,7 +236,7 @@ void func_800999F8(u32 which) {
     }
 }
 
-s32 func_80099A94(s32 *slot) {
+s32 tour_move_slot_left(s32 *slot) {
     s32 i;
 
     for (i = *slot - 1; i >= 0; i--) {
@@ -248,7 +249,7 @@ s32 func_80099A94(s32 *slot) {
     return 0;
 }
 
-s32 func_80099AF0(s32 *slot) {
+s32 tour_move_slot_right(s32 *slot) {
     s32 i;
 
     for (i = *slot + 1; i < 3; i++) {
@@ -261,7 +262,7 @@ s32 func_80099AF0(s32 *slot) {
     return 0;
 }
 
-s32 func_80099B54(void) {
+s32 tour_update_selection(void) {
     GameObject *obj;
     s16 i;
     s32 slot;
@@ -328,13 +329,13 @@ s32 func_80099B54(void) {
     }
     func_80019268();
     if ((D_800A9220 & 0x401004) && D_801F9944 == 0) {
-        if (func_80099A94((s32 *)&obj->arg) != 0) {
+        if (tour_move_slot_left((s32 *)&obj->arg) != 0) {
             func_8001F724(0x4E);
             obj->unk_60++;
             obj->anim = D_800A43A4[D_800A3450[(s32)obj->arg.p]];
             obj->frames_left = 0;
             obj->unk_74 = D_800A43C0[D_800A3450[(s32)obj->arg.p]];
-            func_800999F8((s32)obj->arg.p);
+            tour_show_slot((s32)obj->arg.p);
             D_800A9218 = 0;
             D_800A9240 = 0xA;
             D_800A9238 = 2;
@@ -342,13 +343,13 @@ s32 func_80099B54(void) {
         }
         D_801F9944 = 0xB;
     } else if ((D_800A9220 & 0x802008) && D_801F9944 == 0) {
-        if (func_80099AF0((s32 *)&obj->arg) != 0) {
+        if (tour_move_slot_right((s32 *)&obj->arg) != 0) {
             func_8001F724(0x4E);
             obj->unk_60++;
             obj->anim = D_800A43A4[D_800A3450[(s32)obj->arg.p]];
             obj->frames_left = 0;
             obj->unk_74 = D_800A43C0[D_800A3450[(s32)obj->arg.p]];
-            func_800999F8((s32)obj->arg.p);
+            tour_show_slot((s32)obj->arg.p);
             D_800A9218 = 0;
             D_800A9240 = 0xA;
             D_800A9238 = 2;
@@ -420,7 +421,7 @@ s32 func_80099B54(void) {
     return 1;
 }
 
-void func_8009A238(void) {
+void tour_init_selection(void) {
     s32 i;
     s32 j;
     s32 which;
@@ -432,7 +433,7 @@ void func_8009A238(void) {
     if (D_801FA984[0] != 0 || D_801FA984[1] != 0 || D_801FA984[2] != 0) {
         func_800180E4();
     } else {
-        func_8009F9E0();
+        menu_create_buttons();
     }
     func_8001A420();
     func_8001AA4C(0xB, 0x1E);
@@ -442,7 +443,7 @@ void func_8009A238(void) {
     i = 0;
     p = D_800A3954;
     do {
-        obj = func_80099138(p++);
+        obj = tour_place_object(p++);
         obj->unk_6C &= ~0x20;
         i++;
     } while (i < 6);
@@ -536,7 +537,7 @@ void func_8009A238(void) {
     def->flags = 0xC;
     def->unk_06 |= 0x20;
     D_801E28F4[11] = func_8001DCB4();
-    func_800999F8(which);
+    tour_show_slot(which);
     D_800A9218 = 0;
     D_800A9240 = 0xA;
     D_800A9238 = 2;
@@ -544,10 +545,7 @@ void func_8009A238(void) {
     func_8001F724(0x4E);
 }
 
-#ifdef NON_MATCHING
-/* 99.62%: the map pointer p gets s2 and the music s1, the original's the other way round (the dot loop's x
- * pointer, a giv, outranks p for s1); everything else matches */
-void func_8009A708(void) {
+void tour_init_map(void) {
     OverattrPlacement *p;
     s32 music;
     s32 i;
@@ -601,7 +599,9 @@ void func_8009A708(void) {
     D_801D3D7C = 0;
     SetDispMask(1);
     do {
-        obj = func_80099138(p++);
+        /* Class B: the inner loop counts the map pointer's references twice, so it gets s1 before the dot loop's
+         * x pointer (statement orders, loop forms and a fresh pointer per loop leave p and the music swapped). */
+        LOOP_BLOCK(obj = tour_place_object(p++););
         obj->unk_6C &= ~0x20;
         i++;
     } while (i < 16);
@@ -621,7 +621,7 @@ void func_8009A708(void) {
             do {
                 x = D_800A3760[i * 2];
                 y = D_800A3760[i * 2 + 1];
-                obj = func_80099138(p);
+                obj = tour_place_object(p);
                 obj->pos_x.s.hi = x;
                 obj->pos_y.s.hi = y;
                 obj->unk_6C &= ~0x20;
@@ -654,7 +654,7 @@ void func_8009A708(void) {
     D_801F9AC8.w = cx << 16;
     D_801F9ACC.w = cy << 16;
     if (D_801CA464 & 1) {
-        obj = func_80099138(&D_800A40B4[0]);
+        obj = tour_place_object(&D_800A40B4[0]);
         D_801E28F4[0] = obj;
         obj->unk_40.w = x;
         obj->pos_x.s.hi = x;
@@ -665,7 +665,7 @@ void func_8009A708(void) {
         func_8001F6B4();
         func_8001F724(0x6C);
         p = &D_800A40B4[1];
-        obj = func_80099138(p);
+        obj = tour_place_object(p);
         D_801E28F4[0] = obj;
         obj->pos_x.s.hi = x;
         obj->pos_y.s.hi = y;
@@ -674,7 +674,7 @@ void func_8009A708(void) {
         D_801E28F4[1] = obj;
         obj->priority = 0xF;
         obj->unk_6C |= 0x1000;
-        obj = func_80099138(p - 1);
+        obj = tour_place_object(p - 1);
         D_801E28F4[2] = obj;
         obj->pos_x.s.hi = D_800A3760[D_801FA960 * 2];
         obj->pos_y.s.hi = D_800A3760[D_801FA960 * 2 + 1];
@@ -745,11 +745,8 @@ void func_8009A708(void) {
         } while (i < 3);
     }
 }
-#else
-INCLUDE_ASM("asm/overattr/nonmatchings/overattr_80099118", func_8009A708);
-#endif
 
-s32 func_8009AE40(s32 *step) {
+s32 tour_update_map(s32 *step) {
     s32 t;
     GameObject *obj;
     GameObject *cam;
@@ -842,7 +839,7 @@ s32 func_8009AE40(s32 *step) {
     return 1;
 }
 
-void func_8009B0F0(void) {
+void tour_create_time_screen(void) {
     s32 i;
     OverattrPlacement *p;
 
@@ -854,34 +851,34 @@ void func_8009B0F0(void) {
     i = 0;
     p = D_800A4430;
     do {
-        func_80099138(p++);
+        tour_place_object(p++);
         /* Class B: the inner loop counts the counter's references twice, so it gets s0 before the pointer (every
          * statement order, loop form and fresh variable leaves the two swapped). */
         LOOP_BLOCK(i++;);
     } while (i < 4);
 }
 
-u8 *func_8009B160(s16 n) {
+u8 *tour_get_goal_line(s16 n) {
     return func_80025C08(D_800A49D4)->text[n];
 }
 
-void func_8009B19C(void) {
+void tour_print_goal(void) {
     if (D_800AA2DC & 0x71C0) {
         D_800AA2EC = 0x44;
     }
     func_8001F39C(&D_800A49E4);
-    D_801D8588.text = func_8009B160(0);
+    D_801D8588.text = tour_get_goal_line(0);
     func_8001EDB0();
     D_800AA2EC = 0x47;
     func_8001F39C(&D_800A49FC);
-    D_801D8588.text = func_8009B160(1);
+    D_801D8588.text = tour_get_goal_line(1);
     func_8001EDB0();
     func_8001F39C(&D_800A4A14);
-    D_801D8588.text = func_8009B160(2);
+    D_801D8588.text = tour_get_goal_line(2);
     func_8001EDB0();
 }
 
-void func_8009B23C(void) {
+void tour_init_time_screen(void) {
     ObjectDef *def;
     GameObject *obj;
     u8 *p;
@@ -889,7 +886,7 @@ void func_8009B23C(void) {
     s32 minutes;
     u8 pm;
 
-    func_8009B0F0();
+    tour_create_time_screen();
     D_800AA2EC = 0x44;
     if (D_800AA2DC == 0) {
         func_8002A354(1);
@@ -905,7 +902,7 @@ void func_8009B23C(void) {
         obj->kind = 0x400;
     }
     D_800AA2EC = 0x47;
-    func_8009B19C();
+    tour_print_goal();
     D_800AA2EC = 0x45;
     p = D_800A4488;
     p = func_8001ECB4(p + 4, D_8007C974 + 1, 0);

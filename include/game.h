@@ -85,7 +85,7 @@ typedef struct GameObject {
                } unk_40;
     /* 0x44 */ union {                  /* by kind */
                    s32 pc;                  /* the animation script's next command (an address) */
-                   s32 height;              /* a box's height (main_create_box; the results bars, func_800991EC) */
+                   s32 height;              /* a box's height (main_create_box; the results bars, tour_update_results) */
                    s32 v;                   /* a value (OVERATTR's logo: a y, with unk_40.w its x) */
                } script;
     /* 0x48 */ s32 anim;                /* the current animation (an address: the script restarts there) */
@@ -94,7 +94,7 @@ typedef struct GameObject {
     /* 0x4E */ u8 unk_4E[0x02];
     /* 0x50 */ union {                  /* by kind */
                    struct GameObject *obj;  /* a link */
-                   s32 cam_start;           /* OVERATTR's camera: its start point, y << 16 | x (func_8009AE40) */
+                   s32 cam_start;           /* OVERATTR's camera: its start point, y << 16 | x (tour_update_map) */
                    s32 count;               /* a monster's bomb (kind 0x73A): its bounces */
                } unk_50;
     /* 0x54 */ union {
@@ -111,7 +111,7 @@ typedef struct GameObject {
     /* 0x60 */ s32 unk_60;
     /* 0x64 */ union {                  /* by kind */
                    s32 w;
-                   s32 count;               /* a results bar: the tally shown so far (func_800991EC) */
+                   s32 count;               /* a results bar: the tally shown so far (tour_update_results) */
                } unk_64;
     /* 0x68 */ union {                  /* a monster's body: its monster; an effect: two halfwords */
                    struct Monster *monster;
@@ -169,7 +169,7 @@ typedef struct Monster {
                                                 * (func_8004C0E0); full, monster 5 gets its extra sprites */
     /* 0x014 */ Fixed meter_shown;             /* eased towards meter by 1/16 a frame (bonus_update_bars); meter_bar
                                                 * shows it */
-    /* 0x018 */ u8 unk_018[0x02];
+    /* 0x018 */ u16 unk_018;
     /* 0x01A */ u16 unk_01A;
     /* 0x01C */ u16 unk_01C;                   /* a countdown set from a random draw */
     /* 0x01E */ u16 unk_01E;                   /* its id at spawn */
@@ -204,7 +204,7 @@ typedef struct Monster {
     /* 0x078 */ GameObject *lives_digits[2];   /* the digit sprites of lives */
     /* 0x080 */ GameObject *score_digits[6];   /* the digit sprites of score (bonus_create_score) */
     /* 0x098 */ GameObject *icons[3];          /* the status icons (bonus.c), [0] its body sprite too (func_8002CBF4) */
-    /* 0x0A4 */ GameObject *bars[3];           /* the results bars, one per tally (OVERATTR, func_8009951C) */
+    /* 0x0A4 */ GameObject *bars[3];           /* the results bars, one per tally (OVERATTR, tour_create_bars) */
     /* 0x0B0 */ u8 unk_0B0[0x04];
     /* 0x0B4 */ GameObject *extra[5];          /* its own sprites (5's, 7's: kind 0x73A; 2-4 func_8002A1AC), or NULL */
     /* 0x0C8 */ u16 buttons;                   /* the pad's buttons held, pad bits >> 4 (func_800273F4); & 0xF: the
@@ -268,7 +268,7 @@ typedef struct Monster {
     /* 0x146 */ s16 unk_146;
     /* 0x148 */ u16 unk_148;
     /* 0x14A */ u16 unk_14A;                   /* the last of the countdowns */
-    /* 0x14C */ u8 unk_14C[0x04];
+    /* 0x14C */ s32 unk_14C;
     /* 0x150 */ s16 unk_150;
     /* 0x152 */ u16 unk_152;
     /* 0x154 */ u8 unk_154[0x0C];
@@ -383,7 +383,7 @@ typedef struct GameState {
     /* 0x24 */ s32 dir;                        /* a monster's direction, copied before its handlers run (D_800AA26C);
                                                 * scratch: main_count_monsters's count */
     /* 0x28 */ union {
-                   s32 n;                   /* a counter (func_8003C3B0: the items left in the building) */
+                   s32 n;                   /* a counter (pickup_hide_items: the items left in the building) */
                    s32 *p;                  /* a write pointer into a word list (main_step_anim) */
                } unk_28;
     /* 0x2C */ s32 unk_2C;
@@ -650,7 +650,9 @@ typedef struct Unk1D3D64 {
     /* 0x28 */ s16 unk_28;
     /* 0x2A */ u8 unk_2A[0x02];
     /* 0x2C */ s32 unk_2C;
-    /* 0x30 */ u8 unk_30[0x28];
+    /* 0x30 */ s32 unk_30;
+    /* 0x34 */ s32 unk_34;                     /* D_801D3D98[0] */
+    /* 0x38 */ u8 unk_38[0x20];
     /* 0x58 */ s32 unk_58;
     /* 0x5C */ u16 unk_5C;
     /* 0x5E */ u16 unk_5E;
