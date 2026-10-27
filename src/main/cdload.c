@@ -12,7 +12,7 @@
 #include "psyq/libgpu.h"
 #include "psyq/libspu.h"
 
-void func_8002958C(void);
+void main_count_monsters(void);
 ObjectDef *func_8001D110(void);
 void func_8001DCB4(void);
 void func_800415B4(void);
@@ -145,7 +145,7 @@ void cdload_sort_players(void) {
     s32 j;
     s32 n;
 
-    func_8002958C();
+    main_count_monsters();
     D_801FB49C[0] = D_801FB49C[1] = D_801FB49C[2] = 99;
     n = 0;
     for (m = 0; m < 7; m++) {

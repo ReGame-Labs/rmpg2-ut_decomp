@@ -12,7 +12,7 @@ void func_8001F7CC(s32 sound, s32 variant);                 /* play a sound */
 ObjectDef *func_8001D110(void);                             /* a fresh definition to fill in */
 GameObject *func_8001DCB4(void);                            /* create the object of D_800AA248.new_def */
 void func_8001E4B0(GameObject *obj);                        /* free an object */
-void func_80020BA0(s32, u16 flags, GameObject *obj);
+void main_set_frame(s32, u16 flags, GameObject *obj);
 void func_8002CE74(u16, Monster *m, void *);
 void func_8002CFAC(Monster *m, Building *b);
 void func_8002D0C0(Monster *m, Building *b);
@@ -521,7 +521,7 @@ void func_8004F47C(void) {
         m->unk_16C = D_800AA248.cur_obj;
     }
     D_800AA248.cur_obj->priority = saved->priority + 1;
-    func_80020BA0(*arg, D_800AA248.cur_obj->flags, D_800AA248.cur_obj);
+    main_set_frame(*arg, D_800AA248.cur_obj->flags, D_800AA248.cur_obj);
     D_800AA248.cur_obj = saved;
 }
 

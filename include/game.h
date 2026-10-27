@@ -78,12 +78,12 @@ typedef struct GameObject {
     /* 0x3E */ u8 unk_3E[0x02];
     /* 0x40 */ union {
                    struct GameObject *obj;  /* a link (main.c's list from D_801D8584) */
-                   s32 w;                   /* a value; a box's width (func_8001EB9C: the status bars, OVERATTR's
+                   s32 w;                   /* a value; a box's width (main_create_box: the status bars, OVERATTR's
                                              * volume bars) */
                } unk_40;
     /* 0x44 */ union {                  /* by kind */
                    s32 pc;                  /* the animation script's next command (an address) */
-                   s32 height;              /* a box's height (func_8001EB9C; the results bars, func_800991EC) */
+                   s32 height;              /* a box's height (main_create_box; the results bars, func_800991EC) */
                    s32 v;                   /* a value (OVERATTR's logo: a y, with unk_40.w its x) */
                } script;
     /* 0x48 */ s32 anim;                /* the current animation (an address: the script restarts there) */
@@ -120,7 +120,7 @@ typedef struct GameObject {
                } unk_68;
     /* 0x6C */ u16 unk_6C;              /* 0x80: gone */
     /* 0x6E */ u16 unk_6E;
-    /* 0x70 */ u16 kind;                /* the id func_8001E450 and func_8001EC74 select objects by (0x790 + a
+    /* 0x70 */ u16 kind;                /* the id main_free_kind and func_8001EC74 select objects by (0x790 + a
                                          * monster's slot for the status sprites) */
     /* 0x72 */ u8 unk_72[0x02];
     /* 0x74 */ u16 unk_74;
@@ -203,8 +203,7 @@ typedef struct Monster {
     /* 0x09C */ u8 unk_09C[0x08];
     /* 0x0A4 */ GameObject *bars[3];           /* the results bars, one per tally (OVERATTR, func_8009951C) */
     /* 0x0B0 */ u8 unk_0B0[0x04];
-    /* 0x0B4 */ GameObject *extra[2];          /* sprites of its own (monster 5's, 7's: kind 0x73A), NULL for none */
-    /* 0x0BC */ u8 unk_0BC[0x0C];
+    /* 0x0B4 */ GameObject *extra[5];          /* its own sprites (5's, 7's: kind 0x73A; 2-4 func_8002A1AC), or NULL */
     /* 0x0C8 */ u16 buttons;                   /* the pad's buttons held, pad bits >> 4 (func_800273F4) */
     /* 0x0CA */ u8 unk_0CA[0x02];
     /* 0x0CC */ u16 dir;                       /* the d-pad direction, 0 none (D_8007C124[pad bits & 0xF]); an index
@@ -361,7 +360,10 @@ typedef struct GameState {
     /* 0x14 */ s32 action;                     /* the monster's action, clamped, before the dispatch (monster_dispatch_action;
                                                 * D_800AA25C) */
     /* 0x18 */ s32 unk_18;                     /* the argument of the current actor's handler (D_800AA260) */
-    /* 0x1C */ ObjectDef *unk_1C;
+    /* 0x1C */ union {
+                   ObjectDef *def;
+                   s32 n;                   /* a count (main_count_monsters) */
+               } unk_1C;
     /* 0x20 */ GameObject *cur_obj;            /* the object being updated (D_800AA268) */
     /* 0x24 */ s32 unk_24;                     /* D_800AA26C */
     /* 0x28 */ s32 unk_28;                     /* a counter (func_8003C3B0: the items left in the building) */
@@ -688,7 +690,7 @@ typedef struct TextMessage {
     /* 0x0A */ u16 y;
     /* 0x0C */ s32 unk_0C;
     /* 0x10 */ void (*layout)(void);       /* func_8001EDE4: centred */
-    /* 0x14 */ s32 kind;                   /* the kind of the objects that show it (func_8001E450 frees them) */
+    /* 0x14 */ s32 kind;                   /* the kind of the objects that show it (main_free_kind frees them) */
     /* 0x18 */ u8 text[1];                 /* as long as the message */
 } TextMessage;
 

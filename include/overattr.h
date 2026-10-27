@@ -13,7 +13,7 @@
 
 ObjectDef *func_8001D110(void);        /* a fresh definition to fill in */
 GameObject *func_8001DCB4();           /* creates the object of D_800AA248.new_def; no argument */
-void func_8001E450(u16 kind);          /* frees every object of a kind */
+void main_free_kind(u16 kind);          /* frees every object of a kind */
 void func_8001EC74(s32 kind, s32 value); /* sets unk_74 of every object of a kind */
 void func_8001A420(void);
 void func_80017B24(void);
@@ -42,11 +42,11 @@ OverattrTexts *func_80025C08(void *list);
 void func_8001F39C(void *msg);         /* loads a text message into the printer */
 void func_8001EDB0(void);              /* prints it, its text through sprintf */
 void func_8001E4B0(GameObject *obj);   /* frees an object */
-void func_8001E8C0(s32 kind, s32 arg1);
+void main_free_kind_masked(s32 kind, s32 arg1);
 void func_8001F61C(u8 *text, s16 x, s16 y, s32 spacing, s32 arg4, s32 *glyphs, s32 kind, s32 arg7); /* draws a text */
 
 extern s32 D_8007ABCC[];               /* a font's glyphs */
-GameObject *func_8001EB9C(s32 x, s32 y, s32 w, s32 h, s32 colour); /* creates a coloured box */
+GameObject *main_create_box(s32 x, s32 y, s32 w, s32 h, s32 colour); /* creates a coloured box */
 s32 func_80025DF8(s32 player);          /* the monster number of a player */
 extern u8 *D_8007F8E0[];               /* the monsters' names, by number - 1 */
 extern Monster *D_800A9258;             /* the round's winner (func_800996CC) */

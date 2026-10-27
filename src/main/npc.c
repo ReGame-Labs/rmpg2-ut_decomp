@@ -17,7 +17,7 @@ s32 func_8001EA78(void);
 void func_8001F7CC(s32 a, s32 b);
 u16 func_8004A9B0(void *a, s32 b, s32 c, s32 d, s32 e);
 void func_8001BB68(GameObject *mover);
-GameObject *func_8001EB9C(s32 a, s32 b, s32 c, s32 d, s32 color);
+GameObject *main_create_box(s32 a, s32 b, s32 c, s32 d, s32 color);
 void func_8001BB88(GameObject *mover);
 s16 func_8001EB10(s32 arg0, s32 arg1);
 s32 *func_80025C08(void *list);
@@ -1087,7 +1087,7 @@ void func_80036440(Npc *npc, s32 depth) {
     ObjectDef *effect;
     s32 d;
 
-    mover = func_8001EB9C(0, 0, 0, 0, 0xFFFFFF);
+    mover = main_create_box(0, 0, 0, 0, 0xFFFFFF);
     mover->unk_40.w = -0x3E7;
     d = depth - 1;
     mover->priority = d;

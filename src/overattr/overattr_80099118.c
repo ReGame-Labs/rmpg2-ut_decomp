@@ -75,7 +75,7 @@ void func_800991EC(void) {
     } while (i < 3);
     if (--D_801E29BC == 0) {
         D_801D3780++;
-        func_8001E450(0x400);
+        main_free_kind(0x400);
     }
     if (done == 1 && D_800A9230 == done) {
         D_800A9230 = 0;
@@ -114,20 +114,20 @@ void func_8009951C(void) {
     for (i = 0; i < 3; i++) {
         m = &D_801E0B78[func_80025DF8(i + 1)];
         if (m->id != 0) {
-            m->bars[0] = func_8001EB9C(0, 0, 0x10, 1, 0xFF00);
+            m->bars[0] = main_create_box(0, 0, 0x10, 1, 0xFF00);
             x = i * 0x78;
             m->bars[0]->pos_x.s.hi = x + 0x2D;
             m->bars[0]->pos_y.s.hi = 0xCC;
             m->bars[0]->priority = 0x19;
             m->bars[0]->flags |= 0x400;
             m->bars[0]->unk_64.count = 0;
-            m->bars[1] = func_8001EB9C(0, 0, 0x10, 1, 0xFFFF);
+            m->bars[1] = main_create_box(0, 0, 0x10, 1, 0xFFFF);
             m->bars[1]->pos_x.s.hi = x + 0x48;
             m->bars[1]->pos_y.s.hi = 0xCC;
             m->bars[1]->priority = 0x19;
             m->bars[1]->flags |= 0x400;
             m->bars[1]->unk_64.count = 0;
-            m->bars[2] = func_8001EB9C(0, 0, 0x10, 1, 0xFF00FF);
+            m->bars[2] = main_create_box(0, 0, 0x10, 1, 0xFF00FF);
             m->bars[2]->pos_x.s.hi = x + 0x65;
             m->bars[2]->pos_y.s.hi = 0xCC;
             m->bars[2]->priority = 0x19;
