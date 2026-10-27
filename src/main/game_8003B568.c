@@ -9,13 +9,13 @@ extern s32 D_8007DB60[];                /* the second sprite of kinds 0xD..0x11 
 extern s32 D_800830AC[];
 extern s16 D_801D8748;
 void func_800380C0(GameObject *mover);
-void func_800346FC(UnkStructB1 *r);
+void func_800346FC(Pickup *r);
 void func_80034C54(GameObject *obj);
-void func_800634D4(Monster *m, s32 preset);
+void func_800634D4(Monster *, u32);
 extern GameObject *D_801FB44C[3];
 
 void func_8003B568(void) {
-    UnkStructB1 *var_s0;
+    Pickup *var_s0;
     u16 temp_v0_2;
     u16 var_s1;
     u32 temp_v0;
@@ -36,7 +36,7 @@ void func_8003B568(void) {
     }
 }
 
-void func_8003B5D0(UnkStructB1 *r) {
+void func_8003B5D0(Pickup *r) {
     D_800AA268.p = r->unk_00;
     func_80029D1C();
     switch (r->unk_06) {
@@ -84,7 +84,7 @@ void func_8003B5D0(UnkStructB1 *r) {
 
 void func_8003B68C(void) {
     u16 n = 8;
-    UnkStructB1 *p = D_801FA9BC;
+    Pickup *p = D_801FA9BC;
 
     do {
         func_8003B9A0(p);
@@ -96,7 +96,7 @@ void func_8003B68C(void) {
 void func_8003B6E0(void) {
     Anim *anim;
     SpawnItem *item;
-    UnkStructB1 *r;
+    Pickup *r;
     GameObject *obj;
     GameObject *part;
     ObjectDef *def;
@@ -129,9 +129,9 @@ void func_8003B6E0(void) {
         obj->pos_x.u.hi = item->unk_06;
         obj->pos_y.u.hi = item->unk_08;
         obj->flags |= item->unk_0A;
-        obj->unk_80 = item->unk_0C;
+        obj->priority = item->unk_0C;
         if (r->unk_06 != 0x17) {
-            obj->unk_80 = obj->pos_y.u.hi + 0xF23;
+            obj->priority = obj->pos_y.u.hi + 0xF23;
         }
         obj->kind = 0x71A;
         if (item->unk_0E == -1) {
@@ -143,7 +143,7 @@ void func_8003B6E0(void) {
             func_800380C0(obj);
         }
         if (r->unk_06 >= 0xD && r->unk_06 < 0x12) {
-            obj->unk_80 += 2;
+            obj->priority += 2;
             D_800AA248.new_def = func_8001D110();
             def = D_800AA248.new_def;
             def->id = D_8007DB60[r->unk_06 - 0xD];
@@ -155,7 +155,7 @@ void func_8003B6E0(void) {
             }
             r->unk_40 = func_8001DCB4();
             r->unk_40->flags = obj->flags;
-            r->unk_40->unk_80 = obj->unk_80 + 1;
+            r->unk_40->priority = obj->priority + 1;
             r->unk_40->kind = 0x71A;
             r->unk_40->pos_x.u.hi = obj->pos_x.u.hi;
             r->unk_40->pos_y.u.hi = obj->pos_y.u.hi;
@@ -165,8 +165,8 @@ void func_8003B6E0(void) {
     } while (--n != 0);
 }
 
-void func_8003B9A0(UnkStructB1 *p) {
-    memset(p, 0, sizeof(UnkStructB1));
+void func_8003B9A0(Pickup *p) {
+    memset(p, 0, sizeof(Pickup));
     D_801E29B0 = 0;
 }
 
@@ -230,7 +230,7 @@ INCLUDE_ASM("asm/main/nonmatchings/game_8003B568", func_8003B9C8);
 
 void func_8003BAB0(Monster *e) {
     u16 n;
-    UnkStructB1 *r;
+    Pickup *r;
     GameObject *obj;
     s32 i;
 
@@ -288,7 +288,7 @@ void func_8003BAB0(Monster *e) {
 #ifdef NON_MATCHING
 /* 85 %: the original loads the limit once into v0 and copies it to v1 (a separate variable from the tested
  * value); every form tried loads it once into the variable or twice. */
-void func_8003BD48(UnkStructB1 *b) {
+void func_8003BD48(Pickup *b) {
     s32 limit;
     u16 x;
     u16 d;
@@ -328,7 +328,7 @@ void func_8003BD48(UnkStructB1 *b) {
 INCLUDE_ASM("asm/main/nonmatchings/game_8003B568", func_8003BD48);
 #endif
 
-s32 func_8003BE34(UnkStructB1 *rec) {
+s32 func_8003BE34(Pickup *rec) {
     D_800AA248.cur_obj->vel_y.w += rec->unk_30;
     D_800AA248.cur_obj->pos_y.w += D_800AA248.cur_obj->vel_y.w;
     D_800AA248.cur_obj->vel_x.w += rec->unk_34;
@@ -336,16 +336,16 @@ s32 func_8003BE34(UnkStructB1 *rec) {
     D_800AA248.cur_obj->pos_x.w &= D_801D8864.w;
     if (rec->unk_3E != 0) {
         if (D_800AA248.cur_obj->unk_6C & 0x80) {
-            D_800AA248.unk_78 = 1;
+            D_800AA248.result = 1;
             return 1;
         }
-        D_800AA248.unk_78 = 0;
+        D_800AA248.result = 0;
         return 0;
     }
     if (!(D_800AA248.cur_obj->unk_6C & 0x80)) {
         rec->unk_3E = 1;
     }
-    D_800AA248.unk_78 = 0;
+    D_800AA248.result = 0;
     return 0;
 }
 
@@ -353,7 +353,7 @@ s32 func_8003BE34(UnkStructB1 *rec) {
 #ifdef NON_MATCHING
 /* 98.8 %: the first test's second range check masks `st - 0xD` to 16 bits (andi) in the original; the same
  * expression in a local, in the field, or as a switch with case ranges drops the mask. */
-void func_8003BF34(GameObject *obj, UnkStructB1 *b, u16 x) {
+void func_8003BF34(GameObject *obj, Pickup *b, u16 x) {
     u8 *anim = NULL;
     u16 flags;
     GameObject *o;
@@ -696,7 +696,7 @@ void func_8003C894(void **arg0) {
     func_8003CCC0(arg0);
 }
 
-void func_8003C8D4(UnkStructB1 *arg0) {
+void func_8003C8D4(Pickup *arg0) {
     void *temp_a0;
 
     temp_a0 = arg0->unk_00;
@@ -712,7 +712,7 @@ block_4:
     func_8003CCC0(arg0);
 }
 
-void func_8003C934(UnkStructB1 *rec) {
+void func_8003C934(Pickup *rec) {
     GameObject *saved;
     UnkStructB4 *step;
     u16 k;
@@ -737,7 +737,7 @@ void func_8003C934(UnkStructB1 *rec) {
 }
 
 
-void func_8003C9E8(UnkStructB1 *arg0) {
+void func_8003C9E8(Pickup *arg0) {
     if (arg0->unk_1A == 0xA) {
         func_8003CA28(arg0);
         return;
@@ -745,7 +745,7 @@ void func_8003C9E8(UnkStructB1 *arg0) {
     func_8003CA70(arg0);
 }
 
-void func_8003CA28(UnkStructB1 *arg0) {
+void func_8003CA28(Pickup *arg0) {
     Monster *temp_v1;
 
     temp_v1 = arg0->unk_14;
@@ -754,7 +754,7 @@ void func_8003CA28(UnkStructB1 *arg0) {
     }
 }
 
-void func_8003CA70(UnkStructB1 *rec) {
+void func_8003CA70(Pickup *rec) {
     Monster *a;
     s32 kind;
 
@@ -833,7 +833,7 @@ void func_8003CB68(s16 n, Monster *a) {
 
 
 
-s32 func_8003CBE0(UnkStructB1 *rec, Monster *a) {
+s32 func_8003CBE0(Pickup *rec, Monster *a) {
     s32 kind;
 
     if (a == NULL) {

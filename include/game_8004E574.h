@@ -3,7 +3,7 @@
 
 #include "game.h"
 
-/* game_8004E574: the monsters' script commands. The speed tables, one pair per Monster.unk_0CC value. */
+/* game_8004E574: the monsters' script commands. The speed tables, one pair per Monster.dir value. */
 typedef struct {
     /* 0x00 */ s32 speed;              /* Monster.unk_100 */
     /* 0x04 */ s32 vel_y;              /* GameObject.vel_y */

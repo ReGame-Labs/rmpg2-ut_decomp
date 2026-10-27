@@ -29,7 +29,7 @@ typedef struct ActorPair {
 
 void func_8001E698(GameObject *mover, Anim *anim);
 s32 func_8001EB10(s32 arg0, s32 arg1);
-void func_8001F724(s32 arg0);
+void func_8001F724(u16);
 void func_8003C894(Actor *actor);
 void func_8003C8D4(Actor *actor);
 void func_8004CFC0(void);
@@ -64,7 +64,7 @@ void func_8003FE70(Actor *actor);
 void func_8003FD30(Actor *actor);
 void func_80029D1C(void);
 u16 *func_80025C08(void *list);
-ActorLink *func_8002F01C(void);
+Building *func_8002F01C(void);
 void func_8003ECF8(void);
 
 /* What an actor of a kind is made of: its effect, its kind, its handlers and animations (0x14 bytes, D_80082138[]). */
@@ -90,14 +90,14 @@ void func_80053C50(s32 arg0, Monster *player);
 void func_80061068(s32 arg0, s16 arg1, s16 arg2);
 void func_8001E4B0(GameObject *mover);
 void func_8003F150(void);
-void func_80030338(GameObject *mover);
+u16 func_80030338(GameObject *);
 ObjectDef *func_8001D110(void);
 GameObject *func_8001DCB4(void);       /* spawns D_800AA248.unk_3C */
 void func_8004003C(s32 arg0, Ai *link);
 s16 func_80053AC4(s16 x, s16 y, s32 w, s32 h, Monster *player);
-void func_8003CCC0(Ai *link);
+void func_8003CCC0(void *);
 void func_80040B94(Actor *actor);
-void func_800634D4(Monster *player, s32 arg1);
+void func_800634D4(Monster *, u32);
 
 /* A sound and an argument per kind of actor hit (the file's .data). */
 typedef struct ActorSound {
@@ -211,9 +211,9 @@ void func_8003CEA0(Anim *anim, GameObject *mover) {
     Actor *actor;
     GameObject *o;
 
-    if (mover->unk_48 != (s32) anim) {
-        if (*(u16 *)&mover->unk_80 == 0) {
-            mover->unk_80 = ((AnimFrame *)func_8003D1F8(mover->owner.ai->unk_10.actor))->unk_8 - 1;
+    if (mover->anim != (s32) anim) {
+        if (*(u16 *)&mover->priority == 0) {
+            mover->priority = ((AnimFrame *)func_8003D1F8(mover->owner.ai->unk_10.actor))->unk_8 - 1;
         }
         func_80024964(0, mover);
         func_8001E698(mover, anim);
@@ -311,13 +311,13 @@ void *func_8003D1F8(Actor *actor) {
     return *(void **)(p - 4);
 }
 
-void func_8003D228(Npc *npc) {
+void func_8003D228(UnkStructB2 *rec) {
     Anim *anim = NULL;
 
-    switch (npc->unk_6) {
+    switch (rec->unk_06) {
     case 0x2A:
         anim = &D_80094514;
-        if (npc->unk_4 < 2) {
+        if (rec->unk_04 < 2) {
             return;
         }
         break;
@@ -326,20 +326,20 @@ void func_8003D228(Npc *npc) {
     case 0x29:
     case 0x2B:
     case 0x2C:
-        npc->unk_4 = 3;
+        rec->unk_04 = 3;
         break;
     default:
         return;
     }
-    if (npc->unk_E != 0) {
-        npc->unk_8 = 3;
-        npc->unk_18 = 0x34;
-        npc->unk_E = 0;
-        npc->unk_14 = NULL;
-        if (npc->unk_4 != 3) {
+    if (rec->unk_0E != 0) {
+        rec->unk_08 = 3;
+        rec->unk_18 = 0x34;
+        rec->unk_0E = 0;
+        rec->unk_14 = NULL;
+        if (rec->unk_04 != 3) {
             func_8001F7CC(0xC8, 0x2F);
-            npc->unk_4 = 3;
-            npc->unk_18 = -1;
+            rec->unk_04 = 3;
+            rec->unk_18 = -1;
             if (anim != NULL) {
                 func_8003D58C(anim);
             }
@@ -347,53 +347,53 @@ void func_8003D228(Npc *npc) {
     }
 }
 
-void func_8003D30C(Npc *npc) {
-    switch (npc->unk_6) {
+void func_8003D30C(UnkStructB2 *rec) {
+    switch (rec->unk_06) {
     case 0x34:
-        if (npc->unk_E != 0 && npc->unk_14 != NULL) {
+        if (rec->unk_0E != 0 && rec->unk_14 != NULL) {
             func_8001F724(0x11);
-            npc->unk_14->unk_8 = 0x440000;
-            func_8003C8D4((Actor *)npc);
-            npc->unk_1C = 0;
+            rec->unk_14->health.w = 0x440000;
+            func_8003C8D4((Actor *)rec);
+            rec->unk_1C = 0;
         }
         break;
     case 0x35:
-        if (npc->unk_E != 0 && npc->unk_14 != NULL) {
+        if (rec->unk_0E != 0 && rec->unk_14 != NULL) {
             func_8001F724(0x11);
-            npc->unk_14->unk_10 = 0x440000;
-            func_8003C8D4((Actor *)npc);
-            npc->unk_1C = 0;
+            rec->unk_14->meter.w = 0x440000;
+            func_8003C8D4((Actor *)rec);
+            rec->unk_1C = 0;
         }
         break;
     }
 }
 
-void func_8003D3CC(Npc *npc) {
+void func_8003D3CC(UnkStructB2 *rec) {
     Anim *anim = NULL;
 
-    switch (npc->unk_6) {
+    switch (rec->unk_06) {
     case 0x2F:
         anim = &D_80094AEC;
-        if (npc->unk_4 < 2) {
+        if (rec->unk_04 < 2) {
             return;
         }
         break;
     case 0x2D:
     case 0x2E:
     case 0x30:
-        npc->unk_4 = 3;
+        rec->unk_04 = 3;
         break;
     default:
         return;
     }
-    if (npc->unk_E != 0) {
-        npc->unk_E = 0;
-        npc->unk_14 = NULL;
-        if (npc->unk_4 == 3) {
-            func_8003D4AC((Ai *)npc);
+    if (rec->unk_0E != 0) {
+        rec->unk_0E = 0;
+        rec->unk_14 = NULL;
+        if (rec->unk_04 == 3) {
+            func_8003D4AC((Ai *)rec);
         } else {
-            npc->unk_4 = 3;
-            npc->unk_8 = 6;
+            rec->unk_04 = 3;
+            rec->unk_08 = 6;
             if (anim != NULL) {
                 func_8003D58C(anim);
             }
@@ -409,7 +409,7 @@ void func_8003D490(Actor *actor) {
 
 void func_8003D4AC(Ai *ai) {
     ai->action = 6;
-    D_800AA248.cur_obj->unk_80 = 0xF00;
+    D_800AA248.cur_obj->priority = 0xF00;
     if (ai->unk_10.order->unk_4 == 2) {
         D_800AA248.cur_obj->flags |= 0x10;
     }
@@ -439,7 +439,7 @@ void func_8003D51C(Ai *ai) {
 }
 
 void func_8003D58C(Anim *anim) {
-    if (D_800AA248.cur_obj->unk_48 != (s32) anim) {
+    if (D_800AA248.cur_obj->anim != (s32) anim) {
         func_8001E698(D_800AA248.cur_obj, anim);
     }
 }
@@ -527,7 +527,7 @@ void func_8003D9D8(Ai *ai) {
     if (ai->state != 5) {
         ai->state = 5;
         func_8003DF34(ai);
-        D_800AA248.cur_obj->unk_80 = 0x390;
+        D_800AA248.cur_obj->priority = 0x390;
         func_8001E39C(D_800AA248.cur_obj);
         func_8001E2F8(D_800AA248.cur_obj);
     }
@@ -690,7 +690,7 @@ void func_8003E630(Ai *ai) {
             break;
         }
     } while (--n != 0);
-    ai->unk_14 = (Monster *)player;
+    ai->target = (Monster *)player;
     ai->unk_04 = i;
 }
 
@@ -714,7 +714,7 @@ void func_8003E6A4(Ai *ai) {
     ai->state = 0;
     ai->unk_10.order = NULL;
     ai->unk_1C.order = 0;
-    ai->unk_14 = NULL;
+    ai->target = NULL;
     ai->unk_38 = 0;
     ai->unk_0C = 0;
     ((s16 *)&mover->pos_x.w)[1] = -0x190;
@@ -749,11 +749,11 @@ s32 func_8003E79C(void) {
         }
     }
     func_80030338(D_800AA248.cur_obj);
-    D_800AA248.unk_78 = 0;
+    D_800AA248.result = 0;
     return 0;
 inside:
     D_800AA248.unk_4C = 0;
-    D_800AA248.unk_78 = 1;
+    D_800AA248.result = 1;
     return 1;
 }
 
@@ -827,15 +827,15 @@ void func_8003EB40(void) {
 }
 
 u16 func_8003EB5C(Anim *anim, GameObject *mover) {
-    if ((s32) anim == mover->unk_48) {
+    if ((s32) anim == mover->anim) {
         D_800AA248.unk_7A = 1;
         mover->flags |= 0x800;
     } else {
-        mover->unk_48 = (s32) anim;
-        mover->script_pc = (s32) anim;
+        mover->anim = (s32) anim;
+        mover->script.pc = (s32) anim;
         mover->unk_4C = 0;
         mover->unk_4D = 0;
-        mover->unk_64 = 0;
+        mover->unk_64.w = 0;
         mover->flags |= 0x800;
         D_800AA248.unk_7A = 0;
     }
@@ -1275,7 +1275,7 @@ void func_8004022C(void) {
     p = (Anim **)D_800AA248.cur_obj->arg.h;
     func_8004003C(D_800AA248.cur_obj->flags ^ 0x10, D_800AA248.cur_obj->owner.ai);
     if (D_800AA248.unk_0C != 0) {
-        D_800AA248.cur_obj->script_pc = (s32) *p;
+        D_800AA248.cur_obj->script.pc = (s32) *p;
     }
 }
 
@@ -1285,7 +1285,7 @@ void func_80040294(void) {
     p = (Anim **)D_800AA248.cur_obj->arg.h;
     func_8004003C(D_800AA248.cur_obj->flags ^ 0x10, D_800AA248.cur_obj->owner.ai);
     if (abs(D_800AA248.unk_00) < 0x4B) {
-        D_800AA248.cur_obj->script_pc = (s32) *p;
+        D_800AA248.cur_obj->script.pc = (s32) *p;
     }
 }
 
@@ -1302,7 +1302,7 @@ void func_80040314(Monster *player) {
     mover = player->obj;
     effect->pos_x.s.hi = ((u16 *)&mover->pos_x.w)[1];
     effect->pos_y.s.hi = ((u16 *)&mover->pos_y.w)[1] | 0xC000;
-    effect->flags = *(u16 *)&mover->unk_80 - 1;
+    effect->flags = *(u16 *)&mover->priority - 1;
     D_800AA248.cur_obj = func_8001DCB4();
     D_800AA248.cur_obj->owner.monster = player;
     D_800AA248.cur_obj = saved;
@@ -1582,7 +1582,7 @@ void func_80040D68(Actor *actor) {
                 x = ((u16 *)&D_800AA248.cur_obj->unk_1C.u.lo)[0];
                 y = ((u16 *)&D_800AA248.cur_obj->unk_1C.u.lo)[1];
                 func_8004155C(2, actor);
-                frame = func_8001A784(*(s32 *)D_800AA248.cur_obj->unk_48);
+                frame = func_8001A784(*(s32 *)D_800AA248.cur_obj->anim);
                 x = frame->unk_8 - x;
                 ((u16 *)&D_800AA248.cur_obj->pos_x.w)[1] += x;
                 y = frame->unk_A - y;

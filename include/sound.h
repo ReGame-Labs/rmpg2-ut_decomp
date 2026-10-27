@@ -217,11 +217,11 @@ typedef struct SoundEntry {
  * the loader returns. */
 typedef struct SoundFileHeader {
     /* 0x00 */ u8 unk_00[0x0E];
-    /* 0x0E */ u16 unk_0E;          /* the number of sequences */
-    /* 0x10 */ u8 unk_10;           /* the sequence table's packing method, 0 none (func_800703D8) */
+    /* 0x0E */ u16 count;           /* the number of sequences (D_801FDEA0, the bound func_8006E504 checks) */
+    /* 0x10 */ u8 method;           /* the sequence table's packing method, 0 none (func_800703D8) */
     /* 0x11 */ u8 unk_11[0x03];
-    /* 0x14 */ s32 unk_14;          /* the table's packed size */
-    /* 0x18 */ s32 unk_18;          /* its size */
+    /* 0x14 */ s32 packed_size;     /* the table's packed size */
+    /* 0x18 */ s32 size;            /* its size */
     /* 0x1C */ s32 unk_1C;
 } SoundFileHeader;
 

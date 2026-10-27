@@ -728,7 +728,7 @@ s32 func_8006E804(SoundDriver *drv, s32 name) {
             func_8006E4BC(2);
             return 0;
         }
-        r = D_801FDE78.unk_18;
+        r = D_801FDE78.size;
         func_8006E59C();
     }
     return r;
@@ -756,21 +756,21 @@ s32 func_8006E8B4(SoundDriver *drv, s32 name, s32 keep, SoundSlot *table) {
             func_8006E4BC(2);
             return 0;
         }
-        r = D_801FDE78.unk_18;
-        D_801FDEA0 = D_801FDE78.unk_0E;
+        r = D_801FDE78.size;
+        D_801FDEA0 = D_801FDE78.count;
         D_801FDE98->unk_0C->unk_20 = table;
-        if (D_801FDE78.unk_10 == 0) {
-            n = D_801FDE78.unk_18;
+        if (D_801FDE78.method == 0) {
+            n = D_801FDE78.size;
             if (n != func_80070898(D_801FDE98->unk_0C->unk_20, n, D_801FDEB0)) {
                 func_8006E4BC(2);
                 return 0;
             }
-            D_801FDEB4 = D_801FDE78.unk_18 + 32;
+            D_801FDEB4 = D_801FDE78.size + 32;
         } else {
-            if (func_800703D8(D_801FDE78.unk_10, D_801FDE9C, 32, (s32) D_801FDE98->unk_0C->unk_20, D_801FDE78.unk_18) < 0) {
+            if (func_800703D8(D_801FDE78.method, D_801FDE9C, 32, (s32) D_801FDE98->unk_0C->unk_20, D_801FDE78.size) < 0) {
                 return 0;
             }
-            D_801FDEB4 = D_801FDE78.unk_14 + 32;
+            D_801FDEB4 = D_801FDE78.packed_size + 32;
         }
         if (keep != 1) {
             func_8006E59C();

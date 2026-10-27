@@ -715,12 +715,12 @@ void func_8009D948(void) {
         D_800A9808[0] = func_8001EB9C(0, 0, 0x4B, 5, 0xFF00);
         D_800A9808[0]->pos_x.s.hi = 0x1F4;
         D_800A9808[0]->pos_y.s.hi = 0x69;
-        D_800A9808[0]->unk_80 = 0x32;
+        D_800A9808[0]->priority = 0x32;
         D_800A9808[0]->kind = 0x400;
         D_800A9808[1] = func_8001EB9C(0, 0, 0x32, 5, 0xFF00);
         D_800A9808[1]->pos_x.s.hi = 0x1F4;
         D_800A9808[1]->pos_y.s.hi = 0xA3;
-        D_800A9808[1]->unk_80 = 0x32;
+        D_800A9808[1]->priority = 0x32;
         D_800A9808[1]->kind = 0x400;
         func_8009CE5C();
     }
@@ -998,7 +998,7 @@ void func_8009E5BC(void) {
         def->unk_06 |= 0x20;
         D_800AA248.cur_obj = func_8001DCB4();
         D_801E294C[i] = D_800AA248.cur_obj;
-        D_800AA248.cur_obj->unk_48 = (s32) D_800A7510;
+        D_800AA248.cur_obj->anim = (s32) D_800A7510;
         D_800AA248.cur_obj->unk_4D = 0;
         def->pos_y.w = 0x8C0000;
         def->id = 0x4A001888;
@@ -1007,7 +1007,7 @@ void func_8009E5BC(void) {
         def->unk_06 |= 0x20;
         D_800AA248.cur_obj = func_8001DCB4();
         *(D_801E294C + i + 6) = D_800AA248.cur_obj;
-        D_800AA248.cur_obj->unk_48 = (s32) D_800A751C;
+        D_800AA248.cur_obj->anim = (s32) D_800A751C;
         D_800AA248.cur_obj->unk_4D = 0;
         if (i < D_8007A690) {
             anim = D_800A74C0[i];
@@ -1022,7 +1022,7 @@ void func_8009E5BC(void) {
         def->flags = 0x1F3;
         D_800AA248.cur_obj = func_8001DCB4();
         D_801E2958[i] = D_800AA248.cur_obj;
-        D_800AA248.cur_obj->unk_48 = (s32) anim;
+        D_800AA248.cur_obj->anim = (s32) anim;
         D_800AA248.cur_obj->unk_4D = 0;
     }
 }
@@ -1040,7 +1040,7 @@ void func_8009E7D4(s16 n) {
     def->unk_06 |= 0x20;
     D_800AA248.cur_obj = func_8001DCB4();
     *(D_801E28F4 + n + 1) = D_800AA248.cur_obj;
-    D_800AA248.cur_obj->unk_48 = (s32) D_800A74E4;
+    D_800AA248.cur_obj->anim = (s32) D_800A74E4;
     D_800AA248.cur_obj->unk_4D = 0;
     D_800AA248.cur_obj->flags |= 0x400;
     D_800AA248.cur_obj = saved;
@@ -1061,7 +1061,7 @@ void func_8009F968(OverattrPlacement *p, s32 n, s32 color) {
     OverattrPlacement *q;
 
     D_801F9AC8.w = 0;
-    D_801F9ACC = 0;
+    D_801F9ACC.w = 0;
     q = p;
     for (i = 0; i < n; i++) {
         func_80099138(q++)->colour = color;

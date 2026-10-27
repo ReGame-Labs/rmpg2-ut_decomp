@@ -58,16 +58,16 @@ extern s32 D_8008C804;
 extern u16 D_801D8850;
 
 void func_8001E4B0(GameObject *obj);                        /* free an object */
-void func_8001F724(s32 sound);
+void func_8001F724(u16);
 void func_8001F7CC(u16 sound, u16 variant);
 u16 *func_80025C08(void *);
 s32 func_80025DF8(s32 player);
-void func_80029118(s32, s32);
+void func_80029118(s16, u16);
 void func_80053C50(s32, Monster *m);
 void func_8006353C(s32);
 u16 func_8004A9B0();
 s32 func_8001EB10(s32 range, s32 x);
-s16 func_8003FCD8(s16 x0, s16 x1);              /* a horizontal distance */
+s16 func_8003FCD8(s32, s32);              /* a horizontal distance */
 extern s32 D_800916D8[];
 void func_8004B204(void);
 void func_8003EB5C(void *anim, GameObject *obj);
@@ -362,7 +362,7 @@ void func_80047B6C(void) {
     Monster *m;
     u16 kind;
 
-    saved->script_pc += 4;
+    saved->script.pc += 4;
     m = saved->owner.monster;
     kind = m->unk_02A;
     if (kind != 0) {
@@ -433,7 +433,7 @@ void func_80047D7C(void) {
 }
 
 void func_80047DCC(void) {
-    D_800AA248.cur_obj->script_pc = *D_800AA248.cur_obj->arg.w;
+    D_800AA248.cur_obj->script.pc = *D_800AA248.cur_obj->arg.w;
 }
 
 u16 func_80047DEC(u16 a, u16 b, s16 dx, s16 dy, Throw *t) {
@@ -1047,7 +1047,7 @@ void func_800490D4(Throw *t) {
         D_800AA248.cur_obj->pos_y.w += vy;
         if (D_800AA248.cur_obj->vel_y.w >= 0 && D_800AA248.cur_obj->pos_y.s.hi >= 0xD9) {
             t->unk_0A = 0x10;
-            D_800AA248.cur_obj->script_pc = (s32) D_80091730;
+            D_800AA248.cur_obj->script.pc = (s32) D_80091730;
         } else {
             i = 7;
             do {
@@ -1057,7 +1057,7 @@ void func_800490D4(Throw *t) {
                     if (hit != 0) {
                         func_80053C50(0x34000, m);
                         t->unk_0A = 0x10;
-                        D_800AA248.cur_obj->script_pc = (s32) D_800916E4;
+                        D_800AA248.cur_obj->script.pc = (s32) D_800916E4;
                         break;
                     }
                 }
@@ -1069,13 +1069,13 @@ void func_800490D4(Throw *t) {
 
 void func_8004928C(void) {
     if (D_800AA248.cur_obj->vel_y.w <= -0x10000) {
-        D_800AA248.cur_obj->script_pc = *D_800AA248.cur_obj->arg.w;
+        D_800AA248.cur_obj->script.pc = *D_800AA248.cur_obj->arg.w;
     }
 }
 
 void func_800492C8(void) {
     if (D_800AA248.cur_obj->vel_y.w <= 0x10000) {
-        D_800AA248.cur_obj->script_pc = *D_800AA248.cur_obj->arg.w;
+        D_800AA248.cur_obj->script.pc = *D_800AA248.cur_obj->arg.w;
     }
 }
 
@@ -1097,7 +1097,7 @@ void func_80049304(Throw *t) {
     D_800AA248.cur_obj->pos_y.w += vy;
     if (D_800AA248.cur_obj->vel_y.w >= 0 && D_800AA248.cur_obj->pos_y.s.hi >= 0xD9) {
         t->unk_0A = 0x10;
-        D_800AA248.cur_obj->script_pc = (s32) D_8009192C;
+        D_800AA248.cur_obj->script.pc = (s32) D_8009192C;
         return;
     }
     i = 7;
@@ -1109,7 +1109,7 @@ void func_80049304(Throw *t) {
                 func_80053C50(0x58000, m);
                 func_8004A93C(m);
                 t->unk_0A = 0x10;
-                D_800AA248.cur_obj->script_pc = (s32) D_800918C4;
+                D_800AA248.cur_obj->script.pc = (s32) D_800918C4;
                 return;
             }
         }
@@ -1197,7 +1197,7 @@ void func_80049650(Throw *t) {
             D_800AA268.p->pos_x.s.hi = x;
         }
         D_800AA268.p->flags |= 0x20;
-    } else if (D_801F9ACC + cur->pos_y.w > 0xD8FFFF) {
+    } else if (D_801F9ACC.w + cur->pos_y.w > 0xD8FFFF) {
         cur->pos_y.w = 0xCF0000;
         D_800AA248.cur_obj->flags &= ~0x20;
         func_8001E698(D_800AA248.cur_obj, D_80095678);
@@ -1232,7 +1232,7 @@ void func_80049850(Throw *t) {
     D_800AA248.cur_obj->pos_y.w += vy;
     if (D_800AA248.cur_obj->vel_y.w >= 0 && D_800AA248.cur_obj->pos_y.s.hi >= 0xD9) {
         t->unk_0A = 0x10;
-        D_800AA248.cur_obj->script_pc = (s32) D_80091A20;
+        D_800AA248.cur_obj->script.pc = (s32) D_80091A20;
         return;
     }
     i = 7;
@@ -1243,7 +1243,7 @@ void func_80049850(Throw *t) {
             if (hit != 0) {
                 func_80053C50(0x48000, m);
                 t->unk_0A = 0x10;
-                D_800AA248.cur_obj->script_pc = (s32) D_800919D4;
+                D_800AA248.cur_obj->script.pc = (s32) D_800919D4;
                 return;
             }
         }
@@ -1262,13 +1262,13 @@ void func_800499F4(Throw *t) {
         if (D_800AA248.cur_obj->pos_y.s.hi >= 0xD9) {
             D_800AA248.cur_obj->vel_y.w = 0;
             D_800AA248.cur_obj->unk_08.w = 0xE6;
-            D_800AA248.cur_obj->unk_80 = 0x1005;
+            D_800AA248.cur_obj->priority = 0x1005;
         }
         return;
     }
     if (D_800AA248.cur_obj->unk_08.w == 1) {
         t->unk_0A = 0x10;
-        D_800AA248.cur_obj->script_pc = (s32) D_80091820;
+        D_800AA248.cur_obj->script.pc = (s32) D_80091820;
         func_8001F724(5);
         return;
     }
@@ -1281,7 +1281,7 @@ void func_800499F4(Throw *t) {
                 func_80053C50(0x58000, m);
                 func_8004A90C(m);
                 t->unk_0A = 0x10;
-                D_800AA248.cur_obj->script_pc = (s32) D_80091820;
+                D_800AA248.cur_obj->script.pc = (s32) D_80091820;
                 func_8001F724(5);
                 return;
             }
@@ -1305,7 +1305,7 @@ void func_80049B9C(Throw *t) {
         D_800AA248.cur_obj->unk_08.w++;
         if (D_800AA248.cur_obj->unk_08.w == 4) {
             t->unk_0A = 0x10;
-            D_800AA248.cur_obj->script_pc = (s32) D_80091AD0;
+            D_800AA248.cur_obj->script.pc = (s32) D_80091AD0;
             func_8001F724(5);
             return;
         }
@@ -1329,7 +1329,7 @@ void func_80049B9C(Throw *t) {
             func_80053C50(0x58000, m);
             func_8004A93C(m);
             t->unk_0A = 0x10;
-            D_800AA248.cur_obj->script_pc = (s32) D_80091AD0;
+            D_800AA248.cur_obj->script.pc = (s32) D_80091AD0;
             func_8001F724(5);
             return;
         }
@@ -1380,7 +1380,7 @@ void func_80049E10(Throw *t) {
             D_800AA248.cur_obj->pos_y.w -= D_800AA248.cur_obj->vel_y.w;
             if (D_800AA248.cur_obj->vel_y.w <= 0 && D_800AA248.cur_obj->pos_y.s.hi >= 0xD9) {
                 t->unk_0A = 0x10;
-                D_800AA248.cur_obj->script_pc = (s32) D_8008C810;
+                D_800AA248.cur_obj->script.pc = (s32) D_8008C810;
             } else {
                 i = 7;
                 do {
@@ -1393,7 +1393,7 @@ void func_80049E10(Throw *t) {
                             func_80053C50(0x18000, m);
                         }
                         t->unk_0A = 0x10;
-                        D_800AA248.cur_obj->script_pc = (s32) D_8008C828;
+                        D_800AA248.cur_obj->script.pc = (s32) D_8008C828;
                         break;
                     }
                 } while (--i != 0);
@@ -1464,7 +1464,7 @@ void func_8004A1F8(Throw *t) {
             D_800AA248.cur_obj->pos_y.w += D_800AA248.cur_obj->vel_y.w;
             if (D_800AA248.cur_obj->pos_y.s.hi >= 0xD9) {
                 t->unk_0A = 0x10;
-                D_800AA248.cur_obj->script_pc = (s32) D_8008C810;
+                D_800AA248.cur_obj->script.pc = (s32) D_8008C810;
             } else if (--D_800AA248.cur_obj->unk_8C == 0) {
                 func_8004AE2C();
             } else {
@@ -1495,8 +1495,8 @@ void func_8004A1F8(Throw *t) {
     D_800AA268.p = saved;
 }
 
-s32 func_8004A468(Monster *m) {
-    Monster *target = m->target;
+s32 func_8004A468(Ai *ai) {
+    Monster *target = ai->target;
     GameObject *obj;
     s16 r;
     s16 d;
@@ -1592,7 +1592,7 @@ void func_8004A698(Throw *t) {
             D_800AA248.cur_obj->pos_y.w -= vy;
             if (D_800AA248.cur_obj->pos_y.s.hi >= 0xD9) {
                 t->unk_0A = 0x10;
-                D_800AA248.cur_obj->script_pc = (s32) D_80091788;
+                D_800AA248.cur_obj->script.pc = (s32) D_80091788;
                 D_800AA248.cur_obj->flags |= 0x800;
             } else {
                 i = 7;
@@ -1604,7 +1604,7 @@ void func_8004A698(Throw *t) {
                             func_80053C50(0x58000, m);
                             t->unk_0A = 0x10;
                             func_8004A93C(m);
-                            D_800AA248.cur_obj->script_pc = (s32) D_800917D0;
+                            D_800AA248.cur_obj->script.pc = (s32) D_800917D0;
                             D_800AA248.cur_obj->flags |= 0x800;
                             goto sound;
                         }
@@ -1635,13 +1635,13 @@ void func_8004A90C(Monster *m) {
     m->obj->vel_y.w = 0xFFF70000;
     m->unk_104 = 0x4000;
     m->unk_100 = 0;
-    m->unk_1B0 = 0;
-    m->unk_1B2 = 0;
-    m->unk_1B4 = 0;
+    m->climb_side = 0;
+    m->climb_building = 0;
+    m->climb_floor = 0;
 }
 
 void func_8004A93C(Monster *m) {
-    u16 side = m->unk_1B0;
+    u16 side = m->climb_side;
 
     if (side != 0) {
         if (side != 3) {

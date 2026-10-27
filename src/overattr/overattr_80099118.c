@@ -46,28 +46,28 @@ void func_800991EC(void) {
     do {
         m = &D_801E0B78[func_80025DF8(i + 1)];
         if (m->id != 0) {
-            if ((u32) m->unk_0A4[0]->unk_64 < m->unk_020) {
-                m->unk_0A4[0]->unk_64++;
+            if ((u32) m->bars[0]->unk_64.count < m->unk_020) {
+                m->bars[0]->unk_64.count++;
                 done = 0;
-                if ((u32) m->unk_0A4[0]->script_pc < 0x46) {
-                    m->unk_0A4[0]->script_pc = m->unk_0A4[0]->unk_64 * 2 + 0xB;
-                    m->unk_0A4[0]->pos_y.s.hi = 0xCC - m->unk_0A4[0]->script_pc;
+                if ((u32) m->bars[0]->script.height < 0x46) {
+                    m->bars[0]->script.height = m->bars[0]->unk_64.count * 2 + 0xB;
+                    m->bars[0]->pos_y.s.hi = 0xCC - m->bars[0]->script.height;
                 }
             }
-            if ((u32) m->unk_0A4[1]->unk_64 < m->unk_024) {
-                m->unk_0A4[1]->unk_64++;
+            if ((u32) m->bars[1]->unk_64.count < m->unk_024) {
+                m->bars[1]->unk_64.count++;
                 done = 0;
-                if ((u32) m->unk_0A4[1]->script_pc < 0x46) {
-                    m->unk_0A4[1]->script_pc = m->unk_0A4[1]->unk_64 * 2 + 0xB;
-                    m->unk_0A4[1]->pos_y.s.hi = 0xCC - m->unk_0A4[1]->script_pc;
+                if ((u32) m->bars[1]->script.height < 0x46) {
+                    m->bars[1]->script.height = m->bars[1]->unk_64.count * 2 + 0xB;
+                    m->bars[1]->pos_y.s.hi = 0xCC - m->bars[1]->script.height;
                 }
             }
-            if ((u32) m->unk_0A4[2]->unk_64 < m->unk_026) {
-                m->unk_0A4[2]->unk_64++;
+            if ((u32) m->bars[2]->unk_64.count < m->unk_026) {
+                m->bars[2]->unk_64.count++;
                 done = 0;
-                if ((u32) m->unk_0A4[2]->script_pc < 0x46) {
-                    m->unk_0A4[2]->script_pc = m->unk_0A4[2]->unk_64 * 2 + 0xB;
-                    m->unk_0A4[2]->pos_y.s.hi = 0xCC - m->unk_0A4[2]->script_pc;
+                if ((u32) m->bars[2]->script.height < 0x46) {
+                    m->bars[2]->script.height = m->bars[2]->unk_64.count * 2 + 0xB;
+                    m->bars[2]->pos_y.s.hi = 0xCC - m->bars[2]->script.height;
                 }
             }
         }
@@ -114,25 +114,25 @@ void func_8009951C(void) {
     for (i = 0; i < 3; i++) {
         m = &D_801E0B78[func_80025DF8(i + 1)];
         if (m->id != 0) {
-            m->unk_0A4[0] = func_8001EB9C(0, 0, 0x10, 1, 0xFF00);
+            m->bars[0] = func_8001EB9C(0, 0, 0x10, 1, 0xFF00);
             x = i * 0x78;
-            m->unk_0A4[0]->pos_x.s.hi = x + 0x2D;
-            m->unk_0A4[0]->pos_y.s.hi = 0xCC;
-            m->unk_0A4[0]->unk_80 = 0x19;
-            m->unk_0A4[0]->flags |= 0x400;
-            m->unk_0A4[0]->unk_64 = 0;
-            m->unk_0A4[1] = func_8001EB9C(0, 0, 0x10, 1, 0xFFFF);
-            m->unk_0A4[1]->pos_x.s.hi = x + 0x48;
-            m->unk_0A4[1]->pos_y.s.hi = 0xCC;
-            m->unk_0A4[1]->unk_80 = 0x19;
-            m->unk_0A4[1]->flags |= 0x400;
-            m->unk_0A4[1]->unk_64 = 0;
-            m->unk_0A4[2] = func_8001EB9C(0, 0, 0x10, 1, 0xFF00FF);
-            m->unk_0A4[2]->pos_x.s.hi = x + 0x65;
-            m->unk_0A4[2]->pos_y.s.hi = 0xCC;
-            m->unk_0A4[2]->unk_80 = 0x19;
-            m->unk_0A4[2]->flags |= 0x400;
-            m->unk_0A4[2]->unk_64 = 0;
+            m->bars[0]->pos_x.s.hi = x + 0x2D;
+            m->bars[0]->pos_y.s.hi = 0xCC;
+            m->bars[0]->priority = 0x19;
+            m->bars[0]->flags |= 0x400;
+            m->bars[0]->unk_64.count = 0;
+            m->bars[1] = func_8001EB9C(0, 0, 0x10, 1, 0xFFFF);
+            m->bars[1]->pos_x.s.hi = x + 0x48;
+            m->bars[1]->pos_y.s.hi = 0xCC;
+            m->bars[1]->priority = 0x19;
+            m->bars[1]->flags |= 0x400;
+            m->bars[1]->unk_64.count = 0;
+            m->bars[2] = func_8001EB9C(0, 0, 0x10, 1, 0xFF00FF);
+            m->bars[2]->pos_x.s.hi = x + 0x65;
+            m->bars[2]->pos_y.s.hi = 0xCC;
+            m->bars[2]->priority = 0x19;
+            m->bars[2]->flags |= 0x400;
+            m->bars[2]->unk_64.count = 0;
         }
     }
 }
@@ -151,7 +151,7 @@ void func_800996CC(void) {
     s32 id;
 
     D_801F9AC8.w = 0;
-    D_801F9ACC = 0;
+    D_801F9ACC.w = 0;
     func_8001A420();
     func_80017B24();
     func_8001AC18(0xA, 0x17);
@@ -289,7 +289,7 @@ s32 func_8009AE40(s32 *step) {
             obj->pos_y.s.hi = -100;
         } else {
             obj->pos_x.s.hi = obj->unk_40.w;
-            obj->pos_y.s.hi = obj->script_pc;
+            obj->pos_y.s.hi = obj->script.v;
         }
         t++;
         if (t >= 0x65) {
@@ -328,12 +328,12 @@ s32 func_8009AE40(s32 *step) {
         y0 = obj->pos_y.s.hi;
         y1 = D_801E28F8[1]->pos_y.s.hi;
         cam = D_801E28F8[0];
-        /* the camera's start, end and current points, y << 16 | x (unk_50 is a link in other objects) */
-        cam->unk_50 = (GameObject *) ((y0 << 16) | x0);
+        /* the camera's start, end and current points, y << 16 | x */
+        cam->unk_50.cam_start = (y0 << 16) | x0;
         x = x0 + (((x1 - x0) * f) >> 16);
-        cam->unk_54 = (y1 << 16) | x1;
+        cam->unk_54.cam_end = (y1 << 16) | x1;
         y = y0 + (((y1 - y0) * f) >> 16);
-        cam->arg.v = (y << 16) | x;
+        cam->arg.cam_point = (y << 16) | x;
         x -= 0xC8;
         y -= 0x80;
         if (x < 0) {
@@ -350,7 +350,7 @@ s32 func_8009AE40(s32 *step) {
         }
         t++;
         D_801F9AC8.w = x << 16;
-        D_801F9ACC = y << 16;
+        D_801F9ACC.w = y << 16;
         if (t >= 0xC9) {
             func_80062E44();
             return 0;

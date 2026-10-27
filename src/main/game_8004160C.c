@@ -4,13 +4,13 @@
 #include "game_80034590.h"
 
 void func_8003EB5C(u8 *table, GameObject *mover);
-u16 func_8004A468(void);
-s16 func_8003DC3C(Ai *ai);
+u16 func_8004A468(Ai *ai);    /* defined returning s32: its callers take the low half */
+s32 func_8003DC3C(Ai *);
 void func_8003DB74(Ai *ai);
 void func_8003DAA0(Ai *ai);
 void func_8003E788(Ai *ai);
 u16 func_8003E79C(void);
-u16 func_8004B6C4(s32 arg0, s32 arg1, s32 arg2);
+u16 func_8004B6C4(GameObject *, s16, s32);
 void func_8004E99C(void);
 
 void func_800416AC(const AiHandler *handlers, Ai *ai);
@@ -316,7 +316,7 @@ void func_80041B2C(const AiHandler *handlers, Ai *ai) {
         }
         D_800AA248.cur_obj->vel_y.w = speed;
         func_8003E788(ai);
-        D_800AA248.cur_obj->unk_80 = 0x353;
+        D_800AA248.cur_obj->priority = 0x353;
         func_80041A70(handlers, ai);
     }
 }
@@ -336,7 +336,7 @@ void func_80041C0C(const AiHandler *handlers, Ai *ai) {
     if (D_800AA248.cur_obj->pos_y.w >= limit) {
         if (ai->unk_28.link != NULL && ai->unk_28.link->unk_8 != NULL) {
             D_800AA248.cur_obj->pos_y.w = limit;
-            D_800AA248.cur_obj->unk_80 = ((s16 *)&D_800AA248.cur_obj->pos_y.w)[1] + 0xF23;
+            D_800AA248.cur_obj->priority = ((s16 *)&D_800AA248.cur_obj->pos_y.w)[1] + 0xF23;
             D_800AA248.cur_obj->vel_y.w = 0;
             ai->unk_0C = 0;
             if (ai->unk_28.link->unk_8->unk_14 == 4) {
@@ -504,10 +504,10 @@ void func_80042238(Ai *ai) {
     s16 near;
     s32 dist;
 
-    if (ai->unk_14 != NULL) {
-        target = ai->unk_14->obj;
+    if (ai->target != NULL) {
+        target = ai->target->obj;
         if (target == NULL) {
-            ai->unk_14 = NULL;
+            ai->target = NULL;
             return;
         }
         tx = ((s16 *)&target->pos_x.w)[1];
@@ -607,10 +607,10 @@ void func_80042644(void) {
     func_8003EB5C(D_8008EC28, D_800AA248.cur_obj);
 }
 
-void func_80042670(void) {
+void func_80042670(Ai *ai) {
     u8 *tbl;
 
-    switch (func_8004A468()) {
+    switch (func_8004A468(ai)) {
     case 0:
         tbl = D_8008EC34;
         break;
@@ -630,10 +630,10 @@ void func_80042670(void) {
     func_8003EB5C(tbl, D_800AA248.cur_obj);
 }
 
-void func_80042704(void) {
+void func_80042704(Ai *ai) {
     u8 *tbl;
 
-    switch (func_8004A468()) {
+    switch (func_8004A468(ai)) {
     case 0: case 1:
         tbl = D_8008EFF0;
         break;
@@ -656,10 +656,10 @@ void func_80042704(void) {
     func_8003EB5C(tbl, D_800AA248.cur_obj);
 }
 
-void func_800427A4(void) {
+void func_800427A4(Ai *ai) {
     u8 *tbl;
 
-    switch (func_8004A468()) {
+    switch (func_8004A468(ai)) {
     case 0: case 1:
         tbl = D_8008F864;
         break;
@@ -714,10 +714,10 @@ void func_80042978(void) {
     func_8003EB5C(D_80090290, D_800AA248.cur_obj);
 }
 
-void func_800429A4(void) {
+void func_800429A4(Ai *ai) {
     u8 *tbl;
 
-    switch (func_8004A468()) {
+    switch (func_8004A468(ai)) {
     case 0:
         tbl = D_800902C0;
         break;
@@ -737,10 +737,10 @@ void func_800429A4(void) {
     func_8003EB5C(tbl, D_800AA248.cur_obj);
 }
 
-void func_80042A38(void) {
+void func_80042A38(Ai *ai) {
     u8 *tbl;
 
-    switch (func_8004A468()) {
+    switch (func_8004A468(ai)) {
     case 0:
         tbl = D_80090330;
         break;
@@ -760,10 +760,10 @@ void func_80042A38(void) {
     func_8003EB5C(tbl, D_800AA248.cur_obj);
 }
 
-void func_80042ACC(void) {
+void func_80042ACC(Ai *ai) {
     u8 *tbl;
 
-    switch (func_8004A468()) {
+    switch (func_8004A468(ai)) {
     case 0:
         tbl = D_80090374;
         break;
@@ -847,10 +847,10 @@ void func_80042DF4(void) {
     func_8003EB5C(D_80090BD4, D_800AA248.cur_obj);
 }
 
-void func_80042E20(void) {
+void func_80042E20(Ai *ai) {
     u8 *tbl;
 
-    switch (func_8004A468()) {
+    switch (func_8004A468(ai)) {
     case 0: case 1:
         tbl = D_80090F68;
         break;
@@ -873,10 +873,10 @@ void func_80042E20(void) {
     func_8003EB5C(tbl, D_800AA248.cur_obj);
 }
 
-void func_80042EC0(void) {
+void func_80042EC0(Ai *ai) {
     u8 *tbl;
 
-    switch (func_8004A468()) {
+    switch (func_8004A468(ai)) {
     case 0: case 1:
         tbl = D_80090FE0;
         break;
@@ -899,10 +899,10 @@ void func_80042EC0(void) {
     func_8003EB5C(tbl, D_800AA248.cur_obj);
 }
 
-void func_80042F60(void) {
+void func_80042F60(Ai *ai) {
     u8 *tbl;
 
-    switch (func_8004A468()) {
+    switch (func_8004A468(ai)) {
     case 0: case 1:
         tbl = D_80091058;
         break;
@@ -937,10 +937,10 @@ void func_80043058(void) {
     func_8003EB5C(D_80097078, D_800AA248.cur_obj);
 }
 
-void func_80043084(void) {
+void func_80043084(Ai *ai) {
     u8 *tbl;
 
-    switch (func_8004A468()) {
+    switch (func_8004A468(ai)) {
     case 0:
         tbl = D_80097084;
         break;

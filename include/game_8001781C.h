@@ -46,17 +46,6 @@ typedef struct Unk24C2C {
     u8 pad_16[0x2];
 } Unk24C2C;
 
-/* The object of func_80029510: a value at unk_8 clamped to 0x440000. */
-typedef struct Unk29510 {
-    u8 pad_0[0x8];
-    s32 unk_8;
-    u8 pad_C[0x58];
-    u16 unk_64;
-    u8 pad_66[0x2];
-    u8 pad_68[0x88];
-    s32 unk_F0;
-} Unk29510;
-
 /* An 8-byte record of the two 20-entry tables at 0x801FA738 and 0x801FA7EC. */
 typedef struct UnkFA738 {
     s32 unk_0;
@@ -91,7 +80,7 @@ typedef struct Unk1F9A30 {
     s32 unk_0;
 } Unk1F9A30;
 
-/* Where a behaviour slot's object starts (func_800210C8, the table D_8007B358 indexed by Ai.unk_3A): a position
+/* Where a behaviour slot's object starts (func_800210C8, the table D_8007B358 indexed by Ai.start): a position
  * relative to the camera, a speed, and flags for the object. */
 typedef struct Unk7B358 {
     s32 x;

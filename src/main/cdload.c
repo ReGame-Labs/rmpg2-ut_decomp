@@ -13,7 +13,7 @@
 #include "psyq/libspu.h"
 
 void func_8002958C(void);
-void *func_8001D110(void);
+ObjectDef *func_8001D110(void);
 void func_8001DCB4(void);
 void func_800415B4(void);
 void func_8001B5E8(s32);
@@ -22,11 +22,11 @@ s32 cdload_play_xa(u32);
 void cdload_on_xa_ready(s32);
 void func_80063E48(s32, s32);
 s32 func_80063F30(void);
-void func_800700CC(s32);
+void func_800700CC(u8);
 void func_80063DF8(s32);
 void func_8006FC6C(void);
 void func_8006FC8C(s32, s32 *);
-void func_8006FEB4(void);
+void func_8006FEB4(s32);
 void func_800700A8(void);
 void func_8006BBA0(s32, s32);
 void func_8006BD60(s32);
@@ -76,9 +76,9 @@ extern u8 *D_80085300;
 
 s32 func_8006EE30(s32);
 void func_8006F0D8(s32, void *, s32);
-s32 func_8006E804(void *, s32);
+s32 func_8006E804(SoundDriver *, s32);
 void func_8006E8B4(void *, s32, s32, void *, s32);
-void *func_8006EC08(void);
+SoundDriver *func_8006EC08(void);
 s32 func_8006E4F4(void);
 s32 func_80070298(s32, s32);
 s32 func_80070324(s32, s32, void *);
@@ -157,7 +157,7 @@ void func_800610E8(void) {
 }
 
 void func_800610F0(void) {
-    D_800AA268.p->unk_80 = *D_800AA268.p->arg.w;
+    D_800AA268.p->priority = *D_800AA268.p->arg.w;
 }
 
 void func_80061110(void) {
@@ -166,11 +166,11 @@ void func_80061110(void) {
 }
 
 void func_8006113C(void) {
-    D_800AA268.p->owner.monster->unk_010.u.hi = 1;
+    D_800AA268.p->owner.monster->meter.u.hi = 1;
 }
 
 void func_80061158(void) {
-    D_800AA268.p->owner.monster->unk_010.u.hi = 0;
+    D_800AA268.p->owner.monster->meter.u.hi = 0;
 }
 
 s32 func_80061170(s32 index) {
@@ -720,8 +720,8 @@ void func_80062DEC(s32 arg0, s32 arg1) {
     func_8006FC8C(arg0, param);
 }
 
-void func_80062E24(void) {
-    func_8006FEB4();
+void func_80062E24(s32 arg0) {
+    func_8006FEB4(arg0);
 }
 
 void func_80062E44(void) {

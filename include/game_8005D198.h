@@ -14,7 +14,7 @@ void func_8001E450(s32);
 GameObject *func_8001EB9C(s32, s32, s32, s32, s32);
 void func_8001ED54(TextMessage *);
 void func_8001EE24(void);
-void func_8001F724(s32);
+void func_8001F724(u16);
 void func_80020BA0(s32, u16, GameObject *);
 s32 func_80025DF8(s32);
 void func_8005E124(Monster *, s32);

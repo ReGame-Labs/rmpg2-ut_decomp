@@ -18,13 +18,13 @@ void func_800500EC(Monster *e, GameObject *obj) {
     } else {
         x += half;
     }
-    e->unk_0F4 = x;
+    e->front_x = x;
     state = e->action;
     if (state >= 0x68) {
         state = 0x67;
     }
     D_800AA248.unk_0C = x;
-    D_800AA248.unk_14 = state;
+    D_800AA248.action = state;
     D_800AA248.cur_obj = obj;
     D_8007F8FC[state](e);
 }
@@ -33,7 +33,7 @@ INCLUDE_ASM("asm/main/nonmatchings/game_800500EC", func_800500EC);
 #endif
 
 void func_80050190(Monster *e) {
-    if (!(e->unk_0C8 & 4)) {
+    if (!(e->buttons & 4)) {
         e->action = 0;
     }
 }
@@ -41,7 +41,7 @@ void func_80050190(Monster *e) {
 INCLUDE_ASM("asm/main/nonmatchings/game_800500EC", func_800501B0);
 
 void func_800504B4(Monster *e) {
-    D_800AA248.unk_24 = e->unk_0CC;
+    D_800AA248.unk_24 = e->dir;
     D_800AA248.cur_obj->vel_y.w = 0;
     D_800AA248.cur_obj->vel_x.w = 0;
     e->unk_100 = 0;
@@ -67,20 +67,20 @@ void func_80050520(Monster *e) {
 void func_8005059C(Monster *e) {
     s32 kind;
 
-    D_800AA248.unk_24 = e->unk_0CC;
+    D_800AA248.unk_24 = e->dir;
     D_800AA248.cur_obj->vel_y.w = 0;
     D_800AA248.cur_obj->vel_x.w = 0;
     e->unk_104 = 0;
     e->unk_100 = 0;
     if (e->unk_168 == 7) {
-        kind = e->unk_0CC;
+        kind = e->dir;
         if (kind < 5) {
             if (kind >= 2) {
                 e->action = 0xC;
             }
         }
     } else {
-        kind = e->unk_0CC;
+        kind = e->dir;
         if (kind < 9) {
             if (kind >= 6) {
                 e->action = 0xC;
@@ -116,9 +116,9 @@ void func_800506BC(Monster *e) {
     Building *obj;
     s16 x;
 
-    obj = func_80054728(e->unk_1B2);
+    obj = func_80054728(e->climb_building);
     if (obj != NULL) {
-        if (e->unk_1B0 == 2) {
+        if (e->climb_side == 2) {
             x = obj->unk_00E;
             if (D_800AA268.p->flags & 0x10) {
                 x += 0x18;
@@ -126,7 +126,7 @@ void func_800506BC(Monster *e) {
                 x -= 0x18;
             }
             D_800AA268.p->pos_x.s.hi = x;
-        } else if (e->unk_1B0 == 1) {
+        } else if (e->climb_side == 1) {
             x = obj->unk_004;
             if (D_800AA268.p->flags & 0x10) {
                 x += 0x18;
@@ -203,14 +203,14 @@ void func_80050DAC(Monster *e) {
 void func_80050DD8(Monster *e) {
     u16 n;
 
-    D_800AA248.unk_24 = e->unk_0CC;
-    if (e->unk_0CC == 0) {
+    D_800AA248.unk_24 = e->dir;
+    if (e->dir == 0) {
         func_800531C0(e);
         return;
     }
-    n = e->unk_1B0;
+    n = e->climb_side;
     D_800AA248.unk_08 = n;
-    if (n == 0 || e->unk_1B0 == 3) {
+    if (n == 0 || e->climb_side == 3) {
         e->action = 0;
         func_800501B0(e);
     } else {
@@ -222,7 +222,7 @@ void func_80050DD8(Monster *e) {
 void func_80050E58(Monster *e) {
     u16 n;
 
-    n = e->unk_1B0;
+    n = e->climb_side;
     D_800AA250 = n;
     if (n != 0) {
         func_80054A18();
@@ -362,8 +362,8 @@ INCLUDE_ASM("asm/main/nonmatchings/game_800500EC", func_800514CC);
 
 void func_800517C0(Monster *e) {
     e->unk_104 = 0x4000;
-    e->unk_1B0 = 0;
-    e->unk_1B2 = 0;
+    e->climb_side = 0;
+    e->climb_building = 0;
     if (D_800AA268.p->vel_y.w > 0) {
         func_8005189C(e);
     }
@@ -374,8 +374,8 @@ void func_8005180C(Monster *e) {
         func_8001E4B0(e->unk_16C);
         e->unk_16C = NULL;
     }
-    e->unk_1B0 = 0;
-    e->unk_1B2 = 0;
+    e->climb_side = 0;
+    e->climb_building = 0;
     if (e->unk_18E != 0) {
         e->unk_104 = 0xC000;
     } else {
@@ -394,7 +394,7 @@ void func_8005189C(Monster *e) {
         return;
     }
     D_800AA268.p->pos_y.s.hi = 0xE1;
-    if (D_801D8740 < 2 || D_801F9ACC == 0 || D_801F9ACC > 0xFFF00000U) {
+    if (D_801D8740 < 2 || D_801F9ACC.w == 0 || D_801F9ACC.w > 0xFFF00000U) {
         if ((u16) func_80031714(e) == 1) {
             e->action = 0x35;
             D_800AA268.p->pos_y.s.hi = 0xED;
@@ -424,13 +424,13 @@ void func_8005199C(Monster *e) {
 }
 
 void func_80051A08(Monster *e) {
-    if (D_800AA268.p->vel_y.w <= 0 && D_800AA268.p->pos_y.w <= (s32) D_801F9ACC) {
+    if (D_800AA268.p->vel_y.w <= 0 && D_800AA268.p->pos_y.w <= (s32) D_801F9ACC.w) {
         D_800AA268.p->vel_y.w = 0;
     }
 }
 
 void func_80051A48(Monster *e) {
-    if (!(e->unk_0C8 & 4)) {
+    if (!(e->buttons & 4)) {
         e->action = 2;
     }
     func_80051C9C(e);
@@ -443,14 +443,14 @@ void func_80051A80(Monster *e) {
             D_800AA248.cur_obj->pos_y.s.hi = 0xED;
             func_800531C0(e);
         } else {
-            D_800AA248.unk_14 = e->action;
+            D_800AA248.action = e->action;
             if (e->action != 0x4E) {
                 e->action = 0x19;
-                D_800AA248.unk_14 = 0x19;
+                D_800AA248.action = 0x19;
                 func_800531C0(e);
             } else {
                 e->action = 0x4D;
-                D_800AA248.unk_14 = 0x4D;
+                D_800AA248.action = 0x4D;
                 func_800531C0(e);
             }
         }
@@ -462,8 +462,8 @@ void func_80051B38(Monster *e) {
 
     vy = D_800AA248.cur_obj->vel_y.w;
     if (vy > 0) {
-        if (e->unk_008.w != 0) {
-            if (D_800AA248.unk_14 == 0x4E || (func_80056598(), D_800AA248.unk_14 == 2)) {
+        if (e->health.w != 0) {
+            if (D_800AA248.action == 0x4E || (func_80056598(), D_800AA248.action == 2)) {
                 if (D_800AA248.cur_obj->pos_y.s.hi < 0xE1) {
                     func_8005199C(e);
                     return;
@@ -474,7 +474,7 @@ void func_80051B38(Monster *e) {
                     func_8003EF64(e);
                     func_80046F68(e);
                     func_8004D488(e);
-                    if (D_801D8740 < 2 || D_801F9ACC == 0 || D_801F9ACC > 0xFFE00000) {
+                    if (D_801D8740 < 2 || D_801F9ACC.w == 0 || D_801F9ACC.w > 0xFFE00000) {
                         func_80051A80(e);
                         return;
                     }
@@ -483,7 +483,7 @@ void func_80051B38(Monster *e) {
                 }
                 goto state_done;
             }
-            if (D_800AA248.unk_14 != 0x2C) {
+            if (D_800AA248.action != 0x2C) {
             state_done:
                 func_800531C0(e);
             }
@@ -503,14 +503,14 @@ void func_80051C9C(Monster *e) {
         e->unk_16C = NULL;
     }
     g = &D_800AA248;
-    e->unk_1B0 = 0;
-    e->unk_1B2 = 0;
-    g->unk_24 = e->unk_0CC;
-    if ((u32) (e->unk_0CC - 4) >= 3U) {
+    e->climb_side = 0;
+    e->climb_building = 0;
+    g->unk_24 = e->dir;
+    if ((u32) (e->dir - 4) >= 3U) {
         func_80051B38(e);
     } else if (e->unk_168 == 7) {
         func_80056AC8(e);
-        g->unk_14 = e->action;
+        g->action = e->action;
         if (e->action == 2 || e->action == 0x4E) {
             func_80051B38(e);
         } else {
@@ -571,7 +571,7 @@ void func_80051E80(Monster *e) {
             }
             func_800634D4(m, 5);
             func_8004FC00(1, e);
-            if (m->unk_1B0 != 0 || m->obj->pos_y.s.hi != 0xE1) {
+            if (m->climb_side != 0 || m->obj->pos_y.s.hi != 0xE1) {
                 m->action = 0xF;
                 m->obj->vel_x.w = (m->obj->flags & 0x10) ? 0x20000 : -0x20000;
             } else if ((D_800AA248.cur_obj->flags & 0x10) == (m->obj->flags & 0x10)) {
@@ -649,11 +649,11 @@ void func_8005212C(Monster *e) {
 }
 
 void func_8005222C(Monster *e) {
-    e->unk_1B0 = 0;
-    e->unk_1B2 = 0;
+    e->climb_side = 0;
+    e->climb_building = 0;
     if (D_800AA268.p->pos_y.s.hi >= 0xE1) {
         D_800AA268.p->pos_y.s.hi = 0xE1;
-        if (D_801D8740 < 2 || D_801F9ACC == 0 || D_801F9ACC > 0xFFF00000) {
+        if (D_801D8740 < 2 || D_801F9ACC.w == 0 || D_801F9ACC.w > 0xFFF00000) {
             if ((u16) func_80031714(e) == 1) {
                 e->action = 0x35;
                 D_800AA268.p->pos_y.s.hi = 0xED;
@@ -670,12 +670,12 @@ void func_8005222C(Monster *e) {
 void func_800522F8(Monster *e) {
     GameObject *b;
 
-    e->unk_1B0 = 0;
-    e->unk_1B2 = 0;
+    e->climb_side = 0;
+    e->climb_building = 0;
     b = D_800AA268.p;
     if (b->vel_y.w > 0 && b->pos_y.s.hi >= 0xE1) {
         b->pos_y.s.hi = 0xE1;
-        if (D_801D8740 < 2 || D_801F9ACC == 0 || D_801F9ACC > 0xFFF00000) {
+        if (D_801D8740 < 2 || D_801F9ACC.w == 0 || D_801F9ACC.w > 0xFFF00000) {
             if ((u16) func_80031714(e) == 1) {
                 e->action = 0x35;
                 D_800AA268.p->pos_y.s.hi = 0xED;
@@ -686,10 +686,10 @@ void func_800522F8(Monster *e) {
 }
 
 void func_800523B8(Monster *e) {
-    e->unk_1B0 = 0;
-    e->unk_1B2 = 0;
+    e->climb_side = 0;
+    e->climb_building = 0;
     if (D_800AA268.p->pos_y.s.hi >= 0xE1) {
-        if (D_801D8740 < 2 || D_801F9ACC == 0 || D_801F9ACC > 0xFFF00000) {
+        if (D_801D8740 < 2 || D_801F9ACC.w == 0 || D_801F9ACC.w > 0xFFF00000) {
             if ((u16)func_80031714(e) == 1) {
                 func_800524AC(e);
                 e->action = 0x35;
@@ -725,8 +725,8 @@ void func_80052520(Monster *e) {
         func_80052880(e, g);
         return;
     }
-    g->unk_24 = e->unk_0CC;
-    dir = e->unk_0CC;
+    g->unk_24 = e->dir;
+    dir = e->dir;
     if (dir >= 2) {
         if (dir < 5) {
             vx = 0x8000;
@@ -736,9 +736,9 @@ void func_80052520(Monster *e) {
     }
     e->unk_100 = vx;
     e->unk_104 = 0x4000;
-    e->unk_1B0 = 0;
-    e->unk_1B2 = 0;
-    if ((u16) (e->unk_0CC - 4) < 3) {
+    e->climb_side = 0;
+    e->climb_building = 0;
+    if ((u16) (e->dir - 4) < 3) {
         func_80056CCC(e, g);
         if (e->action != 0x2C) {
             func_800531C0(e);
@@ -769,7 +769,7 @@ void func_8005262C(Monster *e) {
 }
 
 void func_800526A4(Monster *e) {
-    if (e->unk_008.w != 0) {
+    if (e->health.w != 0) {
         func_80056598();
         if (e->action != 0x2C) {
             func_800531C0(e);
@@ -785,7 +785,7 @@ void func_800526A4(Monster *e) {
     func_8003EF64(e);
     func_80046F68(e);
     func_8004D488(e);
-    if (D_801D8740 < 2 || D_801F9ACC == 0 || D_801F9ACC > 0xFFE00000) {
+    if (D_801D8740 < 2 || D_801F9ACC.w == 0 || D_801F9ACC.w > 0xFFE00000) {
         func_8005262C(e);
     } else {
         func_80052798(e);
@@ -801,7 +801,7 @@ void func_80052798(Monster *e) {
         e->action = 0;
         return;
     }
-    if (D_801F9914 >= 0x89 || e->unk_008.w <= 0xFFFF) {
+    if (D_801F9914 >= 0x89 || e->health.w <= 0xFFFF) {
         func_80029118(5, 8);
         e->action = 0;
         return;
@@ -878,7 +878,7 @@ void func_80052ADC(Monster *e) {
     func_8003EF64(e);
     func_80046F68(e);
     func_8004D488(e);
-    if (D_801D8740 < 2 || D_801F9ACC == 0 || D_801F9ACC > 0xFFE80000U) {
+    if (D_801D8740 < 2 || D_801F9ACC.w == 0 || D_801F9ACC.w > 0xFFE80000U) {
         func_8005262C(e);
         return;
     }
@@ -893,8 +893,8 @@ void func_80052BE0(Monster *e) {
 
     func_80053C50(0x700, e);
     D_800AA248.cur_obj->vel_x.w = 0;
-    D_800AA248.unk_24 = e->unk_0CC;
-    kind = e->unk_0CC;
+    D_800AA248.unk_24 = e->dir;
+    kind = e->dir;
     vx = 0;
     if (kind >= 2 && kind != 5) {
         vx = 0xFFFE0000;
@@ -923,14 +923,14 @@ void func_80052CB0(Monster *e) {
     e->unk_1C8 = 1;
     if (state != 0) {
         if (state == 1) {
-            if (e->unk_0C8 & 0x10) {
+            if (e->buttons & 0x10) {
                 other = func_8005D918();
                 if (other != NULL) {
                     other->unk_004--;
                     e->unk_004 = 0;
                     e->unk_002 = 0xFF;
                     func_8001F724(0x71);
-                    e->unk_008.w = 0x440000;
+                    e->health.w = 0x440000;
                     e->unk_1CC = 0;
                     e->action = 0x3B;
                     e->unk_0DC = 0;
@@ -976,7 +976,7 @@ void func_80052E44(Monster *e) {
 }
 
 void func_80052E70(Monster *e) {
-    func_8005382C(e->unk_0CC);
+    func_8005382C(e->dir);
 }
 
 void func_80052E94(void) {
@@ -1023,10 +1023,10 @@ s32 func_80053854(s16 x, s16 y, Monster *m) {
     if (x < D_801F9ACA) {
         px = x + ((D_801D8864.w + 1) >> 16);
     }
-    if (px >= m->unk_108 && y >= m->unk_10A && m->unk_10C >= px && m->unk_10E >= y) {
+    if (px >= m->box_x0 && y >= m->box_y0 && m->box_x1 >= px && m->box_y1 >= y) {
         return 1;
     }
-    if (px >= m->unk_110 && y >= (s16) m->unk_112 && m->unk_114 >= px && (s16) m->unk_116 >= y) {
+    if (px >= m->box2_x0 && y >= (s16) m->box2_y0 && m->box2_x1 >= px && (s16) m->box2_y1 >= y) {
         return 2;
     }
     return 0;
@@ -1055,13 +1055,13 @@ s32 func_80053B30(s16 x, s16 y, s16 dx, s16 dy, Monster *e) {
     if (x < D_801F9ACA) {
         px = x + ((D_801D8864.w + 1) >> 16);
     }
-    ax = e->unk_108;
-    ay = e->unk_10A;
+    ax = e->box_x0;
+    ay = e->box_y0;
     if (px < (s16) (ax - dx) || y < (s16) (ay - dy)) {
         return 0;
     }
-    ax = e->unk_10C;
-    ay = e->unk_10E;
+    ax = e->box_x1;
+    ay = e->box_y1;
     if ((s16) (ax + dx) < px || (s16) (ay + dy) < y) {
         return 0;
     }
@@ -1078,10 +1078,10 @@ u16 func_80053BE8(s16 x, Monster *e) {
     if (x < D_801F9ACA) {
         v = x + ((D_801D8864.w + 1) >> 16);
     }
-    if (v < e->unk_108) {
+    if (v < e->box_x0) {
         return 0;
     }
-    return v <= e->unk_10C;
+    return v <= e->box_x1;
 }
 
 void func_80053C50(s32 amount, Monster *e) {
@@ -1175,7 +1175,7 @@ void func_80053EA8(void) {
     x = obj->pos_x.u.hi;
     m = obj->owner.monster;
     func_8001F724(0x61);
-    if ((u32) (m->unk_1B0 - 1) < 2) {
+    if ((u32) (m->climb_side - 1) < 2) {
         y = y - 0x13;
         sx = (s16) x;
         flip = obj->flags & 0x10;
@@ -1224,9 +1224,9 @@ void func_80053FDC(void) {
     b->pos_y.w += v;
     b->vel_y.w = v;
     if (b->pos_y.s.hi >= 0xC0) {
-        b->unk_80 = 0x319;
+        b->priority = 0x319;
     } else {
-        b->script_pc = *b->arg.w;
+        b->script.pc = *b->arg.w;
     }
 }
 
@@ -1305,13 +1305,13 @@ void func_8005421C(Monster *e) {
                     continue;
                 }
                 m = &D_801E0B78[i];
-                if (!(m->unk_058 & 1) || m->unk_0DC == 0 || m->action == 0x37 || m->unk_1B0 != 0) {
+                if (!(m->unk_058 & 1) || m->unk_0DC == 0 || m->action == 0x37 || m->climb_side != 0) {
                     continue;
                 }
                 obj = m->obj;
                 dx = obj->pos_x.s.hi - D_800AA248.cur_obj->pos_x.s.hi;
                 if ((dx < 0 ? -dx : dx) < 0x13 && obj->pos_y.s.hi == 0xE1) {
-                    m->unk_180 = e;
+                    m->attacker = e;
                     if (D_8007A68A != 0) {
                         func_80053C50(0x30000, m);
                     }
@@ -1333,7 +1333,7 @@ void func_80054374(s32 points, Monster *e) {
     s32 n;
 
     n = 0;
-    if (e->unk_008.w != 0) {
+    if (e->health.w != 0) {
         step = 50000;
         next = step;
         old = e->unk_038;
@@ -1387,11 +1387,11 @@ void func_800544D8(Monster *e, GameObject *dst, GameObject *src) {
         dst->pos_x.s.hi = e->pos.u.lo;
         dst->pos_y.s.hi = e->pos.u.hi;
     }
-    dst->unk_80 = src->unk_80 + 0x1000;
+    dst->priority = src->priority + 0x1000;
 }
 
 #ifdef NON_MATCHING
-/* 95.4 %: the original reloads m->unk_108 for the facing-left test (its first load dies in the bound's subtraction) and keeps m->unk_10C in v1 */
+/* 95.4 %: the original reloads m->box_x0 for the facing-left test (its first load dies in the bound's subtraction) and keeps m->box_x1 in v1 */
 s32 func_8005453C(s16 x, s32 unused, Monster *m) {
     GameObject *obj;
     s16 px;
@@ -1404,12 +1404,12 @@ s32 func_8005453C(s16 x, s32 unused, Monster *m) {
     if (x < D_801F9ACA) {
         px = x + ((D_801D8864.w + 1) >> 16);
     }
-    if (px >= m->unk_108 - 0x30 && m->unk_10C + 0x30 >= px) {
+    if (px >= m->box_x0 - 0x30 && m->box_x1 + 0x30 >= px) {
         if (!(obj->flags & 0x10)) {
-            if (px >= m->unk_10C) {
+            if (px >= m->box_x1) {
                 return 1;
             }
-        } else if (m->unk_108 >= px) {
+        } else if (m->box_x0 >= px) {
             return 1;
         }
     }
@@ -1430,23 +1430,23 @@ void func_80054608(u16 kind, Monster *e, Building *u) {
         e->action = 0;
         return;
     }
-    x = e->unk_0F4;
+    x = e->front_x;
     if (x >= (s16) u->unk_004 + 8 && u->unk_00E - 8 >= x) {
         top = u->unk_074;
         if (top - 4 >= y && top - 4 - y < 0xB && u->unk_008 >= kind) {
-            if (u->unk_014 >= 9) {
+            if (u->state >= 9) {
                 e->unk_152 = (u32) (e->action - 5) < 2;
                 e->action = 2;
                 e->obj->vel_y.w = 0;
                 e->unk_104 = 0;
                 func_800580F8(e);
                 e->action = 0x4E;
-                e->unk_1B0 = 0;
+                e->climb_side = 0;
             } else {
                 next = u->unk_01E;
-                e->unk_1B0 = 3;
+                e->climb_side = 3;
                 e->action = 0;
-                e->unk_1B2 = next;
+                e->climb_building = next;
                 e->obj->pos_y.s.hi = u->unk_074 + 8;
             }
         }
@@ -1480,7 +1480,7 @@ INCLUDE_ASM("asm/main/nonmatchings/game_800500EC", func_80054728);
 void func_8005478C(Monster *e) {
     Building *obj;
 
-    obj = func_80054728(e->unk_1B2);
+    obj = func_80054728(e->climb_building);
     if (obj != NULL && obj->unk_078 == 0 && obj->unk_058 == 0) {
         func_80031280(e, obj);
     }
@@ -1489,7 +1489,7 @@ void func_8005478C(Monster *e) {
 INCLUDE_ASM("asm/main/nonmatchings/game_800500EC", func_800547EC);
 
 void func_80054A18(Monster *e) {
-    func_800578E0(e, func_80054728(e->unk_1B2));
+    func_800578E0(e, func_80054728(e->climb_building));
 }
 
 void func_80054A50(Monster *e) {
@@ -1499,13 +1499,13 @@ void func_80054A50(Monster *e) {
     s32 limit;
     u16 kind;
 
-    u = func_80054728(e->unk_1B2);
+    u = func_80054728(e->climb_building);
     if (!func_80057AD8(e, u, 2)) {
         func_80056F38(e, u);
         func_800578E0(e, u);
         g = &D_800AA248;
-        if (g->unk_14 == 5) {
-            g->unk_0C = e->unk_0F4;
+        if (g->action == 5) {
+            g->unk_0C = e->front_x;
             g->unk_10 = g->cur_obj->pos_y.s.hi;
             if ((u32) (g->unk_24 - 4) < 3U) {
                 if (func_800573C8(e, u) == 1) {
@@ -1544,13 +1544,13 @@ void func_80054BA4(Monster *e) {
     s32 limit;
     u16 kind;
 
-    u = func_80054728(e->unk_1B2);
+    u = func_80054728(e->climb_building);
     if (!func_80057AD8(e, u, 1)) {
         func_80056F38(e, u);
         func_800578E0(e, u);
         g = &D_800AA248;
-        if (g->unk_14 == 5) {
-            g->unk_0C = e->unk_0F4;
+        if (g->action == 5) {
+            g->unk_0C = e->front_x;
             g->unk_10 = g->cur_obj->pos_y.s.hi;
             if ((u32) (g->unk_24 - 4) < 3U) {
                 if (func_800576B8(e, u) == 1) {
@@ -1596,14 +1596,14 @@ void func_80054CF8(Monster *e, Building *city) {
 void func_80054D74(u16 kind, Monster *e, Building *u) {
     u16 next;
 
-    if (u->unk_014 < 0xB && u->unk_008 >= kind && D_800AA248.unk_0C >= (s16) u->unk_004 + 8 &&
+    if (u->state < 0xB && u->unk_008 >= kind && D_800AA248.unk_0C >= (s16) u->unk_004 + 8 &&
         (s16) u->unk_00E - 8 >= D_800AA248.unk_0C && D_800AA248.unk_10 >= (s16) u->unk_074 - 4) {
         next = u->unk_01E;
-        e->unk_1B0 = 3;
-        e->unk_1B2 = next;
+        e->climb_side = 3;
+        e->climb_building = next;
         D_800AA248.unk_08 = 3;
         e->action = 0;
-        D_800AA248.unk_14 = 0;
+        D_800AA248.action = 0;
         D_800AA248.cur_obj->pos_y.s.hi = u->unk_074 + 8;
     }
 }
@@ -1612,12 +1612,12 @@ void func_80054E1C(Monster *e) {
     Building *city;
     s16 y;
 
-    city = func_80054728(e->unk_1B2);
+    city = func_80054728(e->climb_building);
     func_80056F38(e, city);
     func_800578E0(e, city);
-    if (D_800AA248.unk_14 != 0xF && D_800AA248.unk_14 != 2 && D_800AA248.unk_14 != 0x4E) {
+    if (D_800AA248.action != 0xF && D_800AA248.action != 2 && D_800AA248.action != 0x4E) {
         if (func_80057AD8(e, city, 2) == 0) {
-            D_800AA248.unk_0C = e->unk_0F4;
+            D_800AA248.unk_0C = e->front_x;
             y = D_800AA248.cur_obj->pos_y.s.hi;
             D_800AA248.unk_10 = y;
             if (y >= 0xE2) {
@@ -1636,12 +1636,12 @@ void func_80054F18(Monster *e) {
     Building *city;
     s16 y;
 
-    city = func_80054728(e->unk_1B2);
+    city = func_80054728(e->climb_building);
     if (func_80057AD8(e, city, 2) == 0) {
         func_80056F38(e, city);
         func_800578E0(e, city);
-        if (D_800AA248.unk_14 != 0xF && D_800AA248.unk_14 != 2 && D_800AA248.unk_14 != 0x4E) {
-            D_800AA248.unk_0C = e->unk_0F4;
+        if (D_800AA248.action != 0xF && D_800AA248.action != 2 && D_800AA248.action != 0x4E) {
+            D_800AA248.unk_0C = e->front_x;
             y = D_800AA248.cur_obj->pos_y.s.hi;
             D_800AA248.unk_10 = y;
             if (y >= 0xE2) {
@@ -1660,12 +1660,12 @@ void func_80055014(Monster *e) {
     Building *city;
     s16 y;
 
-    city = func_80054728(e->unk_1B2);
+    city = func_80054728(e->climb_building);
     if (func_80057AD8(e, city, 1) == 0) {
         func_80056F38(e, city);
         func_800578E0(e, city);
-        if (D_800AA248.unk_14 != 0xF && D_800AA248.unk_14 != 2 && D_800AA248.unk_14 != 0x4E) {
-            D_800AA248.unk_0C = e->unk_0F4;
+        if (D_800AA248.action != 0xF && D_800AA248.action != 2 && D_800AA248.action != 0x4E) {
+            D_800AA248.unk_0C = e->front_x;
             y = D_800AA248.cur_obj->pos_y.s.hi;
             D_800AA248.unk_10 = y;
             if (y >= 0xE2) {
@@ -1684,12 +1684,12 @@ void func_80055110(Monster *e) {
     Building *u;
     s16 y;
 
-    u = func_80054728(e->unk_1B2);
+    u = func_80054728(e->climb_building);
     if (!func_80057AD8(e, u, 1)) {
         func_80056F38(e, u);
         func_800578E0(e, u);
-        if (D_800AA248.unk_14 != 0xF && D_800AA248.unk_14 != 2 && D_800AA248.unk_14 != 0x4E) {
-            D_800AA248.unk_0C = e->unk_0F4;
+        if (D_800AA248.action != 0xF && D_800AA248.action != 2 && D_800AA248.action != 0x4E) {
+            D_800AA248.unk_0C = e->front_x;
             y = D_800AA248.cur_obj->pos_y.s.hi;
             D_800AA248.unk_10 = y;
             if (y >= 0xE2) {
@@ -1714,17 +1714,17 @@ void func_8005520C(Monster *e) {
     GameState *h;
     s16 d;
 
-    u = func_80054728(e->unk_1B2);
+    u = func_80054728(e->climb_building);
     func_80056F38(e, u);
     func_800578E0(e, u);
     g = &D_800AA248;
-    if (g->unk_14 != 0xF && g->unk_14 != 2 && g->unk_14 != 0x4E) {
+    if (g->action != 0xF && g->action != 2 && g->action != 0x4E) {
         g->unk_10 = (s16) u->unk_074 + 8;
         g->cur_obj->pos_y.s.hi = g->unk_10;
         if ((u32) (g->unk_24 - 4) < 3U && !func_80057AD8(e, u, 3)) {
             func_80055970(e, u);
-            e->action = g->unk_14;
-            if (g->unk_14 == 0xD) {
+            e->action = g->action;
+            if (g->action == 0xD) {
                 return;
             }
         }
@@ -1759,7 +1759,7 @@ void func_800553B0(Monster *e) {
     Building *obj;
 
     if (!(D_800AA2DC & 0x38)) {
-        obj = func_80054728(e->unk_1B2);
+        obj = func_80054728(e->climb_building);
         if (!func_80057AD8(e, obj, 1)) {
             func_80056F38(e, obj);
             func_800578E0(e, obj);
@@ -1788,7 +1788,7 @@ void func_800554F8(Monster *e, Building *u) {
             return;
         }
         e->action = 9;
-        D_800AA248.unk_14 = 9;
+        D_800AA248.action = 9;
     }
 }
 
@@ -1815,7 +1815,7 @@ void func_80055600(Monster *e, Building *u) {
 void func_800556AC(Monster *e) {
     Building *obj;
 
-    obj = func_80054728(e->unk_1B2);
+    obj = func_80054728(e->climb_building);
     if (!func_80057AD8(e, obj, 2)) {
         func_80056F38(e, obj);
         func_800578E0(e, obj);
@@ -1843,7 +1843,7 @@ void func_800557C8(Monster *e, Building *u) {
             return;
         }
         e->action = 9;
-        D_800AA248.unk_14 = 9;
+        D_800AA248.action = 9;
     }
 }
 
@@ -1868,9 +1868,9 @@ void func_800558AC(Monster *e, Building *u) {
 }
 
 void func_80055948(Monster *e, Building *u) {
-    if (D_800AA248.unk_14 == 9) {
+    if (D_800AA248.action == 9) {
         e->action = 0;
-        D_800AA248.unk_14 = 0;
+        D_800AA248.action = 0;
     }
 }
 
@@ -1887,7 +1887,7 @@ void func_80055970(Monster *e, Building *city) {
         } else {
             city--;
         }
-        if (kind < city->unk_008 || city->unk_014 >= 0xB) {
+        if (kind < city->unk_008 || city->state >= 0xB) {
             func_80055B68(e, start);
             return;
         }
@@ -1896,14 +1896,14 @@ void func_80055970(Monster *e, Building *city) {
             func_80055AB8(e, city, start);
             return;
         }
-        if (func_800573EC(e, city, e->unk_1B2) == 1) {
+        if (func_800573EC(e, city, e->climb_building) == 1) {
             e->unk_104 = 0;
             g->cur_obj->vel_y.w = 0;
             return;
         }
         func_800560A8(e, city);
         e->action = 0xD;
-        g->unk_14 = 0xD;
+        g->action = 0xD;
     }
 }
 
@@ -1912,14 +1912,14 @@ void func_80055AB8(Monster *e, Building *city, Building *start) {
         func_80055B68(e, start);
         return;
     }
-    if (func_800576DC(e, city, e->unk_1B2) == 1) {
+    if (func_800576DC(e, city, e->climb_building) == 1) {
         e->unk_104 = 0;
         D_800AA248.cur_obj->vel_y.w = 0;
         return;
     }
     func_80055FBC(e, city);
     e->action = 0xD;
-    D_800AA248.unk_14 = 0xD;
+    D_800AA248.action = 0xD;
 }
 
 void func_80055B68(Monster *e, Building *city) {
@@ -1932,20 +1932,20 @@ void func_80055B68(Monster *e, Building *city) {
     } else {
         city++;
     }
-    if (kind >= city->unk_008 && city->unk_014 < 0xB) {
+    if (kind >= city->unk_008 && city->state < 0xB) {
         g = &D_800AA248;
         if (!func_80056378(g->unk_0C, city)) {
             if (!func_800562E4(g->unk_0C, city)) {
                 return;
             }
-            if (func_800576DC(e, city, e->unk_1B2) == 1) {
+            if (func_800576DC(e, city, e->climb_building) == 1) {
                 e->unk_104 = 0;
                 g->cur_obj->vel_y.w = 0;
                 return;
             }
             func_80055FBC(e, city);
         } else {
-            if (func_800573EC(e, city, e->unk_1B2) == 1) {
+            if (func_800573EC(e, city, e->climb_building) == 1) {
                 e->unk_104 = 0;
                 g->cur_obj->vel_y.w = 0;
                 return;
@@ -1953,7 +1953,7 @@ void func_80055B68(Monster *e, Building *city) {
             func_800560A8(e, city);
         }
         e->action = 0xD;
-        g->unk_14 = 0xD;
+        g->action = 0xD;
     }
 }
 
@@ -1964,19 +1964,19 @@ void func_80055FBC(Monster *e, Building *city) {
     u16 state;
 
     target = city->unk_01E;
-    e->unk_1B0 = 1;
-    e->unk_1B2 = target;
+    e->climb_side = 1;
+    e->climb_building = target;
     D_800AA248.unk_08 = 1;
     state = e->action;
     if (state == 0x11 || state == 2 || state == 0x4E || state == 0x2C) {
         e->action = 6;
-        D_800AA248.unk_14 = 6;
+        D_800AA248.action = 6;
         e->unk_168 = 3;
         D_800AA248.cur_obj->vel_x.w = 0;
         D_800AA248.cur_obj->vel_y.w = 0;
         e->unk_05C = 0;
     } else {
-        D_800AA248.unk_14 = 0xD;
+        D_800AA248.action = 0xD;
         e->action = 0xD;
     }
 }
@@ -1985,11 +1985,11 @@ void func_80056050(Monster *e, Building *city) {
     u16 target;
 
     target = city->unk_01E;
-    e->unk_1B0 = 1;
-    e->unk_1B2 = target;
+    e->climb_side = 1;
+    e->climb_building = target;
     D_800AA248.unk_08 = 1;
     e->action = 6;
-    D_800AA248.unk_14 = 6;
+    D_800AA248.action = 6;
     e->unk_168 = 3;
     D_800AA248.cur_obj->vel_x.w = 0;
     D_800AA248.cur_obj->vel_y.w = 0;
@@ -2001,8 +2001,8 @@ void func_800560A8(Monster *e, Building *city) {
     u16 state;
 
     target = city->unk_01E;
-    e->unk_1B0 = 2;
-    e->unk_1B2 = target;
+    e->climb_side = 2;
+    e->climb_building = target;
     D_800AA248.unk_08 = 2;
     D_800AA248.cur_obj->vel_x.w = 0;
     D_800AA248.cur_obj->vel_y.w = 0;
@@ -2013,7 +2013,7 @@ void func_800560A8(Monster *e, Building *city) {
         e->unk_168 = 7;
         e->unk_05C = 0;
     } else {
-        D_800AA248.unk_14 = 0xD;
+        D_800AA248.action = 0xD;
         e->action = 0xD;
     }
 }
@@ -2022,11 +2022,11 @@ void func_80056134(Monster *e, Building *city) {
     u16 target;
 
     target = city->unk_01E;
-    e->unk_1B0 = 2;
-    e->unk_1B2 = target;
+    e->climb_side = 2;
+    e->climb_building = target;
     D_800AA248.unk_08 = 2;
     e->action = 6;
-    D_800AA248.unk_14 = 6;
+    D_800AA248.action = 6;
     e->unk_168 = 7;
     D_800AA248.cur_obj->vel_x.w = 0;
     D_800AA248.cur_obj->vel_y.w = 0;
@@ -2035,10 +2035,10 @@ void func_80056134(Monster *e, Building *city) {
 
 void func_8005618C(Monster *e, Building *city) {
     D_800AA248.cur_obj->pos_y.w = 0xE10000;
-    D_800AA248.unk_14 = 0;
+    D_800AA248.action = 0;
     e->action = 0;
-    e->unk_1B2 = 0;
-    e->unk_1B0 = 0;
+    e->climb_building = 0;
+    e->climb_side = 0;
     func_8004E8A8();
 }
 
@@ -2104,7 +2104,7 @@ void func_8005640C(Monster *e, Building *city) {
     GameState *g;
 
     g = &D_800AA248;
-    n = e->unk_1B0;
+    n = e->climb_side;
     g->unk_08 = n;
     if ((s16) city->unk_074 + 0x34 >= g->unk_10) {
         h = e->unk_1C4.s.hi;
@@ -2121,13 +2121,13 @@ void func_8005640C(Monster *e, Building *city) {
             goto clear;
         }
     stand:
-        g->unk_14 = 0x10;
+        g->action = 0x10;
             e->action = 0x10;
     }
 }
 
 void func_80056488(Monster *e) {
-    D_800AA268.p->pos_x.s.hi = func_80054728(e->unk_1B2)->unk_004 + 0x28;
+    D_800AA268.p->pos_x.s.hi = func_80054728(e->climb_building)->unk_004 + 0x28;
 }
 
 void func_800564C0(Monster *e, Building *city) {
@@ -2135,7 +2135,7 @@ void func_800564C0(Monster *e, Building *city) {
 }
 
 void func_800564D8(Monster *e) {
-    D_800AA268.p->pos_x.s.hi = func_80054728(e->unk_1B2)->unk_00E - 0x28;
+    D_800AA268.p->pos_x.s.hi = func_80054728(e->climb_building)->unk_00E - 0x28;
 }
 
 void func_80056510(Monster *e, Building *u) {
@@ -2143,11 +2143,11 @@ void func_80056510(Monster *e, Building *u) {
 }
 
 void func_80056528(Monster *e) {
-    D_800AA268.p->pos_y.s.hi = func_80054728(e->unk_1B2)->unk_074 + 0x30;
+    D_800AA268.p->pos_y.s.hi = func_80054728(e->climb_building)->unk_074 + 0x30;
 }
 
 void func_80056560(Monster *e) {
-    D_800AA268.p->pos_y.s.hi = func_80054728(e->unk_1B2)->unk_074 + 8;
+    D_800AA268.p->pos_y.s.hi = func_80054728(e->climb_building)->unk_074 + 8;
 }
 
 INCLUDE_ASM("asm/main/nonmatchings/game_800500EC", func_80056598);
@@ -2156,10 +2156,10 @@ INCLUDE_ASM("asm/main/nonmatchings/game_800500EC", func_80056708);
 
 void func_800567E8(Monster *e, Building *city) {
     D_800AA248.cur_obj->pos_y.s.hi = city->unk_074;
-    e->unk_1B2 = city->unk_01E;
+    e->climb_building = city->unk_01E;
     D_800AA248.unk_08 = 3;
-    e->unk_1B0 = 3;
-    D_800AA248.unk_14 = 0x19;
+    e->climb_side = 3;
+    D_800AA248.action = 0x19;
     e->action = 0x19;
     func_8005478C(e);
 }
@@ -2169,9 +2169,9 @@ u16 func_80056840(Monster *e) {
     s32 d;
     s16 n;
 
-    D_800AA248.unk_0C = e->unk_0F4;
+    D_800AA248.unk_0C = e->front_x;
     D_800AA248.unk_10 = D_800AA248.cur_obj->pos_y.w;
-    D_800AA248.unk_10 -= (&D_801F9AC8)[1].w; /* FAKE: the camera y (D_801F9ACC) read as the word after the camera x: the original loads it after the state stores, as a member of the camera record would be (game.h declares it a scalar) */
+    D_800AA248.unk_10 -= D_801F9ACC.w;
     if ((u32) (D_800AA248.unk_10 - 0x580000) > 0xB00000) {
         return 0;
     }
@@ -2185,9 +2185,9 @@ u16 func_80056840(Monster *e) {
     city = D_801D3DC8;
     do {
         D_800AA248.unk_04++;
-        if (city->unk_014 < 9) {
-            d = (s16) city->unk_004 - e->unk_0F4;
-            if ((d < 0 ? -d : d) < 0x15 && (e->unk_1BE == 0 || city->unk_01E != e->unk_1BE) &&
+        if (city->state < 9) {
+            d = (s16) city->unk_004 - e->front_x;
+            if ((d < 0 ? -d : d) < 0x15 && (e->skip_building == 0 || city->unk_01E != e->skip_building) &&
                 (u16) func_80056990(e, city) == 1) {
                 return 1;
             }
@@ -2207,7 +2207,7 @@ s32 func_80056990(Monster *e, Building *u) {
         return 0;
     }
     n = func_80056A44(e, u);
-    if ((u16) u->unk_024 < n && func_800575F0(n, e, u, e->unk_1B2) != 1) {
+    if ((u16) u->unk_024 < n && func_800575F0(n, e, u, e->climb_building) != 1) {
         func_80055FBC(e, u);
         func_800564C0(e, u);
         return 1;
@@ -2247,9 +2247,9 @@ u16 func_80056AC8(Monster *e) {
     s32 d;
     s16 n;
 
-    D_800AA248.unk_0C = e->unk_0F4;
+    D_800AA248.unk_0C = e->front_x;
     D_800AA248.unk_10 = D_800AA248.cur_obj->pos_y.w;
-    D_800AA248.unk_10 -= (&D_801F9AC8)[1].w; /* FAKE: the camera y (D_801F9ACC) read as the word after the camera x: the original loads it after the state stores, as a member of the camera record would be (game.h declares it a scalar) */
+    D_800AA248.unk_10 -= D_801F9ACC.w;
     if ((u32) (D_800AA248.unk_10 - 0x580000) > 0xB00000) {
         return 0;
     }
@@ -2263,9 +2263,9 @@ u16 func_80056AC8(Monster *e) {
     city = D_801D3DC8;
     do {
         D_800AA248.unk_04++;
-        if (city->unk_014 < 9) {
-            d = (s16) city->unk_00E - e->unk_0F4;
-            if ((d < 0 ? -d : d) < 0x15 && (e->unk_1BE == 0 || city->unk_01E != e->unk_1BE) &&
+        if (city->state < 9) {
+            d = (s16) city->unk_00E - e->front_x;
+            if ((d < 0 ? -d : d) < 0x15 && (e->skip_building == 0 || city->unk_01E != e->skip_building) &&
                 (u16) func_80056C18(e, city) == 1) {
                 return 1;
             }
@@ -2285,7 +2285,7 @@ s32 func_80056C18(Monster *e, Building *u) {
         return 0;
     }
     n = func_80056A44(e, u);
-    if ((u16) u->unk_028 < n && func_80057300(n, e, u, e->unk_1B2) != 1) {
+    if ((u16) u->unk_028 < n && func_80057300(n, e, u, e->climb_building) != 1) {
         func_800560A8(e, u);
         func_80056510(e, u);
         return 1;
@@ -2298,10 +2298,10 @@ INCLUDE_ASM("asm/main/nonmatchings/game_800500EC", func_80056CCC);
 void func_80056E2C(Monster *e, Building *city) {
     u16 n;
 
-    n = e->unk_1B0;
+    n = e->climb_side;
     D_800AA248.unk_08 = n;
     if ((u32) (n - 1) < 2) {
-        D_800AA248.unk_14 = 0x12;
+        D_800AA248.action = 0x12;
         e->action = 0x12;
     } else {
         func_80056E78(e);
@@ -2312,28 +2312,28 @@ void func_80056E78(Monster *e) {
     D_800AA25C = 2;
     e->action = 2;
     func_800580F8(e);
-    e->unk_1B0 = 0;
-    e->unk_1B2 = 0;
-    e->unk_1B4 = 0;
+    e->climb_side = 0;
+    e->climb_building = 0;
+    e->climb_floor = 0;
 }
 
 void func_80056EB8(Monster *e, Building *city) {
     u16 n;
 
-    if (city->unk_014 == 4) {
+    if (city->state == 4) {
         if (city->unk_082 != 0) {
             return;
         }
         goto fall;
     }
-    n = e->unk_1B0;
+    n = e->climb_side;
     D_800AA248.unk_08 = n;
     if (n == 3) {
-        D_800AA248.unk_14 = 0x2C;
+        D_800AA248.action = 0x2C;
         e->action = 0x2C;
         return;
     }
-    if (city->unk_014 >= 0xB) {
+    if (city->state >= 0xB) {
     fall:
         func_80056E78(e);
     }
@@ -2365,7 +2365,7 @@ s32 func_800570D4(Monster *e, BuildingBlock *p) {
     s32 x;
 
     x = p->unk_1E + 8;
-    if (x < e->unk_10A || x >= e->unk_10E) {
+    if (x < e->box_y0 || x >= e->box_y1) {
         return 0;
     }
     return 1;
@@ -2374,7 +2374,7 @@ s32 func_800570D4(Monster *e, BuildingBlock *p) {
 u16 func_80057110(Monster *e) {
     BuildingBlock *p;
 
-    p = func_80054728(e->unk_1B2)->unk_018;
+    p = func_80054728(e->climb_building)->unk_018;
     if (p != NULL && p->unk_1C == 2) {
         return func_800571D0(e, p);
     }
@@ -2384,7 +2384,7 @@ u16 func_80057110(Monster *e) {
 u16 func_80057170(Monster *e) {
     BuildingBlock *p;
 
-    p = func_80054728(e->unk_1B2)->unk_018;
+    p = func_80054728(e->climb_building)->unk_018;
     if (p != NULL && p->unk_1C == 1) {
         return func_800571D0(e, p);
     }
@@ -2395,7 +2395,7 @@ s32 func_800571D0(Monster *e, BuildingBlock *p) {
     s32 x;
 
     x = p->unk_0E - 8;
-    if (e->unk_10E < x || e->unk_10A >= x) {
+    if (e->box_y1 < x || e->box_y0 >= x) {
         return 0;
     }
     return 1;
@@ -2425,9 +2425,9 @@ s32 func_800572A4(Monster *e, BuildingBlock *p) {
     s32 x;
 
     x = p->unk_1E + 8;
-    if (x < e->unk_10A || x >= e->unk_10E) {
+    if (x < e->box_y0 || x >= e->box_y1) {
         x = p->unk_0E - 8;
-        if (e->unk_10E < x || e->unk_10A >= x) {
+        if (e->box_y1 < x || e->box_y0 >= x) {
             return 0;
         }
     }
@@ -2443,8 +2443,8 @@ u16 func_80057300(u16 x, Monster *e, Building *city, u16 n) {
     do {
         if (i != e->id) {
             m = &D_801E0B78[i];
-            if ((m->unk_058 & 1) && m->unk_1B0 == 2 && m->unk_1B2 == n) {
-                d = m->unk_1B4 - x;
+            if ((m->unk_058 & 1) && m->climb_side == 2 && m->climb_building == n) {
+                d = m->climb_floor - x;
                 if ((d < 0 ? -d : d) < 2) {
                     return 1;
                 }
@@ -2455,7 +2455,7 @@ u16 func_80057300(u16 x, Monster *e, Building *city, u16 n) {
 }
 
 u16 func_800573C8(Monster *e, Building *city) {
-    return func_800573EC(e, city, e->unk_1B2);
+    return func_800573EC(e, city, e->climb_building);
 }
 
 u16 func_800573EC(Monster *e, Building *city, u16 n) {
@@ -2470,8 +2470,8 @@ u16 func_800573EC(Monster *e, Building *city, u16 n) {
     do {
         if (i != e->id) {
             m = &D_801E0B78[i];
-            if ((m->unk_058 & 1) && m->unk_1B0 == 2 && m->unk_1B2 == n) {
-                d = m->unk_1B4 - e->unk_1B4;
+            if ((m->unk_058 & 1) && m->climb_side == 2 && m->climb_building == n) {
+                d = m->climb_floor - e->climb_floor;
                 if ((d < 0 ? -d : d) < 2) {
                     y = D_800AA248.cur_obj->pos_y.s.hi;
                     my = m->obj->pos_y.s.hi;
@@ -2503,8 +2503,8 @@ u16 func_800574EC(Monster *e, Building *city) {
     do {
         if (i != e->id) {
             m = &D_801E0B78[i];
-            if ((m->unk_058 & 1) && m->unk_1B0 == 2 && m->unk_1B2 == e->unk_1B2) {
-                d = m->unk_1B4 - e->unk_1B4;
+            if ((m->unk_058 & 1) && m->climb_side == 2 && m->climb_building == e->climb_building) {
+                d = m->climb_floor - e->climb_floor;
                 if ((d < 0 ? -d : d) < 2) {
                     y = D_800AA248.cur_obj->pos_y.s.hi;
                     my = m->obj->pos_y.s.hi;
@@ -2533,8 +2533,8 @@ u16 func_800575F0(u16 x, Monster *e, Building *city, u16 n) {
     do {
         if (i != e->id) {
             m = &D_801E0B78[i];
-            if ((m->unk_058 & 1) && m->unk_1B0 == 1 && m->unk_1B2 == n) {
-                d = m->unk_1B4 - x;
+            if ((m->unk_058 & 1) && m->climb_side == 1 && m->climb_building == n) {
+                d = m->climb_floor - x;
                 if ((d < 0 ? -d : d) < 2) {
                     return 1;
                 }
@@ -2545,7 +2545,7 @@ u16 func_800575F0(u16 x, Monster *e, Building *city, u16 n) {
 }
 
 u16 func_800576B8(Monster *e, Building *u) {
-    return func_800576DC(e, u, e->unk_1B2);
+    return func_800576DC(e, u, e->climb_building);
 }
 
 u16 func_800576DC(Monster *e, Building *city, u16 n) {
@@ -2560,8 +2560,8 @@ u16 func_800576DC(Monster *e, Building *city, u16 n) {
     do {
         if (i != e->id) {
             m = &D_801E0B78[i];
-            if ((m->unk_058 & 1) && m->unk_1B0 == 1 && m->unk_1B2 == n) {
-                d = m->unk_1B4 - e->unk_1B4;
+            if ((m->unk_058 & 1) && m->climb_side == 1 && m->climb_building == n) {
+                d = m->climb_floor - e->climb_floor;
                 if ((d < 0 ? -d : d) < 2) {
                     y = D_800AA248.cur_obj->pos_y.s.hi;
                     my = m->obj->pos_y.s.hi;
@@ -2593,8 +2593,8 @@ u16 func_800577DC(Monster *e, Building *city) {
     do {
         if (i != e->id) {
             m = &D_801E0B78[i];
-            if ((m->unk_058 & 1) && m->unk_1B0 == 1 && m->unk_1B2 == e->unk_1B2) {
-                d = m->unk_1B4 - e->unk_1B4;
+            if ((m->unk_058 & 1) && m->climb_side == 1 && m->climb_building == e->climb_building) {
+                d = m->climb_floor - e->climb_floor;
                 if ((d < 0 ? -d : d) < 2) {
                     y = D_800AA248.cur_obj->pos_y.s.hi;
                     my = m->obj->pos_y.s.hi;
@@ -2625,11 +2625,11 @@ void func_800578E0(Monster *e, Building *city) {
         return;
     }
     {
-        if (city->unk_058 == 1 && city->unk_014 != 0) {
+        if (city->unk_058 == 1 && city->state != 0) {
             func_80056EB8(e, city);
             return;
         }
-        kind = city->unk_014;
+        kind = city->state;
         if (kind < 0xB) {
             if (kind != 4) {
                 if ((u16) func_80057A08(e) != 1) {
@@ -2643,7 +2643,7 @@ void func_800578E0(Monster *e, Building *city) {
                 if (n >= 0x83) {
                     return;
                 }
-                if ((u16) e->unk_1B4 < 3) {
+                if ((u16) e->climb_floor < 3) {
                     e->action = 0x2B;
                     return;
                 }
@@ -2663,19 +2663,19 @@ u16 func_80057A08(Monster *e) {
     Building *city;
     GameObject *top;
 
-    if (e->unk_1B0 == 0 || e->unk_1B2 == 0) {
+    if (e->climb_side == 0 || e->climb_building == 0) {
         return 0;
     }
-    city = func_80054728(e->unk_1B2);
+    city = func_80054728(e->climb_building);
     if (city != NULL) {
-        if (city->unk_014 != 4) {
+        if (city->state != 4) {
             return 0;
         }
-        if (e->unk_1B0 != 3) {
-            if ((u16) e->unk_1B4 == 0) {
+        if (e->climb_side != 3) {
+            if ((u16) e->climb_floor == 0) {
                 return 0;
             }
-            top = *func_80031420(e->unk_1B4, city);
+            top = *func_80031420(e->climb_floor, city);
             if (e->obj->pos_y.s.hi >= top->pos_y.s.hi) {
                 return 0;
             }

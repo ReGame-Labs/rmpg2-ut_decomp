@@ -1,5 +1,5 @@
 /* A file of the game's code, named after its first function until its contents are understood: the records of
- * D_801FA9BC (UnkStructB1) and D_801FAC9C (NpcS, include/game_80034590.h) and their per-kind updaters.
+ * D_801FA9BC (Pickup) and D_801FAC9C (Npc, include/game_80034590.h) and their per-kind updaters.
  * The boundaries and their evidence: config/main.yaml (docs/MATCHING.md "Splitting a target into files"). */
 #include "common.h"
 #include "game.h"
@@ -10,7 +10,7 @@
 ObjectDef *func_8001D110(void);
 GameObject *func_8001DCB4(void);         /* spawns D_800AA248.unk_3C */
 void func_8001E4B0(GameObject *mover);
-void func_80029118(s32 a, s32 b);
+void func_80029118(s16, u16);
 void func_8004BFE0(void);
 void func_80053D68(s32 n, Monster *player);
 s32 func_8001EA78(void);
@@ -23,130 +23,130 @@ s16 func_8001EB10(s32 arg0, s32 arg1);
 s32 *func_80025C08(void *list);
 extern s32 D_8007DA48[];
 extern s32 D_8007D470[];                /* speeds by kind - 1 (func_800360D8) */
-void func_8003BD48(UnkStructB1 *npc);                /* the spawn list of D_801FAC9C */
-void func_8001F724(s32 sound);
+void func_8003BD48(Pickup *npc);                /* the spawn list of D_801FAC9C */
+void func_8001F724(u16);
 void func_80020D20();                /* called with the record and without it: no prototype in the original */
 void func_800242A8(void);
 s32 func_80025DF8(s32 n);
 void func_8003EB5C(u8 *anim, GameObject *mover);
-u16 func_8003BE34(UnkStructB1 *npc);
+u16 func_8003BE34(Pickup *npc);
 void func_8004CFC0(void);
 void func_80054374(s32 n, Monster *player);
 void func_80053C50(s32 n, Monster *player);
 void func_8004A90C(Monster *player);
 void func_800215C0(s16 x, s16 y);
 void func_8003C080();                /* called with the position and without: no prototype in the original */
-void func_800634D4(Monster *player, s32 n);
+void func_800634D4(Monster *, u32);
 s32 abs(s32 n);
 
 void func_80029D1C(void);
 s32 func_8003B9C8(GameObject *mover, Monster *player);
 void func_8005E0E8(Monster *player);
-void func_8004BBC8(NpcS *npc);
-void func_80020DDC(NpcS *npc);
+void func_8004BBC8(Npc *npc);
+void func_80020DDC(Npc *npc);
 
 /* This unit. */
 u16 func_80036FD0(s16 x, s16 y, GameObject *mover);
-u16 func_80036C30(Monster *player, NpcS *npc, GameObject *mover, s32 reach);
-void func_800383F4(NpcS *npc);
-void func_80038494(NpcS *npc);
-void func_800384E8(NpcS *npc);
-void func_80038AE8(NpcS *npc);
-void func_80036818(NpcS *npc);
-void func_80037A88(NpcS *npc);
-void func_80037F20(NpcS *npc);
-void func_80038348(NpcS *npc);
-void func_8003A98C(NpcS *npc);
-void func_8003B294(NpcS *npc);
-void func_8003B3C8(NpcS *npc);
+u16 func_80036C30(Monster *player, Npc *npc, GameObject *mover, s32 reach);
+void func_800383F4(Npc *npc);
+void func_80038494(Npc *npc);
+void func_800384E8(Npc *npc);
+void func_80038AE8(Npc *npc);
+void func_80036818(Npc *npc);
+void func_80037A88(Npc *npc);
+void func_80037F20(Npc *npc);
+void func_80038348(Npc *npc);
+void func_8003A98C(Npc *npc);
+void func_8003B294(Npc *npc);
+void func_8003B3C8(Npc *npc);
 void func_80035260();                /* called without the record it takes: no prototype in the original */
-void func_8003518C(UnkStructB1 *npc);
-void func_80035330(UnkStructB1 *npc);
-void func_800345F8(UnkStructB1 *npc);
+void func_8003518C(Pickup *npc);
+void func_80035330(Pickup *npc);
+void func_800345F8(Pickup *npc);
 void func_80034B68(s32 speed);
-void func_800346FC(UnkStructB1 *npc);
+void func_800346FC(Pickup *npc);
 s32 func_80036028(void);
-u16 func_80039958(NpcS *npc);
-void func_8003AAF8(NpcS *npc);
-void func_80039A58(NpcS *npc);
+u16 func_80039958(Npc *npc);
+void func_8003AAF8(Npc *npc);
+void func_80039A58(Npc *npc);
 void func_8003831C(void);
-void func_800347E4(UnkStructB1 *npc, Anim *def);
+void func_800347E4(Pickup *npc, Anim *def);
 void func_80036504(GameObject *a, GameObject *b, GameObject *c);
-void func_80035B6C(UnkStructB1 *npc);
-void func_80035EBC(UnkStructB1 *npc);
-void func_8003585C(UnkStructB1 *npc);
-void func_800358C8(UnkStructB1 *npc);
-void func_80035928(UnkStructB1 *npc);
-void func_8003599C(UnkStructB1 *npc);
-void func_80035E80(UnkStructB1 *npc);
-void func_80035F8C(UnkStructB1 *npc);
-void func_80035DC0(UnkStructB1 *npc);
-void func_80035BE8(UnkStructB1 *npc);
-void func_80035A3C(UnkStructB1 *npc);
-void func_80035B30(UnkStructB1 *npc);
+void func_80035B6C(Pickup *npc);
+void func_80035EBC(Pickup *npc);
+void func_8003585C(Pickup *npc);
+void func_800358C8(Pickup *npc);
+void func_80035928(Pickup *npc);
+void func_8003599C(Pickup *npc);
+void func_80035E80(Pickup *npc);
+void func_80035F8C(Pickup *npc);
+void func_80035DC0(Pickup *npc);
+void func_80035BE8(Pickup *npc);
+void func_80035A3C(Pickup *npc);
+void func_80035B30(Pickup *npc);
 void func_80034418(void);
-void func_80034670();                /* called with the record and without: no prototype in the original */
-void func_8003AA7C(NpcS *npc);
-u16 func_80038DA8(NpcS *npc);
-void func_800380F0(NpcS *npc);
-void func_80038058(NpcS *npc);
-void func_80038198(NpcS *npc);
-void func_800381E4(NpcS *npc);
-void func_80038240(NpcS *npc);
-void func_800382A8(NpcS *npc);
-void func_80038A2C(NpcS *npc);
-void func_80038920(NpcS *npc);
+void func_80034670(void);                /* called with the record and without: no prototype in the original */
+void func_8003AA7C(Npc *npc);
+u16 func_80038DA8(Npc *npc);
+void func_800380F0(Npc *npc);
+void func_80038058(Npc *npc);
+void func_80038198(Npc *npc);
+void func_800381E4(Npc *npc);
+void func_80038240(Npc *npc);
+void func_800382A8(Npc *npc);
+void func_80038A2C(Npc *npc);
+void func_80038920(Npc *npc);
 Monster *func_80039B60(s32 x);
 s32 func_80039B04(Monster *player, s32 x);
-void func_80034988(UnkStructB1 *npc);
+void func_80034988(Pickup *npc);
 void func_80034C54(GameObject *mover);
-void func_80034D28(UnkStructB1 *npc);
-void func_80034DAC(UnkStructB1 *npc);
-void func_80034E48(UnkStructB1 *npc);
+void func_80034D28(Pickup *npc);
+void func_80034DAC(Pickup *npc);
+void func_80034E48(Pickup *npc);
 void func_80035040(void);
-void func_800351CC(UnkStructB1 *npc);
+void func_800351CC(Pickup *npc);
 void func_800354A4();                /* called without the record it reads: no prototype in the original */
-void func_80035464(UnkStructB1 *npc);
-void func_80035550(UnkStructB1 *npc);
-void func_80035590(UnkStructB1 *npc);
-void func_80035620(UnkStructB1 *npc);
-void func_80035A88(UnkStructB1 *npc);
-void func_80035DFC(UnkStructB1 *npc);
+void func_80035464(Pickup *npc);
+void func_80035550(Pickup *npc);
+void func_80035590(Pickup *npc);
+void func_80035620(Pickup *npc);
+void func_80035A88(Pickup *npc);
+void func_80035DFC(Pickup *npc);
 void func_80035FF0(void);
-void func_80036300(NpcS *npc);
-void func_800369F8(NpcS *npc);
+void func_80036300(Npc *npc);
+void func_800369F8(Npc *npc);
 u16 func_80037574(s16 x, s16 y, GameObject *mover);
-u16 func_8003761C(s16 x, s16 y, Monster *player, NpcS *npc);
-void func_800376E0(NpcS *npc);
-void func_80037960(NpcS *npc, GameObject *obj);
-void func_80037BB4(NpcS *npc);
-void func_80037C1C(NpcS *npc);
-void func_80037CA0(NpcS *npc);
-void func_80037CF4(NpcS *npc);
-void func_80037D78(NpcS *npc);
-void func_80037E1C(NpcS *npc);
-void func_80037E78(NpcS *npc);
-void func_80037EE0(NpcS *npc);
+u16 func_8003761C(s16 x, s16 y, Monster *player, Npc *npc);
+void func_800376E0(Npc *npc);
+void func_80037960(Npc *npc, GameObject *obj);
+void func_80037BB4(Npc *npc);
+void func_80037C1C(Npc *npc);
+void func_80037CA0(Npc *npc);
+void func_80037CF4(Npc *npc);
+void func_80037D78(Npc *npc);
+void func_80037E1C(Npc *npc);
+void func_80037E78(Npc *npc);
+void func_80037EE0(Npc *npc);
 void func_800380C0(GameObject *mover);
-void func_80038528(NpcS *npc);
-void func_800385F4(NpcS *npc);
-void func_80038754(NpcS *npc);
-void func_80038800(NpcS *npc);
-void func_80038838(NpcS *npc);
+void func_80038528(Npc *npc);
+void func_800385F4(Npc *npc);
+void func_80038754(Npc *npc);
+void func_80038800(Npc *npc);
+void func_80038838(Npc *npc);
 u16 func_80038C1C();                 /* called without the record it reads: no prototype in the original */
-u16 func_80038F3C(u16 *out, NpcS *npc);
-u16 func_800391F8(u16 *out, NpcS *npc);
-u16 func_80039220(u16 *out, NpcS *npc);
+u16 func_80038F3C(u16 *out, Npc *npc);
+u16 func_800391F8(u16 *out, Npc *npc);
+u16 func_80039220(u16 *out, Npc *npc);
 void func_800398D4();                /* called without the record it reads: no prototype in the original */
 s32 func_80039C40(s32 x, s32 left, s32 right);
 s32 func_80039C98(s32 x, s32 left, s32 right);
-void func_8003A328(NpcS *npc, s32 arg1);
-void func_8003AAF8(NpcS *npc);
-void func_8003ABE8(NpcS *npc);
-void func_8003AC74(NpcS *npc);
-void func_8003AEA0(NpcS *npc);
-void func_8003AF40(NpcS *npc);
-void func_8003B1D0(NpcS *npc);
+void func_8003A328(Npc *npc, s32 arg1);
+void func_8003AAF8(Npc *npc);
+void func_8003ABE8(Npc *npc);
+void func_8003AC74(Npc *npc);
+void func_8003AEA0(Npc *npc);
+void func_8003AF40(Npc *npc);
+void func_8003B1D0(Npc *npc);
 
 extern u8 *D_8007D4C0[];           /* animations per kind */
 extern Anim *D_8007D50C[];
@@ -208,14 +208,14 @@ extern u8 D_8009594C[];
 extern u8 D_80095800[];
 extern u8 D_800957A4[];
 
-void func_80034590(UnkStructB1 *npc) {
+void func_80034590(Pickup *npc) {
     npc->unk_08 = 2;
     npc->unk_1E = func_8001EB10(0x190, 0);
     npc->unk_22 = 0;
     func_8003EB5C(D_8007D4C0[npc->unk_06 - 1], D_800AA248.cur_obj);
 }
 
-void func_800345F8(UnkStructB1 *npc) {
+void func_800345F8(Pickup *npc) {
     func_8001F724(5);
     D_800AA248.cur_obj->vel_x.w = 0;
     D_800AA248.cur_obj->vel_y.w = 0;
@@ -235,13 +235,13 @@ void func_80034670(void) {
     y = ((u16 *)&D_800AA248.cur_obj->pos_y.w)[1];
     effect->anim = &D_8008A538;
     effect->pos_y.s.hi = y;
-    effect->flags = *(u16 *)&D_800AA248.cur_obj->unk_80 + 1;
+    effect->flags = *(u16 *)&D_800AA248.cur_obj->priority + 1;
     effect->id = D_8008A538.id;
     func_8001DCB4();
     D_800AA248.cur_obj = saved;
 }
 
-void func_800346FC(UnkStructB1 *npc) {
+void func_800346FC(Pickup *npc) {
     GameObject *saved = D_800AA248.cur_obj;
     Anim *table;
     GameObject *mover;
@@ -260,7 +260,7 @@ void func_800346FC(UnkStructB1 *npc) {
     }
     effect->pos_y.s.hi = ((s16 *)&mover->pos_y.w)[1] - 0x19;
     effect->anim = table;
-    effect->flags = *(u16 *)&mover->unk_80 + 1;
+    effect->flags = *(u16 *)&mover->priority + 1;
     effect->id = table->id;
     func_8001DCB4();
     func_8001E4B0(npc->unk_40);
@@ -268,7 +268,7 @@ void func_800346FC(UnkStructB1 *npc) {
     D_800AA248.cur_obj = saved;
 }
 
-void func_800347E4(UnkStructB1 *npc, Anim *def) {
+void func_800347E4(Pickup *npc, Anim *def) {
     GameObject *saved = D_800AA248.cur_obj;
     ObjectDef *effect;
 
@@ -277,7 +277,7 @@ void func_800347E4(UnkStructB1 *npc, Anim *def) {
     effect->pos_x.s.hi = ((u16 *)&D_800AA248.cur_obj->pos_x.w)[1];
     effect->pos_y.s.hi = ((u16 *)&D_800AA248.cur_obj->pos_y.w)[1];
     effect->anim = def;
-    effect->flags = *(u16 *)&D_800AA248.cur_obj->unk_80 + 1;
+    effect->flags = *(u16 *)&D_800AA248.cur_obj->priority + 1;
     effect->id = def->id;
     func_8001DCB4();
     if (npc->unk_40 != NULL) {
@@ -286,7 +286,7 @@ void func_800347E4(UnkStructB1 *npc, Anim *def) {
     D_800AA248.cur_obj = saved;
 }
 
-void func_80034898(UnkStructB1 *npc) {
+void func_80034898(Pickup *npc) {
     u16 n = npc->unk_1C;
     GameObject *mover;
 
@@ -306,7 +306,7 @@ void func_80034898(UnkStructB1 *npc) {
     func_8003C080();
 }
 
-void func_80034924(UnkStructB1 *npc) {
+void func_80034924(Pickup *npc) {
     func_8001F724(0x60);
     if (!((D_800AA248.cur_obj->flags ^ npc->unk_44) & 0x10)) {
         func_80034988(npc);
@@ -315,7 +315,7 @@ void func_80034924(UnkStructB1 *npc) {
     func_800345F8(npc);
 }
 
-void func_80034988(UnkStructB1 *npc) {
+void func_80034988(Pickup *npc) {
     void (*handler)(void) = D_8007D558[npc->unk_06 - 1];
 
     if (handler == NULL) {
@@ -325,7 +325,7 @@ void func_80034988(UnkStructB1 *npc) {
     handler();
 }
 
-void func_800349E0(UnkStructB1 *npc) {
+void func_800349E0(Pickup *npc) {
     void (*handler)(void) = D_8007D5A4[npc->unk_06 - 1];
 
     if (handler == NULL) {
@@ -335,16 +335,16 @@ void func_800349E0(UnkStructB1 *npc) {
     handler();
 }
 
-void func_80034A38(UnkStructB1 *npc) {
+void func_80034A38(Pickup *npc) {
     func_80034B68(0x30000);
     D_800AA248.cur_obj->vel_y.w = -0xB0000;
     D_800AA248.cur_obj->pos_x.w += D_800AA248.cur_obj->vel_x.w;
-    D_800AA248.cur_obj->unk_80 = 0x4000;
+    D_800AA248.cur_obj->priority = 0x4000;
     npc->unk_08 = 6;
     func_8003EB5C(D_8008A4F4, D_800AA248.cur_obj);
 }
 
-void func_80034AB4(UnkStructB1 *npc) {
+void func_80034AB4(Pickup *npc) {
     s32 speed;
 
     D_800AA248.cur_obj->pos_x.w += D_800AA248.cur_obj->vel_x.w;
@@ -366,7 +366,7 @@ void func_80034B68(s32 speed) {
     D_800AA248.cur_obj->vel_x.w = speed;
 }
 
-void func_80034B94(UnkStructB1 *npc) {
+void func_80034B94(Pickup *npc) {
     D_800AA248.cur_obj = npc->unk_00;
     switch (npc->unk_08) {
     case 1:
@@ -389,7 +389,7 @@ void func_80034C34(void) {
 }
 
 void func_80034C54(GameObject *mover) {
-    mover->unk_48 = (s32) D_8007D45C[mover->unk_68.u.lo];
+    mover->anim = (s32) D_8007D45C[mover->unk_68.u.lo];
 }
 
 void func_80034C74(void) {
@@ -415,7 +415,7 @@ void func_80034CB8(void) {
     }
 }
 
-void func_80034D28(UnkStructB1 *npc) {
+void func_80034D28(Pickup *npc) {
     func_8001F724(0x60);
     D_800AA248.cur_obj->vel_x.w = 0;
     D_800AA248.cur_obj->vel_y.w = 0;
@@ -428,7 +428,7 @@ void func_80034D28(UnkStructB1 *npc) {
     }
 }
 
-void func_80034DAC(UnkStructB1 *npc) {
+void func_80034DAC(Pickup *npc) {
     ObjectDef *effect;
 
     if (npc->unk_0C != 0) {
@@ -438,7 +438,7 @@ void func_80034DAC(UnkStructB1 *npc) {
         effect->pos_x.s.hi = ((u16 *)&D_800AA248.cur_obj->pos_x.w)[1];
         effect->pos_y.s.hi = ((u16 *)&D_800AA248.cur_obj->pos_y.w)[1] - 0x14;
         effect->anim = &D_8008A7A4;
-        effect->flags = (u16)D_800AA248.cur_obj->unk_80 + 1;
+        effect->flags = (u16)D_800AA248.cur_obj->priority + 1;
         effect->id = D_8008A7A4.id;
         func_8001DCB4();
         func_8003C080();
@@ -447,7 +447,7 @@ void func_80034DAC(UnkStructB1 *npc) {
 
 /* 86.73%: the three spawned movers are right; the prologue's setup order, the loop counters' increments (placed before the mask load here, after the store in the original) and the register of the 0x17 constant at the end differ */
 #ifdef NON_MATCHING
-void func_80034E48(UnkStructB1 *npc) {
+void func_80034E48(Pickup *npc) {
     GameObject *mover;
     GameObject **slot;
     GameObject *spawned;
@@ -473,7 +473,7 @@ void func_80034E48(UnkStructB1 *npc) {
         D_800AA248.new_def = effect;
         effect->anim = def;
         effect->id = def->id;
-        effect->flags = (u16)mover->unk_80;
+        effect->flags = (u16)mover->priority;
         spawned = func_8001DCB4();
         *slot = spawned;
         spawned->flags = mover->flags;
@@ -527,7 +527,7 @@ void func_80035040(void) {
     }
 }
 
-void func_800350C0(UnkStructB1 *npc) {
+void func_800350C0(Pickup *npc) {
     GameObject *mover;
     u16 action;
 
@@ -550,7 +550,7 @@ void func_800350C0(UnkStructB1 *npc) {
     }
 }
 
-void func_8003518C(UnkStructB1 *npc) {
+void func_8003518C(Pickup *npc) {
     u16 n = npc->unk_1C;
 
     if (n == 0) {
@@ -561,7 +561,7 @@ void func_8003518C(UnkStructB1 *npc) {
     func_800242A8();
 }
 
-void func_800351CC(UnkStructB1 *npc) {
+void func_800351CC(Pickup *npc) {
     npc->unk_06 = 0x1B;
     npc->unk_3E = 0;
     D_800AA248.cur_obj->pos_x.w = D_801F9AC8.w - 0x19A0000;
@@ -575,7 +575,7 @@ void func_800351CC(UnkStructB1 *npc) {
     func_8003EB5C(D_8008A488, D_800AA248.cur_obj);
 }
 
-void func_80035260(UnkStructB1 *npc) {
+void func_80035260(Pickup *npc) {
     u16 n = npc->unk_1C;
 
     if (n == 0) {
@@ -586,18 +586,18 @@ void func_80035260(UnkStructB1 *npc) {
     func_800242A8();
 }
 
-void func_800352A0(UnkStructB1 *npc) {
+void func_800352A0(Pickup *npc) {
     func_8001F724(5);
     D_800AA248.cur_obj->vel_x.w = 0;
     D_800AA248.cur_obj->vel_y.w = 0;
-    D_800AA248.cur_obj->unk_80 = 0x4000;
+    D_800AA248.cur_obj->priority = 0x4000;
     npc->unk_08 = 4;
     npc->unk_1C = 0xF;
     func_8003EB5C(D_8008A448, D_800AA248.cur_obj);
     func_800215C0(((s16 *)&D_800AA248.cur_obj->pos_x.w)[1], ((s16 *)&D_800AA248.cur_obj->pos_y.w)[1]);
 }
 
-void func_80035330(UnkStructB1 *npc) {
+void func_80035330(Pickup *npc) {
     if (npc->unk_0C != 0) {
         npc->unk_1C = 0x384;
         npc->unk_08 = 0x64;
@@ -606,7 +606,7 @@ void func_80035330(UnkStructB1 *npc) {
     }
 }
 
-void func_8003537C(UnkStructB1 *npc) {
+void func_8003537C(Pickup *npc) {
     D_800AA248.cur_obj = npc->unk_00;
     if (npc->unk_06 == 0x15) {
         func_80034418();
@@ -634,7 +634,7 @@ void func_8003537C(UnkStructB1 *npc) {
     }
 }
 
-void func_80035464(UnkStructB1 *npc) {
+void func_80035464(Pickup *npc) {
     u16 n = npc->unk_1C;
 
     if (n == 0) {
@@ -646,7 +646,7 @@ void func_80035464(UnkStructB1 *npc) {
 }
 
 void func_800354A4(npc)
-    UnkStructB1 *npc;
+    Pickup *npc;
 {
     npc->unk_3E = 0;
     D_800AA248.cur_obj->pos_x.w = D_801F9AC8.w - 0x19A0000;
@@ -664,7 +664,7 @@ void func_800354A4(npc)
     }
 }
 
-void func_80035550(UnkStructB1 *npc) {
+void func_80035550(Pickup *npc) {
     u16 n = npc->unk_1C;
 
     if (n == 0) {
@@ -675,18 +675,18 @@ void func_80035550(UnkStructB1 *npc) {
     func_800242A8();
 }
 
-void func_80035590(UnkStructB1 *npc) {
+void func_80035590(Pickup *npc) {
     func_8001F724(5);
     D_800AA248.cur_obj->vel_x.w = 0;
     D_800AA248.cur_obj->vel_y.w = 0;
-    D_800AA248.cur_obj->unk_80 = 0x4000;
+    D_800AA248.cur_obj->priority = 0x4000;
     npc->unk_08 = 4;
     npc->unk_1C = 0xF;
     func_8003EB5C(D_8008A9D4, D_800AA248.cur_obj);
     func_800215C0(((s16 *)&D_800AA248.cur_obj->pos_x.w)[1], ((s16 *)&D_800AA248.cur_obj->pos_y.w)[1]);
 }
 
-void func_80035620(UnkStructB1 *npc) {
+void func_80035620(Pickup *npc) {
     if (npc->unk_0C != 0) {
         npc->unk_1C = 0x384;
         npc->unk_08 = 0x64;
@@ -695,7 +695,7 @@ void func_80035620(UnkStructB1 *npc) {
     }
 }
 
-void func_8003566C(UnkStructB1 *npc) {
+void func_8003566C(Pickup *npc) {
     D_800AA248.cur_obj = npc->unk_00;
     switch (npc->unk_08) {
     case 0x64:
@@ -747,7 +747,7 @@ void func_8003566C(UnkStructB1 *npc) {
     }
 }
 
-void func_8003585C(UnkStructB1 *npc) {
+void func_8003585C(Pickup *npc) {
     D_800AA248.cur_obj->pos_y.w += D_800AA248.cur_obj->vel_y.w;
     if (npc->unk_1C == 0) {
         npc->unk_0A = 1;
@@ -756,14 +756,14 @@ void func_8003585C(UnkStructB1 *npc) {
     }
 }
 
-void func_800358C8(UnkStructB1 *npc) {
+void func_800358C8(Pickup *npc) {
     D_800AA248.cur_obj->pos_y.w += D_800AA248.cur_obj->vel_y.w;
     if (D_800AA248.cur_obj->pos_y.w > 0x153FFFF) {
         func_80035A88(npc);
     }
 }
 
-void func_80035928(UnkStructB1 *npc) {
+void func_80035928(Pickup *npc) {
     D_800AA248.cur_obj->pos_y.w += D_800AA248.cur_obj->vel_y.w;
     if (D_800AA248.cur_obj->pos_y.w <= 0xFA0000) {
         npc->unk_0A = 2;
@@ -772,7 +772,7 @@ void func_80035928(UnkStructB1 *npc) {
     }
 }
 
-void func_8003599C(UnkStructB1 *npc) {
+void func_8003599C(Pickup *npc) {
     D_800AA248.cur_obj->pos_y.w += D_800AA248.cur_obj->vel_y.w;
     if (D_800AA248.cur_obj->pos_y.w <= 0xF00000) {
         D_800AA248.cur_obj->pos_y.w = 0xF00000;
@@ -785,7 +785,7 @@ void func_8003599C(UnkStructB1 *npc) {
     }
 }
 
-void func_80035A3C(UnkStructB1 *npc) {
+void func_80035A3C(Pickup *npc) {
     u16 n;
 
     D_800AA248.cur_obj->pos_y.w = 0x01900000;
@@ -797,7 +797,7 @@ void func_80035A3C(UnkStructB1 *npc) {
     npc->unk_1C = n - 1;
 }
 
-void func_80035A88(UnkStructB1 *npc) {
+void func_80035A88(Pickup *npc) {
     u8 *anim;
 
     npc->unk_0A = 0;
@@ -815,7 +815,7 @@ void func_80035A88(UnkStructB1 *npc) {
     func_8003EB5C(anim, D_800AA248.cur_obj);
 }
 
-void func_80035B30(UnkStructB1 *npc) {
+void func_80035B30(Pickup *npc) {
     u16 n = npc->unk_1C;
 
     if (n == 0) {
@@ -825,18 +825,18 @@ void func_80035B30(UnkStructB1 *npc) {
     npc->unk_1C = n - 1;
 }
 
-void func_80035B6C(UnkStructB1 *npc) {
+void func_80035B6C(Pickup *npc) {
     func_8001F724(5);
     D_800AA248.cur_obj->vel_x.w = 0;
     D_800AA248.cur_obj->vel_y.w = 0;
-    D_800AA248.cur_obj->unk_80 = 0x1300;
+    D_800AA248.cur_obj->priority = 0x1300;
     npc->unk_08 = 4;
     npc->unk_1C = 0x12;
     func_8003EB5C(D_8008AA28, D_800AA248.cur_obj);
     func_8004BFE0();
 }
 
-void func_80035BE8(UnkStructB1 *npc) {
+void func_80035BE8(Pickup *npc) {
     u16 n = npc->unk_1C;
 
     if (n == 0) {
@@ -850,7 +850,7 @@ void func_80035BE8(UnkStructB1 *npc) {
     npc->unk_1C = n - 1;
 }
 
-void func_80035C4C(UnkStructB1 *npc) {
+void func_80035C4C(Pickup *npc) {
     D_800AA248.cur_obj = npc->unk_00;
     switch (npc->unk_08) {
     case 0x64:
@@ -886,7 +886,7 @@ void func_80035C4C(UnkStructB1 *npc) {
     }
 }
 
-void func_80035DC0(UnkStructB1 *npc) {
+void func_80035DC0(Pickup *npc) {
     u16 n = npc->unk_1C;
 
     if (n == 0) {
@@ -896,7 +896,7 @@ void func_80035DC0(UnkStructB1 *npc) {
     npc->unk_1C = n - 1;
 }
 
-void func_80035DFC(UnkStructB1 *npc) {
+void func_80035DFC(Pickup *npc) {
     ((s16 *)&D_800AA248.cur_obj->pos_x.w)[1] = D_801D87B0 + 0x20;
     D_800AA248.cur_obj->pos_y.w = 0xF00000;
     D_800AA248.cur_obj->vel_x.w = 0x6000;
@@ -908,7 +908,7 @@ void func_80035DFC(UnkStructB1 *npc) {
     }
 }
 
-void func_80035E80(UnkStructB1 *npc) {
+void func_80035E80(Pickup *npc) {
     u16 n = npc->unk_1C;
 
     if (n == 0) {
@@ -918,14 +918,14 @@ void func_80035E80(UnkStructB1 *npc) {
     npc->unk_1C = n - 1;
 }
 
-void func_80035EBC(UnkStructB1 *npc) {
+void func_80035EBC(Pickup *npc) {
     Monster *player;
 
     if (npc->unk_06 == 0x1C) {
         func_8001F724(5);
         D_800AA248.cur_obj->vel_x.w = 0;
         D_800AA248.cur_obj->vel_y.w = 0;
-        D_800AA248.cur_obj->unk_80 = 0x1300;
+        D_800AA248.cur_obj->priority = 0x1300;
         npc->unk_08 = 4;
         npc->unk_1C = 0x12;
         func_8004BFE0();
@@ -941,7 +941,7 @@ void func_80035EBC(UnkStructB1 *npc) {
     npc->unk_08 = 4;
 }
 
-void func_80035F8C(UnkStructB1 *npc) {
+void func_80035F8C(Pickup *npc) {
     u16 n = npc->unk_1C;
 
     if (n == 0) {
@@ -974,7 +974,7 @@ s32 func_80036028(void) {
     return D_800AA248.cur_obj->vel_x.w;
 }
 
-void func_800360D8(UnkStructB1 *npc) {
+void func_800360D8(Pickup *npc) {
     Monster *m;
     GameObject *obj;
     s16 d;
@@ -1017,7 +1017,7 @@ void func_800360D8(UnkStructB1 *npc) {
 }
 
 void func_80036298(void) {
-    NpcS *npc = D_801FAC9C;
+    Npc *npc = D_801FAC9C;
     u16 n = D_801D8730;
 
     if (n != 0) {
@@ -1031,7 +1031,7 @@ void func_80036298(void) {
     }
 }
 
-void func_80036300(NpcS *npc) {
+void func_80036300(Npc *npc) {
     D_800AA268.p = npc->unk_0;
     func_80029D1C();
     func_80036818(npc);
@@ -1069,7 +1069,7 @@ void func_80036300(NpcS *npc) {
 }
 
 void func_800363E4(void) {
-    NpcS *npc = D_801FAC9C;
+    Npc *npc = D_801FAC9C;
     u16 n = 6;
 
     do {
@@ -1082,7 +1082,7 @@ void func_800363E4(void) {
 
 #ifdef NON_MATCHING
 /* 95.59 %: the scheduler loads unk_22 before the unk_40 store in the original (here after); the statements and types are right */
-void func_80036440(NpcS *npc, s32 depth) {
+void func_80036440(Npc *npc, s32 depth) {
     GameObject *mover;
     ObjectDef *effect;
     s32 d;
@@ -1090,7 +1090,7 @@ void func_80036440(NpcS *npc, s32 depth) {
     mover = func_8001EB9C(0, 0, 0, 0, 0xFFFFFF);
     mover->unk_40.w = -0x3E7;
     d = depth - 1;
-    mover->unk_80 = d;
+    mover->priority = d;
     mover->flags = (mover->flags & ~0x20) | 0x400;
     mover->unk_6C |= 0x2000;
     npc->unk_70 = mover;
@@ -1098,7 +1098,7 @@ void func_80036440(NpcS *npc, s32 depth) {
     effect = func_8001D110();
     effect->id = 0x4F000986;
     effect->flags = d;
-    D_800AA284 = effect;
+    D_800AA284.p = effect;
     mover = func_8001DCB4();
     mover->flags |= 0x400;
     npc->unk_74 = mover;
@@ -1110,7 +1110,7 @@ INCLUDE_ASM("asm/main/nonmatchings/game_80034590", func_80036440);
 
 INCLUDE_ASM("asm/main/nonmatchings/game_80034590", func_80036504);
 
-void func_80036818(NpcS *npc) {
+void func_80036818(Npc *npc) {
     GameObject *a = npc->unk_70;
     GameObject *b = npc->unk_0;
     GameObject *c = npc->unk_74;
@@ -1122,7 +1122,7 @@ void func_80036818(NpcS *npc) {
 
 void func_8003684C(void) {
     SpawnItem *item;
-    NpcS *npc;
+    Npc *npc;
     GameObject *obj;
     ObjectDef *def;
     Anim *anim;
@@ -1151,11 +1151,11 @@ void func_8003684C(void) {
         npc->unk_6 = item->unk_04;
         obj = func_8001DCB4();
         npc->unk_0 = obj;
-        obj->owner.p = npc;
+        obj->owner.npc = npc;
         obj->pos_x.u.hi = item->unk_06;
         obj->pos_y.u.hi = item->unk_08;
         obj->flags |= item->unk_0A;
-        obj->unk_80 = item->unk_0C;
+        obj->priority = item->unk_0C;
         obj->kind = 0x713;
         if (item->unk_0E == -1) {
             npc->unk_1C = func_8001EB10(0xC8, 0x64);
@@ -1165,15 +1165,15 @@ void func_8003684C(void) {
         if (npc->unk_6 == 0x11 || npc->unk_6 == 0x12) {
             func_80036440(npc, item->unk_0C);
         } else {
-            obj->unk_80 = obj->pos_y.u.hi + 0xF23;
+            obj->priority = obj->pos_y.u.hi + 0xF23;
         }
         item++;
         npc++;
     } while (--n != 0);
 }
 
-void func_800369F8(NpcS *npc) {
-    memset(npc, 0, sizeof(NpcS));
+void func_800369F8(Npc *npc) {
+    memset(npc, 0, sizeof(Npc));
     D_801D8730 = 0;
 }
 
@@ -1181,7 +1181,7 @@ void func_800369F8(NpcS *npc) {
 #ifdef NON_MATCHING
 void func_80036A20(Monster *player) {
     u16 n;
-    NpcS *npc;
+    Npc *npc;
     GameObject *mover;
     u16 kind;
 
@@ -1267,7 +1267,7 @@ u16 func_80036FD0(s16 x, s16 y, GameObject *mover) {
     return 0;
 }
 
-void func_80037078(Monster *player, NpcS *npc) {
+void func_80037078(Monster *player, Npc *npc) {
     player->unk_024++;
     func_80054374(0x28, player);
     func_800634D4(player, 4);
@@ -1286,7 +1286,7 @@ INCLUDE_ASM("asm/main/nonmatchings/game_80034590", func_8003712C);
 
 #ifdef NON_MATCHING
 /* 99.85 %: the control flow and the saved registers are right; the first rectangle's x tests load the field into v1 (a0 in the original) */
-u16 func_800372DC(s16 x, s16 y, Monster *player, NpcS *npc, s32 arg4) {
+u16 func_800372DC(s16 x, s16 y, Monster *player, Npc *npc, s32 arg4) {
     func_80037960(npc, arg4);
     if ((x >= npc->unk_3E || x >= (s16)(npc->unk_3E - 4)) && (x <= npc->unk_40 || x <= (s16)(npc->unk_40 + 4)) &&
         (y >= npc->unk_44 || y >= (s16)(npc->unk_44 - 4)) && (y <= npc->unk_42 || y <= (s16)(npc->unk_42 + 4))) {
@@ -1308,11 +1308,11 @@ hit:
 INCLUDE_ASM("asm/main/nonmatchings/game_80034590", func_800372DC);
 #endif
 
-u16 func_800374FC(s16 x, s16 y, NpcS *npc, GameObject *arg3) {
+u16 func_800374FC(s16 x, s16 y, Npc *npc, GameObject *arg3) {
     MoverTarget *target = D_800AA248.cur_obj->unk_94.target;
 
     if (target != NULL) {
-        NpcS *other = target->unk_4->owner.p;
+        Npc *other = target->unk_4->owner.npc;
         if (other != npc && other->unk_A != 2) {
             return func_80037574(x, y, arg3);
         }
@@ -1344,7 +1344,7 @@ u16 func_80037574(s16 x, s16 y, GameObject *mover) {
     return 0;
 }
 
-u16 func_8003761C(s16 x, s16 y, Monster *player, NpcS *npc) {
+u16 func_8003761C(s16 x, s16 y, Monster *player, Npc *npc) {
     if (player == NULL) {
         return 0;
     }
@@ -1366,7 +1366,7 @@ void func_800376D8(void) {
 
 #ifdef NON_MATCHING
 /* 82.2 %: the twin of func_8003BD48 (game_8003B568), with the same difference: the original tests the loaded limit in v0 and copies it into a1, where every form tried loads it straight into one register */
-void func_800376E0(NpcS *npc) {
+void func_800376E0(Npc *npc) {
     s32 limit;
     u16 x;
     u16 d;
@@ -1405,7 +1405,7 @@ INCLUDE_ASM("asm/main/nonmatchings/game_80034590", func_800376E0);
 
 INCLUDE_ASM("asm/main/nonmatchings/game_80034590", func_800377B4);
 
-void func_80037960(NpcS *npc, GameObject *obj) {
+void func_80037960(Npc *npc, GameObject *obj) {
     s16 x;
     u16 y;
     SpriteFrame *f;
@@ -1462,7 +1462,7 @@ void func_80037960(NpcS *npc, GameObject *obj) {
     }
 }
 
-void func_80037A88(NpcS *npc) {
+void func_80037A88(Npc *npc) {
     D_800AA248.cur_obj = npc->unk_0;
     switch (npc->unk_8) {
     case 0x64:
@@ -1497,7 +1497,7 @@ void func_80037A88(NpcS *npc) {
     }
 }
 
-void func_80037BB4(NpcS *npc) {
+void func_80037BB4(Npc *npc) {
     if (npc->unk_1C == 0) {
         func_80037C1C(npc);
         return;
@@ -1507,7 +1507,7 @@ void func_80037BB4(NpcS *npc) {
     D_800AA248.cur_obj->vel_y.w = 0;
 }
 
-void func_80037C1C(NpcS *npc) {
+void func_80037C1C(Npc *npc) {
     if (npc->unk_1C != 0) {
         npc->unk_1C--;
         D_800AA248.cur_obj->pos_y.w = 0x01900000;
@@ -1520,7 +1520,7 @@ void func_80037C1C(NpcS *npc) {
     func_8003EB5C(D_8008A374, D_800AA248.cur_obj);
 }
 
-void func_80037CA0(NpcS *npc) {
+void func_80037CA0(Npc *npc) {
     if ((D_800AA248.cur_obj->flags ^ npc->unk_54) & 0x10) {
         func_80037E1C(npc);
         return;
@@ -1528,16 +1528,16 @@ void func_80037CA0(NpcS *npc) {
     func_80037CF4(npc);
 }
 
-void func_80037CF4(NpcS *npc) {
+void func_80037CF4(Npc *npc) {
     func_80034B68(0x58000);
     D_800AA248.cur_obj->vel_y.w = -0x65529;
     D_800AA248.cur_obj->pos_x.w += D_800AA248.cur_obj->vel_x.w;
-    D_800AA248.cur_obj->unk_80 = 0x4000;
+    D_800AA248.cur_obj->priority = 0x4000;
     npc->unk_8 = 0xD;
     func_8003EB5C(D_8008A398, D_800AA248.cur_obj);
 }
 
-void func_80037D78(NpcS *npc) {
+void func_80037D78(Npc *npc) {
     D_800AA248.cur_obj->pos_x.w += D_800AA248.cur_obj->vel_x.w;
     D_800AA248.cur_obj->vel_y.w += 0x6000;
     D_800AA248.cur_obj->pos_y.w += D_800AA248.cur_obj->vel_y.w;
@@ -1546,7 +1546,7 @@ void func_80037D78(NpcS *npc) {
     }
 }
 
-void func_80037E1C(NpcS *npc) {
+void func_80037E1C(Npc *npc) {
     func_8001F724(5);
     D_800AA248.cur_obj->vel_x.w = 0;
     D_800AA248.cur_obj->vel_y.w = 0;
@@ -1555,7 +1555,7 @@ void func_80037E1C(NpcS *npc) {
     func_80034670();
 }
 
-void func_80037E78(NpcS *npc) {
+void func_80037E78(Npc *npc) {
     if (npc->unk_1C != 0) {
         npc->unk_1C--;
         return;
@@ -1567,13 +1567,13 @@ void func_80037E78(NpcS *npc) {
     func_8003831C();
 }
 
-void func_80037EE0(NpcS *npc) {
+void func_80037EE0(Npc *npc) {
     npc->unk_A = 0;
     D_800AA248.cur_obj->vel_x.w = -D_800AA248.cur_obj->vel_x.w;
     D_800AA248.cur_obj->flags ^= 0x10;
 }
 
-void func_80037F20(NpcS *npc) {
+void func_80037F20(Npc *npc) {
     D_800AA248.cur_obj = npc->unk_0;
     switch (npc->unk_8) {
     case 0x64:
@@ -1607,7 +1607,7 @@ void func_80037F20(NpcS *npc) {
     }
 }
 
-void func_80038058(NpcS *npc) {
+void func_80038058(Npc *npc) {
     if (npc->unk_1C == 0) {
         func_800380F0(npc);
         return;
@@ -1623,10 +1623,10 @@ void func_800380C0(GameObject *mover) {
     } else {
         mover->pos_y.w = 0xE30000;
     }
-    mover->unk_80 = ((u16 *)&mover->pos_y.w)[1] + 0xF23;
+    mover->priority = ((u16 *)&mover->pos_y.w)[1] + 0xF23;
 }
 
-void func_800380F0(NpcS *npc) {
+void func_800380F0(Npc *npc) {
     if (npc->unk_1C != 0) {
         npc->unk_1C--;
         D_800AA248.cur_obj->pos_y.w = 0x01900000;
@@ -1643,7 +1643,7 @@ void func_800380F0(NpcS *npc) {
     }
 }
 
-void func_80038198(NpcS *npc) {
+void func_80038198(Npc *npc) {
     if (npc->unk_6 == 0x3E) {
         func_8003EB5C(D_8008A408, D_800AA248.cur_obj);
     } else {
@@ -1651,7 +1651,7 @@ void func_80038198(NpcS *npc) {
     }
 }
 
-void func_800381E4(NpcS *npc) {
+void func_800381E4(Npc *npc) {
     func_8001F724(5);
     D_800AA248.cur_obj->vel_x.w = 0;
     D_800AA248.cur_obj->vel_y.w = 0;
@@ -1660,7 +1660,7 @@ void func_800381E4(NpcS *npc) {
     func_80034670();
 }
 
-void func_80038240(NpcS *npc) {
+void func_80038240(Npc *npc) {
     if (npc->unk_1C != 0) {
         npc->unk_1C--;
         return;
@@ -1672,26 +1672,26 @@ void func_80038240(NpcS *npc) {
     func_8003831C();
 }
 
-void func_800382A8(NpcS *npc) {
+void func_800382A8(Npc *npc) {
     npc->unk_A = 0;
     D_800AA248.cur_obj->vel_x.w = -D_800AA248.cur_obj->vel_x.w;
     D_800AA248.cur_obj->flags ^= 0x10;
 }
 
 void func_800382E8(void) {
-    ((NpcS *)D_800AA248.cur_obj->owner.ai)->unk_1C = 0;
+    ((Npc *)D_800AA248.cur_obj->owner.ai)->unk_1C = 0;
 }
 
 void func_80038300(void) {
-    ((NpcS *)D_800AA248.cur_obj->owner.ai)->unk_C = 1;
+    ((Npc *)D_800AA248.cur_obj->owner.ai)->unk_C = 1;
 }
 
 void func_8003831C(void) {
-    ((NpcS *)D_800AA248.cur_obj->owner.ai)->unk_6 = 0;
+    ((Npc *)D_800AA248.cur_obj->owner.ai)->unk_6 = 0;
     func_8004CFC0();
 }
 
-void func_80038348(NpcS *npc) {
+void func_80038348(Npc *npc) {
     D_800AA268.p = npc->unk_0;
     func_80020D20();
     switch (npc->unk_8) {
@@ -1714,7 +1714,7 @@ void func_80038348(NpcS *npc) {
     }
 }
 
-void func_800383F4(NpcS *npc) {
+void func_800383F4(Npc *npc) {
     if (npc->unk_1C == 0) {
         if (func_80039C40(D_800AA248.cur_obj->pos_x.w, -0x280000, -0x280000) == 0) {
             npc->unk_6 = 0xF;
@@ -1728,7 +1728,7 @@ void func_800383F4(NpcS *npc) {
     }
 }
 
-void func_80038494(NpcS *npc) {
+void func_80038494(Npc *npc) {
     u16 n = npc->unk_1A;
 
     if (n >= 2) {
@@ -1741,7 +1741,7 @@ void func_80038494(NpcS *npc) {
     func_800398D4();
 }
 
-void func_800384E8(NpcS *npc) {
+void func_800384E8(Npc *npc) {
     if (npc->unk_64 == NULL) {
         func_800385F4(npc);
         return;
@@ -1749,8 +1749,8 @@ void func_800384E8(NpcS *npc) {
     func_80038528(npc);
 }
 
-void func_80038528(NpcS *npc) {
-    switch (npc->unk_64->unk_0CC) {
+void func_80038528(Npc *npc) {
+    switch (npc->unk_64->dir) {
     case 6:
     case 7:
     case 8:
@@ -1783,7 +1783,7 @@ void func_80038528(NpcS *npc) {
 #ifdef NON_MATCHING
 /* 11 instructions differ: the flags read into `facing` keep their own register (a1) before the `andi` in the
  * original; every variant tried ties the two. */
-void func_800385F4(NpcS *npc) {
+void func_800385F4(Npc *npc) {
     s32 speed;
     u16 n;
 
@@ -1834,7 +1834,7 @@ void func_800385F4(NpcS *npc) {
 INCLUDE_ASM("asm/main/nonmatchings/game_80034590", func_800385F4);
 #endif
 
-void func_80038754(NpcS *npc) {
+void func_80038754(Npc *npc) {
     Monster *player;
 
     func_8001F724(5);
@@ -1852,7 +1852,7 @@ void func_80038754(NpcS *npc) {
     func_800215C0(((s16 *)&D_800AA248.cur_obj->pos_x.w)[1], ((u16 *)&D_800AA248.cur_obj->pos_y.w)[1] - 0xA);
 }
 
-void func_80038800(NpcS *npc) {
+void func_80038800(Npc *npc) {
     if (npc->unk_1C != 0) {
         npc->unk_1C--;
         return;
@@ -1860,7 +1860,7 @@ void func_80038800(NpcS *npc) {
     func_80038838(npc);
 }
 
-void func_80038838(NpcS *npc) {
+void func_80038838(Npc *npc) {
     u16 kind;
 
     D_800AA248.cur_obj->vel_x.w = 0;
@@ -1890,7 +1890,7 @@ void func_80038838(NpcS *npc) {
 
 #ifdef NON_MATCHING
 /* 98.73 %: register choices only: the original builds both table addresses in a0 and adds the row before the index (row + which * 4); here which * 4 + row */
-void func_80038920(NpcS *npc) {
+void func_80038920(Npc *npc) {
     u16 which;
     u8 *anim;
     u8 **row;
@@ -1905,7 +1905,7 @@ void func_80038920(NpcS *npc) {
     } else {
         row = *(D_8007DA78 + (npc->unk_2C & 3));
         anim = row[which];
-        if (anim != (u8 *)D_800AA268.p->unk_48) {
+        if (anim != (u8 *)D_800AA268.p->anim) {
             func_8003EB5C(anim, D_800AA268.p);
             return;
         }
@@ -1924,7 +1924,7 @@ void func_80038920(NpcS *npc) {
 INCLUDE_ASM("asm/main/nonmatchings/game_80034590", func_80038920);
 #endif
 
-void func_80038A2C(NpcS *npc) {
+void func_80038A2C(Npc *npc) {
     u16 move = npc->unk_2A;
 
     if (move != 0) {
@@ -1951,11 +1951,11 @@ void func_80038A2C(NpcS *npc) {
 
 #ifdef NON_MATCHING
 /* 96.62 %: register choices only, as func_80038920: the table entry's address is built in v1 in the original */
-void func_80038AE8(NpcS *npc) {
+void func_80038AE8(Npc *npc) {
     Monster *player;
 
     player = npc->unk_64;
-    if ((player == NULL || player->unk_0CC == 0 || player->unk_0CC == 5 || player->unk_0CC == 1) && npc->unk_2A == 4) {
+    if ((player == NULL || player->dir == 0 || player->dir == 5 || player->dir == 1) && npc->unk_2A == 4) {
         if (npc->unk_C != 0) {
             func_8003EB5C(D_8007DA68[npc->unk_2E & 3], D_800AA268.p);
         }
@@ -1966,7 +1966,7 @@ void func_80038AE8(NpcS *npc) {
     }
     if (D_800AA268.p->vel_x.w == 0) {
         npc->unk_C = 0;
-        if (player != NULL && player->unk_0CC != 0 && player->unk_0CC != 5 && player->unk_0CC != 1) {
+        if (player != NULL && player->dir != 0 && player->dir != 5 && player->dir != 1) {
             npc->unk_8 = 0x32;
             func_80038528(npc);
             return;
@@ -1985,7 +1985,7 @@ INCLUDE_ASM("asm/main/nonmatchings/game_80034590", func_80038AE8);
 #endif
 
 u16 func_80038C1C(npc)
-    NpcS *npc;
+    Npc *npc;
 {
     s16 x;
     s16 mx;
@@ -2022,7 +2022,7 @@ u16 func_80038C1C(npc)
     return 1;
 }
 
-u16 func_80038DA8(NpcS *npc) {
+u16 func_80038DA8(Npc *npc) {
     s16 x;
     s16 mx;
     u16 i;
@@ -2064,7 +2064,7 @@ u16 func_80038DA8(NpcS *npc) {
 
 INCLUDE_ASM("asm/main/nonmatchings/game_80034590", func_80038F3C);
 
-u16 func_800391F8(u16 *out, NpcS *npc) {
+u16 func_800391F8(u16 *out, Npc *npc) {
     *out = npc->unk_2C;
     if (npc->unk_64 != NULL) {
         npc->unk_4 = 3;
@@ -2072,7 +2072,7 @@ u16 func_800391F8(u16 *out, NpcS *npc) {
     return 1;
 }
 
-u16 func_80039220(u16 *out, NpcS *npc) {
+u16 func_80039220(u16 *out, Npc *npc) {
     u16 state = npc->unk_4;
 
     if (state != 0) {
@@ -2090,13 +2090,13 @@ u16 func_80039220(u16 *out, NpcS *npc) {
 }
 
 void func_80039290(void) {
-    NpcS *npc;
+    Npc *npc;
     u16 *info;
     u16 sound;
     u16 arg;
     u16 which;
 
-    npc = D_800AA268.p->owner.p;
+    npc = D_800AA268.p->owner.npc;
     if (npc->unk_2A == 0 || npc->unk_2A == 4) {
         goto count;
     }
@@ -2121,7 +2121,7 @@ INCLUDE_ASM("asm/main/nonmatchings/game_80034590", func_80039358);
 INCLUDE_ASM("asm/main/nonmatchings/game_80034590", func_8003956C);
 
 void func_80039890(void) {
-    NpcS *npc = (NpcS *)D_800AA248.cur_obj->owner.ai;
+    Npc *npc = (Npc *)D_800AA248.cur_obj->owner.ai;
     u16 *info;
 
     npc->unk_C = 1;
@@ -2131,7 +2131,7 @@ void func_80039890(void) {
 }
 
 void func_800398D4(npc)
-    NpcS *npc;
+    Npc *npc;
 {
     GameObject *mover;
     ObjectDef *effect;
@@ -2139,7 +2139,7 @@ void func_800398D4(npc)
     mover = D_800AA248.cur_obj;
     effect = func_8001D110();
     D_800AA248.new_def = effect;
-    effect->flags = (u16)mover->unk_80 + 1;
+    effect->flags = (u16)mover->priority + 1;
     effect->pos_y.s.hi = npc->unk_5E - 0xA;
     effect->pos_x.s.hi = npc->unk_5C;
     effect->id = 0x4F0035F6;
@@ -2148,7 +2148,7 @@ void func_800398D4(npc)
     D_800AA248.cur_obj = mover;
 }
 
-u16 func_80039958(NpcS *npc) {
+u16 func_80039958(Npc *npc) {
     s32 speed;
     s32 *edge;
     s16 x;
@@ -2176,7 +2176,7 @@ u16 func_80039958(NpcS *npc) {
     return x <= D_801FA990;
 }
 
-void func_80039A58(NpcS *npc) {
+void func_80039A58(Npc *npc) {
     if (npc->unk_1C == 0) {
         if (func_80039C40(D_800AA248.cur_obj->pos_x.w, -0x280000, -0x280000) == 0) {
             npc->unk_6 = 0x31;
@@ -2247,7 +2247,7 @@ s32 func_80039C98(s32 x, s32 left, s32 right) {
     return 0;
 }
 
-void func_80039D04(NpcS *npc) {
+void func_80039D04(Npc *npc) {
     s32 x;
     Monster *player;
     s32 px;
@@ -2282,7 +2282,7 @@ void func_80039D04(NpcS *npc) {
 
 INCLUDE_ASM("asm/main/nonmatchings/game_80034590", func_80039EC4);
 
-void func_8003A0A8(NpcS *npc) {
+void func_8003A0A8(Npc *npc) {
     if (D_801FA990 != 0 || D_801FA98C != 0) {
         if (((s16 *)&D_800AA248.cur_obj->pos_x.w)[1] > D_801FA98C && ((s16 *)&D_800AA248.cur_obj->pos_x.w)[1] < D_801FA98C + 4 &&
             !(D_800AA248.cur_obj->flags & 0x10)) {
@@ -2315,7 +2315,7 @@ stop:
 
 #ifdef NON_MATCHING
 /* 99.78 %: the velocity lands in v1 here; the original reuses the flag test's v0 */
-void func_8003A218(NpcS *npc) {
+void func_8003A218(Npc *npc) {
     Monster *player;
     s32 v;
 
@@ -2342,7 +2342,7 @@ void func_8003A218(NpcS *npc) {
 INCLUDE_ASM("asm/main/nonmatchings/game_80034590", func_8003A218);
 #endif
 
-void func_8003A328(NpcS *npc, s32 arg1) {
+void func_8003A328(Npc *npc, s32 arg1) {
     GameObject *mover;
     Anim *def;
     ObjectDef *effect;
@@ -2363,7 +2363,7 @@ void func_8003A328(NpcS *npc, s32 arg1) {
         effect->pos_x.s.hi = ((u16 *)&D_800AA248.cur_obj->pos_x.w)[1];
         effect->pos_y.s.hi = ((u16 *)&D_800AA248.cur_obj->pos_y.w)[1] - 0x19;
         effect->anim = def;
-        effect->flags = (u16)D_800AA248.cur_obj->unk_80 + 1;
+        effect->flags = (u16)D_800AA248.cur_obj->priority + 1;
         effect->id = def->id;
         func_8001DCB4();
         npc->unk_1C = 3;
@@ -2384,7 +2384,7 @@ void func_8003A328(NpcS *npc, s32 arg1) {
     D_800AA268.p = mover;
 }
 
-void func_8003A4A0(NpcS *npc) {
+void func_8003A4A0(Npc *npc) {
     u16 n;
 
     D_800AA248.cur_obj->vel_x.w = 0;
@@ -2418,7 +2418,7 @@ INCLUDE_ASM("asm/main/nonmatchings/game_80034590", func_8003A5A0);
 
 INCLUDE_ASM("asm/main/nonmatchings/game_80034590", func_8003A744);
 
-void func_8003A904(NpcS *npc) {
+void func_8003A904(Npc *npc) {
     npc->unk_2A = 1;
     switch (npc->unk_24) {
     case 0:
@@ -2437,8 +2437,8 @@ void func_8003A904(NpcS *npc) {
 
 INCLUDE_ASM("asm/main/nonmatchings/game_80034590", func_8003A98C);
 
-void func_8003AA7C(NpcS *npc) {
-    D_800AA248.cur_obj->unk_80 = 0x4000;
+void func_8003AA7C(Npc *npc) {
+    D_800AA248.cur_obj->priority = 0x4000;
     npc->unk_8 = 2;
     npc->unk_1C = 0x3C;
     func_8003EB5C(D_800956D0, D_800AA248.cur_obj);
@@ -2449,11 +2449,11 @@ void func_8003AA7C(NpcS *npc) {
 
 /* 93.12%: the original keeps the facing test as two arms joined by a jump, and rebuilds the address of D_800AA248 after the join (in s0); here the arms collapse into one conditional set and the address stays in one saved register throughout */
 #ifdef NON_MATCHING
-void func_8003AAF8(NpcS *npc) {
+void func_8003AAF8(Npc *npc) {
     s32 offset;
 
     if (npc->unk_1C == 0) {
-        D_800AA248.cur_obj->unk_80 = 0x50;
+        D_800AA248.cur_obj->priority = 0x50;
         if (D_800AA248.cur_obj->flags & 0x10) {
             offset = 0x1CC0000;
         } else {
@@ -2475,7 +2475,7 @@ void func_8003AAF8(NpcS *npc) {
 INCLUDE_ASM("asm/main/nonmatchings/game_80034590", func_8003AAF8);
 #endif
 
-void func_8003ABE8(NpcS *npc) {
+void func_8003ABE8(Npc *npc) {
     if (D_800AA248.cur_obj->flags & 0x10) {
         npc->unk_34 = -0x40000;
     } else {
@@ -2493,7 +2493,7 @@ void func_8003ABE8(NpcS *npc) {
 
 /* 99.86%: one register pair swapped: the right-edge test loads D_801F9AC8 into v1 and the constant into v0 in the original, the other way round here */
 #ifdef NON_MATCHING
-void func_8003AC74(NpcS *npc) {
+void func_8003AC74(Npc *npc) {
     s32 x;
     u16 t;
     u16 n;
@@ -2550,7 +2550,7 @@ void func_8003AC74(NpcS *npc) {
 INCLUDE_ASM("asm/main/nonmatchings/game_80034590", func_8003AC74);
 #endif
 
-void func_8003AEA0(NpcS *npc) {
+void func_8003AEA0(Npc *npc) {
     if (func_80039C40(D_800AA248.cur_obj->pos_x.w, 0x460000, 0x460000) == 0) {
         if (D_800AA248.cur_obj->flags & 0x10) {
             npc->unk_34 = -0x48000;
@@ -2569,7 +2569,7 @@ void func_8003AEA0(NpcS *npc) {
 
 INCLUDE_ASM("asm/main/nonmatchings/game_80034590", func_8003AF40);
 
-void func_8003B1D0(NpcS *npc) {
+void func_8003B1D0(Npc *npc) {
     if (npc->unk_C != 0) {
         if (npc->unk_1C > 0) {
             npc->unk_1C--;
@@ -2591,7 +2591,7 @@ void func_8003B1D0(NpcS *npc) {
     }
 }
 
-void func_8003B294(NpcS *npc) {
+void func_8003B294(Npc *npc) {
     u16 action;
 
     D_800AA248.cur_obj = npc->unk_0;
@@ -2628,7 +2628,7 @@ void func_8003B294(NpcS *npc) {
 
 /* 98.32%: the original rebuilds the address of D_800AA248 into s1 once the countdown reaches zero (the earlier one ends there) and keeps the facing speed in v0; here the first address lives on and the speed lands in v1 */
 #ifdef NON_MATCHING
-void func_8003B3C8(NpcS *npc) {
+void func_8003B3C8(Npc *npc) {
     s32 speed;
 
     D_800AA248.cur_obj = npc->unk_0;
