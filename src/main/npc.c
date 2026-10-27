@@ -48,11 +48,12 @@ void func_80020DDC(Npc *npc);
 /* This unit. */
 u16 func_80036FD0(s16 x, s16 y, GameObject *mover);
 u16 func_80036C30(Monster *player, Npc *npc, GameObject *mover, s32 reach);
+void func_80037078(Monster *player, Npc *npc);
 void func_800383F4(Npc *npc);
 void func_80038494(Npc *npc);
 void func_800384E8(Npc *npc);
 void func_80038AE8(Npc *npc);
-void func_80036818(Npc *npc);
+void npc_update_searchlight(Npc *npc);
 void func_80037A88(Npc *npc);
 void func_80037F20(Npc *npc);
 void func_80038348(Npc *npc);
@@ -73,7 +74,7 @@ void func_8003AAF8(Npc *npc);
 void func_80039A58(Npc *npc);
 void func_8003831C(void);
 void func_800347E4(Pickup *npc, Anim *def);
-void func_80036504(GameObject *a, GameObject *b, GameObject *c);
+void npc_place_searchlight(GameObject *a, GameObject *b, GameObject *c);
 void func_80035B6C(Pickup *npc);
 void func_80035EBC(Pickup *npc);
 void func_8003585C(Pickup *npc);
@@ -456,25 +457,22 @@ void func_80034DAC(Pickup *npc) {
 }
 
 #ifdef NON_MATCHING
-/* 92.84%: 92.8 %: the original masks with D_801D8866 loaded signed (lh) and steps n after the x store; the prologue
- * sets up the hoisted constants before n = 1 */
+/* 96.82%: 96.8 %: the slot pointer and n are loop.c's givs of i (the prologue now matches); left: the original
+ * keeps the giv increment of n after the x store and the mflo after the loads, here both go to the top of the join
+ * block */
 void func_80034E48(Pickup *npc) {
     GameObject *mover;
-    GameObject **slot;
     GameObject *spawned;
     ObjectDef *effect;
     Anim *def;
     s32 kind;
     s32 i;
-    s32 n;
     s32 step;
     s32 offset;
     s32 x;
 
     mover = D_800AA248.cur_obj;
     i = 0;
-    n = 1;
-    slot = D_801FB44C;
     do {
         kind = 4;
         if (npc->kind != 0x17) {
@@ -487,7 +485,7 @@ void func_80034E48(Pickup *npc) {
         effect->id = def->id;
         effect->flags = (u16)mover->priority;
         spawned = func_8001DCB4();
-        *slot = spawned;
+        D_801FB44C[i] = spawned;
         spawned->flags = mover->flags;
         spawned->kind = 0x71A;
         spawned->unk_68.w = (i << 16) | kind;
@@ -496,16 +494,14 @@ void func_80034E48(Pickup *npc) {
             step = 0x64;
         }
         if (mover->flags & 0x10) {
-            offset = n * step;
+            offset = (i + 1) * step;
         } else {
-            offset = n * -step;
+            offset = (i + 1) * -step;
         }
         x = mover->pos_x.u.hi + offset;
         x &= (s16)D_801D8866;
         spawned->pos_x.s.hi = x;
         ((u16 *)&spawned->pos_y.w)[1] = ((u16 *)&mover->pos_y.w)[1];
-        n++;
-        slot++;
         i++;
     } while (i < 3);
     D_800AA268.p = mover;
@@ -1048,7 +1044,7 @@ void func_80036298(void) {
 void func_80036300(Npc *npc) {
     D_800AA268.p = npc->obj;
     func_80029D1C();
-    func_80036818(npc);
+    npc_update_searchlight(npc);
     switch (npc->kind) {
     case 3:
         func_8004BBC8(npc);
@@ -1094,7 +1090,7 @@ void func_800363E4(void) {
     D_801E2A50 = n;
 }
 
-void func_80036440(Npc *npc, s32 depth) {
+void npc_create_searchlight(Npc *npc, s32 depth) {
     GameObject *mover;
     ObjectDef *effect;
     s32 d;
@@ -1117,15 +1113,95 @@ void func_80036440(Npc *npc, s32 depth) {
     func_8001BB68(mover);
 }
 
-INCLUDE_ASM("asm/main/nonmatchings/npc", func_80036504);
+extern u32 D_801FB198;                  /* the day's clock in seconds (building_update_sky_colours) */
+extern s32 D_8007D5F0[];                /* per searchlight frame: its id (0 ends), the beam's slope divisor, the point's dx and
+                                         * dy */
 
-void func_80036818(Npc *npc) {
+/* The beam shows at night only (before 6:00, after 18:04); the box is its quad, 3 pixels wide at the point and 48 on the
+ * ground (y 0xE1), where the spot object sits. */
+void npc_place_searchlight(GameObject *line, GameObject *obj, GameObject *end) {
+    s32 i;
+    s32 x;
+    s32 y;
+    s32 len;
+    s32 bits;
+    s32 dx;
+    s32 dy;
+    s32 step;
+    s32 prev;
+    s32 nx;
+    s32 ex;
+
+    if (D_801FB198 - 0x5461 > 0xA8BE && !(obj->unk_6C & 0x80)) {
+        i = 0;
+        while (D_8007D5F0[i] != obj->anim_frame) {
+            if (D_8007D5F0[i] == 0) {
+                goto hide;
+            }
+            i += 4;
+        }
+        if (obj->flags & 0x10) {
+            x = (obj->pos_x.w - (D_8007D5F0[i + 2] << 16)) & D_801D8864.w;
+        } else {
+            x = (obj->pos_x.w + (D_8007D5F0[i + 2] << 16)) & D_801D8864.w;
+        }
+        y = obj->pos_y.w + (D_8007D5F0[i + 3] << 16);
+        len = 0xE10000 - y;
+        if ((u32)(len - 0xA0000) <= 0xE60000) {
+            bits = 6;
+            if (D_801D8864.w == 0x7FFFFFF) {
+                bits = 5;
+            } else if (D_801D8864.w == 0xFFFFFFF) {
+                bits = 4;
+            }
+            dx = ((x - D_801F9AC8.w) << bits) >> bits;
+            dy = y - D_801F9ACC.w;
+            if ((u32)(dx + 0x500000) <= 0x2300000) {
+                dx -= 0x10000;
+                line->unk_50.xy = ((u32)dx >> 16) | (dy & 0xFFFF0000);
+                dx += 0x30000;
+                line->unk_54.w = ((u32)dx >> 16) | (dy & 0xFFFF0000);
+                step = len / D_8007D5F0[i + 1];
+                if (obj->flags & 0x10) {
+                    step = -step - 0x30000;
+                }
+                prev = line->unk_40.w;
+                if (prev != -999) {
+                    nx = (x + step) & D_801D8864.w;
+                    x = prev;
+                    step = ((nx - x) << bits) >> (bits + 3);
+                }
+                nx = (x + step) & D_801D8864.w;
+                ex = ((nx - D_801F9AC8.w) << bits) >> bits;
+                dy = y + len - D_801F9ACC.w;
+                if (dx > 0x1500000 && ex < 0) {
+                    ex += D_801D8864.w + 1;
+                }
+                ex -= 0x180000;
+                line->arg.xy = ((u32)ex >> 16) | (dy & 0xFFFF0000);
+                ex += 0x300000;
+                line->unk_60 = ((u32)ex >> 16) | (dy & 0xFFFF0000);
+                line->unk_40.w = nx;
+                end->pos_x.w = x + step - 0x180000;
+                end->pos_y.w = y + len;
+                func_8001BB88(line);
+                func_8001BB88(end);
+                return;
+            }
+        }
+    }
+hide:
+    func_8001BB68(line);
+    func_8001BB68(end);
+}
+
+void npc_update_searchlight(Npc *npc) {
     GameObject *a = npc->unk_70;
     GameObject *b = npc->obj;
     GameObject *c = npc->unk_74;
 
     if (a != NULL) {
-        func_80036504(a, b, c);
+        npc_place_searchlight(a, b, c);
     }
 }
 
@@ -1172,7 +1248,7 @@ void func_8003684C(void) {
             npc->unk_1C = item->unk_0E;
         }
         if (npc->kind == 0x11 || npc->kind == 0x12) {
-            func_80036440(npc, item->unk_0C);
+            npc_create_searchlight(npc, item->unk_0C);
         } else {
             obj->priority = obj->pos_y.u.hi + 0xF23;
         }
@@ -1249,7 +1325,75 @@ void func_80036A20(Monster *player) {
     } while (--n != 0);
 }
 
-INCLUDE_ASM("asm/main/nonmatchings/npc", func_80036C30);
+u16 func_80036C30(Monster *player, Npc *npc, GameObject *mover, s32 reach) {
+    s16 x;
+    s16 y;
+    s16 e;
+
+    x = player->pos.u.lo;
+    y = player->pos.u.hi;
+    func_80037960(npc, mover);
+    e = npc->unk_3E;
+    if (x < e && x < (s16)(e - 4)) {
+        if (player->unk_0DE == 0 || player->unk_0EA != 1 || x < (s16)(e - 4) - 0x19) {
+            goto second;
+        }
+    }
+    e = npc->unk_40;
+    if (x > e && x > (s16)(e + 4)) {
+        if (player->unk_0DE == 0 || player->unk_0EA != 2 || x > (s16)(e + 4) + 0x19) {
+            goto second;
+        }
+    }
+    e = npc->unk_44;
+    if (y < e && y < (s16)(e - 4)) {
+        if (player->unk_0DE == 0 || player->unk_0EA != 3 || y < (s16)(e - 4) - 0x19) {
+            goto second;
+        }
+    }
+    e = npc->unk_42;
+    if (y > e && y > (s16)(e + 4)) {
+        if (player->unk_0DE == 0 || player->unk_0EA != 4 || y > (s16)(e + 4) + 0x19) {
+            goto second;
+        }
+        return 1;
+    }
+    goto first;
+second:
+    e = npc->unk_46;
+    if (x < e && x < (s16)(e - 4)) {
+        if (player->unk_0DE == 0 || player->unk_0EA != 1 || x < (s16)(e - 4) - 0x19) {
+            return 0;
+        }
+    }
+    e = npc->unk_48;
+    if (x > e && x > (s16)(e + 4)) {
+        if (player->unk_0DE == 0 || player->unk_0EA != 2 || x > (s16)(e + 4) + 0x19) {
+            return 0;
+        }
+    }
+    e = npc->unk_4C;
+    if (y < e && y < (s16)(e - 4)) {
+        if (player->unk_0DE == 0 || player->unk_0EA != 3 || y < (s16)(e - 4) - 0x19) {
+            return 0;
+        }
+    }
+    e = npc->unk_4A;
+    if (y > e && y > (s16)(e + 4)) {
+        if (player->unk_0DE == 0 || player->unk_0EA != 4 || y > (s16)(e + 4) + 0x19) {
+            return 0;
+        }
+    }
+    player->unk_024++;
+    func_80054374(0x28, player);
+    func_800634D4(player, 4);
+    npc->action = reach;
+    goto done;
+first:
+    func_80037078(player, npc);
+done:
+    return 1;
+}
 
 u16 func_80036FD0(s16 x, s16 y, GameObject *mover) {
     u16 pos;
@@ -1290,17 +1434,13 @@ void func_80037078(Monster *player, Npc *npc) {
     player->unk_18A = 1;
 }
 
-#ifdef NON_MATCHING
-/* 76.88%: 76.9 %: the case order and the calls are the original's; the original sign-extends x and y once (s1, s2)
- * and keeps a copy of each (fp, s7) for the call to func_800372DC; here the shifted values stay live and x, y spill */
-u16 func_800372DC(s16 x, s16 y, Monster *player, Npc *npc, s32 arg4);
+u16 func_800372DC(s16 x, s16 y, Monster *player, Npc *npc, GameObject *mover);
 u16 func_800374FC(s16 x, s16 y, Npc *npc, GameObject *mover);
 
 u16 func_8003712C(s16 x, s16 y, Monster *player) {
     Npc *npc;
     GameObject *obj;
     u16 n;
-    u16 hit;
 
     n = D_801D8730;
     npc = D_801FAC9C;
@@ -1313,11 +1453,10 @@ u16 func_8003712C(s16 x, s16 y, Monster *player) {
             switch (npc->kind) {
             case 0x42:
                 if (player->unk_18E != 1) {
-                    hit = func_800374FC(x, y, npc, obj);
-                } else {
-                    hit = func_80037574(x, y, obj);
-                }
-                if (hit == 1) {
+                    if (func_800374FC(x, y, npc, obj) == 1) {
+                        return func_8003761C(x, y, player, npc);
+                    }
+                } else if (func_80037574(x, y, obj) == 1) {
                     return func_8003761C(x, y, player, npc);
                 }
                 break;
@@ -1328,7 +1467,7 @@ u16 func_8003712C(s16 x, s16 y, Monster *player) {
                 }
                 break;
             case 0x12:
-                if (func_800372DC(x, y, player, npc, (s32)obj) == 1) {
+                if (func_800372DC(x, y, player, npc, obj) == 1) {
                     return func_8003761C(x, y, player, npc);
                 }
                 break;
@@ -1338,23 +1477,45 @@ u16 func_8003712C(s16 x, s16 y, Monster *player) {
     } while (--n != 0);
     return 0;
 }
-#else
-INCLUDE_ASM("asm/main/nonmatchings/npc", func_8003712C);
-#endif
 
-#ifdef NON_MATCHING
-/* 99.85%: 99.85 %: the first rectangle's lhu temporaries (global, they cross the beqz) take v1 first in global-
- * alloc; the original's a0 needs v1 excluded: a v1 conflict or a v1 preference of the lower-priority s16 x (88) */
-u16 func_800372DC(s16 x, s16 y, Monster *player, Npc *npc, s32 arg4) {
-    func_80037960(npc, arg4);
-    if ((x >= npc->unk_3E || x >= (s16)(npc->unk_3E - 4)) && (x <= npc->unk_40 || x <= (s16)(npc->unk_40 + 4)) &&
-        (y >= npc->unk_44 || y >= (s16)(npc->unk_44 - 4)) && (y <= npc->unk_42 || y <= (s16)(npc->unk_42 + 4))) {
-        goto hit;
+u16 func_800372DC(s16 x, s16 y, Monster *player, Npc *npc, GameObject *mover) {
+    s16 e;
+
+    func_80037960(npc, mover);
+    e = npc->unk_3E;
+    if (x < e && x < (s16)(e - 4)) {
+        goto second;
     }
-    if (x < npc->unk_46 && x < (s16)(npc->unk_46 - 4)) return 0;
-    if (x > npc->unk_48 && x > (s16)(npc->unk_48 + 4)) return 0;
-    if (y < npc->unk_4C && y < (s16)(npc->unk_4C - 4)) return 0;
-    if (y > npc->unk_4A && y > (s16)(npc->unk_4A + 4)) return 0;
+    e = npc->unk_40;
+    if (x > e && x > (s16)(e + 4)) {
+        goto second;
+    }
+    e = npc->unk_44;
+    if (y < e && y < (s16)(e - 4)) {
+        goto second;
+    }
+    e = npc->unk_42;
+    if (y > e && y > (s16)(e + 4)) {
+        goto second;
+    }
+    goto hit;
+second:
+    e = npc->unk_46;
+    if (x < e && x < (s16)(e - 4)) {
+        return 0;
+    }
+    e = npc->unk_48;
+    if (x > e && x > (s16)(e + 4)) {
+        return 0;
+    }
+    e = npc->unk_4C;
+    if (y < e && y < (s16)(e - 4)) {
+        return 0;
+    }
+    e = npc->unk_4A;
+    if (y > e && y > (s16)(e + 4)) {
+        return 0;
+    }
     if (player != NULL) {
         player->unk_024++;
         func_80054374(0x28, player);
@@ -1363,9 +1524,6 @@ u16 func_800372DC(s16 x, s16 y, Monster *player, Npc *npc, s32 arg4) {
 hit:
     return func_8003761C(x, y, player, npc);
 }
-#else
-INCLUDE_ASM("asm/main/nonmatchings/npc", func_800372DC);
-#endif
 
 u16 func_800374FC(s16 x, s16 y, Npc *npc, GameObject *arg3) {
     MoverTarget *target = D_800AA248.cur_obj->unk_94.target;
@@ -1423,53 +1581,46 @@ u16 func_8003761C(s16 x, s16 y, Monster *player, Npc *npc) {
 void func_800376D8(void) {
 }
 
-#ifdef NON_MATCHING
-/* 82.2 %: the twin of func_8003BD48 (pickup.c), with the same difference: the original tests the loaded limit in v0 and copies it into a1, where every form tried loads it straight into one register */
 void func_800376E0(Npc *npc) {
-    s32 limit;
+    s16 limit;
     u16 x;
-    u16 d;
 
     if (npc->action == 2) {
         limit = D_801FAC84;
-        if (D_801FAC84 != 0) {
+        if (limit != 0) {
             x = D_800AA268.p->pos_x.u.hi;
             if (!(D_800AA268.p->flags & 0x10)) {
-                d = limit - x;
-            } else {
-                d = (u16) D_801F9AB0 - x + 0x31;
-            }
-            if (d < 0x32) {
+                limit -= x;
+                if ((u16)limit < 0x32) {
+                    npc->state = 1;
+                }
+            } else if ((u16)(D_801F9AB0 - x + 0x31) < 0x32) {
                 npc->state = 1;
             }
         } else if (D_801D37BC == 0) {
-            limit = (s16)D_801FA98C;
-            if ((s16)D_801FA98C != 0) {
+            limit = D_801FA98C;
+            if (limit != 0) {
                 x = D_800AA268.p->pos_x.u.hi;
                 if (!(D_800AA268.p->flags & 0x10)) {
-                    d = limit - x;
-                } else {
-                    d = D_801FA990 - x + 0x31;
-                }
-                if (d < 0x32) {
+                    limit -= x;
+                    if ((u16)limit < 0x32) {
+                        npc->state = 1;
+                    }
+                } else if ((u16)(D_801FA990 - x + 0x31) < 0x32) {
                     npc->state = 1;
                 }
             }
         }
     }
 }
-#else
-INCLUDE_ASM("asm/main/nonmatchings/npc", func_800376E0);
-#endif
 
-#ifdef NON_MATCHING
-/* 94.25%: the original keeps the slot bound 8 in a register (sltu against t0) and counts with a2/a1 where this C
- * uses sltiu and a3/a2; first draft after the Npc typing */
-void func_800377B4(Npc *npc) {
+void npc_pick_target(Npc *npc) {
     u16 i;
     u16 slot;
     u16 best;
     Monster *m;
+    u16 max;
+    u16 k;
 
     npc->unk_58 ^= 1;
     if (D_801D8740 == 0) {
@@ -1479,11 +1630,12 @@ void func_800377B4(Npc *npc) {
     }
     best = 0;
     if (npc->unk_58 == 0) {
+        max = 8;
         i = 7;
         slot = npc->unk_04;
         do {
             slot++;
-            if (slot >= 8) {
+            if (slot >= max) {
                 slot = 1;
             }
             m = &D_801E0B78[slot];
@@ -1496,24 +1648,25 @@ void func_800377B4(Npc *npc) {
         return;
     }
     i = 7;
-    slot = 1;
+    k = 1;
     do {
-        m = &D_801E0B78[slot];
+        m = &D_801E0B78[k];
         if ((m->unk_058 & 1) && m->unk_040 >= 0x1C20 && m->unk_040 >= best) {
             best = m->unk_040;
         }
-        slot++;
+        k++;
     } while (--i != 0);
+    max = 8;
     i = 7;
     slot = npc->unk_56;
     do {
         slot++;
-        if (slot >= 8) {
+        if (slot >= max) {
             slot = 1;
         }
         m = &D_801E0B78[slot];
         if (m->unk_058 & 1) {
-            if (m->unk_040 + 0x12C < best) {
+            if (m->unk_040 + 0x12C >= best) {
                 break;
             }
         } else {
@@ -1523,9 +1676,6 @@ void func_800377B4(Npc *npc) {
     npc->unk_10 = m;
     npc->unk_56 = slot;
 }
-#else
-INCLUDE_ASM("asm/main/nonmatchings/npc", func_800377B4);
-#endif
 
 void func_80037960(Npc *npc, GameObject *obj) {
     s16 x;

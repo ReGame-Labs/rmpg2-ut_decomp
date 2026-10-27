@@ -65,13 +65,13 @@ typedef struct ActorLink {
  * which reaches 0x50. */
 typedef struct Npc {
     /* 0x00 */ GameObject *obj;            /* the object it drives */
-    /* 0x04 */ u16 unk_04;                 /* the player slot last targeted (func_800377B4) */
+    /* 0x04 */ u16 unk_04;                 /* the player slot last targeted (npc_pick_target) */
     /* 0x06 */ u16 kind;                   /* picks the dispatcher (func_80036300) */
     /* 0x08 */ u16 action;                 /* the current action */
     /* 0x0A */ u16 state;                  /* the index into the action's handler table */
     /* 0x0C */ u16 unk_0C;                 /* 1 while the state is new */
     /* 0x0E */ u8 unk_0E[0x2];
-    /* 0x10 */ Monster *unk_10;            /* the monster it goes for (func_800377B4 picks it) */
+    /* 0x10 */ Monster *unk_10;            /* the monster it goes for (npc_pick_target picks it) */
     /* 0x14 */ u16 unk_14;
     /* 0x16 */ u8 unk_16[0x4];
     /* 0x1A */ s16 unk_1A;
@@ -102,8 +102,8 @@ typedef struct Npc {
     /* 0x4E */ u16 unk_4E;
     /* 0x50 */ GameObject *unk_50;         /* a second object it makes (kinds 0x11, 0x12: func_80020EDC) */
     /* 0x54 */ u16 unk_54;
-    /* 0x56 */ u16 unk_56;                 /* another player slot (func_800377B4) */
-    /* 0x58 */ u16 unk_58;                 /* toggled by func_800377B4: which way it picks */
+    /* 0x56 */ u16 unk_56;                 /* another player slot (npc_pick_target) */
+    /* 0x58 */ u16 unk_58;                 /* toggled by npc_pick_target: which way it picks */
     /* 0x5A */ u8 unk_5A[0x2];
     /* 0x5C */ u16 unk_5C;
     /* 0x5E */ u16 unk_5E;

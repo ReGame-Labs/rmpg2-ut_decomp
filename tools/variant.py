@@ -30,6 +30,9 @@ still link and the block must compile with -DNON_MATCHING. No ninja: other sessi
                         f flow, j jump, J jump2, S sched, R sched2, d dbr, r rtl, F addressof)
   -t TARGET, -u UNIT    where the function is (default: found under src/); -j N parallel compiles (RMPG2_JOBS, 4)
   -V VER, -G N, -D DEF  as tools/unit_diff.py (nothing is kept with -D)
+  --cc1 FLAG            one more cc1 flag for every compile, the candidates' and the scoring's (repeatable; e.g.
+                        -fno-cse-follow-jumps, -fno-schedule-insns2): a diagnostic, its scores say so and nothing
+                        is kept (-k and --wip refused); a match under -fno-X says the original's code stopped X there
 
 A replacement is the function's definition, ANSI or K&R, optionally with declarations before it (they move with
 it; those the unit already has before the function are left out, so putting a function twice does not repeat them).
@@ -371,8 +374,9 @@ class Unit:
     """A C unit and how to compile and check it."""
 
     def __init__(self, target: str, name: str, path: Path = None, cc: str = None, g: int = None,
-                 flags: list = None, checker: unit_diff.Checker = None, work: Path = None):
+                 flags: list = None, checker: unit_diff.Checker = None, work: Path = None, cc1: list = None):
         self.target, self.name = target, name
+        self.cc1 = list(cc1 or [])  # --cc1: extra cc1 flags for every compile (a diagnostic: nothing is kept)
         self.path = path or ROOT / f"src/{target}/{name}.c"
         src = f"src/{target}/{name}.c"
         self.cc = cc or configure.CC_OVERRIDES.get(src, configure.DEFAULT_CC)
@@ -394,14 +398,16 @@ class Unit:
 
     def compile(self, text: str, tag: str, defines=(), includes=(), preprocess=False, cc1=()):
         """Compile `text` as this unit: (the object, the preprocessed file (preprocess) or cc1's assembly (cc1: these
-        cc1 flags, cc1 only; its dumps next to it, <out>.i.<dump>), the compiler's log, its status)."""
+        cc1 flags, cc1 only; its dumps next to it, <out>.i.<dump>), the compiler's log, its status). The unit's own
+        extra cc1 flags (self.cc1) go to every compile."""
         self.work.mkdir(parents=True, exist_ok=True)
         tag = f"{os.getpid()}_{tag}"  # several sessions may score the same unit
         c = self.work / f"{tag}.c"
         c.write_text(text)
         out = self.work / (f"{tag}.i" if preprocess else f"{tag}.s" if cc1 else f"{tag}.o")
         stop = ["-E"] if preprocess else ["-S", *(x for f in cc1 for x in ("--cc1", f))] if cc1 else []
-        r = subprocess.run([str(ROOT / "tools/cc_psx.sh"), "-V", self.cc, "-G", str(self.g), *self.flags,
+        extra = [x for f in self.cc1 for x in ("--cc1", f)]
+        r = subprocess.run([str(ROOT / "tools/cc_psx.sh"), "-V", self.cc, "-G", str(self.g), *self.flags, *extra,
                             *(f"-I{d}" for d in includes), *(f"-D{d}" for d in defines),
                             *stop, str(c), "-o", str(out)],
                            capture_output=True, text=True, cwd=ROOT)
@@ -446,6 +452,8 @@ def put_text(unit_text: str, region: Region, c: str) -> str:
 def keep(unit: Unit, func: str, region: Region, c: str, score: Score, wip: bool, note: str = None) -> str:
     """Write `c` in place of the function, checked: as C when it matches, as a WIP block when asked. Returns what
     was done; the file is left as it was when the check fails."""
+    if unit.cc1:
+        return f"not kept: scored with --cc1 {' '.join(unit.cc1)}, a diagnostic"
     text = unit.text()
     if score.error is not None:
         return "not kept: it does not compile"
@@ -779,7 +787,8 @@ def dump(unit: Unit, text: str, func: str, letters: str = "", defines=()) -> lis
             return [f"dump: no {func} in cc1's -dl/-dg dumps"]
         rows = allocation(parts["l"], parts["g"])
         local = [p for p in rows if not p["rank"] and p["local"] is not None]
-        lines = [f"cc1 -dl -dg, gcc {unit.cc} -G{unit.g}: {func}, {len(rows)} pseudos, in global-alloc's order"
+        flags = "".join(" " + f for f in unit.cc1)
+        lines = [f"cc1 -dl -dg{flags}, gcc {unit.cc} -G{unit.g}: {func}, {len(rows)} pseudos, in global-alloc's order"
                  " (priority = floor_log2(refs) x refs / live x size), then local-alloc's",
                  f"  {'pseudo':>6}  {'refs':>4}  {'live':>4}  {'prio':>6}  {'alloc':<9} {'reg':<5} notes"]
         if not rows:
@@ -851,6 +860,12 @@ def read_input(path: str) -> str:
     return sys.stdin.read() if path == "-" else Path(path).read_text()
 
 
+def diagnostic(unit: Unit) -> str:
+    """The line that says the scores are under extra cc1 flags."""
+    return (f"  --cc1 {' '.join(unit.cc1)}: scored with these extra cc1 flags, a diagnostic (nothing is kept); a match"
+            " says the original's code stopped that pass there")
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("cmd", choices=["get", "put", "try", "perm"])
@@ -873,7 +888,11 @@ def main():
     ap.add_argument("-V")
     ap.add_argument("-G", type=int)
     ap.add_argument("-D", action="append", default=[], metavar="DEF")
-    a = ap.parse_args()
+    ap.add_argument("--cc1", action="append", default=[], metavar="FLAG",
+                    help="one more cc1 flag for every compile (repeatable): a diagnostic, nothing is kept")
+    a = ap.parse_args(unit_diff.cc1_argv(sys.argv[1:]))
+    if a.cc1 and (a.keep is not None or a.wip):
+        ap.error("--cc1 scores are a diagnostic: nothing is kept (-k, --wip)")
     if a.dump is not None:
         try:
             a.dump = dump_letters(a.dump)
@@ -883,9 +902,11 @@ def main():
             a.file, a.dump = a.dump, ""  # `--dump file.c`: the file, not the sections
     if a.cmd != "get" and not a.file:
         ap.error(f"{a.cmd} needs a file")
+    if a.cmd == "get" and a.cc1 and a.dump is None:
+        ap.error("get: --cc1 only with --dump")
 
     target, name = locate(a.func, a.target, a.unit)
-    unit = Unit(target, name, cc=a.V, g=a.G)
+    unit = Unit(target, name, cc=a.V, g=a.G, cc1=a.cc1)
     text = unit.text()
     region = find(text, a.func)
     defines = a.D
@@ -894,6 +915,8 @@ def main():
         if region.kind == "asm":
             sys.exit(f"{a.func}: INCLUDE_ASM in src/{target}/{name}.c")
         if a.dump is not None:
+            if unit.cc1:
+                print(diagnostic(unit))
             print("\n".join(dump(unit, splice(text, region, region.c), a.func, a.dump, defines)))
             return
         print(region.c, end="")
@@ -902,6 +925,8 @@ def main():
         return
 
     print(f"{a.func}: src/{target}/{name}.c ({region.kind}), gcc {unit.cc} -G{unit.g}", flush=True)
+    if unit.cc1:
+        print(diagnostic(unit), flush=True)
     if a.cmd == "put":
         c = read_input(a.file)
         s = unit.score(put_text(text, region, c), a.func, "put", keep=a.show, defines=defines)

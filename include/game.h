@@ -96,6 +96,7 @@ typedef struct GameObject {
                    struct GameObject *obj;  /* a link */
                    s32 cam_start;           /* OVERATTR's camera: its start point, y << 16 | x (tour_update_map) */
                    s32 count;               /* a monster's bomb (kind 0x73A): its bounces */
+                   s32 xy;                  /* a quad box's corner, y << 16 | x (npc_place_searchlight) */
                } unk_50;
     /* 0x54 */ union {
                    s32 w;
@@ -107,6 +108,7 @@ typedef struct GameObject {
                    u16 *h;
                    s32 *w;
                    s32 cam_point;           /* OVERATTR's camera: its current point, y << 16 | x */
+                   s32 xy;                  /* a quad box's corner, y << 16 | x (npc_place_searchlight) */
                } arg;
     /* 0x60 */ s32 unk_60;
     /* 0x64 */ union {                  /* by kind */
@@ -207,7 +209,7 @@ typedef struct Monster {
     /* 0x0A4 */ GameObject *bars[3];           /* the results bars, one per tally (OVERATTR, tour_create_bars) */
     /* 0x0B0 */ u8 unk_0B0[0x04];
     /* 0x0B4 */ GameObject *extra[5];          /* its own sprites (5's, 7's: kind 0x73A; 2-4 func_8002A1AC), or NULL */
-    /* 0x0C8 */ u16 buttons;                   /* the pad's buttons held, pad bits >> 4 (func_800273F4); & 0xF: the
+    /* 0x0C8 */ u16 buttons;                   /* the pad's buttons held, pad bits >> 4 (main_update_input); & 0xF: the
                                                 * direction bits, the index into the action's handler table (func_80027FD0) */
     /* 0x0CA */ u8 unk_0CA[0x02];
     /* 0x0CC */ u16 dir;                       /* the d-pad direction, 0 none (D_8007C124[pad bits & 0xF]); an index
@@ -709,7 +711,7 @@ typedef struct DrawState {
     /* 0xB2 */ u8 unk_B2;
     /* 0xB3 */ u8 unk_B3[0x3];
     /* 0xB6 */ s16 unk_B6;
-    /* 0xB8 */ u8 unk_B8[0x90];
+    /* 0xB8 */ POLY_F4 unk_B8[6];
     /* 0x148 */ unsigned long ot[4];        /* cleared reversed, drawn from ot[3] */
     /* 0x158 */ u8 prims[0x47E0];           /* the frame's primitives */
     /* 0x4938 */ u8 *next_prim;
@@ -726,7 +728,7 @@ typedef struct TextState {
     /* 0x08 */ s32 unk_08;
     /* 0x0C */ u16 pen_x;
     /* 0x0E */ u16 pen_y;
-    /* 0x10 */ s32 unk_10;
+    /* 0x10 */ Fixed unk_10;                /* the advance per glyph: x in s.lo, a line feed in s.hi */
     /* 0x14 */ s32 *glyphs;                /* the font */
     /* 0x18 */ s32 unk_18;
     /* 0x1C */ u8 *text;                   /* the string being printed */
@@ -833,5 +835,15 @@ extern s16 D_801FAC84;
 extern s16 D_801FAC8C;
 extern s16 D_801FAC90;
 extern s32 D_801FB49C[];
+
+/* A player's monster on the selection screen (menu_create_player_monster, main.c main_start_demo), 10 bytes. */
+typedef struct {
+    /* 0x00 */ u8 unk_00[0x04];
+    /* 0x04 */ s16 unk_04;              /* the monster: indexes D_800A8EE4, D_800A8FA8 */
+    /* 0x06 */ s16 unk_06;
+    /* 0x08 */ s16 unk_08;
+} OverattrPlayer;
+
+extern OverattrPlayer D_800A8FD4[];
 
 #endif /* GAME_H */
