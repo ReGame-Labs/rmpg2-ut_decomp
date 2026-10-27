@@ -218,7 +218,7 @@ void func_8001E6CC(GameObject *arg0);
 void func_8001E758(void);
 void func_8001E7A0(void);
 void func_8001E94C(s32 arg0, s32 arg1, GameObject *arg2);
-void func_8001E978(void);
+void func_8001E978(GameObject *obj);
 void func_8001E980(void);
 void func_8001E9C4(s16 arg0, s16 arg1);
 s32 func_8001EA78(void);
@@ -353,7 +353,7 @@ void func_8001BBB0(void);
 void func_800543FC(void);
 extern u16 D_8007AB60;
 void func_8001D1C8(void);
-void func_8001E174(void);
+void func_8001E174(GameObject *obj);
 void func_8001E2F8(GameObject *arg0);
 void func_8005DBC4(s32, Unk29510 *, s32);
 void func_80029510(Unk29510 *arg0);
@@ -362,7 +362,7 @@ void func_80025B3C(Building *);
 void func_80025B7C(BuildingItem *);
 void func_8003044C(void);
 void func_80024AEC(void);
-void func_8001E39C(void *);
+void func_8001E39C(GameObject *);
 void func_80029C6C(Monster *arg0);
 void func_80026A6C(void);
 ObjectDef *func_8001D110(void);
@@ -479,6 +479,10 @@ void func_800211F4(Ai *);
 void func_80021384(Ai *);
 void func_80021644(Ai *);
 void func_800216C8(Ai *);
+extern GameObject D_801E2A80[];
+extern GameObject D_801F9910[];
+extern u8 *D_801D85A4;   /* D_801D8588.text by its own name */
+extern u32 D_801D377C;
 /* decls:end */
 
 /* main: config/aliases.ld gives it its name (GCC 2.8.1 would start a function named main with a call to __main). */
@@ -1850,7 +1854,14 @@ INCLUDE_ASM("asm/main/nonmatchings/game_8001781C", func_8001E010);
 
 INCLUDE_ASM("asm/main/nonmatchings/game_8001781C", func_8001E0AC);
 
-INCLUDE_ASM("asm/main/nonmatchings/game_8001781C", func_8001E174);
+void func_8001E174(GameObject *obj) {
+    if (obj < D_801E2A80 || obj >= D_801F9910) {
+        func_8001B5E8(0xE);
+    }
+    if (((u32) obj - (u32) D_801E2A80) % sizeof(GameObject) != 0) {
+        func_8001B5E8(0xE);
+    }
+}
 
 GameObject *func_8001E204(void) {
     u16 temp_v0;
@@ -1889,7 +1900,7 @@ void func_8001E2F8(GameObject *arg0) {
     GameObject *p;
     u16 key;
 
-    func_8001E174();
+    func_8001E174(arg0);
     head = arg0->next;
     if (head == NULL) {
         if (arg0->unk_82 != 1) {
@@ -1911,7 +1922,22 @@ void func_8001E2F8(GameObject *arg0) {
     }
 }
 
-INCLUDE_ASM("asm/main/nonmatchings/game_8001781C", func_8001E39C);
+void func_8001E39C(GameObject *obj) {
+    GameObject *next;
+    GameObject *prev;
+
+    if (obj->next != NULL) {
+        prev = obj->prev;
+        next = obj->next;
+        if (prev != &D_801E28C0 && prev != &D_801E29A8 && next != &D_801E28C0 && next != &D_801E29A8 &&
+            (prev < D_801E2A80 || prev > D_801F9910 || next < D_801E2A80 || next > D_801F9910)) {
+            func_8001E978(obj);
+        }
+        prev->next = next;
+        next->prev = prev;
+        obj->next = NULL;
+    }
+}
 
 void func_8001E450(s32 kind) {
     GameObject *head;
@@ -1930,7 +1956,7 @@ void func_8001E450(s32 kind) {
 }
 
 void func_8001E4B0(GameObject *sprite) {
-    func_8001E174();
+    func_8001E174(sprite);
     if (!(sprite->flags & 0x8000)) {
         for (;;) {
         }
@@ -2084,7 +2110,7 @@ void func_8001E94C(s32 arg0, s32 arg1, GameObject *arg2) {
     arg2->unk_28.s.hi = (s16) (arg1 - temp_v1->origin.u.hi);
 }
 
-void func_8001E978(void) {
+void func_8001E978(GameObject *obj) {
 }
 
 void func_8001E980(void) {
@@ -2180,7 +2206,28 @@ void func_8001EC74(s32 kind, s16 value) {
     }
 }
 
-INCLUDE_ASM("asm/main/nonmatchings/game_8001781C", func_8001ECB4);
+u8 *func_8001ECB4(u8 *dst, s32 value, s32 width) {
+    s32 digits[8];
+    s32 count;
+    s32 i;
+    u8 *end;
+
+    count = 0;
+    do {
+        digits[count] = value;
+        value /= 10;
+        digits[count] -= value * 10;
+        count++;
+        width--;
+    } while (value != 0 || width > 0);
+    end = dst + count;
+    dst = end;
+    *end = 0;
+    for (i = 0; i < count; i++) {
+        *--dst = digits[i] + '0';
+    }
+    return end;
+}
 
 void func_8001ED54(TextMessage *arg0) {
     func_8001F39C(arg0);
