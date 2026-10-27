@@ -160,7 +160,10 @@ The four pieces of the game's own code that sit between the Psy-Q objects (`game
 not 2.8.1: their stores to globals go through the assembler's macro form (`sh $v1, sym`, which assembles to a
 `lui $at` pair), a form 2.8.x never emits because it splits every address itself, and over the experiment's drafts
 2.7.2 matches 72 of their functions where 2.8.1 matches 32 (`game_8006BB14`: 47 against 16, mean 89.5 % against
-73.4 %). `configure.py`'s `CC_OVERRIDES` names them; `tools/cc_psx.sh` pairs 2.7.2 with ASPSX 2.56. The sound setup
+73.4 %). `configure.py`'s `CC_OVERRIDES` names them; `tools/cc_psx.sh` pairs 2.7.2 with ASPSX 2.56,
+and runs maspsx with `--expand-div` for it: 2.7.2 leaves a division to the assembler's macro form, which ASPSX
+expands with the divide-by-zero and overflow checks the original has (`break 7`, `break 6`; 2.8.x writes them
+itself). The sound setup
 in `game_800633EC`, the game's own code, stays on 2.8.1 (78 % against 58 %).
 
 ### `-G0` everywhere
