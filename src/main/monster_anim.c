@@ -80,14 +80,41 @@ void func_8005D034(s32 x, s32 y, s32 flags);
 void func_8001E4B0(GameObject *obj);
 void main_set_frame(s32, u16, GameObject *);
 void func_8004F370(void);
-extern u16 D_80084278;                  /* the projectile's state bits (monster_anim_update_projectile) */
+extern s16 D_80084278;                  /* the projectile's state bits (monster_anim_update_projectile) */
 extern Building *D_801FB45C;            /* the building the projectile hit */
 extern u8 D_50003464[];
 void func_8005C578(GameObject *b, Monster *e);
 void func_8005C71C(GameObject *b, Monster *e);
 void func_8005C958(GameObject *b, Monster *skip);
 extern u16 D_801FB460;                  /* the buildings the bomb hit (a mask by index) */
+extern u16 D_801FB462;                  /* the buildings monster 1's special move has hit (config/aliases.ld) */
 extern s32 D_80011B60;                  /* the explosion's animation */
+s16 func_800598F4(Monster *e);
+u16 func_8005D0D8(Monster *e);
+void func_8004C2B8(void *script, Monster *m);
+void func_8004C308(void *script, Monster *m);
+void func_80036A20(Monster *m);
+void pickup_collect(Monster *m);
+void func_8003F150(Monster *m);
+u16 func_8004D6F8(Monster *m, Ai **out);
+void func_8005E0E8(Monster *m);
+void func_80053D68(s32, Monster *m);
+u16 monster_test_hit_box(Monster *m, Monster *other);
+void func_8004DA30(GameObject *obj, Monster *m, Monster *other);
+void func_8004DD78(GameObject *obj, Monster *m, Monster *other);
+extern u8 D_100032FC[];                 /* the special moves' scripts, by monster id */
+extern u8 D_100033F8[];
+extern u8 D_200032F4[];
+extern u8 D_20003364[];
+extern u8 D_2000339C[];
+extern u8 D_300032E4[];
+extern u8 D_400032EC[];
+extern u8 D_500032E4[];
+extern u8 D_5000333C[];
+extern u8 D_500033F4[];
+extern u8 D_600031A8[];
+extern u8 D_6000325C[];
+extern u8 D_7000328C[];
 extern s16 D_8008427A;                   /* toggled every call of func_80059F24 */
 extern u16 D_801E28C8;
 extern u8 D_50003440[];                 /* sprite ids the code takes by address */
@@ -1198,7 +1225,7 @@ void func_80059710(Monster *e, s16 want, s16 max) {
 /* 99.96%: 99.96 %: a second pointer to the building (v, copied at the top of each iteration) gives the original's
  * a0 copy; the original reads the first unk_058 test through the building's own register, the second through a0,
  * and no u/v mix gives both with the original's s0/s1 assignment */
-s32 func_800598F4(Monster *e) {
+s16 func_800598F4(Monster *e) {
     Building *u;
     Building *v;
     GameObject *b;
@@ -1799,7 +1826,229 @@ void monster_anim_update_bomb(Monster *e) {
 INCLUDE_ASM("asm/main/nonmatchings/monster_anim", monster_anim_update_bomb);
 #endif
 
-INCLUDE_ASM("asm/main/nonmatchings/monster_anim", func_8005AE28);
+void monster_anim_update_special(Monster *e) {
+    Ai *ai;
+    Monster *other;
+    Building *u;
+    s32 i;
+    s16 j;
+    u16 hits;
+    u16 side;
+    u16 action;
+
+    switch (e->id) {
+    case 1:
+        if (func_8005D0D8(e) != 0) {
+            D_800AA268.p->vel_x.w = 0;
+        }
+        if (D_800AA268.p->anim != (s32)D_100032FC && D_800AA268.p->anim != (s32)D_100033F8) {
+            func_8004C308(D_100032FC, e);
+            e->unk_124 = 300;
+            D_801FB462 = 0;
+        }
+        if (e->unk_100 == 0) {
+            break;
+        }
+        if (D_800AA268.p->vel_x.w == 0) {
+            func_800531C0(e);
+            func_8004C308(D_100033F8, e);
+            break;
+        }
+        if (--e->unk_124 == 0) {
+            goto done;
+        }
+        func_80036A20(e);
+        pickup_collect(e);
+        func_8003F150(e);
+        if (func_8004D6F8(e, &ai) == 1) {
+            func_8001F724(0x55);
+            func_8005E0E8(e);
+            func_80054374(e->unk_1AC != 0 ? 0x5A : 0x1E, e);
+            e->unk_126 = 0;
+            action = ai->action >= 0x1E ? 0xF5 : 0xF0;
+            func_80053D68(0x30000, e);
+            ai->action = action;
+        }
+        for (i = 1; i < 4; i++) {
+            if (i != D_801FA8A0[e->id - 1] && D_801FA8A0[e->id - 1] != 0) {
+                other = &D_801E0B78[func_80025DF8(i)];
+                if (monster_test_hit_box(e, other) != 0) {
+                    if (other->action == 0x37) {
+                        if (D_8007A68A != 0) {
+                            func_8004DA30(other->obj, e, other);
+                        }
+                    } else {
+                        if (D_800AA268.p->flags & 0x10) {
+                            other->obj->flags &= ~0x10;
+                            other->unk_168 = 3;
+                        } else {
+                            other->obj->flags |= 0x10;
+                            other->unk_168 = 7;
+                        }
+                        other->unk_132 = 0;
+                        other->unk_0E4 = 0;
+                        other->unk_0E6 = 0;
+                        other->unk_0EE = 0x78;
+                        other->attacker = e;
+                        func_8004DD78(other->obj, e, other);
+                    }
+                }
+            }
+        }
+        hits = monster_anim_find_buildings(e->obj->pos_x.s.hi, e->obj->pos_y.s.hi, 1, (s16)e->obj->size.u.lo >> 1, (s16)e->obj->size.u.hi >> 1);
+        if (hits != 0) {
+            for (j = 0; j < 13; j++) {
+                if (((hits >> j) & 1) && !((D_801FB462 >> j) & 1)) {
+                    u = &D_801D3DC8[j];
+                    if (u->unk_058 == 0) {
+                        e->unk_188 = 0;
+                        func_8005BB04(e, 1, 0x78, u);
+                    } else {
+                        func_8002CFAC(e, u);
+                    }
+                }
+            }
+        }
+        D_801FB462 |= hits;
+        break;
+    case 2:
+        if (func_8005D0D8(e) != 0) {
+            D_800AA268.p->vel_x.w = 0;
+        }
+        if (D_800AA268.p->anim != (s32)D_200032F4 && D_800AA268.p->anim != (s32)D_20003364 && D_800AA268.p->anim != (s32)D_2000339C) {
+            func_8004C308(D_200032F4, e);
+            e->unk_124 = 300;
+        }
+        if (e->unk_100 == 0) {
+            break;
+        }
+        if (D_800AA268.p->vel_x.w == 0) {
+            func_800531C0(e);
+            func_8004C308(D_20003364, e);
+            break;
+        }
+        if (--e->unk_124 == 0) {
+            goto done;
+        }
+        if (func_800598F4(e) != 0) {
+            func_800531C0(e);
+            func_8004C308(D_2000339C, e);
+            e->meter.w = 0;
+        }
+        for (i = 1; i < 4; i++) {
+            if (i != D_801FA8A0[e->id - 1] && D_801FA8A0[e->id - 1] != 0) {
+                other = &D_801E0B78[func_80025DF8(i)];
+                if (monster_test_hit_box(e, other) != 0 && other->action != 0x37) {
+                    if (D_800AA268.p->flags & 0x10) {
+                        other->obj->flags &= ~0x10;
+                        other->unk_168 = 3;
+                    } else {
+                        other->obj->flags |= 0x10;
+                        other->unk_168 = 7;
+                    }
+                    other->unk_132 = 0;
+                    other->unk_0E4 = 0;
+                    other->unk_0E6 = 0;
+                    other->unk_0EE = 0x78;
+                    other->attacker = e;
+                    if (D_8007A68A != 0) {
+                        func_80053C50(0x28000, other);
+                    }
+                    func_8004DD78(other->obj, e, other);
+                }
+            }
+        }
+        break;
+    case 3:
+        if (D_800AA268.p->anim != (s32)D_300032E4) {
+            func_8004C2B8(D_300032E4, e);
+            e->unk_124 = 300;
+        }
+        if (--e->unk_124 == 0) {
+            if (e->climb_side == 3 || e->obj->pos_y.s.hi == 0xE1) {
+            done:
+                e->action = 0;
+                e->meter.w = 0;
+                break;
+            }
+            e->unk_124 = 1;
+        }
+        break;
+    case 4:
+        if (e->climb_side == 3) {
+            e->climb_side = 0;
+            func_8004C2B8(D_400032EC, e);
+        } else {
+            func_8004C2B8(D_400032EC, e);
+        }
+        break;
+    case 5:
+        if (D_800AA268.p->anim != (s32)D_5000339C && D_800AA268.p->anim != (s32)D_5000333C && D_800AA268.p->anim != (s32)D_500032E4 && D_80084278 == 0) {
+            side = e->climb_side;
+            if (side == 1 || side == 2) {
+                if ((e->dir == 3 && side == 2) || (e->dir == 7 && side == 1)) {
+                    func_8004C2B8(D_5000339C, e);
+                } else {
+                    func_8004C2B8(D_5000333C, e);
+                }
+            } else if ((e->unk_05C == 2 || e->unk_05C == 0x19) && e->obj->pos_y.s.hi < 0xE1 && side == 0) {
+                func_8004C2B8(D_500033F4, e);
+            } else {
+                func_8004C2B8(D_500032E4, e);
+            }
+        }
+        break;
+    case 6:
+        if (e->climb_side == 1 || e->climb_side == 2) {
+            func_8004C2B8(D_600031A8, e);
+            e->meter.w = 0;
+        } else {
+            func_8004C2B8(D_6000325C, e);
+            e->meter.w = 0;
+        }
+        if (e->unk_188 < 5) {
+            func_80059710(e, 5, 4);
+        }
+        func_8005C578(e->obj, e);
+        func_8005C71C(e->obj, e);
+        hits = monster_anim_find_buildings(e->obj->pos_x.s.hi, e->obj->pos_y.s.hi, 1, 0x3C, 0x64);
+        if (hits != 0) {
+            for (j = 0; j < 13; j++) {
+                if ((hits >> j) & 1) {
+                    u = &D_801D3DC8[j];
+                    if (u->unk_058 == 0) {
+                        func_8005BB04(e, 1, 0x78, u);
+                    } else if (u->unk_058 != 2 && u->unk_058 != 3) {
+                        if (u->unk_010 < u->unk_012) {
+                            func_8001F724(5);
+                            u->unk_010 = u->unk_012;
+                            func_8002CFAC(e, u);
+                        }
+                    } else {
+                        func_8002CFAC(e, u);
+                    }
+                }
+            }
+        }
+        for (i = 1; i < 4; i++) {
+            if (i != D_801FA8A0[e->id - 1] && D_801FA8A0[e->id - 1] != 0) {
+                other = &D_801E0B78[func_80025DF8(i)];
+                if (other->action != 0x64 && other->action != 0x37 && other->unk_0DC != 0) {
+                    if (other->climb_side == 1 || other->climb_side == 2 || other->action == 2) {
+                        other->action = 0xF;
+                    } else if (other->action < 2 || other->action == 0xC) {
+                        other->action = 0x64;
+                    }
+                }
+            }
+        }
+        break;
+    case 7:
+        e->meter.w = 0;
+        func_8004C2B8(D_7000328C, e);
+        break;
+    }
+}
 
 void func_8005B85C(Monster *e) {
     func_80057B94(e, D_80085130);

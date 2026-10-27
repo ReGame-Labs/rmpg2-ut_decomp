@@ -875,8 +875,8 @@ void func_8004D614(void) {
 }
 
 #ifdef NON_MATCHING
-/* 91.12%: the box test with the monster's edges loaded first (m_bottom, m_right, m_left, m_top, as in pickup's
- * pickup_test_touch); the original keeps m in a0 and loads the object's y before the flip test */
+/* 94.96%: 94.96 %: the object's y read with its x and frame keeps m in a0; the x, its wrapped copy and the
+ * D_801F9AC8 limit take v1/t1/a3 for the original's t1/a2/v1, and the monster's box is loaded in another order */
 u16 func_8004D6F8(Monster *m, Ai **out) {
     u16 n;
     Ai *p;
@@ -884,6 +884,7 @@ u16 func_8004D6F8(Monster *m, Ai **out) {
     SpriteFrame *f;
     s16 x;
     s32 t;
+    u16 y;
     s16 left;
     s16 right;
     s16 top;
@@ -900,8 +901,9 @@ u16 func_8004D6F8(Monster *m, Ai **out) {
             if ((u32) (p->action - 9) < 0x5C && p->unk_34.u.hi == 0) {
                 o = p->obj;
                 t = o->pos_x.s.hi;
-                x = t;
+                y = o->pos_y.u.hi;
                 f = o->frame;
+                x = t;
                 if (t < D_801F9AC8.s.hi && t < D_801F9AC8.s.hi - 0x50) {
                     x += (D_801D8864.w + 1) >> 16;
                 }
@@ -912,7 +914,7 @@ u16 func_8004D6F8(Monster *m, Ai **out) {
                     left = x - f->origin.u.lo;
                     right = f->size.u.lo + left;
                 }
-                top = o->pos_y.u.hi - f->origin.u.hi;
+                top = y - f->origin.u.hi;
                 bottom = top + f->size.u.hi;
                 m_bottom = m->hit_bottom;
                 m_right = m->hit_right;

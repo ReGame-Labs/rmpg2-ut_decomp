@@ -249,7 +249,7 @@ typedef struct Monster {
     /* 0x11C */ s16 hit_right;
     /* 0x11E */ u16 hit_bottom;
     /* 0x120 */ Fixed pos;                     /* its position: s.lo x, s.hi y */
-    /* 0x124 */ u8 unk_124[0x02];
+    /* 0x124 */ u16 unk_124;
     /* 0x126 */ u16 unk_126;
     /* 0x128 */ u16 unk_128;
     /* 0x12A */ u16 unk_12A;
