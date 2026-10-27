@@ -4,24 +4,21 @@
 #include "game_800633EC.h"
 
 s32 func_80025DF8(s32 player);
-void func_800633EC(RumbleMonster *monster, s32 level, s32 time);
+void func_800633EC(Monster *monster, s32 level, s32 time);
 void func_8006366C(u8 ports, u8 level, u8 time, u8 ramp_down);
 void func_800636D8(s32 port);
 void func_80063710(s32 port);
 void func_800638B0(RumbleRequest *request);
 void func_80063A2C(RumbleRequest *request);
 
-extern u16 D_801D36FC;          /* the game mode */
 extern u16 D_801FA968;
-extern u8 D_801FA8A0[];         /* the player (pad port + 1) of each monster id (1-based), 0 for none */
 extern s16 D_8007A694;          /* the vibration option */
 extern u8 D_801C51C8[][2];      /* the PadSetAct buffers, one per port: the motor byte first */
-extern RumbleMonster D_801E0B78[];
 extern Rumble D_801FB4C4[3];
 extern RumblePreset D_80085308[];
 extern RumbleCue D_80085328[19];
 
-void func_800633EC(RumbleMonster *monster, s32 level, s32 time) {
+void func_800633EC(Monster *monster, s32 level, s32 time) {
     u32 masks[3] = { 1, 2, 4 };
     s32 port;
 
@@ -34,11 +31,11 @@ void func_800633EC(RumbleMonster *monster, s32 level, s32 time) {
     }
 }
 
-void func_800634B0(RumbleMonster *monster, s32 time) {
+void func_800634B0(Monster *monster, s32 time) {
     func_800633EC(monster, 0x40, time);
 }
 
-void func_800634D4(RumbleMonster *monster, u32 preset) {
+void func_800634D4(Monster *monster, u32 preset) {
     s32 level = D_80085308[preset].level;
     s32 time = D_80085308[preset].time;
 
@@ -61,7 +58,7 @@ void func_8006353C(s32 preset) {
     func_800633EC(&D_801E0B78[func_80025DF8(3)], level, time);
 }
 
-void func_800635F4(RumbleMonster *monster, s32 pc) {
+void func_800635F4(Monster *monster, s32 pc) {
     u32 i;
     s32 slot;
 

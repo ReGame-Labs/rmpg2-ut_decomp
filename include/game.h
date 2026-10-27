@@ -226,7 +226,7 @@ typedef struct Monster {
     /* 0x13C */ s16 unk_13C;
     /* 0x13E */ u16 unk_13E;
     /* 0x140 */ u16 unk_140;
-    /* 0x142 */ u16 unk_142;
+    /* 0x142 */ u16 unk_142;                   /* nonzero: the vibration presets 0-3 run twice as strong and long */
     /* 0x144 */ s16 unk_144;
     /* 0x146 */ s16 unk_146;
     /* 0x148 */ u8 unk_148[0x08];
@@ -618,7 +618,7 @@ extern Anim D_8008A7A4;
 extern u8 D_8008E6AC[];
 extern Anim D_8009556C;
 extern s16 D_800AA2EC;
-extern u16 D_801D36FC;
+extern u16 D_801D36FC;                   /* the game mode */
 extern u16 D_801D376C;                   /* the screen's right edge, in pixels */
 extern s16 D_801D37B8;
 extern u16 D_801D37BC;
