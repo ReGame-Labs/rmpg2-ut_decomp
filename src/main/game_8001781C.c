@@ -84,7 +84,7 @@ extern u16 D_801F9950;
 extern u16 D_801F9954;
 extern s16 D_801F9958;
 extern u16 D_801F995C;
-extern s32 D_801F9A30;
+extern Unk1F9A30 D_801F9A30;
 extern u16 D_801F9A40;
 extern u16 D_801F9ACE;
 extern s16 D_801F9AD0;
@@ -451,6 +451,9 @@ extern u8 D_800105A8[];
 extern s16 D_800AA300[11][8][8];
 void func_8001F61C(u8 *, s16, s16, s32, s32, s32 *, s32, s32);
 u16 func_80025C54(void *);
+extern void (*D_8007BE20[])(Monster *);
+void func_80023E30(Ai *);
+void func_80020BA0(s32, s32, GameObject *);
 /* decls:end */
 
 /* main: config/aliases.ld gives it its name (GCC 2.8.1 would start a function named main with a call to __main). */
@@ -1092,23 +1095,14 @@ void func_8001B098(GameObject *arg0) {
     }
 }
 
-/* 83 %: the original copies the argument (move a2,a0) and walks two pointers from it, the first loop load ordered before the second */
-#ifdef NON_MATCHING
 void func_8001B0D8(s32 *p, s32 flags) {
-    s32 *q;
-
     if (p[1] != 0) {
-        q = p + 1;
         do {
-            D_801D8868[*p] = *q | flags;
-            q += 2;
+            D_801D8868[p[0]] = p[1] | flags;
             p += 2;
-        } while (*q != 0);
+        } while (p[1] != 0);
     }
 }
-#else
-INCLUDE_ASM("asm/main/nonmatchings/game_8001781C", func_8001B0D8);
-#endif
 
 Glyph *func_8001B128(u32 arg0) {
     u32 index;
@@ -1458,7 +1452,9 @@ void func_8001C3C4(void) {
     func_8001C404();
 }
 
-INCLUDE_ASM("asm/main/nonmatchings/game_8001781C", func_8001C3E4);
+u8 func_8001C3E4(s16 id) {
+    return D_801FA8A0[id];
+}
 
 INCLUDE_ASM("asm/main/nonmatchings/game_8001781C", func_8001C404);
 
@@ -2028,17 +2024,12 @@ s32 func_8001EA78(void) {
     return temp_lo;
 }
 
-/* 84 %: the original's divu keeps the assembler's divide-by-zero check (bnez/break 7); the C, whose divisor is known non-zero on that path, gets none */
-#ifdef NON_MATCHING
 s32 func_8001EAC4(s32 range) {
     if (range == 0) {
         return 0;
     }
     return func_8001EA78() % (u32) range + 1;
 }
-#else
-INCLUDE_ASM("asm/main/nonmatchings/game_8001781C", func_8001EAC4);
-#endif
 
 s32 func_8001EB10(s32 arg0, s32 arg1) {
     return arg1 + func_8001EAC4(arg0 - arg1);
@@ -2314,8 +2305,6 @@ void func_80020704(void) {
 
 INCLUDE_ASM("asm/main/nonmatchings/game_8001781C", func_8002075C);
 
-#ifdef NON_MATCHING
-/* 98.8 %: register names only (the entry read into v0 in the original, a0 here) */
 void func_80020AF4(s32 id) {
     s32 *p;
     s32 *dst;
@@ -2334,20 +2323,17 @@ void func_80020AF4(s32 id) {
             if (key == 0) {
                 return;
             }
-            value = *p++;
-            D_800AA248.unk_38 = value;
-        } while (value != D_800AA248.unk_00);
+            key = *p++;
+            D_800AA248.unk_38 = key;
+        } while (key != D_800AA248.unk_00);
         do {
             dst = p - 2;
-            key = *p++;
-            dst[0] = key;
+            value = *p++;
+            dst[0] = value;
             dst[1] = *p++;
-        } while (key != 0);
+        } while (value != 0);
     }
 }
-#else
-INCLUDE_ASM("asm/main/nonmatchings/game_8001781C", func_80020AF4);
-#endif
 
 INCLUDE_ASM("asm/main/nonmatchings/game_8001781C", func_80020BA0);
 
@@ -2556,7 +2542,19 @@ void func_80021C5C(Ai *ai) {
     ai->unk_34.w = 0;
 }
 
-INCLUDE_ASM("asm/main/nonmatchings/game_8001781C", func_80021D24);
+void func_80021D24(Ai *ai) {
+    ai->unk_0C = 0;
+    if (ai->kind == 0x11) {
+        func_8003EB5C(&D_80097340, D_800AA268.p);
+    } else {
+        func_8003EB5C(&D_8008AE40, D_800AA268.p);
+    }
+    ai->state = 0;
+    func_800232AC(0x36000);
+    ai->unk_30.w = 0;
+    D_800AA268.p->vel_y.w = 0;
+    func_800377B4(ai);
+}
 
 INCLUDE_ASM("asm/main/nonmatchings/game_8001781C", func_80021DA8);
 
@@ -2596,7 +2594,15 @@ INCLUDE_ASM("asm/main/nonmatchings/game_8001781C", func_800220D0);
 
 INCLUDE_ASM("asm/main/nonmatchings/game_8001781C", func_800221BC);
 
-INCLUDE_ASM("asm/main/nonmatchings/game_8001781C", func_800222E8);
+void func_800222E8(Ai *ai) {
+    D_800AA248.cur_obj->vel_y.w = 0xFFFE8000;
+    if (ai->kind == 0x11) {
+        func_8003EB5C(&D_80097340, D_800AA248.cur_obj);
+    } else {
+        func_8003EB5C(&D_8008AE40, D_800AA248.cur_obj);
+    }
+    func_80023E30(ai);
+}
 
 /* 92 %: the result is masked into its own register before the stores and the four stores are scheduled in source order; the C copies the result and moves the counter's store first */
 #ifdef NON_MATCHING
@@ -2959,8 +2965,6 @@ INCLUDE_ASM("asm/main/nonmatchings/game_8001781C", func_80023620);
 
 INCLUDE_ASM("asm/main/nonmatchings/game_8001781C", func_80023764);
 
-#ifdef NON_MATCHING
-/* 99.9 %: one instruction, the negation of the copy (negu v0,v0) comes out as negu v0,v1 */
 u16 func_800239F4(Ai *ai) {
     Monster *target;
     GameObject *sprite;
@@ -2976,10 +2980,7 @@ u16 func_800239F4(Ai *ai) {
             return func_800239F4(ai);
         }
         dy = (s16) ((sprite->pos_y.u.hi - 0x58) - D_800AA268.p->pos_y.u.hi);
-        ady = dy;
-        if (dy < 0) {
-            ady = -ady;
-        }
+        ady = (dy >= 0) ? dy : -dy;
         if (ady < 0xB) {
             D_800AA268.p->vel_y.w = 0;
             return 1;
@@ -2994,22 +2995,14 @@ u16 func_800239F4(Ai *ai) {
     D_800AA268.p->vel_y.w = 0x18000;
     return 0;
 }
-#else
-INCLUDE_ASM("asm/main/nonmatchings/game_8001781C", func_800239F4);
-#endif
 
-#ifdef NON_MATCHING
-/* 99.8 %: the negation reads the copy's register in the original (negu v0, v0), the s16 delta's here. */
 u16 func_80023AC0(Ai *ai) {
     s16 delta;
     s32 dist;
     s32 step;
 
     delta = ai->unk_28.s.lo - D_800AA268.p->pos_y.u.hi;
-    dist = delta;
-    if (delta < 0) {
-        dist = -dist;
-    }
+    dist = (delta >= 0) ? delta : -delta;
     if (dist < 0xB) {
         D_800AA268.p->vel_y.w = 0;
         return 1;
@@ -3021,24 +3014,16 @@ u16 func_80023AC0(Ai *ai) {
     D_800AA268.p->vel_y.w = step | 0x8000;
     return 0;
 }
-#else
-INCLUDE_ASM("asm/main/nonmatchings/game_8001781C", func_80023AC0);
-#endif
 
 INCLUDE_ASM("asm/main/nonmatchings/game_8001781C", func_80023B20);
 
-#ifdef NON_MATCHING
-/* 99.8 %: the negation reads the copy's register in the original (negu v0, v0), the s16 delta's here. */
 u16 func_80023C58(s16 arg0, Ai *ai) {
     s16 delta;
     s32 dist;
     s32 step;
 
     delta = arg0 - D_800AA268.p->pos_y.u.hi;
-    dist = delta;
-    if (delta < 0) {
-        dist = -dist;
-    }
+    dist = (delta >= 0) ? delta : -delta;
     if (dist < 0xB) {
         D_800AA268.p->vel_y.w = 0;
         return 1;
@@ -3050,9 +3035,6 @@ u16 func_80023C58(s16 arg0, Ai *ai) {
     D_800AA268.p->vel_y.w = step | 0x8000;
     return 0;
 }
-#else
-INCLUDE_ASM("asm/main/nonmatchings/game_8001781C", func_80023C58);
-#endif
 
 u16 func_80023CB8(void) {
     if (D_800AA268.p->pos_y.w - D_801F9ACC <= 0x2FFFFF) {
@@ -3224,7 +3206,22 @@ INCLUDE_ASM("asm/main/nonmatchings/game_8001781C", func_8002439C);
 
 INCLUDE_ASM("asm/main/nonmatchings/game_8001781C", func_80024418);
 
-INCLUDE_ASM("asm/main/nonmatchings/game_8001781C", func_800244A8);
+void func_800244A8(void) {
+    GameObject *obj;
+    GameObject *owner;
+    GameObject *part;
+    s32 *arg;
+
+    obj = D_800AA248.cur_obj;
+    owner = obj->owner.p;
+    part = owner->unk_50;
+    arg = obj->arg.w;
+    if (part != NULL) {
+        D_800AA248.cur_obj = part;
+        func_80020BA0(*arg, 0x8002, part);
+    }
+    D_800AA248.cur_obj = obj;
+}
 
 void func_80024508(GameObject *arg0) {
     func_80024530(arg0->unk_50, arg0);
@@ -3706,7 +3703,18 @@ void func_80025BBC(Building *block) {
     }
 }
 
-INCLUDE_ASM("asm/main/nonmatchings/game_8001781C", func_80025C08);
+void *func_80025C08(void *list) {
+    void **table;
+    u16 index;
+
+    table = ((void ***) list)[D_801D8728];
+    if (D_801D8728 != 0) {
+        index = D_801FA964;
+    } else {
+        index = D_801FA960;
+    }
+    return table[index];
+}
 
 INCLUDE_ASM("asm/main/nonmatchings/game_8001781C", func_80025C54);
 
@@ -3882,7 +3890,13 @@ void func_80026BC4(Monster *arg0) {
     }
 }
 
-INCLUDE_ASM("asm/main/nonmatchings/game_8001781C", func_80026C04);
+void func_80026C04(Monster *monster) {
+    void (**handler)(Monster *);
+
+    D_800AA268.p = monster->obj;
+    handler = &D_8007BE20[monster->action];
+    (*handler)(monster);
+}
 
 #ifdef NON_MATCHING
 /* 89.8 %: the zero stored into unk_3C/unk_3E goes through a register in the original (a variable that is 0 on both paths). */
@@ -4224,17 +4238,12 @@ void func_80028140(s32 arg0, Monster *arg1, s32 arg2) {
     arg1->unk_0CE = 0;
 }
 
-/* 78 %: the four stores come out in another order (the original stores the first word between the two halfwords); source order and other orders tried */
-#ifdef NON_MATCHING
 void func_80028160(void) {
     D_801D3D64.unk_26 = 0;
-    D_801F9A30 = 0;
+    D_801F9A30.unk_0 = 0;
     D_801D3D64.unk_28 = 0;
     D_801F9ACC = 0;
 }
-#else
-INCLUDE_ASM("asm/main/nonmatchings/game_8001781C", func_80028160);
-#endif
 
 INCLUDE_ASM("asm/main/nonmatchings/game_8001781C", func_80028184);
 
@@ -4245,12 +4254,12 @@ void func_800284D8(void) {
     if (D_801D8720 == 0) {
         var_v1 = 0x80000;
     }
-    D_801F9A30 = var_v1;
+    D_801F9A30.unk_0 = var_v1;
     D_801D3D8C = 2;
 }
 
 void func_80028508(void) {
-    D_801F9A30 = 0xFFFE0000;
+    D_801F9A30.unk_0 = 0xFFFE0000;
     D_801D3D8C = 1;
 }
 
@@ -4258,21 +4267,19 @@ INCLUDE_ASM("asm/main/nonmatchings/game_8001781C", func_80028524);
 
 INCLUDE_ASM("asm/main/nonmatchings/game_8001781C", func_800288B0);
 
+/* 91.3 %: the result is computed from a copy of the larger value (move v0,a2) in the original; the C computes it in place */
 #ifdef NON_MATCHING
-/* 84.7 %: register allocation (both inputs copied, the result built from a copy of the larger one) */
 s16 func_80028ADC(s32 a, s32 b) {
-    s32 lo;
-    s32 hi;
-    s32 mid;
+    s16 lo;
+    s16 hi;
 
     lo = a;
     hi = b;
-    if ((s16) a >= (s16) b) {
+    if ((s16) b <= (s16) a) {
         lo = b;
         hi = a;
     }
-    mid = hi;
-    return mid - ((s16) (mid - lo) >> 1);
+    return hi - ((s16) (hi - lo) >> 1);
 }
 #else
 INCLUDE_ASM("asm/main/nonmatchings/game_8001781C", func_80028ADC);

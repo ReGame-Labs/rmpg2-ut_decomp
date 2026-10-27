@@ -85,6 +85,12 @@ typedef struct Unk1AD1C {
     u32 unk_8;
 } Unk1AD1C;
 
+/* The word at 0x801F9A30, a vertical speed (0x20000, 0x80000, -0x20000). A one-member struct: GCC 2.8 keeps its
+ * stores in order with the stores into D_801D3D64 only then (func_80028160). */
+typedef struct Unk1F9A30 {
+    s32 unk_0;
+} Unk1F9A30;
+
 /* A glyph of the font (func_8001B128 maps a packed glyph index to one): its size at unk_4/unk_6. */
 typedef struct Glyph {
     s32 unk_0;
