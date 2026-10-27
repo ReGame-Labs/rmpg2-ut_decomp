@@ -169,7 +169,7 @@ typedef struct SoundSeqStat {
     /* 0x14 */ u8 *unk_14;          /* more byte counters (commands 21, 23, 24) */
 } SoundSeqStat;
 
-/* The driver state (D_801FDF20; func_8006EC08 returns it; D_80087FA0 is the sequencer's copy). */
+/* The driver state (D_801FDF20; wess_get_driver returns it; D_80087FA0 is the sequencer's copy). */
 struct SoundDriver {
     /* 0x00 */ u32 *unk_00;         /* the current time */
     /* 0x04 */ u8 unk_04;           /* sequences active */

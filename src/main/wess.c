@@ -10,7 +10,7 @@
 void func_80063BB0(void);
 void func_8006FED8(s32 set_rate, s32 rate);
 void func_8006FCD4(s32 n, s32 set_rate, s32 rate);
-s32 func_8006EC68(s32 n);
+s32 wess_sequence_loaded(s32 n);
 s32 func_8006C1F4(void);
 void func_8006C19C(s32 n);
 s32 func_80070868(s32);
@@ -26,7 +26,7 @@ void func_8006ECD8(void);
 void func_80070414(void);
 void func_80070444(void);
 void func_800700A8(void);
-void func_8006ED5C(void);
+void wess_free_module_memory(void);
 void wess_report_error(s32);
 u16 func_8007050C(void);
 u32 func_80070588(s16 ips, s16 ppq, s16 qpm);
@@ -52,7 +52,7 @@ s32 func_8006ECF8(void);
 void func_8006BED0(u8 *src);
 void func_8006BF08(u16 *src);
 void func_8006CA64(s32 bits);
-s32 func_8006EC58(void);
+s32 wess_module_loaded(void);
 void func_80070468(void);
 void func_800704A8(void);
 void func_8006BF44(s32 kinds);
@@ -78,8 +78,8 @@ extern SoundPatch *D_801FDA88;
 extern SoundPatchmap *D_801FDA8C;
 extern u8 *D_801FDA94;
 extern s32 D_80087158;
-extern s32 D_8008715C;
-extern s32 D_80087160;
+extern u32 D_8008715C;
+extern u32 D_80087160;
 extern s32 D_801FD97C;
 extern u8 D_801FDC58[];
 extern s32 D_801FDE9C;
@@ -173,7 +173,7 @@ void func_8006BBA0(s32 mute, s32 kinds) {
     u8 *idx;
     SoundChannel *ch;
 
-    if (!func_8006EC58()) {
+    if (!wess_module_loaded()) {
         return;
     }
     func_80070468();
@@ -224,7 +224,7 @@ void func_8006BD60(s32 replay) {
     u8 *idx;
     SoundChannel *ch;
 
-    if (!func_8006EC58()) {
+    if (!wess_module_loaded()) {
         return;
     }
     func_80070468();
@@ -1175,19 +1175,19 @@ s32 wess_load_sequence(s32 n, s32 dst) {
     return size;
 }
 
-void func_8006EBA4(s32 arg0) {
+void wess_report_module_error(s32 arg0) {
     if (D_80087128 != NULL) {
         D_80087128(D_8008712C, arg0);
     }
 }
 
-void func_8006EBDC(u8 *p, u32 n) {
+void wess_clear_memory(u8 *p, u32 n) {
     while (n-- != 0) {
         *p++ = 0;
     }
 }
 
-SoundDriver *func_8006EC08(void) {
+SoundDriver *wess_get_driver(void) {
     return D_801FDF20;
 }
 
@@ -1202,11 +1202,11 @@ s32 func_8006EC48(void) {
     return D_8008710C != 0;
 }
 
-s32 func_8006EC58(void) {
+s32 wess_module_loaded(void) {
     return D_80087110 != 0;
 }
 
-s32 func_8006EC68(s32 n) {
+s32 wess_sequence_loaded(s32 n) {
     if (n < 0 || n >= wess_sequence_count()) {
         return 0;
     }
@@ -1233,7 +1233,7 @@ s32 func_8006ECF8(void) {
     return r;
 }
 
-void func_8006ED5C(void) {
+void wess_free_module_memory(void) {
     if (D_80087118 != 0) {
         if (D_8008711C != 0) {
             func_8007043C(D_8008711C);
@@ -1243,13 +1243,13 @@ void func_8006ED5C(void) {
     }
 }
 
-void func_8006EDAC(void) {
+void wess_unload_module(void) {
     if (D_80087110 != 0) {
         func_800700A8();
         func_80070444();
         D_80087130[0][1](D_801FDF20);
         D_80087130[1][1](D_801FDF20);
-        func_8006ED5C();
+        wess_free_module_memory();
         D_80087110 = 0;
     }
 }
@@ -1264,21 +1264,17 @@ extern SoundSeqTable D_801FDEBC;
 extern SoundBank D_801FDEE0;
 extern SoundDriver D_801FDEFC;
 
-#ifdef NON_MATCHING
-/* 89.12%: the size sums: the original reads D_8008715C, D_80087160 and D_8008716C before the driver's stores and
- * the loop's sums in other registers; the rest is the original's (size 0x2A4, original 0x2A8). */
 s32 wess_module_size(s32 name) {
     u8 *mem;
-    u32 i;
+    s32 i;
     s32 n;
-    SoundDriver *drv;
 
     if (name == 0) {
         return 0;
     }
     D_80087108 = func_80070868(name);
     if (D_80087108 == 0) {
-        func_8006EBA4(1);
+        wess_report_module_error(1);
         return D_80087110;
     }
     n = 0x20;
@@ -1288,7 +1284,7 @@ s32 wess_module_size(s32 name) {
     D_801FDEFC.unk_14 = &D_801FDEE0;
     D_801FDEFC.unk_07[0] = D_80087158;
     if (func_80070898(&D_801FDEBC, n, D_80087108) != n) {
-        func_8006EBA4(2);
+        wess_report_module_error(2);
         return 0;
     }
     if (D_801FDF20->unk_0C->magic != D_8001709C) {
@@ -1299,23 +1295,22 @@ s32 wess_module_size(s32 name) {
     }
     n = 0x18;
     if (func_80070898(&D_801FDEE0, n, D_80087108) != n) {
-        func_8006EBA4(2);
+        wess_report_module_error(2);
         return 0;
     }
     func_800708EC(D_80087108);
-    drv = D_801FDF20;
     mem = (u8 *) 8;
-    drv->unk_14->unk_18 = mem;
-    drv->unk_0A = D_80087170;
-    mem += drv->unk_0C->unk_18;
-    drv->unk_18 = (SoundSeqStat *) mem;
+    D_801FDF20->unk_14->unk_18 = mem;
+    mem += D_801FDF20->unk_0C->unk_18;
+    D_801FDF20->unk_18 = (SoundSeqStat *) mem;
     mem += D_8008715C * sizeof(SoundSeqStat);
-    drv->unk_1C = (SoundChannel *) mem;
+    D_801FDF20->unk_1C = (SoundChannel *) mem;
     mem += D_80087160 * sizeof(SoundChannel);
-    drv->unk_20 = (SoundNote *) mem;
-    mem += drv->unk_07[0] * sizeof(SoundNote);
-    drv->unk_10 = (SoundHandler *) mem;
+    D_801FDF20->unk_20 = (SoundNote *) mem;
+    mem += D_801FDF20->unk_07[0] * sizeof(SoundNote);
+    D_801FDF20->unk_10 = (SoundHandler *) mem;
     mem += D_8008716C * sizeof(SoundHandler);
+    D_801FDF20->unk_0A = D_80087170;
     for (i = 0; i < D_8008715C; i++) {
         mem += D_80087164;
         mem += (s32) mem & 1;
@@ -1335,26 +1330,22 @@ s32 wess_module_size(s32 name) {
     mem += (s32) mem & 2;
     return (s32) mem;
 }
-#else
-INCLUDE_ASM("asm/main/nonmatchings/wess", wess_module_size);
-#endif
 
 #ifdef NON_MATCHING
-/* 98.58%: register choice only: the loop counters get a1 (the original's a2), the fill pointer a0 (a1), so
- * the loop's other temporaries shift by one register */
+/* 99.85%: the module data's size gets s1 when it is loaded (the original loads it into a1, the read call's
+ * argument, and copies it to s1 in the call's delay slot) */
 extern s32 D_80087120;
 extern s32 D_80087124;
 
 s32 wess_load_module(s32 name, s32 buf, s32 size) {
     u8 *mem;
     s32 i;
-    u32 j;
     s32 len;
     u8 *idx;
     s32 count;
 
     if (D_80087110 != 0) {
-        func_8006EDAC();
+        wess_unload_module();
     }
     if (buf == 0) {
         D_80087118 = 1;
@@ -1367,15 +1358,15 @@ s32 wess_load_module(s32 name, s32 buf, s32 size) {
         D_8008711C = buf;
     }
     D_80087124 = size;
-    func_8006EBDC((u8 *)D_8008711C, size);
+    wess_clear_memory((u8 *)D_8008711C, size);
     if (func_8006EC48() == 0 || name == 0) {
-        func_8006ED5C();
+        wess_free_module_memory();
         return D_80087110;
     }
     D_80087108 = func_80070868(name);
     if (D_80087108 == 0) {
-        func_8006EBA4(1);
-        func_8006ED5C();
+        wess_report_module_error(1);
+        wess_free_module_memory();
         return D_80087110;
     }
     size = 0x20;
@@ -1404,9 +1395,9 @@ s32 wess_load_module(s32 name, s32 buf, s32 size) {
     if (D_801FDF20->unk_0C->unk_08[8] == 0) {
         if (len != func_80070898(D_801FDF20->unk_14->unk_18, len, D_80087108)) {
         read_error:
-            func_8006EBA4(2);
+            wess_report_module_error(2);
         error:
-            func_8006ED5C();
+            wess_free_module_memory();
             return 0;
         }
         func_800708EC(D_80087108);
@@ -1430,18 +1421,18 @@ s32 wess_load_module(s32 name, s32 buf, s32 size) {
     D_801FDF20->unk_10 = (SoundHandler *)mem;
     mem += D_8008716C * sizeof(SoundHandler);
     D_801FDF20->unk_0A = D_80087170;
-    for (j = 0; j < D_8008715C; j++) {
-        D_801FDF20->unk_18[j].unk_10 = mem;
+    for (i = 0; i < D_8008715C; i++) {
+        D_801FDF20->unk_18[i].unk_10 = mem;
         mem += D_80087164;
         mem += (s32)mem & 1;
         mem += (s32)mem & 2;
-        D_801FDF20->unk_18[j].unk_14 = mem;
+        D_801FDF20->unk_18[i].unk_14 = mem;
         mem += D_80087168;
         mem += (s32)mem & 1;
         mem += (s32)mem & 2;
         idx = mem;
-        D_801FDF20->unk_18[j].unk_0C = mem;
         count = D_801FDF20->unk_0A;
+        D_801FDF20->unk_18[i].unk_0C = mem;
         mem += count;
         mem += (s32)mem & 1;
         mem += (s32)mem & 2;
@@ -1450,11 +1441,11 @@ s32 wess_load_module(s32 name, s32 buf, s32 size) {
         }
     }
     D_801FDF20->unk_0B = D_80087174;
-    for (j = 0; j < D_80087160; j++) {
-        D_801FDF20->unk_1C[j].unk_00.b[1] = j;
-        D_801FDF20->unk_1C[j].unk_3C = (u8 **)mem;
+    for (i = 0; i < D_80087160; i++) {
+        D_801FDF20->unk_1C[i].unk_00.b[1] = i;
+        D_801FDF20->unk_1C[i].unk_3C = (u8 **)mem;
         mem += D_801FDF20->unk_0B * 4;
-        D_801FDF20->unk_1C[j].unk_44 = (u8 **)mem;
+        D_801FDF20->unk_1C[i].unk_44 = (u8 **)mem;
     }
     mem += (s32)mem & 1;
     mem += (s32)mem & 2;
@@ -1569,7 +1560,7 @@ s32 wess_start_sequence(SoundSlot *slot, s32 n, s32 arg2, s32 arg3, SoundTrackOp
     SoundChannel *ch;
     SoundTrack *track;
 
-    if (func_8006EC68(n) == 0) {
+    if (wess_sequence_loaded(n) == 0) {
         return 0;
     }
     seq = 0;
@@ -1656,7 +1647,7 @@ void func_8006FCD4(s32 n, s32 set_rate, s32 rate) {
     s32 old;
 
     old = 0;
-    if (!func_8006EC68(n)) {
+    if (!wess_sequence_loaded(n)) {
         return;
     }
     func_80070468();
@@ -1713,7 +1704,7 @@ void func_8006FED8(s32 set_rate, s32 rate) {
     s32 old;
 
     old = 0;
-    if (!func_8006EC58()) {
+    if (!wess_module_loaded()) {
         return;
     }
     func_80070468();
@@ -1768,7 +1759,7 @@ void func_800700CC(u8 volume) {
     u8 *pos;
     u8 cmd[2];
 
-    if (!func_8006EC58()) {
+    if (!wess_module_loaded()) {
         return;
     }
     D_800870F0 = volume;
