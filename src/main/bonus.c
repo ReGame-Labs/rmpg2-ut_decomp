@@ -909,8 +909,9 @@ INCLUDE_ASM("asm/main/nonmatchings/bonus", bonus_create_counter);
 #endif
 
 #ifdef NON_MATCHING
-/* 99.83%: 99.83 %: the rest is register allocation in case 2: the original gives the D_8007BD78 base s4 and the
- * inner loop's copy of &D_801FB49C[n] s5, here the other way */
+/* 99.83%: 99.83 %: global-alloc order in case 2: the inner loop's copy of &D_801FB49C[n] (5 refs over 34 insns,
+ * 0.29) outranks the D_8007BD78 base (14 over 170, 0.25), so the copy takes s4; the base needs 16 refs or a live
+ * length of 142 to come first (loop-variable, ++/+= and loop-bound forms tried) */
 void bonus_update_counters(s32 round) {
     Monster *m;
     GameObject *obj;

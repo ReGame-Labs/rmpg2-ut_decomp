@@ -470,8 +470,10 @@ void func_80050E58(Monster *e) {
 }
 
 #ifdef NON_MATCHING
-/* 98.60%: 98.6 %: register allocation only: the original gives obj s0, m s1, i s2, e s3; here m s0, obj s1, e s2, i
- * s3 (global-alloc priorities) */
+/* 98.60%: 98.6 %: global-alloc order: m (22 refs over 63 insns, 1.40) outranks obj (14 over 32, 1.31) and e (17
+ * over 176, 0.39) outranks i (7 over 59, 0.24); obj and i each need one more reference (15 and 8) to come first as
+ * in the original. Merging the per-path action stores lowers m and e enough, but the smaller loop then hoists
+ * &D_801E0B78 and drops the 0x1C/0xB constants from s4/s5 */
 void func_80050E88(Monster *e) {
     Monster *m;
     GameObject *obj;
@@ -1455,8 +1457,9 @@ void func_80052E94(void) {
 }
 
 #ifdef NON_MATCHING
-/* 98.78%: 98.8 %: one instruction short: the original copies func_8001D110's result into a1 (move a1,v0) and builds
- * the definition through a1; here it stays in v0 */
+/* 98.78%: 98.8 %: the definition pointer: local-alloc ties it to v0 (the call's value dies in the copy, one block);
+ * the original's sits in a1 after the temporaries took v0/v1/a0, as a global pseudo or an untied qty would (read-
+ * back through D_800AA284/new_def, chained stores, a second set: no change) */
 void func_80052E9C(Monster *e) {
     s32 *speeds;
     s32 speed;
@@ -2211,7 +2214,9 @@ void func_800544D8(Monster *e, GameObject *dst, GameObject *src) {
 }
 
 #ifdef NON_MATCHING
-/* 95.4 %: the original reloads m->box_x0 for the facing-left test (its first load dies in the bound's subtraction) and keeps m->box_x1 in v1 */
+/* 95.39%: 95.4 %: cse: the facing-left block (the else) is a jump target with one use preceded by a barrier, so cse
+ * follows the jump into it and reuses box_x0 from the bound's test; the original reloads it there (its first load
+ * dies in the subtraction), so its else block was not in that extended block (ternary, || and goto forms tried) */
 s32 func_8005453C(s16 x, s32 unused, Monster *m) {
     GameObject *obj;
     s16 px;
@@ -3415,9 +3420,10 @@ void func_80056EB8(Monster *e, Building *city) {
 }
 
 #ifdef NON_MATCHING
-/* 98.00%: 98 %: the scan only matches as labels (the original enters the loop at its test, which jump.c did not
- * copy); the floor and the item count swap t0/t1 (the count's value, live into the action 9 test, outranks the
- * floor) */
+/* 98.00%: 98 %: the goto layout gives the original's blocks but no loop notes, so the floor's references count
+ * once: the count (3 over 8 insns, 0.38) outranks the floor (7 over 51, 0.27) for t0. The original was a real loop
+ * (its refs doubled) whose rolled exit test jump.c did not copy to the entry; while/for forms get the copied test
+ * (62-65 %) */
 void monster_find_floor(Monster *e, Building *city) {
     s16 *limit;
     u16 side;
