@@ -50,11 +50,74 @@ void bonus_create_bars(Monster *e) {
     D_800AA248.cur_obj = saved;
 }
 
-INCLUDE_ASM("asm/main/nonmatchings/bonus", func_8005D364);
-
 #ifdef NON_MATCHING
-/* 92.10%: 92.1 %: the first block's schedule: the original stores new_def through the copy of &D_800AA248 (s5) and
- * orders the definition's stores unk_06, id, pos_y, flags around the table read */
+/* 99.46%: 99.5 %: register allocation only: the original gives the monster s7 and the frame s6, here the other way
+ * round */
+void func_8005D364(Monster *e) {
+    GameObject *saved;
+    ObjectDef *def;
+    s32 dy;
+    u16 frame;
+    s16 y;
+    s16 x;
+    s32 v;
+    s32 i;
+
+    dy = 0;
+    saved = D_800AA268.p;
+    if (D_800AA2DC != 0 && (D_8007BD78.flags & 0x10)) {
+        dy = -0xF;
+    }
+    D_800AA284.p = func_8001D110();
+    def = D_800AA284.p;
+    def->pos_x.s.hi = (D_801FA8A0[e->id - 1] - 2) * 0x78 + 0x96;
+    if (e->id == 7 && D_801F9ABC != 0) {
+        if (D_801F9ABC == 3) {
+            frame = 0x53;
+            def->id = 0x4F003EB2;
+        } else {
+            frame = 0x54;
+            def->id = 0x4F003EB0;
+        }
+    } else {
+        def->id = D_8008427C[e->id - 1];
+        frame = 0xFFFF;
+    }
+    y = dy + 0x30;
+    def->pos_y.s.hi = y;
+    def->flags = 0x4FF;
+    def->unk_06 |= 0x20;
+    D_800AA248.cur_obj = func_8001DCB4();
+    D_800AA248.cur_obj->kind = e->id + 0x798;
+    e->unk_074 = D_800AA248.cur_obj;
+    def->pos_x.s.hi = (D_801FA8A0[e->id - 1] - 2) * 0x78 + 0xE6;
+    def->id = D_80084298[e->id - 1];
+    def->pos_y.s.hi = y;
+    def->unk_06 |= 0x20;
+    def->flags = 0x4FF;
+    D_800AA248.cur_obj = func_8001DCB4();
+    D_800AA248.cur_obj->kind = e->id + 0x7A8;
+    D_800AA248.cur_obj->unk_74 = frame;
+    v = e->unk_004;
+    x = (D_801FA8A0[e->id - 1] - 2) * 0x78 + 0xF1;
+    for (i = 0; i < 2; i++) {
+        def->pos_x.s.hi = x;
+        x -= 8;
+        def->id = D_800842B4[v % 10];
+        def->pos_y.s.hi = dy + 0x30;
+        def->unk_06 |= 0x20;
+        def->flags = 0x4FF;
+        D_800AA248.cur_obj = func_8001DCB4();
+        D_800AA248.cur_obj->kind = e->id + 0x7A8;
+        v /= 10;
+        e->unk_078[i] = D_800AA248.cur_obj;
+    }
+    D_800AA268.p = saved;
+}
+#else
+INCLUDE_ASM("asm/main/nonmatchings/bonus", func_8005D364);
+#endif
+
 void bonus_create_score(Monster *e) {
     GameObject *saved;
     ObjectDef *def;
@@ -64,13 +127,13 @@ void bonus_create_score(Monster *e) {
     s32 i;
 
     saved = D_800AA248.cur_obj;
-    def = func_8001D110();
-    D_800AA248.new_def = def;
+    D_800AA248.new_def = func_8001D110();
+    def = D_800AA248.new_def;
     x = (D_801FA8A0[e->id - 1] - 2) * 0x78;
     def->id = 0x4F0021DE;
     def->pos_y.s.hi = 0x30;
-    def->flags = 0x4FF;
     def->unk_06 |= 0x20;
+    def->flags = 0x4FF;
     def->pos_x.s.hi = x + 0x96;
     D_800AA248.cur_obj = func_8001DCB4();
     dx = x + 0xF1;
@@ -90,9 +153,6 @@ void bonus_create_score(Monster *e) {
     }
     D_800AA268.p = saved;
 }
-#else
-INCLUDE_ASM("asm/main/nonmatchings/bonus", bonus_create_score);
-#endif
 
 void bonus_update_score(Monster *e) {
     GameObject *saved;

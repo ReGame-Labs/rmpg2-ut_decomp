@@ -315,7 +315,7 @@ typedef struct Monster {
     /* 0x1E8 */ u8 unk_1E8[0x10];
     /* 0x1F8 */ s32 unk_1F8;
     /* 0x1FC */ GameObject *unk_1FC;
-    /* 0x200 */ s32 unk_200;
+    /* 0x200 */ struct Monster *unk_200;     /* a monster it bounces off (func_80053204) */
     /* 0x204 */ u16 unk_204;
     /* 0x206 */ u8 unk_206[0x02];
     /* 0x208 */ s32 unk_208;
