@@ -373,6 +373,25 @@ _copy_memcard_patch = 0x8007A640; // type:func
 // LIBCARD A75.OBJ
 StartCARD2 = 0x8007A674; // type:func
 
+// monster (src/main/monster.c): the action handlers, the hits, climbing the buildings.
+monster_dispatch_action = 0x800500EC; // type:func  (e, obj) runs D_8007F8FC[e->action], the action clamped to 0..0x67
+monster_follow_holder = 0x80050774; // type:func  (e) places its body at the point of the carrying object's frame for its id
+monster_update_climb = 0x8005086C; // type:func  (e) the climbing speed by direction (slower in the rain), action 5 or 6
+monster_start_jump = 0x800524B4; // type:func  (e) action 0x2C, the upward speed by direction
+monster_test_boxes = 0x80053854; // type:func  (x, y, m) 1 or 2 when the point is in its first or second box, else 0
+monster_get_building = 0x80054728; // type:func  (n) building n of the ring, 1-based, NULL for 0
+monster_test_left_side = 0x800561CC; // type:func  (x, city) near the building's left wall and that side free, then the probe y is 0xE0
+monster_test_right_side = 0x80056258; // type:func  (x, city) the same for the right wall
+monster_find_floor = 0x80056F38; // type:func  (e, city) climb_floor from its height and the building's floor table
+
+// bonus (src/main/bonus.c): the bonus rounds and the status panel.
+bonus_create_bars = 0x8005D20C; // type:func  (e) the health and meter bars and the panel frame
+bonus_create_score = 0x8005D644; // type:func  (e) the six score digits
+bonus_update_score = 0x8005D7D8; // type:func  (e) redraws the digits when the score changed
+bonus_find_most_lives = 0x8005D918; // type:func  (skip) the monster in play with the most lives, NULL for none
+bonus_update_lives = 0x8005D9BC; // type:func  (e) the portrait and the two lives digits
+bonus_update_bars = 0x8005DBC4; // type:func  (old, e, value) eases the shown health and meter towards their values
+
 // cdload (src/main/cdload.c), the CD file reader and the overlay loader (docs/DISC_LAYOUT.md "The file table" and
 // "Overlays"). Files are read by index into the file table, checksummed and retried.
 cdload_sort_players = 0x80060F3C; // type:func  the monsters' players into D_801FB49C, sorted, 99 for none

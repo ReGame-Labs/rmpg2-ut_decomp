@@ -13,7 +13,7 @@ void func_80057B94(Monster *, s32 *);
 void func_80057BD4(u16, Monster *, s32 *);
 void func_80057C38(u16, Monster *, s32 *);
 
-Building *func_80054728(u16);
+Building *monster_get_building(u16);
 void func_8004A90C(Monster *, Monster *);
 void func_8002CFAC(Monster *, Building *);
 void func_8002E278(Monster *, Building *);
@@ -344,7 +344,7 @@ void func_80058288(Monster *e) {
     u16 dir;
     u16 v;
 
-    u = func_80054728(e->climb_building);
+    u = monster_get_building(e->climb_building);
     b = D_800AA268.p;
     table = D_800845EC;
     x = b->pos_x.s.hi;

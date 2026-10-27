@@ -27,6 +27,7 @@ void func_80060A7C(s32, u32, s32);
 
 extern Anim D_80016A84;
 extern s32 D_8007BD7C;
+extern s32 D_8008427C[];                /* the portrait animations, by monster id - 1 */
 extern s32 D_800842B4[];
 extern TextMessage D_80089604;
 extern TextMessage D_80089624;

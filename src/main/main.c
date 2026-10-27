@@ -356,7 +356,7 @@ extern u16 D_8007AB60;
 void func_8001D1C8(void);
 void func_8001E174(GameObject *obj);
 void func_8001E2F8(GameObject *arg0);
-void func_8005DBC4(s32, Monster *, s32);
+void bonus_update_bars(s32, Monster *, s32);
 void func_80029510(Monster *arg0);
 void func_80024BB4(void);
 void func_80025B3C(Building *);
@@ -4746,7 +4746,7 @@ void func_80029510(Monster *arg0) {
             arg0->health.w = 0;
         }
     }
-    func_8005DBC4(old, arg0, value);
+    bonus_update_bars(old, arg0, value);
 }
 #else
 INCLUDE_ASM("asm/main/nonmatchings/main", func_80029510);
