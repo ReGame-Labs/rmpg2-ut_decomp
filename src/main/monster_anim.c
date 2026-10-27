@@ -73,6 +73,21 @@ void func_8005CAA4(GameObject *b, Monster *e);
 void func_8005CC54(GameObject *b, Monster *e);
 void func_8005CEC4(GameObject *b, Monster *skip);
 void func_8005BB04(Monster *e, s16 want, s16 max, Building *u);
+s16 func_8005BF54(GameObject *b, Monster *e);
+s16 func_8005C1F8(GameObject *b, Monster *e);
+s16 func_8005C3C8(GameObject *b, Monster *skip);
+void func_8005D034(s32 x, s32 y, s32 flags);
+void func_8001E4B0(GameObject *obj);
+void main_set_frame(s32, u16, GameObject *);
+void func_8004F370(void);
+extern u16 D_80084278;                  /* the projectile's state bits (monster_anim_update_projectile) */
+extern Building *D_801FB45C;            /* the building the projectile hit */
+extern u8 D_50003464[];
+void func_8005C578(GameObject *b, Monster *e);
+void func_8005C71C(GameObject *b, Monster *e);
+void func_8005C958(GameObject *b, Monster *skip);
+extern u16 D_801FB460;                  /* the buildings the bomb hit (a mask by index) */
+extern s32 D_80011B60;                  /* the explosion's animation */
 extern s16 D_8008427A;                   /* toggled every call of func_80059F24 */
 extern u16 D_801E28C8;
 extern u8 D_50003440[];                 /* sprite ids the code takes by address */
@@ -1180,8 +1195,9 @@ void func_80059710(Monster *e, s16 want, s16 max) {
 }
 
 #ifdef NON_MATCHING
-/* 99.42%: 99.4 %: a second pointer to the building (v, copied at the top of each iteration) gives the original's a0
- * reload of unk_058; the building and the inner counter still swap s0 and s1 */
+/* 99.96%: 99.96 %: a second pointer to the building (v, copied at the top of each iteration) gives the original's
+ * a0 copy; the original reads the first unk_058 test through the building's own register, the second through a0,
+ * and no u/v mix gives both with the original's s0/s1 assignment */
 s32 func_800598F4(Monster *e) {
     Building *u;
     Building *v;
@@ -1211,7 +1227,7 @@ s32 func_800598F4(Monster *e) {
             if ((e->unk_168 == 3 && left < (s16)u->left && (s16)u->left < right)
                 || (e->unk_168 == 7 && left < u->right && u->right < right)) {
                 k = 0;
-                if (u->unk_058 != 2 && u->unk_058 != 3) {
+                if (v->unk_058 != 2 && v->unk_058 != 3) {
                     u->unk_010 = u->unk_012;
                     if (v->unk_058 == 0) {
                         func_8002E278(e, u);
@@ -1280,12 +1296,11 @@ void func_80059C00(void) {
     func_8001F724(0x20);
 }
 
-#ifdef NON_MATCHING
-/* 99.1%: the state compares are made on a u16-truncated copy (andi) in the original; a local for it makes GCC hoist a constant out of the loop */
 void func_80059C2C(void) {
     GameObject *saved;
     Ai *ai;
     u16 n;
+    u16 action;
 
     saved = D_800AA268.p;
     func_8001F7CC(0xFF, 0x21);
@@ -1294,20 +1309,20 @@ void func_80059C2C(void) {
         ai = D_801D85C8;
         n = 5;
         do {
-            if (ai->delay == 0 && ((u32) (ai->action - 2) < 2U || ai->action == 0xA || ai->action == 0xB || ai->action == 4 || (u32) (ai->action - 0x15) < 5U)) {
-                ai->unk_0C = 1;
-                ai->action = 0x33;
-                ai->delay = 0;
-                func_8003D71C(ai);
+            if (ai->delay == 0) {
+                action = ai->action;
+                if ((u16) (action - 2) < 2U || action == 0xA || action == 0xB || action == 4 || (u16) (action - 0x15) < 5U) {
+                    ai->unk_0C = 1;
+                    ai->action = 0x33;
+                    ai->delay = 0;
+                    func_8003D71C(ai);
+                }
             }
             ai++;
         } while (--n != 0);
     }
     D_800AA268.p = saved;
 }
-#else
-INCLUDE_ASM("asm/main/nonmatchings/monster_anim", func_80059C2C);
-#endif
 
 void func_80059D2C(void) {
     GameObject *saved;
@@ -1456,7 +1471,152 @@ void func_8005A154(void) {
     D_800AA268.p = self;
 }
 
-INCLUDE_ASM("asm/main/nonmatchings/monster_anim", func_8005A2F4);
+void monster_anim_update_projectile(Monster *e, s32 k) {
+    GameObject *obj;
+    GameObject *self;
+    GameObject *body;
+    u16 hits;
+    s16 x;
+    s16 i;
+    s32 speed;
+    s32 vx;
+    u16 kind;
+    s16 max;
+
+    self = D_800AA248.cur_obj;
+    obj = e->extra[k];
+    if (obj == NULL) {
+        return;
+    }
+    if (D_80084278 & 1) {
+        obj->pos_x.w += obj->vel_x.w;
+        if (func_8005C3C8(obj, e) == 1) {
+            e->extra[k] = NULL;
+            func_8005D034(obj->pos_x.s.hi, obj->pos_y.s.hi, obj->flags);
+            func_8001E4B0(obj);
+            D_80084278 = 0;
+            func_8004F370();
+            D_800AA248.cur_obj = self;
+            return;
+        }
+        if (func_8005BF54(obj, e) == 1) {
+            e->extra[k] = NULL;
+            func_8005D034(obj->pos_x.s.hi, obj->pos_y.s.hi, obj->flags);
+            func_8001E4B0(obj);
+            D_80084278 = 0;
+            func_8004F370();
+            D_800AA248.cur_obj = self;
+            return;
+        }
+        if (func_8005C1F8(obj, e) == 1) {
+            e->extra[k] = NULL;
+            func_8005D034(obj->pos_x.s.hi, obj->pos_y.s.hi, obj->flags);
+            func_8001E4B0(obj);
+            D_80084278 = 0;
+            func_8004F370();
+            D_800AA248.cur_obj = self;
+            return;
+        }
+        if (obj->vel_x.w > 0) {
+            x = obj->pos_x.u.hi + obj->unk_2C.u.lo;
+        } else {
+            x = obj->pos_x.u.hi - obj->unk_2C.u.lo;
+        }
+        hits = monster_anim_find_buildings(x, obj->pos_y.s.hi, 1, (s16)obj->unk_2C.u.lo >> 1, (s16)obj->unk_2C.u.hi >> 1);
+        obj->unk_60--;
+        if (hits != 0) {
+            obj->unk_60 = 0;
+            func_8005D034(obj->pos_x.s.hi, obj->pos_y.s.hi, obj->flags);
+            func_8004F370();
+            func_8001E4B0(obj);
+            for (i = 0; i < 13; i++) {
+                if ((hits >> i) & 1) {
+                    break;
+                }
+            }
+            D_801FB45C = &D_801D3DC8[i];
+            if (D_801FB45C->unk_058 == 0) {
+                e->unk_188 = 0;
+                D_80084278 = 2;
+                func_8005BB04(e, 1, 0x78, D_801FB45C);
+                D_800AA268.p = self;
+                return;
+            } else {
+                e->unk_188 = 0;
+                D_80084278 = 2;
+                func_8002CFAC(e, D_801FB45C);
+                D_800AA268.p = self;
+                return;
+            }
+        } else if (obj->unk_60 == 0) {
+            func_8001E4B0(obj);
+            e->extra[k] = NULL;
+            D_80084278 = 0;
+            D_801FB45C = NULL;
+            D_800AA268.p = self;
+            return;
+        } else if (D_80084278 & 4) {
+            obj->anim = (s32)func_8001B660(D_50003464);
+            main_set_frame(*(s32 *)obj->anim, obj->flags, obj);
+            obj->frames_left = 4;
+            D_80084278 &= ~4;
+        }
+    } else if (D_80084278 & 2) {
+        kind = D_801FB45C->unk_058;
+        if (kind < 2) { max = 4; } else { max = 2; }
+        if (e->unk_188 < max) {
+            if (kind == 0) {
+                func_8005BB04(e, 1, 0x78, D_801FB45C);
+            } else {
+                if (kind != 2 && kind != 3) {
+                    if (D_801FB45C->unk_010 < D_801FB45C->unk_012) {
+                        func_8001F724(5);
+                        D_801FB45C->unk_010 = D_801FB45C->unk_012;
+                        func_8002CFAC(e, D_801FB45C);
+                    }
+                } else {
+                    func_8002CFAC(e, D_801FB45C);
+                }
+                e->unk_188++;
+            }
+        } else {
+            e->extra[k] = NULL;
+            e->unk_188 = 0;
+            D_80084278 = 0;
+        }
+    } else if (--obj->frames_left == 0) {
+        obj->anim += 8;
+        if (*(s32 *)obj->anim != 0) {
+            main_set_frame(*(s32 *)obj->anim, obj->flags, obj);
+            obj->frames_left = 2;
+        } else {
+            body = e->obj;
+            speed = body->vel_x.s.hi;
+            if (speed < 0) {
+                speed = -speed;
+            }
+            if (body->anim == (s32)D_5000339C) {
+                if (body->vel_x.w != 0) {
+                    vx = -0x70000 - (speed << 16);
+                } else {
+                    vx = -0x70000;
+                }
+            } else if (body->vel_x.w != 0) {
+                vx = (speed << 16) + 0x70000;
+            } else {
+                vx = 0x70000;
+            }
+            if (e->obj->flags & 0x10) {
+                vx = -vx;
+            }
+            obj->vel_x.w = vx;
+            obj->unk_60 = 0x1E;
+            D_80084278 = 5;
+            D_801FB45C = NULL;
+        }
+    }
+    D_800AA268.p = self;
+}
 
 void func_8005A7C4(void) {
     GameObject *self;
@@ -1508,7 +1668,136 @@ void func_8005A7C4(void) {
     D_800AA268.p = self;
 }
 
-INCLUDE_ASM("asm/main/nonmatchings/monster_anim", func_8005A964);
+#ifdef NON_MATCHING
+/* 99.86%: 99.86 %: the falling bomb's vel_y: the original loads it into a0 and increments a copy in v1 (the move in
+ * the beqz delay slot); here the loaded register is incremented and the copy feeds pos_y */
+void monster_anim_update_bomb(Monster *e) {
+    GameObject *obj;
+    GameObject *self;
+    Building *u;
+    s16 i;
+    s16 max;
+    s32 vy;
+    s32 vx;
+
+    obj = e->extra[0];
+    self = D_800AA268.p;
+    if (obj == NULL) {
+        return;
+    }
+    if (e->obj->anim == (s32)&D_80011A80) {
+        vx = vy = obj->vel_y.w;
+        if (vy != 0) {
+            vx += 0x2100;
+            obj->vel_y.w = vx;
+            obj->pos_y.w += vy;
+            if (vx > 0) {
+                func_8001F724(5);
+                func_80029118(0xB, 0x12);
+                obj->anim = (s32)&D_80011B60;
+                obj->vel_y.w = 0;
+                obj->frames_left = 4;
+            }
+        } else if (--obj->frames_left == 0) {
+            obj->anim += 8;
+            if (*(s32 *)obj->anim != 0) {
+                main_set_frame(*(s32 *)obj->anim, obj->flags, obj);
+                obj->frames_left = 5;
+            } else {
+                func_8001E4B0(obj);
+                e->extra[0] = NULL;
+            }
+        }
+    } else {
+        vx = obj->vel_x.w;
+        if (vx != 0) {
+            obj->pos_x.w += vx;
+            obj->pos_y.w += obj->vel_y.w;
+            if (obj->pos_y.w > 0xE10000) {
+                func_8001F724(0x4B);
+                obj->pos_y.w = 0xE10000;
+                obj->vel_y.w = -(obj->vel_y.w / 2);
+                if (++obj->unk_50.count == 3) {
+                    obj->vel_y.w = 0;
+                    obj->vel_x.w = 0;
+                    obj->unk_54.w = 0x1E;
+                }
+            }
+            obj->vel_y.w += 0x6000;
+        } else if (obj->unk_54.w != 0) {
+            if (--obj->unk_54.w == 0) {
+                func_8001F724(5);
+                func_80029118(0xB, 0x12);
+                func_8005C578(obj, e);
+                func_8005C71C(obj, e);
+                func_8005C958(obj, e);
+                if ((D_801FB460 = monster_anim_find_buildings(obj->pos_x.s.hi, obj->pos_y.s.hi, 1, 0x3C, 0x64)) != 0) {
+                    for (i = 0; i < 13; i++) {
+                        if ((D_801FB460 >> i) & 1) {
+                            u = &D_801D3DC8[i];
+                            if (u->unk_058 == 0) {
+                                func_8005BB04(e, 1, 0x78, u);
+                            } else if (u->unk_058 != 2 && u->unk_058 != 3) {
+                                if (u->unk_010 < u->unk_012) {
+                                    func_8001F724(5);
+                                    u->unk_010 = u->unk_012;
+                                    func_8002CFAC(e, u);
+                                }
+                            } else {
+                                func_8002CFAC(e, u);
+                            }
+                        }
+                    }
+                }
+                obj->anim = (s32)&D_80011B60;
+                main_set_frame(D_80011B60, obj->flags, obj);
+                obj->frames_left = 4;
+            }
+        } else {
+            if (D_801FB460 >= 2) {
+                max = 4;
+            } else {
+                max = 2;
+            }
+            if (e->unk_188 < max && D_801FB460 != 0) {
+                for (i = 0; i < 13; i++) {
+                    if ((D_801FB460 >> i) & 1) {
+                        u = &D_801D3DC8[i];
+                        if (u->unk_058 == 0) {
+                            func_8005BB04(e, 1, 0x78, u);
+                        } else {
+                            if (u->unk_058 != 2 && u->unk_058 != 3) {
+                                if (u->unk_010 < u->unk_012) {
+                                    func_8001F724(5);
+                                    u->unk_010 = u->unk_012;
+                                    func_8002CFAC(e, u);
+                                }
+                            } else {
+                                func_8002CFAC(e, u);
+                            }
+                            e->unk_188++;
+                        }
+                    }
+                }
+            }
+            if (--obj->frames_left == 0) {
+                obj->anim += 8;
+                if (*(s32 *)obj->anim != 0) {
+                    main_set_frame(*(s32 *)obj->anim, obj->flags, obj);
+                    obj->frames_left = 5;
+                } else {
+                    func_8001E4B0(obj);
+                    e->extra[0] = NULL;
+                    e->unk_188 = 0;
+                }
+            }
+        }
+    }
+    D_800AA268.p = self;
+}
+#else
+INCLUDE_ASM("asm/main/nonmatchings/monster_anim", monster_anim_update_bomb);
+#endif
 
 INCLUDE_ASM("asm/main/nonmatchings/monster_anim", func_8005AE28);
 
@@ -1711,7 +2000,7 @@ s32 monster_anim_test_box(s16 x, s16 y, s32 w, s32 h, GameObject *obj, u16 flags
 INCLUDE_ASM("asm/main/nonmatchings/monster_anim", monster_anim_test_box);
 #endif
 
-u16 func_8005BF54(GameObject *b, Monster *e) {
+s16 func_8005BF54(GameObject *b, Monster *e) {
     u16 n;
     Pickup *r;
     s16 x;
@@ -1763,7 +2052,7 @@ u16 func_8005BF54(GameObject *b, Monster *e) {
     return 0;
 }
 
-u16 func_8005C1F8(GameObject *b, Monster *e) {
+s16 func_8005C1F8(GameObject *b, Monster *e) {
     u16 n;
     Npc *npc;
     GameObject *obj;
@@ -1805,7 +2094,7 @@ u16 func_8005C1F8(GameObject *b, Monster *e) {
     return 0;
 }
 
-u16 func_8005C3C8(GameObject *b, Monster *skip) {
+s16 func_8005C3C8(GameObject *b, Monster *skip) {
     Monster *e;
     s16 x;
     s16 i;

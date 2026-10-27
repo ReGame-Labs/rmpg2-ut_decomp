@@ -94,6 +94,7 @@ typedef struct GameObject {
     /* 0x50 */ union {                  /* by kind */
                    struct GameObject *obj;  /* a link */
                    s32 cam_start;           /* OVERATTR's camera: its start point, y << 16 | x (func_8009AE40) */
+                   s32 count;               /* a monster's bomb (kind 0x73A): its bounces */
                } unk_50;
     /* 0x54 */ union {
                    s32 w;
