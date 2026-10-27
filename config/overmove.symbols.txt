@@ -11,3 +11,30 @@ DecDCTin = 0x8009827C; // type:func  3.3-4.7
 DecDCTout = 0x800982F8; // type:func  3.3-4.7, the 32 bytes between DecDCTin and DecDCToutCallback (DecDCTout's size in the library, DecDCTinSync and DecDCToutSync are 60)
 DecDCToutCallback = 0x80098318; // type:func  4.2-4.7, its static helpers follow it to 0x8009870C
 MDEC_status = 0x80098670; // type:func  2.6-4.7
+
+// overmove: the movie player (src/overmove/overmove.c). func_800A9890, which the executable calls, keeps its name
+// until the executable's caller is renamed with it.
+overmove_play_stream = 0x800A99E4; // type:func
+overmove_set_dec_env = 0x800A9C58; // type:func
+overmove_init_stream = 0x800A9CC0; // type:func
+overmove_slice_done = 0x800A9D30; // type:func
+overmove_next_vlc = 0x800A9E5C; // type:func
+overmove_next_frame = 0x800A9EE0; // type:func
+overmove_sync = 0x800AA008; // type:func
+overmove_kick_cd = 0x800AA09C; // type:func
+overmove_movies = 0x800AA0F0; // size:0xE8
+overmove_width = 0x800AA1D8;
+overmove_height = 0x800AA1DC;
+overmove_dec = 0x800AA1E0; // size:0x38
+overmove_ring = 0x800AA218;
+overmove_vlcbuf0 = 0x800AA21C;
+overmove_vlcbuf1 = 0x800AA220;
+overmove_imgbuf0 = 0x800AA224;
+overmove_imgbuf1 = 0x800AA228;
+overmove_start_frame = 0x800AA22C;
+overmove_end_frame = 0x800AA230;
+overmove_end_reached = 0x800AA234;
+overmove_frames = 0x800AA238;
+// Constants spimdisasm would pair into symbols (lui + addiu/ori): left as numbers. overmove_next_vlc and
+// overmove_next_frame count from 0x800000; func_800A9890 carves its buffers at 0x10000 and 0x2D00 offsets.
+D_12D00 = 0x00012D00; // ignore:true

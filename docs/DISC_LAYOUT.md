@@ -76,8 +76,8 @@ contents are understood; `cdload` is the CD file reader.
 | `game_800500EC` | `0x800500EC`–`0x80057C94` | `0x80011534`–`0x80011594` | `0x8007F8FC`–`0x8007FC84` | the last file whose `.data` precedes the screens' tables |
 | `game_80057C94` | `0x80057C94`–`0x8005D198` | `0x80011594`–`0x800115D8` | `0x8008434C`–`0x80085264` | the first file whose `.data` follows the screens' tables; 150 small tables, one per function |
 | `game_8005D198` | `0x8005D198`–`0x80060F3C` | `0x800115D8`–`0x8001169C` |  | 38 functions; uses the config tables `D_8008427C`–`D_8008433C` |
-| `cdload` | `0x80060F3C`–`0x800633EC` | `0x80016A90`–`0x80016AC8` | `0x80085264`–`0x80085328` | the CD file reader and the overlay loader (`cdload_read_file`, `cdload_load_overlay`); `func_800619A4`–`func_80062868` and the stream reader `func_80062C10`–`func_800632E8` may be files of their own |
-| `game_800633EC` | `0x800633EC`–`0x80063A78` |  | `0x80085328`–`0x800853C0` | the sound setup, before the `InitHeap` stub |
+| `cdload` | `0x80060F3C`–`0x800633EC` | `0x80016A90`–`0x80016AC8` | `0x80085264`–`0x80085308` | the CD file reader and the overlay loader (`cdload_read_file`, `cdload_load_overlay`); `func_800619A4`–`func_80062868` and the stream reader `func_80062C10`–`func_800632E8` may be files of their own |
+| `game_800633EC` | `0x800633EC`–`0x80063A78` | `0x80016AD0`–`0x80016ADC` | `0x80085308`–`0x800853C0` | the controllers' vibration (the `PadSetAct` buffers' motor bytes), before the `InitHeap` stub |
 | `game_80063A88` | `0x80063A88`–`0x80063FA8` |  | `0x800853C0`–`0x800853F4` | the SPU setup, between the first two library objects |
 | `game_8006BB14` | `0x8006BB14`–`0x80070914` |  |  | the sound driver (the `SPSX` string), between library objects |
 | `game_80076C8C` | `0x80076C8C`–`0x800783C0` |  |  | more of the sound driver |
@@ -138,7 +138,7 @@ executable resolve to the executable's own definitions; splat gets the executabl
 
 | Overlay | `.rodata` | `.text` | `.data` and `.bss` |
 |---|---|---|---|
-| `OVERATTR.BIN` | `0x80097EA4`–`0x80098730`: the save header, the credits' and the memory-card screens' strings, nine jump tables | `0x80098730`–`0x800A3360`: 108 functions, one file (`overattr`) until the evidence says otherwise (its jump tables share one parity, the string users run in text order) | `0x800A3360`–`0x800A92A4` `.data`, then zeros to the file's end `0x800A98C0`: its `.bss`, inside the file. The file table says 72,244 bytes, 24 more than the file: the loader copies that much, so the image in memory extends 24 bytes past the file's last word |
+| `OVERATTR.BIN` | `0x80097EA4`–`0x80098730`: the save header, the credits' and the memory-card screens' strings, nine jump tables | `0x80098730`–`0x800A3360`: 108 functions in three files (`card` the memory-card file, `overattr_80099118`, `overattr_8009B478`), each object's `.rodata` and `.text` 8-aligned (`config/overattr.yaml`); a data-only word at `0x80097EA4` first | `0x800A3360`–`0x800A92A4` `.data`, then zeros to the file's end `0x800A98C0`: its `.bss`, inside the file. The file table says 72,244 bytes, 24 more than the file: the loader copies that much, so the image in memory extends 24 bytes past the file's last word |
 | `OVERMOVE.BIN` | `0x80097EA4`–`0x80097EF8`: libpress's strings (`MDEC_rest`, `MDEC_in_sync`, ...) | `0x80097EF8`–`0x800AA0EC`: libpress first (`psyq/libpress/vlc`: `DecDCTvlc`; `psyq/libpress/libpress`: `DecDCTReset`, `DecDCTin`, `DecDCTout`, `DecDCToutCallback` and its static helpers; `psyq/libpress/vlctbl`: the VLC decoding tables, 70 KB of data in `.text`, `0x8009870C`–`0x800A9890`), then the game's movie player (`overmove`, 9 functions from `0x800A9890`) | `0x800AA0EC`–`0x800AA240`: the movie table and the player's state |
 
 No other library code is in the overlays: `OVERATTR.BIN` calls the executable's `MemCard*`, `strchr`, `strcmp` and

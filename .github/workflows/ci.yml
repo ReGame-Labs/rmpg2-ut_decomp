@@ -51,7 +51,7 @@ jobs:
       - name: Scripts parse, Python compiles, workaround census
         run: |
           bash -n scripts/*.sh tools/*.sh
-          python3 -m py_compile configure.py diff_settings.py tools/*.py
+          python3 -m py_compile configure.py diff_settings.py tools/*.py tests/*.py
           python3 tools/hacks.py --check
 
   # The toolchain (cached on its pins) and its smoke test; with the game files the byte-identical rebuild from
@@ -76,6 +76,9 @@ jobs:
 
       - name: Toolchain smoke test
         run: scripts/check_toolchain.sh
+
+      - name: unit_diff's comparison
+        run: tools/venv/bin/python tests/unit_diff_test.py
 
       - name: Byte-identical rebuild of every game file
         if: env.HAVE_GAME_FILES == 'true'

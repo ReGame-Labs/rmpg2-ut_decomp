@@ -375,10 +375,46 @@ StartCARD2 = 0x8007A674; // type:func
 
 // cdload (src/main/cdload.c), the CD file reader and the overlay loader (docs/DISC_LAYOUT.md "The file table" and
 // "Overlays"). Files are read by index into the file table, checksummed and retried.
+cdload_get_next_player = 0x80061014; // type:func  (player) the player after `player` in the sorted list D_801FB49C, else the first
+cdload_read_file = 0x8006118C; // type:func  (index, buffer) CdlSetmode, CdlSetloc, CdRead, the checksum, 5 retries, returns the size
 cdload_wait_sync = 0x800613AC; // type:func  waits on CdSync, 600 tries
+cdload_open = 0x800613FC; // type:func  (index, mode) reads a file into the read buffer (the stdio emulation the sound driver is given)
+cdload_read = 0x80061444; // type:func  (buf, size, count, handle) copies from the loaded file
+cdload_close = 0x800614B0; // type:func  (handle)
+cdload_size = 0x800614BC; // type:func  () the loaded file's size
+cdload_seek = 0x800614E0; // type:func  (handle, pos)
 cdload_wait_read_sync = 0x800614F0; // type:func  waits on CdReadSync, 10 s cap
 cdload_checksum = 0x80061564; // type:func  the exclusive-or of a buffer's words, the tail zero-padded
-cdload_read_file = 0x8006118C; // type:func  (index, buffer) CdlSetmode, CdlSetloc, CdRead, the checksum, 5 retries, returns the size
 cdload_city_file_index = 0x800615FC; // type:func  (which) the current city's .BIN (1) or .CMB file index
+cdload_write_spu = 0x80061668; // type:func  (handle, len, spuAddr) one piece through the two sector buffers
+cdload_load_spu = 0x80061774; // type:func  (handle, spuAddr, size) the loaded file into SPU RAM in 2 KB pieces
 cdload_load_overlay = 0x8006180C; // type:func  (n) 0 OVERATTR.BIN, 1 OVERMOVE.BIN, 2 none, copied to 0x80097EA4
 cdload_load_city_table = 0x800618F4; // type:func  (index) a city's .BIN table into the overlay region
+cdload_unpack = 0x800619A4; // type:func  (dst, 0, src, 0) by the method in the low nibble of byte 3
+cdload_unpack_rle8 = 0x80061ACC; // type:func  (src, dst) byte RLE
+cdload_unpack_rle16 = 0x80061B4C; // type:func  (src, dst) halfword RLE, the runs through a computed-goto table
+cdload_unpack_rle6 = 0x80061D10; // type:func  (src, dst) 6-bit RLE, four symbols per three bytes
+cdload_unpack_rle4 = 0x80061F90; // type:func  (src, dst) nibble RLE into packed bytes
+cdload_alloc = 0x80062C10; // type:func  (size) the bump allocator, 8-aligned
+cdload_load_bank = 0x80062F14; // type:func  (index, spuAddr, ..., reload) a sound bank's samples into SPU RAM, returns the bytes used
+cdload_load_bank_by_number = 0x8006301C; // type:func  (n, spuAddr) the bank file D_80085304[n]
+cdload_reset_xa = 0x80063064; // type:func  () the XA player's state
+cdload_stop_xa = 0x800630E8; // type:func  (mode) pauses the drive and restores the ready callback, mode 1 waits and resets
+cdload_on_xa_ready = 0x800632CC; // type:func  (status) the data-ready callback while a track plays
+cdload_play_xa = 0x800632E8; // type:func  (track) XA file track >> 4, channel track & 15
+// Constants spimdisasm would pair into symbols (lui + addiu): left as numbers so the C, which has no symbol there,
+// compares equal. cdload_wait_read_sync counts from 0x800000.
+D_7FFFFF = 0x007FFFFF; // ignore:true
+
+// game_80063A88: the SPU reverb attributes (an SpuReverbAttr)
+D_801FB530 = 0x801FB530; // size:0x14
+
+// game_8006BB14: the voice attributes (an SpuVoiceAttr), the queue of cut music notes, the sequence file's header
+D_801FDA98 = 0x801FDA98; // size:0x40
+D_801FDC70 = 0x801FDC70; // size:0x208
+D_801FDE78 = 0x801FDE78; // size:0x20
+
+// game_80076C8C: the command handler tables and the commands' lengths
+D_80087130 = 0x80087130; // size:0x28
+D_80087F00 = 0x80087F00; // size:0x90
+D_80088364 = 0x80088364; // size:0x24

@@ -44,4 +44,7 @@ int ClearOTagR(unsigned long *ot, int n);
 int LoadImage(RECT *rect, unsigned long *p);
 int ClearImage(RECT *rect, unsigned char r, unsigned char g, unsigned char b);
 
+/* Appended for the movie player (overmove). */
+void SetDefDispEnv(DISPENV *env, int x, int y, int w, int h);
+
 #endif /* PSYQ_LIBGPU_H */
