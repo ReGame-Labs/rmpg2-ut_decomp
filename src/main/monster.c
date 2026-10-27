@@ -1526,7 +1526,7 @@ void func_80052E9C(Monster *e) {
             D_800AA248.unk_0C = e->front_x;
             D_800AA248.unk_10 = e->obj->pos_y.s.hi;
             for (i = 0; i < (s16) D_801E29A4; i++) {
-                func_80054608(city->unk_008, e, city);
+                func_80054608(city->priority, e, city);
                 city++;
             }
             if (e->action == 0) {
@@ -2244,7 +2244,7 @@ void func_80054608(u16 kind, Monster *e, Building *u) {
     x = e->front_x;
     if (x >= (s16) u->left + 8 && u->right - 8 >= x) {
         top = u->top;
-        if (top - 4 >= y && top - 4 - y < 0xB && u->unk_008 >= kind) {
+        if (top - 4 >= y && top - 4 - y < 0xB && u->priority >= kind) {
             if (u->state >= 9) {
                 e->unk_152 = (u32) (e->action - 5) < 2;
                 e->action = 2;
@@ -2384,7 +2384,7 @@ void func_80054A50(Monster *e) {
                     func_8005640C(e, u);
                 }
             } else {
-                kind = u->unk_008;
+                kind = u->priority;
                 limit = 0xE3;
                 if (kind != 0x300) {
                     limit = 0xDB;
@@ -2429,7 +2429,7 @@ void func_80054BA4(Monster *e) {
                     func_8005640C(e, u);
                 }
             } else {
-                kind = u->unk_008;
+                kind = u->priority;
                 limit = 0xE3;
                 if (kind != 0x300) {
                     limit = 0xDB;
@@ -2456,7 +2456,7 @@ void func_80054CF8(Monster *e, Building *city) {
     u16 kind;
 
     u = city;
-    kind = u->unk_008;
+    kind = u->priority;
     if (u == D_801D3DC8 || (func_80054D74(kind, e, city - 1), D_800AA250 != 3)) {
         func_80054D74(kind, e, u + 1);
     }
@@ -2465,7 +2465,7 @@ void func_80054CF8(Monster *e, Building *city) {
 void func_80054D74(u16 kind, Monster *e, Building *u) {
     u16 next;
 
-    if (u->state < 0xB && u->unk_008 >= kind && D_800AA248.unk_0C >= (s16) u->left + 8 &&
+    if (u->state < 0xB && u->priority >= kind && D_800AA248.unk_0C >= (s16) u->left + 8 &&
         (s16) u->right - 8 >= D_800AA248.unk_0C && D_800AA248.unk_10 >= (s16) u->top - 4) {
         next = u->unk_01E;
         e->climb_side = 3;
@@ -2746,14 +2746,14 @@ void func_80055970(Monster *e, Building *city) {
     u16 kind;
 
     if (!(D_800AA2DC & 0x38)) {
-        kind = city->unk_008;
+        kind = city->priority;
         start = city;
         if (city == D_801D3DC8) {
             city = &D_801D3DC8[(s16) D_801E29A4 - 1];
         } else {
             city--;
         }
-        if (kind < city->unk_008 || city->state >= 0xB) {
+        if (kind < city->priority || city->state >= 0xB) {
             func_80055B68(e, start);
             return;
         }
@@ -2792,13 +2792,13 @@ void func_80055B68(Monster *e, Building *city) {
     GameState *g;
     u16 kind;
 
-    kind = city->unk_008;
+    kind = city->priority;
     if (city == &D_801D3DC8[(s16) D_801E29A4 - 1]) {
         city = D_801D3DC8;
     } else {
         city++;
     }
-    if (kind >= city->unk_008 && city->state < 0xB) {
+    if (kind >= city->priority && city->state < 0xB) {
         g = &D_800AA248;
         if (!func_80056378(g->unk_0C, city)) {
             if (!func_800562E4(g->unk_0C, city)) {
@@ -3252,7 +3252,7 @@ u16 func_80056A44(Monster *e, Building *city) {
     u16 kind;
     u16 i;
 
-    kind = city->unk_008;
+    kind = city->priority;
     i = 0;
     switch (kind) {
     case 0x300:
@@ -3428,7 +3428,7 @@ void monster_find_floor(Monster *e, Building *city) {
             D_800AA248.unk_04--;
             floor = D_800AA248.unk_04;
         } else {
-            kind = city->unk_008;
+            kind = city->priority;
             switch (kind) {
             case 0x300:
                 limit = D_8007FD04;

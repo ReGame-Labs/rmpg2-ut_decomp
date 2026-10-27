@@ -54,7 +54,7 @@ void func_8003DAA0(Ai *ai);
 s16 func_8003DCC8(Ai *ai);
 void func_8003DD44(Ai *ai);
 void func_8003DF34(Ai *ai);
-AiLink *func_8003E1C8(AiOrder **order, Ai *ai);
+BuildingItem *func_8003E1C8(BuildingPart **part, Ai *ai);   /* the second argument is not used */
 void func_8003D71C(Ai *ai);
 void func_8003E630(Ai *ai);
 void func_8003E764(Ai *ai);
@@ -415,7 +415,7 @@ void func_8003D490(Actor *actor) {
 void func_8003D4AC(Ai *ai) {
     ai->action = 6;
     D_800AA248.cur_obj->priority = 0xF00;
-    if (ai->unk_10.order->unk_4 == 2) {
+    if (ai->unk_10.part->unk_04 == 2) {
         D_800AA248.cur_obj->flags |= 0x10;
     }
     func_8003D58C(&D_80094350);
@@ -638,7 +638,7 @@ void func_8003DBCC(Ai *ai) {
         return;
     }
     if (ai->unk_0C == 1) {
-        ai->unk_1A = ai->unk_10.order->unk_6;
+        ai->unk_1A = ai->unk_10.part->unk_06;
         func_8003E630(ai);
         func_8003DD44(ai);
     }
@@ -650,29 +650,29 @@ s32 func_8003DC3C(Ai *ai) {
     if (func_8005F208() == 3) {
         return 1;
     }
-    k = ai->unk_1C.order->unk_14;
+    k = ai->unk_1C.building->state;
     if (k != 0 && k != 2 && k != 3) {
         return -1;
     }
-    if (ai->unk_1A != ai->unk_10.order->unk_6) {
+    if (ai->unk_1A != ai->unk_10.part->unk_06) {
         return 1;
     }
-    if (ai->unk_28.link->unk_6 != 2) {
+    if (ai->unk_28.item->unk_06 != 2) {
         return 0;
     }
     return -1;
 }
 
 s16 func_8003DCC8(Ai *ai) {
-    AiOrder *order;
+    Building *b;
     u16 kind;
 
-    order = ai->unk_1C.order;
-    if (order != NULL && ai->unk_28.link->unk_6 < 2) {
-        if (ai->unk_10.order != NULL && ai->unk_10.order->unk_C != 0) {
+    b = ai->unk_1C.building;
+    if (b != NULL && ai->unk_28.item->unk_06 < 2) {
+        if (ai->unk_10.part != NULL && ai->unk_10.part->unk_0C != NULL) {
             return -1;
         }
-        kind = order->unk_14;
+        kind = b->state;
         if (kind == 0 || kind == 2) {
             return 0;
         }
@@ -689,9 +689,9 @@ void func_8003DD44(Ai *ai) {
 }
 
 void func_8003DD70(Ai *ai) {
-    AiOrder *order;
-    AiLink *link;
-    AiLinkInfo *info;
+    BuildingPart *part;
+    BuildingItem *item;
+    Building *b;
     GameObject *obj;
     SpriteFrame *frame;
     s32 n;
@@ -703,30 +703,30 @@ void func_8003DD70(Ai *ai) {
         D_800AA248.cur_obj->pos_y.w = 0x02000000;
         return;
     }
-    link = func_8003E1C8(&order, ai);
-    if (link == NULL) {
+    item = func_8003E1C8(&part, ai);
+    if (item == NULL) {
         ai->timer = 0xF0;
         return;
     }
     ai->state = 1;
     ai->action = 2;
-    if (link->unk_6 >= 2 || link->open == 0) {
+    if (item->unk_06 >= 2 || item->unk_04 == 0) {
         func_8003DAA0(ai);
         return;
     }
-    ai->unk_28.link = link;
-    ai->unk_10.order = order;
-    order->unk_8 = (s32)ai;
-    info = link->unk_8;
-    ai->unk_1C.order = (AiOrder *)info;
-    obj = link->obj;
+    ai->unk_28.item = item;
+    ai->unk_10.part = part;
+    part->unk_08 = ai;
+    b = item->building;
+    ai->unk_1C.building = b;
+    obj = item->obj;
     frame = obj->frame;
-    D_800AA248.cur_obj->priority = info->priority + 0x10;
-    if (order->unk_4 == 2) {
+    D_800AA248.cur_obj->priority = b->priority + 0x10;
+    if (part->unk_04 == 2) {
         D_800AA248.cur_obj->flags |= 0x10;
         D_800AA248.cur_obj->pos_x.s.hi = obj->pos_x.s.hi + frame->unk_1C + 0xE;
         D_800AA248.cur_obj->pos_y.s.hi = obj->pos_y.s.hi + frame->unk_1E;
-    } else if (order->unk_4 != 1) {
+    } else if (part->unk_04 != 1) {
         D_800AA248.cur_obj->pos_x.s.hi = obj->pos_x.s.hi + frame->unk_18;
         D_800AA248.cur_obj->pos_y.s.hi = obj->pos_y.s.hi + frame->unk_1A;
     } else {
@@ -822,18 +822,18 @@ void func_8003DFD4(void) {
 
 INCLUDE_ASM("asm/main/nonmatchings/actor", func_8003E1C8);
 
-s32 func_8003E59C(AiOrder *order, Actor *actor, Monster *player) {
+s32 func_8003E59C(BuildingPart *part, BuildingItem *item, Building *b) {
     s16 limit;
 
-    if (order->unk_8 == 0 && order->unk_14 == 0) {
-        if (order->unk_4 == 1) {
-            limit = player->unk_024;
-        } else if (order->unk_4 == 2) {
-            limit = player->unk_028;
+    if (part->unk_08 == NULL && part->unk_14 == 0) {
+        if (part->unk_04 == 1) {
+            limit = b->left_side;
+        } else if (part->unk_04 == 2) {
+            limit = b->right_side;
         } else {
-            limit = player->unk_026;
+            limit = b->unk_026;
         }
-        if (limit == 0 || (limit != -1 && actor->unk_4 >= limit)) {
+        if (limit == 0 || (limit != -1 && item->unk_04 >= limit)) {
             return 1;
         }
     }
@@ -863,16 +863,16 @@ void func_8003E630(Ai *ai) {
 }
 
 void func_8003E6A4(Ai *ai) {
-    AiOrder *order;
+    BuildingPart *part;
     GameObject *mover;
     u16 kind;
 
-    order = ai->unk_10.order;
-    if (order != NULL) {
-        order->unk_8 = 0;
+    part = ai->unk_10.part;
+    if (part != NULL) {
+        part->unk_08 = NULL;
         kind = ai->unk_22;
         if (kind != 0) {
-            order->unk_14 = kind;
+            part->unk_14 = kind;
         }
     }
     ai->unk_30.u.hi++;
@@ -880,8 +880,8 @@ void func_8003E6A4(Ai *ai) {
     ai->unk_22 = 0;
     ai->unk_34.s.hi = 0;
     ai->state = 0;
-    ai->unk_10.order = NULL;
-    ai->unk_1C.order = 0;
+    ai->unk_10.part = NULL;
+    ai->unk_1C.building = NULL;
     ai->target = NULL;
     ai->unk_38 = 0;
     ai->unk_0C = 0;
@@ -903,8 +903,8 @@ void func_8003E764(Ai *ai) {
 }
 
 void func_8003E788(Ai *ai) {
-    ai->unk_10.order->unk_8 = 0;
-    ai->unk_10.order = NULL;
+    ai->unk_10.part->unk_08 = NULL;
+    ai->unk_10.part = NULL;
 }
 
 s32 func_8003E79C(void) {

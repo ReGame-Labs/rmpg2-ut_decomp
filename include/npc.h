@@ -7,37 +7,12 @@
 
 /* Types of npc.c, actor.c, ai.c and game_80043118.c. */
 
-typedef struct AiOrder AiOrder;
-
 /* What GameObject.unk_94 points at for some objects: a record holding another object (npc.c). */
 typedef struct MoverTarget {
     /* 0x00 */ u8 unk_0[0x4];
     /* 0x04 */ GameObject *unk_4;
 } MoverTarget;
 
-struct AiOrder {
-    /* 0x00 */ u8 unk_0[0x4];
-    /* 0x04 */ u16 unk_4;
-    /* 0x06 */ u16 unk_6;
-    /* 0x08 */ s32 unk_8;
-    /* 0x0C */ s32 unk_C;
-    /* 0x10 */ u8 unk_10[0x4];
-    /* 0x14 */ u16 unk_14;
-};
-
-typedef struct AiLink {
-    /* 0x00 */ GameObject *obj;
-    /* 0x04 */ u16 open;
-    /* 0x06 */ u16 unk_6;
-    /* 0x08 */ struct AiLinkInfo *unk_8;
-} AiLink;
-
-typedef struct AiLinkInfo {
-    /* 0x00 */ u8 unk_0[0x8];
-    /* 0x08 */ u16 priority;    /* the current object's priority becomes it + 0x10 */
-    /* 0x0A */ u8 unk_A[0xA];
-    /* 0x14 */ u16 unk_14;
-} AiLinkInfo;
 
 /* A state handler; the first argument is the table it was called from. */
 typedef void (*AiHandler)(Ai *ai);

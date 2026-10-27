@@ -4403,7 +4403,7 @@ void func_80024C2C(void) {
         rec->unk_08A = e->unk_8;
         rec->unk_00A = e->unk_14;
         rec->state = 0;
-        rec->unk_008 = type = e->unk_12;
+        rec->priority = type = e->unk_12;
         if (type != 0x200) {
             tile = 0xC5;
             if (type == 0x300) {
@@ -4483,7 +4483,7 @@ void func_80025124(Building *rec) {
     request->unk_0C = 0x728;
     request->pos_y.u.hi = rec->bottom;
     request->pos_x.u.hi = rec->left;
-    kind = rec->unk_008;
+    kind = rec->priority;
     item = &rec->items[0];
     if (def->unk_08 != 0) {
         request->id = def->unk_08;
@@ -5496,7 +5496,15 @@ void func_8002994C(void) {
     }
 }
 
-INCLUDE_ASM("asm/main/nonmatchings/main", func_80029984);
+void func_80029984(Monster *m) {
+    u16 *p;
+
+    for (p = &m->unk_130; p <= &m->unk_14A; p++) {
+        if (*p != 0) {
+            (*p)--;
+        }
+    }
+}
 
 void func_800299C4(void) {
     GameObject *sprite;

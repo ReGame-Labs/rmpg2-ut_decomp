@@ -2013,15 +2013,15 @@ void func_8002EBD8(Building *b) {
     n = D_801E29A4;
     o = D_801D3DC8;
     if (n != 0) {
-        if (b->unk_008 == 0x300) {
+        if (b->priority == 0x300) {
             kind = 0x200;
-        } else if (b->unk_008 == 0x200) {
+        } else if (b->priority == 0x200) {
             kind = 0x100;
         } else {
             return;
         }
         do {
-            if (o->state < 0x10 && o->unk_008 == kind && o->right > (s16) b->left &&
+            if (o->state < 0x10 && o->priority == kind && o->right > (s16) b->left &&
                 (b->right >= o->right || b->right >= (s16) o->left)) {
                 o->left_side = 0;
                 o->right_side = 0;
@@ -2624,7 +2624,7 @@ void func_8002FEA4(Building *a) {
         x = a->left + (a->right - (s16) a->left - 0x7A) / 2;
         r->pos_x.u.hi = x;
         r->pos_y.u.hi = a->bottom - 0x1D;
-        r->flags = a->unk_008 + 0x90;
+        r->flags = a->priority + 0x90;
         D_800AA248.new_def = r;
         spr = func_8001DCB4();
         if (spr != NULL) {
@@ -2643,7 +2643,7 @@ void building_create_roof(void) {
 
     saved = D_800AA248.cur_obj;
     b = saved->owner.p;
-    if (b->unk_008 == 0x300 && b->roof != 0) {
+    if (b->priority == 0x300 && b->roof != 0) {
         def = func_8001D110();
         D_800AA248.new_def = def;
         if (b->kind == 2) {
@@ -3178,7 +3178,7 @@ void func_80030E04(Monster *m, BuildingItem *rec) {
                     D_800AA248.cur_obj = obj;
                     def->pos_x.s.hi = obj->pos_x.u.hi + dx;
                     def->pos_y.s.hi = obj->pos_y.u.hi;
-                    def->flags = b->unk_008 + 0x11;
+                    def->flags = b->priority + 0x11;
                     obj = func_8001DCB4();
                     obj->owner.p = rec;
                     obj->unk_94.monster = m;
@@ -3328,7 +3328,7 @@ void func_80031364(Building *b) {
     def->pos_x.s.hi = b->kind == 2 ? x + 0x28 : x + 0x3C;
     obj = b->unk_070->obj;
     def->pos_y.s.hi = obj->pos_y.u.hi + (obj->size.s.hi >> 1);
-    def->flags = b->unk_008 + 0x80;
+    def->flags = b->priority + 0x80;
     func_8001DCB4();
     D_800AA268.p = saved;
 }
@@ -3722,7 +3722,7 @@ void func_80032064(s32 arg0, Ai *arg1) {
 
 void func_8003212C(s32 arg0, Ai *ai) {
     s32 floor;
-    AiLink *link;
+    BuildingItem *item;
 
     if (ai->unk_24 != 0) {
         ai->unk_24 = 0;
@@ -3738,8 +3738,8 @@ void func_8003212C(s32 arg0, Ai *ai) {
         D_800AA248.cur_obj->priority = D_800AA248.cur_obj->pos_y.u.hi + 0xF23;
         D_800AA248.cur_obj->vel_y.w = 0;
         ai->unk_0C = 0;
-        link = ai->unk_28.link;
-        if (link->unk_8 != NULL && link->unk_8->unk_14 == 4) {
+        item = ai->unk_28.item;
+        if (item->building != NULL && item->building->state == 4) {
             ai->state = 0x12;
             ai->action = 0x46;
             if (D_800AA248.cur_obj->flags & 0x10) {

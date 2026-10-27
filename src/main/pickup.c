@@ -621,12 +621,12 @@ void func_8003C3B0(void) {
     def->pos_x.s.hi = -400;
     def->pos_y.s.hi = -400;
     do {
-        D_800AA248.unk_28 = (u16)u->unk_00A;
-        if (D_800AA248.unk_28 != 0) {
+        D_800AA248.unk_28.n = (u16)u->unk_00A;
+        if (D_800AA248.unk_28.n != 0) {
             do {
                 p = func_8003C67C(u, rec);
                 if (p != NULL) {
-                    if ((u16)p->unk_14 != 0) {
+                    if (p->unk_14 != 0) {
                         def->flags = 0;
                     } else {
                         q = func_8003D1F8((s32)p);
@@ -668,7 +668,7 @@ void func_8003C3B0(void) {
                 if (--D_800AA248.unk_08 == 0) {
                     goto done;
                 }
-            } while (--D_800AA248.unk_28 != 0);
+            } while (--D_800AA248.unk_28.n != 0);
         }
         u++;
     } while (u->unk_000 != 0);

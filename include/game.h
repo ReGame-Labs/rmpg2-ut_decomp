@@ -253,7 +253,8 @@ typedef struct Monster {
     /* 0x128 */ u16 unk_128;
     /* 0x12A */ u16 unk_12A;
     /* 0x12C */ u16 unk_12C;
-    /* 0x12E */ u8 unk_12E[0x04];
+    /* 0x12E */ u8 unk_12E[0x02];
+    /* 0x130 */ u16 unk_130;                   /* 0x130..0x14A: countdowns, func_80029984 runs them all down */
     /* 0x132 */ u16 unk_132;
     /* 0x134 */ u8 unk_134[0x04];
     /* 0x138 */ u16 unk_138;
@@ -263,7 +264,9 @@ typedef struct Monster {
     /* 0x140 */ u16 icon_timers[3];            /* the frames left on each status icon (bonus.c shows them); [1] nonzero: the
                                                 * vibration presets 0-3 run twice as strong and long */
     /* 0x146 */ s16 unk_146;
-    /* 0x148 */ u8 unk_148[0x08];
+    /* 0x148 */ u16 unk_148;
+    /* 0x14A */ u16 unk_14A;                   /* the last of the countdowns */
+    /* 0x14C */ u8 unk_14C[0x04];
     /* 0x150 */ s16 unk_150;
     /* 0x152 */ u16 unk_152;
     /* 0x154 */ u8 unk_154[0x0C];
@@ -372,11 +375,15 @@ typedef struct GameState {
     /* 0x1C */ union {
                    ObjectDef *def;
                    s32 n;                   /* a count (main_count_monsters) */
+                   s32 flags;               /* the object's flags while its script runs (func_8002075C) */
                } unk_1C;
     /* 0x20 */ GameObject *cur_obj;            /* the object being updated (D_800AA268) */
     /* 0x24 */ s32 dir;                        /* a monster's direction, copied before its handlers run (D_800AA26C);
                                                 * scratch: main_count_monsters's count */
-    /* 0x28 */ s32 unk_28;                     /* a counter (func_8003C3B0: the items left in the building) */
+    /* 0x28 */ union {
+                   s32 n;                   /* a counter (func_8003C3B0: the items left in the building) */
+                   s32 *p;                  /* a write pointer into a word list (func_8002075C) */
+               } unk_28;
     /* 0x2C */ s32 unk_2C;
     /* 0x30 */ s32 *unk_30;
     /* 0x34 */ void *unk_34;
@@ -443,14 +450,14 @@ typedef struct Ai {
     /* 0x10 */ union {                  /* by kind */
                    void *p;
                    struct Monster *monster;
-                   struct AiOrder *order;
+                   struct BuildingPart *part;   /* the building part it holds (func_8003DD70) */
                    struct Actor *actor;
                } unk_10;
     /* 0x14 */ struct Monster *target;         /* the monster it goes for */
     /* 0x18 */ s16 timer;                      /* a countdown */
     /* 0x1A */ u16 unk_1A;
     /* 0x1C */ union {
-                   struct AiOrder *order;
+                   struct Building *building;   /* the building of that part */
                    s16 s;                   /* a countdown */
                } unk_1C;
     /* 0x20 */ u8 unk_20[0x02];
@@ -459,7 +466,7 @@ typedef struct Ai {
     /* 0x24 */ u16 unk_24;
     /* 0x26 */ s16 unk_26;
     /* 0x28 */ union {
-                   struct AiLink *link;
+                   struct BuildingItem *item;   /* the item of that part */
                    struct {
                        s16 lo;
                        s16 hi;
@@ -521,15 +528,16 @@ typedef struct BuildingBlock {
     /* 0x1E */ s16 unk_1E;                     /* the top y */
 } BuildingBlock;
 
-/* One of a building item's three parts. */
+/* One of a building item's three parts; a behaviour slot takes one free part (Ai.unk_10.part, func_8003E1C8). */
 typedef struct BuildingPart {
     /* 0x00 */ GameObject *unk_00;
-    /* 0x04 */ u16 unk_04;
+    /* 0x04 */ u16 unk_04;                     /* its side: 1 left, 2 right, else the middle (func_8003E59C) */
     /* 0x06 */ u16 unk_06;
     /* 0x08 */ struct Ai *unk_08;               /* a behaviour slot (its object at 0) */
     /* 0x0C */ struct Ai *unk_0C;               /* another (func_8002CD24 passes it to func_8002CE40) */
     /* 0x10 */ GameObject *unk_10;
-    /* 0x14 */ s16 unk_14;
+    /* 0x14 */ u16 unk_14;                     /* set to 1 when the item is made; a behaviour slot's kind once it leaves
+                                                * (func_8003E6A4) */
     /* 0x16 */ u16 unk_16;
 } BuildingPart;
 
@@ -552,7 +560,8 @@ typedef struct Building {
                                                 * 0x28 or 0x3C */
     /* 0x004 */ u16 left;                      /* its box: the left wall's x, */
     /* 0x006 */ u16 bottom;                    /* the ground's y (top and right below) */
-    /* 0x008 */ u16 unk_008;
+    /* 0x008 */ u16 priority;                  /* its depth, 0x200 or 0x300: the objects on it are drawn at it + 0x10.. and
+                                                * the floor tables are picked by it */
     /* 0x00A */ s16 unk_00A;
     /* 0x00C */ s16 unk_00C;
     /* 0x00E */ s16 right;                     /* the right wall's x */
