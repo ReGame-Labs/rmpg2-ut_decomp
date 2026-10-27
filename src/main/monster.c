@@ -5,8 +5,6 @@
 #include "game.h"
 #include "monster.h"
 
-#ifdef NON_MATCHING
-/* 83.5%: the original copies e to a3 and builds &D_800AA248 in a0 (the clamped action in v1); here e stays in a0 and the action takes a3 */
 void monster_dispatch_action(Monster *e, GameObject *obj) {
     s16 x;
     s16 half;
@@ -24,14 +22,11 @@ void monster_dispatch_action(Monster *e, GameObject *obj) {
     if (state >= 0x68) {
         state = 0x67;
     }
-    D_800AA248.unk_0C = x;
     D_800AA248.action = state;
+    D_800AA248.unk_0C = x;
     D_800AA248.cur_obj = obj;
     D_8007F8FC[state](e);
 }
-#else
-INCLUDE_ASM("asm/main/nonmatchings/monster", monster_dispatch_action);
-#endif
 
 void func_80050190(Monster *e) {
     if (!(e->buttons & 4)) {
@@ -475,8 +470,10 @@ void func_80050E58(Monster *e) {
 }
 
 #ifdef NON_MATCHING
-/* 98.60%: 98.6 %: register allocation only: the original gives obj s0, m s1, i s2, e s3; here m s0, obj s1, e s2, i
- * s3 (global-alloc priorities) */
+/* 98.60%: 98.6 %: global-alloc order: m (22 refs over 63 insns, 1.40) outranks obj (14 over 32, 1.31) and e (17
+ * over 176, 0.39) outranks i (7 over 59, 0.24); obj and i each need one more reference (15 and 8) to come first as
+ * in the original. Merging the per-path action stores lowers m and e enough, but the smaller loop then hoists
+ * &D_801E0B78 and drops the 0x1C/0xB constants from s4/s5 */
 void func_80050E88(Monster *e) {
     Monster *m;
     GameObject *obj;
@@ -1460,8 +1457,9 @@ void func_80052E94(void) {
 }
 
 #ifdef NON_MATCHING
-/* 98.78%: 98.8 %: one instruction short: the original copies func_8001D110's result into a1 (move a1,v0) and builds
- * the definition through a1; here it stays in v0 */
+/* 98.78%: 98.8 %: the definition pointer: local-alloc ties it to v0 (the call's value dies in the copy, one block);
+ * the original's sits in a1 after the temporaries took v0/v1/a0, as a global pseudo or an untied qty would (read-
+ * back through D_800AA284/new_def, chained stores, a second set: no change) */
 void func_80052E9C(Monster *e) {
     s32 *speeds;
     s32 speed;
@@ -1564,13 +1562,15 @@ void func_800531C0(Monster *e) {
 }
 
 #ifdef NON_MATCHING
-/* 93.60%: 93.6 %: the bump and the direction switch match; the position tail is func_800535E4's: the original
- * reloads the camera x (D_801F9AC8) for the clamped values and the second bound, here it stays in a register */
+/* 96.30%: 96.3 %: everything but the camera clamp matches (the if/else adds give both ternary shapes, b declared
+ * before a gives the bump's registers); the clamp is func_800535E4's: the original keeps only the %hi of D_801F9AC8
+ * and reloads the camera x for the clamped values and the second bound, where cse here reuses the first compare's
+ * sum (6 instructions short) */
 void func_80053204(Monster *e) {
     GameObject *shadow;
     Monster *m;
-    GameObject *a;
     GameObject *b;
+    GameObject *a;
     s32 v;
     s32 d;
 
@@ -1647,7 +1647,11 @@ void func_80053204(Monster *e) {
         break;
     }
     v = D_800AA268.p->pos_x.w;
-    v += D_801D3780 != 0 ? 0x40000 : D_800AA268.p->vel_x.w;
+    if (D_801D3780 != 0) {
+        v += 0x40000;
+    } else {
+        v += D_800AA268.p->vel_x.w;
+    }
     if (v <= D_801F9AC8.w) {
         v += D_801D8864.w;
     }
@@ -1662,7 +1666,11 @@ void func_80053204(Monster *e) {
     D_800AA248.cur_obj->pos_x.w = v;
     shadow->pos_x.w = v;
     v = D_800AA248.cur_obj->pos_y.w;
-    v += D_801D3780 != 0 ? 0x18000 : D_800AA248.cur_obj->vel_y.w;
+    if (D_801D3780 != 0) {
+        v += 0x18000;
+    } else {
+        v += D_800AA248.cur_obj->vel_y.w;
+    }
     if (D_801D3780 == 0) {
         if (v < -0x370000) {
             v = -0x370000;
@@ -1679,8 +1687,12 @@ INCLUDE_ASM("asm/main/nonmatchings/monster", func_80053204);
 #endif
 
 #ifdef NON_MATCHING
-/* 84.95%: 85 %: the original keeps the camera x of the wrap test for the first clamp's compare but reloads it for
- * the clamped values (ours reuses it), and stores unk_20C/unk_208 before the abs branches (ours in the delay slot) */
+/* 92.33%: 92.3 %: abs() gives the original's in-place negates with the stores before the branches; the if/else adds
+ * give both ternary shapes (jump.c turns the one-insn 0x40000 arm into the delay-slot set, the lui/ori 0x18000 arm
+ * stays a branch). Left: the step pseudo takes v0 where the original has v1; the camera clamp: the original keeps
+ * only the %hi of D_801F9AC8 (a0) and reloads the camera x for the clamped values and the second bound (its first
+ * compare reuses the value loaded for the wrap test), where cse here reuses the compare's sum and keeps the camera
+ * x in a0 */
 void func_800535E4(Monster *e) {
     GameObject *shadow;
     s32 v;
@@ -1693,35 +1705,33 @@ void func_800535E4(Monster *e) {
     e->unk_218 = 0;
     v += step;
     e->unk_20C = v;
-    if (v < 0) {
-        v = -v;
-    }
-    if (step < 0) {
-        step = -step;
-    }
+    v = abs(v);
+    step = abs(step);
     if (step >= v) {
         e->unk_214 = 0;
     }
-    D_800AA248.cur_obj->vel_x.w = e->unk_20C;
+    v = e->unk_20C;
+    D_800AA248.cur_obj->vel_x.w = v;
     v = e->unk_208;
     step = e->unk_210;
     v += step;
     e->unk_208 = v;
-    if (v < 0) {
-        v = -v;
-    }
-    if (step < 0) {
-        step = -step;
-    }
+    v = abs(v);
+    step = abs(step);
     if (step >= v) {
         e->unk_210 = 0;
     }
-    D_800AA248.cur_obj->vel_y.w = e->unk_208;
+    v = e->unk_208;
+    D_800AA248.cur_obj->vel_y.w = v;
     if ((e->unk_210 | e->unk_214) == 0) {
         e->action = 0x50;
     }
     v = D_800AA248.cur_obj->pos_x.w;
-    v += D_801D3780 != 0 ? 0x40000 : D_800AA248.cur_obj->vel_x.w;
+    if (D_801D3780 != 0) {
+        v += 0x40000;
+    } else {
+        v += D_800AA248.cur_obj->vel_x.w;
+    }
     if (v <= D_801F9AC8.w) {
         v += D_801D8864.w;
     }
@@ -1736,7 +1746,11 @@ void func_800535E4(Monster *e) {
     D_800AA248.cur_obj->pos_x.w = v;
     shadow->pos_x.w = v;
     v = D_800AA248.cur_obj->pos_y.w;
-    v += D_801D3780 == 0 ? D_800AA248.cur_obj->vel_y.w : 0x18000;
+    if (D_801D3780 != 0) {
+        v += 0x18000;
+    } else {
+        v += D_800AA248.cur_obj->vel_y.w;
+    }
     if (D_801D3780 == 0) {
         if (v < -0x370000) {
             v = -0x370000;
@@ -2200,7 +2214,9 @@ void func_800544D8(Monster *e, GameObject *dst, GameObject *src) {
 }
 
 #ifdef NON_MATCHING
-/* 95.4 %: the original reloads m->box_x0 for the facing-left test (its first load dies in the bound's subtraction) and keeps m->box_x1 in v1 */
+/* 95.39%: 95.4 %: cse: the facing-left block (the else) is a jump target with one use preceded by a barrier, so cse
+ * follows the jump into it and reuses box_x0 from the bound's test; the original reloads it there (its first load
+ * dies in the subtraction), so its else block was not in that extended block (ternary, || and goto forms tried) */
 s32 func_8005453C(s16 x, s32 unused, Monster *m) {
     GameObject *obj;
     s16 px;
@@ -2262,30 +2278,31 @@ void func_80054608(u16 kind, Monster *e, Building *u) {
     }
 }
 
-#ifdef NON_MATCHING
-/* 89.00%: 89 %: the count loads into v0 and moves to a2 (the original loads it into a2 at once), and i steps as ++i
- * != n (addiu/move/andi) */
 Building *monster_get_building(u16 n) {
     Building *city;
     u16 i;
     u16 count;
 
-    if (n == 0 || *(s16 *) &D_801E29A4 == 0 /* the original tests it as an s16: other units read it u16 */) {
+    /* The original tests the count as an s16; other units read it u16. */
+    if (n == 0 || *(s16 *) &D_801E29A4 == 0) {
         return NULL;
     }
-    count = D_801E29A4;
     city = D_801D3DC8;
-    for (i = 1; i != n; i++) {
-        city++;
-        if (--count == 0) {
-            break;
+    count = D_801E29A4;
+    i = 1;
+    if (i != n) {
+        while (1) {
+            city++;
+            if (--count == 0) {
+                break;
+            }
+            if (++i == n) {
+                break;
+            }
         }
     }
     return city;
 }
-#else
-INCLUDE_ASM("asm/main/nonmatchings/monster", monster_get_building);
-#endif
 
 void func_8005478C(Monster *e) {
     Building *obj;
@@ -3403,9 +3420,10 @@ void func_80056EB8(Monster *e, Building *city) {
 }
 
 #ifdef NON_MATCHING
-/* 98.00%: 98 %: the scan only matches as labels (the original enters the loop at its test, which jump.c did not
- * copy); the floor and the item count swap t0/t1 (the count's value, live into the action 9 test, outranks the
- * floor) */
+/* 98.00%: 98 %: the goto layout gives the original's blocks but no loop notes, so the floor's references count
+ * once: the count (3 over 8 insns, 0.38) outranks the floor (7 over 51, 0.27) for t0. The original was a real loop
+ * (its refs doubled) whose rolled exit test jump.c did not copy to the entry; while/for forms get the copied test
+ * (62-65 %) */
 void monster_find_floor(Monster *e, Building *city) {
     s16 *limit;
     u16 side;
