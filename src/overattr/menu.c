@@ -902,7 +902,7 @@ void func_8009DE00(void) {
     }
 }
 
-void func_8009DEA8(void *list, s32 selected) {
+void menu_free_others(void *list, s32 selected) {
     MenuRecord *menu;
     s32 i;
 
@@ -918,7 +918,7 @@ void func_8009DEA8(void *list, s32 selected) {
     }
 }
 
-void func_8009DF60(void) {
+void menu_free_all(void) {
     s32 i;
 
     for (i = 0x400; i < 0x4FF; i++) {
@@ -964,7 +964,7 @@ s16 menu_draw(void *list, s32 selected, s32 lit, s32 normal) {
     return menu->unk_00;
 }
 
-s32 func_8009E114(s32 kind, s32 y) {
+s32 menu_slide_kind(s32 kind, s32 y) {
     GameObject *head;
     GameObject *obj;
     s32 done;
@@ -1001,7 +1001,7 @@ void menu_light_items(void *list, s32 selected, s32 lit, s32 normal) {
     }
 }
 
-void func_8009E238(void *list, s32 lit, s32 normal) {
+void menu_light_choices(void *list, s32 lit, s32 normal) {
     MenuRecord *menu;
     s32 i;
 
@@ -1546,7 +1546,7 @@ void menu_place_objects(OverattrPlacement *p, s32 n, s32 color) {
     }
 }
 
-void func_8009F9E0(void) {
+void menu_create_buttons(void) {
     ObjectDef *def;
     GameObject *head;
     GameObject *obj;
@@ -1583,7 +1583,7 @@ void func_8009F9E0(void) {
     }
 }
 
-void func_8009FB78(void) {
+void menu_create_select_button(void) {
     ObjectDef *def;
     GameObject *head;
     GameObject *obj;
@@ -1733,7 +1733,7 @@ s16 func_8009FF38(void) {
         D_801D885C = 0x44;
         D_801E2A44 = 0x45;
         D_801F9AAC = 0x47;
-        func_8009F9E0();
+        menu_create_buttons();
         D_801D3780 = 6;
         break;
     case 6:
@@ -1781,7 +1781,7 @@ s16 func_8009FF38(void) {
         break;
     case 8:
         if (D_800A9888 == 0) {
-            func_8009DF60();
+            menu_free_all();
             D_801D3780 = 6;
         }
         break;
@@ -1816,7 +1816,7 @@ s16 func_8009FF38(void) {
         D_800A9290 = 0xE10;
         break;
     case 0xD:
-        func_8009F9E0();
+        menu_create_buttons();
         D_801D3780 = 3;
         break;
     case 3:
@@ -1855,8 +1855,8 @@ s16 func_8009FF38(void) {
     case 4:
         break;
     case 5:
-        if (func_8009E114(D_800A92C0[D_800A92D0 + 2].kind, 0x200000) != 0) {
-            func_8009DEA8(D_800A92C0, D_800A92D0);
+        if (menu_slide_kind(D_800A92C0[D_800A92D0 + 2].kind, 0x200000) != 0) {
+            menu_free_others(D_800A92C0, D_800A92D0);
             D_801D3780 = D_801E2148;
         }
         break;
@@ -1944,7 +1944,7 @@ s16 func_8009FF38(void) {
                 func_8001F724(0x1E);
             }
         }
-        func_8009E238(D_800A92C0, (s16) D_801E2A44, D_801F9AAC);
+        menu_light_choices(D_800A92C0, (s16) D_801E2A44, D_801F9AAC);
         func_80018C14();
         if ((D_800A9220 & 0x1C0701C) && D_801F9944 == 0) {
             D_800A9860 = 0x708;
@@ -2092,7 +2092,9 @@ void menu_update_load_screen(void) {
 }
 
 #ifdef NON_MATCHING
-/* 81.7 %: the city names' address is hoisted into s7 (a frame 8 bytes larger); the original reloads it. */
+/* 83.19%: the city read as its own statement keeps the names' address in the loop, as in the original (frame 88);
+ * the original sets up sprintf's buffer and format before the three stores, and the counting loop's index and slot
+ * offset swap v1/a0 */
 s32 menu_list_saves(void) {
     char buf[0x18];
     s32 limit;
@@ -2102,6 +2104,7 @@ s32 menu_list_saves(void) {
     s32 y;
     s32 i;
     s32 count;
+    s32 city;
 
     limit = 10000000;
     n = 0;
@@ -2124,11 +2127,12 @@ s32 menu_list_saves(void) {
                 count++;
             }
         }
+        city = D_800A9300.slots[slot].city;
         D_800A9830[n] = slot;
         D_800A9820[n] = 0x20;
         D_800A9810[n] = y;
         y += 23;
-        sprintf(buf, "%s   %dP", D_8007C704[D_800A9300.slots[slot].city], count);
+        sprintf(buf, "%s   %dP", D_8007C704[city], count);
         func_8001F61C(buf, D_800A9820[n], D_800A9810[n], 1, D_801F9AAC, D_8007AD4C, 1, 0x450 + n);
         n++;
         limit = best;
@@ -2447,7 +2451,7 @@ void menu_delete_save(void) {
             D_800AA2EC = (s16) D_801E2A44;
             func_8001F61C("DELETE GAMES", 0xC8, 0x20, 0, D_801D885C, D_8007ABCC, 0, 0x400);
             func_8001ED54(&D_800A6400);
-            func_8009FB78();
+            menu_create_select_button();
         }
         break;
     case 3:

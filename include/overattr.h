@@ -348,7 +348,7 @@ void card_string_to_sjis(s16 *dst, u8 *src);
 
 /* The monster selection screen (func_8009A238). */
 void func_800180E4(void);               /* the SELECT button alone */
-void func_8009F9E0(void);               /* the SELECT and BACK buttons */
+void menu_create_buttons(void);               /* the SELECT and BACK buttons */
 extern s32 D_800A3450[3];               /* the three monsters offered (0-based numbers), a player's own replaced */
 extern s32 D_800A436C[];                /* per monster: the selection cursor's sprite */
 extern s32 D_800A43A4[];                /* its animation */

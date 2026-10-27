@@ -432,7 +432,7 @@ void func_8009A238(void) {
     if (D_801FA984[0] != 0 || D_801FA984[1] != 0 || D_801FA984[2] != 0) {
         func_800180E4();
     } else {
-        func_8009F9E0();
+        menu_create_buttons();
     }
     func_8001A420();
     func_8001AA4C(0xB, 0x1E);
