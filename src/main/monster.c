@@ -105,7 +105,7 @@ void func_800501B0(Monster *e) {
         if (D_800AA248.unk_08 != 0) {
             func_8005520C(e);
         } else if ((u16) (e->dir - 4) < 3 && e->health.w > 0xFFFF) {
-            func_800547EC(e);
+            monster_grab_building(e);
         }
         e->action = D_800AA25C;
         if (e->action == 0 && D_801E1E44 >= 2) {
@@ -703,7 +703,7 @@ void func_800514CC(Monster *e) {
         do {
             m = &D_801E0B78[i];
             if (m != e && (m->unk_058 & 1) && m->unk_0DC != 0 && m->action != 0x37) {
-                D_800AA248.unk_08 = func_80053970(e, m);
+                D_800AA248.unk_08 = monster_test_hit_box(e, m);
                 if (D_800AA248.unk_08 != 0) {
                     m->attacker = e;
                     if (m->action == 0x4D) {
@@ -857,7 +857,7 @@ void func_80051B38(Monster *e) {
     vy = D_800AA248.cur_obj->vel_y.w;
     if (vy > 0) {
         if (e->health.w != 0) {
-            if (D_800AA248.action == 0x4E || (func_80056598(), D_800AA248.action == 2)) {
+            if (D_800AA248.action == 0x4E || (monster_find_roof(), D_800AA248.action == 2)) {
                 if (D_800AA248.cur_obj->pos_y.s.hi < 0xE1) {
                     func_8005199C(e);
                     return;
@@ -952,7 +952,7 @@ void func_80051E80(Monster *e) {
             if (m->unk_0DC == 0 || m->action == 0x37) {
                 continue;
             }
-            D_800AA248.unk_08 = (u16) func_80053970(e, m);
+            D_800AA248.unk_08 = (u16) monster_test_hit_box(e, m);
             if (D_800AA248.unk_08 == 0) {
                 continue;
             }
@@ -1155,7 +1155,7 @@ void func_80052520(Monster *e) {
     e->climb_side = 0;
     e->climb_building = 0;
     if ((u16) (e->dir - 4) < 3) {
-        func_80056CCC(e);
+        monster_find_wall(e);
         if (e->action != 0x2C) {
             func_800531C0(e);
             return;
@@ -1186,7 +1186,7 @@ void func_8005262C(Monster *e) {
 
 void func_800526A4(Monster *e) {
     if (e->health.w != 0) {
-        func_80056598();
+        monster_find_roof();
         if (e->action != 0x2C) {
             func_800531C0(e);
             return;
@@ -1284,7 +1284,7 @@ done:
     e->unk_104 = 0x4000;
     e->climb_side = 0;
     e->climb_building = 0;
-    func_80056CCC(e);
+    monster_find_wall(e);
     if (e->action == 0x2C) {
         if (D_800AA268.p->vel_y.w > 0) {
             func_80052ADC(e);
@@ -1340,7 +1340,7 @@ s32 func_80052A68(Monster *e) {
 void func_80052ADC(Monster *e) {
     u16 state;
 
-    func_80056598();
+    monster_find_roof();
     state = e->action;
     if (state != 0x2C) {
         func_800531C0(e);
@@ -1517,7 +1517,7 @@ void func_80052E9C(Monster *e) {
         }
         break;
     case 5:
-        func_80056598(e);
+        monster_find_roof(e);
         func_8005A0F0();
         break;
     case 4:
@@ -1799,7 +1799,7 @@ s32 monster_test_boxes(s16 x, s16 y, Monster *m) {
     return 0;
 }
 
-u16 func_80053970(Monster *e, Monster *m) {
+u16 monster_test_hit_box(Monster *e, Monster *m) {
     s16 left;
     u16 top;
     u16 right;
@@ -2298,7 +2298,7 @@ void func_8005478C(Monster *e) {
     }
 }
 
-void func_800547EC(Monster *e) {
+void monster_grab_building(Monster *e) {
     Building *city;
     u16 x;
     u16 cx;
@@ -3114,7 +3114,7 @@ void func_80056560(Monster *e) {
     D_800AA268.p->pos_y.s.hi = monster_get_building(e->climb_building)->unk_074 + 8;
 }
 
-u16 func_80056598(e)
+u16 monster_find_roof(e)
 Monster *e;
 {
     Building *city;
@@ -3325,7 +3325,7 @@ s32 func_80056C18(Monster *e, Building *u) {
     return 0;
 }
 
-u16 func_80056CCC(Monster *e) {
+u16 monster_find_wall(Monster *e) {
     Building *city;
     s32 d;
     s32 d2;

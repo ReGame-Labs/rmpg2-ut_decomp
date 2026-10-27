@@ -788,7 +788,7 @@ void func_8003CADC(Monster *arg0) {
     }
     arg0->unk_140 = var_v1;
     arg0->unk_056 = 1;
-    func_8005DD48(arg0);
+    bonus_add_icon(arg0);
 }
 
 void func_8003CB30(Monster *arg0) {
@@ -811,7 +811,7 @@ void func_8003CB68(s16 n, Monster *a) {
     }
     a->unk_142 = v;
     a->unk_056 = 2;
-    func_8005DD48(a);
+    bonus_add_icon(a);
 }
 
 

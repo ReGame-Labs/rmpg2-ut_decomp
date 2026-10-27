@@ -20,7 +20,7 @@ void func_8002CFAC(Monster *m, Building *b);
 void func_8002D5B8(Monster *m, s32);
 u16 func_8003CBE0(Ai *p, Monster *m);
 u16 func_8003CC84(Ai *p, Monster *m);
-u16 func_80053970(Monster *m, Monster *other);
+u16 monster_test_hit_box(Monster *m, Monster *other);
 void func_80053C50(s32, Monster *m);
 void func_80053D68(s32, Monster *m);
 void func_8005404C(Monster *m);
@@ -1126,7 +1126,7 @@ void func_8004DDFC(void) {
             if (other->unk_058 & 1) {
                 o = other->obj;
                 if (!(o->unk_6C & 0x80) && other->unk_0DC != 0) {
-                    hit = func_80053970(m, other);
+                    hit = monster_test_hit_box(m, other);
                     if (hit != 0) {
                         if (other->action == 0x37) {
                             if (D_8007A68A != 0) {

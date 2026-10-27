@@ -17,7 +17,7 @@ extern s32 D_801FA72C;
 void func_8001E4B0(GameObject *);
 void func_8001F724(u16);
 void func_8004CFC0(void);
-void func_8005DD48(Monster *);
+void bonus_add_icon(Monster *);
 
 void func_80029D1C(void);
 /* The handlers of the D_801FA9BC records by kind (func_8003B5D0): building.c and npc.c. */

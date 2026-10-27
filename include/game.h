@@ -581,10 +581,14 @@ typedef struct LevelFlags {
     /* 0x00 */ s32 flags;                      /* 0x20, 0x40 */
     /* 0x04 */ s32 unk_04;
     /* 0x08 */ s32 unk_08[4];                  /* per player (D_801FA8A0[monster id - 1] - 1) */
-    /* 0x18 */ u8 unk_18[0x0C];
-    /* 0x24 */ GameObject *unk_24[4][3];       /* per player - 1: digit sprites (func_8005F33C) */
+    /* 0x18 */ u16 unk_18[4];                  /* per player - 1: frames counted towards a second (func_8005F5B8) */
+    /* 0x20 */ u8 unk_20[0x04];
+    /* 0x24 */ GameObject *unk_24[4][3];       /* per player - 1: digit sprites (bonus_create_counter) */
     /* 0x54 */ s32 unk_54;
-    /* 0x58 */ u8 unk_58[0x3C];
+    /* 0x58 */ u8 unk_58[0x0C];
+    /* 0x64 */ s32 unk_64[3];                  /* the award icons shown (bonus_give_awards), by kind: health, */
+    /* 0x70 */ s32 unk_70[3];                  /* meter, */
+    /* 0x7C */ s32 unk_7C[6];                  /* extra lives */
 } LevelFlags;
 
 extern LevelFlags D_8007BD78;
