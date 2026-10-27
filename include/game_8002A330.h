@@ -632,4 +632,14 @@ void func_8002B6E8(s32);
 extern Anim *D_8007CFD8[];
 void func_8003CCC0(void *);
 extern s32 D_800AA294;   /* D_800AA248.unk_4C by its own name */
+s32 func_80025DF8(s32);
+extern s32 D_8007CB4C[];   /* per city: the rain chance in the high half, the snow chance in the low half */
+/* A one-member struct: its store stays after func_8002A3A4's table load only so (docs/MATCHING.md "Structs, globals
+ * and aliasing"); likely the head of a weather record with D_801FB194 and D_801FB198. */
+typedef struct Unk801FB190 {
+    s8 unk_00;
+} Unk801FB190;
+extern Unk801FB190 D_801FB190;
+extern GameObject *D_801FB194;
+u32 func_8001EAC4(s32);   /* a random number 1..range */
 #endif /* GAME_8002A330_H */

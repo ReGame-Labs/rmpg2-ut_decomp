@@ -22,7 +22,45 @@ void func_8002A354(s32 arg0) {
     func_8001EDB0();
 }
 
-INCLUDE_ASM("asm/main/nonmatchings/game_8002A330", func_8002A3A4);
+void func_8002A3A4(void) {
+    ObjectDef *def;
+    GameObject *obj;
+    s32 chance;
+    s32 rain;
+    s32 players;
+
+    D_8007C976 = 0;
+    chance = D_8007CB4C[D_801FA960];
+    D_801FB190.unk_00 = 0;
+    players = D_8007A690;
+    rain = chance >> 16;
+    if (players == 1) {
+        if (func_8001EAC4(100) < rain) {
+            D_8007C976 = players;
+        } else if (func_8001EAC4(100) < (s16) chance) {
+            D_8007C976 = 2;
+        }
+    }
+    def = func_8001D110();
+    def->unk_1C = 1;
+    def->id = 0x4F00097E;
+    def->flags = 0x50;
+    D_800AA248.new_def = def;
+    obj = func_8001DCB4();
+    obj->pos_x.s.hi = -100;
+    obj->pos_y.s.hi = -100;
+    D_801FB194 = obj;
+    obj->unk_6C |= 0x10;
+    func_8001B054(obj);
+    def->id = 0x4F000982;
+    D_800AA248.new_def = def;
+    obj = func_8001DCB4();
+    obj->pos_x.s.hi = -100;
+    obj->pos_y.s.hi = -100;
+    D_801FB420 = obj;
+    obj->unk_6C |= 0x10;
+    func_8001B054(obj);
+}
 
 /* 98.55 %: the sky gradient's colour bytes (D_8007CAFC: three RGB triples of words); the original materializes the colour table's address before the frame pointer's (the two lui/la swapped), every statement order tried keeps the pointer first */
 #ifdef NON_MATCHING
@@ -1708,7 +1746,17 @@ void func_8002F084(Building *a) {
 
 INCLUDE_ASM("asm/main/nonmatchings/game_8002A330", func_8002F100);
 
-INCLUDE_ASM("asm/main/nonmatchings/game_8002A330", func_8002F474);
+void func_8002F474(u16 action) {
+    s16 i;
+    Monster *m;
+
+    for (i = 0; i < D_801D8740; i++) {
+        m = &D_801E0B78[func_80025DF8(D_801FB49C[i])];
+        if (m->action != 0x37 && m->action != 0x3B && (action != 0x62 || m->action == 0)) {
+            m->action = action;
+        }
+    }
+}
 
 /* 97.3 %: a random 1-3 per building kind; the original masks the final value with andi 0xffff (a u16 it does not know is small), every typing of the temporary drops or moves the mask */
 #ifdef NON_MATCHING
@@ -2220,7 +2268,25 @@ void func_80030698(s16 n, Building *a, BuildingItem *rec) {
     }
 }
 
-INCLUDE_ASM("asm/main/nonmatchings/game_8002A330", func_80030754);
+void func_80030754(BuildingPart *part, s16 n, s32 arg2, BuildingItem *rec) {
+    Building *b;
+    u16 *step;
+
+    b = rec->building;
+    if (b->unk_014 < 9 && n < 7) {
+        func_80031154((u16) n, arg2);
+        if (n >= 0) {
+            step = &D_8007CFE8[n];
+            if ((s16) part->unk_06 >= 0) {
+                b->unk_010 += *step - D_8007CFE8[part->unk_06];
+                func_80030834(b, b->unk_010);
+                if (b->unk_010 < b->unk_012) {
+                    func_8003111C(1, (Monster *) arg2);
+                }
+            }
+        }
+    }
+}
 
 void func_80030834(Building *b, s32 v) {
     u16 d;
@@ -2431,20 +2497,21 @@ void func_80030D14(UnkStruct19 *p) {
 
 
 
+/* 98.6 %: the loop's pointer register is &p->items[0] in the original (negative offsets for unk_070 and unk_014), &p->unk_014 here; count and n swap a1/a2 */
 #ifdef NON_MATCHING
-/* 83.8 %: the loop's pointer register is &p->unk_98 in the original (negative offsets for unk_70 and unk_14),
- * &p->unk_14 here: which field's address the compiler keeps as the induction variable. */
 void func_80030D74(void) {
     u16 n = D_801E29A4;
     s16 count = 0;
     Building *p;
     GameObject *o;
+    GameObject *q;
 
     if (n != 0) {
         p = D_801D3DC8;
         do {
+            q = p->items[0].obj;
             o = p->unk_070->obj;
-            if (!(p->items[0].obj->unk_6C & 0x80) || o == NULL || !(o->unk_6C & 0x80)) {
+            if (!(q->unk_6C & 0x80) || o == NULL || !(o->unk_6C & 0x80)) {
                 if (p->unk_014 < 0x10) {
                     count++;
                 }
@@ -2488,7 +2555,18 @@ void func_80030FA4(void) {
     }
 }
 
-INCLUDE_ASM("asm/main/nonmatchings/game_8002A330", func_80031074);
+void func_80031074(void) {
+    GameObject *saved;
+    BuildingItem *rec;   /* tested before it is set: a bug of the original, whose test reads the caller's s0 */
+
+    saved = D_800AA268.p;
+    if (rec != NULL && rec->obj != NULL && rec->building != NULL) {
+        rec = saved->owner.item;
+        func_800305C8(func_8001EB10(rec->unk_04 + 0x5ABC, rec->unk_04) & 1 ? D_800121AC : D_8001214C,
+                      rec->obj->pos_y.s.hi + 12, saved, (UnkStructFEA4 *) rec->building);
+        D_800AA268.p = saved;
+    }
+}
 
 void func_8003111C(s32 arg0, Monster *arg1) {
     if (((u8 *) arg1 >= D_801E0D98) && ((u8 *) arg1 <= D_801E0D98 + 0xCC0)) {
