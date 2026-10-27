@@ -235,7 +235,7 @@ typedef struct Monster {
     /* 0x134 */ u8 unk_134[0x04];
     /* 0x138 */ u16 unk_138;
     /* 0x13A */ u8 unk_13A[0x02];
-    /* 0x13C */ s16 unk_13C;
+    /* 0x13C */ u16 unk_13C;
     /* 0x13E */ u16 unk_13E;
     /* 0x140 */ u16 unk_140;
     /* 0x142 */ u16 unk_142;                   /* nonzero: the vibration presets 0-3 run twice as strong and long */
@@ -338,7 +338,7 @@ typedef struct GameState {
     /* 0x1C */ ObjectDef *unk_1C;
     /* 0x20 */ GameObject *cur_obj;            /* the object being updated (D_800AA268) */
     /* 0x24 */ s32 unk_24;                     /* D_800AA26C */
-    /* 0x28 */ s32 *unk_28;
+    /* 0x28 */ s32 unk_28;                     /* a counter (func_8003C3B0: the items left in the building) */
     /* 0x2C */ s32 unk_2C;
     /* 0x30 */ s32 *unk_30;
     /* 0x34 */ void *unk_34;
@@ -463,7 +463,7 @@ typedef struct BuildingPart {
     /* 0x0C */ struct UnkStruct14 *unk_0C;
     /* 0x10 */ GameObject *unk_10;
     /* 0x14 */ s16 unk_14;
-    /* 0x16 */ s16 unk_16;
+    /* 0x16 */ u16 unk_16;
 } BuildingPart;
 
 /* One of a building's 15 items: a sprite each. */
@@ -500,8 +500,8 @@ typedef struct Building {
     /* 0x026 */ s16 unk_026;
     /* 0x028 */ s16 unk_028;
     /* 0x02A */ u16 unk_02A;
-    /* 0x02C */ s16 unk_02C;
-    /* 0x02E */ s16 unk_02E;
+    /* 0x02C */ u16 unk_02C;
+    /* 0x02E */ u16 unk_02E;
     /* 0x030 */ u16 unk_030;
     /* 0x032 */ u16 unk_032;
     /* 0x034 */ u16 unk_034;
@@ -520,14 +520,14 @@ typedef struct Building {
     /* 0x076 */ u16 unk_076;
     /* 0x078 */ u16 unk_078;
     /* 0x07A */ u16 unk_07A;
-    /* 0x07C */ u8 unk_07C[0x04];
+    /* 0x07C */ GameObject *unk_07C;
     /* 0x080 */ u16 unk_080;
     /* 0x082 */ u16 unk_082;
     /* 0x084 */ void *unk_084;
     /* 0x088 */ u16 unk_088;
     /* 0x08A */ u16 unk_08A;
     /* 0x08C */ s32 unk_08C;
-    /* 0x090 */ s32 unk_090;
+    /* 0x090 */ GameObject *unk_090;
     /* 0x094 */ s16 unk_094;                   /* claimed (func_8002F01C) */
     /* 0x096 */ u8 unk_096[0x02];
     /* 0x098 */ BuildingItem items[15];

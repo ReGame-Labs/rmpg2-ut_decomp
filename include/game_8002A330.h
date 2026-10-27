@@ -8,6 +8,7 @@
 /* Declarations of src/main/game_8002A330.c: provisional types from the code's own use; refined as functions match. */
 
 extern u8 D_80011BA4[];
+extern u8 D_80011BA4_alt[];   /* another name for D_80011BA4 (config/aliases.ld) */
 extern u8 D_80011E18[];
 extern u8 D_8007C934[];
 extern u8 D_8007D0B8[];
@@ -185,6 +186,7 @@ extern u8 D_80093E30[];
 extern u8 D_80093EF8[];
 extern u8 D_80093F10[];
 extern u8 D_80093F44[];
+extern Anim D_80097E30;
 extern u16 D_801D37C0;
 extern s32 D_801D857C;
 
@@ -193,14 +195,16 @@ typedef struct UnkStructPair {  /* provisional: s16 pairs: D_801D8804 (func_8003
     s16 unk_02;
 } UnkStructPair;
 
-typedef struct UnkStructFEA4 {  /* provisional: func_8002FEA4's and func_800305C8's argument */
-    u8 pad_00[0x2];
+typedef struct UnkStructFEA4 {  /* provisional: func_8002FEA4's and func_800305C8's argument, the owner of func_8003047C's object */
+    u16 unk_00;
     u16 unk_02;
     s16 unk_04;
     u16 unk_06;
     u16 unk_08;
     u8 pad_0A[0x4];
     s16 unk_0E;
+    u8 pad_10[0x4];
+    u16 unk_14;
 } UnkStructFEA4;
 
 
@@ -214,12 +218,6 @@ typedef struct UnkStruct15 {  /* provisional: func_800300A0's first argument */
     s16 unk_1A;
 } UnkStruct15;
 
-typedef struct UnkStruct8 {  /* provisional: func_80030268's third argument */
-    u8 pad_00[0xDC];
-    u16 unk_DC;
-    u8 pad_DE[0x16];
-    s16 unk_F4;
-} UnkStruct8;
 
 
 s32 * func_80025C08(void *);
@@ -259,7 +257,7 @@ void func_8002E5F4(u16, BuildingItem *);
 void func_8003C894(void **);
 void func_8002E614(u16, BuildingItem *);
 void func_8002ED28(void);
-void func_80030698(s32, Building *, BuildingItem *);
+void func_80030698(s16, Building *, BuildingItem *);
 void func_8001E4B0(void *);
 void func_80025B7C(BuildingItem *);
 void func_8002F9BC(void);
@@ -477,8 +475,8 @@ void func_80025898(BuildingItem *);
 void func_8003CD08(void *);
 void func_8003D60C(Building *);
 s32 func_8001EA78();
-extern s32 D_801FB19C[0x50];
-extern s32 D_801FB2DC[0x50];
+extern s32 D_801FB19C[0x50];          /* per weather sprite: a delay before it starts */
+extern GameObject *D_801FB2DC[0x50];   /* per weather sprite: its object */
 void func_80025BBC(Building *);
 void func_8001EDB0();
 void func_8001F39C(void *);
@@ -522,11 +520,11 @@ extern UnkStructPair D_8007CE08[];
 extern UnkStructPair D_8007CE34[];
 void func_8002EE14(s16, BuildingItem *);
 void func_80030E04(s32, BuildingItem *);
-void func_8002FD24(Building *, Building *);
+void func_8002FD24(BuildingItem *, Building *);
 s32 func_8002DB3C(u16, u16, BuildingItem *);
 void func_80034418(Building *);
 void func_8002F898(Building *, BuildingItem *);
-BuildingItem *func_8002ED30(u16, void *);   /* called with an actor and with one of its records */
+BuildingPart *func_8002ED30(u16, BuildingItem *);   /* the part `which` (1-3) of a record, NULL for another value */
 u16 func_8002F558(Building *);
 void func_8002DBF4(u16, s32, Building *, BuildingItem *);
 void func_80025848(BuildingItem *);
@@ -536,12 +534,12 @@ extern u8 D_80012394[];
 extern u8 D_8001236C_alt[];   /* another name for D_8001236C (config/aliases.ld) */
 extern UnkStructPair D_801D8804[14];
 extern u16 D_8007CFF8[];   /* a u16 table after a header word (func_8003089C) */
-void func_800303DC(Building *, GameObject *);
+void func_800303DC(GameObject *, Building *);
 void func_80030D74(void);
 void func_8002CFAC(Monster *, Building *);
 BuildingItem *func_8002CD24(u16, Monster *, BuildingItem *);
 void func_80031280(s32, Building *);
-void func_8002CE74(u16, Building *, BuildingItem *);
+void func_8002CE74(u16, Monster *, BuildingItem *);
 void func_8003111C(s32, Monster *);
 void func_80031364(Building *);
 extern void *D_8007D008[];
@@ -566,18 +564,18 @@ extern s32 D_80011E10[];
 extern s32 D_80011E90[];
 
 
-extern u8 D_8007CAFC[];
+extern s32 D_8007CAFC[];
 extern s32 D_8007CD40[];
 extern s16 D_801F9A38;
-extern s32 D_801FB41C;
+extern u32 D_801FB41C;
 void func_8002FA20(s32, BuildingItem *);
 typedef struct UnkStruct18 {  /* provisional: what func_80025C08(D_80084028) returns (two counts and two lists) */
     u16 unk_00;
     u16 unk_02;
     s32 unk_04;
     s32 unk_08;
-    u8 unk_0C[0xC];
-    u8 unk_18[0xC];
+    u16 unk_0C[6];   /* func_8003197C: flags, x, y, ?, colour */
+    u16 unk_18[6];
 } UnkStruct18;
 
 typedef struct UnkStruct19 {  /* provisional: an object and the animation to start on it (func_80030D14) */
@@ -586,8 +584,61 @@ typedef struct UnkStruct19 {  /* provisional: an object and the animation to sta
 } UnkStruct19;
 
 extern u8 D_80084028[];
-extern s32 D_801E1E34[2];
-void func_8003197C(void *, s32, s32 *);
+extern GameObject *D_801E1E34[2];
+void func_8003197C(u16 *, s32, GameObject **);
 void func_80053C50(s32, Monster *);
 void func_8002BAEC(Monster *);
+extern Anim D_80011F58;
+extern Anim D_80011F90;
+extern s32 D_80012110[];
+extern s32 D_8001214C[];
+extern s32 D_8001214C_alt[];   /* another name for D_8001214C (config/aliases.ld) */
+extern s32 D_800121AC[];
+extern s32 D_80012204[];
+extern s32 D_80012264[];
+extern s32 D_800122B4[];
+extern s32 D_8001231C[];
+void func_8003DAA0(Ai *);
+u16 func_8003E79C(GameObject *, s32);
+u16 func_8004B6C4(GameObject *, s16, s32);
+extern u8 D_80084268[];
+void func_8001B054(GameObject *);
+extern s16 D_8007C976;
+extern u32 D_801FB198;
+extern GameObject *D_801FB420;
+void func_800257F0(BuildingItem *);
+extern u8 D_80083CE8[];
+extern UnkStructPair D_8007CE60[];
+extern UnkStructPair D_8007CEBC[];
+extern UnkStructPair D_8007CF18[];
+extern UnkStructPair D_8007CF74[];
+extern u16 D_8007CDA4[7][5];
+s32 func_8001AA4C(s32, s32);
+void func_8001AB30(s32, s32);
+extern u8 D_8007C978;
+extern u8 D_8007C979;
+extern u8 D_8007C97A;
+extern s16 D_801D8728;
+void func_8002ADE8(void);
+void func_8002B0E0(s32);
+void func_8002B3AC(s32);
+void func_8002B6E8(s32);
+extern Anim *D_8007CFD8[];
+void func_8003CCC0(void *);
+extern s32 D_800AA294;   /* D_800AA248.unk_4C by its own name */
+s32 func_80025DF8(s32);
+extern s32 D_8007CB4C[];   /* per city: the rain chance in the high half, the snow chance in the low half */
+/* A one-member struct: its store stays after func_8002A3A4's table load only so (docs/MATCHING.md "Structs, globals
+ * and aliasing"); likely the head of a weather record with D_801FB194 and D_801FB198. */
+typedef struct Unk801FB190 {
+    s8 unk_00;
+} Unk801FB190;
+extern Unk801FB190 D_801FB190;
+extern GameObject *D_801FB194;
+u32 func_8001EAC4(s32);   /* a random number 1..range */
+void func_8002F100(Building *);
+extern s16 D_801F9ACE;   /* the camera y's integer half (D_801F9ACC) */
+extern u8 D_80097E64[];
+s32 func_80030268(s16, s32, Monster *);
+void func_800302AC(u16, Monster *);
 #endif /* GAME_8002A330_H */

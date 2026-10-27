@@ -3,6 +3,7 @@
 
 #include "common.h"
 #include "game.h"
+#include "game_80057C94.h"
 
 /* Types of game_80034590, game_8003CD08, game_8004160C and game_80043118. */
 
@@ -76,9 +77,11 @@ typedef struct ActorLink {
 } ActorLink;
 
 
-/* The records of game_80034590: 0x78 bytes each, six at D_801FAC9C (D_801D8730 counts them), each with a mover
- * (unk_0), a kind (unk_6), an action (unk_8) and a state (unk_A), updated by a dispatcher per kind on the action.
- * The later functions of the file read the same record with signed counters (NpcS below): a second declaration. */
+/* game_80034590 handles two record sets: the first part of the file (func_80034590 .. func_800360D8) the 0x58-byte
+ * records of D_801FA9BC (UnkStructB1, include/game_80057C94.h), the rest (from func_80036298) the 0x78-byte records
+ * of D_801FAC9C (NpcS below). Npc is no longer used by this file: only game_8003CD08's func_8003D228, func_8003D30C
+ * and func_8003D3CC still take it, and their caller func_8003C1C0 hands them the 0x30-byte records of D_801D3824
+ * (UnkStructB2, include/game_8003B568.h). */
 /* What an Npc's unk_14 points at: two velocities set when it is hit (game_8003CD08: func_8003D30C). */
 typedef struct NpcTarget {
     /* 0x00 */ u8 unk_0[0x8];
@@ -131,7 +134,9 @@ typedef struct Npc {
     /* 0x74 */ GameObject *unk_74;
 } Npc;                      /* 0x78 */
 
-/* The same record as the later functions declare it: signed counters. */
+/* The records of D_801FAC9C: 0x78 bytes each, six (D_801D8730 counts them), made from the spawn list D_8007DA48 by
+ * func_8003684C; each with a mover (unk_0), a kind (unk_6), an action (unk_8) and a state (unk_A), updated by a
+ * dispatcher per kind on the action (func_80036300). */
 typedef struct NpcS {
     /* 0x00 */ GameObject *unk_0;
     /* 0x04 */ u16 unk_4;
@@ -171,7 +176,12 @@ typedef struct NpcS {
     /* 0x5E */ u16 unk_5E;
     /* 0x60 */ Monster *unk_60;
     /* 0x64 */ Monster *unk_64;
-    /* 0x68 */ u8 unk_68[0x10];
-} NpcS;
+    /* 0x68 */ u8 unk_68[0x8];
+    /* 0x70 */ GameObject *unk_70;
+    /* 0x74 */ GameObject *unk_74;
+} NpcS;                     /* 0x78 */
+
+extern NpcS D_801FAC9C[6];
+extern u16 D_801D8730;                   /* how many of D_801FAC9C are live */
 
 #endif /* GAME_80034590_H */
