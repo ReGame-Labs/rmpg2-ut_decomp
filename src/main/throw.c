@@ -2235,7 +2235,119 @@ void func_8004BAC0(void) {
     func_8006353C(7);
 }
 
+#ifdef NON_MATCHING
+/* 99.86%: 99.86%: registers only: the original keeps the object (npc->obj) in a1 and &D_800AA248 in a0, here the
+ * other way round (their global priorities are 0.25 and 0.235) */
+void func_8003831C(void);
+extern Anim D_8008AA58;
+extern Anim D_8008AA78;
+extern Anim D_8008AAA8;
+extern Anim D_8008AAD8;
+extern Anim D_8008AAF0;
+
+void func_8004BBC8(Npc *npc) {
+    D_800AA248.cur_obj = npc->obj;
+    switch (npc->action) {
+    case 3:
+    case 5:
+        func_8001F724(5);
+        D_800AA248.cur_obj->vel_x.w = D_800AA248.cur_obj->vel_y.w = 0;
+        D_800AA248.cur_obj->priority = 0x1300;
+        npc->action = 4;
+        npc->unk_1C = 0x12;
+        func_8003EB5C(&D_8008A7A4, D_800AA248.cur_obj);
+        func_8004BFE0();
+        break;
+    case 4:
+        if (npc->unk_1C == 0) {
+            npc->unk_1C = 0xBE;
+            npc->action = 0x33;
+            D_800AA248.cur_obj->pos_y.w = 0x2000000;
+            D_800AA248.cur_obj->pos_x.w = 0x2000000;
+            func_8003831C();
+        } else {
+            npc->unk_1C--;
+        }
+        break;
+    case 1:
+        D_800AA248.cur_obj->pos_y.w = 0x1900000;
+    case 0x64:
+        if (npc->unk_1C == 0) {
+            goto enter;
+        }
+        npc->unk_1C--;
+        break;
+    case 0x33:
+        break;
+    default:
+        switch (npc->state) {
+        case 0:
+            D_800AA248.cur_obj->pos_y.w += D_800AA248.cur_obj->vel_y.w;
+            if (D_800AA248.cur_obj->pos_y.s.hi < 0xFB) {
+                npc->state = 2;
+                npc->unk_1C = 1;
+                func_8003EB5C(&D_8008AAA8, D_800AA248.cur_obj);
+            }
+            break;
+        case 1:
+            D_800AA248.cur_obj->pos_y.w += D_800AA248.cur_obj->vel_y.w;
+            if (D_800AA248.cur_obj->pos_y.s.hi >= 0x154) {
+            enter:
+                npc->kind = 3;
+                npc->state = 0;
+                npc->unk_20 = 0;
+                D_800AA248.cur_obj->pos_x.s.hi = D_801D87B0 + 0xA;
+                D_800AA248.cur_obj->pos_y.w = 0x1540000;
+                D_800AA248.cur_obj->vel_y.w = -0x8000;
+                npc->action = 2;
+                func_8003EB5C(&D_8008AAD8, D_800AA248.cur_obj);
+            }
+            break;
+        case 2:
+            D_800AA248.cur_obj->pos_y.w += D_800AA248.cur_obj->vel_y.w;
+            if (D_800AA248.cur_obj->pos_y.s.hi < 0xF1) {
+                D_800AA248.cur_obj->pos_y.w = 0xF00000;
+            }
+            if (npc->unk_1C == 0) {
+                npc->state = 4;
+                D_800AA248.cur_obj->vel_x.w = npc->unk_20 != 0 ? -0x8000 : 0x8000;
+                D_800AA248.cur_obj->vel_y.w = 0;
+                func_8003EB5C(&D_8008AA58, D_800AA248.cur_obj);
+            }
+            break;
+        case 3:
+            D_800AA248.cur_obj->pos_y.w += D_800AA248.cur_obj->vel_y.w;
+            if (npc->unk_1C == 0) {
+                npc->state = 1;
+                D_800AA248.cur_obj->vel_y.w = 0x8000;
+                func_8003EB5C(&D_8008AAF0, D_800AA248.cur_obj);
+            }
+            break;
+        default:
+            if (D_800AA248.cur_obj->vel_x.w <= 0) {
+                D_800AA248.cur_obj->pos_x.w += D_800AA248.cur_obj->vel_x.w;
+                if (D_800AA248.cur_obj->pos_x.s.hi < D_801D87B0) {
+                    goto turn;
+                }
+            } else {
+                D_800AA248.cur_obj->pos_x.w += D_800AA248.cur_obj->vel_x.w;
+                if (D_800AA248.cur_obj->pos_x.s.hi > D_801D376C) {
+                turn:
+                    D_800AA248.cur_obj->vel_x.w = 0;
+                    D_800AA248.cur_obj->vel_y.w = 0x8000;
+                    npc->state = 3;
+                    npc->unk_1C = 1;
+                    func_8003EB5C(&D_8008AA78, D_800AA248.cur_obj);
+                }
+            }
+            break;
+        }
+        break;
+    }
+}
+#else
 INCLUDE_ASM("asm/main/nonmatchings/throw", func_8004BBC8);
+#endif
 
 void func_8004BFE0(void) {
     ObjectDef *def = func_8001D110();
