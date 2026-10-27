@@ -375,7 +375,9 @@ StartCARD2 = 0x8007A674; // type:func
 
 // cdload (src/main/cdload.c), the CD file reader and the overlay loader (docs/DISC_LAYOUT.md "The file table" and
 // "Overlays"). Files are read by index into the file table, checksummed and retried.
+cdload_sort_players = 0x80060F3C; // type:func  the monsters' players into D_801FB49C, sorted, 99 for none
 cdload_get_next_player = 0x80061014; // type:func  (player) the player after `player` in the sorted list D_801FB49C, else the first
+cdload_file_size = 0x80061170; // type:func  (index) a file's size from the file table
 cdload_read_file = 0x8006118C; // type:func  (index, buffer) CdlSetmode, CdlSetloc, CdRead, the checksum, 5 retries, returns the size
 cdload_wait_sync = 0x800613AC; // type:func  waits on CdSync, 600 tries
 cdload_open = 0x800613FC; // type:func  (index, mode) reads a file into the read buffer (the stdio emulation the sound driver is given)
@@ -395,7 +397,10 @@ cdload_unpack_rle8 = 0x80061ACC; // type:func  (src, dst) byte RLE
 cdload_unpack_rle16 = 0x80061B4C; // type:func  (src, dst) halfword RLE, the runs through a computed-goto table
 cdload_unpack_rle6 = 0x80061D10; // type:func  (src, dst) 6-bit RLE, four symbols per three bytes
 cdload_unpack_rle4 = 0x80061F90; // type:func  (src, dst) nibble RLE into packed bytes
+cdload_unpack_vlc = 0x800621F8; // type:func  (hdr, bits, dims, dst) method 5, the VLC image, through a code table copied to the scratchpad
+cdload_unpack_vlc8 = 0x80062868; // type:func  (hdr, bits, dims, dst) the same for 8-bit tables, two rows of words per code
 cdload_alloc = 0x80062C10; // type:func  (size) the bump allocator, 8-aligned
+cdload_init_sound = 0x80062C30; // type:func  hands the sound driver its file access, loads its tables and the first bank
 cdload_load_bank = 0x80062F14; // type:func  (index, spuAddr, ..., reload) a sound bank's samples into SPU RAM, returns the bytes used
 cdload_load_bank_by_number = 0x8006301C; // type:func  (n, spuAddr) the bank file D_80085304[n]
 cdload_reset_xa = 0x80063064; // type:func  () the XA player's state

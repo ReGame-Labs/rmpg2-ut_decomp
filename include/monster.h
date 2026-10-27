@@ -124,7 +124,7 @@ void func_800580F8(void *);
 void func_80058F78(Monster *);
 Monster *func_8005D918(void);
 s32 func_8005E4E4(void);
-void func_80060F3C(void);
+void cdload_sort_players(void);
 void func_800634B0(Monster *, s32);
 void func_800634D4(Monster *, u32);
 

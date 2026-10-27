@@ -325,7 +325,7 @@ extern u16 D_8007C1D4[];
 extern u16 D_8007BA20[];
 extern u16 D_801E289A;
 void func_8001A870(s32, u8 *);
-s32 func_80061170(s32);
+s32 cdload_file_size(s32);
 s32 cdload_read_file(s32, u8 *);
 extern s32 D_801D3D9C[];
 void func_80062DCC(s32);
@@ -340,7 +340,7 @@ extern u16 D_801FA99C;
 void func_80017B24(void);
 void func_8001AC18(s32, s32);
 GameObject *func_8001DCB4();   /* no argument: it reads D_800AA284 (the callers' a0 is incidental) */
-void func_80062C30(void);
+void cdload_init_sound(void);
 void func_800A30B4(void);
 extern u8 D_800A5DD8[];
 extern u8 D_800A5E18[];
@@ -1119,7 +1119,7 @@ s32 func_8001AA4C(s32 arg0, s32 arg1) {
     if (func_8001A820(bank, file)) {
         return 1;
     }
-    func_80061170(file);
+    cdload_file_size(file);
     if (cdload_read_file(file, D_801F9948) == 0) {
         return 0;
     }
@@ -1447,7 +1447,7 @@ block_4:
         return;
     }
     if (D_801D3770 == 0) {
-        func_80062C30();
+        cdload_init_sound();
         func_80062DA8((u8) D_801E1CB4);
         func_80062D88((u8) D_801E2150);
     }
