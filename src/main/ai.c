@@ -333,12 +333,12 @@ void func_80041C0C(const AiHandler *handlers, Ai *ai) {
     }
     D_800AA248.cur_obj->pos_y.w += D_800AA248.cur_obj->vel_y.w;
     if (D_800AA248.cur_obj->pos_y.w >= limit) {
-        if (ai->unk_28.link != NULL && ai->unk_28.link->unk_8 != NULL) {
+        if (ai->unk_28.item != NULL && ai->unk_28.item->building != NULL) {
             D_800AA248.cur_obj->pos_y.w = limit;
             D_800AA248.cur_obj->priority = ((s16 *)&D_800AA248.cur_obj->pos_y.w)[1] + 0xF23;
             D_800AA248.cur_obj->vel_y.w = 0;
             ai->unk_0C = 0;
-            if (ai->unk_28.link->unk_8->unk_14 == 4) {
+            if (ai->unk_28.item->building->state == 4) {
                 ai->state = 0x15;
                 ai->action = 0x46;
                 if (D_800AA248.cur_obj->flags & 0x10) {

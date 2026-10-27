@@ -252,7 +252,7 @@ void building_update_cloud(s32 i) {
         def->flags = 0x1005;
         D_800AA284.p = def;
         obj = func_8001DCB4();
-        obj->unk_40.w = (s32) ids;
+        obj->unk_40.ids = ids;
         obj->script.pc = 0;
         obj->pos_x.s.hi = (((D_801F9ACA - 400) & mask) + func_8001EA78() % 800) & mask;
         obj->pos_y.s.hi = -100;
@@ -266,7 +266,7 @@ void building_update_cloud(s32 i) {
         if (obj->pos_y.s.hi >= 0xD8) {
             obj->pos_y.s.hi = 0xDD;
             if ((u32) obj->script.pc < 4) {
-                main_set_frame(((s32 *) obj->unk_40.w)[obj->script.pc], obj->flags, obj);
+                main_set_frame(obj->unk_40.ids[obj->script.pc], obj->flags, obj);
                 obj->script.pc++;
             } else {
                 if ((func_8001EA78() & 0xFF) < 0x80) {
@@ -427,8 +427,8 @@ void func_8002B988(void) {
             temp_a0 = func_8002BA30(temp_s0);
             if (D_8007A7D4 & 1) {
                 temp_v0 = D_8007A688 - 1;
-                temp_a0->unk_002 = temp_v0;
-                temp_a0->unk_004 = temp_v0;
+                temp_a0->lives_shown = temp_v0;
+                temp_a0->lives = temp_v0;
             }
         }
         var_s1 += 1;
@@ -960,7 +960,7 @@ void func_8002C8B4(Building *b) {
         b->state = 4;
     }
     if (b->state != 0x10) {
-        if (b->unk_032 >= 1 && b->unk_032 <= 7 && b->unk_058 == 1 && (m = &D_801E0B78[b->unk_032])->unk_142 != 0) {
+        if (b->unk_032 >= 1 && b->unk_032 <= 7 && b->unk_058 == 1 && (m = &D_801E0B78[b->unk_032])->icon_timers[1] != 0) {
             func_8002C7D0(b);
             D_800AA248.cur_obj = saved;
             return;
@@ -1058,7 +1058,7 @@ void func_8002CBF4(Monster *m) {
     s32 *anim;
 
     if (func_8001A3AC() >= 0x46) {
-        body = m->unk_098[0];
+        body = m->icons[0];
         r = func_8001D110();
         D_800AA248.new_def = r;
         if (m->unk_058 == 3) {
@@ -1092,7 +1092,7 @@ BuildingItem *func_8002CD24(u16 idx, Monster *a, BuildingItem *rec) {
 
     if (rec->building->unk_070 == rec) {
         func_8002CE74(idx, a, rec - 1);
-    } else if (a->unk_142 != 0) {
+    } else if (a->icon_timers[1] != 0) {
         func_80030E04(a, rec);
     } else {
         r = func_8002ED30(idx, rec);
@@ -1129,7 +1129,7 @@ void func_8002CE74(u16 idx, Monster *a, BuildingItem *rec) {
     BuildingPart *part;
     u16 top;
 
-    if (a->unk_142 != 0) {
+    if (a->icon_timers[1] != 0) {
         func_80030E04(a, rec);
         return;
     }
@@ -1248,7 +1248,7 @@ void func_8002D228(Monster *arg0, Building *arg1) {
 }
 
 s32 func_8002D2CC(s32 arg0, Building *arg1) {
-    if ((arg1->unk_088 != 0) || (arg1->def == D_80011BA4) || ((arg1->unk_024 != 0) && ((s16) ((u16) arg1->unk_024 - 1) == (arg0 & 0xFFFF))) || ((arg1->unk_028 != 0) && ((s16) ((u16) arg1->unk_028 - 1) == (arg0 & 0xFFFF))) || ((arg1->unk_026 != 0) && ((s16) ((u16) arg1->unk_026 - 1) == (arg0 & 0xFFFF)))) {
+    if ((arg1->unk_088 != 0) || (arg1->def == D_80011BA4) || ((arg1->left_side != 0) && ((s16) ((u16) arg1->left_side - 1) == (arg0 & 0xFFFF))) || ((arg1->right_side != 0) && ((s16) ((u16) arg1->right_side - 1) == (arg0 & 0xFFFF))) || ((arg1->unk_026 != 0) && ((s16) ((u16) arg1->unk_026 - 1) == (arg0 & 0xFFFF)))) {
         return 1;
     }
     return arg1->unk_076 != 0;
@@ -1292,7 +1292,7 @@ void func_8002D448(Monster *m, Building *b) {
             return;
         }
     }
-    if (m->unk_142 != 0) {
+    if (m->icon_timers[1] != 0) {
         func_8002E440(m, rec);
         return;
     }
@@ -1925,7 +1925,7 @@ void func_8002E854(Building *b) {
         obj = rec->obj;
         D_800AA248.cur_obj = obj;
         v = obj->pos_y.s.hi - obj->unk_1C.s.hi + obj->size.s.hi;
-        if (obj->pos_y.s.hi >= 0x12D || v >= (s16) b->unk_006 - 8) {
+        if (obj->pos_y.s.hi >= 0x12D || v >= (s16) b->bottom - 8) {
             func_800257F0(rec);
             func_80025B7C(rec);
             b->unk_016++;
@@ -2013,18 +2013,18 @@ void func_8002EBD8(Building *b) {
     n = D_801E29A4;
     o = D_801D3DC8;
     if (n != 0) {
-        if (b->unk_008 == 0x300) {
+        if (b->priority == 0x300) {
             kind = 0x200;
-        } else if (b->unk_008 == 0x200) {
+        } else if (b->priority == 0x200) {
             kind = 0x100;
         } else {
             return;
         }
         do {
-            if (o->state < 0x10 && o->unk_008 == kind && o->unk_00E > (s16) b->unk_004 &&
-                (b->unk_00E >= o->unk_00E || b->unk_00E >= (s16) o->unk_004)) {
-                o->unk_024 = 0;
-                o->unk_028 = 0;
+            if (o->state < 0x10 && o->priority == kind && o->right > (s16) b->left &&
+                (b->right >= o->right || b->right >= (s16) o->left)) {
+                o->left_side = 0;
+                o->right_side = 0;
                 o->unk_026 = 0;
             }
             o++;
@@ -2262,7 +2262,7 @@ void func_8002F100(Building *b) {
                     func_8002CBF4((Monster *) b);
                     func_80029118(8, 8);
                     building_set_players_action(10);
-                    b->unk_074 += 0x14;
+                    b->top += 0x14;
                     func_8001E698(b->items[0].obj, &D_800168D8);
                 } else {
                     if (t > 0x64 && D_801FB448->colour != 0xFF0000) {
@@ -2404,7 +2404,7 @@ BuildingItem *rec;
             def->unk_24 = b->unk_06C;
             if (b->unk_02E != 1) {
                 def->unk_04 |= 0x10;
-                def->pos_x.s.hi = b->unk_00E;
+                def->pos_x.s.hi = b->right;
             }
             obj = D_800AA248.cur_obj;
             D_800AA248.new_def = def;
@@ -2559,7 +2559,7 @@ void func_8002FB6C(Monster *arg0, BuildingItem *rec, Building *b) {
         func_8001E4B0(top->obj);
         func_80025B7C(top);
         b->unk_070 = rec;
-        b->unk_074 = obj->pos_y.u.hi + 0xC;
+        b->top = obj->pos_y.u.hi + 0xC;
         rec->unk_06 = 3;
     }
     D_800AA268.p = saved;
@@ -2621,10 +2621,10 @@ void func_8002FEA4(Building *a) {
         r = func_8001D110();
         r->anim = D_80012068;
         r->id = D_80012068[0];
-        x = a->unk_004 + (a->unk_00E - (s16) a->unk_004 - 0x7A) / 2;
+        x = a->left + (a->right - (s16) a->left - 0x7A) / 2;
         r->pos_x.u.hi = x;
-        r->pos_y.u.hi = a->unk_006 - 0x1D;
-        r->flags = a->unk_008 + 0x90;
+        r->pos_y.u.hi = a->bottom - 0x1D;
+        r->flags = a->priority + 0x90;
         D_800AA248.new_def = r;
         spr = func_8001DCB4();
         if (spr != NULL) {
@@ -2643,7 +2643,7 @@ void building_create_roof(void) {
 
     saved = D_800AA248.cur_obj;
     b = saved->owner.p;
-    if (b->unk_008 == 0x300 && b->roof != 0) {
+    if (b->priority == 0x300 && b->roof != 0) {
         def = func_8001D110();
         D_800AA248.new_def = def;
         if (b->kind == 2) {
@@ -2654,8 +2654,8 @@ void building_create_roof(void) {
         } else {
             dx = 0x3C;
         }
-        def->pos_x.s.hi = dx + b->unk_004;
-        def->pos_y.s.hi = b->unk_006;
+        def->pos_x.s.hi = dx + b->left;
+        def->pos_y.s.hi = b->bottom;
         anim = D_8007CFD8;
         if (b->roof >= 1 && b->roof <= 3) {
             anim += b->roof;
@@ -2857,8 +2857,8 @@ void func_800305C8(s32 *anim, s16 y, GameObject *body, Building *rec) {
     r->pos_y.u.hi = y;
     r->anim = anim;
     r->id = *anim;
-    x = (s16) rec->unk_004 + ((rec->kind == 2) ? 0x4F : 0x77);
-    r->pos_x.u.hi = D_801D8866 & func_8001EB10(x, (s16) rec->unk_004);
+    x = (s16) rec->left + ((rec->kind == 2) ? 0x4F : 0x77);
+    r->pos_x.u.hi = D_801D8866 & func_8001EB10(x, (s16) rec->left);
     r->flags = body->priority + 1;
     D_800AA248.new_def = r;
     func_8001DCB4();
@@ -3178,7 +3178,7 @@ void func_80030E04(Monster *m, BuildingItem *rec) {
                     D_800AA248.cur_obj = obj;
                     def->pos_x.s.hi = obj->pos_x.u.hi + dx;
                     def->pos_y.s.hi = obj->pos_y.u.hi;
-                    def->flags = b->unk_008 + 0x11;
+                    def->flags = b->priority + 0x11;
                     obj = func_8001DCB4();
                     obj->owner.p = rec;
                     obj->unk_94.monster = m;
@@ -3324,11 +3324,11 @@ void func_80031364(Building *b) {
     def = D_800AA248.new_def;
     def->anim = &D_80011F58;
     def->id = D_80011F58.id;
-    x = (s16) b->unk_004;
+    x = (s16) b->left;
     def->pos_x.s.hi = b->kind == 2 ? x + 0x28 : x + 0x3C;
     obj = b->unk_070->obj;
     def->pos_y.s.hi = obj->pos_y.u.hi + (obj->size.s.hi >> 1);
-    def->flags = b->unk_008 + 0x80;
+    def->flags = b->priority + 0x80;
     func_8001DCB4();
     D_800AA268.p = saved;
 }
@@ -3722,7 +3722,7 @@ void func_80032064(s32 arg0, Ai *arg1) {
 
 void func_8003212C(s32 arg0, Ai *ai) {
     s32 floor;
-    AiLink *link;
+    BuildingItem *item;
 
     if (ai->unk_24 != 0) {
         ai->unk_24 = 0;
@@ -3738,8 +3738,8 @@ void func_8003212C(s32 arg0, Ai *ai) {
         D_800AA248.cur_obj->priority = D_800AA248.cur_obj->pos_y.u.hi + 0xF23;
         D_800AA248.cur_obj->vel_y.w = 0;
         ai->unk_0C = 0;
-        link = ai->unk_28.link;
-        if (link->unk_8 != NULL && link->unk_8->unk_14 == 4) {
+        item = ai->unk_28.item;
+        if (item->building != NULL && item->building->state == 4) {
             ai->state = 0x12;
             ai->action = 0x46;
             if (D_800AA248.cur_obj->flags & 0x10) {
@@ -4594,8 +4594,8 @@ void building_bob_pickup(Building *b) {
 }
 
 void building_update_pickup(Pickup *r) {
-    D_800AA268.p = r->unk_00;
-    if (r->unk_06 == 0x12 || r->unk_06 == 0x13) {
+    D_800AA268.p = r->obj;
+    if (r->kind == 0x12 || r->kind == 0x13) {
         building_bob_pickup((Building *) r);   /* bobs the object: counts in the record's halfword at 0x14 */
     }
     switch (r->unk_08) {

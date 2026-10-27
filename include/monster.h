@@ -44,7 +44,7 @@ void func_800376D8(Monster *);
 void pickup_collect(Monster *);
 void func_8003EF64(Monster *);
 void func_8003F114(Monster *);
-void func_8003F50C(Monster *);
+u16 func_8003F50C(Monster *);
 void func_80046F68(Monster *);
 void func_80047028(Monster *);
 void func_8004718C(Monster *);

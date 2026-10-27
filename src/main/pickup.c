@@ -2,7 +2,75 @@
  * the monster that touches them; also the 0x30-byte records of D_801D3824.
  * The boundaries and their evidence: config/main.yaml (docs/MATCHING.md "Splitting a target into files"). */
 #include "common.h"
+#include "building.h"     /* the declarations building shares with it */
 #include "pickup.h"
+
+extern s16 D_801F9980;
+extern s16 D_801F9984;
+extern s16 D_801F9988;
+extern s32 D_801FA72C;
+
+void func_8004CFC0(void);
+void bonus_add_icon(Monster *);
+
+void func_80029D1C(void);
+/* The handlers of the D_801FA9BC records by kind (pickup_update): building.c and npc.c. */
+void building_update_pickup(Pickup *r);
+void func_80034B94(Pickup *r);
+void func_800350C0(Pickup *r);
+void func_8003537C(Pickup *r);
+void func_8003566C(Pickup *r);
+void func_80035C4C(Pickup *r);
+
+void pickup_update_all(void);
+void pickup_update(Pickup *);
+void pickup_clear_all(void);
+void pickup_clear(Pickup *);
+void func_8003C130(void);
+void func_8003C344(void);
+void func_8003C080(void);
+void func_8003C0AC(void);
+void func_8003C0C8(void);
+void func_8003C0E0(void);
+void func_8003BD48(Pickup *);
+void func_8003BF34(GameObject *, Pickup *, u16);   /* the third argument is not used */
+extern u8 D_8008A494[];
+extern u8 D_8008A4A0[];
+extern u8 D_8008A4B8[];
+extern u8 D_8008A4C4[];
+void func_8003C1C0(u16, UnkStructB2 *);
+void func_8003C674();                  /* empty; func_8003C3B0 passes it two arguments */
+BuildingPart *func_8003C67C(Building *u, UnkStructB2 *rec);
+void func_8003CE24(BuildingPart *p, ObjectDef *def, UnkStructB2 *rec, s32 arg3);
+void func_8003C8D4(Pickup *arg0);
+void func_8003C934(Pickup *);
+void func_8003C9E8(Pickup *arg0);
+typedef struct UnkStructB4 {  /* provisional: 8-byte records of D_8007DDD4 (an animation and a value per step) */
+    void *unk_00;
+    u16 unk_04;
+} UnkStructB4;
+extern UnkStructB4 D_8007DDD4[];
+extern void (*D_8007DDB4[8])(void);
+s32 pickup_test_touch(GameObject *, Monster *);
+void func_8003CA28(Pickup *arg0);
+void func_8003CA70(Pickup *);
+void func_8003CADC(Monster *arg0);
+void func_8003CB30(Monster *arg0);
+void func_8003CCA8(void);
+void func_8003CB68(s16, Monster *);
+void func_8003CEA0(Anim *, GameObject *);
+extern s32 D_800830BC[];
+u16 func_8003C858(BuildingPart *, s32, s32);
+u16 func_8003CC84(BuildingPart *, s32);
+void func_8003C2D4(u16, UnkStructB2 *);
+/* The handlers of the D_801D3824 records by kind (func_8003C1C0), in actor.c. */
+void func_8003D03C(UnkStructB2 *rec);
+void func_8003D0D4(UnkStructB2 *rec);
+void func_8003D11C(UnkStructB2 *rec);
+void func_8003D228(UnkStructB2 *rec);
+void func_8003D30C(UnkStructB2 *rec);
+void func_8003D3CC(UnkStructB2 *rec);
+void func_8003D5C8(void);
 
 
 extern s32 D_8007DDA4[];
@@ -38,9 +106,9 @@ void pickup_update_all(void) {
 }
 
 void pickup_update(Pickup *r) {
-    D_800AA268.p = r->unk_00;
+    D_800AA268.p = r->obj;
     func_80029D1C();
-    switch (r->unk_06) {
+    switch (r->kind) {
     case 1:
     case 2:
     case 3:
@@ -123,15 +191,15 @@ void pickup_spawn_all(void) {
         def->id = anim->id;
         r->unk_0A = 0;
         r->unk_08 = 1;
-        r->unk_06 = item->unk_04;
+        r->kind = item->unk_04;
         obj = func_8001DCB4();
-        r->unk_00 = obj;
+        r->obj = obj;
         obj->owner.p = r;
         obj->pos_x.u.hi = item->unk_06;
         obj->pos_y.u.hi = item->unk_08;
         obj->flags |= item->unk_0A;
         obj->priority = item->unk_0C;
-        if (r->unk_06 != 0x17) {
+        if (r->kind != 0x17) {
             obj->priority = obj->pos_y.u.hi + 0xF23;
         }
         obj->kind = 0x71A;
@@ -140,18 +208,18 @@ void pickup_spawn_all(void) {
         } else {
             r->unk_1C = item->unk_0E;
         }
-        if (r->unk_06 != 0x16 && r->unk_06 != 0x17) {
+        if (r->kind != 0x16 && r->kind != 0x17) {
             func_800380C0(obj);
         }
-        if (r->unk_06 >= 0xD && r->unk_06 < 0x12) {
+        if (r->kind >= 0xD && r->kind < 0x12) {
             obj->priority += 2;
             D_800AA248.new_def = func_8001D110();
             def = D_800AA248.new_def;
-            def->id = D_8007DB60[r->unk_06 - 0xD];
-            if (r->unk_06 == 0xD && (obj->flags & 0x10)) {
+            def->id = D_8007DB60[r->kind - 0xD];
+            if (r->kind == 0xD && (obj->flags & 0x10)) {
                 def->id = 0x080027EA;
             }
-            if (r->unk_06 == 0xF && (obj->flags & 0x10)) {
+            if (r->kind == 0xF && (obj->flags & 0x10)) {
                 def->id = 0x080027F4;
             }
             r->unk_40 = func_8001DCB4();
@@ -221,10 +289,10 @@ s32 pickup_test_touch(GameObject *obj, Monster *m) {
         l = right;
         r = left;
     }
-    m_bottom = m->unk_11E;
-    m_right = m->unk_11C;
-    m_left = m->unk_118;
-    m_top = m->unk_11A;
+    m_bottom = m->hit_bottom;
+    m_right = m->hit_right;
+    m_left = m->hit_left;
+    m_top = m->hit_top;
     if (l < m_right && m_left < r && top < m_bottom && m_top < bottom) {
         return 1;
     }
@@ -250,22 +318,22 @@ void pickup_collect(Monster *e) {
         return;
     }
     do {
-        if (!(r->unk_00->unk_6C & 0x80) && r->unk_08 == 2 && r->unk_06 != 0 && r->unk_06 < 0x1D) {
-            if (r->unk_06 >= 0xD && r->unk_06 < 0x12 && r->unk_40 != NULL && pickup_test_touch(r->unk_40, e) != 0) {
+        if (!(r->obj->unk_6C & 0x80) && r->unk_08 == 2 && r->kind != 0 && r->kind < 0x1D) {
+            if (r->kind >= 0xD && r->kind < 0x12 && r->unk_40 != NULL && pickup_test_touch(r->unk_40, e) != 0) {
                 e->unk_024++;
                 func_80054374(0x28, e);
                 r->unk_54 = e;
                 r->unk_44 = D_800AA248.cur_obj->flags;
                 r->unk_4E = e->pos.u.lo;
                 r->unk_50 = e->pos.u.hi;
-                if (e->unk_142 != 0) {
+                if (e->icon_timers[1] != 0) {
                     r->unk_1A += 10;
                 }
                 e->unk_18A = 1;
                 func_800346FC(r);
                 func_800634D4(e, 4);
             }
-            if (r->unk_06 == 0x16 || r->unk_06 == 0x17) {
+            if (r->kind == 0x16 || r->kind == 0x17) {
                 for (i = 0; i < 3; i++) {
                     obj = D_801FB44C[i];
                     if (obj != NULL && pickup_test_touch(obj, e) != 0) {
@@ -275,7 +343,7 @@ void pickup_collect(Monster *e) {
                     }
                 }
             }
-            if (pickup_test_touch(r->unk_00, e) != 0) {
+            if (pickup_test_touch(r->obj, e) != 0) {
                 e->unk_024++;
                 func_80054374(0x28, e);
                 r->unk_08 = 3;
@@ -283,7 +351,7 @@ void pickup_collect(Monster *e) {
                 r->unk_44 = D_800AA248.cur_obj->flags;
                 r->unk_4E = e->pos.u.lo;
                 r->unk_50 = e->pos.u.hi;
-                if (e->unk_142 != 0) {
+                if (e->icon_timers[1] != 0) {
                     r->unk_1A += 10;
                 }
                 e->unk_18A = 1;
@@ -365,11 +433,11 @@ void func_8003BF34(GameObject *obj, Pickup *b, u16 x) {
     u16 flags;
     GameObject *o;
 
-    if (b->unk_06 == 0x16 || b->unk_06 == 0x17) {
+    if (b->kind == 0x16 || b->kind == 0x17) {
         b->unk_0A = 1;
         return;
     }
-    if (b->unk_06 >= 0xD && b->unk_06 < 0x12) {
+    if (b->kind >= 0xD && b->kind < 0x12) {
         b->unk_0A = 1;
         return;
     }
@@ -377,26 +445,26 @@ void func_8003BF34(GameObject *obj, Pickup *b, u16 x) {
     obj->flags = (flags & 0x10) ? (flags & 0xFFEF) : (flags | 0x10);
     b->unk_34 = -b->unk_34;
     obj->vel_x.w = -obj->vel_x.w;
-    switch (b->unk_06) {
+    switch (b->kind) {
     case 6:
         anim = D_8008A4A0;
-        b->unk_06 = 7;
+        b->kind = 7;
         break;
     case 7:
         anim = D_8008A494;
-        b->unk_06 = 6;
+        b->kind = 6;
         break;
     case 8:
         anim = D_8008A4C4;
-        b->unk_06 = 9;
+        b->kind = 9;
         break;
     case 9:
         anim = D_8008A4B8;
-        b->unk_06 = 8;
+        b->kind = 8;
         break;
     }
     if (anim != NULL) {
-        func_8001E698(b->unk_00, anim);
+        func_8001E698(b->obj, anim);
     }
     o = b->unk_40;
     if (o != NULL) {
@@ -455,10 +523,10 @@ void func_8003C130(void) {
 }
 
 void func_8003C1C0(u16 kind, UnkStructB2 *rec) {
-    D_800AA268.p = rec->unk_00;
+    D_800AA268.p = rec->obj;
     func_80029D1C();
     if (rec->unk_04 == 1) {
-        func_8003C2D4(rec->unk_06, rec);
+        func_8003C2D4(rec->kind, rec);
     } else if (rec->unk_18 > 0) {
         if (--rec->unk_18 == 0) {
             func_8003D5C8();
@@ -494,7 +562,7 @@ void func_8003C2D4(u16 k, UnkStructB2 *rec) {
         rec->unk_04 = 2;
         if ((u16) (k - 1) < 0x4A) {
             t = (s32 *) ((k << 2) + (u32) D_800830BC);
-            func_8003CEA0(*t, rec->unk_00);
+            func_8003CEA0(*t, rec->obj);
         }
     }
 }
@@ -553,12 +621,12 @@ void func_8003C3B0(void) {
     def->pos_x.s.hi = -400;
     def->pos_y.s.hi = -400;
     do {
-        D_800AA248.unk_28 = (u16)u->unk_00A;
-        if (D_800AA248.unk_28 != 0) {
+        D_800AA248.unk_28.n = (u16)u->unk_00A;
+        if (D_800AA248.unk_28.n != 0) {
             do {
                 p = func_8003C67C(u, rec);
                 if (p != NULL) {
-                    if ((u16)p->unk_14 != 0) {
+                    if (p->unk_14 != 0) {
                         def->flags = 0;
                     } else {
                         q = func_8003D1F8((s32)p);
@@ -575,13 +643,13 @@ void func_8003C3B0(void) {
                         if (obj == NULL) {
                             goto done;
                         }
-                        rec->unk_00 = obj;
+                        rec->obj = obj;
                         if (p->unk_04 != 2) {
                             obj->flags &= ~0x10;
                         }
                         obj->owner.p = rec;
                         rec->unk_1C = item->unk_0C;
-                        rec->unk_06 = item->unk_04;
+                        rec->kind = item->unk_04;
                         rec->unk_0A = item->unk_06;
                         rec->unk_0C = item->unk_08;
                         rec->unk_08 = item->unk_0A;
@@ -600,7 +668,7 @@ void func_8003C3B0(void) {
                 if (--D_800AA248.unk_08 == 0) {
                     goto done;
                 }
-            } while (--D_800AA248.unk_28 != 0);
+            } while (--D_800AA248.unk_28.n != 0);
         }
         u++;
     } while (u->unk_000 != 0);
@@ -708,7 +776,7 @@ void func_8003C894(void **arg0) {
 void func_8003C8D4(Pickup *arg0) {
     void *temp_a0;
 
-    temp_a0 = arg0->unk_00;
+    temp_a0 = arg0->obj;
     if (temp_a0 != NULL) {
         if (arg0->unk_1A != 0) {
             func_8003C934(arg0);
@@ -728,7 +796,7 @@ void func_8003C934(Pickup *rec) {
 
     saved = D_800AA248.cur_obj;
     rec->unk_04 = 8;
-    D_800AA248.cur_obj = rec->unk_00;
+    D_800AA248.cur_obj = rec->obj;
     func_8003C9E8(rec);
     step = D_8007DDD4;
     k = rec->unk_1A;
@@ -758,7 +826,7 @@ void func_8003CA28(Pickup *arg0) {
     Monster *temp_v1;
 
     temp_v1 = arg0->unk_14;
-    if ((temp_v1 != NULL) && ((u32) (arg0->unk_06 - 0x45) < 2U)) {
+    if ((temp_v1 != NULL) && ((u32) (arg0->kind - 0x45) < 2U)) {
         func_8003CADC(temp_v1);
     }
 }
@@ -769,7 +837,7 @@ void func_8003CA70(Pickup *rec) {
 
     a = rec->unk_14;
     if (a != NULL) {
-        kind = rec->unk_06;
+        kind = rec->kind;
         if (kind >= 0x31) {
             if (kind < 0x34) {
                 func_8003CB68(0x1E0, a);
@@ -794,15 +862,15 @@ void func_8003CADC(Monster *arg0) {
         var_v1 = 0x528;
         arg0->unk_186 = 0U;
     }
-    arg0->unk_140 = var_v1;
-    arg0->unk_056 = 1;
+    arg0->icon_timers[0] = var_v1;
+    arg0->icon_kind = 1;
     bonus_add_icon(arg0);
 }
 
 void func_8003CB30(Monster *arg0) {
     func_8001F724(3);
-    arg0->unk_144 = 0x294;
-    arg0->unk_056 = 3;
+    arg0->icon_timers[2] = 0x294;
+    arg0->icon_kind = 3;
 }
 
 void func_8003CB68(s16 n, Monster *a) {
@@ -817,8 +885,8 @@ void func_8003CB68(s16 n, Monster *a) {
             v = 0x5A0;
         }
     }
-    a->unk_142 = v;
-    a->unk_056 = 2;
+    a->icon_timers[1] = v;
+    a->icon_kind = 2;
     bonus_add_icon(a);
 }
 
@@ -873,13 +941,13 @@ s32 func_8003CBE0(Pickup *rec, Monster *a) {
     default:
         goto fail;
     }
-    if (kind != rec->unk_06) {
+    if (kind != rec->kind) {
 fail:
         return 0;
     }
     rec->unk_1A = 0xB;
     a->unk_146 = 0x5A;
-    a->unk_056 = 7;
+    a->icon_kind = 7;
     return 1;
 }
 

@@ -1109,7 +1109,7 @@ void menu_create_player_slots(void) {
         D_800AA248.cur_obj = func_8001DCB4();
         D_801E294C[i] = D_800AA248.cur_obj;
         D_800AA248.cur_obj->anim = (s32) D_800A7510;
-        D_800AA248.cur_obj->unk_4D = 0;
+        D_800AA248.cur_obj->frames_left = 0;
         def->pos_y.w = 0x8C0000;
         def->id = 0x4A001888;
         def->pos_x.w = (i * 0x78 + 0x28) << 16;
@@ -1118,7 +1118,7 @@ void menu_create_player_slots(void) {
         D_800AA248.cur_obj = func_8001DCB4();
         *(D_801E294C + i + 6) = D_800AA248.cur_obj;
         D_800AA248.cur_obj->anim = (s32) D_800A751C;
-        D_800AA248.cur_obj->unk_4D = 0;
+        D_800AA248.cur_obj->frames_left = 0;
         if (i < D_8007A690) {
             anim = D_800A74C0[i];
             def->id = D_800A74A8[i];
@@ -1133,7 +1133,7 @@ void menu_create_player_slots(void) {
         D_800AA248.cur_obj = func_8001DCB4();
         D_801E2958[i] = D_800AA248.cur_obj;
         D_800AA248.cur_obj->anim = (s32) anim;
-        D_800AA248.cur_obj->unk_4D = 0;
+        D_800AA248.cur_obj->frames_left = 0;
     }
 }
 
@@ -1151,7 +1151,7 @@ void func_8009E7D4(s16 n) {
     D_800AA248.cur_obj = func_8001DCB4();
     *(D_801E28F4 + n + 1) = D_800AA248.cur_obj;
     D_800AA248.cur_obj->anim = (s32) D_800A74E4;
-    D_800AA248.cur_obj->unk_4D = 0;
+    D_800AA248.cur_obj->frames_left = 0;
     D_800AA248.cur_obj->flags |= 0x400;
     D_800AA248.cur_obj = saved;
 }
@@ -1203,7 +1203,7 @@ void menu_create_player_bars(s16 player, s16 flag) {
     D_800AA248.cur_obj = func_8001DCB4();
     *(D_801E28F4 + player + 16) = D_800AA248.cur_obj;
     D_800AA248.cur_obj->anim = (s32) D_800A7444;
-    D_800AA248.cur_obj->unk_4D = 0;
+    D_800AA248.cur_obj->frames_left = 0;
     if (flag != 0) {
         D_800AA248.cur_obj->anim = (s32) D_800A7454;
     }
@@ -1228,7 +1228,7 @@ void menu_create_player_monster(s16 player, s16 flag) {
     D_800AA248.cur_obj = func_8001DCB4();
     *(D_801E28F4 + player + 13) = D_800AA248.cur_obj;
     D_800AA248.cur_obj->anim = D_800A8F00[player];
-    D_800AA248.cur_obj->unk_4D = 0;
+    D_800AA248.cur_obj->frames_left = 0;
     if (player == 6) {
         if (D_801F9ABC == 0) {
             D_800AA248.cur_obj->unk_74 = D_800A900C;
@@ -1271,7 +1271,7 @@ GameObject *menu_animate(GameObject *obj, s32 player) {
         if (player < 3) {
             obj->pos_y.s.hi += D_800AA2CC[player];
         }
-        if (obj->unk_4D == 0) {
+        if (obj->frames_left == 0) {
             do {
                 op = ((s32 *) obj->anim)[0];
                 arg = ((s32 *) obj->anim)[1];
@@ -1304,7 +1304,7 @@ GameObject *menu_animate(GameObject *obj, s32 player) {
                         obj->vel_y.w = 0;
                         obj->unk_64.w = 0;
                         obj->anim = D_800A8F00[D_800A8FD4[player].unk_04 + 0x1C];
-                        obj->unk_4D = 0;
+                        obj->frames_left = 0;
                         name = *(D_801E28F4 + player + 19);
                         if (D_800A8FD4[player].unk_04 == 6) {
                             if (D_801F9ABC == 0) {
@@ -1368,10 +1368,10 @@ GameObject *menu_animate(GameObject *obj, s32 player) {
             if (id != 0xDEAD) {
                 main_set_frame(id, obj->flags, obj);
             }
-            obj->unk_4D = frames;
+            obj->frames_left = frames;
             obj->anim += 8;
         } else {
-            obj->unk_4D--;
+            obj->frames_left--;
         }
     }
     return obj;
@@ -1449,7 +1449,7 @@ void menu_choose_monsters(s32 unused, s32 *timer) {
         } else if (rec->unk_06 != 0) {
             if ((pad & 0x10) && D_800AA244[i] == 1) {
                 D_800A9860 = 0x708;
-                obj->unk_4D = 0;
+                obj->frames_left = 0;
                 obj->anim = D_800A8F00[rec->unk_04 + 0xE];
                 rec->unk_06 = 0;
                 D_800AA244[i] = 0;
@@ -1469,7 +1469,7 @@ void menu_choose_monsters(s32 unused, s32 *timer) {
                 rec->unk_06 = 1;
                 D_801FA8A0[rec->unk_04] = i + 1;
                 func_8001F724(D_800A8FC4[rec->unk_04]);
-                obj->unk_4D = 0;
+                obj->frames_left = 0;
                 obj->anim = D_800A8F00[rec->unk_04 + 0x23];
             }
             *timer = 0xE10;
@@ -1495,7 +1495,7 @@ void menu_choose_monsters(s32 unused, s32 *timer) {
             } while (found);
             func_8001F724(0x2D);
             rec->unk_08 = 0xB;
-            obj->unk_4D = 0;
+            obj->frames_left = 0;
             obj->anim = D_800A8F00[monster + 0x15];
             *timer = 0xE10;
         } else if (((pad & 4) || (pad & 1)) && D_800AA244[i] == 0) {
@@ -1520,7 +1520,7 @@ void menu_choose_monsters(s32 unused, s32 *timer) {
             } while (found);
             func_8001F724(0x2D);
             rec->unk_08 = 0xB;
-            obj->unk_4D = 0;
+            obj->frames_left = 0;
             obj->anim = D_800A8F00[monster + 0x15];
             *timer = 0xE10;
         } else if (pad & 0x40) {
@@ -1871,11 +1871,11 @@ void menu_load_slot(s32 slot) {
     for (i = 0; i < 3; i++) {
         m = &D_801E0B78[func_80025DF8(i + 1)];
         m->id = D_800A9300.slots[slot].monster[i];
-        m->unk_004 = D_800A9300.slots[slot].unk_12[i];
-        m->unk_002 = D_800A9300.slots[slot].unk_12[i];
+        m->lives = D_800A9300.slots[slot].unk_12[i];
+        m->lives_shown = D_800A9300.slots[slot].unk_12[i];
         m->health.w = D_800A9300.slots[slot].health[i];
         m->meter.w = D_800A9300.slots[slot].meter[i];
-        m->unk_038 = D_800A9300.slots[slot].unk_30[i];
+        m->score = D_800A9300.slots[slot].unk_30[i];
         D_801D8800[i] = D_800A9300.slots[slot].unk_46[i];
     }
     D_801E1CB4 = D_800A9300.slots[slot].unk_42;
@@ -2292,10 +2292,10 @@ void menu_write_save(void) {
         for (i = 0; i < 3; i++) {
             m = &D_801E0B78[func_80025DF8(i + 1)];
             D_800A9300.slots[slot].monster[i] = m->id;
-            D_800A9300.slots[slot].unk_12[i] = m->unk_004;
+            D_800A9300.slots[slot].unk_12[i] = m->lives;
             D_800A9300.slots[slot].health[i] = m->health.w;
             D_800A9300.slots[slot].meter[i] = m->meter.w;
-            D_800A9300.slots[slot].unk_30[i] = m->unk_038;
+            D_800A9300.slots[slot].unk_30[i] = m->score;
             D_800A9300.slots[slot].unk_46[i] = D_801D8800[i];
         }
         for (i = 0; i < 7; i++) {
