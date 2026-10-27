@@ -21,7 +21,9 @@ linked words are the original's).
 The summary says the unit links to the original bytes only when every function (C and asm) is at its original
 offset with its original size and passes, the .text between functions is the original's, and every data section
 the C provides (.rodata, .data, .sdata: the YAML's `.rodata`-style subsegments) is word for word the original's
-once relocated. The exit status is 0 then, 1 otherwise. Data sections the unit still takes from asm are not
+once relocated. Each section ends where the link starts the next object's (the zero fill up to a `. = ALIGN(8);`
+of the target's linker script is part of it: the original's asm has it, the C object not). The exit status is 0
+then, 1 otherwise. Data sections the unit still takes from asm are not
 compared (listed with --all).
 
   tools/venv/bin/python tools/unit_diff.py main                 # every function's result
@@ -335,12 +337,22 @@ class Result:
 
 
 def compare(expected: Path, out: Path, resolver: Resolver, fallback_bases: dict = None,
-            c_sections=None) -> Result:
+            c_sections=None, align: dict = None) -> Result:
     """Compare the C object `out` with the original's object `expected`. `c_sections`: the data sections the C
-    object provides (None: those either object has bytes in)."""
+    object provides (None: those either object has bytes in). `align`: section -> the alignment the link gives
+    what follows it (`following_alignment`; 4 when not given): the zero fill up to there is part of the section."""
     e, c = Elf(expected), Elf(out)
     res = Result()
     bases = section_bases(e, resolver, fallback_bases)
+
+    def size(elf, sec):
+        """`sec`'s size as the link lays it out: up to where the next object's section starts."""
+        n, a = elf.section_size(sec), max(4, (align or {}).get(sec, 4))
+        start = bases.get(sec, 0)
+        return 0 if not n else -(-(start + n) // a) * a - start
+
+    def fill(words, elf, sec):
+        return words + [0] * (size(elf, sec) // 4 - len(words))
     e_place = Placement(bases)
     resolver.local = {}
     for n, (sec, v) in e.defined().items():
@@ -349,8 +361,8 @@ def compare(expected: Path, out: Path, resolver: Resolver, fallback_bases: dict 
             resolver.local[n] = a
     e_funcs, c_funcs = e.functions(), c.functions()
     c_place = Placement(bases, c_funcs, e_funcs)
-    e_text = linked_words(e, ".text", e_place, resolver)
-    c_text = linked_words(c, ".text", c_place, resolver)
+    e_text = fill(linked_words(e, ".text", e_place, resolver), e, ".text")
+    c_text = fill(linked_words(c, ".text", c_place, resolver), c, ".text")
     res.asm = c.asm_functions()
 
     res.order = list(e_funcs) + [n for n in c_funcs if n not in e_funcs]
@@ -375,7 +387,7 @@ def compare(expected: Path, out: Path, resolver: Resolver, fallback_bases: dict 
         res.functions[name] = reasons
 
     # The layout: every function at its original offset with its original size, the bytes between them the same.
-    if e.section_size(".text") != c.section_size(".text"):
+    if size(e, ".text") != size(c, ".text"):
         res.unit.append(f".text 0x{c.section_size('.text'):X} bytes, original 0x{e.section_size('.text'):X}")
     moved = [n for n in res.order if e_funcs.get(n) != c_funcs.get(n)]
     if moved:
@@ -410,12 +422,12 @@ def compare(expected: Path, out: Path, resolver: Resolver, fallback_bases: dict 
             continue
         if not e.section_size(sec) and not c.section_size(sec):
             continue
-        a, b = linked_words(e, sec, e_place, resolver), linked_words(c, sec, c_place, resolver)
-        size = f"{e.section_size(sec)} bytes"
+        a = fill(linked_words(e, sec, e_place, resolver), e, sec)
+        b = fill(linked_words(c, sec, c_place, resolver), c, sec)
         if a == b:
-            ra = linked_words(e, sec, Placement({}), raw)
-            rb = linked_words(c, sec, Placement({}, c_funcs, e_funcs), raw)
-            res.sections[sec] = ("OK" if ra == rb else "OK by address", size)
+            ra = fill(linked_words(e, sec, Placement({}), raw), e, sec)
+            rb = fill(linked_words(c, sec, Placement({}, c_funcs, e_funcs), raw), c, sec)
+            res.sections[sec] = ("OK" if ra == rb else "OK by address", f"{e.section_size(sec)} bytes")
             continue
         first = next(i for i in range(max(len(a), len(b))) if i >= len(a) or i >= len(b) or a[i] != b[i])
         res.sections[sec] = ("DIFFERS", f"{e.section_size(sec)} vs {c.section_size(sec)} bytes,"
@@ -458,6 +470,31 @@ def c_data_sections(target: str, unit: str):
 
     walk(yaml.safe_load((ROOT / t.yaml).read_text()).get("segments"))
     return secs if found else None
+
+
+def following_alignment(target: str, unit: str) -> dict:
+    """Section -> the alignment the target's linker script gives what follows the C unit's section: N for a
+    `. = ALIGN(N);` before the next input section (configure.py's align_overlay_sections and align_small_data), else
+    the script's SUBALIGN(4). The original's asm ends with that fill (a zero word after an overlay object's last
+    function, a string's padding), the C object without it."""
+    t = next(t for t in configure.TARGETS if t.name == target)
+    path = ROOT / configure.splat_paths(t)["ld_script_path"]
+    if not path.exists():
+        return {}
+    lines = [ln.strip() for ln in path.read_text().splitlines()]
+    out = {}
+    for i, ln in enumerate(lines):
+        m = re.fullmatch(rf"\S*/src/{re.escape(target)}/{re.escape(unit)}\.c\.o\((\.\w+)\);", ln)
+        if not m:
+            continue
+        a = 4
+        for nxt in lines[i + 1:]:
+            if k := re.fullmatch(r"\. = ALIGN\((\d+)\);", nxt):
+                a = max(a, int(k.group(1)))
+            elif not re.fullmatch(r"[A-Za-z_]\w* = [^;]*;", nxt):  # past symbol assignments only
+                break
+        out[m.group(1)] = a
+    return out
 
 
 def disasm(obj: Path, func: str):
@@ -507,7 +544,7 @@ def main():
            if s.get("kind") == "SYMBOL_FUNCTION"}
 
     res = compare(expected, out, Resolver.for_target(args.target), map_bases(args.target, args.unit),
-                  c_data_sections(args.target, args.unit))
+                  c_data_sections(args.target, args.unit), following_alignment(args.target, args.unit))
     ok = by_addr = done = 0
     still_asm = sum(1 for n in res.order if n in res.asm)
     for name in res.order:

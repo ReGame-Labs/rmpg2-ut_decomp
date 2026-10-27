@@ -117,7 +117,13 @@ class Source:
     def functions(self):
         """(first line, last line, name) of every function definition, from the braces at file scope."""
         if self._funcs is None:
-            code = "\n".join("" if DIRECTIVE.match(ln) else ln for ln in self.lines)  # same line numbers
+            # directive lines blanked: the same line numbers, not the same offsets (lines are counted in `code`)
+            code = "\n".join("" if DIRECTIVE.match(ln) else ln for ln in self.lines)
+            newlines = [m.start() for m in re.finditer("\n", code)]
+
+            def line(offset):
+                return bisect.bisect_left(newlines, offset) + 1
+
             self._funcs, depth, start = [], 0, None
             for m in re.finditer(r"[{}]", code):
                 if m.group() == "{":
@@ -127,9 +133,9 @@ class Source:
                 else:
                     depth -= 1
                     if depth == 0 and start[1]:
-                        self._funcs.append((self.line(start[0]), self.line(m.start()), start[1]))
+                        self._funcs.append((line(start[0]), line(m.start()), start[1]))
                     if depth < 0:
-                        raise SystemExit(f"{self.rel}:{self.line(m.start())}: unbalanced braces")
+                        raise SystemExit(f"{self.rel}:{line(m.start())}: unbalanced braces")
         return self._funcs
 
     def function_at(self, line):
