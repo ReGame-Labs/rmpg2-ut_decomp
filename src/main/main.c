@@ -256,7 +256,7 @@ void func_8002496C(GameObject *);
 s32 func_80024974(s32 arg0);
 void func_8002497C(void);
 void func_80024AA0(void);
-void func_8002546C(void);
+void func_8002546C(Building *);
 void func_800255E0(BuildingItem *arg0);
 void func_80025648(BuildingItem *arg0);
 void func_800256B0(BuildingItem *arg0);
@@ -4379,15 +4379,14 @@ void func_80024C08(void *arg0) {
     memset(arg0, 0, 0x20);
 }
 
-/* 91 %: the height sum keeps -9 as an addiu on the definition's size before adding the x (the C narrows it to a 0xFFF7 constant hoisted out of the loop), and the definition pointer lands in a0 instead of a1 */
-#ifdef NON_MATCHING
-void func_80024C2C(void) {
+void main_create_buildings(void) {
     Unk24C2C *e;
     Building *rec;
     BuildingDef *def;
     s16 n;
     u16 type;
     s16 tile;
+    s32 w;
 
     func_80024AEC();
     n = 0;
@@ -4402,19 +4401,24 @@ void func_80024C2C(void) {
         rec->unk_018 = e->unk_4;
         rec->unk_08A = e->unk_8;
         rec->unk_00A = e->unk_14;
+        type = e->unk_12;
         rec->state = 0;
-        rec->priority = type = e->unk_12;
-        if (type != 0x200) {
-            tile = 0xC5;
-            if (type == 0x300) {
-                tile = 0xD5;
-            }
-        } else {
+        rec->priority = type;
+        switch (rec->priority) {
+        case 0x300:
+            tile = 0xD5;
+            break;
+        case 0x200:
             tile = 0xCD;
+            break;
+        default:
+            tile = 0xC5;
+            break;
         }
         rec->bottom = tile;
+        w = def->unk_04 - 9;
         rec->left = e->unk_10;
-        rec->right = e->unk_10 + (s16) (def->unk_04 - 9);
+        rec->right = e->unk_10 + w;
         if (def->unk_00.w != 4) {
             rec->unk_05C = def->unk_08;
             rec->unk_060 = def->unk_0C;
@@ -4437,11 +4441,93 @@ void func_80024C2C(void) {
     D_801E1E40 = n;
     func_800258C8();
 }
-#else
-INCLUDE_ASM("asm/main/nonmatchings/main", func_80024C2C);
-#endif
 
+#ifdef NON_MATCHING
+/* 72.10%: 72 %: the original keeps the address of D_80011BA4 computed twice and one compare of def against it (an
+ * if/else-if on D_80011BA4/_alt whose bodies vanished after flow); without that remnant the loop is smaller,
+ * %hi(D_801F9948) is hoisted into a saved register and priority spills to the stack */
+extern u8 D_80011BA4[];
+extern u8 D_80011BA4_alt[];
+extern s16 D_8007A686;
+extern s32 D_800AA25C;
+void func_80025474(Building *b);
+
+void func_80024E08(Building *rec) {
+    ObjectDef *req;
+    BuildingItem *item;
+    GameObject *obj;
+    SpriteFrame *frame;
+    BuildingDef *def;
+    s32 *ids;
+    s32 id;
+    s16 i;
+    s16 y;
+    u16 prio;
+    u16 count;
+    s32 unused;
+
+    req = func_8001D110();
+    item = rec->items;
+    i = 1;
+    req->unk_0C = 0x710;
+    req->pos_x.s.hi = rec->left;
+    y = rec->bottom - 0x1D;
+    prio = rec->priority;
+    def = rec->def;
+    memset(D_801F9948, 0, 0xCC);
+    ids = def->unk_20;
+    id = def->unk_20[0];
+    if (id != 0) {
+        do {
+            req->id = id;
+            frame = func_8001A554(id, (GameObject *) D_801F9948);
+            if (i != 1) {
+                y -= frame->size.u.hi;
+            }
+            req->pos_y.s.hi = y;
+            if (rec->def == (BuildingDef *) D_80011BA4) {
+                unused = 1;
+            } else if (rec->def == (BuildingDef *) D_80011BA4_alt) {
+                unused = 2;
+            }
+            D_800AA284.p = req;
+            obj = func_8001DCB4();
+            item->obj = obj;
+            obj->owner.p = item;
+            obj->priority = prio;
+            item->unk_04 = i;
+            if (i != 1) {
+                obj->priority = rec->priority - 9;
+            }
+            item->building = rec;
+            item->unk_24.unk_04 = 2;
+            item->unk_0C.unk_04 = 1;
+            item->unk_3C.unk_04 = 3;
+            item++;
+            ids++;
+            id = *ids;
+            i++;
+        } while (id != 0);
+    }
+    item--;
+    rec->unk_070 = item;
+    obj = item->obj;
+    count = i - 1;
+    rec->state = 0;
+    rec->unk_000 = count;
+    rec->top = obj->pos_y.u.hi + obj->size.u.hi - 0xC;
+    func_80025BBC(rec);
+    func_8002546C(rec);
+    func_800252CC(rec);
+    D_800AA25C = rec->kind;
+    rec->unk_012 = ((rec->kind * (((s16) (count - 1) - 1) * 3) + 2) * (D_8007A686 << 16)) / 100 >> 16;
+    if (rec->unk_018 != NULL) {
+        func_80025474(rec);
+    }
+}
+#else
 INCLUDE_ASM("asm/main/nonmatchings/main", func_80024E08);
+#endif
 
 void func_8002503C(Building *building, GameObject *obj) {
     GameObject *saved;
@@ -4582,7 +4668,7 @@ void func_800253F0(Building *block, u32 which) {
     }
 }
 
-void func_8002546C(void) {
+void func_8002546C(Building *rec) {
 }
 
 #ifdef NON_MATCHING
@@ -5906,14 +5992,12 @@ void func_80029B54(void) {
     memset(&D_801E2894, 0, 8);
 }
 
-/* 93 %: the distance's sign extension and the abs land in other registers (sll/sra into a0 before the negu) */
-#ifdef NON_MATCHING
 u16 func_80029B80(void) {
     u16 count;
-    s32 result;
+    u16 result;
     s16 best;
     s16 dist;
-    s16 d;
+    s32 d;
     s16 cx;
     Building *building;
 
@@ -5925,12 +6009,9 @@ u16 func_80029B80(void) {
         building = D_801D3DC8;
         do {
             if (building->state < 9) {
-                dist = func_8003FCD8((building->left + building->right) >> 1, cx);
-                d = dist;
-                if (dist < 0) {
-                    d = -d;
-                }
-                if (best >= d) {
+                dist = func_8003FCD8(((s16) building->left + building->right) >> 1, cx);
+                d = dist >= 0 ? dist : -dist;
+                if (d <= best) {
                     best = d;
                     result = dist < 1;
                 }
@@ -5940,9 +6021,6 @@ u16 func_80029B80(void) {
     }
     return result;
 }
-#else
-INCLUDE_ASM("asm/main/nonmatchings/main", func_80029B80);
-#endif
 
 void func_80029C6C(Monster *arg0) {
     GameObject *sprite;

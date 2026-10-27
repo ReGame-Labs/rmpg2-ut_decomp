@@ -512,6 +512,7 @@ typedef struct BuildingDef {
     /* 0x14 */ SpriteFrame **frames;          /* its items' frames (Building.frames) */
     /* 0x18 */ s32 unk_18;
     /* 0x1C */ void *unk_1C;                   /* what func_8002F688 shows on the item it destroys (func_8002FB38) */
+    /* 0x20 */ s32 unk_20[0];                  /* its items' sprite ids, bottom up, 0-terminated (func_80024E08) */
 } BuildingDef;
 
 /* What Building.unk_018 points to. */

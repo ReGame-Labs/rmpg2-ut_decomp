@@ -33,7 +33,7 @@ typedef struct Unk1F9AE4 {
     s32 unk_C;
 } Unk1F9AE4;
 
-/* An entry of the building lists func_80025C08 returns (func_80024C2C): the definition, then the placement. */
+/* An entry of the building lists func_80025C08 returns (main_create_buildings): the definition, then the placement. */
 typedef struct Unk24C2C {
     BuildingDef *unk_0;
     s32 unk_4;
