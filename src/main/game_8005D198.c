@@ -23,7 +23,7 @@ extern s32 D_80089678[];
 extern s32 D_8008969C[];
 extern s32 D_800896C0[];
 extern s32 D_800842B4[];
-extern s32 D_80016A84;
+extern Anim D_80016A84;
 void func_8001F724(s32);
 GameObject *func_8001EB9C(s32, s32, s32, s32, s32);
 ObjectDef *func_8001D110(void);
@@ -237,17 +237,18 @@ void func_8005E3CC(void) {
 
 INCLUDE_ASM("asm/main/nonmatchings/game_8005D198", func_8005E4E4);
 
-#ifdef NON_MATCHING
-/* 86.5%: the result is set to 1 before the last test in the original */
 s32 func_8005E5C8(void) {
-    if (D_800AA2DC <= 0 || (D_800AA2DC >= 3 && D_800AA2DC != 4) || D_801FB46C == 0) {
-        return 0;
+    switch (D_800AA2DC) {
+    case 1:
+    case 2:
+    case 4:
+        if (D_801FB46C != 0) {
+            return 1;
+        }
+        break;
     }
-    return 1;
+    return 0;
 }
-#else
-INCLUDE_ASM("asm/main/nonmatchings/game_8005D198", func_8005E5C8);
-#endif
 
 INCLUDE_ASM("asm/main/nonmatchings/game_8005D198", func_8005E60C);
 
@@ -280,16 +281,11 @@ INCLUDE_ASM("asm/main/nonmatchings/game_8005D198", func_8005FEF4);
 
 INCLUDE_ASM("asm/main/nonmatchings/game_8005D198", func_8006036C);
 
-#ifdef NON_MATCHING
-/* 87.4%: the sprite and the hit pointer get each other's registers (a0/t0), and the colour load is scheduled later */
 void func_800603FC(s32 *id, s32 dx, s32 dy, s32 x, s32 y) {
     GameObject *s;
     GameObject *hit;
-    u32 c;
-    u16 nx;
-    u16 ny;
-    s32 packed;
     GameObject *head;
+    u32 c;
 
     if (*id != 0) {
         head = &D_801E28C0;
@@ -297,23 +293,20 @@ void func_800603FC(s32 *id, s32 dx, s32 dy, s32 x, s32 y) {
         hit = NULL;
         if (s != head) {
             do {
-            if (s->kind == *id) {
-                c = s->colour;
-                ny = s->pos_y.s.hi + dy;
-                s->pos_y.s.hi = ny;
-                packed = s->unk_28.w | (ny << 0x10);
-                s->unk_28.w = packed;
-                nx = s->pos_x.s.hi + dx;
-                s->pos_x.s.hi = nx;
-                s->unk_28.w = (packed & 0xFFFF0000) | nx;
-                if (c <= 0x80807FU) {
-                    s->colour = c + 0x40404;
-                } else if (c > 0x808080U) {
-                    s->colour = 0x808080;
+                if (s->kind == *id) {
+                    c = s->colour;
+                    s->pos_y.s.hi += dy;
+                    s->unk_28.w = (s->unk_28.w & 0xFFFF) | (s->pos_y.s.hi << 16);
+                    s->pos_x.s.hi += dx;
+                    s->unk_28.w = (s->unk_28.w & 0xFFFF0000) | s->pos_x.u.hi;
+                    if (c <= 0x80807F) {
+                        s->colour = c + 0x40404;
+                    } else if (c > 0x808080) {
+                        s->colour = 0x808080;
+                    }
+                    hit = s;
                 }
-                hit = s;
-            }
-            s = s->next;
+                s = s->next;
             } while (s != head);
         }
         if (hit != NULL && hit->pos_x.s.hi == x && hit->pos_y.s.hi == y) {
@@ -323,9 +316,6 @@ void func_800603FC(s32 *id, s32 dx, s32 dy, s32 x, s32 y) {
         }
     }
 }
-#else
-INCLUDE_ASM("asm/main/nonmatchings/game_8005D198", func_800603FC);
-#endif
 
 INCLUDE_ASM("asm/main/nonmatchings/game_8005D198", func_80060524);
 
@@ -380,8 +370,6 @@ INCLUDE_ASM("asm/main/nonmatchings/game_8005D198", func_80060BA8);
 
 INCLUDE_ASM("asm/main/nonmatchings/game_8005D198", func_80060D44);
 
-#ifdef NON_MATCHING
-/* 96.6%: the saved body pointer gets s2 in the original, s5 here (the hoisted address constants take s3-s5) */
 void func_80060DCC(void) {
     GameObject *saved;
     ObjectDef *node;
@@ -392,32 +380,34 @@ void func_80060DCC(void) {
     case 0x31:
     case 0x4A:
     case 0x63:
-        if (D_801FA890 != 0) {
-            if (!(D_8007BD78.flags & 0x800)) {
-                node = func_8001D110();
-                node->anim = &D_80016A84;
-                node->pos_x.s.hi = 0xC8;
-                node->pos_y.s.hi = 0xFA;
-                node->flags = 0x7000;
-                node->unk_0C = 0x7D0;
-                node->id = D_80016A84;
-                node->unk_06 |= 0x20;
-                D_800AA248.cur_obj = func_8001DCB4();
-                D_801FA890 += 0x28;
-                func_80060A7C(D_8007BD78.unk_54, 0x40404, 1);
-                D_8007BD78.unk_54 = 0x7D0;
-                D_800AA248.cur_obj = saved;
-                D_8007BD78.flags |= 0x800;
-                return;
-            }
-            if (D_8007BD78.unk_54 != 0) {
-                func_800603FC(&D_8007BD78.unk_54, 0, -5, 0xC8, 0x3C);
-            }
+        if (D_801FA890 == 0) {
+            D_800AA268.p = saved;
+            return;
         }
+        if (!(D_8007BD78.flags & 0x800)) {
+            node = func_8001D110();
+            node->anim = &D_80016A84;
+            node->id = D_80016A84.id;
+            node->pos_x.s.hi = 0xC8;
+            node->pos_y.s.hi = 0xFA;
+            node->flags = 0x7000;
+            node->unk_0C = 0x7D0;
+            node->unk_06 |= 0x20;
+            D_800AA248.cur_obj = func_8001DCB4();
+            D_801FA890 += 0x28;
+            func_80060A7C(D_8007BD78.unk_54, 0x40404, 1);
+            D_8007BD78.unk_54 = 0x7D0;
+            D_800AA248.cur_obj = saved;
+            D_8007BD78.flags |= 0x800;
+            return;
+        }
+        if (D_8007BD78.unk_54 != 0) {
+            func_800603FC(&D_8007BD78.unk_54, 0, -5, 0xC8, 0x3C);
+        }
+        D_800AA268.p = saved;
+        break;
+    default:
+        D_800AA268.p = saved;
         break;
     }
-    D_800AA268.p = saved;
 }
-#else
-INCLUDE_ASM("asm/main/nonmatchings/game_8005D198", func_80060DCC);
-#endif

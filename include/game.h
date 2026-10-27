@@ -160,7 +160,7 @@ typedef struct Monster {
     /* 0x038 */ s32 unk_038;
     /* 0x03C */ u16 unk_03C;
     /* 0x03E */ u16 unk_03E;
-    /* 0x040 */ u8 unk_040[0x04];
+    /* 0x040 */ s32 unk_040;
     /* 0x044 */ s16 unk_044;
     /* 0x046 */ u16 unk_046;
     /* 0x048 */ u8 unk_048[0x0E];
