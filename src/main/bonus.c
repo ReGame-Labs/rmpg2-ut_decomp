@@ -1,8 +1,9 @@
-/* A file of the game's code, named after its first function until its contents are understood.
+/* The bonus rounds (D_800AA2DC, one bit per round: "READY!", "SET!", "GO!", "BONUS AWARDS!!") and the status panel:
+ * each player's health and meter bars and score digits.
  * The boundaries and their evidence: config/main.yaml (docs/MATCHING.md "Splitting a target into files"). */
 #include "common.h"
 #include "game.h"
-#include "game_8005D198.h"
+#include "bonus.h"
 #include "psyq/libc2.h"
 
 extern u16 D_801D3D80;                   /* D_801D3D64.unk_1C */
@@ -49,9 +50,9 @@ void func_8005D20C(Monster *e) {
     D_800AA248.cur_obj = saved;
 }
 
-INCLUDE_ASM("asm/main/nonmatchings/game_8005D198", func_8005D364);
+INCLUDE_ASM("asm/main/nonmatchings/bonus", func_8005D364);
 
-INCLUDE_ASM("asm/main/nonmatchings/game_8005D198", func_8005D644);
+INCLUDE_ASM("asm/main/nonmatchings/bonus", func_8005D644);
 
 void func_8005D7D8(Monster *e) {
     GameObject *saved;
@@ -105,7 +106,7 @@ Monster *func_8005D918(Monster *skip) {
     return found;
 }
 
-INCLUDE_ASM("asm/main/nonmatchings/game_8005D198", func_8005D9BC);
+INCLUDE_ASM("asm/main/nonmatchings/bonus", func_8005D9BC);
 
 #ifdef NON_MATCHING
 /* 99.9 %: one register: the original loads D_801D3D80 into v0 (free after the colour store), this one into v1 */
@@ -147,12 +148,12 @@ void func_8005DBC4(s32 old, Monster *m, s32 value) {
     }
 }
 #else
-INCLUDE_ASM("asm/main/nonmatchings/game_8005D198", func_8005DBC4);
+INCLUDE_ASM("asm/main/nonmatchings/bonus", func_8005DBC4);
 #endif
 
-INCLUDE_ASM("asm/main/nonmatchings/game_8005D198", func_8005DD48);
+INCLUDE_ASM("asm/main/nonmatchings/bonus", func_8005DD48);
 
-INCLUDE_ASM("asm/main/nonmatchings/game_8005D198", func_8005DF2C);
+INCLUDE_ASM("asm/main/nonmatchings/bonus", func_8005DF2C);
 
 void func_8005E0E0(void) {
 }
@@ -313,9 +314,9 @@ s32 func_8005E5C8(void) {
     return 0;
 }
 
-INCLUDE_ASM("asm/main/nonmatchings/game_8005D198", func_8005E60C);
+INCLUDE_ASM("asm/main/nonmatchings/bonus", func_8005E60C);
 
-INCLUDE_ASM("asm/main/nonmatchings/game_8005D198", func_8005EE54);
+INCLUDE_ASM("asm/main/nonmatchings/bonus", func_8005EE54);
 
 void func_8005F12C(void) {
     Monster *e;
@@ -359,9 +360,9 @@ s32 func_8005F208(void) {
     return -1;
 }
 
-INCLUDE_ASM("asm/main/nonmatchings/game_8005D198", func_8005F33C);
+INCLUDE_ASM("asm/main/nonmatchings/bonus", func_8005F33C);
 
-INCLUDE_ASM("asm/main/nonmatchings/game_8005D198", func_8005F5B8);
+INCLUDE_ASM("asm/main/nonmatchings/bonus", func_8005F5B8);
 
 void func_8005F9FC(void) {
     Monster *e;
@@ -386,9 +387,9 @@ void func_8005FA8C(void) {
     }
 }
 
-INCLUDE_ASM("asm/main/nonmatchings/game_8005D198", func_8005FB14);
+INCLUDE_ASM("asm/main/nonmatchings/bonus", func_8005FB14);
 
-INCLUDE_ASM("asm/main/nonmatchings/game_8005D198", func_8005FEF4);
+INCLUDE_ASM("asm/main/nonmatchings/bonus", func_8005FEF4);
 
 void func_8006036C(s32 *glyphs, s32 x, s32 y, s32 n, s32 kind, u8 *text) {
     if (glyphs == D_8007ABCC) {
@@ -443,7 +444,7 @@ void func_800603FC(s32 *id, s32 dx, s32 dy, s32 x, s32 y) {
     }
 }
 
-INCLUDE_ASM("asm/main/nonmatchings/game_8005D198", func_80060524);
+INCLUDE_ASM("asm/main/nonmatchings/bonus", func_80060524);
 
 void func_80060A7C(s32 id, u32 color, s32 mode) {
     GameObject *s;

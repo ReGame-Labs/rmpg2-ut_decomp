@@ -1,5 +1,5 @@
-#ifndef GAME_8001781C_H
-#define GAME_8001781C_H
+#ifndef MAIN_H
+#define MAIN_H
 
 #include "common.h"
 #include "game.h"
@@ -8,7 +8,7 @@
 #include "psyq/libgpu.h"
 #include "psyq/libetc.h"
 
-/* Provisional types of src/main/game_8001781C.c, the first file of the game's code (main, the game loop, the
+/* Provisional types of src/main/main.c, the first file of the game's code (main, the game loop, the
  * sprite objects). Field names are offsets until their meaning is known; the types are the ones the code's loads and
  * stores imply. */
 
@@ -97,4 +97,4 @@ typedef struct Glyph {
     s16 unk_6;
 } Glyph;
 
-#endif /* GAME_8001781C_H */
+#endif /* MAIN_H */

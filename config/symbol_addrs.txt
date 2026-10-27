@@ -406,15 +406,15 @@ cdload_play_xa = 0x800632E8; // type:func  (track) XA file track >> 4, channel t
 // compares equal. cdload_wait_read_sync counts from 0x800000.
 D_7FFFFF = 0x007FFFFF; // ignore:true
 
-// game_80063A88: the SPU reverb attributes (an SpuReverbAttr)
+// wess_spu: the SPU reverb attributes (an SpuReverbAttr)
 D_801FB530 = 0x801FB530; // size:0x14
 
-// game_8006BB14: the voice attributes (an SpuVoiceAttr), the queue of cut music notes, the sequence file's header
+// wess: the voice attributes (an SpuVoiceAttr), the queue of cut music notes, the sequence file's header
 D_801FDA98 = 0x801FDA98; // size:0x40
 D_801FDC70 = 0x801FDC70; // size:0x208
 D_801FDE78 = 0x801FDE78; // size:0x20
 
-// game_80076C8C: the command handler tables and the commands' lengths
+// wess_seq: the command handler tables and the commands' lengths
 D_80087130 = 0x80087130; // size:0x28
 D_80087F00 = 0x80087F00; // size:0x90
 D_80088364 = 0x80088364; // size:0x24

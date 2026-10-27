@@ -1,9 +1,9 @@
 /* The attackers: the military units (soldiers, vehicles, helicopters...) that hunt the monsters. A pool of four
  * Attacker slots, each driving one GameObject through a state machine: one handler per state and attacker type,
- * in function tables elsewhere. Named after its first function until the rest is understood.
+ * in function tables elsewhere.
  * The boundaries and their evidence: config/main.yaml (docs/MATCHING.md "Splitting a target into files"). */
 #include "common.h"
-#include "game_80043E28.h"
+#include "attacker.h"
 #include "psyq/libc2.h"
 
 void func_8003EB5C(void *anim, GameObject *obj);           /* start an animation on obj */
@@ -17,7 +17,7 @@ GameObject *func_8001DCB4(void);                            /* create the object
 void func_80053D68(s32, Monster *m);
 void func_8005E0E8(Monster *m);
 void func_80047554(void *anim, Attacker *a);
-void func_800475F4();                   /* game_8004750C */
+void func_800475F4();                   /* throw.c */
 u16 func_8004B6C4(GameObject *, s16, s32);
 void func_8001E39C(GameObject *obj);
 void func_8001E2F8(GameObject *obj);
@@ -291,7 +291,7 @@ found:
     return 0;
 }
 #else
-INCLUDE_ASM("asm/main/nonmatchings/game_80043E28", func_80044240);
+INCLUDE_ASM("asm/main/nonmatchings/attacker", func_80044240);
 #endif
 
 void func_800443AC(s32 vel) {
@@ -501,7 +501,7 @@ void func_8004489C(Attacker *a) {
     }
 }
 #else
-INCLUDE_ASM("asm/main/nonmatchings/game_80043E28", func_8004489C);
+INCLUDE_ASM("asm/main/nonmatchings/attacker", func_8004489C);
 #endif
 
 #ifdef NON_MATCHING
@@ -539,7 +539,7 @@ void func_80044A08(Attacker *a) {
     }
 }
 #else
-INCLUDE_ASM("asm/main/nonmatchings/game_80043E28", func_80044A08);
+INCLUDE_ASM("asm/main/nonmatchings/attacker", func_80044A08);
 #endif
 
 void func_80044B28(Attacker *a) {
@@ -1575,9 +1575,9 @@ end:
     D_800AA248.cur_obj = saved;
 }
 #else
-INCLUDE_ASM("asm/main/nonmatchings/game_80043E28", func_80046F68);
+INCLUDE_ASM("asm/main/nonmatchings/attacker", func_80046F68);
 #endif
 
-INCLUDE_ASM("asm/main/nonmatchings/game_80043E28", func_80047028);
+INCLUDE_ASM("asm/main/nonmatchings/attacker", func_80047028);
 
-INCLUDE_ASM("asm/main/nonmatchings/game_80043E28", func_8004718C);
+INCLUDE_ASM("asm/main/nonmatchings/attacker", func_8004718C);

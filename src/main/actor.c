@@ -1,9 +1,9 @@
-/* A file of the game's code, named after its first function until its contents are understood: the actors
- * (Actor) and the monsters' behaviour states (Ai) around the game's current mover, D_800AA248.unk_20.
+/* The actors: the twelve Actor records of D_801E1E48, loaded from the level's list, and the behaviour slots (Ai)
+ * of D_801D85C8 around the game's current object, D_800AA248.cur_obj.
  * The boundaries and their evidence: config/main.yaml (docs/MATCHING.md "Splitting a target into files"). */
 #include "common.h"
 #include "game.h"
-#include "game_80034590.h"
+#include "npc.h"
 #include "psyq/libc2.h"
 
 /* A stage's record of its actors: a count, then 0x54-byte entries from 0x98. */
@@ -132,7 +132,7 @@ extern Anim D_80094514;
 extern ActorDef D_80082138[];
 extern u8 D_8007FFB0[];
 extern s16 D_801D8718;
-extern s16 D_801D8728;   /* not in game.h: this file reads it signed (lh), game_8001781C unsigned (lhu) */
+extern s16 D_801D8728;   /* not in game.h: this file reads it signed (lh), main.c unsigned (lhu) */
 extern s16 D_801D871C;
 extern Actor D_801E1E48[];
 extern u16 D_801E28A4;
@@ -490,7 +490,7 @@ void func_8003D6C4(void) {
     }
 }
 
-INCLUDE_ASM("asm/main/nonmatchings/game_8003CD08", func_8003D71C);
+INCLUDE_ASM("asm/main/nonmatchings/actor", func_8003D71C);
 
 void func_8003D918(void) {
 }
@@ -629,7 +629,7 @@ void func_8003DD44(Ai *ai) {
     ai->action = 0xA;
 }
 
-INCLUDE_ASM("asm/main/nonmatchings/game_8003CD08", func_8003DD70);
+INCLUDE_ASM("asm/main/nonmatchings/actor", func_8003DD70);
 
 void func_8003DF34(Ai *ai) {
     D_8007DEA0[ai->state](ai);
@@ -650,9 +650,9 @@ void func_8003DF70(void) {
     D_801D870C = 0;
 }
 
-INCLUDE_ASM("asm/main/nonmatchings/game_8003CD08", func_8003DFD4);
+INCLUDE_ASM("asm/main/nonmatchings/actor", func_8003DFD4);
 
-INCLUDE_ASM("asm/main/nonmatchings/game_8003CD08", func_8003E1C8);
+INCLUDE_ASM("asm/main/nonmatchings/actor", func_8003E1C8);
 
 s32 func_8003E59C(AiOrder *order, Actor *actor, Monster *player) {
     s16 limit;
@@ -1019,7 +1019,7 @@ void func_8003F114(void) {
     D_800AA248.cur_obj = saved;
 }
 
-INCLUDE_ASM("asm/main/nonmatchings/game_8003CD08", func_8003F150);
+INCLUDE_ASM("asm/main/nonmatchings/actor", func_8003F150);
 
 s32 func_8003F378(Monster *player) {
     Actor *actor = D_801E1E48;
@@ -1058,9 +1058,9 @@ s32 func_8003F4A8(s16 x0, s16 y0, s16 x1, s16 y1, s16 x2, s16 y2) {
     return 1;
 }
 
-INCLUDE_ASM("asm/main/nonmatchings/game_8003CD08", func_8003F50C);
+INCLUDE_ASM("asm/main/nonmatchings/actor", func_8003F50C);
 
-INCLUDE_ASM("asm/main/nonmatchings/game_8003CD08", func_8003F74C);
+INCLUDE_ASM("asm/main/nonmatchings/actor", func_8003F74C);
 
 void func_8003FB5C(Monster *player, Actor *actor) {
     switch (actor->unk_4) {
@@ -1319,7 +1319,7 @@ void func_800403B4(Actor *actor) {
     D_800AA248.cur_obj = saved;
 }
 
-INCLUDE_ASM("asm/main/nonmatchings/game_8003CD08", func_80040418);
+INCLUDE_ASM("asm/main/nonmatchings/actor", func_80040418);
 
 void func_800405D8(Actor *actor) {
     GameObject *mover;
@@ -1597,7 +1597,7 @@ void func_80040D68(Actor *actor) {
     D_800AA248.cur_obj = saved;
 }
 #else
-INCLUDE_ASM("asm/main/nonmatchings/game_8003CD08", func_80040D68);
+INCLUDE_ASM("asm/main/nonmatchings/actor", func_80040D68);
 #endif
 
 void func_80040EA0(Actor *actor) {

@@ -1,7 +1,7 @@
 /* The controllers' vibration: requests by monster (its player's pad port), the presets, and the per-frame pulse.
  * The boundaries and their evidence: config/main.yaml (docs/MATCHING.md "Splitting a target into files"). */
 #include "common.h"
-#include "game_800633EC.h"
+#include "vibrate.h"
 
 s32 func_80025DF8(s32 player);
 void func_800633EC(Monster *monster, s32 level, s32 time);

@@ -1,11 +1,12 @@
 #ifndef SOUND_H
 #define SOUND_H
 
-/* The game's sound driver (the game_8006BB14, game_80076C8C, game_80063A88 and game_80078A40 units: the pieces
- * linked between the Psy-Q objects). It plays the disc's SOUND/RAMPAGE.WMD (the module: "SPSX", the sequences'
+/* The game's sound driver, WESS (wess.c, wess_seq.c, wess_spu.c and wess_trigger.c: the pieces linked between
+ * the Psy-Q objects). It plays the disc's SOUND/RAMPAGE.WMD (the module: "SPSX", the sequences'
  * channel headers), RAMPAGE.WSD (the sequences: "SSEQ") and MAIN.LCD (the SPU samples) through libspu:
- * game_80076C8C is the sequencer (a command byte, its parameters, then a variable-length delay), game_8006BB14 the
- * SPU command set, the voice allocator, the loaders and the API, game_80063A88 the SPU's volumes and reverb.
+ * wess_seq.c is the sequencer (a command byte, its parameters, then a variable-length delay), wess.c the
+ * SPU command set, the voice allocator, the loaders and the API, wess_spu.c the SPU's volumes and reverb,
+ * wess_trigger.c the sequence trigger by type.
  * The types are by offset, from the matched functions. */
 
 #include "common.h"

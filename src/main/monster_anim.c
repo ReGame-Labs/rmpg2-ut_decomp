@@ -1,9 +1,10 @@
-/* A file of the game's code, named after its first function until its contents are understood.
+/* The monsters' animations: the animation scripts (this file's .data) and the functions that choose and start them
+ * for each action, the commands those scripts call (the special moves' extra objects, the touch tests).
  * The boundaries and their evidence: config/main.yaml (docs/MATCHING.md "Splitting a target into files"). */
 #include "common.h"
 #include "game.h"
-#include "game_80034590.h"
-#include "game_80057C94.h"
+#include "npc.h"
+#include "monster_anim.h"
 
 void func_8001F724(u16);
 void func_80029118(s16, u16);
@@ -42,7 +43,7 @@ void func_8003089C(u16, Monster *);
 u16 func_8004F7A4(Building *u);         /* defined with a u8 * and an s32 result in game_8004E574 */
 s32 func_8005BC20(s16, s16, s32, s32, GameObject *, s32);
 void func_80053C50(s32, Monster *);
-u16 func_8005D198(void);                /* defined as s32 in game_8005D198.c; the callers here mask a u16 */
+u16 func_8005D198(void);                /* defined as s32 in bonus.c; the callers here mask a u16 */
 void func_80054374(s32, Monster *);
 void func_800346FC(Pickup *r);
 extern Building D_801D3844[];
@@ -79,7 +80,7 @@ extern u8 D_5000339C[];
 extern Anim D_80011A80;
 extern Anim D_80011B54;
 
-/* The animation scripts (seven words each; game_80057C94's .data). */
+/* The animation scripts (seven words each; this file's .data). */
 extern s32 D_8008434C[];
 extern s32 D_80084368[];
 extern s32 D_80084384[];
@@ -315,7 +316,7 @@ s32 func_80057F98(u16 kind, Monster *e) {
     return 0;
 }
 
-INCLUDE_ASM("asm/main/nonmatchings/game_80057C94", func_800580F8);
+INCLUDE_ASM("asm/main/nonmatchings/monster_anim", func_800580F8);
 
 extern s32 D_800845D0[];
 
@@ -371,7 +372,7 @@ void func_80058288(Monster *e) {
     func_80057B94(e, table);
 }
 #else
-INCLUDE_ASM("asm/main/nonmatchings/game_80057C94", func_80058288);
+INCLUDE_ASM("asm/main/nonmatchings/monster_anim", func_80058288);
 #endif
 
 void func_8005834C(Monster *e) {
@@ -535,9 +536,9 @@ void func_800586AC(Monster *e) {
     func_80057C38(n, e, D_8008481C);
 }
 
-INCLUDE_ASM("asm/main/nonmatchings/game_80057C94", func_80058734);
+INCLUDE_ASM("asm/main/nonmatchings/monster_anim", func_80058734);
 
-INCLUDE_ASM("asm/main/nonmatchings/game_80057C94", func_8005883C);
+INCLUDE_ASM("asm/main/nonmatchings/monster_anim", func_8005883C);
 
 void func_80058944(Monster *e) {
     if (e->climb_side == 2) {
@@ -662,7 +663,7 @@ done:
     func_80057B94(e, D_80084A30);
 }
 #else
-INCLUDE_ASM("asm/main/nonmatchings/game_80057C94", func_80058BF0);
+INCLUDE_ASM("asm/main/nonmatchings/monster_anim", func_80058BF0);
 #endif
 
 void func_80058C6C(Monster *e) {
@@ -1109,7 +1110,7 @@ s32 func_800598F4(Monster *e) {
     return 0;
 }
 #else
-INCLUDE_ASM("asm/main/nonmatchings/game_80057C94", func_800598F4);
+INCLUDE_ASM("asm/main/nonmatchings/monster_anim", func_800598F4);
 #endif
 
 void func_80059B00(void) {
@@ -1179,7 +1180,7 @@ void func_80059C2C(void) {
     D_800AA268.p = saved;
 }
 #else
-INCLUDE_ASM("asm/main/nonmatchings/game_80057C94", func_80059C2C);
+INCLUDE_ASM("asm/main/nonmatchings/monster_anim", func_80059C2C);
 #endif
 
 void func_80059D2C(void) {
@@ -1329,7 +1330,7 @@ void func_8005A154(void) {
     D_800AA268.p = self;
 }
 
-INCLUDE_ASM("asm/main/nonmatchings/game_80057C94", func_8005A2F4);
+INCLUDE_ASM("asm/main/nonmatchings/monster_anim", func_8005A2F4);
 
 void func_8005A7C4(void) {
     GameObject *self;
@@ -1381,9 +1382,9 @@ void func_8005A7C4(void) {
     D_800AA268.p = self;
 }
 
-INCLUDE_ASM("asm/main/nonmatchings/game_80057C94", func_8005A964);
+INCLUDE_ASM("asm/main/nonmatchings/monster_anim", func_8005A964);
 
-INCLUDE_ASM("asm/main/nonmatchings/game_80057C94", func_8005AE28);
+INCLUDE_ASM("asm/main/nonmatchings/monster_anim", func_8005AE28);
 
 void func_8005B85C(Monster *e) {
     func_80057B94(e, D_80085130);
@@ -1397,7 +1398,7 @@ void func_8005B8A4(Monster *e) {
     func_80057B94(e, D_8008514C);
 }
 
-INCLUDE_ASM("asm/main/nonmatchings/game_80057C94", func_8005B8C8);
+INCLUDE_ASM("asm/main/nonmatchings/monster_anim", func_8005B8C8);
 
 void func_8005BB04(Monster *e, s16 want, s16 max, Building *u) {
     s16 i;
@@ -1419,7 +1420,7 @@ void func_8005BB04(Monster *e, s16 want, s16 max, Building *u) {
     } while ((s32) e->unk_188 < want && i < max);
 }
 
-INCLUDE_ASM("asm/main/nonmatchings/game_80057C94", func_8005BC20);
+INCLUDE_ASM("asm/main/nonmatchings/monster_anim", func_8005BC20);
 
 u16 func_8005BF54(GameObject *b, Monster *e) {
     u16 n;
@@ -1583,7 +1584,7 @@ void func_8005C578(GameObject *b, Monster *e) {
     } while (--n != 0);
 }
 #else
-INCLUDE_ASM("asm/main/nonmatchings/game_80057C94", func_8005C578);
+INCLUDE_ASM("asm/main/nonmatchings/monster_anim", func_8005C578);
 #endif
 
 #ifdef NON_MATCHING
@@ -1636,7 +1637,7 @@ void func_8005C71C(GameObject *b, Monster *e) {
     } while (--n != 0);
 }
 #else
-INCLUDE_ASM("asm/main/nonmatchings/game_80057C94", func_8005C71C);
+INCLUDE_ASM("asm/main/nonmatchings/monster_anim", func_8005C71C);
 #endif
 
 #ifdef NON_MATCHING
@@ -1661,7 +1662,7 @@ void func_8005C958(GameObject *b, Monster *skip) {
     }
 }
 #else
-INCLUDE_ASM("asm/main/nonmatchings/game_80057C94", func_8005C958);
+INCLUDE_ASM("asm/main/nonmatchings/monster_anim", func_8005C958);
 #endif
 
 void func_8005CAA4(GameObject *b, Monster *e) {
@@ -1807,13 +1808,13 @@ u16 func_8005D0D8(Monster *e) {
     return 1;
 }
 #else
-INCLUDE_ASM("asm/main/nonmatchings/game_80057C94", func_8005D0D8);
+INCLUDE_ASM("asm/main/nonmatchings/monster_anim", func_8005D0D8);
 #endif
 
-INCLUDE_RODATA("asm/main/nonmatchings/game_80057C94", D_800115B0);
+INCLUDE_RODATA("asm/main/nonmatchings/monster_anim", D_800115B0);
 
-INCLUDE_RODATA("asm/main/nonmatchings/game_80057C94", D_800115C0);
+INCLUDE_RODATA("asm/main/nonmatchings/monster_anim", D_800115C0);
 
-INCLUDE_RODATA("asm/main/nonmatchings/game_80057C94", D_800115C8);
+INCLUDE_RODATA("asm/main/nonmatchings/monster_anim", D_800115C8);
 
-INCLUDE_RODATA("asm/main/nonmatchings/game_80057C94", D_800115D0);
+INCLUDE_RODATA("asm/main/nonmatchings/monster_anim", D_800115D0);

@@ -295,18 +295,18 @@ void func_8009BFE8(void) {
     func_8001ED54(&D_800A63A8);
 }
 #else
-INCLUDE_ASM("asm/overattr/nonmatchings/overattr_8009B478", func_8009BFE8);
+INCLUDE_ASM("asm/overattr/nonmatchings/menu", func_8009BFE8);
 #endif
 
 void func_8009C1AC(void) {
     func_800A0CC0();
 }
 
-INCLUDE_ASM("asm/overattr/nonmatchings/overattr_8009B478", func_8009C1CC);
+INCLUDE_ASM("asm/overattr/nonmatchings/menu", func_8009C1CC);
 
-INCLUDE_RODATA("asm/overattr/nonmatchings/overattr_8009B478", D_80097F58);
+INCLUDE_RODATA("asm/overattr/nonmatchings/menu", D_80097F58);
 
-INCLUDE_RODATA("asm/overattr/nonmatchings/overattr_8009B478", D_80098094);
+INCLUDE_RODATA("asm/overattr/nonmatchings/menu", D_80098094);
 
 #ifdef NON_MATCHING
 /* 99.7 %: the name and the cursor are addressed in the original's order only in the second block: the first loads
@@ -354,7 +354,7 @@ void func_8009C5A4(void) {
     }
 }
 #else
-INCLUDE_ASM("asm/overattr/nonmatchings/overattr_8009B478", func_8009C5A4);
+INCLUDE_ASM("asm/overattr/nonmatchings/menu", func_8009C5A4);
 #endif
 
 void func_8009C7B0(void) {
@@ -439,7 +439,7 @@ s32 func_8009C828(void) {
     return 1;
 }
 
-INCLUDE_ASM("asm/overattr/nonmatchings/overattr_8009B478", func_8009CA68);
+INCLUDE_ASM("asm/overattr/nonmatchings/menu", func_8009CA68);
 
 void func_8009CD30(void) {
     s32 i;
@@ -684,7 +684,7 @@ void func_8009D7B4(void) {
     }
 }
 #else
-INCLUDE_ASM("asm/overattr/nonmatchings/overattr_8009B478", func_8009D7B4);
+INCLUDE_ASM("asm/overattr/nonmatchings/menu", func_8009D7B4);
 #endif
 
 void func_8009D948(void) {
@@ -1046,15 +1046,15 @@ void func_8009E7D4(s16 n) {
     D_800AA248.cur_obj = saved;
 }
 
-INCLUDE_ASM("asm/overattr/nonmatchings/overattr_8009B478", func_8009E8B8);
+INCLUDE_ASM("asm/overattr/nonmatchings/menu", func_8009E8B8);
 
-INCLUDE_ASM("asm/overattr/nonmatchings/overattr_8009B478", func_8009EB74);
+INCLUDE_ASM("asm/overattr/nonmatchings/menu", func_8009EB74);
 
-INCLUDE_ASM("asm/overattr/nonmatchings/overattr_8009B478", func_8009EE5C);
+INCLUDE_ASM("asm/overattr/nonmatchings/menu", func_8009EE5C);
 
-INCLUDE_ASM("asm/overattr/nonmatchings/overattr_8009B478", func_8009F2F8);
+INCLUDE_ASM("asm/overattr/nonmatchings/menu", func_8009F2F8);
 
-INCLUDE_ASM("asm/overattr/nonmatchings/overattr_8009B478", func_8009F554);
+INCLUDE_ASM("asm/overattr/nonmatchings/menu", func_8009F554);
 
 void func_8009F968(OverattrPlacement *p, s32 n, s32 color) {
     s32 i;
@@ -1209,23 +1209,23 @@ void func_8009FEE4(void) {
     }
 }
 
-INCLUDE_ASM("asm/overattr/nonmatchings/overattr_8009B478", func_8009FF38);
+INCLUDE_ASM("asm/overattr/nonmatchings/menu", func_8009FF38);
 
-INCLUDE_RODATA("asm/overattr/nonmatchings/overattr_8009B478", D_800980E8);
+INCLUDE_RODATA("asm/overattr/nonmatchings/menu", D_800980E8);
 
-INCLUDE_RODATA("asm/overattr/nonmatchings/overattr_8009B478", D_80098100);
+INCLUDE_RODATA("asm/overattr/nonmatchings/menu", D_80098100);
 
-INCLUDE_RODATA("asm/overattr/nonmatchings/overattr_8009B478", D_8009811C);
+INCLUDE_RODATA("asm/overattr/nonmatchings/menu", D_8009811C);
 
-INCLUDE_RODATA("asm/overattr/nonmatchings/overattr_8009B478", D_80098128);
+INCLUDE_RODATA("asm/overattr/nonmatchings/menu", D_80098128);
 
-INCLUDE_ASM("asm/overattr/nonmatchings/overattr_8009B478", func_800A0CC0);
+INCLUDE_ASM("asm/overattr/nonmatchings/menu", func_800A0CC0);
 
-INCLUDE_RODATA("asm/overattr/nonmatchings/overattr_8009B478", D_8009814C);
+INCLUDE_RODATA("asm/overattr/nonmatchings/menu", D_8009814C);
 
-INCLUDE_RODATA("asm/overattr/nonmatchings/overattr_8009B478", D_80098164);
+INCLUDE_RODATA("asm/overattr/nonmatchings/menu", D_80098164);
 
-INCLUDE_RODATA("asm/overattr/nonmatchings/overattr_8009B478", jtbl_80098178);
+INCLUDE_RODATA("asm/overattr/nonmatchings/menu", jtbl_80098178);
 
 #ifdef NON_MATCHING
 /* 81.7 %: the city names' address is hoisted into s7 (a frame 8 bytes larger); the original reloads it. */
@@ -1271,10 +1271,10 @@ s32 func_800A1258(void) {
     }
 }
 #else
-INCLUDE_ASM("asm/overattr/nonmatchings/overattr_8009B478", func_800A1258);
+INCLUDE_ASM("asm/overattr/nonmatchings/menu", func_800A1258);
 #endif
 
-INCLUDE_ASM("asm/overattr/nonmatchings/overattr_8009B478", func_800A1434);
+INCLUDE_ASM("asm/overattr/nonmatchings/menu", func_800A1434);
 
 void func_800A1720(void) {
     D_801D885C = 0x44;
@@ -1305,7 +1305,7 @@ void func_800A1720(void) {
     }
 }
 
-INCLUDE_ASM("asm/overattr/nonmatchings/overattr_8009B478", func_800A1804);
+INCLUDE_ASM("asm/overattr/nonmatchings/menu", func_800A1804);
 
 s32 func_800A1B60(void) {
     s32 i;
@@ -1318,11 +1318,11 @@ s32 func_800A1B60(void) {
     return -1;
 }
 
-INCLUDE_ASM("asm/overattr/nonmatchings/overattr_8009B478", func_800A1B9C);
+INCLUDE_ASM("asm/overattr/nonmatchings/menu", func_800A1B9C);
 
-INCLUDE_RODATA("asm/overattr/nonmatchings/overattr_8009B478", D_80098260);
+INCLUDE_RODATA("asm/overattr/nonmatchings/menu", D_80098260);
 
-INCLUDE_RODATA("asm/overattr/nonmatchings/overattr_8009B478", D_80098264);
+INCLUDE_RODATA("asm/overattr/nonmatchings/menu", D_80098264);
 
 void func_800A1F8C(void) {
     s32 state;
@@ -1362,7 +1362,7 @@ void func_800A1F8C(void) {
     }
 }
 
-INCLUDE_ASM("asm/overattr/nonmatchings/overattr_8009B478", func_800A2138);
+INCLUDE_ASM("asm/overattr/nonmatchings/menu", func_800A2138);
 
 s32 func_800A28A0(s32 id) {
     s32 i;
@@ -1375,9 +1375,9 @@ s32 func_800A28A0(s32 id) {
     return -1;
 }
 
-INCLUDE_RODATA("asm/overattr/nonmatchings/overattr_8009B478", D_8009833C);
+INCLUDE_RODATA("asm/overattr/nonmatchings/menu", D_8009833C);
 
-INCLUDE_ASM("asm/overattr/nonmatchings/overattr_8009B478", func_800A28DC);
+INCLUDE_ASM("asm/overattr/nonmatchings/menu", func_800A28DC);
 
 void func_800A309C(void) {
     D_801D3780 += 1;
@@ -1426,7 +1426,7 @@ void func_800A30B4(void) {
     }
 }
 
-INCLUDE_RODATA("asm/overattr/nonmatchings/overattr_8009B478", D_800983F0);
+INCLUDE_RODATA("asm/overattr/nonmatchings/menu", D_800983F0);
 
 void func_800A32CC(void) {
     func_8001F61C("LOADING PREVIOUSLY", 200, 90, 1, D_801F9AAC, D_8007ABCC, 0, 0x400);

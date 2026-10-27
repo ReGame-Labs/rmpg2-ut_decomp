@@ -1,7 +1,7 @@
-#ifndef GAME_800633EC_H
-#define GAME_800633EC_H
+#ifndef VIBRATE_H
+#define VIBRATE_H
 
-/* The controllers' vibration (src/main/game_800633EC.c): one record per pad port, run once a frame by
+/* The controllers' vibration (src/main/vibrate.c): one record per pad port, run once a frame by
  * func_80063744, which pulses the motor byte of the port's PadSetAct buffer (D_801C51C8) by a duty cycle. */
 
 #include "common.h"
@@ -43,4 +43,4 @@ typedef struct {
     /* 0x04 */ RumblePreset preset;
 } RumbleCue;
 
-#endif /* GAME_800633EC_H */
+#endif /* VIBRATE_H */

@@ -1,10 +1,10 @@
-#ifndef GAME_80057C94_H
-#define GAME_80057C94_H
+#ifndef MONSTER_ANIM_H
+#define MONSTER_ANIM_H
 
 #include "common.h"
 #include "game.h"
 
-/* Declarations shared by game_80057C94, game_8003B568 and game_80034590. */
+/* Declarations shared by monster_anim.c, pickup.c and npc.c. */
 
 /* An entry of the spawn lists func_80025C08 picks (D_8007DDA4 for func_8003B6E0, D_800830AC for func_8003C3B0,
  * D_8007DA48 for func_8003684C): an animation and five halfwords the record takes over. The first entry of D_8007DDA4's list holds the count in
@@ -21,8 +21,8 @@ typedef struct SpawnItem {
 
 /* The eight 0x58-byte records of D_801FA9BC (D_801E29B0 in use), made from the spawn list D_8007DDA4 by
  * func_8003B6E0: each with an object, a kind (unk_06, 1..0x1C) and a state (unk_08: 1 new, 2 live, 3 taken).
- * func_8003B5D0 runs the kind's handler (func_800344B8 for 1..19 in game_8002A330, the others in the first part of
- * game_80034590); the pickup checks (func_8003BAB0, func_8005BF54, func_8005C71C, func_8005CC54) hand one to the
+ * func_8003B5D0 runs the kind's handler (func_800344B8 for 1..19 in building.c, the others in the first part of
+ * npc.c); the pickup checks (func_8003BAB0, func_8005BF54, func_8005C71C, func_8005CC54) hand one to the
  * monster that touches it (unk_54). Their head matches the 0x78-byte records of D_801FAC9C (Npc) up to 0x38. */
 typedef struct Pickup {
     /* 0x00 */ GameObject *unk_00;
@@ -57,7 +57,7 @@ extern Pickup D_801FA9BC[];
 extern u16 D_801E29B0;
 
 /* The 0x30-byte records of D_801D3824 (D_801D8738 of them), made from the spawn list D_800830AC by func_8003C3B0;
- * func_8003C1C0 runs the handler of their kind (unk_1C), in game_8003CD08. */
+ * func_8003C1C0 runs the handler of their kind (unk_1C), in actor.c. */
 typedef struct UnkStructB2 {  /* provisional */
     /* 0x00 */ GameObject *unk_00;
     /* 0x04 */ u16 unk_04;     /* 1: in use */
@@ -76,4 +76,4 @@ typedef struct UnkStructB2 {  /* provisional */
 
 extern UnkStructB2 D_801D3824[];
 
-#endif /* GAME_80057C94_H */
+#endif /* MONSTER_ANIM_H */

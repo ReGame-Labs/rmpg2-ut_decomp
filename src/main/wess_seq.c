@@ -1,4 +1,5 @@
-/* A piece of the game's own code between Psy-Q library objects: the sound driver on libspu (docs/TOOLCHAIN.md).
+/* The sound driver WESS, its sequencer: the per-tick engine and the 36 sequence commands (a command byte, its
+ * parameters, then a variable-length delay; docs/TOOLCHAIN.md "The sound driver: GCC 2.7.2").
  * The boundaries and their evidence: config/main.yaml (docs/MATCHING.md "Splitting a target into files"). */
 #include "common.h"
 

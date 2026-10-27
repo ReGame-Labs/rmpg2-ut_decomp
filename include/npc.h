@@ -1,15 +1,15 @@
-#ifndef GAME_80034590_H
-#define GAME_80034590_H
+#ifndef NPC_H
+#define NPC_H
 
 #include "common.h"
 #include "game.h"
-#include "game_80057C94.h"
+#include "monster_anim.h"
 
-/* Types of game_80034590, game_8003CD08, game_8004160C and game_80043118. */
+/* Types of npc.c, actor.c, ai.c and game_80043118.c. */
 
 typedef struct AiOrder AiOrder;
 
-/* What GameObject.unk_94 points at for some objects: a record holding another object (game_80034590). */
+/* What GameObject.unk_94 points at for some objects: a record holding another object (npc.c). */
 typedef struct MoverTarget {
     /* 0x00 */ u8 unk_0[0x4];
     /* 0x04 */ GameObject *unk_4;
@@ -40,7 +40,7 @@ typedef struct AiLinkInfo {
 typedef void (*AiHandler)(Ai *ai);
 
 /* A thing on screen with a mover and an animation set, driven by a state (unk_4) and a kind (unk_6): the
- * actors of game_8003CD08. */
+ * actors of actor.c. */
 typedef struct Actor {
     /* 0x00 */ GameObject *unk_0;
     /* 0x04 */ u16 unk_4;       /* the state; 2 and 6 are tested, 11 is a bound */
@@ -48,14 +48,14 @@ typedef struct Actor {
     /* 0x08 */ s16 unk_8;
     /* 0x0A */ u8 unk_A[0x4];
     /* 0x0E */ u16 unk_E;
-    /* 0x10 */ u16 unk_10;      /* the facing step (game_8003CD08: func_8003FD30) */
-    /* 0x12 */ u16 unk_12;      /* game_8003CD08: func_8003EF64 skips the actor when set */
+    /* 0x10 */ u16 unk_10;      /* the facing step (actor.c: func_8003FD30) */
+    /* 0x12 */ u16 unk_12;      /* actor.c: func_8003EF64 skips the actor when set */
     /* 0x14 */ u16 unk_14;
     /* 0x16 */ u16 unk_16;
     /* 0x18 */ u8 unk_18[0x4];
     /* 0x1C */ u16 unk_1C;
     /* 0x1E */ u8 unk_1E[0x2];
-    /* 0x20 */ void (**unk_20)(struct Actor *);  /* one handler per kind (game_8003CD08: func_8003EC40) */
+    /* 0x20 */ void (**unk_20)(struct Actor *);  /* one handler per kind (actor.c: func_8003EC40) */
     /* 0x24 */ Anim **unk_24;   /* one animation per kind */
     /* 0x28 */ u16 unk_28;
     /* 0x2A */ u16 unk_2A;
@@ -63,22 +63,22 @@ typedef struct Actor {
     /* 0x30 */ u16 unk_30;      /* a countdown */
     /* 0x32 */ u16 unk_32;
     /* 0x34 */ struct ActorLink *unk_34;
-    /* 0x38 */ s16 unk_38;      /* a target x (game_8003CD08: func_800411E8) */
-    /* 0x3A */ s16 unk_3A;      /* a position pair (game_8003CD08: func_80041344 passes them signed) */
+    /* 0x38 */ s16 unk_38;      /* a target x (actor.c: func_800411E8) */
+    /* 0x3A */ s16 unk_3A;      /* a position pair (actor.c: func_80041344 passes them signed) */
     /* 0x3C */ s16 unk_3C;
-    /* 0x3E */ u16 unk_3E;      /* the index into D_8007E1E4 (game_8003CD08: func_80040B94) */
+    /* 0x3E */ u16 unk_3E;      /* the index into D_8007E1E4 (actor.c: func_80040B94) */
 } Actor;                    /* 0x40: D_801E1E48 holds twelve */
 
 typedef struct ActorLink {
     /* 0x00 */ u8 unk_0[0x4];
-    /* 0x04 */ u16 unk_4;       /* an x offset (game_8003CD08: func_8003ED4C) */
+    /* 0x04 */ u16 unk_4;       /* an x offset (actor.c: func_8003ED4C) */
     /* 0x06 */ u8 unk_6[0xA];
     /* 0x10 */ u16 unk_10;
 } ActorLink;
 
 
-/* game_80034590 handles two record sets: the first part of the file (func_80034590 .. func_800360D8) the 0x58-byte
- * Pickup records of D_801FA9BC (include/game_80057C94.h), the rest (from func_80036298) the 0x78-byte Npc records of
+/* npc.c handles two record sets: the first part of the file (func_80034590 .. func_800360D8) the 0x58-byte
+ * Pickup records of D_801FA9BC (include/monster_anim.h), the rest (from func_80036298) the 0x78-byte Npc records of
  * D_801FAC9C. */
 
 /* The records of D_801FAC9C: 0x78 bytes each, six (D_801D8730 counts them), made from the spawn list D_8007DA48 by
@@ -131,4 +131,4 @@ typedef struct Npc {
 extern Npc D_801FAC9C[6];
 extern u16 D_801D8730;                   /* how many of D_801FAC9C are live */
 
-#endif /* GAME_80034590_H */
+#endif /* NPC_H */

@@ -1,7 +1,7 @@
-#ifndef GAME_800500EC_H
-#define GAME_800500EC_H
+#ifndef MONSTER_H
+#define MONSTER_H
 
-/* The declarations of src/main/game_800500EC.c: its own functions and what it calls and reads elsewhere. */
+/* The declarations of src/main/monster.c: its own functions and what it calls and reads elsewhere. */
 
 #include "game.h"
 
@@ -148,4 +148,4 @@ extern Anim D_8008C7A4;
 extern u16 D_801E28C8;
 extern u16 D_801E2A54;
 
-#endif /* GAME_800500EC_H */
+#endif /* MONSTER_H */

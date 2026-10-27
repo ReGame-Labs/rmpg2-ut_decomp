@@ -66,49 +66,50 @@ segments:
       # whose address mod 8 differs from the previous one's starts a new object), the order of each file's .rodata and
       # .data (psylink places both in link order, which is the order of the files' .text), the data-only objects
       # between them, and the calls and static data the functions share. "weak" marks a boundary whose existence is
-      # proven but whose exact position is not. The Psy-Q libraries are one unit per library object, named by
-      # signature (tools/psyq_match.py, docs/TOOLCHAIN.md), never decompiled. Four pieces of the game's own code
-      # (game_80063A88 ...) sit between library objects: the linker pulled them from the game's own library during
-      # the same passes.
+      # proven but whose exact position is not. The game's files are named after their contents (docs/DISC_LAYOUT.md
+      # "The files"), or after their first function while the code does not tell. The Psy-Q libraries are one unit
+      # per library object, named by signature (tools/psyq_match.py, docs/TOOLCHAIN.md), never decompiled. Four
+      # pieces of the game's own code (the sound driver, wess_spu to wess_trigger) sit between library objects: the
+      # linker pulled them from the game's own library during the same passes.
       - [0x800, rodata, rodata_80010000]      # 0x80010000 the file table's checksums (352 words), a data-only object linked first (docs/DISC_LAYOUT.md)
-      - [0xDA8, .rodata, game_8001781C]        # 0x800105A8 "SELECT" (func_8001802C) to jtbl_80010768 (func_8002703C)
-      - [0xF84, .rodata, game_8002A330]        # 0x80010784 jtbl_80010784 (func_8002C4B8): parity flips, a new object
-      - [0x10D8, .rodata, game_80034590]       # 0x800108D8 jtbl_800108D8 (func_80036300): parity flips
-      - [0x14B4, .rodata, game_8003B568]       # 0x80010CB4 jtbl_80010CB4 (func_8003B5D0): parity flips
-      - [0x1570, .rodata, game_8003CD08]       # 0x80010D70 jtbl_80010D70 (func_8003D228): parity flips
-      - [0x1664, .rodata, game_8004160C]       # 0x80010E64 jtbl_80010E64 (func_80042670): parity flips
+      - [0xDA8, .rodata, main]                 # 0x800105A8 "SELECT" (func_8001802C) to jtbl_80010768 (func_8002703C)
+      - [0xF84, .rodata, building]             # 0x80010784 jtbl_80010784 (func_8002C4B8): parity flips, a new object
+      - [0x10D8, .rodata, npc]                 # 0x800108D8 jtbl_800108D8 (func_80036300): parity flips
+      - [0x14B4, .rodata, pickup]              # 0x80010CB4 jtbl_80010CB4 (func_8003B5D0): parity flips
+      - [0x1570, .rodata, actor]               # 0x80010D70 jtbl_80010D70 (func_8003D228): parity flips
+      - [0x1664, .rodata, ai]                  # 0x80010E64 jtbl_80010E64 (func_80042670): parity flips
       - [0x1778, .rodata, game_80043118]       # 0x80010F78 jtbl_80010F78 (func_800432A4): parity flips
-      - [0x187C, .rodata, game_80043E28]       # 0x8001107C jtbl_8001107C (func_8004402C): parity flips
-      - [0x1B40, .rodata, game_8004750C]       # 0x80011340 jtbl_80011340 (func_8004A9B0): parity flips
+      - [0x187C, .rodata, attacker]            # 0x8001107C jtbl_8001107C (func_8004402C): parity flips
+      - [0x1B40, .rodata, throw]               # 0x80011340 jtbl_80011340 (func_8004A9B0): parity flips
       - [0x1BFC, .rodata, game_8004C064]       # 0x800113FC jtbl_800113FC (func_8004C5CC): parity flips
       - [0x1CE0, .rodata, game_8004E574]       # 0x800114E0 jtbl_800114E0 (func_80050044) and the monster names: parity flips
-      - [0x1D34, .rodata, game_800500EC]       # 0x80011534 jtbl_80011534 (func_800524B4): parity flips; jtbl_80011574 (func_80053204)
-      - [0x1D94, .rodata, game_80057C94]       # 0x80011594 jtbl_80011594 (func_8005AE28); the data-only objects between this file and the previous one lie in .data only
-      - [0x1DD8, .rodata, game_8005D198]       # 0x800115D8 jtbl_800115D8 (func_80060BA8): parity flips
-      - [0x1E9C, rodata, rodata_8001169C]     # 0x8001169C const tables and strings of data-only objects (used from .data and from code all over); linked after game_8005D198
+      - [0x1D34, .rodata, monster]             # 0x80011534 jtbl_80011534 (func_800524B4): parity flips; jtbl_80011574 (func_80053204)
+      - [0x1D94, .rodata, monster_anim]        # 0x80011594 jtbl_80011594 (func_8005AE28); the data-only objects between this file and the previous one lie in .data only
+      - [0x1DD8, .rodata, bonus]               # 0x800115D8 jtbl_800115D8 (func_80060BA8): parity flips
+      - [0x1E9C, rodata, rodata_8001169C]     # 0x8001169C const tables and strings of data-only objects (used from .data and from code all over); linked after bonus
       - [0x7290, .rodata, cdload]              # 0x80016A90 jtbl_80016A90 (func_800619A4), jtbl_80016AA8 (func_80061F90)
       - [0x72C8, rodata, rodata_80016AC8]     # 0x80016AC8 the overlay region's address, twice (D_80016AC8/D_80016ACC: a data-only object)
-      - [0x72D0, .rodata, game_800633EC]       # 0x80016AD0 the port masks {1, 2, 4}: the initializer of func_800633EC's local array (GCC puts it in the object's .rodata)
+      - [0x72D0, .rodata, vibrate]             # 0x80016AD0 the port masks {1, 2, 4}: the initializer of func_800633EC's local array (GCC puts it in the object's .rodata)
       - [0x72DC, rodata, rodata_80016ADC]     # 0x80016ADC the libraries' .rodata, with the sound driver's strings among them
       - [0x7F58, asm, crt0]                   # 0x80017758 Psy-Q 2MBYTE.OBJ: the entry point (0x80017760), calls main
-      - [0x801C, c, game_8001781C]            # 0x8001781C main first; one object's .rodata parity from jtbl_800105B0 to jtbl_80010768 (func_8002703C): no split inside
-      - [0x1AB30, c, game_8002A330]           # 0x8002A330 parity flip between func_8002703C and func_8002C4B8; .data 0x8007C934-0x8007CFD0 is used by func_8002A330-func_8002C0F8 only, after func_80027FD0's tables: placed at its first user (weak: anywhere after func_80027FD0)
-      - [0x24D90, c, game_80034590]           # 0x80034590 parity flip between func_800344B8 and func_80036300; .data 0x8007D448-0x8007D5A4 is used by func_80034590-func_800360D8 (D_8007D470 by func_800360D8 alone), so the flip is before func_80034590
-      - [0x2BD68, c, game_8003B568]           # 0x8003B568 parity flip between func_8003A98C and func_8003B5D0; func_8003AA7C-func_8003B3C8 call each other, func_8003B568 is tied to func_8003B5D0 (weak position)
-      - [0x2D508, c, game_8003CD08]           # 0x8003CD08 parity flip between func_8003CBE0 and func_8003D228; func_8003CD08-func_8003D228 call each other (weak position: the three stubs before could go either way)
-      - [0x31E0C, c, game_8004160C]           # 0x8004160C parity flip between func_80040418 and func_80042670; .data 0x8007E6C8-0x8007E9E0 is used by func_8004160C-func_800416AC and func_80042170-func_80042210, interleaved: one file from func_8004160C (weak: func_800415B4 and func_800415E0 could be its first stubs)
+      - [0x801C, c, main]                     # 0x8001781C main first; one object's .rodata parity from jtbl_800105B0 to jtbl_80010768 (func_8002703C): no split inside
+      - [0x1AB30, c, building]                # 0x8002A330 parity flip between func_8002703C and func_8002C4B8; .data 0x8007C934-0x8007CFD0 is used by func_8002A330-func_8002C0F8 only, after func_80027FD0's tables: placed at its first user (weak: anywhere after func_80027FD0)
+      - [0x24D90, c, npc]                     # 0x80034590 parity flip between func_800344B8 and func_80036300; .data 0x8007D448-0x8007D5A4 is used by func_80034590-func_800360D8 (D_8007D470 by func_800360D8 alone), so the flip is before func_80034590
+      - [0x2BD68, c, pickup]                  # 0x8003B568 parity flip between func_8003A98C and func_8003B5D0; func_8003AA7C-func_8003B3C8 call each other, func_8003B568 is tied to func_8003B5D0 (weak position)
+      - [0x2D508, c, actor]                   # 0x8003CD08 parity flip between func_8003CBE0 and func_8003D228; func_8003CD08-func_8003D228 call each other (weak position: the three stubs before could go either way)
+      - [0x31E0C, c, ai]                      # 0x8004160C parity flip between func_80040418 and func_80042670; .data 0x8007E6C8-0x8007E9E0 is used by func_8004160C-func_800416AC and func_80042170-func_80042210, interleaved: one file from func_8004160C (weak: func_800415B4 and func_800415E0 could be its first stubs)
       - [0x33918, c, game_80043118]           # 0x80043118 parity flip between func_80043084 and func_800432A4; only 11-instruction stubs between: placed at the stubs (weak)
-      - [0x34628, c, game_80043E28]           # 0x80043E28 parity flip between func_80043D74 and func_8004402C; placed at the stubs before func_80043F30 (weak)
-      - [0x37D0C, c, game_8004750C]           # 0x8004750C parity flip between func_8004718C and func_8004A9B0; .data 0x8007F228-0x8007F3BC is used by func_8004750C-func_8004A51C in order: placed at its first user (weak)
+      - [0x34628, c, attacker]                # 0x80043E28 parity flip between func_80043D74 and func_8004402C; placed at the stubs before func_80043F30 (weak)
+      - [0x37D0C, c, throw]                   # 0x8004750C parity flip between func_8004718C and func_8004A9B0; .data 0x8007F228-0x8007F3BC is used by func_8004750C-func_8004A51C in order: placed at its first user (weak)
       - [0x3C864, c, game_8004C064]           # 0x8004C064 parity flip between func_8004AD18 and func_8004C5CC; func_8004AD18-func_8004BBC8 are tied by calls and D_8007F634, func_8004C064 uses the next piece D_8007F680 (weak: anywhere in func_8004BFE0-func_8004C0E0)
       - [0x3ED74, c, game_8004E574]           # 0x8004E574 parity flip between func_8004C83C and func_80050044; .data 0x8007F710-0x8007F878 is used by func_8004E574-func_8004E764 after a run of untied functions (weak: anywhere in func_8004DDFC-func_8004E574)
-      - [0x408EC, c, game_800500EC]           # 0x800500EC parity flip between func_80050044 and func_800524B4; .data 0x8007F8FC-0x8007FBAC, the last of the first .data run, is used by func_800500EC-func_80050BBC (weak: func_80050044 may belong here)
-      - [0x48494, c, game_80057C94]           # 0x80057C94 the data-only objects at 0x8007FC84-0x8008434C are linked between the file of func_80050BBC and the file of func_80057C94 (its .data starts at 0x8008434C, used by func_80057C94-func_8005B8A4): a boundary exists in between; placed at the first user (weak position)
-      - [0x4D998, c, game_8005D198]           # 0x8005D198 parity flip between func_8005AE28 and func_80060BA8; func_8005AE28-func_8005D0D8 are tied by calls, func_8005D364-func_8005FB14 by the config tables D_8008427C-D_8008433C (weak position: func_8005D198-func_8005D364)
+      - [0x408EC, c, monster]                 # 0x800500EC parity flip between func_80050044 and func_800524B4; .data 0x8007F8FC-0x8007FBAC, the last of the first .data run, is used by func_800500EC-func_80050BBC (weak: func_80050044 may belong here)
+      - [0x48494, c, monster_anim]            # 0x80057C94 the data-only objects at 0x8007FC84-0x8008434C are linked between the file of func_80050BBC and the file of func_80057C94 (its .data starts at 0x8008434C, used by func_80057C94-func_8005B8A4): a boundary exists in between; placed at the first user (weak position)
+      - [0x4D998, c, bonus]                   # 0x8005D198 parity flip between func_8005AE28 and func_80060BA8; func_8005AE28-func_8005D0D8 are tied by calls, func_8005D364-func_8005FB14 by the config tables D_8008427C-D_8008433C (weak position: func_8005D198-func_8005D364)
       - [0x5173C, c, cdload]                  # 0x80060F3C the CD file reader and the overlay loader (docs/DISC_LAYOUT.md): func_80060F3C-func_80061158 use D_801FB49C next to its other state, func_80061170 the file sizes; its .data 0x80085264-0x80085328 follows func_8005B8A4's in link order; func_800619A4-func_80062868 and func_80062C10-func_800632E8 (the stream reader with the second sector buffer) may be files of their own (no evidence)
-      - [0x53BEC, c, game_800633EC]           # 0x800633EC the controllers' vibration: func_800633EC-func_80063A2C call each other and share D_801FB4C4; .data 0x80085308 (func_800634D4, func_8006353C) follows cdload's last (D_80085304, func_8006301C); .rodata 0x80016AD0 is its local array's initializer. GCC 2.8.1 like its neighbours before it: all 12 match with it, the 2.7.2 drafts score lower; the 2.7.2 code starts with the next game object (game_80063A88)
+      - [0x53BEC, c, vibrate]                 # 0x800633EC the controllers' vibration: func_800633EC-func_80063A2C call each other and share D_801FB4C4; .data 0x80085308 (func_800634D4, func_8006353C) follows cdload's last (D_80085304, func_8006301C); .rodata 0x80016AD0 is its local array's initializer. GCC 2.8.1 like its neighbours before it: all 12 match with it, the 2.7.2 drafts score lower; the 2.7.2 code starts with the next game object (wess_spu)
       - [0x54278, asm, psyq/libapi/c57]         # 0x80063A78 InitHeap; the InitHeap stub crt0 calls, placed between game objects
-      - [0x54288, c, game_80063A88]           # 0x80063A88 game code: the SPU setup (SpuInit, SpuSetReverbModeParam...), linked after the first library object; .data 0x800853C0-0x800853F4
+      - [0x54288, c, wess_spu]                # 0x80063A88 the sound driver's SPU layer: SpuInit, the reverb, the master and CD volumes and their fades, linked after the first library object; .data 0x800853C0-0x800853F4
       - [0x547A8, asm, psyq/libcd/c_011]        # 0x80063FA8 StCdInterrupt
       - [0x55298, asm, psyq/libcd/c_003]        # 0x80064A98 StUnSetRing
       - [0x55318, asm, psyq/libgpu/sys]         # 0x80064B18 ResetGraph, SetGraphDebug, SetDispMask...; sys.c $Id 1998/01/12; 17 of 36 functions kept
@@ -152,7 +153,7 @@ segments:
       - [0x5C1F4, asm, psyq/libspu/s_w]         # 0x8006B9F4 SpuWrite; SpuWrite by its callee _spu_Fw (SpuRead is byte-identical)
       - [0x5C254, asm, psyq/libspu/s_itc]       # 0x8006BA54 SpuIsTransferCompleted
       - [0x5C304, asm, psyq/libapi/c68]         # 0x8006BB04 FlushCache
-      - [0x5C314, c, game_8006BB14]           # 0x8006BB14 game code between library objects: the sound driver (SpuSetKey, SpuSetVoiceAttr; the SPSX string)
+      - [0x5C314, c, wess]                    # 0x8006BB14 game code between library objects: the sound driver WESS (the SPSX string): its API, the SPU commands and voices (SpuSetKey, SpuSetVoiceAttr), the sequence loader, the timer and the file access
       - [0x61114, asm, psyq/libspu/s_m_init]    # 0x80070914 SpuInitMalloc
       - [0x61174, asm, psyq/libspu/s_stm]       # 0x80070974 SpuSetTransferMode
       - [0x611A4, asm, psyq/libspu/s_srmp]      # 0x800709A4 SpuSetReverbModeParam
@@ -207,10 +208,10 @@ segments:
       - [0x67210, asm, psyq/libspu/s_sk]        # 0x80076A10 SpuSetKey
       - [0x673D0, asm, psyq/libspu/sr_gaks]     # 0x80076BD0 SpuGetAllKeysStatus
       - [0x6745C, asm, psyq/libspu/s_srv]       # 0x80076C5C SpuSetReverbVoice
-      - [0x6748C, c, game_80076C8C]           # 0x80076C8C game code between library objects: more of the sound driver (calls into the piece above)
+      - [0x6748C, c, wess_seq]                # 0x80076C8C game code between library objects: the sound driver's sequencer, the per-tick engine and its 36 commands (calls into the piece above)
       - [0x68BC0, asm, psyq/libspu/s_q]         # 0x800783C0 SpuQuit
       - [0x68C40, asm, psyq/libspu/s_sva]       # 0x80078440 SpuSetVoiceAttr
-      - [0x69240, c, game_80078A40]           # 0x80078A40 game code between library objects: one sound-driver function (calls into the first piece)
+      - [0x69240, c, wess_trigger]            # 0x80078A40 game code between library objects: one sound-driver function, the sequence trigger by type (calls into the first piece)
       - [0x69288, asm, psyq/libapi/a12]         # 0x80078A88 EnableEvent
       - [0x69298, asm, psyq/libsn/_udivdi3]     # 0x80078A98 __udivdi3
       - [0x692B8, asm, psyq/libapi/a08]         # 0x80078AB8 OpenEvent
@@ -235,23 +236,23 @@ segments:
       - [0x6AC94, asm, psyq/libcard/a74]        # 0x8007A494 InitCARD2
       - [0x6ACA4, asm, psyq/libcard/patch]      # 0x8007A4A4 _patch_card, _patch_card2, _copy_memcard_patch; 4.1-4.4
       - [0x6AE74, asm, psyq/libcard/a75]        # 0x8007A674 StartCARD2
-      - [0x6AE84, data, game_8001781C]        # 0x8007A684 to the first piece used by game_8002A330 only; holds globals used from everywhere (D_8007BD78, D_8007AD4C) and two used by game_8005D198 only (D_8007ABCC, D_8007BD8C)
-      - [0x6D134, data, game_8002A330]        # 0x8007C934 D_8007C934 (func_8002A330) to D_8007D3FC (func_80031C8C)
-      - [0x6DC48, data, game_80034590]        # 0x8007D448 D_8007D448 (func_80034E48) to D_8007DB28 (func_8003A5A0)
-      - [0x6E360, data, game_8003B568]        # 0x8007DB60 D_8007DB60 (func_8003B6E0) to D_8007DDD4 (func_8003C934)
-      - [0x6E644, data, game_8003CD08]        # 0x8007DE44 D_8007DE44 (func_8003D71C) to D_8007E398 (func_8003F150)
-      - [0x6EEC8, data, game_8004160C]        # 0x8007E6C8 D_8007E6C8 (func_80042170) to D_8007E9E0 (func_80042210); game_80043118 has no .data of its own
+      - [0x6AE84, data, main]                 # 0x8007A684 to the first piece used by building only; holds globals used from everywhere (D_8007BD78, D_8007AD4C) and two used by bonus only (D_8007ABCC, D_8007BD8C)
+      - [0x6D134, data, building]             # 0x8007C934 D_8007C934 (func_8002A330) to D_8007D3FC (func_80031C8C)
+      - [0x6DC48, data, npc]                  # 0x8007D448 D_8007D448 (func_80034E48) to D_8007DB28 (func_8003A5A0)
+      - [0x6E360, data, pickup]               # 0x8007DB60 D_8007DB60 (func_8003B6E0) to D_8007DDD4 (func_8003C934)
+      - [0x6E644, data, actor]                # 0x8007DE44 D_8007DE44 (func_8003D71C) to D_8007E398 (func_8003F150)
+      - [0x6EEC8, data, ai]                   # 0x8007E6C8 D_8007E6C8 (func_80042170) to D_8007E9E0 (func_80042210); game_80043118 has no .data of its own
       - [0x6F564, data, data_8007ED64]        # 0x8007ED64 a screen's tables and their descriptor D_8007ED64 (used by func_800245F8): a data-only object linked here
-      - [0x6F9F4, data, game_80043E28]        # 0x8007F1F4 D_8007F1F4 (func_80044494)
-      - [0x6FA28, data, game_8004750C]        # 0x8007F228 D_8007F228 (func_8004750C) to D_8007F634 (func_8004AEE0, func_8004B754)
+      - [0x6F9F4, data, attacker]             # 0x8007F1F4 D_8007F1F4 (func_80044494)
+      - [0x6FA28, data, throw]                # 0x8007F228 D_8007F228 (func_8004750C) to D_8007F634 (func_8004AEE0, func_8004B754)
       - [0x6FE80, data, game_8004C064]        # 0x8007F680 D_8007F680 (func_8004C064)
       - [0x6FF10, data, game_8004E574]        # 0x8007F710 D_8007F710 (func_8004E574) to D_8007F878 (func_8004E6F0); D_8007F8E0 (used by func_800264D4) may be a data-only object
-      - [0x700FC, data, game_800500EC]        # 0x8007F8FC D_8007F8FC (func_800500EC) to D_8007FBAC (func_80050BBC): the end of the first .data run
-      - [0x70484, data, data_8007FC84]        # 0x8007FC84 data-only objects: the screens' tables (500-byte records and 16-byte descriptors, used from code all over) and the config tables D_8008427C-D_8008433C (game_8005D198)
-      - [0x74B4C, data, game_80057C94]        # 0x8008434C D_8008434C (func_80057D4C) to D_80085168 (func_8005B880), then unreferenced pieces to cdload's first
+      - [0x700FC, data, monster]              # 0x8007F8FC D_8007F8FC (func_800500EC) to D_8007FBAC (func_80050BBC): the end of the first .data run
+      - [0x70484, data, data_8007FC84]        # 0x8007FC84 data-only objects: the screens' tables (500-byte records and 16-byte descriptors, used from code all over) and the config tables D_8008427C-D_8008433C (bonus)
+      - [0x74B4C, data, monster_anim]         # 0x8008434C D_8008434C (func_80057D4C) to D_80085168 (func_8005B880), then unreferenced pieces to cdload's first
       - [0x75A64, data, cdload]               # 0x80085264 D_80085264 (func_800615FC), the loaded-overlay state, jtbl_80085280 (func_80061B4C), D_80085300 (func_80062C10), D_80085304 (func_8006301C)
-      - [0x75B08, data, game_800633EC]        # 0x80085308 D_80085308 (func_800634D4, func_8006353C: the vibration presets), D_80085328 (func_800635F4)
-      - [0x75BC0, data, game_80063A88]        # 0x800853C0 D_800853C0-D_800853F0 (the SPU setup's state)
+      - [0x75B08, data, vibrate]              # 0x80085308 D_80085308 (func_800634D4, func_8006353C: the vibration presets), D_80085328 (func_800635F4)
+      - [0x75BC0, data, wess_spu]             # 0x800853C0 D_800853C0-D_800853F0 (the SPU setup's state)
       - [0x75BF4, data, data_800853F4]        # 0x800853F4 the Psy-Q libraries' .data in link order (libcd first, libcard last), with the sound driver's among them
       - [0x790DC, data, data_800888DC]        # 0x800888DC data-only objects linked after the libraries: the file table (D_80089820, D_80089DA0), the per-screen and per-monster tables
       - [0x886A4, pad, pad]            # 0x80097EA4 zeros: the file is padded to a whole sector; the overlay region

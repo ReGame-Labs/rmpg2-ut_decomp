@@ -1,7 +1,7 @@
-#ifndef GAME_8005D198_H
-#define GAME_8005D198_H
+#ifndef BONUS_H
+#define BONUS_H
 
-/* The declarations of src/main/game_8005D198.c: its own functions and what it calls and reads elsewhere. */
+/* The declarations of src/main/bonus.c: its own functions and what it calls and reads elsewhere. */
 
 #include "game.h"
 
@@ -40,4 +40,4 @@ extern TextMessage D_801FB470;           /* the message func_8006036C builds */
 extern s32 D_8007ABCC[];                /* a font's glyphs */
 extern s32 D_801FB474;                   /* D_801FB470.spacing */
 
-#endif /* GAME_8005D198_H */
+#endif /* BONUS_H */

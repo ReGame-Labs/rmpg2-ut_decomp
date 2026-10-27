@@ -1,11 +1,11 @@
-#ifndef GAME_8003B568_H
-#define GAME_8003B568_H
+#ifndef PICKUP_H
+#define PICKUP_H
 
 #include "common.h"
-#include "game_8002A330.h"   /* the declarations game_8002A330 shares with it */
-#include "game_80057C94.h"   /* the records of D_801FA9BC */
+#include "building.h"   /* the declarations building shares with it */
+#include "monster_anim.h"   /* the records of D_801FA9BC */
 
-/* Declarations of src/main/game_8003B568.c: provisional types from the code's own use; refined as functions match. */
+/* Declarations of src/main/pickup.c: provisional types from the code's own use; refined as functions match. */
 
 
 
@@ -20,7 +20,7 @@ void func_8004CFC0(void);
 void func_8005DD48(Monster *);
 
 void func_80029D1C(void);
-/* The handlers of the D_801FA9BC records by kind (func_8003B5D0): game_8002A330 and game_80034590. */
+/* The handlers of the D_801FA9BC records by kind (func_8003B5D0): building.c and npc.c. */
 void func_800344B8(Pickup *r);
 void func_80034B94(Pickup *r);
 void func_800350C0(Pickup *r);
@@ -71,7 +71,7 @@ extern s32 D_800830BC[];
 u16 func_8003C858(BuildingPart *, s32, s32);
 u16 func_8003CC84(BuildingPart *, s32);
 void func_8003C2D4(u16, UnkStructB2 *);
-/* The handlers of the D_801D3824 records by kind (func_8003C1C0), in game_8003CD08. */
+/* The handlers of the D_801D3824 records by kind (func_8003C1C0), in actor.c. */
 void func_8003D03C(UnkStructB2 *rec);
 void func_8003D0D4(UnkStructB2 *rec);
 void func_8003D11C(UnkStructB2 *rec);
@@ -80,4 +80,4 @@ void func_8003D30C(UnkStructB2 *rec);
 void func_8003D3CC(UnkStructB2 *rec);
 void func_8003D5C8(void);
 
-#endif /* GAME_8003B568_H */
+#endif /* PICKUP_H */

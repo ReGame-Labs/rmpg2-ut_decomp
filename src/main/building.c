@@ -1,8 +1,10 @@
-/* A file of the game's code, named after its first function until its contents are understood.
+/* The buildings: the 0x584-byte records of D_801D3DC8, their items, parts and blocks, what monsters do to them and
+ * what falls from them. The file starts with the sky (the clouds, the thunder, the rain and the snow) and ends with
+ * the handlers of the Ai kinds 1 to 12 (D_8007DE44) and their animation states.
  * The boundaries and their evidence: config/main.yaml (docs/MATCHING.md "Splitting a target into files"). */
 #include "common.h"
-#include "game_8002A330.h"
-#include "game_80034590.h"
+#include "building.h"
+#include "npc.h"
 
 void func_800634D4(Monster *, u32);
 
@@ -100,11 +102,11 @@ void func_8002A4E8(void) {
     D_801FA9A4 = (D_801FAC80->unk_98 << 16) | (D_801FAC80->unk_99 << 8) | D_801FAC80->unk_9A;
 }
 #else
-INCLUDE_ASM("asm/main/nonmatchings/game_8002A330", func_8002A4E8);
+INCLUDE_ASM("asm/main/nonmatchings/building", func_8002A4E8);
 #endif
 
 
-INCLUDE_ASM("asm/main/nonmatchings/game_8002A330", func_8002A72C);
+INCLUDE_ASM("asm/main/nonmatchings/building", func_8002A72C);
 
 void func_8002AC34(GameObject *obj) {
     s16 d;
@@ -168,7 +170,7 @@ void func_8002ADE8(void) {
     D_801FA9A4 = (D_801FAC80->unk_98 << 16) | (D_801FAC80->unk_99 << 8) | D_801FAC80->unk_9A;
 }
 #else
-INCLUDE_ASM("asm/main/nonmatchings/game_8002A330", func_8002ADE8);
+INCLUDE_ASM("asm/main/nonmatchings/building", func_8002ADE8);
 #endif
 
 /* 99.7 %: the thunder flashes of the sky; only the register of the random draw's masked value differs (a0 in the original, v0 here) */
@@ -227,12 +229,12 @@ void func_8002AF28(void) {
     }
 }
 #else
-INCLUDE_ASM("asm/main/nonmatchings/game_8002A330", func_8002AF28);
+INCLUDE_ASM("asm/main/nonmatchings/building", func_8002AF28);
 #endif
 
-INCLUDE_ASM("asm/main/nonmatchings/game_8002A330", func_8002B0E0);
+INCLUDE_ASM("asm/main/nonmatchings/building", func_8002B0E0);
 
-INCLUDE_ASM("asm/main/nonmatchings/game_8002A330", func_8002B3AC);
+INCLUDE_ASM("asm/main/nonmatchings/building", func_8002B3AC);
 
 void func_8002B640(void) {
     D_800AA248.cur_obj->pos_x.s.hi = (((D_801F9ACA - 400) & (D_801D8864.w >> 16)) + func_8001EA78() % 800) & D_801D8864.w;
@@ -280,7 +282,7 @@ void func_8002B6E8(s32 i) {
     }
 }
 #else
-INCLUDE_ASM("asm/main/nonmatchings/game_8002A330", func_8002B6E8);
+INCLUDE_ASM("asm/main/nonmatchings/building", func_8002B6E8);
 #endif
 
 void func_8002B878(void) {
@@ -354,7 +356,7 @@ void func_8002BA70(s32 n) {
 }
 
 
-INCLUDE_ASM("asm/main/nonmatchings/game_8002A330", func_8002BAEC);
+INCLUDE_ASM("asm/main/nonmatchings/building", func_8002BAEC);
 
 #ifdef NON_MATCHING
 /* 99.8 %: the original's frame is 32 bytes (a spilled or address-taken local?), this one's 24. */
@@ -366,7 +368,7 @@ void func_8002BE30(Monster *arg0) {
     }
 }
 #else
-INCLUDE_ASM("asm/main/nonmatchings/game_8002A330", func_8002BE30);
+INCLUDE_ASM("asm/main/nonmatchings/building", func_8002BE30);
 #endif
 
 void func_8002BE78(Building *b) {
@@ -605,7 +607,7 @@ void func_8002C430(Building *arg0) {
     func_8002E9F8(arg0);
 }
 
-INCLUDE_ASM("asm/main/nonmatchings/game_8002A330", func_8002C4B8);
+INCLUDE_ASM("asm/main/nonmatchings/building", func_8002C4B8);
 
 /* An old-style definition: its callers pass the actor they already hold in a0 without naming it. */
 void func_8002C6A0(a)
@@ -860,7 +862,7 @@ BuildingItem *func_8002CD24(u16 idx, Monster *a, BuildingItem *rec) {
     return (BuildingItem *) q;
 }
 #else
-INCLUDE_ASM("asm/main/nonmatchings/game_8002A330", func_8002CD24);
+INCLUDE_ASM("asm/main/nonmatchings/building", func_8002CD24);
 #endif
 
 void func_8002CE40(Ai *arg0, Monster *arg1) {
@@ -1021,9 +1023,9 @@ void func_8002D370(Monster *a, BuildingItem *b, Building *c) {
     func_8003089C(5, a);
 }
 
-INCLUDE_ASM("asm/main/nonmatchings/game_8002A330", func_8002D448);
+INCLUDE_ASM("asm/main/nonmatchings/building", func_8002D448);
 
-INCLUDE_ASM("asm/main/nonmatchings/game_8002A330", func_8002D5B8);
+INCLUDE_ASM("asm/main/nonmatchings/building", func_8002D5B8);
 
 void func_8002D844(BuildingPart *p0, BuildingPart *p1, Monster *a, BuildingPart *p2, BuildingItem *rec) {
     GameObject *saved;
@@ -1161,7 +1163,7 @@ s32 func_8002DB3C(u16 which, u16 n, BuildingItem *rec) {
     return result;
 }
 #else
-INCLUDE_ASM("asm/main/nonmatchings/game_8002A330", func_8002DB3C);
+INCLUDE_ASM("asm/main/nonmatchings/building", func_8002DB3C);
 #endif
 
 /* 82 %: the sprite request for a record's slot; the original keeps n (a1) in s3 and needs one saved register less (no s8), and its u16 n compares unsigned; the u16, s16 and int parameter forms each add a copy or a sign extension */
@@ -1235,7 +1237,7 @@ void func_8002DBF4(u16 which, s32 n, Monster *a, BuildingItem *rec) {
     D_800AA268.p = saved;
 }
 #else
-INCLUDE_ASM("asm/main/nonmatchings/game_8002A330", func_8002DBF4);
+INCLUDE_ASM("asm/main/nonmatchings/building", func_8002DBF4);
 #endif
 
 
@@ -1504,7 +1506,7 @@ void func_8002E440(Monster *arg0, BuildingItem *rec) {
     }
 }
 #else
-INCLUDE_ASM("asm/main/nonmatchings/game_8002A330", func_8002E440);
+INCLUDE_ASM("asm/main/nonmatchings/building", func_8002E440);
 #endif
 
 void func_8002E5F4(u16 which, BuildingItem *rec) {
@@ -1520,7 +1522,7 @@ void func_8002E614(u16 which, BuildingItem *rec) {
     }
 }
 
-INCLUDE_ASM("asm/main/nonmatchings/game_8002A330", func_8002E658);
+INCLUDE_ASM("asm/main/nonmatchings/building", func_8002E658);
 
 void func_8002E854(Building *b) {
     GameObject *saved;
@@ -1838,7 +1840,7 @@ void func_8002F084(Building *a) {
     D_800AA268.p = saved;
 }
 
-INCLUDE_ASM("asm/main/nonmatchings/game_8002A330", func_8002F100);
+INCLUDE_ASM("asm/main/nonmatchings/building", func_8002F100);
 
 void func_8002F474(u16 action) {
     s16 i;
@@ -1868,7 +1870,7 @@ u16 func_8002F558(Building *a) {
     return r;
 }
 #else
-INCLUDE_ASM("asm/main/nonmatchings/game_8002A330", func_8002F558);
+INCLUDE_ASM("asm/main/nonmatchings/building", func_8002F558);
 #endif
 
 
@@ -1914,7 +1916,7 @@ void func_8002F65C(Building *arg0, s32 arg1, BuildingItem *arg2) {
     func_8002F688(arg0, 1, arg1, arg2);
 }
 
-INCLUDE_ASM("asm/main/nonmatchings/game_8002A330", func_8002F688);
+INCLUDE_ASM("asm/main/nonmatchings/building", func_8002F688);
 
 void func_8002F898(Building *arg0, BuildingItem *rec) {
     GameObject *saved = D_800AA248.cur_obj;
@@ -2104,7 +2106,7 @@ void func_8002FDC0(Monster *m, BuildingItem *rec) {
     D_800AA268.p = saved;
 }
 #else
-INCLUDE_ASM("asm/main/nonmatchings/game_8002A330", func_8002FDC0);
+INCLUDE_ASM("asm/main/nonmatchings/building", func_8002FDC0);
 #endif
 
 void func_8002FEA4(Building *a) {
@@ -2171,7 +2173,7 @@ void func_8002FF74(void) {
     D_800AA268.p = saved;
 }
 #else
-INCLUDE_ASM("asm/main/nonmatchings/game_8002A330", func_8002FF74);
+INCLUDE_ASM("asm/main/nonmatchings/building", func_8002FF74);
 #endif
 
 void func_800300A0(UnkStruct15 *arg0, Building *arg1) {
@@ -2641,10 +2643,10 @@ void func_80030D74(void) {
     }
 }
 #else
-INCLUDE_ASM("asm/main/nonmatchings/game_8002A330", func_80030D74);
+INCLUDE_ASM("asm/main/nonmatchings/building", func_80030D74);
 #endif
 
-INCLUDE_ASM("asm/main/nonmatchings/game_8002A330", func_80030E04);
+INCLUDE_ASM("asm/main/nonmatchings/building", func_80030E04);
 
 void func_80030FA4(void) {
     void *temp_a0;
@@ -2872,14 +2874,14 @@ void func_80031690(void) {
     }
 }
 #else
-INCLUDE_ASM("asm/main/nonmatchings/game_8002A330", func_80031690);
+INCLUDE_ASM("asm/main/nonmatchings/building", func_80031690);
 #endif
 
 
 
 
 
-INCLUDE_ASM("asm/main/nonmatchings/game_8002A330", func_80031714);
+INCLUDE_ASM("asm/main/nonmatchings/building", func_80031714);
 
 void func_8003197C(u16 *p, s32 id, GameObject **out) {
     GameObject *saved;
@@ -2967,7 +2969,7 @@ void func_80031C8C(s32 arg0) {
     func_80031CB4(D_8007D3FC, arg0);
 }
 
-INCLUDE_ASM("asm/main/nonmatchings/game_8002A330", func_80031CB4);
+INCLUDE_ASM("asm/main/nonmatchings/building", func_80031CB4);
 
 void func_80031EC0(s32 arg0, Ai *arg1) {
     if (arg1->state != 0) {
@@ -3035,7 +3037,7 @@ void func_80032008(s16 arg0, s32 arg1, Ai *arg2) {
     func_80032630(arg1, arg2);
 }
 #else
-INCLUDE_ASM("asm/main/nonmatchings/game_8002A330", func_80032008);
+INCLUDE_ASM("asm/main/nonmatchings/building", func_80032008);
 #endif
 
 void func_80032064(s32 arg0, Ai *arg1) {
@@ -3177,7 +3179,7 @@ void func_80032350(s32 arg0, Ai *ai) {
     }
 }
 
-/* 98.75 %: only the first statement's registers differ (the original holds the object in v0 and the position in a1; func_80042008 of game_8004160C has the same statement and the same difference) */
+/* 98.75 %: only the first statement's registers differ (the original holds the object in v0 and the position in a1; func_80042008 of ai.c has the same statement and the same difference) */
 #ifdef NON_MATCHING
 void func_80032530(s32 arg0, Ai *ai) {
     s32 vy;
@@ -3206,7 +3208,7 @@ void func_80032530(s32 arg0, Ai *ai) {
     }
 }
 #else
-INCLUDE_ASM("asm/main/nonmatchings/game_8002A330", func_80032530);
+INCLUDE_ASM("asm/main/nonmatchings/building", func_80032530);
 #endif
 
 void func_80032630(s32 handlers, Ai *r) {
@@ -3939,4 +3941,4 @@ void func_80034418(Building *b) {
     D_800AA268.p->pos_y.w += D_800AA268.p->vel_y.w;
 }
 
-INCLUDE_ASM("asm/main/nonmatchings/game_8002A330", func_800344B8);
+INCLUDE_ASM("asm/main/nonmatchings/building", func_800344B8);
