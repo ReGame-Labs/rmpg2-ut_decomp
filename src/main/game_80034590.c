@@ -4,6 +4,7 @@
 #include "common.h"
 #include "game.h"
 #include "game_80034590.h"
+#include "psyq/libc2.h"
 
 /* Other units. */
 ObjectDef *func_8001D110(void);
@@ -32,7 +33,6 @@ void func_8004A90C(Monster *player);
 void func_800215C0(s16 x, s16 y);
 void func_8003C080();                /* called with the position and without: no prototype in the original */
 void func_800634D4(Monster *player, s32 n);
-void *memset(void *s, s32 c, u32 n);
 s32 abs(s32 n);
 
 void func_80029D1C(void);

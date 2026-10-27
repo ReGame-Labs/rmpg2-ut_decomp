@@ -4,6 +4,7 @@
 #include "common.h"
 #include "game.h"
 #include "game_80034590.h"
+#include "psyq/libc2.h"
 
 /* A stage's record of its actors: a count, then 0x54-byte entries from 0x98. */
 typedef struct ActorList {
@@ -43,7 +44,6 @@ typedef struct AnimFrame {
     /* 0x08 */ u16 unk_8;
     /* 0x0A */ u16 unk_A;
 } AnimFrame;
-void *memset(void *dst, s32 c, u32 n);
 s32 abs(s32 x);                 /* GCC's builtin: inlined */
 
 void func_8003CD5C(ActorEntry *entry);

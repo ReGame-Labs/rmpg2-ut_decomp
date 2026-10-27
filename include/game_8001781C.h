@@ -3,7 +3,7 @@
 
 #include "common.h"
 #include "game.h"
-#include "psyq/libc.h"
+#include "psyq/libc2.h"
 #include "psyq/libapi.h"
 #include "psyq/libgpu.h"
 #include "psyq/libetc.h"

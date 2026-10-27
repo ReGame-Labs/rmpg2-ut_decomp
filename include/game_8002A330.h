@@ -3,7 +3,7 @@
 
 #include "common.h"
 #include "game.h"
-#include "psyq/libc.h"
+#include "psyq/libc2.h"
 
 /* Declarations of src/main/game_8002A330.c: provisional types from the code's own use; refined as functions match. */
 
