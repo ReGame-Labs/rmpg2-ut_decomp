@@ -103,7 +103,7 @@ s32 func_80056990(Monster *, Building *);
 u16 func_80056A44(Monster *, Building *);
 s32 func_80056C18(Monster *, Building *);
 u16 func_80056AC8(Monster *);
-void func_80056CCC(Monster *, GameState *);
+void func_80056CCC(Monster *);
 void func_80056E2C(Monster *, Building *);
 void func_80056E78(Monster *);
 void func_80056EB8(Monster *, Building *);
@@ -130,6 +130,9 @@ void func_800634D4(Monster *, u32);
 
 extern s32 D_800123BC;
 extern u16 D_8007BE0C[];
+extern s32 D_8007FB24[];                /* climbing speeds by direction: monster 7's (two sets) */
+extern s32 D_8007FB6C[];
+extern s32 *D_8007FB90[];               /* climbing speeds by direction, per monster id - 1 */
 extern s16 D_8007FD04[];
 extern s16 D_8007FD24[];
 extern s16 D_8007FD44[];

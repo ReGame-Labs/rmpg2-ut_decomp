@@ -108,9 +108,10 @@ Monster *func_8005D918(Monster *skip) {
 
 INCLUDE_ASM("asm/main/nonmatchings/bonus", func_8005D9BC);
 
-#ifdef NON_MATCHING
-/* 99.9 %: one register: the original loads D_801D3D80 into v0 (free after the colour store), this one into v1 */
 void func_8005DBC4(s32 old, Monster *m, s32 value) {
+    s32 v; /* FAKE: one scratch for the colour bits and the eased meter: a variable live in two blocks keeps the
+            * load of D_801D3D80 out of the shift's register */
+
     if (m->id == 0) {
         return;
     }
@@ -122,13 +123,15 @@ void func_8005DBC4(s32 old, Monster *m, s32 value) {
         }
         if (D_800AA248.cur_obj->unk_40.w == 0x44) {
             D_800AA248.cur_obj->colour &= 0xFF00FF;
-            D_800AA248.cur_obj->colour |= (D_801D3D80 << 10) & 0xE000;
+            v = D_801D3D80 << 10;
+            D_800AA248.cur_obj->colour |= v & 0xE000;
         } else {
             D_800AA248.cur_obj->colour = 0xFF00FF;
         }
         if (m->meter_shown.w != m->meter.w) {
             m->meter_shown.w += (m->meter.w - m->meter_shown.w) >> 4;
-            if (abs(m->meter_shown.w - m->meter.w) <= 0xFFFF) {
+            v = m->meter_shown.w;
+            if (abs(v - m->meter.w) <= 0xFFFF) {
                 m->meter_shown.w = m->meter.w;
             }
         }
@@ -147,9 +150,6 @@ void func_8005DBC4(s32 old, Monster *m, s32 value) {
         }
     }
 }
-#else
-INCLUDE_ASM("asm/main/nonmatchings/bonus", func_8005DBC4);
-#endif
 
 INCLUDE_ASM("asm/main/nonmatchings/bonus", func_8005DD48);
 

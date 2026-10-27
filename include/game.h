@@ -719,6 +719,7 @@ extern Fixed D_801F9AC8;                 /* the camera's x: the screen's left ed
 extern s16 D_8007A68A;
 extern u16 D_8007A696;
 extern u16 D_8007A7D4;
+extern s16 D_8007C976;                   /* the weather, drawn by func_8002A3A4: 1 rain (it slows climbing, func_8005086C), 2 another */
 extern s32 D_8007AD4C[];
 extern s32 *D_80085114[];
 extern Anim D_8008A7A4;
