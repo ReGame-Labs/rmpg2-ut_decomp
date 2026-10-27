@@ -202,7 +202,7 @@ typedef struct SoundPatchmap {
     /* 0x08 */ s8 bend_down;        /* the pitch bend's range down, in semitones (wess_pitch_mod) */
     /* 0x09 */ s8 bend_up;          /* and up */
     /* 0x0A */ s16 unk_0A;          /* its sample (SoundEntry) */
-    /* 0x0C */ u16 unk_0C;          /* the voice's ADSR word 1 (func_8006C204) */
+    /* 0x0C */ u16 unk_0C;          /* the voice's ADSR word 1 (wess_start_voice) */
     /* 0x0E */ u16 unk_0E;          /* ADSR word 2; the release: bit 5 linear/exponential, bits 0-4 the rate */
 } SoundPatchmap;
 

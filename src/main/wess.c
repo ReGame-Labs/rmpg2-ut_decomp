@@ -33,7 +33,7 @@ u32 func_80070588(s16 ips, s16 ppq, s16 qpm);
 void func_8006CD78(SoundChannel *ch);
 void func_8006DF68(SoundNote *);
 void func_80076D5C(SoundChannel *ch);
-void func_8006C204(SoundNote *v);
+void wess_start_voice(SoundNote *v);
 void func_8006DD48(SoundNote *v, SoundChannel *ch, SoundPatchmap *map, SoundEntry *sample, u8 note, u8 velocity);
 void func_8006DDE4(SoundNote *v);
 s32 wess_valid_sequence(s32 n);
@@ -348,7 +348,7 @@ extern s32 D_801FD970;
 extern SoundChannel *D_801FD974;
 extern s16 D_801FD978;
 
-void func_8006C204(SoundNote *v) {
+void wess_start_voice(SoundNote *v) {
     s32 root;
 
     D_801FDA98.voice = 1 << v->unk_00.b[2];
@@ -645,7 +645,7 @@ extern SoundNote *D_801FD9EC;
 extern s16 D_801FD9F0;
 extern u8 D_801FD9F4;
 
-void func_8006D18C(SoundChannel *ch) {
+void wess_volume_mod(SoundChannel *ch) {
     D_801FD9F4 = ch->unk_34[1];
     if (ch->unk_0D != D_801FD9F4) {
         ch->unk_0D = D_801FD9F4;
@@ -725,7 +725,7 @@ extern SoundNote *D_801FDA04;
 extern s16 D_801FDA08;
 extern u8 D_801FDA0C;
 
-void func_8006D6E4(SoundChannel *ch) {
+void wess_pan_mod(SoundChannel *ch) {
     D_801FDA0C = ch->unk_34[1];
     if (ch->unk_0E != D_801FDA0C) {
         ch->unk_0E = D_801FDA0C;
@@ -842,7 +842,7 @@ void func_8006DD48(SoundNote *v, SoundChannel *ch, SoundPatchmap *map, SoundEntr
     v->unk_10 = *D_801FDA84;
     ch->unk_11++;
     D_801FDA6C->unk_06++;
-    func_8006C204(v);
+    wess_start_voice(v);
 }
 
 void func_8006DDE4(SoundNote *v) {
@@ -1345,7 +1345,7 @@ INCLUDE_ASM("asm/main/nonmatchings/wess", wess_module_size);
 extern s32 D_80087120;
 extern s32 D_80087124;
 
-s32 func_8006F0D8(s32 name, s32 buf, s32 size) {
+s32 wess_load_module(s32 name, s32 buf, s32 size) {
     u8 *mem;
     s32 i;
     u32 j;
@@ -1466,7 +1466,7 @@ s32 func_8006F0D8(s32 name, s32 buf, s32 size) {
     return 1;
 }
 #else
-INCLUDE_ASM("asm/main/nonmatchings/wess", func_8006F0D8);
+INCLUDE_ASM("asm/main/nonmatchings/wess", wess_load_module);
 #endif
 
 void wess_init_channel(SoundChannel *ch, SoundTrack *track, SoundTrackOpts *opts) {
