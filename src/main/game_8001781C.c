@@ -337,10 +337,7 @@ s16 func_8003FCD8(s32, s16);
 void func_800585C0(void *);
 GameObject *func_8001E204(void);
 extern s16 D_801E2998;
-extern s8 D_801FA8A0[];
-extern Unk7BD78 D_8007BD78;
 void func_80017964(void);
-extern Unk801D3D64 D_801D3D64;
 extern s32 D_801FA72C;
 extern u16 D_800AA2E0;
 extern u16 D_800AA2E8;
@@ -604,7 +601,7 @@ void func_80017B24(void) {
     D_801D8708 = 0;
     D_801F9AD0 = 0;
     D_800AA2D4 = 0;
-    D_801D3D64.unk_8 = 0;
+    D_801D3D64.unk_08 = 0;
     saved = D_800AA248.cur_obj;
     func_80017B90();
     func_8001E980();
@@ -4413,7 +4410,7 @@ void func_8002987C(Monster *monster) {
     s16 found;
     u16 *p;
 
-    if ((D_800AA2DC != 0) && (D_8007BD78.unk_0 & 0x100)) {
+    if ((D_800AA2DC != 0) && (D_8007BD78.flags & 0x100)) {
         monster->unk_0DC = 0;
         return;
     }

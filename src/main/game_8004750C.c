@@ -2,7 +2,7 @@
  * against monsters, and the attack table. Named after its first function until the rest is understood.
  * The boundaries and their evidence: config/main.yaml (docs/MATCHING.md "Splitting a target into files"). */
 #include "common.h"
-#include "gameobject.h"
+#include "game.h"
 #include "psyq/libc2.h"
 #include "game_80043E28.h"           /* Attacker: the attack command func_80047554 drives one */
 

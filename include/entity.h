@@ -1,10 +1,10 @@
 #ifndef ENTITY_H
 #define ENTITY_H
 
-/* This group of units' view of the game's shared types (Entity, Body, the current body); include/game.h has another
- * group's view (Mover, Ai, Actor), to be unified. The game's shared types, as the matched code shows them. Every struct here is provisional: only the fields the
- * matched functions touch are known, the rest is padding (unk_XX / pad_XX). Append new structs and fields; do not
- * reorder (several units are matched in parallel). */
+/* cdload's view of the shared records (through include/cdload.h), kept while src/main/cdload.c is being matched:
+ * every other file uses the unified types of include/game.h. Body is GameObject, Entity is Monster, Unk54728 is
+ * Building, Unk800AA248 is GameState, Unk1D85C8 is Ai, Fixed32 and Half32 are Fixed, BodyRef is GameObjectRef.
+ * To go once cdload.c moves to game.h. */
 
 #include "common.h"
 

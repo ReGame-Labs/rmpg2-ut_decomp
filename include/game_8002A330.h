@@ -9,7 +9,6 @@
 
 extern u8 D_80011BA4[];
 extern u8 D_80011E18[];
-extern s32 D_8007BD78;
 extern u8 D_8007C934[];
 extern u8 D_8007D0B8[];
 extern u8 D_8007D104[];
@@ -533,7 +532,6 @@ void func_80030D14();   /* called with one and with two arguments: no prototype 
 void func_8002B878();
 void func_8002BA70(s32);
 extern u16 D_8007A688;
-extern u8 D_801FA8A0[7];
 void func_8002FAA4(s32, BuildingItem *);
 void func_80030BAC(BuildingPart *);
 void func_80030A70(s32, BuildingPart *);

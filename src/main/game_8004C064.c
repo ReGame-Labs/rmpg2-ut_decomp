@@ -3,7 +3,7 @@
  * (func_8004DDFC). Named after its first function until the rest is understood.
  * The boundaries and their evidence: config/main.yaml (docs/MATCHING.md "Splitting a target into files"). */
 #include "common.h"
-#include "gameobject.h"
+#include "game.h"
 #include "game_8004C064.h"
 
 /* The current object as a scalar: the same word as D_800AA248.cur_obj, which some functions read on its own

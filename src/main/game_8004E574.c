@@ -3,7 +3,7 @@
  * cur_obj->script_pc are branches. Named after its first function until the rest is understood.
  * The boundaries and their evidence: config/main.yaml (docs/MATCHING.md "Splitting a target into files"). */
 #include "common.h"
-#include "gameobject.h"
+#include "game.h"
 #include "game_8004E574.h"
 
 s32 func_8001EB10(s32 range, s32 arg1);                     /* a random number */

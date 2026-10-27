@@ -36,26 +36,6 @@ typedef struct SpriteSlots {
     GameObject *unk_4C;
 } SpriteSlots;
 
-/* The block at 0x801D3D64. */
-typedef struct Unk801D3D64 {
-    u8 pad_0[0x8];
-    s16 unk_8;              /* = D_801D3D6C */
-    u8 pad_A[0x10];
-    u16 unk_1A;
-    u16 unk_1C;
-    u8 pad_1E[0x6];
-    s16 unk_24;
-    s16 unk_26;
-    s16 unk_28;
-    u8 pad_2A[0x2];
-    s32 unk_2C;
-    u8 pad_30[0x2C];
-    u16 unk_5C;
-    u16 unk_5E;
-    u8 pad_60[0x2];
-    u16 unk_62;
-} Unk801D3D64;
-
 /* A 0x14-byte record of the 1024-entry table at 0x801C542C. */
 typedef struct Unk1C542C {
     s16 unk_0;              /* -1 when free */
@@ -135,12 +115,6 @@ typedef struct Unk1AD1C {
     u32 unk_4;
     u32 unk_8;
 } Unk1AD1C;
-
-/* The level flags at 0x8007BD78 (cleared as 0x94 bytes). */
-typedef struct Unk7BD78 {
-    s32 unk_0;
-    u8 pad_4[0x90];
-} Unk7BD78;
 
 /* An animation (the tables in .data from 0x8008AE40 on); opaque here. */
 typedef struct Anim Anim;

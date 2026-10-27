@@ -638,7 +638,7 @@ void func_8002D144(s32 arg0, Building *arg1) {
     s32 temp_s2;
 
     temp_s2 = D_800AA248.cur_obj;
-    if ((D_800AA2DC == 0) || !(D_8007BD78 & 0x40)) {
+    if ((D_800AA2DC == 0) || !(D_8007BD78.flags & 0x40)) {
         if (arg1->unk_078 == 0) {
             func_8002F5B0(arg0, arg1);
             func_8003089C(5, arg0);

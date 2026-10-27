@@ -1,7 +1,7 @@
 #ifndef GAME_80043E28_H
 #define GAME_80043E28_H
 
-#include "gameobject.h"
+#include "game.h"
 
 /* game_80043E28: the attackers (the military units that hunt the monsters): a pool of four, each driving one
  * GameObject through a state machine of handlers (one function per state and type). */

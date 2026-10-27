@@ -203,7 +203,6 @@ extern u8 D_8008A4F4[];
 extern EffectDef D_800960E0;
 extern s32 D_801E1E14;
 extern u8 D_800956C4[];
-extern u8 D_801FA8A0[];
 extern s32 D_801D3D98[];
 extern EffectDef *D_8007D448[];
 extern u8 D_8008A59C[];

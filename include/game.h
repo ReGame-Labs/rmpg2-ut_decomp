@@ -217,7 +217,7 @@ typedef struct Monster {
     /* 0x138 */ u16 unk_138;
     /* 0x13A */ u8 unk_13A[0x02];
     /* 0x13C */ s16 unk_13C;
-    /* 0x13E */ s16 unk_13E;
+    /* 0x13E */ u16 unk_13E;
     /* 0x140 */ u16 unk_140;
     /* 0x142 */ u16 unk_142;
     /* 0x144 */ s16 unk_144;
@@ -515,5 +515,41 @@ typedef struct Building {
 
 extern Building D_801D3DC8[];
 extern u16 D_801E29A4;
+
+/* Level-wide flags and per-player counters at D_8007BD78 (.data of game_8001781C; cleared as 0x94 bytes). */
+typedef struct LevelFlags {
+    /* 0x00 */ s32 flags;                      /* 0x20, 0x40 */
+    /* 0x04 */ s32 unk_04;
+    /* 0x08 */ s32 unk_08[4];                  /* per player (D_801FA8A0[monster id - 1] - 1) */
+    /* 0x18 */ u8 unk_18[0x3C];
+    /* 0x54 */ s32 unk_54;
+    /* 0x58 */ u8 unk_58[0x3C];
+} LevelFlags;
+
+extern LevelFlags D_8007BD78;
+extern u8 D_801FA8A0[7];                /* the player of each monster id (1-based), 0 for none */
+
+/* The block at D_801D3D64. */
+typedef struct Unk1D3D64 {
+    /* 0x00 */ u8 unk_00[0x08];
+    /* 0x08 */ s16 unk_08;                     /* D_801D3D6C */
+    /* 0x0A */ u8 unk_0A[0x10];
+    /* 0x1A */ u16 unk_1A;
+    /* 0x1C */ u16 unk_1C;
+    /* 0x1E */ u8 unk_1E[0x06];
+    /* 0x24 */ s16 unk_24;
+    /* 0x26 */ s16 unk_26;
+    /* 0x28 */ s16 unk_28;
+    /* 0x2A */ u8 unk_2A[0x02];
+    /* 0x2C */ s32 unk_2C;
+    /* 0x30 */ u8 unk_30[0x28];
+    /* 0x58 */ s32 unk_58;
+    /* 0x5C */ u16 unk_5C;
+    /* 0x5E */ u16 unk_5E;
+    /* 0x60 */ u8 unk_60[0x02];
+    /* 0x62 */ u16 unk_62;
+} Unk1D3D64;
+
+extern Unk1D3D64 D_801D3D64;
 
 #endif /* GAME_H */
