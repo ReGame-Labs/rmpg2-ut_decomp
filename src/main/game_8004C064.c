@@ -722,24 +722,24 @@ void func_8004D194(void) {
 }
 
 #ifdef NON_MATCHING
-/* 95%: the registers of floor - 1 and its masked copy */
+/* 95.53%: 95.5%: the original copies n into floor in the n test's delay slot and repeats the andi of floor on both
+ * paths; here the copy lands in the unk_1BC test's delay slot */
 s32 func_8004D264(s16 *side, Monster *m, s32 bld) {
     u16 floor;
     s32 part;
-    s32 n;
-    u16 idx;
+    u16 n;
     s16 s;
 
     floor = m->climb_floor;
     part = bld + 0x98;
     if (floor != 0) {
         n = floor - 1;
-        if ((u16) n != 0) {
-            idx = n;
+        if (n != 0) {
+            floor = n;
             if (m->unk_1BC != 0) {
-                idx = n + 1;
+                floor = n + 1;
             }
-            part += idx * 0x54;
+            part += floor * 0x54;
         }
     }
     s = 2;
