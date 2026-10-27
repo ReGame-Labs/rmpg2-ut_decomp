@@ -3424,8 +3424,9 @@ void func_80020CE4(s32 arg0, s32 arg1) {
 }
 
 #ifdef NON_MATCHING
-/* 99.36%: the three adds take their operands in the other order (addu a1,v0,a1: the velocity first, the
- * result in the register of the record's value) */
+/* 99.36%: 99.36 %: expand_binop swaps (vel + v) into (v + vel) whenever the target is v or vel is still a MEM; the
+ * original's (plus vel v) in v's register needs vel in a register and a target other than v (combine then folding
+ * the copy) */
 s32 func_80020D20(Npc *npc) {
     s32 v;
 
@@ -4021,8 +4022,6 @@ void func_800222E8(Npc *npc) {
     func_80023E30(npc);
 }
 
-/* 92 %: the result is masked into its own register before the stores and the four stores are scheduled in source order; the C copies the result and moves the counter's store first */
-#ifdef NON_MATCHING
 void func_8002235C(Npc *npc) {
     u16 result;
 
@@ -4034,9 +4033,9 @@ void func_8002235C(Npc *npc) {
         }
         result = func_80023AC0(npc);
         if (result == 1) {
-            npc->unk_2A = result;
-            npc->unk_22 = 0x30;
+            npc->unk_2A = 1;
             npc->unk_0C = 0;
+            npc->unk_22 = 0x30;
             npc->state++;
             if (npc->unk_38 != 2) {
                 if (npc->kind == 0x11) {
@@ -4056,9 +4055,6 @@ void func_8002235C(Npc *npc) {
         D_800AA268.p->vel_x.w = 0;
     }
 }
-#else
-INCLUDE_ASM("asm/main/nonmatchings/main", func_8002235C);
-#endif
 
 void func_80022490(Npc *npc) {
     if (npc->unk_0C == 0) {
@@ -4337,8 +4333,8 @@ void func_80022E58(Npc *npc) {
 }
 
 #ifdef NON_MATCHING
-/* 84.38%: the halving loop matches; the start allocates the difference to other registers (the original keeps x - y
- * in a3 and tests a copy in v1), and the table lookup reloads x where the original keeps x & 7 in a1 */
+/* 90.64%: 90.6 %: the table part now matches but for registers (step in a1, the original v1); the start keeps x - y
+ * in v1 and copies it to a0 after the pos_y load, the original copies it to a3 before */
 void func_80022EC0(Npc *npc) {
     s16 x;
     s16 y;
@@ -4366,24 +4362,25 @@ void func_80022EC0(Npc *npc) {
             x >>= 1;
         } while (dy >= 8 || x >= 8);
     }
-    x &= 7;
-    dy &= 7;
-    if (npc->kind == 0x11) {
-        table = D_8007B660;
-    } else {
-        table = D_8007B980;
+    {
+        s32 i = x & 7;
+        s32 j = dy & 7;
+        x = i;
+        if (npc->kind == 0x11) {
+            table = D_8007B660;
+        } else {
+            table = D_8007B980;
+        }
+        step = table[j];
+        step += i;
     }
-    step = &table[dy][x];
     v = step->vel_x;
     if (D_800AA248.cur_obj->vel_x.w & 0x10) {
         v = -v;
     }
     D_800AA248.cur_obj->vel_x.w = v;
     v = step->vel_y;
-    if (y <= 0) {
-        v = -v;
-    }
-    D_800AA248.cur_obj->vel_y.w = v;
+    D_800AA248.cur_obj->vel_y.w = y > 0 ? v : -v;
     func_8003EB5C(step->anim, D_800AA248.cur_obj);
 }
 #else
@@ -4881,9 +4878,6 @@ void func_80023CFC(Npc *npc) {
     }
 }
 
-#ifdef NON_MATCHING
-/* 98.63%: the absolute values: the original copies the difference into a0 before negating (move a0,v0), the C
- * negates v1 in the first branch and drops the copy in the second */
 void func_80023E30(Npc *npc) {
     GameObject *obj;
     s32 vx;
@@ -4899,13 +4893,17 @@ void func_80023E30(Npc *npc) {
         vx = obj->vel_x.w;
         if (vx != 0) {
             if (vx > 0) {
-                d = vx - D_801F9AC8.w;
-                if ((d >= 0 ? d : -d) > 0x15E0000) {
+                s32 t = vx - D_801F9AC8.w;
+
+                d = t >= 0 ? t : -t;
+                if (d > 0x15E0000) {
                     goto out;
                 }
             } else {
-                d = vx - D_801F9AC8.w;
-                if ((d >= 0 ? d : -d) < 0) {
+                s32 t = vx - D_801F9AC8.w;
+
+                d = t >= 0 ? t : -t;
+                if (d < 0) {
                     goto out;
                 }
             }
@@ -4925,9 +4923,6 @@ out:
     npc->unk_2A = 0;
     func_800377B4(npc);
 }
-#else
-INCLUDE_ASM("asm/main/nonmatchings/main", func_80023E30);
-#endif
 
 void func_80023F64(Npc *npc) {
     if (D_800AA268.p->unk_6C & 0x80) {
@@ -4973,10 +4968,12 @@ void func_800240F0(Npc *npc) {
     }
 }
 
-/* 79 %: the search loop keeps its test at the top (no rotation) and copies k on the way out; while, for(;;), do-while and goto forms all rotate it or keep the extra copy */
 #ifdef NON_MATCHING
+/* 86.15%: 86.2 %: used and k now copy the masked value as the original does; the loop still uses used in s0
+ * directly (the original copies it to a1 and hoists the table address to a2), and the bit selection reuses the
+ * loop's sign-extended k where the original copies k at the exit */
 u16 func_80024138(Npc *npc) {
-    s32 used;
+    s16 used;
     s16 k;
     s32 bit;
 
@@ -5044,8 +5041,9 @@ void func_800242A8(void) {
 }
 
 #ifdef NON_MATCHING
-/* 92.55%: the C keeps the first read of pos_x in a register to the end (cse follows the jumps) where the original
- * reads it again in the last branch; the registers of x follow from it */
+/* 92.55%: 92.6 %: with -fno-cse-skip-blocks this C gives the original's reload of pos_x in the last branch, so the
+ * original's CFG stopped cse there (an if/else for x does, 97.1 %, but then x and dx share a register); x and dx
+ * also swap v1/a1 */
 void func_800242D8(Npc *npc) {
     GameObject *obj;
     s16 dx;

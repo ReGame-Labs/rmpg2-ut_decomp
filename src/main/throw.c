@@ -1982,7 +1982,9 @@ void func_8004B204(void) {
 }
 
 #ifdef NON_MATCHING
-/* 92 %: the wrap is width & (camera + x), as the original; loop.c hoists only the width's high half out of the loop here, the original also the camera's (s7 and s8) */
+/* 91.98%: 92 %: loop.c moves the camera's high half (life 3, savings 1) only if threshold x 3 >= 67 insns, and
+ * after four moves the threshold is 18: the original's loop had fewer insns or a longer life for it (it keeps both
+ * highs in s7/s8) */
 void func_8004B3D0(void) {
     u16 s = 7;
     ThrowRec *rec;
@@ -2236,8 +2238,8 @@ void func_8004BAC0(void) {
 }
 
 #ifdef NON_MATCHING
-/* 99.86%: 99.86%: registers only: the original keeps the object (npc->obj) in a1 and &D_800AA248 in a0, here the
- * other way round (their global priorities are 0.25 and 0.235) */
+/* 99.86%: 99.86 %: registers only: obj (3 refs over 12 insns, 0.25) is allocated before the &D_800AA248 pseudo (4
+ * over 34, 0.235); the original needs obj below 0.235 (13 insns) or the base above 0.25 */
 void func_8003831C(void);
 extern Anim D_8008AA58;
 extern Anim D_8008AA78;

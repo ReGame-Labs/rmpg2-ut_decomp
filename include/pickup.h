@@ -7,7 +7,7 @@
 /* The records of src/main/pickup.c: the pickups, the spawn lists' entries and the records of D_801D3824. Only
  * game.h is included: npc.h and monster_anim.h include this header, and pickup.c includes building.h itself. */
 
-/* An entry of the spawn lists func_80025C08 picks (D_8007DDA4 for pickup_spawn_all, D_800830AC for func_8003C3B0,
+/* An entry of the spawn lists func_80025C08 picks (D_8007DDA4 for pickup_spawn_all, D_800830AC for pickup_hide_items,
  * D_8007DA48 for func_8003684C): an animation and five halfwords the record takes over. The first entry of D_8007DDA4's list holds the count in
  * unk_04; D_800830AC's ends at an entry whose unk_04 is 0. */
 typedef struct SpawnItem {
@@ -57,7 +57,7 @@ typedef struct Pickup {
 extern Pickup D_801FA9BC[];
 extern u16 D_801E29B0;
 
-/* The 0x30-byte records of D_801D3824 (D_801D8738 of them), made from the spawn list D_800830AC by func_8003C3B0;
+/* The 0x30-byte records of D_801D3824 (D_801D8738 of them), made from the spawn list D_800830AC by pickup_hide_items;
  * func_8003C1C0 runs the handler of their kind (func_8003C2D4), in actor.c. */
 typedef struct UnkStructB2 {  /* provisional */
     /* 0x00 */ GameObject *obj;
