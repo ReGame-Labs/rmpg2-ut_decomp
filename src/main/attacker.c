@@ -35,7 +35,7 @@ extern u8 D_800953BC[], D_800951A8[], D_800950EC[], D_80094EC0[], D_80094ECC[], 
 
 /* This file's handlers, in the order the state machines reach them. */
 void func_80044204(Attacker *a);
-s32 func_80044240(u16 kind, s16 x, s16 y, u16 flags, s32 vel_x, u16 state);
+s32 attacker_spawn(u16 kind, s16 x, s16 y, u16 flags, s32 vel_x, u16 state);
 void func_80044418();                   /* (Attacker *a); some callers pass nothing */
 void func_800455CC(Attacker *a);
 void func_80044790(Attacker *a);
@@ -248,30 +248,33 @@ void func_80044204(Attacker *a) {
     func_8003EB5C(D_800953BC, D_800AA248.cur_obj);
 }
 
-#ifdef NON_MATCHING
-/* 85%: the original keeps the address of D_800AA248 and the value of D_801E1C84 live across the search loop (no reload at the found slot), with the counter in a0; the loop form that does that is not found yet */
-s32 func_80044240(u16 kind, s16 x, s16 y, u16 flags, s32 vel_x, u16 state) {
+s32 attacker_spawn(u16 kind, s16 x, s16 y, u16 flags, s32 vel_x, u16 state) {
     GameObject *saved;
     Attacker *a;
     u16 n;
     ObjectDef *def;
+    u16 count;
 
     saved = D_800AA248.cur_obj;
-    if (kind != 0 && D_801E1C84 < 4) {
+    if (kind != 0 && (count = D_801E1C84) < 4) {
         a = D_801FA8A8;
         n = 4;
-        do {
+        for (;;) {
             if (a->type == 0) {
                 goto found;
             }
             a++;
-        } while (--n != 0);
-        D_800AA248.cur_obj = saved;
+            if (--n == 0) {
+                D_800AA248.cur_obj = saved;
+                break;
+            }
+        }
     }
     return 1;
 
 found:
-    D_801E1C84++;
+    count++;
+    D_801E1C84 = count;
     func_800455CC(a);
     a->type = kind;
     def = func_8001D110();
@@ -284,15 +287,12 @@ found:
     D_800AA248.cur_obj->pos_x.s.hi = x;
     D_800AA248.cur_obj->pos_y.s.hi = y;
     D_800AA248.cur_obj->vel_x.w = 0;
-    a->state = state;
     a->obj = D_800AA248.cur_obj;
+    a->state = state;
     D_800AA248.cur_obj->owner.attacker = a;
     D_800AA248.cur_obj = saved;
     return 0;
 }
-#else
-INCLUDE_ASM("asm/main/nonmatchings/attacker", func_80044240);
-#endif
 
 void func_800443AC(s32 vel) {
     if (func_8001EB10(0x190, 0) & 1) {
@@ -457,7 +457,8 @@ void func_800447F0(Attacker *a) {
 }
 
 #ifdef NON_MATCHING
-/* 96%: the slot is kept in a3 from the entry (a copy of a0) and the ground level in a1; this keeps the slot in a0 */
+/* 98.87%: registers only at the start: the original loads cur_obj into v1 and reloads it into a0 after the
+ * pos_x store */
 void func_8004489C(Attacker *a) {
     s32 vel;
     s32 vy;
@@ -467,13 +468,11 @@ void func_8004489C(Attacker *a) {
         func_80044790(a);
         return;
     }
-    D_800AA248.cur_obj->pos_x.w += D_800AA248.cur_obj->vel_x.w;
-    vel = D_800AA248.cur_obj->vel_x.w + D_800AA248.cur_obj->unk_84;
+    vel = D_800AA248.cur_obj->vel_x.w;
+    D_800AA248.cur_obj->pos_x.w += vel;
+    vel += D_800AA248.cur_obj->unk_84;
     D_800AA248.cur_obj->vel_x.w = vel;
-    if (vel < 0) {
-        vel = -vel;
-    }
-    if (vel < 0x7001) {
+    if (abs(vel) < 0x7001) {
         D_800AA248.cur_obj->unk_84 = 0;
         D_800AA248.cur_obj->vel_x.w = 0;
     }
@@ -504,23 +503,23 @@ void func_8004489C(Attacker *a) {
 INCLUDE_ASM("asm/main/nonmatchings/attacker", func_8004489C);
 #endif
 
-#ifdef NON_MATCHING
-/* 96%: as func_8004489C, the slot register */
 void func_80044A08(Attacker *a) {
-    s32 vel;
+    s32 v;
     s16 ground;
 
     if (a->unk_18 != 0) {
         func_800447F0(a);
         return;
     }
-    D_800AA248.cur_obj->pos_x.w += D_800AA248.cur_obj->vel_x.w;
-    vel = D_800AA248.cur_obj->vel_y.w + a->unk_10;
-    if (vel > 0xC000) {
-        vel = 0xC000;
+    v = D_800AA248.cur_obj->pos_x.w;
+    v += D_800AA248.cur_obj->vel_x.w;
+    D_800AA248.cur_obj->pos_x.w = v;
+    v = D_800AA248.cur_obj->vel_y.w + a->unk_10;
+    if (v > 0xC000) {
+        v = 0xC000;
     }
-    D_800AA248.cur_obj->vel_y.w = vel;
-    D_800AA248.cur_obj->pos_y.w += vel;
+    D_800AA248.cur_obj->vel_y.w = v;
+    D_800AA248.cur_obj->pos_y.w += v;
     ground = 0xD9;
     if (a->type == 9) {
         ground = 0xE0;
@@ -538,9 +537,6 @@ void func_80044A08(Attacker *a) {
         }
     }
 }
-#else
-INCLUDE_ASM("asm/main/nonmatchings/attacker", func_80044A08);
-#endif
 
 void func_80044B28(Attacker *a) {
     if (func_8003E79C() == 1) {
@@ -601,7 +597,7 @@ void func_80044D34(void) {
     if (func_8003E79C() == 0) {
         y = D_800AA248.cur_obj->pos_y.s.hi;
         if (y < 0x99) {
-            func_80044240(8, D_800AA248.cur_obj->pos_x.s.hi, y, 0x1004, D_800AA248.cur_obj->vel_x.w, 0);
+            attacker_spawn(8, D_800AA248.cur_obj->pos_x.s.hi, y, 0x1004, D_800AA248.cur_obj->vel_x.w, 0);
         }
     }
 }
@@ -612,7 +608,7 @@ void func_80044D94(void) {
     if (func_8003E79C() == 0) {
         y = D_800AA248.cur_obj->pos_y.s.hi;
         if (y < 0x99) {
-            func_80044240(9, D_800AA248.cur_obj->pos_x.s.hi, y, 0x1004, D_800AA248.cur_obj->vel_x.w, 0);
+            attacker_spawn(9, D_800AA248.cur_obj->pos_x.s.hi, y, 0x1004, D_800AA248.cur_obj->vel_x.w, 0);
         }
     }
 }
@@ -704,7 +700,7 @@ void func_80045084(void) {
         if (y >= 0xE1) {
             y -= 0x10;
         }
-        func_80044240(1, D_800AA248.cur_obj->pos_x.s.hi, y, 0x1004, D_800AA248.cur_obj->vel_x.w, 0);
+        attacker_spawn(1, D_800AA248.cur_obj->pos_x.s.hi, y, 0x1004, D_800AA248.cur_obj->vel_x.w, 0);
     }
 }
 
@@ -832,7 +828,7 @@ void func_800454BC(void) {
         if (y >= 0xE1) {
             y -= 0x10;
         }
-        func_80044240(7, D_800AA248.cur_obj->pos_x.s.hi, y, 0x1004, D_800AA248.cur_obj->vel_x.w, 0);
+        attacker_spawn(7, D_800AA248.cur_obj->pos_x.s.hi, y, 0x1004, D_800AA248.cur_obj->vel_x.w, 0);
     }
 }
 
@@ -1068,15 +1064,15 @@ void func_80045D14(Attacker *a) {
 }
 
 void func_80045D68(void) {
-    func_80044240(6, D_800AA248.cur_obj->pos_x.s.hi, D_800AA248.cur_obj->pos_y.s.hi - 4, 0x1002, D_800AA248.cur_obj->vel_x.w, 0);
+    attacker_spawn(6, D_800AA248.cur_obj->pos_x.s.hi, D_800AA248.cur_obj->pos_y.s.hi - 4, 0x1002, D_800AA248.cur_obj->vel_x.w, 0);
 }
 
 void func_80045DB4(void) {
-    func_80044240(6, D_800AA248.cur_obj->pos_x.s.hi, D_800AA248.cur_obj->pos_y.s.hi - 4, 0x1003, D_800AA248.cur_obj->vel_x.w, 8);
+    attacker_spawn(6, D_800AA248.cur_obj->pos_x.s.hi, D_800AA248.cur_obj->pos_y.s.hi - 4, 0x1003, D_800AA248.cur_obj->vel_x.w, 8);
 }
 
 void func_80045E04(void) {
-    func_80044240(6, D_800AA248.cur_obj->pos_x.s.hi, D_800AA248.cur_obj->pos_y.s.hi - 4, 0x1003, D_800AA248.cur_obj->vel_x.w, 0xB);
+    attacker_spawn(6, D_800AA248.cur_obj->pos_x.s.hi, D_800AA248.cur_obj->pos_y.s.hi - 4, 0x1003, D_800AA248.cur_obj->vel_x.w, 0xB);
 }
 
 void func_80045E54(Attacker *a) {
@@ -1142,7 +1138,7 @@ void func_80045FCC(Attacker *a) {
 }
 
 void func_800460B8(void) {
-    func_80044240(3, D_800AA248.cur_obj->pos_x.s.hi, D_800AA248.cur_obj->pos_y.s.hi, 0x1004, D_800AA248.cur_obj->vel_x.w, 0);
+    attacker_spawn(3, D_800AA248.cur_obj->pos_x.s.hi, D_800AA248.cur_obj->pos_y.s.hi, 0x1004, D_800AA248.cur_obj->vel_x.w, 0);
 }
 
 void func_800460F8(Attacker *a) {
@@ -1207,7 +1203,7 @@ void func_800462A8(Attacker *a) {
 }
 
 void func_80046300(void) {
-    func_80044240(0xA, D_800AA248.cur_obj->pos_x.s.hi, D_800AA248.cur_obj->pos_y.s.hi, 0x1004, D_800AA248.cur_obj->vel_x.w, 0);
+    attacker_spawn(0xA, D_800AA248.cur_obj->pos_x.s.hi, D_800AA248.cur_obj->pos_y.s.hi, 0x1004, D_800AA248.cur_obj->vel_x.w, 0);
 }
 
 void func_80046340(Attacker *a) {
@@ -1404,7 +1400,7 @@ void func_8004694C(Attacker *a) {
 }
 
 void func_80046A38(void) {
-    func_80044240(4, D_800AA248.cur_obj->pos_x.s.hi, D_800AA248.cur_obj->pos_y.s.hi, 0x1004, D_800AA248.cur_obj->vel_x.w, 0);
+    attacker_spawn(4, D_800AA248.cur_obj->pos_x.s.hi, D_800AA248.cur_obj->pos_y.s.hi, 0x1004, D_800AA248.cur_obj->vel_x.w, 0);
 }
 
 void func_80046A78(Attacker *a) {
@@ -1479,7 +1475,7 @@ void func_80046C30(Attacker *a) {
 }
 
 void func_80046D1C(void) {
-    func_80044240(5, D_800AA248.cur_obj->pos_x.s.hi, D_800AA248.cur_obj->pos_y.s.hi, 0x1004, D_800AA248.cur_obj->vel_x.w, 0);
+    attacker_spawn(5, D_800AA248.cur_obj->pos_x.s.hi, D_800AA248.cur_obj->pos_y.s.hi, 0x1004, D_800AA248.cur_obj->vel_x.w, 0);
 }
 
 void func_80046D5C(Attacker *a) {
@@ -1547,37 +1543,107 @@ void func_80046EC0(Attacker *a) {
 void func_80046F60(void) {
 }
 
-#ifdef NON_MATCHING
-/* 84%: the search is the while condition (right shape); the original keeps a second pointer to unk_20 as a giv and hoists the constant 1 before the loop */
 void func_80046F68(Monster *m) {
     Attacker *a;
     u16 n;
-    s32 dx;
     GameObject *o;
     GameObject *saved;
     s16 x;
 
     a = D_801FA8A8;
+    saved = D_800AA268.p;
     n = 4;
-    saved = D_800AA248.cur_obj;
     if (D_801E1C84 != 0) {
-        x = m->obj->pos_x.s.hi;
-        while ((o = a->obj) == NULL || a->type == 0 || (o->unk_6C & 0x80) ||
-               (dx = o->pos_x.s.hi - x, dx < 0 ? -dx : dx) > ((s16) o->size.u.lo >> 1) - 1) {
-            a++;
-            if (--n == 0) {
-                goto end;
+        o = m->obj;
+        x = o->pos_x.s.hi;
+        do {
+            o = a->obj;
+            if (o != NULL && a->type != 0 && !(o->unk_6C & 0x80) &&
+                abs(o->pos_x.s.hi - x) <= ((s16)o->size.u.lo >> 1) - 1) {
+                a->unk_20 = 1;
+                break;
             }
-        }
-        a->unk_20 = 1;
+            a++;
+        } while (--n != 0);
     }
-end:
-    D_800AA248.cur_obj = saved;
+    D_800AA268.p = saved;
+}
+
+#ifdef NON_MATCHING
+/* 93.31%: the original loads the width before the x distance and makes the half width after it, and keeps the
+ * second half size in v0 with half + 4 in a1 */
+void func_80047028(Monster *m) {
+    Attacker *a = D_801FA8A8;
+    GameObject *saved;
+    GameObject *obj;
+    u16 n;
+    s16 x;
+    s16 d;
+    s32 t;
+    s32 half;
+    u16 w;
+    s32 e;
+    s32 half2;
+    s32 t2;
+    s16 px;
+    s16 py;
+
+    saved = D_800AA268.p;
+    n = 4;
+    if (D_801E1C84 != 0) {
+        px = m->pos.s.lo;
+        py = m->pos.s.hi;
+        do {
+            obj = a->obj;
+            if (a->type != 0 && !(obj->unk_6C & 0x80)) {
+                x = obj->pos_x.s.hi;
+                if (x < D_801F9AC8.s.hi) {
+                    x += (D_801D8864.w + 1) >> 1;
+                }
+                w = obj->size.u.lo;
+                t = x - px;
+                if (t < 0) {
+                    t = -t;
+                }
+                d = t;
+                half = (s16)w >> 1;
+                if (half < d) {
+                    e = d - 4;
+                    if (e < 0) {
+                        e = -e;
+                    }
+                    if (half < e) {
+                        goto next;
+                    }
+                }
+                half2 = (s16)obj->size.u.hi >> 1;
+                t2 = (s16)(obj->pos_y.u.hi - half2) - py;
+                if (t2 < 0) {
+                    t2 = -t2;
+                }
+                d = t2;
+                half2 += 4;
+                if (half2 < d) {
+                    e = d - 4;
+                    if (e < 0) {
+                        e = -e;
+                    }
+                    if (half2 < e) {
+                        goto next;
+                    }
+                }
+                a->unk_22 = 1;
+                a->hit_by = m;
+                break;
+            }
+        next:
+            a++;
+        } while (--n != 0);
+    }
+    D_800AA268.p = saved;
 }
 #else
-INCLUDE_ASM("asm/main/nonmatchings/attacker", func_80046F68);
-#endif
-
 INCLUDE_ASM("asm/main/nonmatchings/attacker", func_80047028);
+#endif
 
 INCLUDE_ASM("asm/main/nonmatchings/attacker", func_8004718C);

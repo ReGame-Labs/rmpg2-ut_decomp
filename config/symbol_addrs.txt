@@ -4,6 +4,17 @@
 // Psy-Q library names come from tools/psyq_match.py (--symbols, then --functions per psyq/ unit) and stay Sony's.
 game_main = 0x8001781C; // type:func  main, which crt0 calls right after setting $gp (docs/TOOLCHAIN.md), compiled under this name (config/aliases.ld)
 
+// main (src/main/main.c)
+main_sort_objects = 0x8001DF98; // type:func
+main_init_objects = 0x8001E0AC; // type:func
+main_free_kind = 0x8001E450; // type:func
+main_free_kind_masked = 0x8001E8C0; // type:func
+main_create_box = 0x8001EB9C; // type:func
+main_set_frame = 0x80020BA0; // type:func
+main_wrap_layer_x = 0x800247E4; // type:func
+main_scroll_layers = 0x8002488C; // type:func
+main_count_monsters = 0x8002958C; // type:func
+
 // The Psy-Q library objects (config/main.yaml's psyq/ units), function by function (tools/psyq_match.py
 // --functions; docs/TOOLCHAIN.md). Byte-identical twins were settled from callers and callees: PadStartCom,
 // SpuWrite, CdFlush/CdSync/CdReady, DsReadyCallback.
@@ -373,6 +384,45 @@ _copy_memcard_patch = 0x8007A640; // type:func
 // LIBCARD A75.OBJ
 StartCARD2 = 0x8007A674; // type:func
 
+// building (src/main/building.c), the buildings, the sky, the monsters' setup
+building_set_sky_colours = 0x8002A4E8; // type:func  () the sky gradient's colours from D_8007CAFC, when D_8007CD40 gives the level one
+building_update_sky = 0x8002AF28; // type:func  () 80 cloud strips, the thunder, then 40 snow flakes or 80 rain drops
+building_update_cloud = 0x8002B0E0; // type:func  (i) cloud strip i, made, moved, its four frames at the bottom
+building_update_raindrop = 0x8002B3AC; // type:func  (i) rain drop i, made, falling, its splash at the bottom
+building_update_snowflake = 0x8002B6E8; // type:func  (i) snow flake i, made, falling
+building_reset_monster = 0x8002BA70; // type:func  (n) clears monster n and makes its body
+building_spawn_monster = 0x8002BAEC; // type:func  (m) the monster's body, its start x by the players, its status bars
+building_clear_monster = 0x8002BE30; // type:func  (m) the whole record, or from 0x58 on
+building_update_all = 0x8002C4B8; // type:func  () each building by its state
+building_set_players_action = 0x8002F474; // type:func  (action) on every player's monster not busy
+building_pick_part = 0x8002F558; // type:func  (b) a random part, 1-2 on a kind-2 building, 1-3 on the others
+building_create_roof = 0x8002FF74; // type:func  () the roof sprite of the current object's building, by Building.roof
+building_count_standing = 0x80030D74; // type:func  () the buildings still standing into D_801FA734
+building_bob_pickup = 0x80034418; // type:func  (r) a pickup's object up and down over 0x50 frames
+building_update_pickup = 0x800344B8; // type:func  (r) the handler of pickup kinds 1-19, by state
+
+// pickup (src/main/pickup.c), the eight Pickup records of D_801FA9BC
+pickup_update_all = 0x8003B568; // type:func  () the D_801E29B0 pickups in use
+pickup_update = 0x8003B5D0; // type:func  (r) its kind's handler
+pickup_clear_all = 0x8003B68C; // type:func  () the eight records
+pickup_spawn_all = 0x8003B6E0; // type:func  () from the level's spawn list D_8007DDA4, at most eight
+pickup_clear = 0x8003B9A0; // type:func  (r)
+pickup_test_touch = 0x8003B9C8; // type:func  (obj, m) 1 when the object's box meets the monster's
+pickup_collect = 0x8003BAB0; // type:func  (m) hands every pickup the monster touches to it
+
+// npc (src/main/npc.c), the per-kind handlers of the pickups (D_801FA9BC) and of the non-player characters (D_801FAC9C)
+npc_update_aim = 0x80039EC4; // type:func  (npc) when the countdown ends, the slope to the nearest player picks the aim 0..2 (unk_24) and a new aim starts D_8007DB04[old * 3 + new]
+
+// actor (src/main/actor.c): the actors of the level's list and the behaviour slots around the current object.
+actor_take_hit = 0x8003F74C; // type:func  (player, actor) what the player's hit does, by the actor's kind and state
+
+// ai (src/main/ai.c): the behaviour slots' action dispatcher and state handlers.
+ai_dispatch_action = 0x800416AC; // type:func  (handlers, ai) the handler for ai->action, else the hit test and the walk
+ai_face_target = 0x80042238; // type:func  (ai) turns the current object round when its target is behind it
+
+// attacker (src/main/attacker.c): the pool of four attackers.
+attacker_spawn = 0x80044240; // type:func  (kind, x, y, flags, vel_x, state) a free slot's object, 0 when made, 1 when none
+
 // monster (src/main/monster.c): the action handlers, the hits, climbing the buildings.
 monster_dispatch_action = 0x800500EC; // type:func  (e, obj) runs D_8007F8FC[e->action], the action clamped to 0..0x67
 monster_follow_holder = 0x80050774; // type:func  (e) places its body at the point of the carrying object's frame for its id
@@ -387,6 +437,10 @@ monster_test_right_side = 0x80056258; // type:func  (x, city) the same for the r
 monster_find_roof = 0x80056598; // type:func  (e) a building roof under it to land on, 1 when found
 monster_find_wall = 0x80056CCC; // type:func  (e) a building wall within 0x14 of its front to climb, 1 when found
 monster_find_floor = 0x80056F38; // type:func  (e, city) climb_floor from its height and the building's floor table
+
+// monster_anim (src/main/monster_anim.c), the monsters' animation scripts and the box tests against buildings, pickups and characters
+monster_anim_find_buildings = 0x8005B8C8; // type:func  (x, y, flags, half_w, half_h) the mask of the standing buildings whose box overlaps, flags 0x10 numbers them from the last
+monster_anim_test_box = 0x8005BC20; // type:func  (x, y, half_w, half_h, obj, how) 1 when the box overlaps the object's, how 1 its frame's box, 2 its size on one side by the facing, 4 a quarter of its width either side
 
 // bonus (src/main/bonus.c): the bonus rounds and the status panel.
 bonus_create_bars = 0x8005D20C; // type:func  (e) the health and meter bars and the panel frame
@@ -405,7 +459,9 @@ bonus_give_awards = 0x8005FEF4; // type:func  (player, awards) bits 1 and 2 extr
 
 // cdload (src/main/cdload.c), the CD file reader and the overlay loader (docs/DISC_LAYOUT.md "The file table" and
 // "Overlays"). Files are read by index into the file table, checksummed and retried.
+cdload_sort_players = 0x80060F3C; // type:func  the monsters' players into D_801FB49C, sorted, 99 for none
 cdload_get_next_player = 0x80061014; // type:func  (player) the player after `player` in the sorted list D_801FB49C, else the first
+cdload_file_size = 0x80061170; // type:func  (index) a file's size from the file table
 cdload_read_file = 0x8006118C; // type:func  (index, buffer) CdlSetmode, CdlSetloc, CdRead, the checksum, 5 retries, returns the size
 cdload_wait_sync = 0x800613AC; // type:func  waits on CdSync, 600 tries
 cdload_open = 0x800613FC; // type:func  (index, mode) reads a file into the read buffer (the stdio emulation the sound driver is given)
@@ -425,16 +481,42 @@ cdload_unpack_rle8 = 0x80061ACC; // type:func  (src, dst) byte RLE
 cdload_unpack_rle16 = 0x80061B4C; // type:func  (src, dst) halfword RLE, the runs through a computed-goto table
 cdload_unpack_rle6 = 0x80061D10; // type:func  (src, dst) 6-bit RLE, four symbols per three bytes
 cdload_unpack_rle4 = 0x80061F90; // type:func  (src, dst) nibble RLE into packed bytes
+cdload_unpack_vlc = 0x800621F8; // type:func  (hdr, bits, dims, dst) method 5, the VLC image, through a code table copied to the scratchpad
+cdload_unpack_vlc8 = 0x80062868; // type:func  (hdr, bits, dims, dst) the same for 8-bit tables, two rows of words per code
 cdload_alloc = 0x80062C10; // type:func  (size) the bump allocator, 8-aligned
+cdload_init_sound = 0x80062C30; // type:func  hands the sound driver its file access, loads its tables and the first bank
 cdload_load_bank = 0x80062F14; // type:func  (index, spuAddr, ..., reload) a sound bank's samples into SPU RAM, returns the bytes used
 cdload_load_bank_by_number = 0x8006301C; // type:func  (n, spuAddr) the bank file D_80085304[n]
 cdload_reset_xa = 0x80063064; // type:func  () the XA player's state
 cdload_stop_xa = 0x800630E8; // type:func  (mode) pauses the drive and restores the ready callback, mode 1 waits and resets
 cdload_on_xa_ready = 0x800632CC; // type:func  (status) the data-ready callback while a track plays
 cdload_play_xa = 0x800632E8; // type:func  (track) XA file track >> 4, channel track & 15
+// The city file tables D_80085264 points to (cdload_city_file_index), in the .data before cdload's own
+D_800851CC = 0x800851CC;
+D_8008524C = 0x8008524C;
+D_80085254 = 0x80085254;
+D_8008525C = 0x8008525C;
 // Constants spimdisasm would pair into symbols (lui + addiu): left as numbers so the C, which has no symbol there,
 // compares equal. cdload_wait_read_sync counts from 0x800000.
 D_7FFFFF = 0x007FFFFF; // ignore:true
+
+// wess (src/main/wess.c), the driver's API, the SPU command set, the voices, the sequence loader
+wess_pitch_mod = 0x8006CF14; // type:func  the pitch bend command every voice of the channel, by its patch map's ranges
+wess_report_error = 0x8006E4BC; // type:func  calls the error callback D_801FDEA8
+wess_sequence_count = 0x8006E4F4; // type:func  the number of sequences in the file
+wess_valid_sequence = 0x8006E504; // type:func  1 for a sequence number in range
+wess_open_sequence_file = 0x8006E530; // type:func  opens the sequence file once, counts the users
+wess_close_sequence_file = 0x8006E59C; // type:func  closes it with its last user
+wess_read_sequence = 0x8006E5F0; // type:func  reads a sequence's data to dst and builds its track table, returns the bytes used
+wess_sequence_header = 0x8006E804; // type:func  reads the sequence file's header, returns the table's size
+wess_load_sequence_table = 0x8006E8B4; // type:func  reads the sequence table, packed or plain
+wess_sequence_size = 0x8006EA50; // type:func  the memory a sequence needs, 0 when loaded
+wess_load_sequence = 0x8006EB08; // type:func  loads a sequence that is not loaded yet
+wess_module_size = 0x8006EE30; // type:func  the memory the module's tables need
+wess_init_channel = 0x8006F634; // type:func  sets a channel up from its track's settings and the caller's overrides
+wess_set_channel_data = 0x8006F8F8; // type:func  the channel's sequence data and labels
+wess_start_sequence = 0x8006F96C; // type:func  a free sequence record and a channel per track, returns the record + 1 or 0
+wess_start_sequence_with = 0x8006FC8C; // type:func  starts a sequence with overrides
 
 // wess_spu: the SPU reverb attributes (an SpuReverbAttr)
 D_801FB530 = 0x801FB530; // size:0x14

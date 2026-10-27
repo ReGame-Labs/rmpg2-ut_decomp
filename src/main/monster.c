@@ -329,7 +329,7 @@ void func_800509EC(Monster *e) {
         if (e->unk_18A == 0) {
             func_80036A20(e);
             if (e->unk_18A == 0) {
-                func_8003BAB0(e);
+                pickup_collect(e);
                 if (e->unk_18A == 0) {
                     func_8004F65C();
                     if (e->unk_18A == 0) {
@@ -742,7 +742,7 @@ void func_800514CC(Monster *e) {
                 }
             }
         } while (--i != 0);
-        if (e->unk_18A != 0 || (func_80036A20(e), e->unk_18A != 0) || (func_8003BAB0(e), e->unk_18A != 0) ||
+        if (e->unk_18A != 0 || (func_80036A20(e), e->unk_18A != 0) || (pickup_collect(e), e->unk_18A != 0) ||
             (func_8004D38C(e), e->unk_18A != 0) || (func_8003F114(e), e->unk_18A != 0) ||
             (func_80047028(e), e->unk_18A != 0)) {
             func_800634D4(e, 3);
@@ -981,7 +981,7 @@ void func_80051E80(Monster *e) {
     if (e->unk_18A == 0) {
         func_80036A20(e);
         if (e->unk_18A == 0) {
-            func_8003BAB0(e);
+            pickup_collect(e);
             if (e->unk_18A == 0) {
                 func_8004D38C(e);
                 if (e->unk_18A == 0) {
@@ -1012,7 +1012,7 @@ void func_8005212C(Monster *e) {
     }
     func_80036A20(e);
     if (e->unk_18A == 0) {
-        func_8003BAB0(e);
+        pickup_collect(e);
         if (e->unk_18A == 0) {
             func_8004DDFC();
             if (e->unk_18A != 0) {
@@ -2182,9 +2182,9 @@ void func_800543FC(void) {
             D_801FA8A0[e->id - 1] = 0;
             e->id = 0;
             D_8007A7D4 |= 1;
-            func_8002BE30(e);
+            building_clear_monster(e);
             D_8007A7D4 &= 0xFFFE;
-            func_80060F3C();
+            cdload_sort_players();
         }
     } while (--i != 0);
     D_801F9924 = 0;

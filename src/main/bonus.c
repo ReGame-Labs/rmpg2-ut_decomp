@@ -13,10 +13,10 @@ s32 func_8005D198(void) {
 }
 
 void func_8005D1BC(s32 arg0, s32 n) {
-    func_8001E450((u16)(n + 0x790));
-    func_8001E450((u16)(n + 0x798));
-    func_8001E450((u16)(n + 0x7A8));
-    func_8001E450((u16)(n + 0x7A0));
+    main_free_kind((u16)(n + 0x790));
+    main_free_kind((u16)(n + 0x798));
+    main_free_kind((u16)(n + 0x7A8));
+    main_free_kind((u16)(n + 0x7A0));
 }
 
 void bonus_create_bars(Monster *e) {
@@ -27,14 +27,14 @@ void bonus_create_bars(Monster *e) {
 
     saved = D_800AA248.cur_obj;
     x = (D_801FA8A0[e->id - 1] - 2) * 0x78;
-    s = func_8001EB9C(0, 0, 0x44, 4, 0xFF00);
+    s = main_create_box(0, 0, 0x44, 4, 0xFF00);
     x2 = x + 0xA6;
     s->pos_x.s.hi = x2;
     s->pos_y.s.hi = 0x18;
     s->priority = 0x501;
     s->kind = e->id + 0x790;
     e->health_bar = s;
-    s = func_8001EB9C(0, 0, 0, 2, 0xFF00FF);
+    s = main_create_box(0, 0, 0, 2, 0xFF00FF);
     s->pos_x.s.hi = x2;
     s->pos_y.s.hi = 0x22;
     s->priority = 0x501;
@@ -174,7 +174,7 @@ void bonus_update_score(Monster *e) {
         for (i = 0; i < 6; i++) {
             digit = e->unk_080[i];
             if (digit != NULL) {
-                func_80020BA0(D_800842B4[v % 10], digit->flags, digit);
+                main_set_frame(D_800842B4[v % 10], digit->flags, digit);
                 v /= 10;
             }
         }
@@ -225,17 +225,17 @@ void bonus_update_lives(Monster *e) {
             func_8005E124(e, 0x7A8);
             func_8005E19C(e, 0x798);
             if (face != NULL) {
-                func_80020BA0(0x4F00417E, face->flags, face);
+                main_set_frame(0x4F00417E, face->flags, face);
             }
             return;
         }
     } else if (face != NULL) {
         if (D_801F9ABC == 3 && id == 7) {
-            func_80020BA0(0x4F003EB2, face->flags, face);
+            main_set_frame(0x4F003EB2, face->flags, face);
         } else if (D_801F9ABC == 4 && e->id == 7) {
-            func_80020BA0(0x4F003EB0, face->flags, face);
+            main_set_frame(0x4F003EB0, face->flags, face);
         } else {
-            func_80020BA0(D_8008427C[e->id - 1], face->flags, face);
+            main_set_frame(D_8008427C[e->id - 1], face->flags, face);
         }
     }
     if (e->unk_004 != e->unk_002) {
@@ -249,7 +249,7 @@ void bonus_update_lives(Monster *e) {
         for (i = 0; i < 2; i++) {
             if (e->unk_078[i] != NULL) {
                 face = e->unk_078[i];
-                func_80020BA0(D_800842B4[v % 10], face->flags, face);
+                main_set_frame(D_800842B4[v % 10], face->flags, face);
                 v /= 10;
             }
         }
@@ -477,16 +477,16 @@ void func_8005E2D8(void) {
         D_801FB46C = t;
         switch (t) {
         case 0x3C:
-            func_8001E450(0x401);
+            main_free_kind(0x401);
             func_8001ED54(&D_80089624);
             break;
         case 0x78:
-            func_8001E450(0x401);
+            main_free_kind(0x401);
             func_8001ED54(&D_80089644);
             break;
         case 0xB4:
-            func_8001E450(0x401);
-            func_8001E450(0x402);
+            main_free_kind(0x401);
+            main_free_kind(0x402);
             D_801FB46C = 0;
             break;
         }

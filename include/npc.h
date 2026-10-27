@@ -26,13 +26,16 @@ struct AiOrder {
 };
 
 typedef struct AiLink {
-    /* 0x00 */ u8 unk_0[0x6];
+    /* 0x00 */ GameObject *unk_0;
+    /* 0x04 */ u16 unk_4;
     /* 0x06 */ u16 unk_6;
     /* 0x08 */ struct AiLinkInfo *unk_8;
 } AiLink;
 
 typedef struct AiLinkInfo {
-    /* 0x00 */ u8 unk_0[0x14];
+    /* 0x00 */ u8 unk_0[0x8];
+    /* 0x08 */ u16 unk_8;
+    /* 0x0A */ u8 unk_A[0xA];
     /* 0x14 */ u16 unk_14;
 } AiLinkInfo;
 

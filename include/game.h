@@ -78,17 +78,17 @@ typedef struct GameObject {
     /* 0x3E */ u8 unk_3E[0x02];
     /* 0x40 */ union {
                    struct GameObject *obj;  /* a link (main.c's list from D_801D8584) */
-                   s32 w;                   /* a value; a box's width (func_8001EB9C: the status bars, OVERATTR's
+                   s32 w;                   /* a value; a box's width (main_create_box: the status bars, OVERATTR's
                                              * volume bars) */
                } unk_40;
     /* 0x44 */ union {                  /* by kind */
                    s32 pc;                  /* the animation script's next command (an address) */
-                   s32 height;              /* a box's height (func_8001EB9C; the results bars, func_800991EC) */
+                   s32 height;              /* a box's height (main_create_box; the results bars, func_800991EC) */
                    s32 v;                   /* a value (OVERATTR's logo: a y, with unk_40.w its x) */
                } script;
     /* 0x48 */ s32 anim;                /* the current animation (an address: the script restarts there) */
     /* 0x4C */ u8 unk_4C;
-    /* 0x4D */ s8 unk_4D;
+    /* 0x4D */ u8 unk_4D;                /* frames left on the animation command (every reader loads it with lbu) */
     /* 0x4E */ u8 unk_4E[0x02];
     /* 0x50 */ union {                  /* by kind */
                    struct GameObject *obj;  /* a link */
@@ -121,9 +121,9 @@ typedef struct GameObject {
                } unk_68;
     /* 0x6C */ u16 unk_6C;              /* 0x80: gone */
     /* 0x6E */ u16 unk_6E;
-    /* 0x70 */ u16 kind;                /* the id func_8001E450 and func_8001EC74 select objects by (0x790 + a
+    /* 0x70 */ u16 kind;                /* the id main_free_kind and func_8001EC74 select objects by (0x790 + a
                                          * monster's slot for the status sprites) */
-    /* 0x72 */ u8 unk_72[0x02];
+    /* 0x72 */ u16 unk_72;
     /* 0x74 */ u16 unk_74;
     /* 0x76 */ u8 unk_76[0x02];
     /* 0x78 */ u32 colour;              /* 0x808080: neutral */
@@ -169,7 +169,7 @@ typedef struct Monster {
     /* 0x018 */ u8 unk_018[0x02];
     /* 0x01A */ u16 unk_01A;
     /* 0x01C */ u16 unk_01C;                   /* a countdown set from a random draw */
-    /* 0x01E */ u8 unk_01E[0x02];
+    /* 0x01E */ u16 unk_01E;
     /* 0x020 */ u16 unk_020;                   /* a tally for the results (OVERATTR's first bar) */
     /* 0x022 */ u16 unk_022;                   /* the step of a throw sequence, 0..4 */
     /* 0x024 */ u16 unk_024;                   /* a tally for the results (the second bar): eating a person or a
@@ -203,8 +203,7 @@ typedef struct Monster {
     /* 0x098 */ GameObject *unk_098[3];
     /* 0x0A4 */ GameObject *bars[3];           /* the results bars, one per tally (OVERATTR, func_8009951C) */
     /* 0x0B0 */ u8 unk_0B0[0x04];
-    /* 0x0B4 */ GameObject *extra[2];          /* sprites of its own (monster 5's, 7's: kind 0x73A), NULL for none */
-    /* 0x0BC */ u8 unk_0BC[0x0C];
+    /* 0x0B4 */ GameObject *extra[5];          /* its own sprites (5's, 7's: kind 0x73A; 2-4 func_8002A1AC), or NULL */
     /* 0x0C8 */ u16 buttons;                   /* the pad's buttons held, pad bits >> 4 (func_800273F4) */
     /* 0x0CA */ u8 unk_0CA[0x02];
     /* 0x0CC */ u16 dir;                       /* the d-pad direction, 0 none (D_8007C124[pad bits & 0xF]); an index
@@ -223,7 +222,7 @@ typedef struct Monster {
     /* 0x0E6 */ u16 unk_0E6;
     /* 0x0E8 */ u8 unk_0E8[0x02];
     /* 0x0EA */ u16 unk_0EA;
-    /* 0x0EC */ u8 unk_0EC[0x02];
+    /* 0x0EC */ u16 unk_0EC;
     /* 0x0EE */ s16 unk_0EE;
     /* 0x0F0 */ s32 unk_0F0;                   /* a change to its health, applied once (func_80029510) */
     /* 0x0F4 */ s16 front_x;                   /* its front: pos_x plus or minus half its width, by its facing */
@@ -265,7 +264,7 @@ typedef struct Monster {
     /* 0x146 */ s16 unk_146;
     /* 0x148 */ u8 unk_148[0x08];
     /* 0x150 */ s16 unk_150;
-    /* 0x152 */ s16 unk_152;
+    /* 0x152 */ u16 unk_152;
     /* 0x154 */ u8 unk_154[0x0C];
     /* 0x160 */ GameObject *unk_160;               /* an object it is carried by: monster_follow_holder places it there */
     /* 0x164 */ s16 unk_164;
@@ -274,7 +273,10 @@ typedef struct Monster {
     /* 0x16A */ u8 unk_16A[0x02];
     /* 0x16C */ GameObject *unk_16C;
     /* 0x170 */ u16 unk_170;
-    /* 0x172 */ u8 unk_172[0x0A];
+    /* 0x172 */ u8 unk_172[0x02];
+    /* 0x174 */ s32 unk_174;
+    /* 0x178 */ u16 unk_178;
+    /* 0x17A */ u16 unk_17A;
     /* 0x17C */ s32 unk_17C;
     /* 0x180 */ struct Monster *attacker;      /* the monster that hit it last (func_8005421C) */
     /* 0x184 */ u16 unk_184;
@@ -310,7 +312,7 @@ typedef struct Monster {
     /* 0x1DA */ u8 unk_1DA[0x04];
     /* 0x1DE */ u16 unk_1DE;
     /* 0x1E0 */ u16 unk_1E0;
-    /* 0x1E2 */ u8 unk_1E2[0x02];
+    /* 0x1E2 */ u16 unk_1E2;
     /* 0x1E4 */ s16 *unk_1E4;                  /* the demo's input script: 12-byte records (frame, direction, buttons), 0x7FFF ends it */
     /* 0x1E8 */ u8 unk_1E8[0x10];
     /* 0x1F8 */ s32 unk_1F8;
@@ -348,7 +350,7 @@ typedef struct ObjectDef {
     /* 0x18 */ u8 unk_18[0x04];
     /* 0x1C */ s32 unk_1C;
     /* 0x20 */ s32 flags;
-    /* 0x24 */ u8 unk_24[0x04];
+    /* 0x24 */ s32 unk_24;
     /* 0x28 */ void *anim;                     /* the animation data */
 } ObjectDef;
 
@@ -366,7 +368,10 @@ typedef struct GameState {
     /* 0x14 */ s32 action;                     /* the monster's action, clamped, before the dispatch (monster_dispatch_action;
                                                 * D_800AA25C) */
     /* 0x18 */ s32 unk_18;                     /* the argument of the current actor's handler (D_800AA260) */
-    /* 0x1C */ ObjectDef *unk_1C;
+    /* 0x1C */ union {
+                   ObjectDef *def;
+                   s32 n;                   /* a count (main_count_monsters) */
+               } unk_1C;
     /* 0x20 */ GameObject *cur_obj;            /* the object being updated (D_800AA268) */
     /* 0x24 */ s32 unk_24;                     /* D_800AA26C */
     /* 0x28 */ s32 unk_28;                     /* a counter (func_8003C3B0: the items left in the building) */
@@ -452,7 +457,7 @@ typedef struct Ai {
                    } s;
                } unk_28;
     /* 0x2C */ u8 unk_2C[0x02];
-    /* 0x2E */ s16 unk_2E;
+    /* 0x2E */ u16 unk_2E;
     /* 0x30 */ Fixed unk_30;
     /* 0x34 */ Fixed unk_34;
     /* 0x38 */ u16 unk_38;                     /* a countdown */
@@ -476,6 +481,7 @@ typedef struct BuildingDef {
     /* 0x10 */ s32 unk_10;
     /* 0x14 */ SpriteFrame **frames;          /* its items' frames (Building.frames) */
     /* 0x18 */ s32 unk_18;
+    /* 0x1C */ void *unk_1C;                   /* what func_8002F688 shows on the item it destroys (func_8002FB38) */
 } BuildingDef;
 
 /* What Building.unk_018 points to. */
@@ -553,7 +559,7 @@ typedef struct Building {
     /* 0x060 */ void *unk_060;
     /* 0x064 */ void *unk_064;
     /* 0x068 */ SpriteFrame **frames;          /* from the definition: the items' frames, by item kind - 2 */
-    /* 0x06C */ u8 unk_06C[0x04];
+    /* 0x06C */ s32 unk_06C;
     /* 0x070 */ struct BuildingItem *unk_070;
     /* 0x074 */ u16 unk_074;
     /* 0x076 */ u16 unk_076;
@@ -698,7 +704,7 @@ typedef struct TextMessage {
     /* 0x0A */ u16 y;
     /* 0x0C */ s32 unk_0C;
     /* 0x10 */ void (*layout)(void);       /* func_8001EDE4: centred */
-    /* 0x14 */ s32 kind;                   /* the kind of the objects that show it (func_8001E450 frees them) */
+    /* 0x14 */ s32 kind;                   /* the kind of the objects that show it (main_free_kind frees them) */
     /* 0x18 */ u8 text[1];                 /* as long as the message */
 } TextMessage;
 
@@ -722,7 +728,7 @@ extern s16 D_801F9944;
 extern s16 D_801F9ADC;
 extern s16 D_801FA964;
 extern u16 D_801FA968;
-extern s16 D_801FA984[3];                /* per player: playing */
+extern s16 D_801FA984[4];                /* per player: playing (the save copies a fourth word, menu_write_save) */
 extern u8 D_800937E8[];
 extern u8 D_800938AC[];
 extern u8 D_80095678[];

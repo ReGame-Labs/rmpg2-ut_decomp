@@ -7,6 +7,7 @@
 #include "psyq/libapi.h"
 #include "psyq/libgpu.h"
 #include "psyq/libetc.h"
+#include "npc.h"
 
 /* Provisional types of src/main/main.c, the first file of the game's code (main, the game loop, the
  * sprite objects). Field names are offsets until their meaning is known; the types are the ones the code's loads and
@@ -96,5 +97,13 @@ typedef struct Glyph {
     s16 unk_4;
     s16 unk_6;
 } Glyph;
+
+/* A step of an Ai's flight towards its target (func_80022EC0): the speed and the animation for one of 8x8
+ * direction classes (the distances halved until both are below 8). */
+typedef struct AiStep {
+    s32 vel_x;
+    s32 vel_y;
+    Anim *anim;
+} AiStep;
 
 #endif /* MAIN_H */

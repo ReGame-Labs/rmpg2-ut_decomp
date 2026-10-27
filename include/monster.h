@@ -34,14 +34,14 @@ s32 func_80025DF8(s32);
 void func_80029118(s16, u16);
 void func_8002CFAC(Monster *, Building *);
 void func_8002D144(Monster *, Building *);
-void func_8002BE30(Monster *);
+void building_clear_monster(Monster *);
 s16 func_8003FCD8(s32, s32);             /* a horizontal distance */
 void func_80031280(Monster *, Building *);
 GameObject **func_80031420(u16, Building *);
 s32 func_80031714(Monster *);
 void func_80036A20(Monster *);
 void func_800376D8(Monster *);
-void func_8003BAB0(Monster *);
+void pickup_collect(Monster *);
 void func_8003EF64(Monster *);
 void func_8003F114(Monster *);
 void func_8003F50C(Monster *);
@@ -152,7 +152,7 @@ void func_80059D2C(void);
 void func_8005A0F0(void);
 Monster *bonus_find_most_lives(void);
 s32 func_8005E4E4(void);
-void func_80060F3C(void);
+void cdload_sort_players(void);
 void func_800634B0(Monster *, s32);
 void func_800634D4(Monster *, u32);
 

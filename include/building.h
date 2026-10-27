@@ -9,6 +9,7 @@
 
 extern u8 D_80011BA4[];
 extern u8 D_80011BA4_alt[];   /* another name for D_80011BA4 (config/aliases.ld) */
+extern u8 D_80011BDC[];   /* func_8002F688: the animation of kind-3 buildings, D_80011BA4 the kind-2 one's */
 extern u8 D_80011E18[];
 extern u8 D_8007C934[];
 extern u8 D_8007D0B8[];
@@ -18,6 +19,10 @@ extern u8 D_8007D19C[];
 extern u8 D_8007D1E8[];
 extern u8 D_8007D234[];
 extern u8 D_8007D280[];
+extern s32 D_8007CB2C[4];   /* the four frames of a cloud strip (building_update_cloud), one set */
+extern s32 D_8007CB3C[4];   /* the other set */
+extern s16 D_8007D0A8[4][2];   /* four x ranges (first, last) func_80031714 tests */
+s32 func_8005F208(void);
 extern u8 D_8007D2CC[];
 extern u8 D_8007D318[];
 extern u8 D_8007D364[];
@@ -220,6 +225,7 @@ void func_80030B5C(Building *);
 void func_8002C25C(Building *arg0);
 void func_8002F084();
 void func_8002C3C4(Building *arg0);
+void func_8002C8B4(Building *);
 void func_8002D9F8(Building *);
 void func_8002C6A0();   /* old-style: called without its argument */
 void func_8002C738(Building *arg0);
@@ -269,22 +275,22 @@ void func_80031A3C(void);
 void func_80031B10(void);
 void func_80031444(void);
 void func_8001E7A0(void);
-void func_80020BA0();
+void main_set_frame();
 void func_80031A68(void);
 void func_80031AC8(void);
-void func_80031CB4(void *, s32);
-void func_80031B74(s32 arg0);
-void func_80031B9C(s32 arg0);
-void func_80031BC4(s32 arg0);
-void func_80031BEC(s32 arg0);
-void func_80031C14(s32 arg0);
-void func_80031C3C(s32 arg0);
-void func_80031C64(s32 arg0);
-void func_80031C8C(s32 arg0);
-void func_80032668(s32 arg0);
-void func_80032710(s32 arg0);
-void func_80032738(s32 arg0);
-void func_80032760(s32 arg0);
+void func_80031CB4(void *, Ai *);
+void func_80031B74(Ai *arg0);
+void func_80031B9C(Ai *arg0);
+void func_80031BC4(Ai *arg0);
+void func_80031BEC(Ai *arg0);
+void func_80031C14(Ai *arg0);
+void func_80031C3C(Ai *arg0);
+void func_80031C64(Ai *arg0);
+void func_80031C8C(Ai *arg0);
+void func_80032668(Ai *arg0);
+void func_80032710(Ai *arg0);
+void func_80032738(Ai *arg0);
+void func_80032760(Ai *arg0);
 void func_8003EB5C(void *, void *);
 void func_80032788(void);
 void func_800327B4(void);
@@ -477,12 +483,12 @@ void func_8002E9F8(Building *);
 void func_80032630(s32, Ai *);
 void func_8002E0C8(Monster *, Building *);
 void func_8003E788(Ai *);
-void func_8002F688();
+void func_8002F688();   /* a K&R definition: (Building *, u16 flag, Monster *, BuildingItem *) */
 void func_8002FB38(void *, GameObject *);
 void func_8002E348(Monster *, BuildingItem *);
 void func_80030D14();   /* called with one and with two arguments: no prototype in the original */
 void func_8002B878(void);
-void func_8002BA70(s32);
+void building_reset_monster(s32);
 void func_8002FAA4(Monster *, BuildingItem *);
 void func_80030BAC(BuildingPart *);
 void func_80030A70(s32, BuildingPart *);
@@ -493,23 +499,24 @@ void func_80030B00(s32, BuildingItem *);
 extern void (*D_8007CFD0[])(Building *);
 extern s32 *D_80011D98[];
 void func_8003DB74(Ai *);
+s32 func_8003DC3C(Ai *);
 void func_80031FD4(s32, Ai *);
 void func_80030834(Building *, s32);
 void func_8002E9A4(Building *);
-void func_8002BE30(Monster *);
+void building_clear_monster(Monster *);
 void func_80031154();   /* a K&R definition: no prototype in the original */
 extern u16 D_8007CFE8[];
 extern UnkStructPair D_8007CE08[];
 extern UnkStructPair D_8007CE34[];
 void func_8002EE14(s16, BuildingItem *);
-void func_80030E04(s32, BuildingItem *);
+void func_80030E04(Monster *, BuildingItem *);
 void func_8002FD24(BuildingItem *, Building *);
 s32 func_8002DB3C(u16, u16, BuildingItem *);
-void func_80034418(Building *);
+void building_bob_pickup(Building *);
 void func_8002F898(Building *, BuildingItem *);
 BuildingPart *func_8002ED30(u16, BuildingItem *);   /* the part `which` (1-3) of a record, NULL for another value */
-u16 func_8002F558(Building *);
-void func_8002DBF4(u16, s32, Monster *, BuildingItem *);
+u16 building_pick_part(Building *);
+void func_8002DBF4(u16, u16, Monster *, BuildingItem *);
 void func_80025848(BuildingItem *);
 void func_80024964(s32, GameObject *);
 extern u8 D_8001236C[];
@@ -518,7 +525,7 @@ extern u8 D_8001236C_alt[];   /* another name for D_8001236C (config/aliases.ld)
 extern UnkStructPair D_801D8804[14];
 extern u16 D_8007CFF8[];   /* a u16 table after a header word (func_8003089C) */
 void func_800303DC(GameObject *, Building *);
-void func_80030D74(void);
+void building_count_standing(void);
 void func_8002CFAC(Monster *, Building *);
 BuildingItem *func_8002CD24(u16, Monster *, BuildingItem *);
 void func_80031280(Monster *, Building *);
@@ -539,7 +546,7 @@ extern s32 D_80011ED0[];
 extern s32 D_80011ED8[];
 extern s32 D_80012068[];
 void func_800305C8(s32 *, s16, GameObject *, Building *);
-void func_8002DE08(u16, s16, Monster *, BuildingItem *);
+void func_8002DE08();   /* a K&R definition: (u16 which, s16 n, Monster *, BuildingItem *) */
 void *func_8002DAAC(u16, u16, BuildingItem *);
 void func_80030754(BuildingPart *, s16, Monster *, BuildingItem *);
 s32 func_8001EB10(s32, s32);
@@ -571,9 +578,30 @@ extern u8 D_80084028[];
 extern GameObject *D_801E1E34[2];
 void func_8003197C(u16 *, s32, GameObject **);
 void func_80053C50(s32, Monster *);
-void func_8002BAEC(Monster *);
+void building_spawn_monster(Monster *);
+extern s32 D_8007CDEC[7];   /* the body sprite of each monster id (building_spawn_monster) */
+extern Anim D_80096560;
+s32 func_8001E2B8(GameObject *);
+void func_8002A1AC(Monster *, s32);
+void bonus_create_bars(Monster *);
+void bonus_create_lives(Monster *);
+void bonus_create_score(Monster *);
+void func_8005E124(Monster *, s32);
+void bonus_create_counter(s32, u8);
+extern Anim D_80011D48;   /* func_8002E658's sprite at a part's point */
+extern Anim D_80011F10;   /* its second sprite, 8 pixels lower right, half the time */
+extern Anim D_80016890;   /* func_8002F100's three stages */
+extern Anim D_800168B8;
+extern Anim D_800168D8;
+extern Anim D_80016964;
+extern Anim D_80016A78;
+extern GameObject *D_801FB448;   /* a box (main_create_box) whose width func_8002F100 sets from Building.unk_010 */
+GameObject *main_create_box(s32 x, s32 y, s32 w, s32 h, s32 colour);
+void func_80029118(s16, u16);
 extern Anim D_80011F58;
 extern Anim D_80011F90;
+extern Anim D_80011FC8;   /* the sprite func_80030E04 puts at x + 0x28 on a kind-2 building */
+extern Anim D_80012018;   /* the same at x + 0x3C on the others */
 extern s32 D_80012110[];
 extern s32 D_8001214C[];
 extern s32 D_8001214C_alt[];   /* another name for D_8001214C (config/aliases.ld) */
@@ -604,9 +632,9 @@ extern u8 D_8007C979;
 extern u8 D_8007C97A;
 extern s16 D_801D8728;
 void func_8002ADE8(void);
-void func_8002B0E0(s32);
-void func_8002B3AC(s32);
-void func_8002B6E8(s32);
+void building_update_cloud(s32);
+void building_update_raindrop(s32);
+void building_update_snowflake(s32);
 extern Anim *D_8007CFD8[];
 void func_8003CCC0(void *);
 extern s32 D_800AA294;   /* D_800AA248.unk_4C by its own name */
