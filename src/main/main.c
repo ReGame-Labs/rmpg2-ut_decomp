@@ -143,7 +143,7 @@ void *func_80025C08(void *);
 s32 main_load_image_8bit(s32, s32, s16, s16);
 s32 main_load_image_4bit(s32, s32, s16, s16);
 extern s16 D_801D876C[];
-void func_80025E68(void);
+void main_update_monsters(void);
 void func_8002A72C(void);
 void building_update_sky(void);
 void func_800377B4(Npc *);
@@ -391,7 +391,7 @@ u16 func_800272B0(Monster *);
 void func_800580F8(void *);
 void func_80026F98(Monster *arg0);
 void func_80020AF4(s32);
-void func_800273F4(Monster *, s32);
+void main_read_pad(Monster *, s32);
 void func_80027394(void);
 extern s32 D_801C51D0;
 s32 func_8001A0A0(void);
@@ -2047,7 +2047,7 @@ void func_8001C77C(void) {
 void func_8001C784(void) {
     D_801D3758 += 1;
     func_8001CFE4();
-    func_80025E68();
+    main_update_monsters();
     func_8002A72C();
     building_update_sky();
     func_8005E3CC();
@@ -6097,7 +6097,7 @@ void bonus_update_lives(Monster *);
 void bonus_update_icons(Monster *);
 void func_80027AB0(void);
 void func_800297B4(void);
-void func_80028184(void);
+void main_update_camera(void);
 void building_update_all(void);
 void func_800636B0(void);
 void cdload_sort_players(void);
@@ -6114,7 +6114,7 @@ void func_8004B038(void);
 void func_800299C4(void);
 void func_8002A354(s32);
 
-void func_80025E68(void) {
+void main_update_monsters(void) {
     char text[40];
     u8 *name;
     Monster *m;
@@ -6198,7 +6198,7 @@ void func_80025E68(void) {
     func_80027AB0();
     main_count_monsters();
     func_800297B4();
-    func_80028184();
+    main_update_camera();
     if (D_801FA980 == 0) {
         D_801FA980 = 1;
         building_update_all();
@@ -6734,13 +6734,13 @@ void func_80027394(void) {
     i = 0;
     do {
         i += 1;
-        func_800273F4(&D_801E0B78[func_80025DF8(i)], i & 0xFFFF);
+        main_read_pad(&D_801E0B78[func_80025DF8(i)], i & 0xFFFF);
     } while (i < 3);
 }
 
 /* Reads a monster's pad (or its demo script when the demo runs): buttons and direction, with their change
  * handlers. One variable holds the new buttons, then the previous direction. */
-void func_800273F4(Monster *monster, s32 arg1) {
+void main_read_pad(Monster *monster, s32 arg1) {
     s16 *script;
     u16 buttons;
     u16 held;
@@ -7293,11 +7293,11 @@ extern s32 D_801D3D90;
 extern s16 D_801FA724;
 extern s16 D_801FA728;
 extern s16 D_801FA9A8;
-void func_80028B1C(void);
+void main_find_camera_pair(void);
 void func_800288B0(s32 *vel2, s32 *vel1);
 void func_80029D5C(s32, s32);
 
-void func_80028184(void) {
+void main_update_camera(void) {
     s32 flags;
     s32 vel2;
     s32 vel1;
@@ -7317,7 +7317,7 @@ void func_80028184(void) {
         func_80029D5C(flags, D_8007BD7C);
         return;
     }
-    func_80028B1C();
+    main_find_camera_pair();
     func_800288B0(&vel2, &vel1);
     x = D_801FA9A8;
     speed = scroll->unk_26 << 16;
@@ -7448,7 +7448,7 @@ done:
     main_update_camera_y();
 }
 #else
-INCLUDE_ASM("asm/main/nonmatchings/main", func_80028184);
+INCLUDE_ASM("asm/main/nonmatchings/main", main_update_camera);
 #endif
 
 void main_start_scroll_down(void) {
@@ -7597,7 +7597,7 @@ extern s16 D_801D8844;
 extern s16 D_801FA724;
 extern s16 D_801FA728;
 extern s16 D_801FA9A8;
-s16 func_80028ADC(s32, s32);
+s16 main_get_midpoint(s32, s32);
 
 void func_800288B0(s32 *vel2, s32 *vel1) {
     Monster *m1;
@@ -7663,7 +7663,7 @@ void func_800288B0(s32 *vel2, s32 *vel1) {
             *vel2 = o2->vel_x.w;
             D_801FA724 = x2;
             D_801FA728 = x1;
-            result = func_80028ADC((s16) x2, (s16) x1);
+            result = main_get_midpoint((s16) x2, (s16) x1);
         }
     }
     D_801FA9A8 = result;
@@ -7674,7 +7674,7 @@ INCLUDE_ASM("asm/main/nonmatchings/main", func_800288B0);
 
 /* 91.3 %: the result is computed from a copy of the larger value (move v0,a2) in the original; the C computes it in place */
 #ifdef NON_MATCHING
-s16 func_80028ADC(s32 a, s32 b) {
+s16 main_get_midpoint(s32 a, s32 b) {
     s16 lo;
     s16 hi;
 
@@ -7687,17 +7687,17 @@ s16 func_80028ADC(s32 a, s32 b) {
     return hi - ((s16) (hi - lo) >> 1);
 }
 #else
-INCLUDE_ASM("asm/main/nonmatchings/main", func_80028ADC);
+INCLUDE_ASM("asm/main/nonmatchings/main", main_get_midpoint);
 #endif
 
 extern s16 D_801D8844;
 extern s16 D_801E1E24[8];
-s16 func_80028ADC(s32, s32);
+s16 main_get_midpoint(s32, s32);
 s32 abs(s32);
 
 /* The camera's two tracked monsters: for each pair of the three players' monsters in play, their x distance and
  * midpoint (D_801E1E24[0..2], [4..6]; a lone monster's x in [4..7]); D_801D8844 picks the farthest (1..4). */
-void func_80028B1C(void) {
+void main_find_camera_pair(void) {
     Monster *m;
     Monster *other;
     s16 xa;
@@ -7740,7 +7740,7 @@ void func_80028B1C(void) {
                 xb += width2;
             }
             xb += cam2;
-            mid = func_80028ADC(xb, xa);
+            mid = main_get_midpoint(xb, xa);
             xa = abs(xa);
             xb = abs(xb);
             xb = abs(xb - xa);
@@ -7756,7 +7756,7 @@ void func_80028B1C(void) {
                 xb += width2;
             }
             xb += cam2;
-            mid = func_80028ADC(xb, xa);
+            mid = main_get_midpoint(xb, xa);
             xa = abs(xa);
             xb = abs(xb);
             xb = abs(xb - xa);
@@ -7780,7 +7780,7 @@ void func_80028B1C(void) {
                 xb += width2;
             }
             xb += cam2;
-            mid = func_80028ADC(xb, xa);
+            mid = main_get_midpoint(xb, xa);
             xa = abs(xa);
             xb = abs(xb);
             xb = abs(xb - xa);
@@ -7839,8 +7839,9 @@ void func_80029170(void) {
 }
 
 #ifdef NON_MATCHING
-/* 95.49%: 95.5 %: the original keeps 0x37 from the first compare in a2 and stores it (m->action = 0x37), the C
- * loads it again (one instruction more); action - 9 is computed before the 0x34 test, the original after it */
+/* 95.77%: 95.8 %: the original keeps 0x37 from the first compare in a2 and stores it (m->action = 0x37) where the C
+ * loads it again (cse's path is longer here); its two range tests (action - 9 < 6, action - 0x34 < 2) keep an andi
+ * the C folds away */
 u16 func_800291DC(Monster *m, GameObject *obj) {
     u16 action;
     u16 next;
@@ -7892,11 +7893,10 @@ u16 func_800291DC(Monster *m, GameObject *obj) {
                     m->action = 0xF;
                     func_8001F724(0x72);
                 } else {
-                    next = m->action;
-                    action = next - 9;
-                    if (next == 0x34 || next == 0x35) {
+                    action = m->action;
+                    if (action == 0x34 || action == 0x35) {
                         m->action = 0x26;
-                    } else if (action < 6) {
+                    } else if ((u16) (action - 9) < 6) {
                         return 0;
                     } else {
                         m->action = 0x37;
@@ -7938,7 +7938,7 @@ u16 func_800291DC(Monster *m, GameObject *obj) {
         next = 0xE;
     } else if (m->climb_side != 0 || obj->pos_y.s.hi < 0xE1 || obj->pos_y.s.hi >= 0xF9) {
         next = 0xF;
-    } else if (action >= 0x34 && action <= 0x35) {
+    } else if ((u16) (action - 0x34) < 2) {
         return 0;
     } else {
         next = 0xA;
