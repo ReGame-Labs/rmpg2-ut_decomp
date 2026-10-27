@@ -117,7 +117,7 @@ void func_800413BC(u16 arg0, Actor *actor);
 void func_8003E6A4(Ai *ai);
 u16 func_8003EB5C(Anim *anim, GameObject *mover);
 void func_8003EC40(Actor *actor);
-void func_8003F74C(Monster *player, Actor *actor);
+void actor_take_hit(Monster *player, Actor *actor);
 u16 func_8003FC30(Monster *player, Actor *actor);
 s16 func_8003FCD8(s32 arg0, s32 arg1);
 void func_8003FF0C(s32 vel, s32 kind, Actor *actor);
@@ -129,6 +129,9 @@ void func_800415B4(void);
 extern const AiHandler D_8007DEA0[];
 extern ActorSound D_8007E1FC[];
 extern void (*D_8007E1E4[])(Actor *actor);
+extern void (*D_8007E244)(Actor *);
+extern void (*D_8007E2CC)(Actor *);
+extern void (*D_8007E398)(Actor *);
 extern Anim D_80094AEC;
 extern Anim D_80094514;
 extern ActorDef D_80082138[];
@@ -1189,18 +1192,13 @@ void func_8003F114(Monster *player) {
     D_800AA248.cur_obj = saved;
 }
 
-#ifdef NON_MATCHING
-/* 97.74%: 97.7%: the original stores D_800AA248.cur_obj in the flag test's delay slot (here after the join), and
- * the counter and &D_800AA248 swap t0/t1 */
-extern void (*D_8007E398)(Actor *);
-
 s32 func_8003F150(Monster *player) {
     Actor *actor = D_801E1E48;
     GameObject *mover;
     u16 n = D_801E28A4;
     s16 kind;
     s16 x;
-    s32 d;
+    s32 flip;
     u16 px;
     u16 py;
 
@@ -1216,27 +1214,19 @@ s32 func_8003F150(Monster *player) {
                     if (x < D_801F9ACA) {
                         x += (D_801D8864.w + 1) >> 16;
                     }
-                    d = x - (s16)px;
-                    if (d < 0) {
-                        d = -d;
-                    }
-                    if ((s16)d <= mover->size.s.lo) {
-                        d = (s16)(mover->pos_y.u.hi - 5) - (s16)py;
-                        if (d < 0) {
-                            d = -d;
-                        }
-                        if ((s16)d <= mover->size.s.hi) {
+                    if ((s16)abs(x - (s16)px) <= mover->size.s.lo) {
+                        if ((s16)abs((s16)(mover->pos_y.u.hi - 5) - (s16)py) <= mover->size.s.hi) {
                             if (kind == 0xA) {
                                 func_80054374(0x28, player);
                                 func_800634D4(player, 4);
                                 player->unk_024++;
                                 actor->unk_28 = 1;
                             } else {
-                                if (D_800AA248.cur_obj->flags & 0x10) {
-                                    D_800AA248.cur_obj = mover;
+                                flip = D_800AA248.cur_obj->flags & 0x10;
+                                D_800AA248.cur_obj = mover;
+                                if (flip) {
                                     mover->vel_x.w = -0x48000;
                                 } else {
-                                    D_800AA248.cur_obj = mover;
                                     mover->vel_x.w = 0x48000;
                                 }
                                 D_800AA248.cur_obj->vel_y.w = -0x58000;
@@ -1256,9 +1246,6 @@ s32 func_8003F150(Monster *player) {
     }
     return 0;
 }
-#else
-INCLUDE_ASM("asm/main/nonmatchings/actor", func_8003F150);
-#endif
 
 s32 func_8003F378(Monster *player) {
     Actor *actor = D_801E1E48;
@@ -1298,7 +1285,8 @@ u16 func_8003F4A8(s16 x0, s16 y0, s16 x1, s16 y1, s16 x2, s16 y2) {
 }
 
 #ifdef NON_MATCHING
-/* 96.31%: 96.3%: registers only: x in a0 (a1 in the original), and the y distance and the size compare swap v0/v1 */
+/* 99.93%: one operand order: the original adds the size to y0 as (size + y0) with the result in y0's
+ * register */
 s32 func_8003F50C(Monster *player) {
     Actor *actor = D_801E1E48;
     GameObject *mover;
@@ -1322,27 +1310,21 @@ s32 func_8003F50C(Monster *player) {
                         if (x < D_801F9ACA) {
                             x += (D_801D8864.w + 1) >> 16;
                         }
-                        t = x - player->pos.s.lo;
-                        if (t < 0) {
-                            t = -t;
-                        }
-                        d = t;
+                        d = abs(x - player->pos.s.lo);
                         if (((s16)mover->size.u.lo >> 1) + 8 >= d) {
                             t = player->pos.s.hi + 5;
-                            t = mover->pos_y.s.hi - t;
-                            if (t < 0) {
-                                t = -t;
-                            }
-                            d = t;
+                            d = abs(mover->pos_y.s.hi - t);
                             if (d < mover->size.s.hi) {
                             hit:
                                 return func_8003FC30(player, actor);
                             }
                         }
                     } else {
-                        x0 = -mover->unk_1C.u.lo + mover->pos_x.u.hi;
-                        y0 = mover->pos_y.u.hi - mover->unk_1C.u.hi;
-                        y1 = mover->size.u.hi + y0;
+                        x = mover->unk_1C.u.lo;
+                        x0 = mover->pos_x.u.hi - x;
+                        d = mover->unk_1C.u.hi;
+                        y0 = mover->pos_y.u.hi - d;
+                        y1 = y0 + mover->size.u.hi;
                         if (func_8003F4A8(x0, y0, player->pos.s.lo, player->pos.s.hi, x0, y1) == 1) {
                             goto hit;
                         }
@@ -1358,7 +1340,131 @@ s32 func_8003F50C(Monster *player) {
 INCLUDE_ASM("asm/main/nonmatchings/actor", func_8003F50C);
 #endif
 
-INCLUDE_ASM("asm/main/nonmatchings/actor", func_8003F74C);
+void actor_take_hit(Monster *player, Actor *actor) {
+    GameObject *obj = actor->unk_0;
+    s32 kind;
+    s32 vx;
+    s32 score;
+
+    if (actor->unk_4 == 0x54 || actor->unk_6 == 0xE) {
+        actor->unk_28 = 1;
+        actor->unk_2C = player;
+        actor->unk_3A = player->pos.u.lo;
+        actor->unk_3C = player->pos.u.hi;
+        return;
+    }
+    if (actor->unk_6 == 0xB) {
+        score = 0x5A;
+        if (player->unk_1AC == 0) {
+            score = 0x1E;
+        }
+        func_80054374(score, player);
+        func_8005E0E8(player);
+        player->unk_126 = 0;
+        return;
+    }
+    actor->unk_28 = 1;
+    if (actor->unk_6 == 0xA) {
+        func_80054374(0x28, player);
+        func_800634D4(player, 4);
+        player->unk_024++;
+        return;
+    }
+    if (actor->unk_6 == 1) {
+        func_8003FB5C(player, actor);
+        return;
+    }
+    if (actor->unk_4 == 0x12) {
+        func_80040314(player);
+    } else {
+        score = 0x5A;
+        if (player->unk_1AC == 0) {
+            score = 0x1E;
+        }
+        func_80054374(score, player);
+        func_8005E0E8(player);
+    }
+    kind = actor->unk_6;
+    actor->unk_1C = D_800AA248.cur_obj->flags;
+    if (kind != 3) {
+        if (actor->unk_4 == 0x8E) {
+            if (kind != 0) {
+                func_80053D68(0x28000, player);
+                player->action = 8;
+                actor->unk_0->vel_x.w = (D_800AA248.cur_obj->flags & 0x10) ? -0x12000 : 0x12000;
+                actor->unk_0->vel_y.w = -0x90000;
+                actor->unk_20 = &D_8007E244;
+                actor->unk_2C = player;
+                func_8004155C(0, actor);
+                return;
+            }
+            player->unk_020--;
+            actor->unk_2C = player;
+            switch (player->unk_0EA) {
+            case 4:
+                obj->vel_y.w = 0x80000;
+                vx = 0x30000;
+                if (D_800AA248.cur_obj->flags & 0x10) {
+                    vx = -0x30000;
+                }
+                obj->vel_x.w = vx;
+                break;
+            case 1:
+                obj->vel_y.w = -0x80000;
+                obj->vel_x.w = -0x30000;
+                break;
+            case 2:
+                obj->vel_y.w = -0x80000;
+                obj->vel_x.w = 0x30000;
+                break;
+            default:
+                obj->vel_y.w = -0x80000;
+                vx = 0x30000;
+                if (D_800AA268.p->flags & 0x10) {
+                    vx = -0x30000;
+                }
+                obj->vel_x.w = vx;
+                break;
+            }
+            player->unk_18A = 1;
+            return;
+        }
+        func_80053D68(0x28000, player);
+        if (player->unk_05C == 0x4E || player->unk_05C == 2) {
+            return;
+        }
+        switch (actor->unk_6) {
+        case 4:
+        case 8:
+        case 9:
+        case 12:
+        case 13:
+            if (D_800AA248.cur_obj->pos_y.s.hi != 0xE1 || player->climb_side != 0 || player->unk_18E != 0) {
+                if (actor->unk_4 == 0x56) {
+                    player->unk_126 = 0x19;
+                }
+                actor->unk_6 = 2;
+                actor->unk_20 = &D_8007E2CC;
+                func_80053D68(8, player);
+                player->action = 8;
+                return;
+            }
+            obj = actor->unk_0;
+            player->action = 0x45;
+            if (D_800AA248.cur_obj->flags & 0x10) {
+                obj->vel_x.w = 0x6000;
+                obj->pos_x.w = D_800AA248.cur_obj->pos_x.w - 0xF0000;
+            } else {
+                obj->vel_x.w = -0x6000;
+                obj->pos_x.w = D_800AA248.cur_obj->pos_x.w + 0xF0000;
+            }
+            player->unk_1D0 = &actor->unk_0;
+            return;
+        }
+    }
+    func_80053D68(8, player);
+    player->action = 8;
+}
 
 void func_8003FB5C(Monster *player, Actor *actor) {
     switch (actor->unk_4) {
@@ -1387,7 +1493,7 @@ void func_8003FB5C(Monster *player, Actor *actor) {
 
 u16 func_8003FC30(Monster *player, Actor *actor) {
     if (actor->unk_14 == 0) {
-        func_8003F74C(player, actor);
+        actor_take_hit(player, actor);
     }
     player->unk_18A = 1;
     return 1;
@@ -1913,14 +2019,12 @@ void func_80040CB8(Actor *actor) {
     }
 }
 
-#ifdef NON_MATCHING
-/* 99.23%: 99.2%: only a0 and a1 are swapped after func_8001A784 (the original has the object in a0, the frame's
- * field in a1) */
 void func_80040D68(Actor *actor) {
     GameObject *saved;
     AnimFrame *frame;
-    s32 x;
-    s32 y;
+    s32 old_x;
+    s32 old_y;
+    s32 anchor;
 
     saved = D_800AA248.cur_obj;
     D_800AA248.cur_obj = actor->unk_0;
@@ -1930,14 +2034,15 @@ void func_80040D68(Actor *actor) {
             actor->unk_30 = 0x3C;
             func_80041344(actor->unk_32, actor);
             if (actor->unk_32 >= 4) {
-                x = D_800AA248.cur_obj->unk_1C.u.lo;
-                y = D_800AA248.cur_obj->unk_1C.u.hi;
+                /* Keep the object in place across the change of animation: move it by the change of anchor. */
+                old_x = D_800AA248.cur_obj->unk_1C.u.lo;
+                old_y = D_800AA248.cur_obj->unk_1C.u.hi;
                 func_8004155C(2, actor);
                 frame = func_8001A784(*(s32 *)D_800AA248.cur_obj->anim);
-                x = frame->unk_8 - x;
-                D_800AA248.cur_obj->pos_x.u.hi += x;
-                y = frame->unk_A - y;
-                D_800AA248.cur_obj->pos_y.u.hi += y;
+                anchor = frame->unk_8;
+                D_800AA248.cur_obj->pos_x.u.hi += anchor - old_x;
+                anchor = frame->unk_A;
+                D_800AA248.cur_obj->pos_y.u.hi += anchor - old_y;
             }
         }
     }
@@ -1947,9 +2052,6 @@ void func_80040D68(Actor *actor) {
     actor->unk_28 = 0;
     D_800AA248.cur_obj = saved;
 }
-#else
-INCLUDE_ASM("asm/main/nonmatchings/actor", func_80040D68);
-#endif
 
 void func_80040EA0(Actor *actor) {
     GameObject *mover;

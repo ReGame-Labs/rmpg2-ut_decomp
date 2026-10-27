@@ -35,7 +35,7 @@ extern u8 D_800953BC[], D_800951A8[], D_800950EC[], D_80094EC0[], D_80094ECC[], 
 
 /* This file's handlers, in the order the state machines reach them. */
 void func_80044204(Attacker *a);
-s32 func_80044240(u16 kind, s16 x, s16 y, u16 flags, s32 vel_x, u16 state);
+s32 attacker_spawn(u16 kind, s16 x, s16 y, u16 flags, s32 vel_x, u16 state);
 void func_80044418();                   /* (Attacker *a); some callers pass nothing */
 void func_800455CC(Attacker *a);
 void func_80044790(Attacker *a);
@@ -248,30 +248,33 @@ void func_80044204(Attacker *a) {
     func_8003EB5C(D_800953BC, D_800AA248.cur_obj);
 }
 
-#ifdef NON_MATCHING
-/* 85%: the original keeps the address of D_800AA248 and the value of D_801E1C84 live across the search loop (no reload at the found slot), with the counter in a0; the loop form that does that is not found yet */
-s32 func_80044240(u16 kind, s16 x, s16 y, u16 flags, s32 vel_x, u16 state) {
+s32 attacker_spawn(u16 kind, s16 x, s16 y, u16 flags, s32 vel_x, u16 state) {
     GameObject *saved;
     Attacker *a;
     u16 n;
     ObjectDef *def;
+    u16 count;
 
     saved = D_800AA248.cur_obj;
-    if (kind != 0 && D_801E1C84 < 4) {
+    if (kind != 0 && (count = D_801E1C84) < 4) {
         a = D_801FA8A8;
         n = 4;
-        do {
+        for (;;) {
             if (a->type == 0) {
                 goto found;
             }
             a++;
-        } while (--n != 0);
-        D_800AA248.cur_obj = saved;
+            if (--n == 0) {
+                D_800AA248.cur_obj = saved;
+                break;
+            }
+        }
     }
     return 1;
 
 found:
-    D_801E1C84++;
+    count++;
+    D_801E1C84 = count;
     func_800455CC(a);
     a->type = kind;
     def = func_8001D110();
@@ -284,15 +287,12 @@ found:
     D_800AA248.cur_obj->pos_x.s.hi = x;
     D_800AA248.cur_obj->pos_y.s.hi = y;
     D_800AA248.cur_obj->vel_x.w = 0;
-    a->state = state;
     a->obj = D_800AA248.cur_obj;
+    a->state = state;
     D_800AA248.cur_obj->owner.attacker = a;
     D_800AA248.cur_obj = saved;
     return 0;
 }
-#else
-INCLUDE_ASM("asm/main/nonmatchings/attacker", func_80044240);
-#endif
 
 void func_800443AC(s32 vel) {
     if (func_8001EB10(0x190, 0) & 1) {
@@ -457,7 +457,7 @@ void func_800447F0(Attacker *a) {
 }
 
 #ifdef NON_MATCHING
-/* 98.87%: 98.9%: registers only at the start: the original loads cur_obj into v1 and reloads it into a0 after the
+/* 98.87%: registers only at the start: the original loads cur_obj into v1 and reloads it into a0 after the
  * pos_x store */
 void func_8004489C(Attacker *a) {
     s32 vel;
@@ -597,7 +597,7 @@ void func_80044D34(void) {
     if (func_8003E79C() == 0) {
         y = D_800AA248.cur_obj->pos_y.s.hi;
         if (y < 0x99) {
-            func_80044240(8, D_800AA248.cur_obj->pos_x.s.hi, y, 0x1004, D_800AA248.cur_obj->vel_x.w, 0);
+            attacker_spawn(8, D_800AA248.cur_obj->pos_x.s.hi, y, 0x1004, D_800AA248.cur_obj->vel_x.w, 0);
         }
     }
 }
@@ -608,7 +608,7 @@ void func_80044D94(void) {
     if (func_8003E79C() == 0) {
         y = D_800AA248.cur_obj->pos_y.s.hi;
         if (y < 0x99) {
-            func_80044240(9, D_800AA248.cur_obj->pos_x.s.hi, y, 0x1004, D_800AA248.cur_obj->vel_x.w, 0);
+            attacker_spawn(9, D_800AA248.cur_obj->pos_x.s.hi, y, 0x1004, D_800AA248.cur_obj->vel_x.w, 0);
         }
     }
 }
@@ -700,7 +700,7 @@ void func_80045084(void) {
         if (y >= 0xE1) {
             y -= 0x10;
         }
-        func_80044240(1, D_800AA248.cur_obj->pos_x.s.hi, y, 0x1004, D_800AA248.cur_obj->vel_x.w, 0);
+        attacker_spawn(1, D_800AA248.cur_obj->pos_x.s.hi, y, 0x1004, D_800AA248.cur_obj->vel_x.w, 0);
     }
 }
 
@@ -828,7 +828,7 @@ void func_800454BC(void) {
         if (y >= 0xE1) {
             y -= 0x10;
         }
-        func_80044240(7, D_800AA248.cur_obj->pos_x.s.hi, y, 0x1004, D_800AA248.cur_obj->vel_x.w, 0);
+        attacker_spawn(7, D_800AA248.cur_obj->pos_x.s.hi, y, 0x1004, D_800AA248.cur_obj->vel_x.w, 0);
     }
 }
 
@@ -1064,15 +1064,15 @@ void func_80045D14(Attacker *a) {
 }
 
 void func_80045D68(void) {
-    func_80044240(6, D_800AA248.cur_obj->pos_x.s.hi, D_800AA248.cur_obj->pos_y.s.hi - 4, 0x1002, D_800AA248.cur_obj->vel_x.w, 0);
+    attacker_spawn(6, D_800AA248.cur_obj->pos_x.s.hi, D_800AA248.cur_obj->pos_y.s.hi - 4, 0x1002, D_800AA248.cur_obj->vel_x.w, 0);
 }
 
 void func_80045DB4(void) {
-    func_80044240(6, D_800AA248.cur_obj->pos_x.s.hi, D_800AA248.cur_obj->pos_y.s.hi - 4, 0x1003, D_800AA248.cur_obj->vel_x.w, 8);
+    attacker_spawn(6, D_800AA248.cur_obj->pos_x.s.hi, D_800AA248.cur_obj->pos_y.s.hi - 4, 0x1003, D_800AA248.cur_obj->vel_x.w, 8);
 }
 
 void func_80045E04(void) {
-    func_80044240(6, D_800AA248.cur_obj->pos_x.s.hi, D_800AA248.cur_obj->pos_y.s.hi - 4, 0x1003, D_800AA248.cur_obj->vel_x.w, 0xB);
+    attacker_spawn(6, D_800AA248.cur_obj->pos_x.s.hi, D_800AA248.cur_obj->pos_y.s.hi - 4, 0x1003, D_800AA248.cur_obj->vel_x.w, 0xB);
 }
 
 void func_80045E54(Attacker *a) {
@@ -1138,7 +1138,7 @@ void func_80045FCC(Attacker *a) {
 }
 
 void func_800460B8(void) {
-    func_80044240(3, D_800AA248.cur_obj->pos_x.s.hi, D_800AA248.cur_obj->pos_y.s.hi, 0x1004, D_800AA248.cur_obj->vel_x.w, 0);
+    attacker_spawn(3, D_800AA248.cur_obj->pos_x.s.hi, D_800AA248.cur_obj->pos_y.s.hi, 0x1004, D_800AA248.cur_obj->vel_x.w, 0);
 }
 
 void func_800460F8(Attacker *a) {
@@ -1203,7 +1203,7 @@ void func_800462A8(Attacker *a) {
 }
 
 void func_80046300(void) {
-    func_80044240(0xA, D_800AA248.cur_obj->pos_x.s.hi, D_800AA248.cur_obj->pos_y.s.hi, 0x1004, D_800AA248.cur_obj->vel_x.w, 0);
+    attacker_spawn(0xA, D_800AA248.cur_obj->pos_x.s.hi, D_800AA248.cur_obj->pos_y.s.hi, 0x1004, D_800AA248.cur_obj->vel_x.w, 0);
 }
 
 void func_80046340(Attacker *a) {
@@ -1400,7 +1400,7 @@ void func_8004694C(Attacker *a) {
 }
 
 void func_80046A38(void) {
-    func_80044240(4, D_800AA248.cur_obj->pos_x.s.hi, D_800AA248.cur_obj->pos_y.s.hi, 0x1004, D_800AA248.cur_obj->vel_x.w, 0);
+    attacker_spawn(4, D_800AA248.cur_obj->pos_x.s.hi, D_800AA248.cur_obj->pos_y.s.hi, 0x1004, D_800AA248.cur_obj->vel_x.w, 0);
 }
 
 void func_80046A78(Attacker *a) {
@@ -1475,7 +1475,7 @@ void func_80046C30(Attacker *a) {
 }
 
 void func_80046D1C(void) {
-    func_80044240(5, D_800AA248.cur_obj->pos_x.s.hi, D_800AA248.cur_obj->pos_y.s.hi, 0x1004, D_800AA248.cur_obj->vel_x.w, 0);
+    attacker_spawn(5, D_800AA248.cur_obj->pos_x.s.hi, D_800AA248.cur_obj->pos_y.s.hi, 0x1004, D_800AA248.cur_obj->vel_x.w, 0);
 }
 
 void func_80046D5C(Attacker *a) {
@@ -1543,40 +1543,35 @@ void func_80046EC0(Attacker *a) {
 void func_80046F60(void) {
 }
 
-#ifdef NON_MATCHING
-/* 84%: the search is the while condition (right shape); the original keeps a second pointer to unk_20 as a giv and hoists the constant 1 before the loop */
 void func_80046F68(Monster *m) {
     Attacker *a;
     u16 n;
-    s32 dx;
     GameObject *o;
     GameObject *saved;
     s16 x;
 
     a = D_801FA8A8;
+    saved = D_800AA268.p;
     n = 4;
-    saved = D_800AA248.cur_obj;
     if (D_801E1C84 != 0) {
-        x = m->obj->pos_x.s.hi;
-        while ((o = a->obj) == NULL || a->type == 0 || (o->unk_6C & 0x80) ||
-               (dx = o->pos_x.s.hi - x, dx < 0 ? -dx : dx) > ((s16) o->size.u.lo >> 1) - 1) {
-            a++;
-            if (--n == 0) {
-                goto end;
+        o = m->obj;
+        x = o->pos_x.s.hi;
+        do {
+            o = a->obj;
+            if (o != NULL && a->type != 0 && !(o->unk_6C & 0x80) &&
+                abs(o->pos_x.s.hi - x) <= ((s16)o->size.u.lo >> 1) - 1) {
+                a->unk_20 = 1;
+                break;
             }
-        }
-        a->unk_20 = 1;
+            a++;
+        } while (--n != 0);
     }
-end:
-    D_800AA248.cur_obj = saved;
+    D_800AA268.p = saved;
 }
-#else
-INCLUDE_ASM("asm/main/nonmatchings/attacker", func_80046F68);
-#endif
 
 #ifdef NON_MATCHING
-/* 92.97%: 93%: registers only: the x distance lands in x's register (a1; v1 in the original) and the half sizes
- * swap v1/a1 */
+/* 93.31%: the original loads the width before the x distance and makes the half width after it, and keeps the
+ * second half size in v0 with half + 4 in a1 */
 void func_80047028(Monster *m) {
     Attacker *a = D_801FA8A8;
     GameObject *saved;
@@ -1588,6 +1583,8 @@ void func_80047028(Monster *m) {
     s32 half;
     u16 w;
     s32 e;
+    s32 half2;
+    s32 t2;
     s16 px;
     s16 py;
 
@@ -1619,19 +1616,19 @@ void func_80047028(Monster *m) {
                         goto next;
                     }
                 }
-                half = (s16)obj->size.u.hi >> 1;
-                t = (s16)(obj->pos_y.u.hi - half) - py;
-                if (t < 0) {
-                    t = -t;
+                half2 = (s16)obj->size.u.hi >> 1;
+                t2 = (s16)(obj->pos_y.u.hi - half2) - py;
+                if (t2 < 0) {
+                    t2 = -t2;
                 }
-                d = t;
-                half += 4;
-                if (half < d) {
+                d = t2;
+                half2 += 4;
+                if (half2 < d) {
                     e = d - 4;
                     if (e < 0) {
                         e = -e;
                     }
-                    if (half < e) {
+                    if (half2 < e) {
                         goto next;
                     }
                 }

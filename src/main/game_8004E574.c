@@ -579,8 +579,8 @@ s32 func_8004F7A4(u8 *list) {
 }
 
 #ifdef NON_MATCHING
-/* 96.33%: 96.3%: one load of the x and a copy as in the original, but the copy, x2 and the definition take a3/a1/a2
- * for the original's a1/a2/a3, and one nop more */
+/* 97.11%: registers: the copy of the x, the other x and the definition take a3/a1/a2 for the original's
+ * a1/a2/a3, and one nop more */
 void func_8004F7F4(GameObject *obj, Monster *m1, Monster *m2, GameObject *cur) {
     ObjectDef *def;
     GameObject *o;
@@ -592,7 +592,8 @@ void func_8004F7F4(GameObject *obj, Monster *m1, Monster *m2, GameObject *cur) {
     def = func_8001D110();
     t = cur->pos_x.s.hi;
     x1 = t;
-    x2 = obj->pos_x.s.hi;
+    x = obj->pos_x.s.hi;
+    x2 = x;
     if (t <= D_801F9ACA) {
         x1 += D_801D8866;
     }
@@ -622,57 +623,48 @@ void func_8004F7F4(GameObject *obj, Monster *m1, Monster *m2, GameObject *cur) {
 INCLUDE_ASM("asm/main/nonmatchings/game_8004E574", func_8004F7F4);
 #endif
 
-#ifdef NON_MATCHING
-/* 85%: the chain that picks unk_056 (1, 2, 5 or 0) and the order of the two monster loads */
 void func_8004F910(void) {
-    GameObject *obj = D_800AA248.cur_obj;
+    GameObject *obj = D_800AA268.p;
     Monster *other = obj->unk_94.monster;
     Monster *m = obj->owner.monster;
-    u16 v;
-    s16 result;
 
-    if (m->unk_18C >= other->unk_18C || !(func_8001EB10(0xF, 0) & 1)) {
+    if (other->unk_18C <= m->unk_18C || !(func_8001EB10(0xF, 0) & 1)) {
         other->action = 0x43;
         m->action = 0x1E;
+        other->unk_1C8 = 0;
     } else {
-        v = m->unk_03C;
-        if (v != 0) {
-            other->unk_03C = v;
+        if (m->unk_03C != 0) {
+            other->unk_03C = m->unk_03C;
             other->unk_03E += m->unk_03E;
             m->unk_03E = 0;
         }
-        v = m->unk_140;
-        if (v != 0) {
-            other->unk_140 += v;
+        if (m->unk_140 != 0) {
+            other->unk_140 += m->unk_140;
             m->unk_140 = 0;
         }
-        v = m->unk_142;
-        if (v != 0) {
-            other->unk_142 += v;
+        if (m->unk_142 != 0) {
+            other->unk_142 += m->unk_142;
             m->unk_142 = 0;
         }
-        result = 2;
-        if (other->unk_142 < other->unk_140) {
-            result = 1;
+        if (other->unk_142 > other->unk_140) {
+            other->unk_056 = 2;
+        } else if (other->unk_142 < other->unk_140) {
+            other->unk_056 = 1;
         } else if (other->unk_142 != 0) {
-            result = 2;
-        } else if (other->unk_03C != 0) {
-            result = 5;
+            other->unk_056 = 2;
+        } else if (other->unk_03C == 0) {
+            other->unk_056 = 0;
         } else {
-            result = 0;
+            other->unk_056 = 5;
         }
-        other->unk_056 = result;
         other->action = 0x43;
         m->action = 0x1E;
         func_80053C50(0x30000, m);
+        other->unk_1C8 = 0;
     }
-    other->unk_1C8 = 0;
     other->obj->pos_y.s.hi = 0xE1;
     m->obj->pos_y.s.hi = 0xE1;
 }
-#else
-INCLUDE_ASM("asm/main/nonmatchings/game_8004E574", func_8004F910);
-#endif
 
 void func_8004FA78(void) {
 }

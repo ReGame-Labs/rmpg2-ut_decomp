@@ -264,7 +264,7 @@ typedef struct Monster {
     /* 0x146 */ s16 unk_146;
     /* 0x148 */ u8 unk_148[0x08];
     /* 0x150 */ s16 unk_150;
-    /* 0x152 */ s16 unk_152;
+    /* 0x152 */ u16 unk_152;
     /* 0x154 */ u8 unk_154[0x0C];
     /* 0x160 */ GameObject *unk_160;               /* an object it is carried by: monster_follow_holder places it there */
     /* 0x164 */ s16 unk_164;

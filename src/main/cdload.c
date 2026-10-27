@@ -806,8 +806,8 @@ s32 cdload_unpack_rle4(u8 *src, u8 *dst) {
 INCLUDE_ASM("asm/main/nonmatchings/cdload", cdload_unpack_vlc);
 
 #ifdef NON_MATCHING
-/* 91.67%: 91.7%: the register allocation differs (n in a2, k in t2, in in a1; the original has n in a1, k in a2 and
- * moves in to t3), and the loop's li 4 lands in the bgtz delay slot */
+/* 95.82%: registers (cur/next/left take t1/t8/t0 for the original's t0/t7/t2) and the count/skip setup
+ * order; the table copies match */
 void cdload_unpack_vlc8(VlcHeader *hdr, u32 *in, u32 dims, u8 *dst) {
     VlcTable *t;
     u32 cur;
@@ -841,8 +841,8 @@ void cdload_unpack_vlc8(VlcHeader *hdr, u32 *in, u32 dims, u8 *dst) {
     rows = hdr->rows;
     t = &hdr->tables[cur >> 26];
     cur <<= 6;
-    *lens = t->lens;
     values = (u8 *)&hdr->tables[hdr->count] + t->values;
+    *lens = t->lens;
     *bases = t->bases;
     w = dims & 0xFFFF;
     *run_lens = t->run_lens;

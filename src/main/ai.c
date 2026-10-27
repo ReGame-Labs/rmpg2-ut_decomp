@@ -1,4 +1,4 @@
-/* The behaviour slots (Ai): the action dispatcher (func_800416AC) and the state handlers of the Ai kinds 13 to 21,
+/* The behaviour slots (Ai): the action dispatcher (ai_dispatch_action) and the state handlers of the Ai kinds 13 to 21,
  * with their animation states.
  * The boundaries and their evidence: config/main.yaml (docs/MATCHING.md "Splitting a target into files"). */
 #include "common.h"
@@ -13,8 +13,9 @@ void func_8003E788(Ai *ai);
 u16 func_8003E79C(void);
 u16 func_8004B6C4(GameObject *, s16, s32);
 void func_8004E99C(void);
+s32 abs(s32 x);                 /* GCC's builtin: inlined */
 
-void func_800416AC(const AiHandler *handlers, Ai *ai);
+void ai_dispatch_action(const AiHandler *handlers, Ai *ai);
 void func_80041928(const AiHandler *handlers, Ai *ai);
 void func_80041988(const AiHandler *handlers, Ai *ai);
 void func_800419C4(const AiHandler *handlers, Ai *ai);
@@ -30,7 +31,7 @@ void func_80042008(const AiHandler *handlers, Ai *ai);
 void func_800420F8(const AiHandler *handlers, Ai *ai);
 void func_80042134(const AiHandler *handlers, Ai *ai);
 void func_80041AD0(s16 hit, const AiHandler *handlers, Ai *ai);
-void func_80042238(Ai *ai);
+void ai_face_target(Ai *ai);
 
 extern const AiHandler D_8007E828[];
 extern const AiHandler D_8007E720[];
@@ -138,90 +139,87 @@ extern u8 D_80097228[];
 extern u8 D_800972B4[];
 
 void func_8004160C(Ai *ai) {
-    func_800416AC(D_8007E828, ai);
+    ai_dispatch_action(D_8007E828, ai);
 }
 
 void func_80041634(Ai *ai) {
-    func_800416AC(D_8007E720, ai);
+    ai_dispatch_action(D_8007E720, ai);
 }
 
 void func_8004165C(Ai *ai) {
-    func_800416AC(D_8007E880, ai);
+    ai_dispatch_action(D_8007E880, ai);
 }
 
 void func_80041684(Ai *ai) {
-    func_800416AC(D_8007E8D8, ai);
+    ai_dispatch_action(D_8007E8D8, ai);
 }
 
-/* 77%: the two switches' dispatch and the default path differ in layout */
-#ifdef NON_MATCHING
-void func_800416AC(const AiHandler *handlers, Ai *ai) {
-    s16 hit;
+void ai_dispatch_action(const AiHandler *handlers, Ai *ai) {
+    u16 hit;
 
     switch (ai->action) {
     case 0xA:
         func_80041928(handlers, ai);
-        return;
+        break;
     case 0xB:
         func_80041A3C(handlers, ai);
-        return;
+        break;
     case 0x32:
+        func_80041B2C(handlers, ai);
+        break;
     case 0x33:
         func_80041B2C(handlers, ai);
-        return;
+        break;
     case 0x36:
+        func_80041DA8(handlers, ai);
+        break;
     case 0x37:
         func_80041DA8(handlers, ai);
-        return;
+        break;
     case 0x3B:
+        func_80041C0C(handlers, ai);
+        break;
     case 0x3C:
         func_80041C0C(handlers, ai);
-        return;
+        break;
     case 0x1E:
         func_80041DE4(handlers, ai);
-        return;
+        break;
     case 0xF2:
         func_80042008(handlers, ai);
-        return;
+        break;
     case 0x46:
         func_80041E54(handlers, ai);
-        return;
+        break;
     case 0x4D:
         if (handlers == D_8007E930) {
             func_800420F8(handlers, ai);
         }
-        return;
+        break;
     case 0x4C:
         if (handlers == D_8007E930) {
             func_80042134(handlers, ai);
         }
-        return;
+        break;
     default:
         hit = func_8003DC3C(ai);
         if (hit != 0) {
             func_80041AD0(hit, handlers, ai);
             return;
         }
-        func_80042238(ai);
-        switch (ai->action) {
-        case 0x15:
+        ai_face_target(ai);
+        if (ai->action == 0x15) {
             func_80041988(handlers, ai);
-            return;
-        case 0x16:
+        } else if (ai->action == 0x16) {
             func_800419C4(handlers, ai);
-            return;
-        case 0x17:
+        } else if (ai->action == 0x17) {
             func_80041A00(handlers, ai);
-            return;
-        default:
+        } else {
             func_8003DB74(ai);
-            return;
         }
+        break;
     }
 }
-#else
-INCLUDE_ASM("asm/main/nonmatchings/ai", func_800416AC);
-#endif
 
 void func_80041928(const AiHandler *handlers, Ai *ai) {
     if (ai->state != 0) {
@@ -280,7 +278,7 @@ void func_80041A70(const AiHandler *handlers, Ai *ai) {
 }
 
 void func_80041AA8(Ai *ai) {
-    func_800416AC(D_8007E930, ai);
+    ai_dispatch_action(D_8007E930, ai);
 }
 
 void func_80041AD0(s16 hit, const AiHandler *handlers, Ai *ai) {
@@ -476,35 +474,31 @@ void func_80042134(const AiHandler *handlers, Ai *ai) {
 }
 
 void func_80042170(Ai *ai) {
-    func_800416AC(D_8007E6C8, ai);
+    ai_dispatch_action(D_8007E6C8, ai);
 }
 
 void func_80042198(Ai *ai) {
-    func_800416AC(D_8007E778, ai);
+    ai_dispatch_action(D_8007E778, ai);
 }
 
 void func_800421C0(Ai *ai) {
-    func_800416AC(D_8007E7D0, ai);
+    ai_dispatch_action(D_8007E7D0, ai);
 }
 
 void func_800421E8(Ai *ai) {
-    func_800416AC(D_8007E988, ai);
+    ai_dispatch_action(D_8007E988, ai);
 }
 
 void func_80042210(Ai *ai) {
-    func_800416AC(D_8007E9E0, ai);
+    ai_dispatch_action(D_8007E9E0, ai);
 }
 
-#ifdef NON_MATCHING
-/* 98.12%: 98.1%: far = tx reloads the halfword (lhu) where the original copies tx in the delay slot of the distance
- * test (move v1,a1); func_8004E99C takes no arguments */
-void func_80042238(Ai *ai) {
+void ai_face_target(Ai *ai) {
     GameObject *target;
     s16 tx;
     s16 x;
     s16 far;
     s16 near;
-    s32 dist;
 
     if (ai->target != NULL) {
         target = ai->target->obj;
@@ -512,15 +506,11 @@ void func_80042238(Ai *ai) {
             ai->target = NULL;
             return;
         }
-        tx = ((s16 *)&target->pos_x.w)[1];
-        x = ((s16 *)&D_800AA248.cur_obj->pos_x.w)[1];
+        tx = target->pos_x.s.hi;
+        x = D_800AA248.cur_obj->pos_x.s.hi;
         near = x;
-        dist = tx - x;
-        if (dist < 0) {
-            dist = -dist;
-        }
         far = tx;
-        if (dist >= 0x1C3) {
+        if (abs(tx - x) >= 0x1C3) {
             if (D_801F9ACA >= tx) {
                 far += (D_801D8864.w + 1) >> 16;
             } else {
@@ -533,9 +523,6 @@ void func_80042238(Ai *ai) {
         }
     }
 }
-#else
-INCLUDE_ASM("asm/main/nonmatchings/ai", func_80042238);
-#endif
 
 void func_80042358(void) {
     func_8003EB5C(D_8008E6AC, D_800AA248.cur_obj);
