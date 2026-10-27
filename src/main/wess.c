@@ -29,6 +29,7 @@ void func_800700A8(void);
 void func_8006ED5C(void);
 void func_8006E4BC(s32);
 u16 func_8007050C(void);
+u32 func_80070588(s16 ips, s16 ppq, s16 qpm);
 void func_8006CD78(SoundChannel *ch);
 void func_8006DF68(SoundNote *);
 void func_80076D5C(SoundChannel *ch);
@@ -78,6 +79,7 @@ extern SoundPatchmap *D_801FDA8C;
 extern u8 *D_801FDA94;
 extern s32 D_80087158;
 extern s32 D_8008715C;
+extern s32 D_80087160;
 extern s32 D_801FD97C;
 extern u8 D_801FDC58[];
 extern s32 D_801FDE9C;
@@ -479,7 +481,57 @@ void func_8006CEE4(SoundChannel *ch) {
 void func_8006CF0C(void) {
 }
 
-INCLUDE_ASM("asm/main/nonmatchings/wess", func_8006CF14);
+extern s32 D_801FD9C4;
+extern s32 D_801FD9C8;
+extern s32 D_801FD9CC;
+extern s32 D_801FD9D0;
+extern s32 D_801FD9D4;
+extern SoundNote *D_801FD9D8;
+extern s16 D_801FD9DC;
+
+void func_8006CF14(SoundChannel *ch) {
+    u8 *p;
+    s16 v;
+
+    p = ch->unk_34;
+    D_801FD9DC = p[1] | (p[2] << 8);
+    if (ch->unk_06 != D_801FD9DC) {
+        ch->unk_06 = D_801FD9DC;
+        D_801FD9C4 = ch->unk_11;
+        if (D_801FD9C4 != 0) {
+            D_801FD9D8 = D_801FDA78;
+            D_801FD9C8 = D_801FDA7C;
+            while (--D_801FD9C8 != -1) {
+                if ((D_801FD9D8->unk_00.w & 1) && D_801FD9D8->unk_00.b[3] == ch->unk_00.b[1]) {
+                    D_801FDA98.voice = 1 << D_801FD9D8->unk_00.b[2];
+                    D_801FDA98.mask = 0x20;
+                    if (ch->unk_06 == 0) {
+                        D_801FDA98.note = D_801FD9D8->unk_05 << 8;
+                    } else if (ch->unk_06 > 0) {
+                        D_801FD9CC = ch->unk_06 * D_801FD9D8->unk_08->unk_09 + 0x20;
+                        D_801FD9D0 = D_801FD9CC >> 13;
+                        D_801FD9D4 = (D_801FD9CC & 0x1FFF) >> 6;
+                        D_801FDA98.note = ((D_801FD9D8->unk_05 + D_801FD9D0) << 8) | D_801FD9D4;
+                    } else {
+                        D_801FD9CC = 0x20 - ch->unk_06 * D_801FD9D8->unk_08->unk_08;
+                        D_801FD9D0 = (D_801FD9CC >> 13) + 1;
+                        D_801FD9D4 = 0x80 - ((D_801FD9CC & 0x1FFF) >> 6);
+                        if (D_801FD9D4 == 0x80) {
+                            D_801FD9D4 = 0;
+                            D_801FD9D0 = D_801FD9CC >> 13;
+                        }
+                        D_801FDA98.note = ((D_801FD9D8->unk_05 - D_801FD9D0) << 8) | (D_801FD9D4 & 0x7F);
+                    }
+                    SpuSetVoiceAttr(&D_801FDA98);
+                    if (--D_801FD9C4 == 0) {
+                        break;
+                    }
+                }
+                D_801FD9D8++;
+            }
+        }
+    }
+}
 
 void func_8006D17C(void) {
 }
@@ -709,7 +761,62 @@ void func_8006E59C(void) {
     }
 }
 
-INCLUDE_ASM("asm/main/nonmatchings/wess", func_8006E5F0);
+s32 func_8006E5F0(s32 n, s32 dst) {
+    SoundSlot *slot;
+    s32 tracks;
+    s32 start;
+    s32 offset;
+    s32 size;
+    u8 *p;
+    s32 i;
+
+    start = dst;
+    if (D_801FDEB8 != 0) {
+        if (!func_8006E504(n)) {
+            return 0;
+        }
+        slot = &D_801FDE98->unk_0C->unk_20[n];
+        tracks = slot->unk_00;
+        if (D_80087170 < tracks) {
+            return 0;
+        }
+        slot->unk_0C = (SoundTrack *) dst;
+        dst += slot->unk_00 * 12;
+        dst += dst & 1;
+        dst += dst & 2;
+        dst += dst & 4;
+        p = (u8 *) dst;
+        dst += slot->unk_04;
+        offset = slot->unk_08 + D_801FDEB4;
+        if (slot->method == 0) {
+            if (func_8006E530() == 0) {
+                func_8006E4BC(1);
+                return 0;
+            }
+            if (func_800708C4(D_801FDEB0, offset, 0) != 0) {
+                func_8006E4BC(3);
+                return 0;
+            }
+            size = slot->unk_04;
+            if (size != func_80070898(p, size, D_801FDEB0)) {
+                func_8006E4BC(2);
+                return 0;
+            }
+            func_8006E59C();
+        } else if (func_800703D8(slot->method, D_801FDE9C, offset, (s32) p, slot->unk_04) < 0) {
+            return 0;
+        }
+        for (i = 0; i < tracks; i++) {
+            slot->unk_0C[i].unk_00 = (SoundTrackHeader *) p;
+            p += sizeof(SoundTrackHeader);
+            slot->unk_0C[i].unk_04 = (s32 *) p;
+            p += (s16) slot->unk_0C[i].unk_00->unk_0E * 4;
+            slot->unk_0C[i].unk_08 = p;
+            p += slot->unk_0C[i].unk_00->unk_10;
+        }
+    }
+    return dst - start;
+}
 
 s32 func_8006E804(SoundDriver *drv, s32 name) {
     s32 r;
@@ -900,11 +1007,165 @@ void func_8006EDAC(void) {
     }
 }
 
+#ifdef NON_MATCHING
+/* 89.12%: the size sums: the original reads D_8008715C, D_80087160 and D_8008716C before the driver's stores and
+ * the loop's sums in other registers; the rest is the original's (size 0x2A4, original 0x2A8). */
+extern s32 D_8001709C;
+extern s32 D_80087108;
+extern s32 D_80087164;
+extern s32 D_80087168;
+extern s32 D_8008716C;
+extern s32 D_80087174;
+extern SoundSeqTable D_801FDEBC;
+extern SoundBank D_801FDEE0;
+extern SoundDriver D_801FDEFC;
+
+s32 func_8006EE30(s32 name) {
+    u8 *mem;
+    u32 i;
+    s32 n;
+    SoundDriver *drv;
+
+    if (name == 0) {
+        return 0;
+    }
+    D_80087108 = func_80070868(name);
+    if (D_80087108 == 0) {
+        func_8006EBA4(1);
+        return D_80087110;
+    }
+    n = 0x20;
+    D_801FDEFC.unk_00 = &D_80087188;
+    D_801FDF20 = &D_801FDEFC;
+    D_801FDEFC.unk_0C = &D_801FDEBC;
+    D_801FDEFC.unk_14 = &D_801FDEE0;
+    D_801FDEFC.unk_07[0] = D_80087158;
+    if (func_80070898(&D_801FDEBC, n, D_80087108) != n) {
+        func_8006EBA4(2);
+        return 0;
+    }
+    if (D_801FDF20->unk_0C->magic != D_8001709C) {
+        return 0;
+    }
+    if (D_801FDF20->unk_0C->version != 2) {
+        return 0;
+    }
+    n = 0x18;
+    if (func_80070898(&D_801FDEE0, n, D_80087108) != n) {
+        func_8006EBA4(2);
+        return 0;
+    }
+    func_800708EC(D_80087108);
+    drv = D_801FDF20;
+    mem = (u8 *) 8;
+    drv->unk_14->unk_18 = mem;
+    drv->unk_0A = D_80087170;
+    mem += drv->unk_0C->unk_18;
+    drv->unk_18 = (SoundSeqStat *) mem;
+    mem += D_8008715C * sizeof(SoundSeqStat);
+    drv->unk_1C = (SoundChannel *) mem;
+    mem += D_80087160 * sizeof(SoundChannel);
+    drv->unk_20 = (SoundNote *) mem;
+    mem += drv->unk_07[0] * sizeof(SoundNote);
+    drv->unk_10 = (SoundHandler *) mem;
+    mem += D_8008716C * sizeof(SoundHandler);
+    for (i = 0; i < D_8008715C; i++) {
+        mem += D_80087164;
+        mem += (s32) mem & 1;
+        mem += (s32) mem & 2;
+        mem += D_80087168;
+        mem += (s32) mem & 1;
+        mem += (s32) mem & 2;
+        mem += D_801FDF20->unk_0A;
+        mem += (s32) mem & 1;
+        mem += (s32) mem & 2;
+    }
+    D_801FDF20->unk_0B = D_80087174;
+    for (i = 0; i < D_80087160; i++) {
+        mem += D_801FDF20->unk_0B * 4;
+    }
+    mem += (s32) mem & 1;
+    mem += (s32) mem & 2;
+    return (s32) mem;
+}
+#else
 INCLUDE_ASM("asm/main/nonmatchings/wess", func_8006EE30);
+#endif
 
 INCLUDE_ASM("asm/main/nonmatchings/wess", func_8006F0D8);
 
-INCLUDE_ASM("asm/main/nonmatchings/wess", func_8006F634);
+void func_8006F634(SoundChannel *ch, SoundTrack *track, SoundTrackOpts *opts) {
+    s32 mask;
+
+    ch->unk_00.w |= 1;
+    ch->unk_00.w &= ~0x10;
+    ch->unk_00.w &= ~0x20;
+    ch->unk_00.w &= ~0x40;
+    ch->unk_00.w |= 0x80;
+    ch->unk_00.b[3] = track->unk_00->unk_00;
+    ch->unk_10 = 1;
+    ch->unk_11 = 0;
+    ch->unk_14 = track->unk_00->unk_0A;
+    ch->unk_20 = 0;
+    ch->unk_24 = 0;
+    ch->unk_28 = 0;
+    ch->unk_40 = ch->unk_3C;
+    ch->unk_18 = track->unk_00->unk_0E;
+    ch->unk_48 = track->unk_00->unk_10;
+    ch->unk_0F = track->unk_00->unk_09;
+    if (opts == NULL || opts->mask == 0) {
+        mask = 0;
+    } else {
+        mask = opts->mask;
+    }
+    if (mask & 1) {
+        ch->unk_0D = opts->unk_04;
+    } else {
+        ch->unk_0D = track->unk_00->unk_06;
+    }
+    if (mask & 2) {
+        ch->unk_0E = opts->unk_05;
+    } else {
+        ch->unk_0E = track->unk_00->unk_07;
+    }
+    if (mask & 4) {
+        ch->unk_04 = opts->unk_06;
+    } else {
+        ch->unk_04 = track->unk_00->unk_02;
+    }
+    if (mask & 8) {
+        ch->unk_06 = opts->unk_08;
+    } else {
+        ch->unk_06 = track->unk_00->unk_04;
+    }
+    if ((mask & 0x10) && ((ch->unk_0F >> opts->unk_0A) & 1)) {
+        ch->unk_00.w |= 2;
+    } else {
+        ch->unk_00.w &= ~2;
+    }
+    if (mask & 0x20) {
+        ch->unk_16 = opts->unk_0C;
+    } else {
+        ch->unk_16 = track->unk_00->unk_0C;
+    }
+    ch->unk_1C = func_80070588(func_8007050C(), ch->unk_14, ch->unk_16);
+    if (mask & 0x40) {
+        ch->unk_2C = ch->unk_28 + opts->unk_10;
+        ch->unk_00.w |= 0x10;
+    } else {
+        ch->unk_00.w &= ~0x10;
+    }
+    if (mask & 0x80) {
+        ch->unk_00.w |= 0x20;
+    } else {
+        ch->unk_00.w &= ~0x20;
+    }
+    if (mask & 0x100) {
+        ch->unk_0C = opts->unk_0B;
+    } else {
+        ch->unk_0C = track->unk_00->unk_01;
+    }
+}
 
 void func_8006F8F8(SoundChannel *ch, SoundTrack *track) {
     u8 *seq;
@@ -917,14 +1178,95 @@ void func_8006F8F8(SoundChannel *ch, SoundTrack *track) {
     ch->unk_38 = track->unk_04;
 }
 
+#ifdef NON_MATCHING
+/* 98.90%: the channel's address adds the base to the index (addu s1,v1,v0), the original the index to the base, and
+ * the slot pointer is reloaded from the stack one instruction earlier; the index forms &p[i], p + i, p += i give
+ * the same. */
+s32 func_8006F96C(SoundSlot *slot, s32 n, s32 arg2, s32 arg3, SoundTrackOpts *opts) {
+    u8 seq;
+    u8 max;
+    u8 i;
+    u8 started;
+    s16 tracks;
+    u8 *idx;
+    SoundSeqStat *stat;
+    SoundChannel *ch;
+    SoundTrack *track;
+
+    if (func_8006EC68(n) == 0) {
+        return 0;
+    }
+    seq = 0;
+    func_80070468();
+    max = D_8008715C;
+    for (; seq < max; seq++) {
+        if (!(D_801FDF20->unk_18[seq].unk_00.w & 1)) {
+            break;
+        }
+    }
+    started = 0;
+    if (seq == max) {
+        func_800704A8();
+        return 0;
+    }
+    stat = &D_801FDF20->unk_18[seq];
+    tracks = slot->unk_00;
+    max = D_80087160;
+    idx = stat->unk_0C;
+    for (i = 0; i < max; i++) {
+        ch = &D_801FDF20->unk_1C[i];
+        if (!(ch->unk_00.w & 1)) {
+            track = &slot->unk_0C[started];
+            ch->unk_00.b[2] = seq;
+            func_8006F634(ch, track, opts);
+            func_8006F8F8(ch, track);
+            if (arg3 != 0) {
+                ch->unk_00.w |= 0xC;
+            } else {
+                ch->unk_00.w &= ~4;
+                ch->unk_00.w &= ~8;
+                stat->unk_05++;
+            }
+            started++;
+            stat->unk_04++;
+            D_801FDF20->unk_05++;
+            *idx++ = i;
+            if (--tracks == 0) {
+                break;
+            }
+        }
+    }
+    if (started) {
+        stat->unk_00.h[1] = n;
+        stat->unk_08 = arg2;
+        if (arg3 != 0) {
+            stat->unk_00.w |= 2;
+            stat->unk_00.b[1] = 0;
+        } else {
+            stat->unk_00.w &= ~2;
+            stat->unk_00.b[1] = 1;
+        }
+        stat->unk_06 = 0x80;
+        stat->unk_07 = 0x40;
+        stat->unk_00.w |= 1;
+        D_801FDF20->unk_04++;
+    }
+    func_800704A8();
+    if (started) {
+        return seq + 1;
+    }
+    return 0;
+}
+#else
 INCLUDE_ASM("asm/main/nonmatchings/wess", func_8006F96C);
+#endif
 
 void func_8006FC6C(s32 n) {
     func_80078A40(n, 0);
 }
 
-void func_8006FC8C(s32 n, s32 arg1) {
-    func_8006F96C(&D_801FDF20->unk_0C->unk_20[n], n, 0, 0, arg1);
+void func_8006FC8C(s32 n, SoundTrackOpts *opts) {
+    func_8006F96C(&D_801FDF20->unk_0C->unk_20[n], n, 0, 0, opts);
 }
 
 void func_8006FCD4(s32 n, s32 set_rate, s32 rate) {
