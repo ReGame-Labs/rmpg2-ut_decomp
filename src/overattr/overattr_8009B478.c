@@ -1,5 +1,6 @@
 /* OVERLAYS/OVERATTR.BIN: the credits, the menus and the memory-card screens (config/overattr.yaml). */
 #include "common.h"
+#include "overattr.h"
 
 INCLUDE_ASM("asm/overattr/nonmatchings/overattr_8009B478", func_8009B478);
 
@@ -31,25 +32,44 @@ INCLUDE_ASM("asm/overattr/nonmatchings/overattr_8009B478", func_8009BF94);
 
 INCLUDE_ASM("asm/overattr/nonmatchings/overattr_8009B478", func_8009BFE8);
 
-INCLUDE_ASM("asm/overattr/nonmatchings/overattr_8009B478", func_8009C1AC);
+void func_8009C1AC(void) {
+    func_800A0CC0();
+}
 
 INCLUDE_ASM("asm/overattr/nonmatchings/overattr_8009B478", func_8009C1CC);
 
 INCLUDE_ASM("asm/overattr/nonmatchings/overattr_8009B478", func_8009C5A4);
 
-INCLUDE_ASM("asm/overattr/nonmatchings/overattr_8009B478", func_8009C7B0);
+void func_8009C7B0(void) {
+    D_801F9ADC = 1;
+}
 
-INCLUDE_ASM("asm/overattr/nonmatchings/overattr_8009B478", func_8009C7C0);
+void func_8009C7C0(void) {
+    D_801F9A4A = 0;
+}
 
-INCLUDE_ASM("asm/overattr/nonmatchings/overattr_8009B478", func_8009C7CC);
+void func_8009C7CC(void) {
+    D_801F9A4C = 0;
+}
 
-INCLUDE_ASM("asm/overattr/nonmatchings/overattr_8009B478", func_8009C7D8);
+void func_8009C7D8(void) {
+    D_801F9A4E = 0;
+}
 
-INCLUDE_ASM("asm/overattr/nonmatchings/overattr_8009B478", func_8009C7E4);
+void func_8009C7E4(void) {
+    D_801F9A50 = 0;
+    D_801F9ABC = 0;
+}
 
-INCLUDE_ASM("asm/overattr/nonmatchings/overattr_8009B478", func_8009C7F8);
+void func_8009C7F8(void) {
+    D_801F9A50 = 0;
+    D_801F9ABC = 3;
+}
 
-INCLUDE_ASM("asm/overattr/nonmatchings/overattr_8009B478", func_8009C810);
+void func_8009C810(void) {
+    D_801F9A50 = 0;
+    D_801F9ABC = 4;
+}
 
 INCLUDE_ASM("asm/overattr/nonmatchings/overattr_8009B478", func_8009C828);
 
@@ -93,7 +113,13 @@ INCLUDE_ASM("asm/overattr/nonmatchings/overattr_8009B478", func_8009DE00);
 
 INCLUDE_ASM("asm/overattr/nonmatchings/overattr_8009B478", func_8009DEA8);
 
-INCLUDE_ASM("asm/overattr/nonmatchings/overattr_8009B478", func_8009DF60);
+void func_8009DF60(void) {
+    s32 i;
+
+    for (i = 0x400; i < 0x4FF; i++) {
+        func_8001E450(i & 0xFFFF);
+    }
+}
 
 INCLUDE_ASM("asm/overattr/nonmatchings/overattr_8009B478", func_8009DF98);
 
@@ -105,7 +131,22 @@ INCLUDE_ASM("asm/overattr/nonmatchings/overattr_8009B478", func_8009E238);
 
 INCLUDE_ASM("asm/overattr/nonmatchings/overattr_8009B478", func_8009E310);
 
-INCLUDE_ASM("asm/overattr/nonmatchings/overattr_8009B478", func_8009E3C0);
+void func_8009E3C0(s32 kind, s32 value) {
+    GameObject *head;
+    GameObject *obj;
+
+    head = &D_801E28C0;
+    obj = head->next;
+    if (obj != head) {
+        do {
+            if (obj->kind == kind) {
+                obj->unk_78 = value;
+                obj->flags |= 0x500;
+            }
+            obj = obj->next;
+        } while (obj != head);
+    }
+}
 
 INCLUDE_ASM("asm/overattr/nonmatchings/overattr_8009B478", func_8009E40C);
 
@@ -169,7 +210,16 @@ INCLUDE_ASM("asm/overattr/nonmatchings/overattr_8009B478", func_800A1720);
 
 INCLUDE_ASM("asm/overattr/nonmatchings/overattr_8009B478", func_800A1804);
 
-INCLUDE_ASM("asm/overattr/nonmatchings/overattr_8009B478", func_800A1B60);
+s32 func_800A1B60(void) {
+    s32 i;
+
+    for (i = 0; i < 6; i++) {
+        if (D_800A9300.unk_204[i] != 0) {
+            return i;
+        }
+    }
+    return -1;
+}
 
 INCLUDE_ASM("asm/overattr/nonmatchings/overattr_8009B478", func_800A1B9C);
 
@@ -181,16 +231,30 @@ INCLUDE_ASM("asm/overattr/nonmatchings/overattr_8009B478", func_800A1F8C);
 
 INCLUDE_ASM("asm/overattr/nonmatchings/overattr_8009B478", func_800A2138);
 
-INCLUDE_ASM("asm/overattr/nonmatchings/overattr_8009B478", func_800A28A0);
+s32 func_800A28A0(s32 id) {
+    s32 i;
+
+    for (i = 0; i < 6; i++) {
+        if (D_800A9300.unk_240[i].unk_00 == id) {
+            return i;
+        }
+    }
+    return -1;
+}
 
 INCLUDE_RODATA("asm/overattr/nonmatchings/overattr_8009B478", D_8009833C);
 
 INCLUDE_ASM("asm/overattr/nonmatchings/overattr_8009B478", func_800A28DC);
 
-INCLUDE_ASM("asm/overattr/nonmatchings/overattr_8009B478", func_800A309C);
+void func_800A309C(void) {
+    D_801D3780 += 1;
+}
 
 INCLUDE_ASM("asm/overattr/nonmatchings/overattr_8009B478", func_800A30B4);
 
 INCLUDE_RODATA("asm/overattr/nonmatchings/overattr_8009B478", D_800983F0);
 
-INCLUDE_ASM("asm/overattr/nonmatchings/overattr_8009B478", func_800A32CC);
+void func_800A32CC(void) {
+    func_8001F61C("LOADING PREVIOUSLY", 200, 90, 1, D_801F9AAC, D_8007ABCC, 0, 0x400);
+    func_8001F61C("SAVED GAMES", 200, 120, 1, D_801F9AAC, D_8007ABCC, 0, 0x400);
+}

@@ -1,11 +1,37 @@
 /* OVERLAYS/OVERATTR.BIN: the pad edges and the attract screens (config/overattr.yaml). */
 #include "common.h"
+#include "overattr.h"
+#include "psyq/libgpu.h"
 
-INCLUDE_ASM("asm/overattr/nonmatchings/overattr_80099118", func_80099118);
+s32 func_80099118(void) {
+    return (D_800A9220 ^ D_800A9250) & D_800A9220;
+}
 
-INCLUDE_ASM("asm/overattr/nonmatchings/overattr_80099118", func_80099138);
+void func_80099138(OverattrPlacement *p) {
+    ObjectDef *def;
+    GameObject *obj;
 
-INCLUDE_ASM("asm/overattr/nonmatchings/overattr_80099118", func_800991BC);
+    D_800AA248.new_def = def = func_8001D110();
+    def->id = p->id;
+    def->pos_x.v = p->x << 16;
+    def->pos_y.v = p->y << 16;
+    def->flags = p->unk_0C;
+    def->unk_06 |= 0x20;
+    obj = func_8001DCB4();
+    obj->flags |= p->flags;
+}
+
+void func_800991BC(void) {
+    u16 n;
+    s32 *p;
+
+    n = 0x13;
+    p = D_801E28F4;
+    do {
+        *p++ = 0;
+    } while (--n != 0);
+    D_801FA88C = 0;
+}
 
 INCLUDE_ASM("asm/overattr/nonmatchings/overattr_80099118", func_800991EC);
 
@@ -27,7 +53,27 @@ INCLUDE_ASM("asm/overattr/nonmatchings/overattr_80099118", func_8009A708);
 
 INCLUDE_ASM("asm/overattr/nonmatchings/overattr_80099118", func_8009AE40);
 
+#ifdef NON_MATCHING
+/* 98.4 %: the counter and the pointer swap s0/s1. */
+void func_8009B0F0(void) {
+    s32 i;
+    OverattrPlacement *p;
+
+    func_8001A420();
+    i = 0;
+    func_80017B24();
+    func_8001AC18(0xA, 0x28);
+    D_801D3D7C = 0;
+    SetDispMask(1);
+    p = D_800A4430;
+    do {
+        func_80099138(p++);
+        i++;
+    } while (i < 4);
+}
+#else
 INCLUDE_ASM("asm/overattr/nonmatchings/overattr_80099118", func_8009B0F0);
+#endif
 
 INCLUDE_ASM("asm/overattr/nonmatchings/overattr_80099118", func_8009B160);
 
