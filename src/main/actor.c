@@ -761,11 +761,6 @@ extern void *D_8008AD5C;
 extern u8 D_8007E1D4[];
 extern s16 D_801D8714;
 
-extern void *D_8008AC94;
-extern void *D_8008AD5C;
-extern u8 D_8007E1D4[];
-extern s16 D_801D8714;
-
 void func_8003DFD4(void) {
     GameObject *saved;
     ObjectDef *def;
@@ -1287,7 +1282,7 @@ u16 func_8003F4A8(s16 x0, s16 y0, s16 x1, s16 y1, s16 x2, s16 y2) {
 #ifdef NON_MATCHING
 /* 99.93%: one operand order: the original adds the size to y0 as (size + y0) with the result in y0's
  * register */
-s32 func_8003F50C(Monster *player) {
+u16 func_8003F50C(Monster *player) {
     Actor *actor = D_801E1E48;
     GameObject *mover;
     u16 n = D_801E28A4;

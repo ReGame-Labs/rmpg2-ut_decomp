@@ -143,7 +143,6 @@ void func_800398D4();                /* called without the record it reads: no p
 s32 func_80039C40(s32 x, s32 left, s32 right);
 s32 func_80039C98(s32 x, s32 left, s32 right);
 void func_8003A328(Npc *npc, s32 arg1);
-void func_8003AAF8(Npc *npc);
 void func_8003ABE8(Npc *npc);
 void func_8003AC74(Npc *npc);
 void func_8003AEA0(Npc *npc);
@@ -2526,10 +2525,6 @@ void func_80039D04(Npc *npc) {
         }
     }
 }
-
-extern u8 *D_8007DB04[];
-
-extern u8 *D_8007DB04[];
 
 extern u8 *D_8007DB04[];
 

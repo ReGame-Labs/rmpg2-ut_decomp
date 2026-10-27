@@ -303,7 +303,6 @@ extern UnkFA738 D_801FA7EC[];
 void func_8001A534(s32 arg0, s32 arg1, s32 arg2);
 extern UnkFA738 D_801FA738[];
 void func_8001A514(s32 arg0, s32 arg1, s32 arg2);
-void func_80024C08(void *arg0);
 void func_8001D15C(void *dst, void *src, s32 size);
 extern ObjectDef D_801CA430;
 extern u8 D_8007AB34[];
@@ -428,7 +427,6 @@ extern Anim D_8008B458;
 extern Anim D_80097750;
 extern Anim D_80097850;
 s32 func_8003EB5C(Anim *, GameObject *);
-void func_800377B4(Npc *);
 u16 func_80023CB8(void);
 s16 func_8002439C(Npc *);
 u16 func_8002326C(s16);
@@ -2426,8 +2424,6 @@ void func_8001ED7C(void) {
     func_8001F2B0();
     D_801D858C();
 }
-
-extern s32 (*D_801D858C)();
 
 void func_8001EDB0(void) {
     func_8001F358();

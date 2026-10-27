@@ -10,8 +10,6 @@ extern s16 D_801F9984;
 extern s16 D_801F9988;
 extern s32 D_801FA72C;
 
-void func_8001E4B0(GameObject *);
-void func_8001F724(u16);
 void func_8004CFC0(void);
 void bonus_add_icon(Monster *);
 
@@ -44,7 +42,6 @@ void func_8003C1C0(u16, UnkStructB2 *);
 void func_8003C674();                  /* empty; func_8003C3B0 passes it two arguments */
 BuildingPart *func_8003C67C(Building *u, UnkStructB2 *rec);
 void func_8003CE24(BuildingPart *p, ObjectDef *def, UnkStructB2 *rec, s32 arg3);
-void func_8003C894(void **arg0);
 void func_8003C8D4(Pickup *arg0);
 void func_8003C934(Pickup *);
 void func_8003C9E8(Pickup *arg0);
@@ -60,7 +57,6 @@ void func_8003CA70(Pickup *);
 void func_8003CADC(Monster *arg0);
 void func_8003CB30(Monster *arg0);
 void func_8003CCA8(void);
-void func_8003CCC0(void *);
 void func_8003CB68(s16, Monster *);
 void func_8003CEA0(Anim *, GameObject *);
 extern s32 D_800830BC[];

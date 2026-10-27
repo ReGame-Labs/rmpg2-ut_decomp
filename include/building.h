@@ -615,7 +615,6 @@ u16 func_8003E79C(GameObject *, s32);
 u16 func_8004B6C4(GameObject *, s16, s32);
 extern u8 D_80084268[];
 void func_8001B054(GameObject *);
-extern s16 D_8007C976;
 extern u32 D_801FB198;
 extern GameObject *D_801FB420;
 void func_800257F0(BuildingItem *);
