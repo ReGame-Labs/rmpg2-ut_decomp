@@ -214,7 +214,48 @@ void func_8009BF94(u8 *dst, s32 index) {
     dst[i] = 0;
 }
 
+#ifdef NON_MATCHING
+/* 99.3 %: the movie line's text address is in s3, the original's s1 (s1/s2 hold the colour's and the cursor's %hi). */
+void func_8009BFE8(void) {
+    func_8009BF40(D_800A631E, D_801FA960);
+    func_8001ECB4(D_800A6359, D_8007A684, 0);
+    func_8001ECB4(D_800A6380, D_8007A686, 0);
+    func_8001ECB4(D_800A63A3, D_8007A688, 0);
+    func_8009BF94(&D_800A63A8.text[7], D_8007A692);
+    func_8001E450(0x421);
+    func_8001E450(0x422);
+    func_8001E450(0x423);
+    func_8001E450(0x424);
+    func_8001E450(0x425);
+    D_800AA2EC = D_801F9AAC;
+    if (D_800A92D0 == 0) {
+        D_800AA2EC = D_801E2A44;
+    }
+    func_8001ED54(&D_800A6300);
+    D_800AA2EC = D_801F9AAC;
+    if (D_800A92D0 == 1) {
+        D_800AA2EC = D_801E2A44;
+    }
+    func_8001ED54(&D_800A6338);
+    D_800AA2EC = D_801F9AAC;
+    if (D_800A92D0 == 2) {
+        D_800AA2EC = D_801E2A44;
+    }
+    func_8001ED54(&D_800A6360);
+    D_800AA2EC = D_801F9AAC;
+    if (D_800A92D0 == 3) {
+        D_800AA2EC = D_801E2A44;
+    }
+    func_8001ED54(&D_800A6384);
+    D_800AA2EC = D_801F9AAC;
+    if (D_800A92D0 == 4) {
+        D_800AA2EC = D_801E2A44;
+    }
+    func_8001ED54(&D_800A63A8);
+}
+#else
 INCLUDE_ASM("asm/overattr/nonmatchings/overattr_8009B478", func_8009BFE8);
+#endif
 
 void func_8009C1AC(void) {
     func_800A0CC0();
@@ -265,43 +306,228 @@ INCLUDE_ASM("asm/overattr/nonmatchings/overattr_8009B478", func_8009CE5C);
 
 INCLUDE_ASM("asm/overattr/nonmatchings/overattr_8009B478", func_8009CEC8);
 
-INCLUDE_ASM("asm/overattr/nonmatchings/overattr_8009B478", func_8009D0B0);
+void func_8009D0B0(void) {
+    if ((u16) (D_801FA960 - 1) < 0x18) {
+        D_801E289C = 3;
+    } else if ((u16) (D_801FA960 - 0x1A) < 0x18) {
+        D_801E289C = 5;
+    } else if ((u16) (D_801FA960 - 0x33) < 0x18) {
+        D_801E289C = 4;
+    }
+    if (D_801FA960 >= 0x4B) {
+        D_801FA984[0] = 1;
+        D_801FA984[1] = 1;
+        D_801FA984[2] = 1;
+    }
+}
 
-INCLUDE_ASM("asm/overattr/nonmatchings/overattr_8009B478", func_8009D140);
+void func_8009D140(void) {
+    if ((D_800A9220 & 0x1004010) && D_801F9944 == 0) {
+        D_800A92D8 = D_800A7014;
+        D_800A9870 = 0;
+        D_801E2148 = 6;
+        D_801D3780 = 5;
+        func_8001EC74(D_800A92C0[D_800A92D0 + 2].kind, D_801D885C);
+        func_8001F724(3);
+        func_8009E40C(D_800A92C0, D_800A92D0);
+        D_800A9878 = 0;
+    }
+}
 
-INCLUDE_ASM("asm/overattr/nonmatchings/overattr_8009B478", func_8009D20C);
+void func_8009D20C(void) {
+    if ((D_800A9220 & 0x10) && D_801F9944 == 0) {
+        D_801E2148 = 2;
+        D_801D3780 = 5;
+        func_8001EC74(D_800A92C0[D_800A92D0 + 2].kind, D_801D885C);
+        func_8001F724(3);
+        func_8009E40C(D_800A92C0, D_800A92D0);
+        D_801FA984[0] = 0;
+        D_801FA984[1] = 0;
+        D_801FA984[2] = 0;
+        D_8007C974 = 0;
+        D_8007A690 = 1;
+        func_8009D0B0();
+    } else if ((D_800A9220 & 0x1004000) && D_801F9944 == 0) {
+        func_8001F724(0x69);
+    }
+}
 
-INCLUDE_ASM("asm/overattr/nonmatchings/overattr_8009B478", func_8009D31C);
+void func_8009D31C(void) {
+    if ((D_800A9220 & 0x4010) && D_801F9944 == 0) {
+        D_801E2148 = 2;
+        D_801D3780 = 5;
+        func_8001EC74(D_800A92C0[D_800A92D0 + 2].kind, D_801D885C);
+        func_8001F724(3);
+        func_8009E40C(D_800A92C0, D_800A92D0);
+        D_801FA984[0] = 0;
+        D_801FA984[1] = 0;
+        D_801FA984[2] = 0;
+        D_8007C974 = 0;
+        D_8007A690 = 2;
+        func_8009D0B0();
+    } else if ((D_800A9220 & 0x1000000) && D_801F9944 == 0) {
+        func_8001F724(0x69);
+    }
+}
 
-INCLUDE_ASM("asm/overattr/nonmatchings/overattr_8009B478", func_8009D42C);
+void func_8009D42C(void) {
+    if ((D_800A9220 & 0x1004010) && D_801F9944 == 0) {
+        D_801E2148 = 2;
+        D_801D3780 = 5;
+        func_8001EC74(D_800A92C0[D_800A92D0 + 2].kind, D_801D885C);
+        func_8001F724(3);
+        func_8009E40C(D_800A92C0, D_800A92D0);
+        D_801FA984[0] = 0;
+        D_801FA984[1] = 0;
+        D_801FA984[2] = 0;
+        D_8007C974 = 0;
+        D_8007A690 = 3;
+        func_8009D0B0();
+    }
+}
 
-INCLUDE_ASM("asm/overattr/nonmatchings/overattr_8009B478", func_8009D504);
+void func_8009D504(void) {
+    if ((D_800A9220 & 0x1004010) && D_801F9944 == 0) {
+        if (D_801F9ADC != 0) {
+            D_800A92D8 = D_800A714C;
+        } else {
+            D_800A92D8 = D_800A7104;
+        }
+        D_800A9870 = 0;
+        D_801E2148 = 6;
+        D_801D3780 = 5;
+        func_8001EC74(D_800A92C0[D_800A92D0 + 2].kind, D_801D885C);
+        func_8001F724(3);
+        func_8009E40C(D_800A92C0, D_800A92D0);
+    }
+}
 
-INCLUDE_ASM("asm/overattr/nonmatchings/overattr_8009B478", func_8009D5E4);
+void func_8009D5E4(void) {
+    if ((D_800A9220 & 0x1004010) && D_801F9944 == 0) {
+        D_800A92D8 = D_800A7080;
+        D_800A9870 = 0;
+        D_801E2148 = 6;
+        D_801D3780 = 5;
+        func_8001EC74(D_800A92C0[D_800A92D0 + 2].kind, D_801D885C);
+        func_8001F724(3);
+        func_8009E40C(D_800A92C0, D_800A92D0);
+        D_800A9878 = 0;
+    }
+}
 
-INCLUDE_ASM("asm/overattr/nonmatchings/overattr_8009B478", func_8009D6B0);
+void func_8009D6B0(void) {
+    s32 i;
+
+    if ((D_800A9220 & 0x1004010) && D_801F9944 == 0) {
+        D_800A92D8 = D_800A70A4;
+        D_800A9870 = 0;
+        D_801E2148 = 6;
+        D_801D3780 = 5;
+        func_8001EC74(D_800A92C0[D_800A92D0 + 2].kind, D_801D885C);
+        func_8001F724(3);
+        func_8009E40C(D_800A92C0, D_800A92D0);
+    }
+    for (i = 0; i < 5; i++) {
+        D_800A6F48[i]->text[0] = 'B';
+        D_800A9890[i] = 'B';
+    }
+    D_800A9890[5] = 0;
+}
 
 INCLUDE_ASM("asm/overattr/nonmatchings/overattr_8009B478", func_8009D7B4);
 
 INCLUDE_ASM("asm/overattr/nonmatchings/overattr_8009B478", func_8009D948);
 
-INCLUDE_ASM("asm/overattr/nonmatchings/overattr_8009B478", func_8009DB38);
+void func_8009DB38(void) {
+    if ((D_800A9220 & 0x1004010) && D_801F9944 == 0) {
+        D_800A92D8 = D_800A71A0;
+        D_800A9870 = 0;
+        D_801E2148 = 6;
+        D_801D3780 = 5;
+        func_8001EC74(D_800A92C0[D_800A92D0 + 2].kind, D_801D885C);
+        func_8001F724(3);
+        func_8009E40C(D_800A92C0, D_800A92D0);
+    }
+}
 
-INCLUDE_ASM("asm/overattr/nonmatchings/overattr_8009B478", func_8009DBFC);
+void func_8009DBFC(void) {
+    if ((D_800A9220 & 0x1004010) && D_801F9944 == 0) {
+        D_800A92D8 = D_800A7284;
+        D_800A9870 = 0;
+        D_801E2148 = 6;
+        D_801D3780 = 5;
+        func_8001EC74(D_800A92C0[D_800A92D0 + 2].kind, D_801D885C);
+        func_8001F724(3);
+        func_8009E40C(D_800A92C0, D_800A92D0);
+    }
+}
 
-INCLUDE_ASM("asm/overattr/nonmatchings/overattr_8009B478", func_8009DCC0);
+void func_8009DCC0(void) {
+    MenuRecord *menu;
 
-INCLUDE_ASM("asm/overattr/nonmatchings/overattr_8009B478", func_8009DD3C);
+    menu = D_800A92C0;
+    if ((D_800A9220 & 0x1004010) && D_801F9944 == 0) {
+        D_800A9800 = 1;
+        D_800A92D8 = menu[0].sub;
+        D_800A9870 = menu[0].kind;
+        func_8001F724(3);
+        func_8009E4D4();
+    }
+}
 
-INCLUDE_ASM("asm/overattr/nonmatchings/overattr_8009B478", func_8009DE00);
+void func_8009DD3C(void) {
+    if ((D_800A9220 & 0x1004010) && D_801F9944 == 0) {
+        D_800A92D8 = D_800A6FCC;
+        D_800A9870 = 0;
+        D_801E2148 = 0xC;
+        D_801D3780 = 5;
+        func_8001EC74(D_800A92C0[D_800A92D0 + 2].kind, D_801D885C);
+        func_8001F724(3);
+        func_8009E40C(D_800A92C0, D_800A92D0);
+    }
+}
 
+void func_8009DE00(void) {
+    MenuRecord *menu;
+    s32 i;
+
+    menu = D_800A92C0;
+    if ((D_800A9220 & 0x1004010) && D_801F9944 == 0) {
+        D_800A9800 = 1;
+        D_800A92D8 = menu[0].sub;
+        D_800A9870 = menu[0].kind;
+        func_8001F724(3);
+        func_8009E4D4();
+    }
+    for (i = 0; i < 12; i++) {
+        func_8009E3C0(0x400, 0x808080);
+    }
+}
+
+#ifdef NON_MATCHING
+/* 95.4 %: the prologue saves s3 before s2 in the original (as func_8009E40C). */
+void func_8009DEA8(MenuRecord *menu, s32 selected) {
+    s32 i;
+
+    for (i = 2; i <= menu->unk_00 + 1; i++) {
+        if (selected != i - 2) {
+            func_8001E450(menu[i].kind);
+        }
+    }
+    if (menu->sub != NULL) {
+        i = menu->kind;
+        func_8001E450(menu->sub[i + 2].kind);
+    }
+}
+#else
 INCLUDE_ASM("asm/overattr/nonmatchings/overattr_8009B478", func_8009DEA8);
+#endif
 
 void func_8009DF60(void) {
     s32 i;
 
     for (i = 0x400; i < 0x4FF; i++) {
-        func_8001E450(i & 0xFFFF);
+        func_8001E450(i);
     }
 }
 
@@ -332,11 +558,53 @@ void func_8009E3C0(s32 kind, s32 value) {
     }
 }
 
+#ifdef NON_MATCHING
+/* 95.8 %: the prologue saves s3 before s2 in the original. */
+void func_8009E40C(MenuRecord *menu, s32 selected) {
+    s32 i;
+
+    for (i = 2; i <= menu[0].unk_00 + 1; i++) {
+        if (selected != i - 2) {
+            func_8009E3C0(menu[i].kind, 0x808080);
+        }
+    }
+    if (menu[0].sub != NULL) {
+        i = menu[0].kind;
+        func_8009E3C0(menu[0].sub[i + 2].kind, 0x808080);
+    }
+    D_800A9888 = 1;
+}
+#else
 INCLUDE_ASM("asm/overattr/nonmatchings/overattr_8009B478", func_8009E40C);
+#endif
 
-INCLUDE_ASM("asm/overattr/nonmatchings/overattr_8009B478", func_8009E4D4);
+void func_8009E4D4(void) {
+    GameObject *head;
+    GameObject *obj;
 
-INCLUDE_ASM("asm/overattr/nonmatchings/overattr_8009B478", func_8009E540);
+    head = &D_801E28C0;
+    obj = head->next;
+    if (obj != head) {
+        do {
+            if ((u32) (obj->kind - 0x400) < 0x100) {
+                obj->unk_78 = 0x808080;
+                obj->flags |= 0x500;
+            }
+            obj = obj->next;
+        } while (obj != head);
+    }
+    D_800A9888 = 1;
+    D_801D3780 = 8;
+}
+
+void func_8009E540(MenuRecord *menu) {
+    s32 i;
+
+    for (i = 2; i <= menu[0].unk_00 + 1; i++) {
+        func_8009E3C0(menu[i].kind, 0);
+    }
+    D_800A9888 = 2;
+}
 
 INCLUDE_ASM("asm/overattr/nonmatchings/overattr_8009B478", func_8009E5BC);
 
@@ -356,7 +624,17 @@ INCLUDE_ASM("asm/overattr/nonmatchings/overattr_8009B478", func_8009F2F8);
 
 INCLUDE_ASM("asm/overattr/nonmatchings/overattr_8009B478", func_8009F554);
 
-INCLUDE_ASM("asm/overattr/nonmatchings/overattr_8009B478", func_8009F968);
+void func_8009F968(OverattrPlacement *p, s32 n, s32 color) {
+    s32 i;
+    OverattrPlacement *q;
+
+    D_801F9AC8 = 0;
+    D_801F9ACC = 0;
+    q = p;
+    for (i = 0; i < n; i++) {
+        func_80099138(q++)->unk_78 = color;
+    }
+}
 
 INCLUDE_RODATA("asm/overattr/nonmatchings/overattr_8009B478", D_800980CC);
 
@@ -366,7 +644,23 @@ INCLUDE_ASM("asm/overattr/nonmatchings/overattr_8009B478", func_8009FB78);
 
 INCLUDE_ASM("asm/overattr/nonmatchings/overattr_8009B478", func_8009FC74);
 
-INCLUDE_ASM("asm/overattr/nonmatchings/overattr_8009B478", func_8009FEE4);
+void func_8009FEE4(void) {
+    GameObject *head;
+    GameObject *obj;
+    GameObject *next;
+
+    head = &D_801E28C0;
+    obj = head->next;
+    if (obj != head) {
+        do {
+            next = obj->next;
+            if (obj != NULL) {
+                func_8001E4B0(obj);
+            }
+            obj = next;
+        } while (obj != head);
+    }
+}
 
 INCLUDE_ASM("asm/overattr/nonmatchings/overattr_8009B478", func_8009FF38);
 

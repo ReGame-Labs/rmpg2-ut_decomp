@@ -57,14 +57,24 @@ extern GameObject D_801E28C0;          /* the object list's sentinel head */
 
 ObjectDef *func_8001D110(void);        /* a fresh definition to fill in */
 GameObject *func_8001DCB4();           /* creates the object of D_800AA248.new_def; no argument */
-void func_8001E450(s32 kind);          /* frees every object of a kind */
+void func_8001E450(u16 kind);          /* frees every object of a kind */
+void func_8001EC74(s32 kind, s16 value); /* sets unk_74 of every object of a kind */
 void func_8001A420(void);
 void func_80017B24(void);
 void func_8001AC18(s32, s32);
+/* What func_80025C08 picks from the list D_800A49D4: the three texts func_8009B19C prints. */
+typedef struct {
+    u8 *text[3];
+} OverattrTexts;
+
+OverattrTexts *func_80025C08(void *list);
+void func_8001F39C(void *msg);         /* loads a text message into the printer */
+void func_8001EDB0(void);              /* prints it, its text through sprintf */
+void func_8001E4B0(GameObject *obj);   /* frees an object */
 void func_8001F61C(u8 *text, s16 x, s16 y, s32 spacing, s32 arg4, s32 *glyphs, s32 kind, s32 arg7); /* draws a text */
 
 extern s32 D_8007ABCC[];               /* a font's glyphs */
-extern s16 D_801F9AAC;
+extern s16 D_801F9AAC;                 /* the printer's normal colour */
 
 void func_8001F724(u16 id);            /* plays a sound or a music by id; 0xFFFF stops */
 void func_80062E44(void);
@@ -85,6 +95,40 @@ extern s16 D_801E2150;                 /* a volume, 0..0x7F (func_80062D88) */
 extern s16 D_801F9944;
 extern s16 D_801FA960;                 /* 0..0x7C */
 extern s16 D_801D3D7C;
+extern s16 D_801D885C;                 /* the lit menu item's value (func_8001EC74) */
+extern s16 D_801E2148;
+extern s16 D_801E289C;
+extern s16 D_801FA984[3];              /* per player: playing */
+extern s16 D_8007C974;
+extern s16 D_8007A690;                 /* the number of players, 1..3 */
+extern s32 D_800AA2DC;
+extern u16 D_800AA2EC;                 /* the printer's colour */
+extern s32 D_801F9AC8;
+extern s32 D_801F9ACC;
+
+/* A text message as func_8001F39C loads it into the printer (game_8001781C.h TextMessage). */
+typedef struct {
+    /* 0x00 */ s32 *glyphs;            /* the font */
+    /* 0x04 */ s32 spacing;
+    /* 0x08 */ u16 x;
+    /* 0x0A */ u16 y;
+    /* 0x0C */ s32 unk_0C;
+    /* 0x10 */ void (*layout)(void);   /* func_8001EDE4: centred */
+    /* 0x14 */ s32 kind;               /* the kind of the objects that show it (func_8001E450 frees them) */
+    /* 0x18 */ u8 text[1];             /* as long as the message */
+} TextMessage;
+
+void func_8001ED54(TextMessage *msg);  /* loads and prints a message */
+void func_8001ECB4(u8 *dst, s16 value, s32 arg2); /* writes a number into a message's text */
+extern u16 D_801E2A44;                 /* the printer's colour for the item under the cursor */
+
+/* The text printer's state (game_8001781C.h TextState). */
+typedef struct {
+    /* 0x00 */ u8 unk_00[0x1C];
+    /* 0x1C */ u8 *text;
+} TextState;
+
+extern TextState D_801D8588;
 extern s32 D_801E28F4[];
 extern s16 D_801F9A4A;
 extern s16 D_801F9A4C;
@@ -112,6 +156,49 @@ extern OverattrPlacement D_800A4430[4];
 
 typedef struct { u32 colors[8]; } CardClut;   /* the save icon's 16-colour CLUT, two per word */
 typedef struct { u32 pixels[32]; } CardIcon;  /* a 16x16 4-bit icon frame */
+
+/* A menu: record 0 holds the item count, a parent menu and the cursor, the items start at record 2. */
+typedef struct MenuRecord {
+    /* 0x00 */ s32 unk_00;             /* record 0: the item count */
+    /* 0x04 */ struct MenuRecord *sub; /* record 0: another menu, whose item at the cursor is lit too */
+    /* 0x08 */ s16 kind;               /* an item: the kind of its objects; record 0: the cursor */
+    /* 0x0A */ u8 unk_0A[0x02];
+} MenuRecord;
+
+/* The cheat screen's lines: CITY, SOUNDFX, DAMAGE, LIVES, MOVIE. */
+extern TextMessage D_800A6300;
+extern TextMessage D_800A6338;
+extern TextMessage D_800A6360;
+extern TextMessage D_800A6384;
+extern TextMessage D_800A63A8;
+/* The values inside the first four lines' texts, reached as symbols of their own. */
+extern u8 D_800A631E[];
+extern u8 D_800A6359[];
+extern u8 D_800A6380[];
+extern u8 D_800A63A3[];
+extern s16 D_800A92D0;                 /* the cheat screen's cursor, 0..4 */
+
+extern MenuRecord *D_800A92C0;          /* the current menu */
+extern MenuRecord *D_800A92D8;          /* the menu to open next */
+extern s16 D_800A9870;                  /* the cursor in the next menu */
+extern s16 D_800A9878;
+extern s16 D_800A9800;
+extern u8 D_800A9890[6];                /* a name being entered, 5 letters */
+extern TextMessage *D_800A6F48[5];      /* the name entry's letters */
+extern MenuRecord D_800A6FCC[];
+extern MenuRecord D_800A7014[];
+extern MenuRecord D_800A7080[];
+extern MenuRecord D_800A70A4[];
+extern MenuRecord D_800A7104[];
+extern MenuRecord D_800A714C[];
+extern MenuRecord D_800A71A0[];
+extern MenuRecord D_800A7284[];
+
+extern s16 D_800A9888;                 /* the fade the objects' colours run (func_8009B478): 1 to black, 2 to white */
+extern u8 D_800A49D4[];
+extern u8 D_800A49E4[];
+extern u8 D_800A49FC[];
+extern u8 D_800A4A14[];
 
 /* The save file's 0x500 bytes (card.c): the memory-card header, then the game's data, with an XOR checksum. */
 typedef struct {
@@ -167,7 +254,11 @@ s16 card_ascii_to_sjis(u8 c);
 void card_string_to_sjis(s16 *dst, u8 *src);
 
 /* overattr_80099118.c */
-void func_80099138(OverattrPlacement *p);
+GameObject *func_80099138(OverattrPlacement *p);
 void func_800A0CC0(void);
+void func_8009E3C0(s32 kind, s32 value);
+void func_8009E40C(MenuRecord *menu, s32 selected);
+void func_8009E4D4(void);
+void func_8009D0B0(void);
 
 #endif /* OVERATTR_H */

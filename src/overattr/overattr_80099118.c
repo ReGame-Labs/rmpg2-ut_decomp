@@ -7,7 +7,7 @@ s32 func_80099118(void) {
     return (D_800A9220 ^ D_800A9250) & D_800A9220;
 }
 
-void func_80099138(OverattrPlacement *p) {
+GameObject *func_80099138(OverattrPlacement *p) {
     ObjectDef *def;
     GameObject *obj;
 
@@ -19,6 +19,7 @@ void func_80099138(OverattrPlacement *p) {
     def->unk_06 |= 0x20;
     obj = func_8001DCB4();
     obj->flags |= p->flags;
+    return obj;
 }
 
 void func_800991BC(void) {
@@ -75,8 +76,24 @@ void func_8009B0F0(void) {
 INCLUDE_ASM("asm/overattr/nonmatchings/overattr_80099118", func_8009B0F0);
 #endif
 
-INCLUDE_ASM("asm/overattr/nonmatchings/overattr_80099118", func_8009B160);
+u8 *func_8009B160(s16 n) {
+    return func_80025C08(D_800A49D4)->text[n];
+}
 
-INCLUDE_ASM("asm/overattr/nonmatchings/overattr_80099118", func_8009B19C);
+void func_8009B19C(void) {
+    if (D_800AA2DC & 0x71C0) {
+        D_800AA2EC = 0x44;
+    }
+    func_8001F39C(&D_800A49E4);
+    D_801D8588.text = func_8009B160(0);
+    func_8001EDB0();
+    D_800AA2EC = 0x47;
+    func_8001F39C(&D_800A49FC);
+    D_801D8588.text = func_8009B160(1);
+    func_8001EDB0();
+    func_8001F39C(&D_800A4A14);
+    D_801D8588.text = func_8009B160(2);
+    func_8001EDB0();
+}
 
 INCLUDE_ASM("asm/overattr/nonmatchings/overattr_80099118", func_8009B23C);
