@@ -804,8 +804,6 @@ void func_8004FC2C(void) {
 INCLUDE_ASM("asm/main/nonmatchings/game_8004E574", func_8004FC2C);
 #endif
 
-#ifdef NON_MATCHING
-/* 96%: register names only (x, y and the saved object in s2, s1, s3) */
 void func_8004FD44(void) {
     GameObject *saved = D_800AA248.cur_obj;
     Monster *m = saved->owner.monster;
@@ -815,7 +813,6 @@ void func_8004FD44(void) {
     ObjectDef *def;
     GameObject *obj;
 
-    flip = 0;
     if (m->unk_1B0 == 2) {
         x += 4;
         y -= 0x28;
@@ -823,6 +820,7 @@ void func_8004FD44(void) {
     } else {
         x -= 4;
         y -= 0x28;
+        flip = 0;
     }
     def = func_8001D110();
     D_800AA248.new_def = def;
@@ -837,9 +835,6 @@ void func_8004FD44(void) {
     D_800AA248.cur_obj->unk_9C = m->id;
     D_800AA248.cur_obj = saved;
 }
-#else
-INCLUDE_ASM("asm/main/nonmatchings/game_8004E574", func_8004FD44);
-#endif
 
 #ifdef NON_MATCHING
 /* 84%: the registers of y and the flip, and the sign of the top-of-sprite arithmetic */

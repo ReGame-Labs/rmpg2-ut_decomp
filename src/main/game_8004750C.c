@@ -1643,30 +1643,25 @@ void func_8004A90C(Monster *m) {
     m->unk_1B4 = 0;
 }
 
-#ifdef NON_MATCHING
-/* 99%: register names only: the action in v0 and the side in v1 in the original */
 void func_8004A93C(Monster *m) {
-    s16 action;
     u16 side = m->unk_1B0;
 
     if (side != 0) {
-        action = 0x3A;
         if (side != 3) {
             func_8004EFAC();
-            action = 0x12;
+            m->action = 0x12;
+        } else {
+            m->action = 0x3A;
         }
     } else {
-        action = 0x3A;
         if (m->obj->pos_y.s.hi < 0xE1) {
             func_8004EFAC();
-            action = 0xF;
+            m->action = 0xF;
+        } else {
+            m->action = 0x3A;
         }
     }
-    m->action = action;
 }
-#else
-INCLUDE_ASM("asm/main/nonmatchings/game_8004750C", func_8004A93C);
-#endif
 
 u16 func_80039358(Monster *m, u16 a, u16 kind, Throw *t);
 u16 func_8003A5A0(u16 a, u16 kind, Throw *t, s32 alt);
@@ -2060,13 +2055,10 @@ void func_8004B3D0(void) {
 INCLUDE_ASM("asm/main/nonmatchings/game_8004750C", func_8004B3D0);
 #endif
 
-#ifdef NON_MATCHING
-/* 98%: the original zero-extends the mode again in the call's delay slot (andi a3) and loads the argument 100 before the jal */
 void func_8004B540(void) {
     ThrowRec *rec = D_801F9A54;
     u16 n = D_801D8710;
     GameObject *obj;
-    u16 mode;
     u16 s;
 
     do {
@@ -2075,12 +2067,13 @@ void func_8004B540(void) {
         obj->pos_x.w = (obj->vel_x.w + obj->pos_x.w) & D_801D8864.w;
     } while (--n != 0);
     func_8004B990();
-    mode = 2;
+    /* the counter doubles as the mode: the original re-extends it before the call (andi a3) */
+    n = 2;
     if (D_801E1C8C == 2) {
-        mode = 1;
+        n = 1;
     }
     rec = D_801F9A54;
-    if (func_8004B660((Throw *) rec, D_801F9A54[0].obj, 100, mode) == 0) {
+    if (func_8004B660((Throw *) rec, D_801F9A54[0].obj, 100, n) == 0) {
         if (D_801E1C8C == 3) {
             func_8004B80C();
         }
@@ -2101,9 +2094,6 @@ void func_8004B540(void) {
         }
     }
 }
-#else
-INCLUDE_ASM("asm/main/nonmatchings/game_8004750C", func_8004B540);
-#endif
 
 u16 func_8004B660(Throw *t, GameObject *target, s16 range, u16 mode) {
     u16 armed = t->armed;
@@ -2146,12 +2136,11 @@ u16 func_8004B6C4(GameObject *obj, s16 range, s32 mode) {
     return D_800AA2C0;
 }
 
-#ifdef NON_MATCHING
-/* 88%: the original checks the divisor (break 7) and keeps the quotient whole: the score table's value is divided as a u32 by a u16 that is not known to be non-zero */
 void func_8004B754(void) {
     u16 n = D_801D8710;
     ThrowRec *rec = D_801F9A54;
-    u32 q;
+    u16 q;
+    u32 total;
 
     do {
         if (rec->obj != NULL) {
@@ -2159,17 +2148,15 @@ void func_8004B754(void) {
         }
         rec++;
     } while (--n != 0);
-    q = (u32) *func_80025C08(D_8007F634) / D_801D8850;
+    total = *func_80025C08(D_8007F634);
+    q = total / D_801D8850;
     if (q < 0x537) {
-        D_801D8850++;
-    } else {
         q = 0x538;
+    } else {
+        D_801D8850++;
     }
     func_8004AF1C(q);
 }
-#else
-INCLUDE_ASM("asm/main/nonmatchings/game_8004750C", func_8004B754);
-#endif
 
 #ifdef NON_MATCHING
 /* 89%: register allocation in the loop: the original keeps the position and the animation's address in v0 in turn and loads the camera before the first object's position */

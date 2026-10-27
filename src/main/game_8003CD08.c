@@ -672,8 +672,6 @@ s32 func_8003E59C(AiOrder *order, Actor *actor, Monster *player) {
     return 0;
 }
 
-#ifdef NON_MATCHING
-/* 89.31 %: the loop's exit by count undoes the last i++ (addiu a1,a1,-1 after the loop) and the bound 8 sits in a register; the loop shape is right */
 void func_8003E630(Ai *ai) {
     Monster *player;
     u16 i;
@@ -681,8 +679,9 @@ void func_8003E630(Ai *ai) {
     u16 max = 8;
 
     n = 8;
-    i = ai->unk_04 + 1;
+    i = ai->unk_04;
     do {
+        i++;
         if (i >= max) {
             i = 1;
         }
@@ -690,14 +689,10 @@ void func_8003E630(Ai *ai) {
         if (player->unk_058 & 1) {
             break;
         }
-        i++;
     } while (--n != 0);
     ai->unk_14 = (Monster *)player;
     ai->unk_04 = i;
 }
-#else
-INCLUDE_ASM("asm/main/nonmatchings/game_8003CD08", func_8003E630);
-#endif
 
 void func_8003E6A4(Ai *ai) {
     AiOrder *order;
@@ -1554,10 +1549,8 @@ void func_80040CA8(void) {
 void func_80040CB0(void) {
 }
 
-#ifdef NON_MATCHING
-/* 97.61 %: in case 0 the original loads a fresh 1 for actor->unk_28 while kind (= 1, in s0) is live; here the store reuses s0 */
 void func_80040CB8(Actor *actor) {
-    u16 kind;
+    u8 kind;
 
     D_800AA268.p = actor->unk_0;
     if (actor->unk_28 != 0) {
@@ -1582,9 +1575,6 @@ void func_80040CB8(Actor *actor) {
         actor->unk_28 = 0;
     }
 }
-#else
-INCLUDE_ASM("asm/main/nonmatchings/game_8003CD08", func_80040CB8);
-#endif
 
 /* 99.2%: the mover pointer and the frame's offsets get a0/a1 in the other order around the x/y adjustment */
 #ifdef NON_MATCHING

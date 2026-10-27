@@ -282,25 +282,18 @@ void func_80041AA8(Ai *ai) {
     func_800416AC(D_8007E930, ai);
 }
 
-/* 94.5%: the two stores at the join come in the other order and the handlers move fills the delay slot */
-#ifdef NON_MATCHING
 void func_80041AD0(s16 hit, const AiHandler *handlers, Ai *ai) {
-    s16 action;
-
     if (hit != -1) {
         ai->state = 9;
-        action = 0x32;
+        ai->unk_0C = 0;
+        ai->action = 0x32;
     } else {
         ai->state = 0xA;
-        action = 0x33;
+        ai->unk_0C = 0;
+        ai->action = 0x33;
     }
-    ai->unk_0C = 0;
-    ai->action = action;
     func_80041A70(handlers, ai);
 }
-#else
-INCLUDE_ASM("asm/main/nonmatchings/game_8004160C", func_80041AD0);
-#endif
 
 /* 92.7%: scheduling of the constant and the argument moves before the call */
 #ifdef NON_MATCHING
@@ -384,27 +377,19 @@ void func_80041DA8(const AiHandler *handlers, Ai *ai) {
     }
 }
 
-/* 98.2%: the mover pointer gets v1 and the velocity v0 in the original */
-#ifdef NON_MATCHING
 void func_80041DE4(const AiHandler *handlers, Ai *ai) {
-    s32 vel;
-
     ai->state = 0x10;
     ai->unk_0C = 0;
     ai->action = 0x46;
     if ((u16)(ai->kind - 0x17) >= 2) {
-        vel = 0x20000;
-        if (!(D_800AA248.cur_obj->flags & 0x10)) {
-            vel = -0x30000;
+        if (D_800AA248.cur_obj->flags & 0x10) {
+            D_800AA248.cur_obj->vel_x.w = 0x28000;
+        } else {
+            D_800AA248.cur_obj->vel_x.w = -0x28000;
         }
-        vel |= 0x8000;
-        D_800AA248.cur_obj->vel_x.w = vel;
     }
     func_80041A70(handlers, ai);
 }
-#else
-INCLUDE_ASM("asm/main/nonmatchings/game_8004160C", func_80041DE4);
-#endif
 
 /* 99.9%: the reload of the mover pointer gets v1, not a0 */
 #ifdef NON_MATCHING
