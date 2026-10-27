@@ -305,7 +305,7 @@ extern UnkFA738 D_801FA738[];
 void func_8001A514(s32 arg0, s32 arg1, s32 arg2);
 void func_8001D15C(void *dst, void *src, s32 size);
 extern ObjectDef D_801CA430;
-extern u8 D_8007AB34[];
+extern ObjectDef D_8007AB34;     /* the template func_8001D110 copies */
 s16 func_8003FCD8(s32, s32);
 void func_800585C0(Monster *);
 GameObject *func_8001E204(void);
@@ -1190,9 +1190,9 @@ SpriteFrame *func_8001A554(s32 id, GameObject *obj) {
             if (!(flags & 0x80)) {
                 obj->unk_6C = (flags & 0xFFF7) | 0x400;
                 if (frame->unk_00 & 0x20000000) {
-                    obj->unk_24 = (D_801F9AE4 + (obj->unk_6E = func_8001B3C4(frame, D_801FA738[b].unk_0, 1)))->unk_0 | 0x20000000;
+                    obj->unk_24 = (D_801F9AE4 + (obj->unk_6E = func_8001B3C4(frame, D_801FA738[b].unk_0, 1)))->unk_0.w | 0x20000000;
                 } else {
-                    obj->unk_24 = (D_801F9AE4 + (obj->unk_6E = func_8001B3C4(frame, D_801FA738[b].unk_0, 0)))->unk_0;
+                    obj->unk_24 = (D_801F9AE4 + (obj->unk_6E = func_8001B3C4(frame, D_801FA738[b].unk_0, 0)))->unk_0.w;
                 }
             }
         }
@@ -1401,7 +1401,40 @@ void func_8001AD1C(Unk1AD1C *bank, s32 addr, s16 id) {
     }
 }
 
-INCLUDE_ASM("asm/main/nonmatchings/main", func_8001AE70);
+u16 func_8001AE70(GameObject *obj, u16 mode) {
+    Unk1F9AE4 *rec;
+    u32 word;
+    u16 id;
+    u16 nth;
+    s16 i;
+    s32 n;
+
+    n = 0;
+    word = obj->unk_24;
+    if (obj->unk_6C & 0x400) {
+        rec = &D_801F9AE4[obj->unk_6E];
+        if (mode & 0x400) {
+            return rec->unk_0.u.hi | ((mode & 0x300) >> 3);
+        }
+        return rec->unk_0.u.hi;
+    }
+    id = (word >> 24) & 0x9F;
+    nth = (word >> 16) & 0xFF;
+    if (word & 0x20000000) {
+        for (i = 0; i < 0x18; i++) {
+            if (D_801D876C[i] == id && !(D_801D876C[i] & 0x8000) && n++ == nth) {
+                return GetTPage(0, (mode & 0x300) >> 8, (i % 12) * 64 + 0x100, (i / 12) * 256);
+            }
+        }
+    } else {
+        for (i = 0; i < 0x18; i += 2) {
+            if ((D_801D876C[i] & 0x8000) && (D_801D876C[i] & 0x7FFF) == id && n++ == nth) {
+                return GetTPage(1, (mode & 0x300) >> 8, (i % 12) * 64 + 0x100, (i / 12) * 256);
+            }
+        }
+    }
+    return 0;
+}
 
 void func_8001B054(GameObject *arg0) {
     u16 temp_v1;
@@ -1440,7 +1473,50 @@ Glyph *func_8001B128(u32 arg0) {
     return (Glyph *) (D_801FA738[(arg0 >> 24) & 0x3F].unk_0 + (D_801D8868[index] & 0x7FFFFFFF));
 }
 
-INCLUDE_ASM("asm/main/nonmatchings/main", func_8001B178);
+s32 func_8001B178(void) {
+    RECT rect;
+    u8 *data;
+    u8 *pixels;
+    u32 id;
+    u32 index;
+
+    cdload_file_size(0x19);
+    if (cdload_read_file(0x19, D_800B09C0) == 0) {
+        return 0;
+    }
+    func_8001A870(0xF, D_800B09C0);
+    data = D_800B09C0 + 4;
+    func_8001A514(0xF, 0x19, (s32) data);
+    rect.w = 0x40;
+    rect.h = 0x100;
+    pixels = data + *(s32 *) (data + 0xC);
+    rect.x = 0x340;
+    rect.y = 0x100;
+    LoadImage(&rect, (unsigned long *) pixels);
+    pixels += 0x8000;
+    rect.x = 0x380;
+    rect.y = 0x100;
+    LoadImage(&rect, (unsigned long *) pixels);
+    rect.x = 0x3C0;
+    rect.y = 0x100;
+    LoadImage(&rect, (unsigned long *) (pixels + 0x8000));
+    DrawSync(0);
+    DrawSync(0);
+    DrawSync(0);
+    D_801D876C[21] = 0xF;
+    D_801D876C[22] = 0xF;
+    D_801D876C[23] = 0xF;
+    func_8001B0D8((s32 *) (data + *(s32 *) (D_800B09C0 + 4)), 0x80000000);
+    D_801F9A3C = 0;
+    D_801E1C78 = D_801F9948 = data + *(s32 *) (D_800B09C0 + 4);
+    D_801C51C0 = D_800AA944;
+    D_801C51C4 = D_800AA948;
+    id = D_8007AB34.id;
+    index = (id & 0xFFFFFF) >> 1;
+    D_801CA42C = D_800AFB74;
+    D_8007AB34.id = D_801FA738[(id >> 24) & 0x3F].unk_0 + (D_801D8868[index] & 0x7FFFFFFF);
+    return 1;
+}
 
 void func_8001B350(s32 index) {
     Unk1F9AE4 *rec;
@@ -1457,7 +1533,55 @@ void func_8001B350(s32 index) {
     }
 }
 
-INCLUDE_ASM("asm/main/nonmatchings/main", func_8001B3C4);
+s32 func_8001B3C4(SpriteFrame *frame, s32 base, u16 mode) {
+    Unk1F9AE4 *rec;
+    Unk1C542C *slot;
+    s32 i;
+    s32 free;
+    s32 size;
+    s32 used;
+
+    free = -1;
+    rec = D_801F9AE4;
+    for (i = 0; i < 0xC4; i++, rec++) {
+        if (rec->unk_8 == (s32) frame) {
+            rec->unk_4++;
+            return i;
+        }
+        if (free == -1 && rec->unk_4 == 0) {
+            free = i;
+        }
+    }
+    if (free == -1) {
+        func_8001B5E8(9);
+    }
+    rec = &D_801F9AE4[free];
+    rec->unk_4 = 1;
+    rec->unk_8 = (s32) frame;
+    rec->unk_C = func_8001A0A0();
+    size = frame->size.s.lo;
+    size = (size + 1) & ~1;
+    size *= frame->size.s.hi;
+    size = (size + 3) & ~3;
+    if (D_801FA974 - size < (s32) D_801F9948) {
+        DrawSync(0);
+        D_801FA974 = D_801E299C;
+    }
+    D_801FA974 -= size;
+    cdload_unpack((u8 *) D_801FA974, 0, (u8 *) (frame->unk_00 + base), 0);
+    if (mode == 1) {
+        func_80019DAC(D_801FA974, frame->size.s.lo, frame->size.s.hi, rec->unk_C);
+    } else {
+        func_80019B08(D_801FA974, frame->size.s.lo, frame->size.s.hi, rec->unk_C);
+    }
+    used = D_801E299C - D_801FA974;
+    if (D_8007A710 < used) {
+        D_8007A710 = used;
+    }
+    slot = &D_801C542C[rec->unk_C];
+    rec->unk_0.w = (slot->unk_0 << 16) | slot->unk_2;
+    return free;
+}
 
 void func_8001B5E8(s32 arg0) {
     func_8001D17C();

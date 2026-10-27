@@ -17,7 +17,7 @@
 /* A 0x14-byte record of the 1024-entry table at 0x801C542C. */
 typedef struct Unk1C542C {
     s16 unk_0;              /* -1 when free */
-    u8 pad_2[0x2];
+    u16 unk_2;
     s32 unk_4;              /* the VRAM position: x in 0x80 steps (bank) and 0x10 steps (column) */
     s32 unk_8;              /* the VRAM y: bit 8 picks the lower half, bits 5-7 the row */
     s32 unk_C;              /* width */
@@ -26,7 +26,7 @@ typedef struct Unk1C542C {
 
 /* A 0x10-byte record of the table at 0x801F9AE4 (func_8001B350): a use count and the slot it holds. */
 typedef struct Unk1F9AE4 {
-    s32 unk_0;
+    Fixed unk_0;            /* the frame word for objects in this slot: the tpage in u.hi */
     s16 unk_4;
     u8 pad_6[0x2];
     s32 unk_8;
@@ -116,7 +116,10 @@ extern s32 D_801F991C;
 extern s32 D_8007A71C;                  /* the music to restart after the XA track */
 void cdload_stop_xa(s32 mode);
 void func_80063744(void);
-u16 func_8001B3C4(SpriteFrame *frame, s32 base, s32 mode);
+s32 func_8001B3C4(SpriteFrame *frame, s32 base, u16 mode);
+unsigned short GetTPage(int tp, int abr, int x, int y);
+s32 cdload_unpack(u8 *dst, s32 arg1, u8 *src, s32 arg3);   /* cdload.c reads three; the callers here pass a fourth */
+extern s32 D_8007A710;                  /* the most of the unpack buffer ever used */
 extern u16 D_800AFB54[];                /* per bank: its first CLUT's index in D_801C51D4 */
 extern u16 D_801C51D4[];                /* the CLUT ids func_8001A870 loaded */
 extern u16 D_801D370C;
