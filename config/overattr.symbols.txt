@@ -1,2 +1,12 @@
 // Names for the overlay OVERLAYS/OVERATTR.BIN (splat's symbol_addrs format, as config/symbol_addrs.txt). The
 // executable's names are not repeated here: configure.py passes them as build/exe_symbols.txt.
+
+// card
+card_get_status = 0x80098730; // type:func  waits for the card in slot 1, 0 ready, 1 none or an error, 2 not formatted
+card_read_save = 0x80098848; // type:func  0 read, 1 error, 2 not formatted, 4 bad checksum, 6 no file (the save reset)
+card_write_save = 0x80098A48; // type:func  creates the file if needed, 0 written, 1 error, 2 not formatted, 3 not created
+card_format = 0x80098CC0; // type:func  0 formatted, 1 error, 5 already formatted
+card_calc_checksum = 0x80098E54; // type:func  the XOR of the save's 0x140 words, its checksum taken as zero
+card_init_save = 0x80098E8C; // type:func  the header (the title, the icon) and the default data
+card_ascii_to_sjis = 0x80098F98; // type:func  one character, as the big-endian Shift-JIS halfword of the save title
+card_string_to_sjis = 0x800990BC; // type:func

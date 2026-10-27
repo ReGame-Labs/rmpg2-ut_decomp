@@ -120,6 +120,8 @@ def split(t: Target):
     print(f"splat: {t.yaml}")
     subprocess.run([SPLAT, "split", t.yaml], cwd=ROOT, check=True, stdout=subprocess.DEVNULL)
     align_small_data(ROOT / splat_paths(t)["ld_script_path"])
+    if t.name != "main":
+        align_overlay_sections(ROOT / splat_paths(t)["ld_script_path"], t.name)
 
 
 def align_small_data(ld_script: Path):
@@ -129,6 +131,18 @@ def align_small_data(ld_script: Path):
     text = ld_script.read_text()
     pat = re.compile(r"^(\s*)(build/main/(?:src/main/\w+\.c|asm/main/data/\w+\.\w+\.s)\.o\(\.(?:sdata|sbss|bss)\);)$",
                      re.M)
+    new = pat.sub(lambda m: f"{m.group(1)}. = ALIGN(8);\n{m.group(1)}{m.group(2)}", text)
+    if new != text:
+        ld_script.write_text(new)
+
+
+def align_overlay_sections(ld_script: Path, name: str):
+    """psylink starts each game object's .rodata and .text of an overlay 8-aligned: OVERATTR has zero words between
+    objects in both sections (config/overattr.yaml), OVERMOVE one between its .rodata and its first function. splat's
+    linker script (SUBALIGN(4)) gets `. = ALIGN(8);` in front of those sections of the overlay's C units (an asm
+    subsegment already ends with the padding, so it is a no-op there)."""
+    text = ld_script.read_text()
+    pat = re.compile(rf"^(\s*)(build/{name}/src/{name}/\w+\.c\.o\(\.(?:rodata|text)\);)$", re.M)
     new = pat.sub(lambda m: f"{m.group(1)}. = ALIGN(8);\n{m.group(1)}{m.group(2)}", text)
     if new != text:
         ld_script.write_text(new)
