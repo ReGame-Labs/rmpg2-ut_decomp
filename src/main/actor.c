@@ -54,6 +54,7 @@ void func_8003DAA0(Ai *ai);
 s16 func_8003DCC8(Ai *ai);
 void func_8003DD44(Ai *ai);
 void func_8003DF34(Ai *ai);
+AiLink *func_8003E1C8(AiOrder **order, Ai *ai);
 void func_8003D71C(Ai *ai);
 void func_8003E630(Ai *ai);
 void func_8003E764(Ai *ai);
@@ -89,7 +90,7 @@ void func_8001E39C(GameObject *mover);
 void func_80053C50(s32 arg0, Monster *player);
 void func_80061068(s32 arg0, s16 arg1, s16 arg2);
 void func_8001E4B0(GameObject *mover);
-void func_8003F150(void);
+s32 func_8003F150(Monster *player);
 u16 func_80030338(GameObject *);
 ObjectDef *func_8001D110(void);
 GameObject *func_8001DCB4(void);       /* spawns D_800AA248.unk_3C */
@@ -117,6 +118,7 @@ void func_8003E6A4(Ai *ai);
 u16 func_8003EB5C(Anim *anim, GameObject *mover);
 void func_8003EC40(Actor *actor);
 void func_8003F74C(Monster *player, Actor *actor);
+u16 func_8003FC30(Monster *player, Actor *actor);
 s16 func_8003FCD8(s32 arg0, s32 arg1);
 void func_8003FF0C(s32 vel, s32 kind, Actor *actor);
 void func_8004089C(Actor *actor);
@@ -490,7 +492,61 @@ void func_8003D6C4(void) {
     }
 }
 
-INCLUDE_ASM("asm/main/nonmatchings/actor", func_8003D71C);
+extern AiHandler D_8007DE44[];
+
+void func_8003D71C(Ai *ai) {
+    s32 x;
+    Monster *target;
+    u16 delay;
+
+    D_800AA248.cur_obj = ai->obj;
+    func_80029D1C();
+    target = ai->target;
+    D_800AA248.cur_obj->unk_68.monster = target;
+    delay = ai->unk_2E;
+    if (delay != 0) {
+        ai->unk_2E = delay - 1;
+        return;
+    }
+    switch (ai->action) {
+    case 1:
+        func_8003DD70(ai);
+        return;
+    case 2:
+        func_8003D920(ai);
+        return;
+    case 3:
+        func_8003DA58(ai);
+        return;
+    case 4:
+        func_8003DBCC(ai);
+        return;
+    case 0xF0:
+        func_8003DACC(ai);
+        return;
+    case 0xF1:
+        func_8003DB2C(ai);
+        return;
+    case 0xF5:
+        func_8003DAA0(ai);
+        return;
+    case 0x4E:
+        func_8003D988(ai);
+        return;
+    case 5:
+        func_8003D9D8(ai);
+        return;
+    }
+    x = D_800AA268.p->pos_x.w - D_801F9AC8.w;
+    x >>= 16;
+    if (x < -0x4FF) {
+        x += ((s16)D_801D8866 + 1) >> 16;
+    }
+    ai->unk_0E = x;
+    if (ai->kind < 0x19) {
+        D_8007DE44[ai->kind](ai);
+    }
+}
 
 void func_8003D918(void) {
 }
@@ -629,7 +685,54 @@ void func_8003DD44(Ai *ai) {
     ai->action = 0xA;
 }
 
-INCLUDE_ASM("asm/main/nonmatchings/actor", func_8003DD70);
+void func_8003DD70(Ai *ai) {
+    AiOrder *order;
+    AiLink *link;
+    AiLinkInfo *info;
+    GameObject *obj;
+    SpriteFrame *frame;
+    s32 n;
+
+    n = (u16)ai->unk_18 - 1;
+    if (n > 0) {
+        ai->unk_18 = n;
+        D_800AA248.cur_obj->pos_x.w = D_801F9AC8.w + 0xFE440000;
+        D_800AA248.cur_obj->pos_y.w = 0x02000000;
+        return;
+    }
+    link = func_8003E1C8(&order, ai);
+    if (link == NULL) {
+        ai->unk_18 = 0xF0;
+        return;
+    }
+    ai->state = 1;
+    ai->action = 2;
+    if (link->unk_6 >= 2 || link->unk_4 == 0) {
+        func_8003DAA0(ai);
+        return;
+    }
+    ai->unk_28.link = link;
+    ai->unk_10.order = order;
+    order->unk_8 = (s32)ai;
+    info = link->unk_8;
+    ai->unk_1C.order = (AiOrder *)info;
+    obj = link->unk_0;
+    frame = obj->frame;
+    D_800AA248.cur_obj->priority = info->unk_8 + 0x10;
+    if (order->unk_4 == 2) {
+        D_800AA248.cur_obj->flags |= 0x10;
+        D_800AA248.cur_obj->pos_x.s.hi = obj->pos_x.s.hi + frame->unk_1C + 0xE;
+        D_800AA248.cur_obj->pos_y.s.hi = obj->pos_y.s.hi + frame->unk_1E;
+    } else if (order->unk_4 != 1) {
+        D_800AA248.cur_obj->pos_x.s.hi = obj->pos_x.s.hi + frame->unk_18;
+        D_800AA248.cur_obj->pos_y.s.hi = obj->pos_y.s.hi + frame->unk_1A;
+    } else {
+        D_800AA248.cur_obj->flags &= ~0x10;
+        D_800AA248.cur_obj->pos_x.s.hi = obj->pos_x.s.hi + frame->unk_14;
+        D_800AA248.cur_obj->pos_y.s.hi = obj->pos_y.s.hi + frame->unk_16;
+    }
+    func_8003DF34(ai);
+}
 
 void func_8003DF34(Ai *ai) {
     D_8007DEA0[ai->state](ai);
@@ -650,7 +753,74 @@ void func_8003DF70(void) {
     D_801D870C = 0;
 }
 
-INCLUDE_ASM("asm/main/nonmatchings/actor", func_8003DFD4);
+extern void *D_8008AC94;
+extern void *D_8008AD5C;
+extern u8 D_8007E1D4[];
+extern s16 D_801D8714;
+
+extern void *D_8008AC94;
+extern void *D_8008AD5C;
+extern u8 D_8007E1D4[];
+extern s16 D_801D8714;
+
+void func_8003DFD4(void) {
+    GameObject *saved;
+    ObjectDef *def;
+    Ai *ai;
+    u16 *init;
+    void **anim;
+    u16 n;
+    s16 y;
+
+    saved = D_800AA248.cur_obj;
+    func_8003DF70();
+    if (D_801D8728 == 0xE && D_801D8714 == 2) {
+        D_800AA248.cur_obj = saved;
+        return;
+    }
+    init = func_80025C08(D_8007E1D4);
+    n = 5;
+    D_801D870C = n;
+    y = 0;
+    ai = D_801D85C8;
+    do {
+        def = D_800AA248.new_def = func_8001D110();
+        if (D_801FA960 >= 0x5E && D_801FA960 != 0x63 && D_801D8728 == 0) {
+            anim = &D_8008AD5C;
+        } else {
+            anim = &D_8008AC94;
+        }
+        def->anim = *anim;
+        def->unk_0C = 0x781;
+        ai->state = 0;
+        if (D_801D36FC != 0x120) {
+            ai->unk_18 = func_8001EB10(0x64, 0x32) + 0x96;
+        }
+        ai->kind = *init;
+        init++;
+        ai->unk_34.u.lo = *init;
+        ai->action = 1;
+        def->flags = 0x353;
+        D_800AA248.cur_obj = func_8001DCB4();
+        init++;
+        ai->obj = D_800AA248.cur_obj;
+        D_800AA248.cur_obj->owner.p = ai;
+        y += 0x12C;
+        D_800AA248.cur_obj->pos_y.s.hi = y;
+        if (func_8005F208() == 3) {
+            ai->unk_18 = 0;
+            ai->unk_2E = 0;
+        } else {
+            ai->unk_2E = y;
+        }
+        if (ai->kind == 0) {
+            ai->unk_2E = 0x7FFF;
+            ai->unk_18 = 0x7FFF;
+        }
+        ai++;
+    } while (--n != 0);
+    D_800AA268.p = saved;
+}
 
 INCLUDE_ASM("asm/main/nonmatchings/actor", func_8003E1C8);
 
@@ -1012,14 +1182,83 @@ void func_8003EF64(Monster *player) {
     D_800AA268.p = saved;
 }
 
-void func_8003F114(void) {
+void func_8003F114(Monster *player) {
     GameObject *saved = D_800AA248.cur_obj;
 
-    func_8003F150();
+    func_8003F150(player);
     D_800AA248.cur_obj = saved;
 }
 
+#ifdef NON_MATCHING
+/* 97.74%: 97.7%: the original stores D_800AA248.cur_obj in the flag test's delay slot (here after the join), and
+ * the counter and &D_800AA248 swap t0/t1 */
+extern void (*D_8007E398)(Actor *);
+
+s32 func_8003F150(Monster *player) {
+    Actor *actor = D_801E1E48;
+    GameObject *mover;
+    u16 n = D_801E28A4;
+    s16 kind;
+    s16 x;
+    s32 d;
+    u16 px;
+    u16 py;
+
+    if (n != 0) {
+        px = player->pos.u.lo;
+        py = player->pos.u.hi;
+        do {
+            mover = actor->unk_0;
+            if (actor->unk_12 == 0 && actor->unk_4 != 0x56 && actor->unk_4 != 0x55 && actor->unk_4 != 0x8E) {
+                kind = actor->unk_6;
+                if (kind != 0 && kind != 0xB && kind != 0xE && kind != 1 && kind != 7 && kind != 3) {
+                    x = mover->pos_x.s.hi;
+                    if (x < D_801F9ACA) {
+                        x += (D_801D8864.w + 1) >> 16;
+                    }
+                    d = x - (s16)px;
+                    if (d < 0) {
+                        d = -d;
+                    }
+                    if ((s16)d <= mover->size.s.lo) {
+                        d = (s16)(mover->pos_y.u.hi - 5) - (s16)py;
+                        if (d < 0) {
+                            d = -d;
+                        }
+                        if ((s16)d <= mover->size.s.hi) {
+                            if (kind == 0xA) {
+                                func_80054374(0x28, player);
+                                func_800634D4(player, 4);
+                                player->unk_024++;
+                                actor->unk_28 = 1;
+                            } else {
+                                if (D_800AA248.cur_obj->flags & 0x10) {
+                                    D_800AA248.cur_obj = mover;
+                                    mover->vel_x.w = -0x48000;
+                                } else {
+                                    D_800AA248.cur_obj = mover;
+                                    mover->vel_x.w = 0x48000;
+                                }
+                                D_800AA248.cur_obj->vel_y.w = -0x58000;
+                                D_800AA248.cur_obj->unk_88 = 0x4000;
+                                actor->unk_6 = 6;
+                                actor->unk_20 = &D_8007E398;
+                                func_8004155C(6, actor);
+                            }
+                            player->unk_18A = 1;
+                            return 1;
+                        }
+                    }
+                }
+            }
+            actor++;
+        } while (--n != 0);
+    }
+    return 0;
+}
+#else
 INCLUDE_ASM("asm/main/nonmatchings/actor", func_8003F150);
+#endif
 
 s32 func_8003F378(Monster *player) {
     Actor *actor = D_801E1E48;
@@ -1051,14 +1290,73 @@ s32 func_8003F378(Monster *player) {
     return 0;
 }
 
-s32 func_8003F4A8(s16 x0, s16 y0, s16 x1, s16 y1, s16 x2, s16 y2) {
+u16 func_8003F4A8(s16 x0, s16 y0, s16 x1, s16 y1, s16 x2, s16 y2) {
     if (x0 >= x1 || y0 >= y1 || x1 >= x2 || y1 >= y2) {
         return 0;
     }
     return 1;
 }
 
+#ifdef NON_MATCHING
+/* 96.31%: 96.3%: registers only: x in a0 (a1 in the original), and the y distance and the size compare swap v0/v1 */
+s32 func_8003F50C(Monster *player) {
+    Actor *actor = D_801E1E48;
+    GameObject *mover;
+    u16 n = D_801E28A4;
+    s16 x;
+    s16 d;
+    s32 t;
+    s16 x0;
+    u16 y0;
+    s16 y1;
+
+    if (n != 0) {
+        do {
+            if (actor->unk_12 == 0 && actor->unk_4 != 0 && actor->unk_4 != 0x55 &&
+                (actor->unk_4 == 0x54 || actor->unk_4 == 0x8E || actor->unk_6 == 0xE || player->unk_18E != 0 ||
+                 player->unk_0EA == 4)) {
+                mover = actor->unk_0;
+                if (!(mover->unk_6C & 0x80) && ((actor->unk_6 != 0 && actor->unk_28 == 0) || actor->unk_4 == 0x8E)) {
+                    if (actor->unk_6 != 0xE) {
+                        x = mover->pos_x.s.hi;
+                        if (x < D_801F9ACA) {
+                            x += (D_801D8864.w + 1) >> 16;
+                        }
+                        t = x - player->pos.s.lo;
+                        if (t < 0) {
+                            t = -t;
+                        }
+                        d = t;
+                        if (((s16)mover->size.u.lo >> 1) + 8 >= d) {
+                            t = player->pos.s.hi + 5;
+                            t = mover->pos_y.s.hi - t;
+                            if (t < 0) {
+                                t = -t;
+                            }
+                            d = t;
+                            if (d < mover->size.s.hi) {
+                            hit:
+                                return func_8003FC30(player, actor);
+                            }
+                        }
+                    } else {
+                        x0 = -mover->unk_1C.u.lo + mover->pos_x.u.hi;
+                        y0 = mover->pos_y.u.hi - mover->unk_1C.u.hi;
+                        y1 = mover->size.u.hi + y0;
+                        if (func_8003F4A8(x0, y0, player->pos.s.lo, player->pos.s.hi, x0, y1) == 1) {
+                            goto hit;
+                        }
+                    }
+                }
+            }
+            actor++;
+        } while (--n != 0);
+    }
+    return 0;
+}
+#else
 INCLUDE_ASM("asm/main/nonmatchings/actor", func_8003F50C);
+#endif
 
 INCLUDE_ASM("asm/main/nonmatchings/actor", func_8003F74C);
 
@@ -1087,7 +1385,7 @@ void func_8003FB5C(Monster *player, Actor *actor) {
     }
 }
 
-s32 func_8003FC30(Monster *player, Actor *actor) {
+u16 func_8003FC30(Monster *player, Actor *actor) {
     if (actor->unk_14 == 0) {
         func_8003F74C(player, actor);
     }
@@ -1319,7 +1617,61 @@ void func_800403B4(Actor *actor) {
     D_800AA248.cur_obj = saved;
 }
 
-INCLUDE_ASM("asm/main/nonmatchings/actor", func_80040418);
+void func_80040418(Actor *actor) {
+    GameObject *mover;
+    s32 v;
+    s32 speed;
+
+    mover = actor->unk_0;
+    D_800AA248.cur_obj = mover;
+    if (actor->unk_28 == 0) {
+        if (actor->unk_10 == 0) {
+            if (mover->unk_6C & 0x80) {
+                return;
+            }
+            speed = 0x10000;
+            switch (actor->unk_4) {
+            case 0x2B:
+                speed = 0x20000;
+                break;
+            case 0x24:
+                speed = 0x5000;
+                break;
+            case 0x46:
+                speed = 0x18000;
+                break;
+            case 0x45:
+                speed = 0x10000;
+                break;
+            case 0x41:
+                speed = 0x8000;
+                break;
+            }
+            if (!(D_800AA268.p->flags & 0x10)) {
+                speed = -speed;
+            }
+            D_800AA268.p->vel_x.w = speed;
+            actor->unk_10 = 1;
+        }
+        v = D_800AA248.cur_obj->vel_x.w;
+        if ((u16)func_8003E79C() == 1) {
+            v = -v;
+            D_800AA248.cur_obj->vel_x.w = v;
+            D_800AA248.cur_obj->flags ^= 0x10;
+        } else if (D_800AA248.unk_4C != 0) {
+            func_8004155C(0x10, actor);
+            return;
+        }
+        speed = D_800AA268.p->pos_x.w + v;
+        speed &= D_801D8864.w;
+        D_800AA268.p->pos_x.w = speed;
+    } else {
+        mover->vel_y.w = -0xA0000;
+        D_800AA248.cur_obj->pos_y.w += -0x80000;
+        func_8004155C(5, actor);
+        func_80040B94(actor);
+    }
+}
 
 void func_800405D8(Actor *actor) {
     GameObject *mover;
@@ -1561,10 +1913,9 @@ void func_80040CB8(Actor *actor) {
     }
 }
 
-/* 99.2%: the mover pointer and the frame's offsets get a0/a1 in the other order around the x/y adjustment */
 #ifdef NON_MATCHING
-/* 98.59 %: the deltas frame->unk_8 - x and frame->unk_A - y land in s0/s1 (x's and y's registers) in the
- * original, in temporaries here. */
+/* 99.23%: 99.2%: only a0 and a1 are swapped after func_8001A784 (the original has the object in a0, the frame's
+ * field in a1) */
 void func_80040D68(Actor *actor) {
     GameObject *saved;
     AnimFrame *frame;
@@ -1579,14 +1930,14 @@ void func_80040D68(Actor *actor) {
             actor->unk_30 = 0x3C;
             func_80041344(actor->unk_32, actor);
             if (actor->unk_32 >= 4) {
-                x = ((u16 *)&D_800AA248.cur_obj->unk_1C.u.lo)[0];
-                y = ((u16 *)&D_800AA248.cur_obj->unk_1C.u.lo)[1];
+                x = D_800AA248.cur_obj->unk_1C.u.lo;
+                y = D_800AA248.cur_obj->unk_1C.u.hi;
                 func_8004155C(2, actor);
                 frame = func_8001A784(*(s32 *)D_800AA248.cur_obj->anim);
                 x = frame->unk_8 - x;
-                ((u16 *)&D_800AA248.cur_obj->pos_x.w)[1] += x;
+                D_800AA248.cur_obj->pos_x.u.hi += x;
                 y = frame->unk_A - y;
-                ((u16 *)&D_800AA248.cur_obj->pos_y.w)[1] += y;
+                D_800AA248.cur_obj->pos_y.u.hi += y;
             }
         }
     }

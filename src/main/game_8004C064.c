@@ -13,7 +13,7 @@ s32 func_8001EB10(s32 range, s32 arg1);                     /* a random number *
 void func_8001E4B0(GameObject *obj);                        /* free an object */
 void func_8001F724(u16);
 void func_8001F7CC(s32 sound, s32 variant);
-void func_80020BA0(s32, u16 flags, GameObject *obj);
+void main_set_frame(s32, u16 flags, GameObject *obj);
 s32 func_8002CD24(u16, Monster *m, s32);
 void func_8002CE74(u16, Monster *m, s32);
 void func_8002CFAC(Monster *m, Building *b);
@@ -27,7 +27,7 @@ void func_8005404C(Monster *m);
 void func_800540D0(Monster *m);
 void func_8005417C(Monster *m);
 void func_80054374(s32, Monster *m);
-Building *func_80054728(u16);
+Building *monster_get_building(u16);
 void func_8005E0E8(Monster *m);
 s32 func_8005F208();                                        /* called with 0, 1 or 2 arguments */
 void func_800634D4(Monster *, u32);
@@ -176,7 +176,7 @@ void func_8004C3A8(void) {
     GameObject *saved = D_800AA248.cur_obj;
     Monster *m = saved->owner.monster;
 
-    func_80020BA0(*saved->arg.w, saved->flags, saved);
+    main_set_frame(*saved->arg.w, saved->flags, saved);
     if (m->id == 7) {
         D_800AA248.cur_obj->unk_74 = D_801F9ABC;
     } else {
@@ -653,7 +653,7 @@ void func_8004CFE8(void) {
         if (side != 0 && side != 3) {
             ea = m->unk_0EA;
             if ((u32) (ea - 3) >= 2 && ea != side) {
-                b = func_80054728(m->climb_building);
+                b = monster_get_building(m->climb_building);
                 if (b != NULL) {
                     m->unk_0FA = m->pos.s.lo;
                     m->unk_0FC = m->pos.s.hi;
@@ -705,7 +705,7 @@ void func_8004D194(void) {
 
     if (D_800AA2DC == 0 || !(D_8007BD78.flags & 0x40)) {
         m = saved->owner.monster;
-        b = func_80054728(m->climb_building);
+        b = monster_get_building(m->climb_building);
         if (b != NULL) {
             if (m->climb_side != 3) {
                 m->unk_0FA = m->pos.s.lo;
@@ -722,24 +722,24 @@ void func_8004D194(void) {
 }
 
 #ifdef NON_MATCHING
-/* 95%: the registers of floor - 1 and its masked copy */
+/* 95.53%: 95.5%: the original copies n into floor in the n test's delay slot and repeats the andi of floor on both
+ * paths; here the copy lands in the unk_1BC test's delay slot */
 s32 func_8004D264(s16 *side, Monster *m, s32 bld) {
     u16 floor;
     s32 part;
-    s32 n;
-    u16 idx;
+    u16 n;
     s16 s;
 
     floor = m->climb_floor;
     part = bld + 0x98;
     if (floor != 0) {
         n = floor - 1;
-        if ((u16) n != 0) {
-            idx = n;
+        if (n != 0) {
+            floor = n;
             if (m->unk_1BC != 0) {
-                idx = n + 1;
+                floor = n + 1;
             }
-            part += idx * 0x54;
+            part += floor * 0x54;
         }
     }
     s = 2;

@@ -269,7 +269,7 @@ void func_80031A3C(void);
 void func_80031B10(void);
 void func_80031444(void);
 void func_8001E7A0(void);
-void func_80020BA0();
+void main_set_frame();
 void func_80031A68(void);
 void func_80031AC8(void);
 void func_80031CB4(void *, s32);

@@ -263,11 +263,11 @@ void func_8009BFE8(void) {
     func_8001ECB4(D_800A6380, D_8007A686, 0);
     func_8001ECB4(D_800A63A3, D_8007A688, 0);
     func_8009BF94(&D_800A63A8.text[7], D_8007A692);
-    func_8001E450(0x421);
-    func_8001E450(0x422);
-    func_8001E450(0x423);
-    func_8001E450(0x424);
-    func_8001E450(0x425);
+    main_free_kind(0x421);
+    main_free_kind(0x422);
+    main_free_kind(0x423);
+    main_free_kind(0x424);
+    main_free_kind(0x425);
     D_800AA2EC = D_801F9AAC;
     if (D_800A92D0 == 0) {
         D_800AA2EC = D_801E2A44;
@@ -475,10 +475,10 @@ void func_8009CE5C(void) {
 }
 
 void func_8009CEC8(void) {
-    func_8001E450(0x442);
-    func_8001E450(0x443);
-    func_8001E450(0x402);
-    func_8001E450(0x403);
+    main_free_kind(0x442);
+    main_free_kind(0x443);
+    main_free_kind(0x402);
+    main_free_kind(0x403);
     D_800AA2EC = D_801F9AAC;
     if (D_800A92D0 == 0) {
         D_800AA2EC = D_801E2A44;
@@ -712,12 +712,12 @@ void func_8009D948(void) {
         def->flags = 0x14;
         def->unk_06 |= 0x20;
         D_800A92F8[1] = func_8001DCB4();
-        D_800A9808[0] = func_8001EB9C(0, 0, 0x4B, 5, 0xFF00);
+        D_800A9808[0] = main_create_box(0, 0, 0x4B, 5, 0xFF00);
         D_800A9808[0]->pos_x.s.hi = 0x1F4;
         D_800A9808[0]->pos_y.s.hi = 0x69;
         D_800A9808[0]->priority = 0x32;
         D_800A9808[0]->kind = 0x400;
-        D_800A9808[1] = func_8001EB9C(0, 0, 0x32, 5, 0xFF00);
+        D_800A9808[1] = main_create_box(0, 0, 0x32, 5, 0xFF00);
         D_800A9808[1]->pos_x.s.hi = 0x1F4;
         D_800A9808[1]->pos_y.s.hi = 0xA3;
         D_800A9808[1]->priority = 0x32;
@@ -799,12 +799,12 @@ void func_8009DEA8(void *list, s32 selected) {
     menu = list;
     for (i = 2; i <= menu->unk_00 + 1; i++) {
         if (selected != i - 2) {
-            func_8001E450(menu[i].kind);
+            main_free_kind(menu[i].kind);
         }
     }
     if (menu->sub != NULL) {
         i = menu->kind;
-        func_8001E450(menu->sub[i + 2].kind);
+        main_free_kind(menu->sub[i + 2].kind);
     }
 }
 
@@ -812,7 +812,7 @@ void func_8009DF60(void) {
     s32 i;
 
     for (i = 0x400; i < 0x4FF; i++) {
-        func_8001E450(i);
+        main_free_kind(i);
     }
 }
 
@@ -1168,12 +1168,12 @@ void func_8009FC74(void) {
             func_8001F61C("PRESS START", 0xC8, 0xD2, 1, 0x45, D_8007ABCC, 0, 0x400);
         }
         if (D_800A92C8 == 0) {
-            func_8001E450(0x400);
+            main_free_kind(0x400);
             D_800A92C8 = 0x5B;
         }
         D_800A92C8--;
         if (D_800A9220 & 0x11044110) {
-            func_8001E450(0x400);
+            main_free_kind(0x400);
             func_8001F724(3);
             D_800AA2EC = 0x45;
             func_8001ED54(&D_800897FC);
@@ -1280,7 +1280,7 @@ void func_800A1720(void) {
     D_801D885C = 0x44;
     if (D_800A9898 == 1) {
         D_800A9898 = 0;
-        func_8001E8C0(0x400, -0x100);
+        main_free_kind_masked(0x400, -0x100);
     }
     switch (D_800A98B8) {
     case 0:
@@ -1333,7 +1333,7 @@ void func_800A1F8C(void) {
     case 0:
         status = card_get_status();
         if (status != 2) {
-            func_8001E8C0(0x400, -0x100);
+            main_free_kind_masked(0x400, -0x100);
             D_801D3780 -= 2;
             break;
         }
@@ -1355,7 +1355,7 @@ void func_800A1F8C(void) {
                 D_800A98B8 = state;
             } else {
                 D_801D3780 -= 2;
-                func_8001E8C0(0x400, -0x100);
+                main_free_kind_masked(0x400, -0x100);
             }
         }
         break;

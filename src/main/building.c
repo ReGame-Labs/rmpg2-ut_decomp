@@ -113,11 +113,11 @@ void func_8002AC34(GameObject *obj) {
 
     if (D_8007C976 == 0) {
         if (D_801FB198 > 0x12430) {
-            func_80020BA0(0x4F00097E, obj->flags, obj);
+            main_set_frame(0x4F00097E, obj->flags, obj);
             obj->pos_x.s.hi = (D_801FB198 - 0x12430) / 58 + 0xF0;
             obj->pos_y.s.hi = 0x82 - (D_801FB198 - 0x12430) / 78;
         } else if (D_801FB198 > 0x2A30 && D_801FB198 < 0xA8C0) {
-            func_80020BA0(0x4F000980, obj->flags, obj);
+            main_set_frame(0x4F000980, obj->flags, obj);
             d = (0xA8C0 - D_801FB198) / 54 + 0x81;
             obj->pos_x.s.hi = 0x122;
             obj->flags |= 0x400;
@@ -1276,7 +1276,7 @@ void func_8002DE08(u16 which, s16 n, Monster *arg2, BuildingItem *rec) {
                     func_8002E5F4(which, rec);
                 }
             }
-            func_80020BA0(t, obj->flags, obj);
+            main_set_frame(t, obj->flags, obj);
             func_80030754(g, n, arg2, rec);
             if ((u16) n < 2) {
                 g->unk_16 = n;
@@ -1997,7 +1997,7 @@ void func_8002FAA4(Monster *arg0, BuildingItem *arg1) {
 
 void func_8002FB38(void *arg0, GameObject *arg1) {
     if (arg1->frame != arg0) {
-        func_80020BA0(arg0, 0x8002, arg1);
+        main_set_frame(arg0, 0x8002, arg1);
     }
 }
 
@@ -2910,7 +2910,7 @@ void func_80031A3C(void) {
 
 void func_80031A68(void) {
     if ((D_801D37BC == 0) && (D_801D37C0 == 0) && (D_801D857C != 0)) {
-        func_80020BA0(D_801D857C, 0x8002, D_800AA248.cur_obj);
+        main_set_frame(D_801D857C, 0x8002, D_800AA248.cur_obj);
         D_801D857C = 0;
         func_8001E7A0();
     }
