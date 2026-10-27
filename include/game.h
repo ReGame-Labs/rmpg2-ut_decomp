@@ -51,6 +51,8 @@ typedef struct SpriteFrame {
     /* 0x1E */ u16 unk_1E;
     /* 0x20 */ u16 unk_20;              /* a third point: x (a spawn origin) */
     /* 0x22 */ u16 unk_22;              /* y */
+    /* 0x24 */ s16 unk_24;              /* a fourth point: x (where an Npc's second object sits, main_place_attached) */
+    /* 0x26 */ s16 unk_26;              /* y */
 } SpriteFrame;
 
 /* A sprite object of the level, 0xCC bytes: a monster's body, a vehicle, a projectile, an effect, a building's
@@ -486,15 +488,15 @@ extern Ai D_801D85C8[];
 extern u16 D_801D870C;
 
 /* A thrown object's slot: 0x10 bytes, 21 in D_801E1CC4 (D_801D8724 in use), filled by func_8004A9B0 and run by
- * func_8004AD18 by its kind; npc.c makes and runs some kinds too (func_80039358, func_8003956C, func_8003A5A0,
- * func_8003A744). */
+ * func_8004AD18 by its kind; npc.c makes and runs some kinds too (npc_create_throw, npc_update_throw, npc_create_shot,
+ * npc_update_shot). */
 typedef struct Throw {
     /* 0x00 */ GameObject *obj;
     /* 0x04 */ GameObject *thrower;            /* the current object when the throw was made (func_8004A9B0) */
     /* 0x08 */ u16 kind;                       /* func_8004AD18 dispatches on it */
     /* 0x0A */ u16 state;                      /* 1 in flight, 0x10 done */
     /* 0x0C */ s32 unk_0C;                     /* npc.c's kinds: added to the object's vel_y each frame, 16.16
-                                                * (func_80039358 sets it, func_8003956C) */
+                                                * (npc_create_throw sets it, npc_update_throw) */
 } Throw;
 
 extern Throw D_801E1CC4[];
