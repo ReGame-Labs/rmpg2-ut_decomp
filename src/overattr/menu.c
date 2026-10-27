@@ -367,25 +367,17 @@ void func_8009C1CC(void) {
 
 INCLUDE_RODATA("asm/overattr/nonmatchings/menu", D_80097F58);
 
-INCLUDE_RODATA("asm/overattr/nonmatchings/menu", D_80098094);
-
-#ifdef NON_MATCHING
-/* 99.7 %: the name and the cursor are addressed in the original's order only in the second block: the first loads
- * the cursor's %hi before the name's (a scheduling tie). With this C the "AEIOU" goes in place of D_80098094. */
 void func_8009C5A4(void) {
-    u8 c;
-    u8 *p;
 
     if ((D_800A9220 & 0x100401) && D_801F9944 == 0) {
         D_800A9860 = 0x708;
         func_8001F724(0x1E);
-        p = &D_800A9890[D_800A92D0];
-        if (*p == '9') {
-            *p = 'B';
-        } else if (*p == 'Z') {
-            *p = '0';
+        if (D_800A9890[D_800A92D0] == '9') {
+            D_800A9890[D_800A92D0] = 'B';
+        } else if (D_800A9890[D_800A92D0] == 'Z') {
+            D_800A9890[D_800A92D0] = '0';
         } else {
-            *p = *p + 1;
+            D_800A9890[D_800A92D0]++;
         }
         if (strchr("AEIOU", D_800A9890[D_800A92D0]) != NULL) {
             D_800A9890[D_800A92D0]++;
@@ -394,13 +386,12 @@ void func_8009C5A4(void) {
     if ((D_800A9220 & 0x200802) && D_801F9944 == 0) {
         D_800A9860 = 0x708;
         func_8001F724(0x1E);
-        p = &D_800A9890[D_800A92D0];
-        if (*p == 'B') {
-            *p = '9';
-        } else if (*p == '0') {
-            *p = 'Z';
+        if (D_800A9890[D_800A92D0] == 'B') {
+            D_800A9890[D_800A92D0] = '9';
+        } else if (D_800A9890[D_800A92D0] == '0') {
+            D_800A9890[D_800A92D0] = 'Z';
         } else {
-            *p = *p - 1;
+            D_800A9890[D_800A92D0]--;
         }
         if (strchr("AEIOU", D_800A9890[D_800A92D0]) != NULL) {
             D_800A9890[D_800A92D0]--;
@@ -414,9 +405,6 @@ void func_8009C5A4(void) {
         }
     }
 }
-#else
-INCLUDE_ASM("asm/overattr/nonmatchings/menu", func_8009C5A4);
-#endif
 
 void func_8009C7B0(void) {
     D_801F9ADC = 1;
@@ -778,16 +766,14 @@ void func_8009D6B0(void) {
     D_800A9890[5] = 0;
 }
 
-#ifdef NON_MATCHING
-/* 99.6 %: the slot counter and the giv of D_800A92B0 swap s5/s6 (declaration orders, loop forms and pointer
- * variables tried). */
 void func_8009D7B4(void) {
     s32 n;
     s32 i;
     s32 j;
     ObjectDef *def;
 
-    if ((D_800A9220 & 0x01004010) && (n = 0, D_801F9944 == 0)) {
+    if ((D_800A9220 & 0x01004010) && D_801F9944 == 0) {
+        n = 0;
         D_800A92D8 = D_800A7200;
         D_800A9870 = 0;
         D_801E2148 = 6;
@@ -810,9 +796,6 @@ void func_8009D7B4(void) {
         }
     }
 }
-#else
-INCLUDE_ASM("asm/overattr/nonmatchings/menu", func_8009D7B4);
-#endif
 
 void func_8009D948(void) {
     ObjectDef *def;
