@@ -87,6 +87,7 @@ OverattrTexts *func_80025C08(void *list);
 void func_8001F39C(void *msg);         /* loads a text message into the printer */
 void func_8001EDB0(void);              /* prints it, its text through sprintf */
 void func_8001E4B0(GameObject *obj);   /* frees an object */
+void func_8001E8C0(s32 kind, s32 arg1);
 void func_8001F61C(u8 *text, s16 x, s16 y, s32 spacing, s32 arg4, s32 *glyphs, s32 kind, s32 arg7); /* draws a text */
 
 extern s32 D_8007ABCC[];               /* a font's glyphs */
@@ -204,6 +205,11 @@ extern MenuRecord *D_800A92C0;          /* the current menu */
 extern MenuRecord *D_800A92D8;          /* the menu to open next */
 extern s16 D_800A9870;                  /* the cursor in the next menu */
 extern s16 D_800A9878;
+extern s16 D_800A9898;
+extern s16 D_800A9810[6];              /* the listed saves' text y */
+extern s16 D_800A9820[6];              /* their text x */
+extern s16 D_800A9830[6];              /* their slot */
+extern s16 D_800A98B8;                 /* the memory-card screen's state */
 extern s32 D_800A9228;                 /* the player slot before the last move */
 extern u8 D_800A74E4[];                /* an animation script */
 extern s16 D_800A92B0[3];              /* per player: the selection's state, 3 done */
@@ -228,6 +234,28 @@ extern u8 D_800A49E4[];
 extern u8 D_800A49FC[];
 extern u8 D_800A4A14[];
 
+/* A saved game in the save file (0x74 bytes). */
+typedef struct {
+    /* 0x00 */ s16 unk_00;             /* the save's number: the newest is the largest */
+    /* 0x02 */ s16 city;               /* an index into the city names D_8007C704 */
+    /* 0x04 */ u8 unk_04[0x3A];
+    /* 0x3E */ u16 unk_3E;
+    /* 0x40 */ u16 unk_40;
+    /* 0x42 */ u16 unk_42;
+    /* 0x44 */ u16 unk_44;
+    /* 0x46 */ u8 unk_46[3];
+    /* 0x49 */ u8 unk_49[7];           /* the number of non-zero entries is printed as "%dP" */
+    /* 0x50 */ u8 unk_50[0x08];
+    /* 0x58 */ u16 unk_58[7];
+    /* 0x66 */ u8 unk_66[0x02];
+    /* 0x68 */ u16 unk_68;
+    /* 0x6A */ u16 unk_6A;
+    /* 0x6C */ u16 unk_6C;
+    /* 0x6E */ u16 unk_6E;
+    /* 0x70 */ u16 unk_70;
+    /* 0x72 */ u8 unk_72[0x02];
+} CardSlot;
+
 /* The save file's 0x500 bytes (card.c): the memory-card header, then the game's data, with an XOR checksum. */
 typedef struct {
     /* 0x000 */ u8 magic[2];           /* "SC" */
@@ -243,10 +271,7 @@ typedef struct {
     /* 0x21C */ u8 unk_21C[0x1C];
     /* 0x238 */ s32 checksum;          /* the XOR of the 0x140 words with this one zero */
     /* 0x23C */ u8 unk_23C[0x04];
-    /* 0x240 */ struct {
-                   s16 unk_00;
-                   u8 unk_02[0x72];
-               } unk_240[6];
+    /* 0x240 */ CardSlot slots[6];
     /* 0x4F8 */ u8 unk_4F8[0x08];
 } CardSave;
 
@@ -288,5 +313,10 @@ void func_8009E3C0(s32 kind, s32 value);
 void func_8009E40C(void *list, s32 selected);
 void func_8009E4D4(void);
 void func_8009D0B0(void);
+void func_800A1804(void);
+void func_800A1B9C(void);
+void func_800A2138(void);
+void func_800A28DC(void);
+void func_800A309C(void);
 
 #endif /* OVERATTR_H */

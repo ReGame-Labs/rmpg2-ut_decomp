@@ -1,6 +1,7 @@
 /* OVERLAYS/OVERATTR.BIN: the credits, the menus and the memory-card screens (config/overattr.yaml). */
 #include "common.h"
 #include "overattr.h"
+#include "psyq/libc.h"
 
 void func_8009B478(void) {
     GameObject *head;
@@ -878,11 +879,83 @@ INCLUDE_RODATA("asm/overattr/nonmatchings/overattr_8009B478", D_80098164);
 
 INCLUDE_RODATA("asm/overattr/nonmatchings/overattr_8009B478", jtbl_80098178);
 
+#ifdef NON_MATCHING
+/* 81.7 %: the city names' address is hoisted into s7 (a frame 8 bytes larger); the original reloads it. */
+s32 func_800A1258(void) {
+    char buf[0x18];
+    s32 limit;
+    s32 n;
+    s32 slot;
+    s32 best;
+    s32 y;
+    s32 i;
+    s32 count;
+
+    limit = 10000000;
+    n = 0;
+    slot = 0;
+    y = 60;
+    for (;;) {
+        best = -1;
+        for (i = 0; i < 6; i++) {
+            if (D_800A9300.unk_204[i] == 0 && best < D_800A9300.slots[i].unk_00 && D_800A9300.slots[i].unk_00 < limit) {
+                slot = i;
+                best = D_800A9300.slots[i].unk_00;
+            }
+        }
+        if (best == -1) {
+            return n;
+        }
+        count = 0;
+        for (i = 0; i < 7; i++) {
+            if (D_800A9300.slots[slot].unk_49[i] != 0) {
+                count++;
+            }
+        }
+        D_800A9830[n] = slot;
+        D_800A9820[n] = 0x20;
+        D_800A9810[n] = y;
+        y += 23;
+        sprintf(buf, "%s   %dP", D_8007C704[D_800A9300.slots[slot].city], count);
+        func_8001F61C(buf, D_800A9820[n], D_800A9810[n], 1, D_801F9AAC, D_8007AD4C, 1, 0x450 + n);
+        n++;
+        limit = best;
+    }
+}
+#else
 INCLUDE_ASM("asm/overattr/nonmatchings/overattr_8009B478", func_800A1258);
+#endif
 
 INCLUDE_ASM("asm/overattr/nonmatchings/overattr_8009B478", func_800A1434);
 
-INCLUDE_ASM("asm/overattr/nonmatchings/overattr_8009B478", func_800A1720);
+void func_800A1720(void) {
+    D_801D885C = 0x44;
+    if (D_800A9898 == 1) {
+        D_800A9898 = 0;
+        func_8001E8C0(0x400, -0x100);
+    }
+    switch (D_800A98B8) {
+    case 0:
+        func_800A1804();
+        break;
+    case 6:
+        func_800A1B9C();
+        break;
+    case 1:
+        func_800A2138();
+        break;
+    case 2:
+        func_800A28DC();
+        break;
+    case 5:
+        D_801D3780++;
+        break;
+    case 4:
+        func_800A309C();
+        D_800A98B8 = 5;
+        break;
+    }
+}
 
 INCLUDE_ASM("asm/overattr/nonmatchings/overattr_8009B478", func_800A1804);
 
@@ -911,7 +984,7 @@ s32 func_800A28A0(s32 id) {
     s32 i;
 
     for (i = 0; i < 6; i++) {
-        if (D_800A9300.unk_240[i].unk_00 == id) {
+        if (D_800A9300.slots[i].unk_00 == id) {
             return i;
         }
     }
