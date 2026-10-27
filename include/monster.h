@@ -5,6 +5,12 @@
 
 #include "game.h"
 
+/* A point of a sprite frame: the frames carry one per monster id from SpriteFrame.unk_10 on (monster_follow_holder). */
+typedef struct FramePoint {
+    u16 x;
+    u16 y;
+} FramePoint;
+
 s32 func_8001B660(s32);
 ObjectDef *func_8001D110(void);
 void *func_8001DCB4(void);
@@ -69,7 +75,7 @@ void func_80053C50(s32, Monster *);
 void func_80053D68(s32, Monster *);
 void func_8005417C(Monster *);
 void func_8005421C(Monster *);
-Building *func_80054728(u16);
+Building *monster_get_building(u16);
 void func_80054A18();
 void func_80054CF8(Monster *, Building *);
 void func_80054D74(u16, Monster *, Building *);
@@ -103,11 +109,11 @@ s32 func_80056990(Monster *, Building *);
 u16 func_80056A44(Monster *, Building *);
 s32 func_80056C18(Monster *, Building *);
 u16 func_80056AC8(Monster *);
-void func_80056CCC(Monster *, GameState *);
+void func_80056CCC(Monster *);
 void func_80056E2C(Monster *, Building *);
 void func_80056E78(Monster *);
 void func_80056EB8(Monster *, Building *);
-void func_80056F38(Monster *, Building *);
+void monster_find_floor(Monster *, Building *);
 s32 func_800571D0(Monster *, BuildingBlock *);
 u16 func_80057300(u16, Monster *, Building *, u16);
 u16 func_800573C8(Monster *, Building *);
@@ -122,14 +128,17 @@ u16 func_80057A08(Monster *);
 u16 func_80057AD8(Monster *, Building *, u16);
 void func_800580F8(void *);
 void func_80058F78(Monster *);
-Monster *func_8005D918(void);
+Monster *bonus_find_most_lives(void);
 s32 func_8005E4E4(void);
-void func_80060F3C(void);
+void cdload_sort_players(void);
 void func_800634B0(Monster *, s32);
 void func_800634D4(Monster *, u32);
 
 extern s32 D_800123BC;
 extern u16 D_8007BE0C[];
+extern s32 D_8007FB24[];                /* climbing speeds by direction: monster 7's (two sets) */
+extern s32 D_8007FB6C[];
+extern s32 *D_8007FB90[];               /* climbing speeds by direction, per monster id - 1 */
 extern s16 D_8007FD04[];
 extern s16 D_8007FD24[];
 extern s16 D_8007FD44[];

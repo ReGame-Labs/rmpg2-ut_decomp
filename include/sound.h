@@ -226,7 +226,7 @@ typedef struct SoundFileHeader {
     /* 0x1C */ s32 unk_1C;
 } SoundFileHeader;
 
-/* What the game hands func_800706C0 (cdload's func_80062C30 fills one on the stack): the file access functions the
+/* What the game hands func_800706C0 (cdload's cdload_init_sound fills one on the stack): the file access functions the
  * driver calls (cdload's stdio emulation), two tables copied into the driver and the timer's settings. The functions
  * are copied into the driver's own pointers (D_801FDF2C ...), which give their calls' types. */
 typedef struct SoundInit {
