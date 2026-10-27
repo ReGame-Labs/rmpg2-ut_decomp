@@ -311,13 +311,13 @@ void *func_8003D1F8(Actor *actor) {
     return *(void **)(p - 4);
 }
 
-void func_8003D228(Npc *npc) {
+void func_8003D228(UnkStructB2 *rec) {
     Anim *anim = NULL;
 
-    switch (npc->unk_6) {
+    switch (rec->unk_06) {
     case 0x2A:
         anim = &D_80094514;
-        if (npc->unk_4 < 2) {
+        if (rec->unk_04 < 2) {
             return;
         }
         break;
@@ -326,20 +326,20 @@ void func_8003D228(Npc *npc) {
     case 0x29:
     case 0x2B:
     case 0x2C:
-        npc->unk_4 = 3;
+        rec->unk_04 = 3;
         break;
     default:
         return;
     }
-    if (npc->unk_E != 0) {
-        npc->unk_8 = 3;
-        npc->unk_18 = 0x34;
-        npc->unk_E = 0;
-        npc->unk_14 = NULL;
-        if (npc->unk_4 != 3) {
+    if (rec->unk_0E != 0) {
+        rec->unk_08 = 3;
+        rec->unk_18 = 0x34;
+        rec->unk_0E = 0;
+        rec->unk_14 = NULL;
+        if (rec->unk_04 != 3) {
             func_8001F7CC(0xC8, 0x2F);
-            npc->unk_4 = 3;
-            npc->unk_18 = -1;
+            rec->unk_04 = 3;
+            rec->unk_18 = -1;
             if (anim != NULL) {
                 func_8003D58C(anim);
             }
@@ -347,53 +347,53 @@ void func_8003D228(Npc *npc) {
     }
 }
 
-void func_8003D30C(Npc *npc) {
-    switch (npc->unk_6) {
+void func_8003D30C(UnkStructB2 *rec) {
+    switch (rec->unk_06) {
     case 0x34:
-        if (npc->unk_E != 0 && npc->unk_14 != NULL) {
+        if (rec->unk_0E != 0 && rec->unk_14 != NULL) {
             func_8001F724(0x11);
-            npc->unk_14->unk_8 = 0x440000;
-            func_8003C8D4((Actor *)npc);
-            npc->unk_1C = 0;
+            rec->unk_14->health.w = 0x440000;
+            func_8003C8D4((Actor *)rec);
+            rec->unk_1C = 0;
         }
         break;
     case 0x35:
-        if (npc->unk_E != 0 && npc->unk_14 != NULL) {
+        if (rec->unk_0E != 0 && rec->unk_14 != NULL) {
             func_8001F724(0x11);
-            npc->unk_14->unk_10 = 0x440000;
-            func_8003C8D4((Actor *)npc);
-            npc->unk_1C = 0;
+            rec->unk_14->meter.w = 0x440000;
+            func_8003C8D4((Actor *)rec);
+            rec->unk_1C = 0;
         }
         break;
     }
 }
 
-void func_8003D3CC(Npc *npc) {
+void func_8003D3CC(UnkStructB2 *rec) {
     Anim *anim = NULL;
 
-    switch (npc->unk_6) {
+    switch (rec->unk_06) {
     case 0x2F:
         anim = &D_80094AEC;
-        if (npc->unk_4 < 2) {
+        if (rec->unk_04 < 2) {
             return;
         }
         break;
     case 0x2D:
     case 0x2E:
     case 0x30:
-        npc->unk_4 = 3;
+        rec->unk_04 = 3;
         break;
     default:
         return;
     }
-    if (npc->unk_E != 0) {
-        npc->unk_E = 0;
-        npc->unk_14 = NULL;
-        if (npc->unk_4 == 3) {
-            func_8003D4AC((Ai *)npc);
+    if (rec->unk_0E != 0) {
+        rec->unk_0E = 0;
+        rec->unk_14 = NULL;
+        if (rec->unk_04 == 3) {
+            func_8003D4AC((Ai *)rec);
         } else {
-            npc->unk_4 = 3;
-            npc->unk_8 = 6;
+            rec->unk_04 = 3;
+            rec->unk_08 = 6;
             if (anim != NULL) {
                 func_8003D58C(anim);
             }

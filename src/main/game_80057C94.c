@@ -44,7 +44,7 @@ s32 func_8005BC20(s16, s16, s32, s32, GameObject *, s32);
 void func_80053C50(s32, Monster *);
 u16 func_8005D198(void);                /* defined as s32 in game_8005D198.c; the callers here mask a u16 */
 void func_80054374(s32, Monster *);
-void func_800346FC(UnkStructB1 *r);
+void func_800346FC(Pickup *r);
 extern Building D_801D3844[];
 extern s32 D_80016A30;
 extern s32 D_80084F54[];
@@ -1423,7 +1423,7 @@ INCLUDE_ASM("asm/main/nonmatchings/game_80057C94", func_8005BC20);
 
 u16 func_8005BF54(GameObject *b, Monster *e) {
     u16 n;
-    UnkStructB1 *r;
+    Pickup *r;
     s16 x;
 
     n = D_801E29B0;
@@ -1475,7 +1475,7 @@ u16 func_8005BF54(GameObject *b, Monster *e) {
 
 u16 func_8005C1F8(GameObject *b, Monster *e) {
     u16 n;
-    NpcS *npc;
+    Npc *npc;
     GameObject *obj;
     s32 action;
     s16 x;
@@ -1549,7 +1549,7 @@ u16 func_8005C3C8(GameObject *b, Monster *skip) {
 /* 99.36 %: the saved registers are assigned in another order (the object in s7, its x in s4 in the original) */
 void func_8005C578(GameObject *b, Monster *e) {
     u16 n;
-    NpcS *npc;
+    Npc *npc;
     GameObject *obj;
     s32 action;
     u16 x;
@@ -1590,7 +1590,7 @@ INCLUDE_ASM("asm/main/nonmatchings/game_80057C94", func_8005C578);
 /* 99.70 %: the object and its x swap saved registers (s5 and s6 in the original) */
 void func_8005C71C(GameObject *b, Monster *e) {
     u16 n;
-    UnkStructB1 *r;
+    Pickup *r;
     u16 x;
 
     n = D_801E29B0;
@@ -1666,7 +1666,7 @@ INCLUDE_ASM("asm/main/nonmatchings/game_80057C94", func_8005C958);
 
 void func_8005CAA4(GameObject *b, Monster *e) {
     u16 n;
-    NpcS *npc;
+    Npc *npc;
     GameObject *obj;
     s32 action;
 
@@ -1700,7 +1700,7 @@ void func_8005CAA4(GameObject *b, Monster *e) {
 
 void func_8005CC54(GameObject *b, Monster *e) {
     u16 n;
-    UnkStructB1 *r;
+    Pickup *r;
 
     n = D_801E29B0;
     r = D_801FA9BC;

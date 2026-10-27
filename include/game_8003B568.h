@@ -9,23 +9,6 @@
 
 
 
-typedef struct UnkStructB2 {  /* provisional: a 0x30-byte record of the table at D_801D3824 (D_801D8738 of them) */
-    GameObject *unk_00;
-    u16 unk_04;     /* 1: in use */
-    u16 unk_06;
-    u16 unk_08;
-    u16 unk_0A;
-    u16 unk_0C;
-    u8 pad_0E[0x2];
-    BuildingPart *unk_10;
-    u8 pad_14[0x4];
-    s16 unk_18;
-    u16 unk_1A;
-    u16 unk_1C;
-    u8 pad_1E[0x12];
-} UnkStructB2;
-
-extern UnkStructB2 D_801D3824[];
 extern s16 D_801F9980;
 extern s16 D_801F9984;
 extern s16 D_801F9988;
@@ -38,25 +21,25 @@ void func_8005DD48(Monster *);
 
 void func_80029D1C(void);
 /* The handlers of the D_801FA9BC records by kind (func_8003B5D0): game_8002A330 and game_80034590. */
-void func_800344B8(UnkStructB1 *r);
-void func_80034B94(UnkStructB1 *r);
-void func_800350C0(UnkStructB1 *r);
-void func_8003537C(UnkStructB1 *r);
-void func_8003566C(UnkStructB1 *r);
-void func_80035C4C(UnkStructB1 *r);
+void func_800344B8(Pickup *r);
+void func_80034B94(Pickup *r);
+void func_800350C0(Pickup *r);
+void func_8003537C(Pickup *r);
+void func_8003566C(Pickup *r);
+void func_80035C4C(Pickup *r);
 
 void func_8003B568(void);
-void func_8003B5D0(UnkStructB1 *);
+void func_8003B5D0(Pickup *);
 void func_8003B68C(void);
-void func_8003B9A0(UnkStructB1 *);
+void func_8003B9A0(Pickup *);
 void func_8003C130(void);
 void func_8003C344(void);
 void func_8003C080(void);
 void func_8003C0AC(void);
 void func_8003C0C8(void);
 void func_8003C0E0(void);
-void func_8003BD48(UnkStructB1 *);
-void func_8003BF34(GameObject *, UnkStructB1 *, u16);   /* the third argument is not used */
+void func_8003BD48(Pickup *);
+void func_8003BF34(GameObject *, Pickup *, u16);   /* the third argument is not used */
 extern u8 D_8008A494[];
 extern u8 D_8008A4A0[];
 extern u8 D_8008A4B8[];
@@ -66,9 +49,9 @@ void func_8003C674();                  /* empty; func_8003C3B0 passes it two arg
 BuildingPart *func_8003C67C(Building *u, UnkStructB2 *rec);
 void func_8003CE24(BuildingPart *p, ObjectDef *def, UnkStructB2 *rec, s32 arg3);
 void func_8003C894(void **arg0);
-void func_8003C8D4(UnkStructB1 *arg0);
-void func_8003C934(UnkStructB1 *);
-void func_8003C9E8(UnkStructB1 *arg0);
+void func_8003C8D4(Pickup *arg0);
+void func_8003C934(Pickup *);
+void func_8003C9E8(Pickup *arg0);
 typedef struct UnkStructB4 {  /* provisional: 8-byte records of D_8007DDD4 (an animation and a value per step) */
     void *unk_00;
     u16 unk_04;
@@ -77,8 +60,8 @@ extern UnkStructB4 D_8007DDD4[];
 void func_80054374(u16, Monster *);
 extern void (*D_8007DDB4[8])(void);
 s32 func_8003B9C8(GameObject *, Monster *);
-void func_8003CA28(UnkStructB1 *arg0);
-void func_8003CA70(UnkStructB1 *);
+void func_8003CA28(Pickup *arg0);
+void func_8003CA70(Pickup *);
 void func_8003CADC(Monster *arg0);
 void func_8003CB30(Monster *arg0);
 void func_8003CCA8(void);

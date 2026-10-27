@@ -23,8 +23,8 @@ typedef struct SpawnItem {
  * func_8003B6E0: each with an object, a kind (unk_06, 1..0x1C) and a state (unk_08: 1 new, 2 live, 3 taken).
  * func_8003B5D0 runs the kind's handler (func_800344B8 for 1..19 in game_8002A330, the others in the first part of
  * game_80034590); the pickup checks (func_8003BAB0, func_8005BF54, func_8005C71C, func_8005CC54) hand one to the
- * monster that touches it (unk_54). Their head matches the 0x78-byte records of D_801FAC9C (NpcS) up to 0x38. */
-typedef struct UnkStructB1 {  /* provisional: a 0x58-byte record of the table at D_801FA9BC */
+ * monster that touches it (unk_54). Their head matches the 0x78-byte records of D_801FAC9C (Npc) up to 0x38. */
+typedef struct Pickup {
     /* 0x00 */ GameObject *unk_00;
     /* 0x04 */ s16 unk_04;
     /* 0x06 */ u16 unk_06;     /* the kind: func_8003B5D0 picks its handler */
@@ -51,9 +51,29 @@ typedef struct UnkStructB1 {  /* provisional: a 0x58-byte record of the table at
     /* 0x50 */ u16 unk_50;
     /* 0x52 */ u8 pad_52[0x2];
     /* 0x54 */ Monster *unk_54;  /* the monster that took it */
-} UnkStructB1;
+} Pickup;
 
-extern UnkStructB1 D_801FA9BC[];
+extern Pickup D_801FA9BC[];
 extern u16 D_801E29B0;
+
+/* The 0x30-byte records of D_801D3824 (D_801D8738 of them), made from the spawn list D_800830AC by func_8003C3B0;
+ * func_8003C1C0 runs the handler of their kind (unk_1C), in game_8003CD08. */
+typedef struct UnkStructB2 {  /* provisional */
+    /* 0x00 */ GameObject *unk_00;
+    /* 0x04 */ u16 unk_04;     /* 1: in use */
+    /* 0x06 */ u16 unk_06;
+    /* 0x08 */ u16 unk_08;
+    /* 0x0A */ u16 unk_0A;
+    /* 0x0C */ u16 unk_0C;
+    /* 0x0E */ u16 unk_0E;     /* tested, then cleared, by its handlers (func_8003D228, func_8003D30C) */
+    /* 0x10 */ BuildingPart *unk_10;
+    /* 0x14 */ Monster *unk_14;  /* a monster: kind 0x34 refills its health, 0x35 its meter (func_8003D30C) */
+    /* 0x18 */ s16 unk_18;
+    /* 0x1A */ u16 unk_1A;
+    /* 0x1C */ u16 unk_1C;
+    /* 0x1E */ u8 pad_1E[0x12];
+} UnkStructB2;
+
+extern UnkStructB2 D_801D3824[];
 
 #endif /* GAME_80057C94_H */

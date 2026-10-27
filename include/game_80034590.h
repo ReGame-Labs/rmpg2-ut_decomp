@@ -78,66 +78,13 @@ typedef struct ActorLink {
 
 
 /* game_80034590 handles two record sets: the first part of the file (func_80034590 .. func_800360D8) the 0x58-byte
- * records of D_801FA9BC (UnkStructB1, include/game_80057C94.h), the rest (from func_80036298) the 0x78-byte records
- * of D_801FAC9C (NpcS below). Npc is no longer used by this file: only game_8003CD08's func_8003D228, func_8003D30C
- * and func_8003D3CC still take it, and their caller func_8003C1C0 hands them the 0x30-byte records of D_801D3824
- * (UnkStructB2, include/game_8003B568.h). */
-/* What an Npc's unk_14 points at: two velocities set when it is hit (game_8003CD08: func_8003D30C). */
-typedef struct NpcTarget {
-    /* 0x00 */ u8 unk_0[0x8];
-    /* 0x08 */ s32 unk_8;
-    /* 0x0C */ u8 unk_C[0x4];
-    /* 0x10 */ s32 unk_10;
-} NpcTarget;
-
-typedef struct Npc {
-    /* 0x00 */ GameObject *unk_0;
-    /* 0x04 */ u16 unk_4;
-    /* 0x06 */ u16 unk_6;       /* the kind */
-    /* 0x08 */ u16 unk_8;       /* the action */
-    /* 0x0A */ u16 unk_A;
-    /* 0x0C */ u16 unk_C;       /* 1 while the action is new */
-    /* 0x0E */ u16 unk_E;       /* game_8003CD08: func_8003D30C */
-    /* 0x10 */ u8 unk_10[0x4];
-    /* 0x14 */ struct NpcTarget *unk_14;  /* game_8003CD08: func_8003D30C */
-    /* 0x18 */ s16 unk_18;      /* game_8003CD08: func_8003D228 */
-    /* 0x1A */ u16 unk_1A;
-    /* 0x1C */ u16 unk_1C;      /* a countdown */
-    /* 0x1E */ s16 unk_1E;
-    /* 0x20 */ s16 unk_20;
-    /* 0x22 */ s16 unk_22;
-    /* 0x24 */ s16 unk_24;
-    /* 0x26 */ u8 unk_26[0x4];
-    /* 0x2A */ u16 unk_2A;
-    /* 0x2C */ u16 unk_2C;
-    /* 0x2E */ u16 unk_2E;
-    /* 0x30 */ u8 unk_30[0x4];
-    /* 0x34 */ s32 unk_34;
-    /* 0x38 */ u8 unk_38[0x6];
-    /* 0x3E */ s16 unk_3E;
-    /* 0x40 */ GameObject *unk_40;
-    /* 0x44 */ u16 unk_44;      /* the mover's flags when it was set up */
-    /* 0x46 */ s16 unk_46;
-    /* 0x48 */ s16 unk_48;
-    /* 0x4A */ s16 unk_4A;
-    /* 0x4C */ s16 unk_4C;
-    /* 0x4E */ u16 unk_4E;
-    /* 0x50 */ u8 unk_50[0x4];
-    /* 0x54 */ Monster *unk_54;
-    /* 0x58 */ u8 unk_58[0x4];
-    /* 0x5C */ u16 unk_5C;
-    /* 0x5E */ u16 unk_5E;
-    /* 0x60 */ Monster *unk_60;
-    /* 0x64 */ Monster *unk_64;
-    /* 0x68 */ u8 unk_68[0x8];
-    /* 0x70 */ GameObject *unk_70;
-    /* 0x74 */ GameObject *unk_74;
-} Npc;                      /* 0x78 */
+ * Pickup records of D_801FA9BC (include/game_80057C94.h), the rest (from func_80036298) the 0x78-byte Npc records of
+ * D_801FAC9C. */
 
 /* The records of D_801FAC9C: 0x78 bytes each, six (D_801D8730 counts them), made from the spawn list D_8007DA48 by
  * func_8003684C; each with a mover (unk_0), a kind (unk_6), an action (unk_8) and a state (unk_A), updated by a
  * dispatcher per kind on the action (func_80036300). */
-typedef struct NpcS {
+typedef struct Npc {
     /* 0x00 */ GameObject *unk_0;
     /* 0x04 */ u16 unk_4;
     /* 0x06 */ u16 unk_6;
@@ -179,9 +126,9 @@ typedef struct NpcS {
     /* 0x68 */ u8 unk_68[0x8];
     /* 0x70 */ GameObject *unk_70;
     /* 0x74 */ GameObject *unk_74;
-} NpcS;                     /* 0x78 */
+} Npc;                      /* 0x78 */
 
-extern NpcS D_801FAC9C[6];
+extern Npc D_801FAC9C[6];
 extern u16 D_801D8730;                   /* how many of D_801FAC9C are live */
 
 #endif /* GAME_80034590_H */
