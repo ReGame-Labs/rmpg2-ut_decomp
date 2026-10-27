@@ -5,8 +5,8 @@
 #include "game_80034590.h"
 #include "game_80057C94.h"
 
-void func_8001F724(s32);
-void func_80029118(s32, s32);
+void func_8001F724(u16);
+void func_80029118(s16, u16);
 void func_8004C38C(void);
 void func_80057B94(Monster *, s32 *);
 void func_80057BD4(u16, Monster *, s32 *);
@@ -35,10 +35,10 @@ void func_800595E4(Monster *);
 void func_800531C0(Monster *);
 s16 func_8001EB10(s32, s32);
 void func_8002D370(Monster *, BuildingItem *, Building *);
-void func_8002DBF4(s32, s32, Monster *, BuildingItem *);
-BuildingItem *func_8002ED30(s32, BuildingItem *);
+void func_8002DBF4(u16, s32, Monster *, BuildingItem *);
+BuildingPart *func_8002ED30(u16, BuildingItem *);
 u16 func_8002F558(Building *);
-void func_8003089C(s32, Monster *);
+void func_8003089C(u16, Monster *);
 u16 func_8004F7A4(Building *u);         /* defined with a u8 * and an s32 result in game_8004E574 */
 s32 func_8005BC20(s16, s16, s32, s32, GameObject *, s32);
 void func_80053C50(s32, Monster *);
@@ -59,12 +59,12 @@ extern s32 D_800847C8[];
 ObjectDef *func_8001D110(void);
 void *func_8001DCB4(void);
 
-void func_80057E54();
-void func_80057F28();
+void func_80057E54(Monster *);
+void func_80057F28(Monster *);
 s32 func_80057F98(u16, Monster *);
 void func_80058734();
 void func_8005883C();
-void func_80058984();
+void func_80058984(Monster *);
 void func_8004EF28(void);
 s32 *func_8001B660(void *id);
 s16 func_8005B8C8(s16 x, s16 y, s32 kind, s32 half_w, s32 half_h);

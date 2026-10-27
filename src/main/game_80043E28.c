@@ -18,7 +18,7 @@ void func_80053D68(s32, Monster *m);
 void func_8005E0E8(Monster *m);
 void func_80047554(void *anim, Attacker *a);
 void func_800475F4();                   /* game_8004750C */
-u16 func_8004B6C4(GameObject *obj, s32, s32);
+u16 func_8004B6C4(GameObject *, s16, s32);
 void func_8001E39C(GameObject *obj);
 void func_8001E2F8(GameObject *obj);
 

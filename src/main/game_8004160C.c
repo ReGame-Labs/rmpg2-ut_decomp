@@ -5,12 +5,12 @@
 
 void func_8003EB5C(u8 *table, GameObject *mover);
 u16 func_8004A468(Ai *ai);    /* defined returning s32: its callers take the low half */
-s16 func_8003DC3C(Ai *ai);
+s32 func_8003DC3C(Ai *);
 void func_8003DB74(Ai *ai);
 void func_8003DAA0(Ai *ai);
 void func_8003E788(Ai *ai);
 u16 func_8003E79C(void);
-u16 func_8004B6C4(s32 arg0, s32 arg1, s32 arg2);
+u16 func_8004B6C4(GameObject *, s16, s32);
 void func_8004E99C(void);
 
 void func_800416AC(const AiHandler *handlers, Ai *ai);

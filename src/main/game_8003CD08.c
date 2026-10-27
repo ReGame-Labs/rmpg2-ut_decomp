@@ -29,7 +29,7 @@ typedef struct ActorPair {
 
 void func_8001E698(GameObject *mover, Anim *anim);
 s32 func_8001EB10(s32 arg0, s32 arg1);
-void func_8001F724(s32 arg0);
+void func_8001F724(u16);
 void func_8003C894(Actor *actor);
 void func_8003C8D4(Actor *actor);
 void func_8004CFC0(void);
@@ -64,7 +64,7 @@ void func_8003FE70(Actor *actor);
 void func_8003FD30(Actor *actor);
 void func_80029D1C(void);
 u16 *func_80025C08(void *list);
-ActorLink *func_8002F01C(void);
+Building *func_8002F01C(void);
 void func_8003ECF8(void);
 
 /* What an actor of a kind is made of: its effect, its kind, its handlers and animations (0x14 bytes, D_80082138[]). */
@@ -90,14 +90,14 @@ void func_80053C50(s32 arg0, Monster *player);
 void func_80061068(s32 arg0, s16 arg1, s16 arg2);
 void func_8001E4B0(GameObject *mover);
 void func_8003F150(void);
-void func_80030338(GameObject *mover);
+u16 func_80030338(GameObject *);
 ObjectDef *func_8001D110(void);
 GameObject *func_8001DCB4(void);       /* spawns D_800AA248.unk_3C */
 void func_8004003C(s32 arg0, Ai *link);
 s16 func_80053AC4(s16 x, s16 y, s32 w, s32 h, Monster *player);
-void func_8003CCC0(Ai *link);
+void func_8003CCC0(void *);
 void func_80040B94(Actor *actor);
-void func_800634D4(Monster *player, s32 arg1);
+void func_800634D4(Monster *, u32);
 
 /* A sound and an argument per kind of actor hit (the file's .data). */
 typedef struct ActorSound {

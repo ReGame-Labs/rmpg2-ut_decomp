@@ -21,8 +21,8 @@ extern s32 D_80087168;
 extern s32 D_8008716C;
 extern u8 D_80088364[];
 
-s16 func_8007050C(void);
-s32 func_80070588(s16, s16, s16);
+u16 func_8007050C(void);
+u32 func_80070588(s16, s16, s16);
 
 u8 *func_80076C8C(u8 *p, s32 *value) {
     D_801FE0B0 = *p++;

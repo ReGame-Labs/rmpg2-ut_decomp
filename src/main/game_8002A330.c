@@ -4,9 +4,7 @@
 #include "game_8002A330.h"
 #include "game_80034590.h"
 
-/* Declared here, not in the group header: include/game_8003B568.h has its own view of func_80054374. */
-void func_80054374(s32 points, Monster *m);
-void func_800634D4(Monster *m, s32 preset);
+void func_800634D4(Monster *, u32);
 
 s32 *func_8002A330(void) {
     return func_80025C08(D_8007C934);

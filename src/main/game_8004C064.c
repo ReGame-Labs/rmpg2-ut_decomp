@@ -11,7 +11,7 @@
 
 s32 func_8001EB10(s32 range, s32 arg1);                     /* a random number */
 void func_8001E4B0(GameObject *obj);                        /* free an object */
-void func_8001F724(s32 sound);
+void func_8001F724(u16);
 void func_8001F7CC(s32 sound, s32 variant);
 void func_80020BA0(s32, u16 flags, GameObject *obj);
 s32 func_8002CD24(u16, Monster *m, s32);
@@ -27,10 +27,10 @@ void func_8005404C(Monster *m);
 void func_800540D0(Monster *m);
 void func_8005417C(Monster *m);
 void func_80054374(s32, Monster *m);
-void *func_80054728(u16);
+Building *func_80054728(u16);
 void func_8005E0E8(Monster *m);
 s32 func_8005F208();                                        /* called with 0, 1 or 2 arguments */
-void func_800634D4(Monster *m, s32);
+void func_800634D4(Monster *, u32);
 void func_800635F4(s32, s32);
 
 

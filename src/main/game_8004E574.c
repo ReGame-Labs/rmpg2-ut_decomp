@@ -25,7 +25,7 @@ void func_800524B4(Monster *m);
 void func_80053C50(s32, Monster *m);
 void func_8005404C(Monster *m);
 u16 func_8005453C(s16 x, s16 y, Monster *m);
-void *func_80054728(u16);
+Building *func_80054728(u16);
 void func_80056488(Monster *m);
 void func_800564D8(Monster *m);
 void func_80056560(Monster *m);

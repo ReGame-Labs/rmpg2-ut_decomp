@@ -58,16 +58,16 @@ extern s32 D_8008C804;
 extern u16 D_801D8850;
 
 void func_8001E4B0(GameObject *obj);                        /* free an object */
-void func_8001F724(s32 sound);
+void func_8001F724(u16);
 void func_8001F7CC(u16 sound, u16 variant);
 u16 *func_80025C08(void *);
 s32 func_80025DF8(s32 player);
-void func_80029118(s32, s32);
+void func_80029118(s16, u16);
 void func_80053C50(s32, Monster *m);
 void func_8006353C(s32);
 u16 func_8004A9B0();
 s32 func_8001EB10(s32 range, s32 x);
-s16 func_8003FCD8(s16 x0, s16 x1);              /* a horizontal distance */
+s16 func_8003FCD8(s32, s32);              /* a horizontal distance */
 extern s32 D_800916D8[];
 void func_8004B204(void);
 void func_8003EB5C(void *anim, GameObject *obj);

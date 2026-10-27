@@ -13,7 +13,7 @@
 #include "psyq/libspu.h"
 
 void func_8002958C(void);
-void *func_8001D110(void);
+ObjectDef *func_8001D110(void);
 void func_8001DCB4(void);
 void func_800415B4(void);
 void func_8001B5E8(s32);
@@ -22,7 +22,7 @@ s32 cdload_play_xa(u32);
 void cdload_on_xa_ready(s32);
 void func_80063E48(s32, s32);
 s32 func_80063F30(void);
-void func_800700CC(s32);
+void func_800700CC(u8);
 void func_80063DF8(s32);
 void func_8006FC6C(void);
 void func_8006FC8C(s32, s32 *);
@@ -76,9 +76,9 @@ extern u8 *D_80085300;
 
 s32 func_8006EE30(s32);
 void func_8006F0D8(s32, void *, s32);
-s32 func_8006E804(void *, s32);
+s32 func_8006E804(SoundDriver *, s32);
 void func_8006E8B4(void *, s32, s32, void *, s32);
-void *func_8006EC08(void);
+SoundDriver *func_8006EC08(void);
 s32 func_8006E4F4(void);
 s32 func_80070298(s32, s32);
 s32 func_80070324(s32, s32, void *);

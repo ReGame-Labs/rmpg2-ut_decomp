@@ -11,7 +11,7 @@ extern s16 D_801D8748;
 void func_800380C0(GameObject *mover);
 void func_800346FC(Pickup *r);
 void func_80034C54(GameObject *obj);
-void func_800634D4(Monster *m, s32 preset);
+void func_800634D4(Monster *, u32);
 extern GameObject *D_801FB44C[3];
 
 void func_8003B568(void) {

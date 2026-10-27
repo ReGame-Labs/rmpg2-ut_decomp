@@ -14,8 +14,8 @@ extern s16 D_801F9984;
 extern s16 D_801F9988;
 extern s32 D_801FA72C;
 
-void func_8001E4B0(void *);
-void func_8001F724(s32);
+void func_8001E4B0(GameObject *);
+void func_8001F724(u16);
 void func_8004CFC0(void);
 void func_8005DD48(Monster *);
 
@@ -57,7 +57,6 @@ typedef struct UnkStructB4 {  /* provisional: 8-byte records of D_8007DDD4 (an a
     u16 unk_04;
 } UnkStructB4;
 extern UnkStructB4 D_8007DDD4[];
-void func_80054374(u16, Monster *);
 extern void (*D_8007DDB4[8])(void);
 s32 func_8003B9C8(GameObject *, Monster *);
 void func_8003CA28(Pickup *arg0);
@@ -67,7 +66,7 @@ void func_8003CB30(Monster *arg0);
 void func_8003CCA8(void);
 void func_8003CCC0(void *);
 void func_8003CB68(s16, Monster *);
-void func_8003CEA0(s32, s32);
+void func_8003CEA0(Anim *, GameObject *);
 extern s32 D_800830BC[];
 u16 func_8003C858(BuildingPart *, s32, s32);
 u16 func_8003CC84(BuildingPart *, s32);

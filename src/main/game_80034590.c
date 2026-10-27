@@ -10,7 +10,7 @@
 ObjectDef *func_8001D110(void);
 GameObject *func_8001DCB4(void);         /* spawns D_800AA248.unk_3C */
 void func_8001E4B0(GameObject *mover);
-void func_80029118(s32 a, s32 b);
+void func_80029118(s16, u16);
 void func_8004BFE0(void);
 void func_80053D68(s32 n, Monster *player);
 s32 func_8001EA78(void);
@@ -24,7 +24,7 @@ s32 *func_80025C08(void *list);
 extern s32 D_8007DA48[];
 extern s32 D_8007D470[];                /* speeds by kind - 1 (func_800360D8) */
 void func_8003BD48(Pickup *npc);                /* the spawn list of D_801FAC9C */
-void func_8001F724(s32 sound);
+void func_8001F724(u16);
 void func_80020D20();                /* called with the record and without it: no prototype in the original */
 void func_800242A8(void);
 s32 func_80025DF8(s32 n);
@@ -36,7 +36,7 @@ void func_80053C50(s32 n, Monster *player);
 void func_8004A90C(Monster *player);
 void func_800215C0(s16 x, s16 y);
 void func_8003C080();                /* called with the position and without: no prototype in the original */
-void func_800634D4(Monster *player, s32 n);
+void func_800634D4(Monster *, u32);
 s32 abs(s32 n);
 
 void func_80029D1C(void);
@@ -85,7 +85,7 @@ void func_80035BE8(Pickup *npc);
 void func_80035A3C(Pickup *npc);
 void func_80035B30(Pickup *npc);
 void func_80034418(void);
-void func_80034670();                /* called with the record and without: no prototype in the original */
+void func_80034670(void);                /* called with the record and without: no prototype in the original */
 void func_8003AA7C(Npc *npc);
 u16 func_80038DA8(Npc *npc);
 void func_800380F0(Npc *npc);
