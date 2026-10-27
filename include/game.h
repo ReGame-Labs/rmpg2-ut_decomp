@@ -88,7 +88,7 @@ typedef struct GameObject {
                } script;
     /* 0x48 */ s32 anim;                /* the current animation (an address: the script restarts there) */
     /* 0x4C */ u8 unk_4C;
-    /* 0x4D */ s8 unk_4D;
+    /* 0x4D */ u8 unk_4D;                /* frames left on the animation command (every reader loads it with lbu) */
     /* 0x4E */ u8 unk_4E[0x02];
     /* 0x50 */ union {                  /* by kind */
                    struct GameObject *obj;  /* a link */
@@ -710,7 +710,7 @@ extern s16 D_801F9944;
 extern s16 D_801F9ADC;
 extern s16 D_801FA964;
 extern u16 D_801FA968;
-extern s16 D_801FA984[3];                /* per player: playing */
+extern s16 D_801FA984[4];                /* per player: playing (the save copies a fourth word, func_800A28DC) */
 extern u8 D_800937E8[];
 extern u8 D_800938AC[];
 extern u8 D_80095678[];

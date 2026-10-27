@@ -86,7 +86,7 @@ extern GameObject *D_800A9270;          /* the logo object that drops in */
 extern s32 D_800A9218;                 /* 1 once it has landed */
 extern s32 D_800A9240;                 /* its speed, bouncing to rest */
 extern s32 D_800A9238;                 /* frames to the next bounce */
-void func_8009EE5C(GameObject *obj, s32 arg1);
+GameObject *func_8009EE5C(GameObject *obj, s32 arg1);
 
 /* ---- the overlay's own types and data ---- */
 
@@ -175,6 +175,54 @@ extern GameObject *D_800A9808[2];      /* the two volume bars */
 extern GameObject *D_800A92F8[2];      /* their markers */
 extern u8 D_800A9890[6];                /* a name being entered, 5 letters */
 extern TextMessage *D_800A6F48[5];      /* the name entry's letters */
+/* The player bars (func_8009E8B8): three per player, in D_801E28F4[player * 3 + 31..33]. */
+extern s16 D_800A734C[];                /* their lengths, by player * 3 + bar */
+extern s16 D_800A92E0[];                /* the lengths shown */
+extern s16 D_800A98A0[];
+extern u8 D_800A747C[];                 /* animations */
+extern u8 D_800A7444[];
+extern u8 D_800A7454[];
+/* A player's monster on the selection screen (func_8009EB74), 10 bytes. */
+typedef struct {
+    /* 0x00 */ u8 unk_00[0x04];
+    /* 0x04 */ s16 unk_04;              /* the monster: indexes D_800A8EE4, D_800A8FA8 */
+    /* 0x06 */ s16 unk_06;
+    /* 0x08 */ s16 unk_08;
+} OverattrPlayer;
+
+extern OverattrPlayer D_800A8FD4[];
+extern s32 D_800A8EE4[];
+extern s32 D_800A8FA8[];
+extern s32 D_800A8F00[];
+extern u32 D_800A8FF4[];
+extern u16 D_800A900C;
+extern u8 D_800AA244[];
+extern s16 D_800AA2CC[];
+extern s16 D_800A9850[];
+extern u16 D_800A8FC4[];                /* per monster: its sound when chosen */
+extern u16 D_8007C144[];
+extern s16 D_800A92A0;                 /* the format question's state: 0 ask, 3 answer, 4 format */
+extern u8 D_80098100[];                /* rodata literals shared by the memory-card screens */
+extern u8 D_80098260[];                /* "YES" */
+extern u8 D_80098264[];                /* "NO" */
+void func_80018C14(void);
+void func_800A1F8C(void);
+extern u8 D_800980E8[];                /* "ACCESSING MEMORY CARD" */
+extern u8 D_8009814C[];                /* "THERE IS NO MEMORY CARD" */
+extern u8 D_80098164[];                /* "INSERTED IN MEMORY" */
+extern s16 D_801FA958;
+extern s16 D_800A9880;
+s32 func_800A1B60(void);               /* the first used save slot, -1 for none */
+void func_800A32CC(void);
+s32 func_800A1258(void);
+extern TextMessage D_800A6400;
+extern s16 D_800A9848;                 /* the delete question's answer: 0 yes, 1 no */
+extern s16 D_801F9AB8;
+extern u16 D_801D883C;                 /* saved with the game (func_800A28DC) */
+extern u16 D_801E1CA8;
+extern s16 D_801D8728;
+s32 func_800A28A0(s32 id);             /* the slot of a save number, -1 for none */                /* per player: the shift of its pad bits */
+void func_80020BA0(s32, u16, GameObject *);
 extern MenuRecord D_800A6FCC[];
 extern MenuRecord D_800A7014[];
 extern MenuRecord D_800A7080[];
@@ -198,22 +246,31 @@ extern u8 D_800A4488[];                /* its text */
 typedef struct {
     /* 0x00 */ s16 unk_00;             /* the save's number: the newest is the largest */
     /* 0x02 */ s16 city;               /* an index into the city names D_8007C704 */
-    /* 0x04 */ u8 unk_04[0x3A];
+    /* 0x04 */ u16 unk_04;
+    /* 0x06 */ u16 unk_06;
+    /* 0x08 */ u16 unk_08;
+    /* 0x0A */ u16 unk_0A;
+    /* 0x0C */ u16 monster[3];         /* per player: the monster's number (func_800A28DC) */
+    /* 0x12 */ u16 unk_12[3];
+    /* 0x18 */ s32 health[3];
+    /* 0x24 */ s32 meter[3];
+    /* 0x30 */ s32 unk_30[3];
+    /* 0x3C */ u16 mode;               /* D_801D36FC */
     /* 0x3E */ u16 unk_3E;
     /* 0x40 */ u16 unk_40;
     /* 0x42 */ u16 unk_42;
     /* 0x44 */ u16 unk_44;
     /* 0x46 */ u8 unk_46[3];
     /* 0x49 */ u8 unk_49[7];           /* the number of non-zero entries is printed as "%dP" */
-    /* 0x50 */ u8 unk_50[0x08];
+    /* 0x50 */ u16 unk_50[4];
     /* 0x58 */ u16 unk_58[7];
-    /* 0x66 */ u8 unk_66[0x02];
+    /* 0x66 */ u16 unk_66;
     /* 0x68 */ u16 unk_68;
     /* 0x6A */ u16 unk_6A;
     /* 0x6C */ u16 unk_6C;
     /* 0x6E */ u16 unk_6E;
     /* 0x70 */ u16 unk_70;
-    /* 0x72 */ u8 unk_72[0x02];
+    /* 0x72 */ u16 unk_72;
 } CardSlot;
 
 /* The save file's 0x500 bytes (card.c): the memory-card header, then the game's data, with an XOR checksum. */
