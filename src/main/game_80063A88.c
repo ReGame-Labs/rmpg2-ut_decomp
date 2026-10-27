@@ -1,6 +1,7 @@
 /* A piece of the game's own code between Psy-Q library objects: the sound driver on libspu (docs/TOOLCHAIN.md).
  * The boundaries and their evidence: config/main.yaml (docs/MATCHING.md "Splitting a target into files"). */
 #include "common.h"
+#include "sound.h"
 #include "psyq/libspu.h"
 
 void func_80063C7C(s16);
@@ -13,7 +14,6 @@ u16 func_8007050C(void);
 extern s32 D_800853C0;
 extern SpuReverbAttr D_801FB530;
 extern char D_801FB544[];
-extern s32 D_80087180;
 
 extern s32 D_800853C4;
 extern s32 D_800853D0;

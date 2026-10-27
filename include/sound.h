@@ -221,20 +221,26 @@ typedef struct SoundFileHeader {
     /* 0x1C */ s32 unk_1C;
 } SoundFileHeader;
 
-/* What the game hands func_800706C0: the file access functions the driver calls (open, read, seek, ..., close),
- * two tables copied into the driver and the timer's settings. */
+/* What the game hands func_800706C0 (cdload's func_80062C30 fills one on the stack): the file access functions the
+ * driver calls (cdload's stdio emulation), two tables copied into the driver and the timer's settings. The functions
+ * are copied into the driver's own pointers (D_801FDF2C ...), which give their calls' types. */
 typedef struct SoundInit {
-    /* 0x00 */ s32 (*unk_00)(s32, u8 *);
-    /* 0x04 */ s32 (*unk_04)(void *, s32, s32, s32);
-    /* 0x08 */ s32 (*unk_08)(s32, s32, s32);
-    /* 0x0C */ s32 unk_0C;
-    /* 0x10 */ void (*unk_10)(s32);
-    /* 0x14 */ s32 unk_14;
+    /* 0x00 */ s32 (*open)();
+    /* 0x04 */ s32 (*read)();
+    /* 0x08 */ s32 (*seek)();
+    /* 0x0C */ s32 (*size)();
+    /* 0x10 */ s32 (*close)();
+    /* 0x14 */ s32 (*load_spu)();       /* uploads a file's samples to the SPU */
     /* 0x18 */ u8 *unk_18;          /* 0x80 bytes for func_8006BED0 */
     /* 0x1C */ u16 *unk_1C;         /* 0x80 halves for func_8006BF08 */
-    /* 0x20 */ s32 unk_20;          /* the timer's ticks per second (func_800704E4) */
+    /* 0x20 */ s32 rate;            /* the timer's ticks per second (func_800704E4) */
     /* 0x24 */ s32 unk_24;          /* the timer is installed when non-zero (func_800707BC) */
     /* 0x28 */ s32 unk_28;
+    /* 0x2C */ s32 unk_2C;
 } SoundInit;
+
+void func_800706C0(SoundInit *init);
+
+extern s32 D_80087180;
 
 #endif /* SOUND_H */

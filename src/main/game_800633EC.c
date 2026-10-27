@@ -11,8 +11,6 @@ void func_80063710(s32 port);
 void func_800638B0(RumbleRequest *request);
 void func_80063A2C(RumbleRequest *request);
 
-extern u16 D_801FA968;
-extern s16 D_8007A694;          /* the vibration option */
 extern u8 D_801C51C8[][2];      /* the PadSetAct buffers, one per port: the motor byte first */
 extern Rumble D_801FB4C4[3];
 extern RumblePreset D_80085308[];

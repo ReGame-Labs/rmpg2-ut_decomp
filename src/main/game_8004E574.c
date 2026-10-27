@@ -31,7 +31,6 @@ void func_800564D8(Monster *m);
 void func_80056560(Monster *m);
 
 extern GameObject *D_801D874C;
-extern s16 D_801E289C;
 extern s32 D_80011B08[];
 extern u8 D_801FA8A6;
 extern u8 D_80095628[];

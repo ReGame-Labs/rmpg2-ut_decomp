@@ -29,7 +29,6 @@ GameObject *func_8001EB9C(s32, s32, s32, s32, s32);
 ObjectDef *func_8001D110(void);
 GameObject *func_8001DCB4(void);
 void func_80060A7C(s32, u32, s32);
-extern s16 D_8007A68C;
 extern s16 D_801FB468;
 extern s16 D_801FB46C;
 

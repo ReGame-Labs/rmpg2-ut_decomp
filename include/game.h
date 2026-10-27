@@ -651,6 +651,25 @@ typedef struct TextMessage {
 
 /* Data shared by several files. */
 extern s16 D_801E1CB4;                   /* the music volume, 0..0x7F */
+extern s16 D_8007A688;                   /* an option, 1..100 */
+extern s16 D_8007A68C;                   /* a toggle */
+extern s16 D_8007A690;                   /* the number of players, 1..3 */
+extern s16 D_8007A692;                   /* 0..0x1C */
+extern s16 D_8007A694;                   /* the vibration option */
+extern GameObject *D_801D373C[2];        /* the SELECT and BACK buttons */
+extern u16 D_801D3780;
+extern s16 D_801D3D7C;
+extern u16 D_801D8750;                   /* the music playing, 0xFFFF for none */
+extern u8 D_801D8800[3];                 /* per player: a choice, 0..4 */
+extern u32 D_801E0D7C;                   /* the pad buttons pressed */
+extern u8 *D_801E1C78;                   /* the file read buffer */
+extern s16 D_801E2150;                   /* a volume, 0..0x7F (func_80062D88) */
+extern s16 D_801E289C;
+extern s16 D_801F9944;
+extern s16 D_801F9ADC;
+extern s16 D_801FA964;
+extern u16 D_801FA968;
+extern s16 D_801FA984[3];                /* per player: playing */
 extern u8 D_800937E8[];
 extern u8 D_800938AC[];
 extern u8 D_80095678[];

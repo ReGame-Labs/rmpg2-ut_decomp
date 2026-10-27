@@ -64,7 +64,6 @@ extern s32 D_8008711C;
 extern s32 (*D_80087128)(s32, s32);
 extern s32 D_8008712C;
 extern s32 D_80087178;
-extern s32 D_80087180;
 extern s32 D_80087190;
 extern s32 D_80087198;
 extern s32 D_8008719C;
@@ -1120,19 +1119,19 @@ long func_8007062C(void) {
 void func_800706C0(SoundInit *init) {
     s32 rate;
 
-    D_801FDF2C = init->unk_00;
-    D_801FDF30 = init->unk_04;
-    D_801FDF34 = init->unk_08;
-    D_801FDF38 = init->unk_0C;
-    D_801FDF3C = init->unk_10;
-    D_801FDF40 = init->unk_14;
+    D_801FDF2C = init->open;
+    D_801FDF30 = init->read;
+    D_801FDF34 = init->seek;
+    D_801FDF38 = (s32) init->size;
+    D_801FDF3C = (void (*)(s32)) init->close;
+    D_801FDF40 = (s32) init->load_spu;
     if (init->unk_18 != NULL) {
         func_8006BED0(init->unk_18);
     }
     if (init->unk_1C != NULL) {
         func_8006BF08(init->unk_1C);
     }
-    rate = init->unk_20;
+    rate = init->rate;
     D_80087178 = init->unk_24;
     D_8008717C = init->unk_28;
     func_800704E4(rate);

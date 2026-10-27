@@ -31,7 +31,6 @@ void func_8001E8C0(s32 kind, s32 arg1);
 void func_8001F61C(u8 *text, s16 x, s16 y, s32 spacing, s32 arg4, s32 *glyphs, s32 kind, s32 arg7); /* draws a text */
 
 extern s32 D_8007ABCC[];               /* a font's glyphs */
-extern GameObject *D_801D373C[2];      /* the SELECT and BACK buttons */
 extern s16 D_801F9AAC;                 /* the printer's normal colour */
 
 void func_8001F724(u16 id);            /* plays a sound or a music by id; 0xFFFF stops */
@@ -41,21 +40,11 @@ void func_80062DA8(s32 volume);
 
 extern s16 D_8007A684;                 /* the music test's track, 0..0x72 */
 extern s16 D_8007A686;                 /* options, 15..90 by 5 */
-extern s16 D_8007A688;                 /* options, 1..100 */
-extern u16 D_8007A68C;                 /* a toggle */
 extern s16 D_8007A68E;                 /* 0..2, selects D_800A6F3C */
-extern s16 D_8007A692;                 /* 0..0x1C */
-extern u16 D_8007A694;                 /* a toggle */
 extern u8 *D_8007C704[];               /* names, by index */
-extern s16 D_801E2150;                 /* a volume, 0..0x7F (func_80062D88) */
-extern s16 D_801F9944;
-extern s16 D_801D3D7C;
 extern s16 D_801D885C;                 /* the lit menu item's value (func_8001EC74) */
 extern s16 D_801E2148;
-extern s16 D_801E289C;
-extern s16 D_801FA984[3];              /* per player: playing */
 extern s16 D_8007C974;
-extern s16 D_8007A690;                 /* the number of players, 1..3 */
 
 
 void func_8001ED54(TextMessage *msg);  /* loads and prints a message */
@@ -71,9 +60,7 @@ extern s16 D_801F9A4A;
 extern s16 D_801F9A4C;
 extern s16 D_801F9A4E;
 extern s16 D_801F9A50;
-extern s16 D_801F9ADC;
 extern s16 D_801FA88C;
-extern u16 D_801D3780;
 
 /* ---- the overlay's own types and data ---- */
 
@@ -126,7 +113,6 @@ extern s16 D_800A98B8;                 /* the memory-card screen's state */
 extern s32 D_800A9228;                 /* the player slot before the last move */
 extern u8 D_800A74E4[];                /* an animation script */
 extern s16 D_800A92B0[3];              /* per player: the selection's state, 3 done */
-extern u8 D_801D8800[3];               /* per player: a choice, 0..4 */
 extern s16 D_800A9840;
 extern s16 D_800A9800;
 extern GameObject *D_800A9808[2];      /* the two volume bars */

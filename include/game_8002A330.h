@@ -502,7 +502,6 @@ void func_8002E348(s32, BuildingItem *);
 void func_80030D14();   /* called with one and with two arguments: no prototype in the original */
 void func_8002B878();
 void func_8002BA70(s32);
-extern u16 D_8007A688;
 void func_8002FAA4(s32, BuildingItem *);
 void func_80030BAC(BuildingPart *);
 void func_80030A70(s32, BuildingPart *);
@@ -557,7 +556,6 @@ extern s32 D_80011E68[];
 extern s32 D_80011ED0[];
 extern s32 D_80011ED8[];
 extern s32 D_80012068[];
-extern s16 D_8007A690;
 void func_800305C8(s32 *, s16, GameObject *, UnkStructFEA4 *);
 void func_8002DE08(u16, s16, s32, BuildingItem *);
 void *func_8002DAAC(u16, u16, BuildingItem *);
