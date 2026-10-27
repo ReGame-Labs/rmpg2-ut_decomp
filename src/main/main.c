@@ -388,7 +388,7 @@ s32 func_80026D90(Monster *);
 s32 func_80027348();   /* (Monster *): the callers that pass nothing still have it in a0 */
 void func_80026C4C(Monster *arg0);
 s32 func_800272FC();   /* (Monster *), as func_80027348 */
-s32 func_800272B0(Monster *);
+u16 func_800272B0(Monster *);
 void func_800580F8(void *);
 void func_80026F98(Monster *arg0);
 void func_80020AF4(s32);
@@ -490,6 +490,7 @@ extern Anim D_8008AE08_alt;   /* the same table (config/aliases.ld) */
 extern AiStep *D_8007B660[];
 extern AiStep *D_8007B980[];
 void func_800247E4(GameObject *obj, s32 left, s32 right);
+extern s16 D_801FA7E4[];
 /* decls:end */
 
 /* main: config/aliases.ld gives it its name (GCC 2.8.1 would start a function named main with a call to __main). */
@@ -1899,7 +1900,36 @@ INCLUDE_ASM("asm/main/nonmatchings/main", func_8001D998);
 
 INCLUDE_ASM("asm/main/nonmatchings/main", func_8001DCB4);
 
+#ifdef NON_MATCHING
+/* 85.83%: one pass of a bubble sort of the object list by priority. The body matches; the original enters the loop
+ * at its test at the bottom (jump.c did not copy the exit test before the loop), the C gets the copy */
+void func_8001DF98(void) {
+    GameObject *cur;
+    GameObject *obj;
+    GameObject *p;
+    s16 last;
+
+    cur = &D_801E28C0;
+    last = 0x7FFF;
+    while ((obj = cur->next) != &D_801E28C0) {
+        if (last < (s16) obj->priority) {
+            p = cur->prev;
+            p->next = obj;
+            obj->prev = p;
+            p = obj->next;
+            cur->next = p;
+            obj->next = cur;
+            cur->prev = obj;
+            p->prev = cur;
+        } else {
+            cur = obj;
+            last = obj->priority;
+        }
+    }
+}
+#else
 INCLUDE_ASM("asm/main/nonmatchings/main", func_8001DF98);
+#endif
 
 #ifdef NON_MATCHING
 /* 98.1 %: register names only (the list head's address is kept in t0/t1 in the original, v1/t0 here) */
@@ -1934,7 +1964,34 @@ void func_8001E010(void) {
 INCLUDE_ASM("asm/main/nonmatchings/main", func_8001E010);
 #endif
 
-INCLUDE_ASM("asm/main/nonmatchings/main", func_8001E0AC);
+void func_8001E0AC(void) {
+    GameObject *obj;
+    GameObject *last;
+    u16 n;
+
+    D_801FA7E8[0] = 0;
+    D_801FA7E8[1] = 0;
+    D_801FA7E4[0] = 0x180;
+    D_801FA7E4[1] = 0xF0;
+    D_801D8584 = NULL;
+    obj = &D_801E28C0;
+    obj->next = obj;
+    obj->prev = obj;
+    obj = &D_801E29A8;
+    obj->next = obj;
+    obj->prev = obj;
+    memset(D_801E2A80, 0, sizeof(GameObject) * 460);
+    obj = D_801E2A80;
+    D_801E1C7C = obj;
+    n = D_801D3768 = 460;
+    do {
+        last = obj;
+        obj++;
+        last->next = obj;
+    } while (--n != 0);
+    last->next = NULL;
+    D_801D8764 = last;
+}
 
 void func_8001E174(GameObject *obj) {
     if (obj < D_801E2A80 || obj >= D_801F9910) {
@@ -2270,7 +2327,23 @@ void func_8001EB3C(void) {
     D_801FA9A4 = temp_s1;
 }
 
-INCLUDE_ASM("asm/main/nonmatchings/main", func_8001EB9C);
+GameObject *func_8001EB9C(s16 x, s16 y, s16 width, s16 height, u32 colour) {
+    GameState *g;
+    ObjectDef *def;
+
+    g = &D_800AA248;
+    def = func_8001D110();
+    def->pos_x.s.hi = x;
+    def->pos_y.s.hi = y;
+    def->flags = 0x7000;
+    g->cur_obj = func_8001DCB4();
+    g->cur_obj->unk_40.w = width;
+    g->cur_obj->script.height = height;
+    g->cur_obj->colour = colour;
+    g->cur_obj->flags |= 0xC;
+    g->cur_obj->unk_6C |= 0x20;
+    return g->cur_obj;
+}
 
 void func_8001EC74(s32 kind, s16 value) {
     GameObject *head;
@@ -2577,7 +2650,48 @@ void func_80020AF4(s32 id) {
     }
 }
 
-INCLUDE_ASM("asm/main/nonmatchings/main", func_80020BA0);
+void func_80020BA0(s32 id, s32 flags, GameObject *obj) {
+    SpriteFrame *frame;
+    Fixed origin;
+    Fixed off;
+    Fixed pos;
+    Fixed o;
+    u16 f;
+
+    frame = func_8001A554(id, obj);
+    origin = frame->origin;
+    f = flags & 0x8F7F;
+    obj->frame = frame;
+    o = frame->size;
+    obj->unk_2C = o;
+    if (obj->unk_6C & 0x8000) {
+        off.w = obj->unk_7C;
+        obj->size = o;
+        if (obj->flags & 0x10) {
+            off.s.lo = -off.s.lo;
+        }
+        if (obj->flags & 0x20) {
+            off.s.hi = -off.s.hi;
+        }
+        pos.s.lo = obj->unk_28.s.lo + off.s.lo;
+        pos.s.hi = obj->unk_28.s.hi + off.s.hi;
+        o = origin;
+        if (flags & 0x10) {
+            o.s.lo = -origin.s.lo;
+        }
+        if (flags & 0x20) {
+            o.s.hi = -origin.s.hi;
+        }
+        pos.s.lo -= o.s.lo;
+        pos.s.hi -= o.s.hi;
+        obj->unk_28 = pos;
+        obj->pos_x.s.hi = pos.s.lo;
+        obj->pos_y.s.hi = pos.s.hi;
+    }
+    obj->flags = f;
+    obj->unk_7C = origin.w;
+    obj->unk_1C = origin;
+}
 
 void func_80020CE4(s32 arg0, s32 arg1) {
     D_801D3D7C = 0;
@@ -3635,7 +3749,50 @@ u16 func_80023AC0(Ai *ai) {
     return 0;
 }
 
+#ifdef NON_MATCHING
+/* 96.66%: the original keeps the raw difference in a2 and extends it again for the second distance test; the C
+ * reuses the first extension (cse keeps it across the step's if), so the function is two instructions short */
+u16 func_80023B20(Ai *ai) {
+    s16 delta;
+    s32 dist;
+    s32 step;
+
+    delta = ai->unk_28.s.lo - 0x6C;
+    delta -= D_800AA268.p->pos_y.u.hi;
+    dist = (delta >= 0) ? delta : -delta;
+    if (dist < 0xB) {
+        D_800AA268.p->vel_y.w = 0;
+        return 1;
+    }
+    step = 0xFFFE0000;
+    if (delta >= 0) {
+        step = 0x10000;
+    }
+    D_800AA268.p->vel_y.w = step | 0x8000;
+    dist = delta; if (dist < 0) { dist = -dist; }
+    if (dist < 0x1F && D_800AA248.cur_obj->vel_x.w == 0) {
+        ai->unk_0C = 0;
+        if (ai->unk_38 != 1) {
+            D_800AA248.cur_obj->vel_x.w = 0x10000;
+            if (ai->kind == 0x11) {
+                func_8003EB5C(&D_80097750, D_800AA248.cur_obj);
+            } else {
+                func_8003EB5C(&D_8008B358, D_800AA248.cur_obj);
+            }
+        } else {
+            D_800AA248.cur_obj->vel_x.w = -0x10000;
+            if (ai->kind == 0x11) {
+                func_8003EB5C(&D_80097850, D_800AA248.cur_obj);
+            } else {
+                func_8003EB5C(&D_8008B458, D_800AA248.cur_obj);
+            }
+        }
+    }
+    return 0;
+}
+#else
 INCLUDE_ASM("asm/main/nonmatchings/main", func_80023B20);
+#endif
 
 u16 func_80023C58(s16 arg0, Ai *ai) {
     s16 delta;
@@ -4778,7 +4935,24 @@ void func_80026E0C(Monster *arg0) {
     arg0->action = 4U;
 }
 
-INCLUDE_ASM("asm/main/nonmatchings/main", func_80026E6C);
+void func_80026E6C(Monster *m) {
+    if ((m->unk_0D0 & 1) && func_800272B0(m) == 0) {
+        if (m->action == 2) {
+            if (m->unk_104 == 0 || D_800AA268.p->vel_y.w == 0) {
+                return;
+            }
+        } else if (m->action == 0x53) {
+            m->action = 0x54;
+            return;
+        } else if (m->action == 0x2C && m->unk_104 != 0 && D_800AA268.p->vel_y.w != 0) {
+            m->unk_05C = 2;
+            func_80026F58(m);
+            return;
+        }
+        m->unk_05C = m->action;
+        func_80026F58(m);
+    }
+}
 
 void func_80026F58(Monster *arg0) {
     D_800AA248.unk_38 = arg0->id;
@@ -4816,7 +4990,7 @@ INCLUDE_ASM("asm/main/nonmatchings/main", func_80026F98);
 
 INCLUDE_ASM("asm/main/nonmatchings/main", func_8002703C);
 
-s32 func_800272B0(Monster *monster) {
+u16 func_800272B0(Monster *monster) {
     u16 *p;
 
     for (p = D_8007BFBC; *p != 0xFFFF; p++) {
