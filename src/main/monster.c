@@ -35,7 +35,7 @@ void func_80050190(Monster *e) {
 }
 
 // u16 A2 B1
-void func_800501B0(Monster *e) {
+void monster_update_walk(Monster *e) {
     s32 *speeds;
     s32 speed;
     u16 dir;
@@ -446,7 +446,7 @@ void func_80050DD8(Monster *e) {
     D_800AA248.unk_08 = n;
     if (n == 0 || e->climb_side == 3) {
         e->action = 0;
-        func_800501B0(e);
+        monster_update_walk(e);
     } else {
         e->action = 6;
         monster_update_climb(e);
@@ -1439,9 +1439,11 @@ void func_80052E94(void) {
 }
 
 #ifdef NON_MATCHING
-/* 98.78%: 98.8 %: the definition pointer: local-alloc ties it to v0 (the call's value dies in the copy, one block);
- * the original's sits in a1 after the temporaries took v0/v1/a0, as a global pseudo or an untied qty would (read-
- * back through D_800AA284/new_def, chained stores, a second set: no change) */
+/* 98.78%: 98.8 %: the definition pointer: local-alloc gives it v0 (its copy-suggestion from the call's value,
+ * honoured in the suggested-register pass because v0 is free over its life); the original's sits in a1 after the
+ * temporaries took v0/v1/a0, which only a global pseudo would get (case 3's building pointer, global, is not in v0
+ * either). Read-back through D_800AA284/new_def, chained stores, a second set, a dead assignment in another block,
+ * an argument to func_8001DCB4: no change */
 void func_80052E9C(Monster *e) {
     s32 *speeds;
     s32 speed;
@@ -2192,9 +2194,10 @@ void func_800544D8(Monster *e, GameObject *dst, GameObject *src) {
 }
 
 #ifdef NON_MATCHING
-/* 95.39%: 95.4 %: cse: the facing-left block (the else) is a jump target with one use preceded by a barrier, so cse
- * follows the jump into it and reuses box_x0 from the bound's test; the original reloads it there (its first load
- * dies in the subtraction), so its else block was not in that extended block (ternary, || and goto forms tried) */
+/* 95.39%: 95.4 %: cse: the original reloads box_x0 in the facing-left block (its first load dies in the
+ * subtraction) but reuses the extended px there. Here cse carries box_x0 into that block by skip-blocks as well as
+ * follow-jumps (-fno-cse-follow-jumps alone changes nothing); with both off box_x0 is reloaded as in the original
+ * but px is extended again. Ternary, ||, goto, result-variable and early-return forms tried */
 s32 func_8005453C(s16 x, s32 unused, Monster *m) {
     GameObject *obj;
     s16 px;

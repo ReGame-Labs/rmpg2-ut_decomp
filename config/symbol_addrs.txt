@@ -462,6 +462,7 @@ attacker_spawn = 0x80044240; // type:func  (kind, x, y, flags, vel_x, state) a f
 
 // monster (src/main/monster.c): the action handlers, the hits, climbing the buildings.
 monster_dispatch_action = 0x800500EC; // type:func  (e, obj) runs D_8007F8FC[e->action], the action clamped to 0..0x67
+monster_update_walk = 0x800501B0; // type:func  (e) on the ground - the walking speed by direction, action 0, 1 or 0xC, a building wall walked into is grabbed, func_80050B40 while unk_18E is set
 monster_follow_holder = 0x80050774; // type:func  (e) places its body at the point of the carrying object's frame for its id
 monster_update_climb = 0x8005086C; // type:func  (e) the climbing speed by direction (slower in the rain), action 5 or 6
 monster_start_jump = 0x800524B4; // type:func  (e) action 0x2C, the upward speed by direction
