@@ -141,7 +141,7 @@ extern s32 D_8007A710;                  /* the most of the unpack buffer ever us
 extern u16 D_800AFB54[];                /* per bank: its first CLUT's index in D_801C51D4 */
 extern u16 D_801C51D4[];                /* the CLUT ids main_load_cluts loaded */
 extern u16 D_801D370C;
-extern u16 D_801FA730;                  /* the calls func_800205AC ran this frame */
+extern u16 D_801FA730;                  /* the calls main_run_calls ran this frame */
 extern s32 D_801F9A2C;
 s32 func_8001E59C(GameObject *sprite, s32 image);
 extern s32 D_800AA2A8;                  /* D_800AA248.unk_60 by its own name */
@@ -149,5 +149,29 @@ extern s32 D_800AA2A8;                  /* D_800AA248.unk_60 by its own name */
 /* The Npc chain's speeds (main_approach_x, main_approach_xy): (vel_x, vel_y) pairs by direction, its bits 1 and 2 for x,
  * 4 and 8 for y. */
 extern s32 D_8007B9A0[];
+
+/* The attract mode's demos (main_start_demo): the demos played so far (the next is count % 3), then per player the
+ * input script of Monster.unk_1E4 (NULL: no player), the third for the monster D_801E0B78[3]. */
+typedef struct MainDemo {
+    u16 count;
+    s16 *script[3];
+} MainDemo;
+
+/* A demo of the table at 0x8007A7D8: the value of D_801FA964 and its copies, the monsters of players 1 and 2. */
+typedef struct MainDemoDef {
+    u16 unk_0;
+    u8 pad_2[0x2];
+    s16 monster[2];
+} MainDemoDef;
+
+/* The pads (main_read_pad): per player the PadSetAct state and its two actuator bytes, per port a multitap. */
+extern s16 D_800AA2F0[];
+extern u8 D_801C51C8[][2];
+extern s16 D_801E28B8[];
+extern u8 D_8007A714[];
+
+#include "psyq/libcd.h"
+#include "psyq/libgte.h"
+#include "psyq/libpad.h"
 
 #endif /* MAIN_H */

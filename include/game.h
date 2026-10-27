@@ -707,7 +707,7 @@ typedef struct DrawState {
     /* 0xB2 */ u8 unk_B2;
     /* 0xB3 */ u8 unk_B3[0x3];
     /* 0xB6 */ s16 unk_B6;
-    /* 0xB8 */ u8 unk_B8[0x90];
+    /* 0xB8 */ POLY_F4 unk_B8[6];
     /* 0x148 */ unsigned long ot[4];        /* cleared reversed, drawn from ot[3] */
     /* 0x158 */ u8 prims[0x47E0];           /* the frame's primitives */
     /* 0x4938 */ u8 *next_prim;
@@ -831,5 +831,15 @@ extern s16 D_801FAC84;
 extern s16 D_801FAC8C;
 extern s16 D_801FAC90;
 extern s32 D_801FB49C[];
+
+/* A player's monster on the selection screen (menu_create_player_monster, main.c main_start_demo), 10 bytes. */
+typedef struct {
+    /* 0x00 */ u8 unk_00[0x04];
+    /* 0x04 */ s16 unk_04;              /* the monster: indexes D_800A8EE4, D_800A8FA8 */
+    /* 0x06 */ s16 unk_06;
+    /* 0x08 */ s16 unk_08;
+} OverattrPlayer;
+
+extern OverattrPlayer D_800A8FD4[];
 
 #endif /* GAME_H */
