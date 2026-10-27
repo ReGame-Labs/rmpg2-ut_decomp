@@ -256,7 +256,9 @@ void func_8009BF94(u8 *dst, s32 index) {
 }
 
 #ifdef NON_MATCHING
-/* 99.3 %: the movie line's text address is in s3, the original's s1 (s1/s2 hold the colour's and the cursor's %hi). */
+/* 99.24%: the movie line's text address (3 refs over 136 insns, priority 0.02) comes last in global-alloc's order,
+ * after the colour's and the cursor's %hi (0.13, 0.12), and gets s3; the original gives it s1 before them, which
+ * this form's priorities cannot do */
 void menu_draw_cheats(void) {
     func_8009BF40(D_800A631E, D_801FA960);
     func_8001ECB4(D_800A6359, D_8007A684, 0);
