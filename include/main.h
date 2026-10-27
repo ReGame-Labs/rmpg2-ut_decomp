@@ -117,7 +117,6 @@ extern s32 D_8007A71C;                  /* the music to restart after the XA tra
 void cdload_stop_xa(s32 mode);
 void func_80063744(void);
 s32 main_alloc_vram_slot(SpriteFrame *frame, s32 base, u16 mode);
-unsigned short GetTPage(int tp, int abr, int x, int y);
 s32 cdload_unpack(u8 *dst, s32 arg1, u8 *src, s32 arg3);   /* cdload.c reads three; the callers here pass a fourth */
 extern s32 D_8007A710;                  /* the most of the unpack buffer ever used */
 extern u16 D_800AFB54[];                /* per bank: its first CLUT's index in D_801C51D4 */
