@@ -71,4 +71,7 @@ u32 StFreeRing(u32 *base);
 void StUnSetRing(void);
 void StCdInterrupt(void);
 
+/* Appended for the start-up (main.c main_init_system). */
+s32 CdInit(void);
+
 #endif /* PSYQ_LIBCD_H */

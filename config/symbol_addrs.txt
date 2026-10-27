@@ -6,6 +6,8 @@ game_main = 0x8001781C; // type:func  main, which crt0 calls right after setting
 
 // main (src/main/main.c)
 main_update_pressed = 0x80017C04; // type:func
+main_read_pad = 0x80018DBC; // type:func
+main_init_system = 0x800193B8; // type:func
 main_begin_frame = 0x80019764; // type:func
 main_load_image_8bit = 0x80019B08; // type:func
 main_load_image_4bit = 0x80019DAC; // type:func
@@ -13,6 +15,10 @@ main_load_cluts = 0x8001A870; // type:func
 main_get_tpage = 0x8001AE70; // type:func
 main_load_font = 0x8001B178; // type:func
 main_alloc_vram_slot = 0x8001B3C4; // type:func
+main_get_monster_player = 0x8001C3E4; // type:func
+main_init_level = 0x8001C404; // type:func
+main_start_demo = 0x8001D28C; // type:func
+main_cull_objects = 0x8001D998; // type:func
 main_sort_objects = 0x8001DF98; // type:func
 main_resort_objects = 0x8001E010; // type:func
 main_init_objects = 0x8001E0AC; // type:func
@@ -20,6 +26,7 @@ main_free_kind = 0x8001E450; // type:func
 main_free_kind_masked = 0x8001E8C0; // type:func
 main_create_box = 0x8001EB9C; // type:func
 main_draw_lists = 0x8001F848; // type:func
+main_run_calls = 0x800205AC; // type:func
 main_step_anim = 0x8002075C; // type:func
 main_set_frame = 0x80020BA0; // type:func
 main_approach_xy = 0x80023474; // type:func  (npc) speed from D_8007B9A0 towards the target height and x, 1 once there
