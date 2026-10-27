@@ -38,7 +38,7 @@ s16 func_8001EB10(s32, s32);
 void func_8002D370(Monster *, BuildingItem *, Building *);
 void func_8002DBF4(u16, s32, Monster *, BuildingItem *);
 BuildingPart *func_8002ED30(u16, BuildingItem *);
-u16 func_8002F558(Building *);
+u16 building_pick_part(Building *);
 void func_8003089C(u16, Monster *);
 u16 func_8004F7A4(Building *u);         /* defined with a u8 * and an s32 result in game_8004E574 */
 s32 monster_anim_test_box(s16 x, s16 y, s32 w, s32 h, GameObject *obj, u16 flags);
@@ -1166,7 +1166,7 @@ void func_80059710(Monster *e, s16 want, s16 max) {
         if (u->unk_058 == 0 && func_8004F7A4(u) == 1) {
             if (u->state < 4) {
                 item = &u->items[func_8001EB10(u->unk_000 - 2, 0)];
-                part = func_8002F558(u);
+                part = building_pick_part(u);
                 if (func_8002ED30(part, item)->unk_06 < 5) {
                     func_8002DBF4(part, 6, e, item);
                     func_8003089C(5, e);

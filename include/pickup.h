@@ -20,18 +20,18 @@ void func_8004CFC0(void);
 void func_8005DD48(Monster *);
 
 void func_80029D1C(void);
-/* The handlers of the D_801FA9BC records by kind (func_8003B5D0): building.c and npc.c. */
-void func_800344B8(Pickup *r);
+/* The handlers of the D_801FA9BC records by kind (pickup_update): building.c and npc.c. */
+void building_update_pickup(Pickup *r);
 void func_80034B94(Pickup *r);
 void func_800350C0(Pickup *r);
 void func_8003537C(Pickup *r);
 void func_8003566C(Pickup *r);
 void func_80035C4C(Pickup *r);
 
-void func_8003B568(void);
-void func_8003B5D0(Pickup *);
-void func_8003B68C(void);
-void func_8003B9A0(Pickup *);
+void pickup_update_all(void);
+void pickup_update(Pickup *);
+void pickup_clear_all(void);
+void pickup_clear(Pickup *);
 void func_8003C130(void);
 void func_8003C344(void);
 void func_8003C080(void);
@@ -58,7 +58,7 @@ typedef struct UnkStructB4 {  /* provisional: 8-byte records of D_8007DDD4 (an a
 } UnkStructB4;
 extern UnkStructB4 D_8007DDD4[];
 extern void (*D_8007DDB4[8])(void);
-s32 func_8003B9C8(GameObject *, Monster *);
+s32 pickup_test_touch(GameObject *, Monster *);
 void func_8003CA28(Pickup *arg0);
 void func_8003CA70(Pickup *);
 void func_8003CADC(Monster *arg0);
