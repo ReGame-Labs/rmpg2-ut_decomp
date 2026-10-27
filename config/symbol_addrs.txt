@@ -19,6 +19,12 @@ main_unwrap_target_x = 0x80024418; // type:func  (x out, cur out, npc) the targe
 main_place_attached = 0x80024530; // type:func  (obj, npc) puts the object at the current object's fourth frame point, mirrored with it
 main_wrap_layer_x = 0x800247E4; // type:func
 main_scroll_layers = 0x8002488C; // type:func
+main_create_buildings = 0x80024C2C; // type:func
+main_update_screen_pos = 0x80027908; // type:func
+main_reset_screen_pos = 0x80027B20; // type:func
+main_update_priority = 0x80027B78; // type:func
+main_update_boxes = 0x80027CB8; // type:func
+main_apply_health = 0x80029510; // type:func
 main_count_monsters = 0x8002958C; // type:func
 
 // The Psy-Q library objects (config/main.yaml's psyq/ units), function by function (tools/psyq_match.py
