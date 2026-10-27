@@ -2071,34 +2071,26 @@ void func_8005D034(s32 x, s32 y, s32 flags) {
     func_8001DCB4();
 }
 
-#ifdef NON_MATCHING
-/* 75.6 %: the final test is a store-flag xor here, a branch in the original; the two limits swap a1/a2 */
-
 u16 func_8005D0D8(Monster *e) {
     s16 x;
-    u16 want;
 
     if (e->unk_18E != 0 || e->climb_side != 0 || D_801D37BC != 0 || D_801FA98C == 0
         || (x = e->obj->pos_x.s.hi) < D_801FA98C || D_801FA990 < x) {
         return 0;
     }
-    want = 7;
     if (x - D_801FA98C < 0x21) {
-        goto check;
-    }
-    want = 3;
-    if (D_801FA990 - x < 0x21) {
-    check:
-        if (e->unk_168 != want) {
+        if (e->unk_168 != 7) {
             return 1;
         }
-        return 0;
+    } else if (D_801FA990 - x < 0x21) {
+        if (e->unk_168 != 3) {
+            return 1;
+        }
+    } else {
+        return 1;
     }
-    return 1;
+    return 0;
 }
-#else
-INCLUDE_ASM("asm/main/nonmatchings/monster_anim", func_8005D0D8);
-#endif
 
 INCLUDE_RODATA("asm/main/nonmatchings/monster_anim", D_800115B0);
 
