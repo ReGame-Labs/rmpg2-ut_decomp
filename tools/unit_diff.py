@@ -1,33 +1,51 @@
 #!/usr/bin/env python3
-"""Compile one C unit on its own and score it per function against the original, without ninja.
+"""Compile one C unit on its own and check it per function against the original, without ninja.
 
 Compiles src/<target>/<unit>.c the way build.ninja does (compiler and -G from configure.py's
-CC_OVERRIDES/G_OVERRIDES, via tools/cc_psx.sh) into build/unit_diff/, then runs objdiff against
-build/expected/<target>/<unit>.s.o (made by ninja; `scripts/build.sh` once). Safe to run while
-other sessions edit other units: it touches no ninja state. Also compares .rodata/.data/.sdata word by
-word with relocations resolved (jump tables, string literals), which objdiff's section score can't.
-A function objdiff scores below 100% only because a relocation names another symbol for the same address
-(`D_8008xxxx` vs `some_table - 18`, a label vs its struct + offset) is listed as "OK (by address)": its
-instructions match once every relocation is resolved to an address (EXE symbols, symbol files, splat's
-undefined_*_auto lists, names like D_8004xxxx; the object's own sections from the last link's map) or else
-to the symbol + offset it falls in.
+CC_OVERRIDES/G_OVERRIDES, via tools/cc_psx.sh) into build/unit_diff/, then compares it with
+build/expected/<target>/<unit>.s.o (made by ninja; `scripts/build.sh` once). Safe to run while other
+sessions edit other units: it touches no ninja state.
 
-  tools/venv/bin/python tools/unit_diff.py main                 # every function's match %
+The check is the link's: every word of the object as the link would write it. Relocations are applied with the
+addresses they resolve to: the original's symbols (config/symbol_addrs.txt, config/<target>.symbols.txt, the
+target's extra linker scripts such as config/aliases.ld, which gives one address several names; splat's names like
+D_8004xxxx and its undefined_*_auto lists; the last link's symbols last), the original object's own sections at
+their addresses. A function passes when its size is the original's and every instruction is the same word once
+linked (opcode, registers, immediates, relocated fields and branch targets), and, for a function with a jump table
+in .rodata, when the table's entries are. Each function of the C object is placed at the original function's
+address, so a function is judged on its own even when an earlier one changed size. objdiff's match percent is
+shown next to each function as the score to iterate on; it does not decide the result ("OK (by address)": objdiff
+scores the function below 100%, typically a relocation naming another symbol for the same address, while the
+linked words are the original's).
+
+The summary says the unit links to the original bytes only when every function (C and asm) is at its original
+offset with its original size and passes, the .text between functions is the original's, and every data section
+the C provides (.rodata, .data, .sdata: the YAML's `.rodata`-style subsegments) is word for word the original's
+once relocated. The exit status is 0 then, 1 otherwise. Data sections the unit still takes from asm are not
+compared (listed with --all).
+
+  tools/venv/bin/python tools/unit_diff.py main                 # every function's result
   tools/venv/bin/python tools/unit_diff.py main func_8001781C   # + side-by-side instruction diff
   options: -G N / -V VER to override the file's -G or compiler; --all to list INCLUDE_ASM ones too;
            -D NON_MATCHING (repeatable) to score the WIP C instead of its INCLUDE_ASM
 Adapted from gascarcella/dw2003recomp's tools/unit_diff.py (MIT; docs/THIRD_PARTY.md).
 """
 import argparse
+import bisect
 import json
+import math
 import re
+import struct
 import subprocess
 import sys
+from collections import Counter
 from pathlib import Path
+
+import yaml
 
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
-import configure  # noqa: E402  (CC_OVERRIDES, g_for, DEFAULT_CC, CC_INCLUDES)
+import configure  # noqa: E402  (CC_OVERRIDES, g_for, DEFAULT_CC, CC_INCLUDES, TARGETS, EXE_SYMS)
 
 OBJDUMP = ROOT / "tools/binutils/bin/mipsel-linux-gnu-objdump"
 
@@ -38,26 +56,165 @@ def run(cmd):
 
 NAME_ADDR = re.compile(r"^(?:D|func|jtbl)_(?:[A-Z0-9]+_)?([0-9A-F]{8})$")  # splat's default names
 
+# ---- the objects ------------------------------------------------------------------------------------------------
 
-def known_addresses(target: str) -> dict:
-    """Symbol name -> address: the EXE's linked symbols, the symbol files and splat's undefined_*_auto lists.
-    Names given to more than one address (static helpers copied per file) are left out."""
-    seen = {}
-    for f in ("build/main/SLUS_007.42.syms.ld", "config/symbol_addrs.txt", f"config/{target}.symbols.txt",
-              f"build/{target}/undefined_syms_auto.txt", f"build/{target}/undefined_funcs_auto.txt"):
-        path = ROOT / f
-        if not path.exists():
-            continue
-        for ln in path.read_text().splitlines():
-            m = re.match(r"\s*([A-Za-z_.$][\w.$]*)\s*=\s*0x([0-9A-Fa-f]+)\s*;", ln)
-            if m:
-                seen.setdefault(m.group(1), set()).add(int(m.group(2), 16))
-    return {name: addrs.pop() for name, addrs in seen.items() if len(addrs) == 1}
+R_MIPS_32, R_MIPS_26, R_MIPS_HI16, R_MIPS_LO16, R_MIPS_GPREL16, R_MIPS_PC16 = 2, 4, 5, 6, 7, 10
+RELOC_NAMES = {R_MIPS_32: "32", R_MIPS_26: "26", R_MIPS_HI16: "HI16", R_MIPS_LO16: "LO16",
+               R_MIPS_GPREL16: "GPREL16", R_MIPS_PC16: "PC16"}
+SHN_UNDEF, SHN_ABS, SHN_COMMON = 0, 0xFFF1, 0xFFF2
+STT_FUNC, STT_SECTION = 2, 3
 
 
-def section_bases(target: str, unit: str) -> dict:
-    """Where the last link put this unit's sections (build/<target>/*.map), so that references into the
-    object's own sections (`.rodata` + 0x40 in C, jtbl_80012345 in asm) compare as addresses."""
+def _s16(x: int) -> int:
+    return x - 0x10000 if x & 0x8000 else x
+
+
+class Elf:
+    """A relocatable little-endian MIPS ELF32 object: sections, symbols, relocations (REL)."""
+
+    def __init__(self, path: Path):
+        self.path = Path(path)
+        b = self.path.read_bytes()
+        if b[:4] != b"\x7fELF" or b[4] != 1 or b[5] != 1:
+            sys.exit(f"{path}: not a little-endian ELF32 object")
+        shoff, = struct.unpack_from("<I", b, 0x20)
+        shentsize, shnum, shstrndx = struct.unpack_from("<HHH", b, 0x2E)
+        hdrs = [struct.unpack_from("<10I", b, shoff + i * shentsize) for i in range(shnum)]
+        names = hdrs[shstrndx]
+
+        def cstr(table, off):
+            start = table[4] + off
+            return b[start:b.index(b"\0", start)].decode("latin-1")
+
+        self.names = [cstr(names, h[0]) for h in hdrs]
+        self.size = [h[5] for h in hdrs]
+        self.data = [b[h[4]:h[4] + h[5]] if h[1] != 8 else b"" for h in hdrs]  # SHT_NOBITS has no bytes
+        self.index = {}
+        for i, n in enumerate(self.names):
+            self.index.setdefault(n, i)
+        self.syms = []  # (name, value, size, type, bind, shndx)
+        for h in hdrs:
+            if h[1] == 2:  # SHT_SYMTAB
+                strtab = hdrs[h[6]]
+                for off in range(h[4], h[4] + h[5], 16):
+                    nm, value, size, info, _, shndx = struct.unpack_from("<IIIBBH", b, off)
+                    name = cstr(strtab, nm)
+                    if info & 0xF == STT_SECTION and shndx < len(self.names):
+                        name = self.names[shndx]
+                    self.syms.append((name, value, size, info & 0xF, info >> 4, shndx))
+        self.relocs = {}  # section index -> [(offset, type, symbol index)] in the table's order
+        for h in hdrs:
+            if h[1] == 9:  # SHT_REL
+                self.relocs[h[7]] = [(o, i & 0xFF, i >> 8) for o, i in struct.iter_unpack("<II", b[h[4]:h[4] + h[5]])]
+
+    def section_words(self, name: str):
+        i = self.index.get(name)
+        if i is None:
+            return []
+        d = self.data[i]
+        return [int.from_bytes(d[o:o + 4].ljust(4, b"\0"), "little") for o in range(0, len(d), 4)]
+
+    def section_size(self, name: str) -> int:
+        i = self.index.get(name)
+        return 0 if i is None else self.size[i]
+
+    def functions(self) -> dict:
+        """Function name -> (offset, size) in .text, in offset order (alternative entries without a size left out)."""
+        text = self.index.get(".text")
+        funcs = sorted((v, s, n) for n, v, s, t, _, shndx in self.syms if t == STT_FUNC and shndx == text and s)
+        return {n: (v, s) for v, s, n in funcs}
+
+    def asm_functions(self) -> set:
+        """Functions still in INCLUDE_ASM: the `nonmatching` macro gives each a `<name>.NON_MATCHING` symbol."""
+        return {s[0][:-len(".NON_MATCHING")] for s in self.syms if s[0].endswith(".NON_MATCHING")}
+
+    def defined(self) -> dict:
+        """Global symbol name -> (section name, value), for the definitions the other object may reference."""
+        return {n: (self.names[shndx], v) for n, v, _, t, bind, shndx in self.syms
+                if bind != 0 and shndx not in (SHN_UNDEF, SHN_ABS, SHN_COMMON) and shndx < len(self.names)
+                and not n.endswith(".NON_MATCHING")}
+
+
+# ---- where symbols are ------------------------------------------------------------------------------------------
+
+ASSIGN = re.compile(r"^\s*([A-Za-z_.$][\w.$]*)\s*=\s*([^;]+);", re.M)
+ALIAS_EXPR = re.compile(r"^([A-Za-z_.$][\w.$]*)\s*(?:([+-])\s*(0x[0-9A-Fa-f]+|\d+))?$")
+
+
+def read_assignments(path: Path):
+    """`name = value;` lines of a symbol file or linker script: ({name: {addresses}}, {name: (other, addend)})."""
+    addrs, aliases = {}, {}
+    if not path.exists():
+        return addrs, aliases
+    text = re.sub(r"/\*.*?\*/", "", path.read_text(errors="replace"), flags=re.S)
+    for name, expr in ASSIGN.findall(text):
+        expr = expr.strip()
+        if re.fullmatch(r"0x[0-9A-Fa-f]+|\d+", expr):
+            addrs.setdefault(name, set()).add(int(expr, 0))
+        elif m := ALIAS_EXPR.match(expr):
+            k = int(m.group(3), 0) if m.group(3) else 0
+            aliases[name] = (m.group(1), -k if m.group(2) == "-" else k)
+    return addrs, aliases
+
+
+def _unique(seen: dict) -> dict:
+    """Names given to more than one address (static helpers copied per file) are left out."""
+    return {n: a.pop() for n, a in seen.items() if len(a) == 1}
+
+
+class Resolver:
+    """Symbol name -> address, in order: the original object's own definitions, the project's symbol files and
+    linker scripts (exact), splat's default names (D_80012345), splat's undefined_*_auto lists and the last link's
+    symbols (derived), each alias through the name it stands for."""
+
+    def __init__(self, exact: dict, derived: dict = None, aliases: dict = None):
+        self.exact, self.derived, self.aliases = exact, derived or {}, aliases or {}
+        self.local = {}  # filled by compare(): the original object's definitions
+
+    @classmethod
+    def for_target(cls, target: str) -> "Resolver":
+        t = next((t for t in configure.TARGETS if t.name == target), None)
+        if t is None:
+            sys.exit(f"unknown target {target}")
+        exact, derived, aliases = {}, {}, {}
+        files = ["config/symbol_addrs.txt", f"config/{target}.symbols.txt",
+                 *(f for f in t.ld_extra if f != configure.EXE_SYMS)]
+        for f in files:
+            a, al = read_assignments(ROOT / f)
+            for n, v in a.items():
+                exact.setdefault(n, set()).update(v)
+            aliases.update(al)
+        for f in (f"build/{target}/undefined_syms_auto.txt", f"build/{target}/undefined_funcs_auto.txt",
+                  configure.EXE_SYMS):
+            a, al = read_assignments(ROOT / f)
+            for n, v in a.items():
+                derived.setdefault(n, set()).update(v)
+            for n, v in al.items():
+                aliases.setdefault(n, v)
+        return cls(_unique(exact), _unique(derived), aliases)
+
+    def named(self, name: str, depth: int = 0):
+        """The address the project's files give `name` (no object definitions), or None."""
+        if name in self.exact:
+            return self.exact[name]
+        if name in self.aliases and depth < 8:
+            other, k = self.aliases[name]
+            a = self.address(other, depth + 1)
+            return None if a is None else a + k
+        m = NAME_ADDR.match(name)
+        if m:
+            return int(m.group(1), 16)
+        return self.derived.get(name)
+
+    def address(self, name: str, depth: int = 0):
+        if name in self.local:
+            return self.local[name]
+        return self.named(name, depth)
+
+
+def map_bases(target: str, unit: str) -> dict:
+    """Where the last link put this unit's sections (build/<target>/*.map): the fallback for a section of the
+    original object that has no symbol with a known address."""
     bases = {}
     for path in sorted((ROOT / f"build/{target}").glob("*.map")):
         for ln in path.read_text(errors="replace").splitlines():
@@ -67,140 +224,255 @@ def section_bases(target: str, unit: str) -> dict:
     return bases
 
 
-class ObjSymbols:
-    """An object's sections and defined symbols (readelf); `bases`: the sections' addresses, when known."""
-
-    def __init__(self, obj: Path, bases: dict = None):
-        self.bases = bases or {}
-        readelf = str(OBJDUMP).replace("objdump", "readelf")
-        secnames = {}
-        for ln in run([readelf, "-SW", str(obj)]).stdout.splitlines():
-            m = re.match(r"^\s*\[\s*(\d+)\] (\S+)", ln)
-            if m:
-                secnames[m.group(1)] = m.group(2)
-        self.sections = set(secnames.values())
-        self.syms = {name: (name, 0) for name in self.sections}  # name -> (section, offset)
-        self.by_sec = {}  # section -> [(offset, name)], named symbols only
-        for ln in run([readelf, "-sW", str(obj)]).stdout.splitlines():
-            f = ln.split()
-            if len(f) == 8 and f[6].isdigit():
-                sec, val = secnames.get(f[6], f[6]), int(f[1], 16)
-                self.syms[f[7]] = (sec, val)
-                if f[3] != "SECTION" and not f[7].endswith(".NON_MATCHING") and not f[7].startswith("."):
-                    self.by_sec.setdefault(sec, []).append((val, f[7]))
-        for v in self.by_sec.values():
-            v.sort()
-
-    def defined(self, name: str) -> bool:
-        return name in self.syms and self.syms[name][0] != name or name in self.sections
-
-    def resolve(self, addrs: dict, sym: str, off: int, depth: int = 0) -> str:
-        """A relocation target: its address when that can be known, else symbol + offset."""
-        if sym in addrs:
-            return f"0x{addrs[sym] + off:08X}"
-        m = NAME_ADDR.match(sym)
-        if m:
-            return f"0x{int(m.group(1), 16) + off:08X}"
-        if self.defined(sym) and depth < 2:
-            sec, base = self.syms[sym]
-            pos = base + off
-            if sec in self.bases:
-                return f"0x{self.bases[sec] + pos:08X}"
-            inside = [(v, n) for v, n in self.by_sec.get(sec, []) if v <= pos]
-            if inside and inside[-1][1] != sym:
-                v, n = inside[-1]
-                return self.resolve(addrs, n, pos - v, depth + 1)
-        return f"{sym}+0x{off:X}"
+def section_bases(elf: Elf, resolver: Resolver, fallback: dict = None) -> dict:
+    """The original object's sections' addresses, from its symbols whose address the project's files give (the most
+    common answer wins), else `fallback`."""
+    votes = {}
+    for name, value, _, typ, _, shndx in elf.syms:
+        if typ == STT_SECTION or shndx in (SHN_UNDEF, SHN_ABS, SHN_COMMON) or shndx >= len(elf.names):
+            continue
+        if name.startswith(".") or name.endswith(".NON_MATCHING"):
+            continue
+        a = resolver.named(name)
+        if a is not None:
+            votes.setdefault(elf.names[shndx], Counter())[a - value] += 1
+    bases = dict(fallback or {})
+    bases.update({sec: c.most_common(1)[0][0] for sec, c in votes.items()})
+    return bases
 
 
-def _s16(x: int) -> int:
-    return x - 0x10000 if x & 0x8000 else x
+class Placement:
+    """Where a section offset of an object lands: the original object's sections at their bases; the C object's
+    .text function by function at the same-named original function (so that a function is compared on its own when
+    an earlier one changed size), its other sections where the original's are. A location without a known base
+    stays (section, offset), which compares equal only to the same location in the other object."""
+
+    def __init__(self, bases: dict, funcs: dict = None, original_funcs: dict = None):
+        self.bases = bases
+        self.spans = []  # (start, end, offset in the original), C object only
+        if funcs and original_funcs:
+            self.spans = sorted((v, v + s, original_funcs[n][0]) for n, (v, s) in funcs.items() if n in original_funcs)
+        self.starts = [s[0] for s in self.spans]
+
+    def locate(self, sec: str, off: int):
+        if sec == ".text" and self.spans:
+            i = bisect.bisect_right(self.starts, off) - 1
+            if i >= 0 and off < self.spans[i][1]:
+                off = self.spans[i][2] + off - self.spans[i][0]
+        if sec in self.bases:
+            return (self.bases[sec] + off) & 0xFFFFFFFF
+        return ("@" + sec, off)
 
 
-def disasm(obj: Path, func: str, addrs: dict = None, osyms: "ObjSymbols" = None):
-    """Instructions of `func` in `obj` as (text, key): text shows each relocation's symbol, key has it resolved
-    (ObjSymbols.resolve) and branch targets relative to the function, so equal keys mean equal linked code."""
+def linked_words(elf: Elf, sec: str, place: Placement, resolver: Resolver):
+    """`sec`'s words as the link writes them: each relocated field filled in with the address its target resolves
+    to (an int), or, where an address can't be known, (the word without the field, relocation type, target)."""
+    words = elf.section_words(sec)
+    i = elf.index.get(sec)
+    if i is None:
+        return words
+    rels = elf.relocs.get(i, [])
+
+    def target(symi, addend):
+        name, value, _, _, _, shndx = elf.syms[symi]
+        if shndx in (SHN_UNDEF, SHN_COMMON):
+            a = resolver.address(name)
+            return ("?" + name, addend) if a is None else (a + addend) & 0xFFFFFFFF
+        if shndx == SHN_ABS:
+            return (value + addend) & 0xFFFFFFFF
+        return place.locate(elf.names[shndx], value + addend)
+
+    for k, (off, typ, symi) in enumerate(rels):
+        w = words[off // 4]
+        if typ == R_MIPS_HI16:  # the addend pairs with the next LO16 of the same symbol, as ld pairs them
+            lo = next((words[o // 4] & 0xFFFF for o, t, s in rels[k + 1:] if t == R_MIPS_LO16 and s == symi), 0)
+            a = ((w & 0xFFFF) << 16) + _s16(lo)
+        elif typ == R_MIPS_26:
+            a = (w & 0x3FFFFFF) << 2
+        elif typ == R_MIPS_PC16:
+            a = _s16(w & 0xFFFF) << 2
+        elif typ == R_MIPS_32:
+            a = w
+        else:  # LO16, GPREL16
+            a = _s16(w & 0xFFFF)
+        t = target(symi, a)
+        here = place.locate(sec, off)
+        if typ == R_MIPS_32:
+            mask, field = 0xFFFFFFFF, t
+        elif typ == R_MIPS_26:
+            mask, field = 0x3FFFFFF, None if isinstance(t, tuple) else (t >> 2) & 0x3FFFFFF
+        elif typ == R_MIPS_HI16:
+            mask, field = 0xFFFF, None if isinstance(t, tuple) else ((t + 0x8000) >> 16) & 0xFFFF
+        elif typ == R_MIPS_LO16:
+            mask, field = 0xFFFF, None if isinstance(t, tuple) else t & 0xFFFF
+        elif typ == R_MIPS_PC16 and not isinstance(t, tuple) and not isinstance(here, tuple):
+            mask, field = 0xFFFF, ((t - here) >> 2) & 0xFFFF
+        else:  # GPREL16 ($gp is not modelled), a PC16 that can't be placed
+            mask, field = 0xFFFF, None
+        if typ == R_MIPS_32:
+            words[off // 4] = t
+        elif field is None:
+            words[off // 4] = (w & ~mask & 0xFFFFFFFF, RELOC_NAMES.get(typ, str(typ)), t)
+        else:
+            words[off // 4] = (w & ~mask & 0xFFFFFFFF) | field
+    return words
+
+
+# ---- the comparison ---------------------------------------------------------------------------------------------
+
+class Result:
+    def __init__(self):
+        self.functions = {}   # name -> [reasons]; [] = passes
+        self.asm = set()      # functions still in INCLUDE_ASM in the C object
+        self.order = []       # the original's functions in offset order, then the C object's extra ones
+        self.sections = {}    # data section -> ("OK" | "OK by address" | "DIFFERS", detail)
+        self.unit = []        # reasons the unit does not link to the original bytes
+        self.words = {}       # function -> (original words, C words), for the side-by-side diff
+
+    @property
+    def links(self) -> bool:
+        return not self.unit
+
+
+def compare(expected: Path, out: Path, resolver: Resolver, fallback_bases: dict = None,
+            c_sections=None) -> Result:
+    """Compare the C object `out` with the original's object `expected`. `c_sections`: the data sections the C
+    object provides (None: those either object has bytes in)."""
+    e, c = Elf(expected), Elf(out)
+    res = Result()
+    bases = section_bases(e, resolver, fallback_bases)
+    e_place = Placement(bases)
+    resolver.local = {}
+    for n, (sec, v) in e.defined().items():
+        a = e_place.locate(sec, v)
+        if not isinstance(a, tuple):
+            resolver.local[n] = a
+    e_funcs, c_funcs = e.functions(), c.functions()
+    c_place = Placement(bases, c_funcs, e_funcs)
+    e_text = linked_words(e, ".text", e_place, resolver)
+    c_text = linked_words(c, ".text", c_place, resolver)
+    res.asm = c.asm_functions()
+
+    res.order = list(e_funcs) + [n for n in c_funcs if n not in e_funcs]
+    for name in res.order:
+        if name not in c_funcs:
+            res.functions[name] = ["missing from the C object"]
+            continue
+        if name not in e_funcs:
+            res.functions[name] = ["not in the original"]
+            continue
+        (eo, es), (co, cs) = e_funcs[name], c_funcs[name]
+        ew, cw = e_text[eo // 4:(eo + es) // 4], c_text[co // 4:(co + cs) // 4]
+        res.words[name] = (ew, cw)
+        reasons = []
+        if es != cs:
+            reasons.append(f"size 0x{cs:X}, original 0x{es:X}")
+        ndiff = sum(1 for x, y in zip(ew, cw) if x != y)
+        if ndiff:
+            first = next(i for i, (x, y) in enumerate(zip(ew, cw)) if x != y)
+            reasons.append(f"{ndiff} instruction{'s' * (ndiff > 1)} differ{'s' * (ndiff == 1)},"
+                           f" the first at +0x{first * 4:X}")
+        res.functions[name] = reasons
+
+    # The layout: every function at its original offset with its original size, the bytes between them the same.
+    if e.section_size(".text") != c.section_size(".text"):
+        res.unit.append(f".text 0x{c.section_size('.text'):X} bytes, original 0x{e.section_size('.text'):X}")
+    moved = [n for n in res.order if e_funcs.get(n) != c_funcs.get(n)]
+    if moved:
+        res.unit.append(f"{len(moved)} function{'s' * (len(moved) > 1)} not at the original's offset or size"
+                        f" (first {moved[0]})")
+    elif len(e_text) == len(c_text):
+        inside = set()
+        for o, s in e_funcs.values():
+            inside.update(range(o // 4, (o + s) // 4))
+        if any(x != y for i, (x, y) in enumerate(zip(e_text, c_text)) if i not in inside):
+            res.unit.append(".text between functions differs")
+
+    # Data sections: word for word once relocated; a .rodata word that points into a function is its jump table.
+    raw = Resolver({})
+    e_spans = sorted((o, o + s, n) for n, (o, s) in e_funcs.items())
+    text_base = bases.get(".text")
+
+    def function_at(w):
+        if isinstance(w, int) and text_base is not None:
+            off = w - text_base
+        elif isinstance(w, tuple) and w[0] == "@.text":
+            off = w[1]
+        else:
+            return None
+        i = bisect.bisect_right([s[0] for s in e_spans], off) - 1
+        return e_spans[i][2] if i >= 0 and off < e_spans[i][1] else None
+
+    for sec in (".rodata", ".data", ".sdata"):
+        if c_sections is not None and sec not in c_sections:
+            if e.section_size(sec):
+                res.sections[sec] = ("asm", f"{e.section_size(sec)} bytes")
+            continue
+        if not e.section_size(sec) and not c.section_size(sec):
+            continue
+        a, b = linked_words(e, sec, e_place, resolver), linked_words(c, sec, c_place, resolver)
+        size = f"{e.section_size(sec)} bytes"
+        if a == b:
+            ra = linked_words(e, sec, Placement({}), raw)
+            rb = linked_words(c, sec, Placement({}, c_funcs, e_funcs), raw)
+            res.sections[sec] = ("OK" if ra == rb else "OK by address", size)
+            continue
+        first = next(i for i in range(max(len(a), len(b))) if i >= len(a) or i >= len(b) or a[i] != b[i])
+        res.sections[sec] = ("DIFFERS", f"{e.section_size(sec)} vs {c.section_size(sec)} bytes,"
+                                        f" first difference at 0x{first * 4:X}")
+        res.unit.append(f"{sec} differs")
+        if sec == ".rodata":
+            for i in range(min(len(a), len(b))):
+                if a[i] != b[i]:
+                    for f in {function_at(a[i]), function_at(b[i])} - {None}:
+                        why = f"its jump table differs (.rodata +0x{i * 4:X})"
+                        if f in res.functions and not any(r.startswith("its jump table") for r in res.functions[f]):
+                            res.functions[f].append(why)
+
+    bad = [n for n in res.order if res.functions.get(n)]
+    if bad:
+        res.unit.insert(0, f"{len(bad)} function{'s' * (len(bad) > 1)} differ{'s' * (len(bad) == 1)}")
+    return res
+
+
+def c_data_sections(target: str, unit: str):
+    """The data sections the C file provides: its `.rodata`/`.data`/`.sdata` subsegments in the target's YAML
+    (`rodata`/`data` ones stay asm). None when the YAML has none for the unit (compare what is there)."""
+    t = next(t for t in configure.TARGETS if t.name == target)
+    secs, found = set(), False
+
+    def walk(segs):
+        nonlocal found
+        for s in segs or []:
+            if isinstance(s, dict):
+                typ, name = s.get("type"), s.get("name")
+                walk(s.get("subsegments"))
+            elif isinstance(s, list) and len(s) >= 3:
+                typ, name = s[1], s[2]
+            else:
+                continue
+            if name == unit and typ in ("rodata", "data", "sdata", ".rodata", ".data", ".sdata"):
+                found = True
+                if typ.startswith("."):
+                    secs.add(typ)
+
+    walk(yaml.safe_load((ROOT / t.yaml).read_text()).get("segments"))
+    return secs if found else None
+
+
+def disasm(obj: Path, func: str):
+    """objdump's text of `func`'s instructions, each relocation's type and symbol appended."""
     r = run([str(OBJDUMP), "-drz", "-m", "mips:3000", f"--disassemble={func}", str(obj)])
-    insns = []  # [offset, word, asm, [(type, symbol)]]
+    out = []
     for ln in r.stdout.splitlines():
-        m = re.match(r"^\t+[0-9a-f]+: (R_MIPS_\w+)\t(\S+)$", ln)
-        if m and insns:
-            insns[-1][3].append((m.group(1), m.group(2)))
+        m = re.match(r"^\t+[0-9a-f]+: R_MIPS_(\w+)\t(\S+)$", ln)
+        if m and out:
+            out[-1] += f"  ; {m.group(1)} {m.group(2)}"
             continue
         m = re.match(r"^\s*([0-9a-f]+):\t([0-9a-f]{8}) \t(.*)$", ln)
         if m:
-            insns.append([int(m.group(1), 16), int(m.group(2), 16),
-                          " ".join(p.strip() for p in m.group(3).split("\t")), []])
-    start = insns[0][0] if insns else 0
-    text_base = osyms.bases.get(".text") if osyms else None
-
-    def target(m):  # a branch target: its address, or its offset in the function, not the label objdump picks
-        t = int(m.group(1), 16)
-        return f"<0x{text_base + t:08X}>" if text_base is not None else f"<+0x{t - start:x}>"
-
-    out, last_hi = [], {}
-    for i, (_, word, asm, relocs) in enumerate(insns):
-        text = asm + "".join(f"  ; {t[7:]} {sym}" for t, sym in relocs)
-        key = re.sub(r"\b([0-9a-f]+) <[^>]*>", target, asm)
-        if relocs and addrs is not None:
-            typ, sym = relocs[0]
-            imm = word & 0xFFFF
-            if typ == "R_MIPS_HI16":
-                last_hi[sym] = imm
-                lo = next((w & 0xFFFF for _, w, _, rl in insns[i + 1:] if ("R_MIPS_LO16", sym) in rl), 0)
-                ahl = (imm << 16) + _s16(lo)
-            elif typ == "R_MIPS_LO16":
-                ahl = (last_hi.get(sym, 0) << 16) + _s16(imm)
-            elif typ == "R_MIPS_26":
-                ahl = (word & 0x3FFFFFF) << 2
-            elif typ == "R_MIPS_PC16":  # the branch goes to S + A + 4
-                ahl = (_s16(imm) << 2) + 4
-            else:  # R_MIPS_GPREL16 and the like
-                ahl = _s16(imm)
-            where = osyms.resolve(addrs, sym, ahl)
-            if typ == "R_MIPS_PC16":  # as a branch without a relocation
-                key = re.sub(r"\b([0-9a-f]+) <[^>]*>", lambda m: f"<{where}>", asm)
-            else:
-                mnemonic, _, ops = asm.partition(" ")
-                regs = [o for o in re.split(r"[,()]", ops) if o and not re.match(r"^-?(0x[0-9a-f]+|\d+)$|.*<", o)]
-                key = f"{mnemonic} {','.join(regs)} {typ[7:]}({where})"
-        out.append((text, key))
+            out.append(" ".join(p.strip() for p in m.group(3).split("\t")))
     return out
-
-
-def section_words(obj: Path, sec: str, addrs: dict):
-    """`sec`'s bytes as 4-byte words, each R_MIPS_32 resolved to (target section, offset), or None if absent.
-
-    asm objects relocate jump tables against their `.L` labels, C objects against `.text` + an in-place
-    addend, so raw bytes and objdiff's section score differ even when the linked output is identical."""
-    r = run([str(OBJDUMP), "-s", "-j", sec, str(obj)])
-    if f"Contents of section {sec}:" not in r.stdout:
-        return None
-    data = bytearray()
-    for ln in r.stdout.split(f"Contents of section {sec}:")[1].splitlines()[1:]:
-        m = re.match(r"^ [0-9a-f]+ ((?:[0-9a-f]{2,8} ?){1,4})", ln)
-        if not m:
-            break
-        data += bytes.fromhex(m.group(1).replace(" ", ""))
-    osyms = ObjSymbols(obj)
-    relocs = {}
-    for ln in run([str(OBJDUMP), "-r", "-j", sec, str(obj)]).stdout.splitlines():
-        m = re.match(r"^([0-9a-f]{8}) (R_MIPS_\w+)\s+(\S+)$", ln)
-        if m:
-            relocs[int(m.group(1), 16)] = (m.group(2), m.group(3))
-    words = []
-    for off in range(0, len(data), 4):
-        w = int.from_bytes(data[off:off + 4].ljust(4, b"\0"), "little")
-        if off in relocs:
-            typ, sym = relocs[off]
-            if osyms.defined(sym):
-                base_sec, val = osyms.syms[sym]
-                words.append((typ, base_sec, val + w))
-            else:  # an extern: by address when it is known
-                words.append((typ, osyms.resolve(addrs, sym, w)))
-        else:
-            words.append(w)
-    return words
 
 
 def main():
@@ -231,64 +503,54 @@ def main():
     r = run([str(ROOT / "tools/bin/objdiff-cli"), "diff", "-1", str(expected), "-2", str(out), "-o", "-"])
     if r.returncode != 0:
         sys.exit(r.stderr)
-    d = json.loads(r.stdout)
-    funcs = [s for s in d["left"]["symbols"] if s.get("kind") == "SYMBOL_FUNCTION"]
-    done = [s for s in funcs if s.get("match_percent") is not None]
-    addrs = known_addresses(args.target)
-    bases = section_bases(args.target, args.unit)
-    syms_a, syms_b = ObjSymbols(expected, bases), ObjSymbols(out, bases)
+    pct = {s["name"]: s.get("match_percent") for s in json.loads(r.stdout)["left"]["symbols"]
+           if s.get("kind") == "SYMBOL_FUNCTION"}
 
-    def same_by_address(name):
-        a, b = disasm(expected, name, addrs, syms_a), disasm(out, name, addrs, syms_b)
-        return bool(a) and [k for _, k in a] == [k for _, k in b]
-
-    ok = by_addr = 0
-    for s in funcs:
-        pct = s.get("match_percent")
-        if pct is None:
-            mark = "asm"
-        elif pct == 100.0:
-            mark, ok = "OK", ok + 1
-        elif same_by_address(s["name"]):
-            mark, ok, by_addr = "OK (by address)", ok + 1, by_addr + 1
-        else:
-            mark = f"{pct:.2f}%"
-        if pct is not None or args.all:
-            print(f"  {s['name']:24} {mark}")
-    print(f"{args.unit} (gcc {cc}, -G{g}): {ok}/{len(done)} C functions match"
-          + (f" ({by_addr} by address)" if by_addr else "") + f", {len(funcs) - len(done)} still asm")
-
-    def as_addr(w):
-        """A word as the value the link gives it, when known: splat leaves pointers it has no label for as
-        plain words (string tables), where C has relocations against its own sections."""
-        if isinstance(w, tuple) and len(w) == 3 and w[1] in bases:
-            return bases[w[1]] + w[2]
-        if isinstance(w, tuple) and len(w) == 2 and str(w[1]).startswith("0x"):
-            return int(w[1], 16)
-        return w
-
-    for sec in (".rodata", ".data", ".sdata"):
-        a, b = section_words(expected, sec, addrs), section_words(out, sec, addrs)
-        if a is None and b is None:
+    res = compare(expected, out, Resolver.for_target(args.target), map_bases(args.target, args.unit),
+                  c_data_sections(args.target, args.unit))
+    ok = by_addr = done = 0
+    still_asm = sum(1 for n in res.order if n in res.asm)
+    for name in res.order:
+        reasons, p = res.functions[name], pct.get(name)
+        if name in res.asm:
+            if reasons:  # the original's own code: a difference here is the comparison's, or the layout's
+                print(f"  {name:24} asm, differs: {'; '.join(reasons)}")
+            elif args.all:
+                print(f"  {name:24} asm")
             continue
-        if a == b:
-            print(f"  {sec:24} OK ({len(a) * 4} bytes)")
-        elif a and b and [as_addr(w) for w in a] == [as_addr(w) for w in b]:
-            print(f"  {sec:24} OK by address ({len(a) * 4} bytes)")
+        done += 1
+        if not reasons:
+            ok += 1
+            if p == 100.0:
+                mark = "OK"
+            else:
+                mark, by_addr = "OK (by address)", by_addr + 1
         else:
-            a, b = a or [], b or []
-            first = next((i for i in range(max(len(a), len(b)))
-                          if i >= len(a) or i >= len(b) or a[i] != b[i]), None)
-            print(f"  {sec:24} DIFFERS: {len(a) * 4} vs {len(b) * 4} bytes, first difference at 0x{first * 4:X}")
+            # objdiff's score, rounded down: never "100.00%" for a function that differs
+            score = "" if p is None or p >= 100.0 else f"{math.floor(p * 100) / 100:.2f}%: "
+            mark = score + "; ".join(reasons)
+        print(f"  {name:24} {mark}")
+    for sec, (status, detail) in res.sections.items():
+        if status != "asm" or args.all:
+            print(f"  {sec:24} {status} ({detail})" if status != "DIFFERS" else f"  {sec:24} DIFFERS: {detail}")
+    verdict = ("the unit links to the original bytes" if res.links
+               else "the unit does not link to the original bytes: " + "; ".join(res.unit))
+    print(f"{args.unit} (gcc {cc}, -G{g}): {ok}/{done} C functions match"
+          + (f" ({by_addr} by address)" if by_addr else "") + f", {still_asm} still asm; {verdict}")
 
     if args.func:
-        a, b = disasm(expected, args.func, addrs, syms_a), disasm(out, args.func, addrs, syms_b)
-        w = max([len(x) for x, _ in a] + [10])
-        print(f"\n{'original':{w}}   C   (| differs; ~ same address, other symbol)")
+        if args.func not in res.words:
+            sys.exit(f"{args.func}: {'; '.join(res.functions.get(args.func, ['not a function of the unit']))}")
+        a, b = disasm(expected, args.func), disasm(out, args.func)
+        wa, wb = res.words[args.func]
+        w = max([len(x) for x in a] + [10])
+        print(f"\n{'original':{w}}   C   (| differs once linked; ~ same once linked, other symbol or form)")
         for i in range(max(len(a), len(b))):
-            x, kx = a[i] if i < len(a) else ("", None)
-            y, ky = b[i] if i < len(b) else ("", None)
-            print(f"{x:{w}} {'  ' if x == y else ' ~' if kx == ky else ' |'} {y}")
+            x = a[i] if i < len(a) else ""
+            y = b[i] if i < len(b) else ""
+            same = i < len(wa) and i < len(wb) and wa[i] == wb[i]
+            print(f"{x:{w}} {'  ' if same and x == y else ' ~' if same else ' |'} {y}")
+    sys.exit(0 if res.links else 1)
 
 
 if __name__ == "__main__":
