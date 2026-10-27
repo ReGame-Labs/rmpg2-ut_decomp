@@ -214,17 +214,6 @@ typedef struct UnkStruct15 {  /* provisional: func_800300A0's first argument */
     s16 unk_1A;
 } UnkStruct15;
 
-typedef struct UnkStruct9 {  /* provisional: the second argument of the func_80031xxx/80032xxx handlers */
-    u8 pad_00[0x8];
-    s16 unk_08;
-    u16 unk_0A;
-    u16 unk_0C;
-    u8 pad_0E[0x16];
-    s16 unk_24;
-    u8 pad_26[0x10];
-    s16 unk_36;
-} UnkStruct9;
-
 typedef struct UnkStruct8 {  /* provisional: func_80030268's third argument */
     u8 pad_00[0xDC];
     u16 unk_DC;
@@ -504,9 +493,9 @@ void func_8002E440();
 void func_8002FB6C(s32, BuildingItem *, Building *);
 void func_8002D448(s32, Building *);
 void func_8002E9F8(Building *);
-void func_80032630(s32, UnkStruct9 *);
+void func_80032630(s32, Ai *);
 void func_8002E0C8(s32, Building *);
-void func_8003E788(UnkStruct9 *);
+void func_8003E788(Ai *);
 void func_8002F688();
 void func_8002FB38(void *, GameObject *);
 void func_8002E348(s32, BuildingItem *);
@@ -518,13 +507,13 @@ void func_8002FAA4(s32, BuildingItem *);
 void func_80030BAC(BuildingPart *);
 void func_80030A70(s32, BuildingPart *);
 void func_8002F65C(Building *, s32, BuildingItem *);
-void func_80032008(s16, s32, UnkStruct9 *);
+void func_80032008(s16, s32, Ai *);
 void func_80030C7C(BuildingItem *);
 void func_80030B00(s32, BuildingItem *);
 extern void (*D_8007CFD0[])(Building *);
 extern s32 *D_80011D98[];
-void func_8003DB74(UnkStruct9 *);
-void func_80031FD4(s32, UnkStruct9 *);
+void func_8003DB74(Ai *);
+void func_80031FD4(s32, Ai *);
 void func_80030834(Building *, s32);
 void func_8002E9A4(Building *);
 void func_8002BE30(Monster *);

@@ -2,7 +2,7 @@
 #define GAME_8003B568_H
 
 #include "common.h"
-#include "game_8002A330.h"   /* the actor record (UnkStruct1) and D_800AA268 */
+#include "game_8002A330.h"   /* the declarations game_8002A330 shares with it */
 
 /* Declarations of src/main/game_8003B568.c: provisional types from the code's own use; refined as functions match. */
 

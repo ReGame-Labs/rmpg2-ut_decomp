@@ -447,7 +447,7 @@ typedef struct BuildingPart {
     /* 0x00 */ GameObject *unk_00;
     /* 0x04 */ u16 unk_04;
     /* 0x06 */ u16 unk_06;
-    /* 0x08 */ GameObject **unk_08;
+    /* 0x08 */ struct Ai *unk_08;               /* a behaviour slot (its object at 0) */
     /* 0x0C */ struct UnkStruct14 *unk_0C;
     /* 0x10 */ GameObject *unk_10;
     /* 0x14 */ s16 unk_14;

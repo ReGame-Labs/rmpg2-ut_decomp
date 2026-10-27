@@ -146,7 +146,7 @@ void func_800242A8(void);
 void func_80024530(GameObject *, GameObject *);
 void func_8002469C(s32 *, s16, s16);
 void func_80023CFC(Ai *ai);
-void func_800256CC(SpriteSlots *);
+void func_800256CC(BuildingItem *);
 void *func_80025C08(void *);
 s32 func_80019B08(s32, s32, s32, s16);
 s32 func_80019DAC(s32, s32, s32, s16);
@@ -265,14 +265,14 @@ s32 func_80024974(s32 arg0);
 void func_8002497C(void);
 void func_80024AA0(void);
 void func_8002546C(void);
-void func_800255E0(SpriteSlots *arg0);
-void func_80025648(SpriteSlots *arg0);
-void func_800256B0(SpriteSlots *arg0);
-void func_8002575C(SpriteSlots *arg0);
-void func_800257C4(SpriteSlots *arg0);
-void func_800257F0(SpriteSlots *arg0);
-void func_80025848(SpriteSlots *arg0);
-void func_80025898(SpriteSlots *arg0);
+void func_800255E0(BuildingItem *arg0);
+void func_80025648(BuildingItem *arg0);
+void func_800256B0(BuildingItem *arg0);
+void func_8002575C(BuildingItem *arg0);
+void func_800257C4(BuildingItem *arg0);
+void func_800257F0(BuildingItem *arg0);
+void func_80025848(BuildingItem *arg0);
+void func_80025898(BuildingItem *arg0);
 void func_80025B10(void);
 void func_80026BC4(Monster *arg0);
 void func_80026CFC(Monster *arg0);
@@ -3567,69 +3567,69 @@ void func_8002546C(void) {
 
 INCLUDE_ASM("asm/main/nonmatchings/game_8001781C", func_80025474);
 
-void func_800255E0(SpriteSlots *arg0) {
+void func_800255E0(BuildingItem *arg0) {
     GameObject *temp_a0;
     GameObject *temp_a0_2;
     GameObject *temp_a0_3;
 
-    temp_a0 = arg0->unk_C;
+    temp_a0 = arg0->unk_0C.unk_00;
     if (temp_a0 != NULL) {
         func_8001E4B0(temp_a0);
     }
-    temp_a0_2 = arg0->unk_24;
+    temp_a0_2 = arg0->unk_24.unk_00;
     if (temp_a0_2 != NULL) {
         func_8001E4B0(temp_a0_2);
     }
-    temp_a0_3 = arg0->unk_3C;
+    temp_a0_3 = arg0->unk_3C.unk_00;
     if (temp_a0_3 != NULL) {
         func_8001E4B0(temp_a0_3);
     }
 }
 
-void func_80025648(SpriteSlots *arg0) {
+void func_80025648(BuildingItem *arg0) {
     GameObject *temp_a0;
     GameObject *temp_a0_2;
     GameObject *temp_a0_3;
 
-    temp_a0 = arg0->unk_1C;
+    temp_a0 = arg0->unk_0C.unk_10;
     if (temp_a0 != NULL) {
         func_8001E4B0(temp_a0);
     }
-    temp_a0_2 = arg0->unk_34;
+    temp_a0_2 = arg0->unk_24.unk_10;
     if (temp_a0_2 != NULL) {
         func_8001E4B0(temp_a0_2);
     }
-    temp_a0_3 = arg0->unk_4C;
+    temp_a0_3 = arg0->unk_3C.unk_10;
     if (temp_a0_3 != NULL) {
         func_8001E4B0(temp_a0_3);
     }
 }
 
-void func_800256B0(SpriteSlots *arg0) {
-    arg0->unk_C = 0;
-    arg0->unk_1C = 0;
-    arg0->unk_24 = 0;
-    arg0->unk_34 = 0;
-    arg0->unk_3C = 0;
-    arg0->unk_4C = 0;
+void func_800256B0(BuildingItem *arg0) {
+    arg0->unk_0C.unk_00 = 0;
+    arg0->unk_0C.unk_10 = 0;
+    arg0->unk_24.unk_00 = 0;
+    arg0->unk_24.unk_10 = 0;
+    arg0->unk_3C.unk_00 = 0;
+    arg0->unk_3C.unk_10 = 0;
 }
 
-void func_800256CC(SpriteSlots *slots) {
+void func_800256CC(BuildingItem *slots) {
     Ai *ai;
     GameObject *current;
 
-    ai = slots->unk_14;
+    ai = slots->unk_0C.unk_08;
     current = D_800AA248.cur_obj;
     if (ai != NULL) {
         D_800AA248.cur_obj = ai->obj;
         func_8003DAA0(ai);
     }
-    ai = slots->unk_2C;
+    ai = slots->unk_24.unk_08;
     if (ai != NULL) {
         D_800AA248.cur_obj = ai->obj;
         func_8003DAA0(ai);
     }
-    ai = slots->unk_44;
+    ai = slots->unk_3C.unk_08;
     if (ai != NULL) {
         D_800AA248.cur_obj = ai->obj;
         func_8003DAA0(ai);
@@ -3637,34 +3637,34 @@ void func_800256CC(SpriteSlots *slots) {
     D_800AA248.cur_obj = current;
 }
 
-void func_8002575C(SpriteSlots *arg0) {
+void func_8002575C(BuildingItem *arg0) {
     s32 temp_a0;
     s32 temp_a0_2;
     s32 temp_a0_3;
 
-    temp_a0 = arg0->unk_18;
+    temp_a0 = arg0->unk_0C.unk_0C;
     if (temp_a0 != 0) {
         func_8003C894(temp_a0);
     }
-    temp_a0_2 = arg0->unk_30;
+    temp_a0_2 = arg0->unk_24.unk_0C;
     if (temp_a0_2 != 0) {
         func_8003C894(temp_a0_2);
     }
-    temp_a0_3 = arg0->unk_48;
+    temp_a0_3 = arg0->unk_3C.unk_0C;
     if (temp_a0_3 != 0) {
         func_8003C894(temp_a0_3);
     }
 }
 
-void func_800257C4(SpriteSlots *arg0) {
+void func_800257C4(BuildingItem *arg0) {
     func_800255E0(arg0);
     func_80025648(arg0);
 }
 
-void func_800257F0(SpriteSlots *arg0) {
+void func_800257F0(BuildingItem *arg0) {
     GameObject *temp_a0;
 
-    temp_a0 = arg0->unk_0;
+    temp_a0 = arg0->obj;
     if (temp_a0 != NULL) {
         func_8001E4B0(temp_a0);
         func_800255E0(arg0);
@@ -3674,8 +3674,8 @@ void func_800257F0(SpriteSlots *arg0) {
     }
 }
 
-void func_80025848(SpriteSlots *arg0) {
-    if (arg0->unk_0 != 0) {
+void func_80025848(BuildingItem *arg0) {
+    if (arg0->obj != 0) {
         func_800255E0(arg0);
         func_80025648(arg0);
         func_800256CC(arg0);
@@ -3683,10 +3683,10 @@ void func_80025848(SpriteSlots *arg0) {
     }
 }
 
-void func_80025898(SpriteSlots *arg0) {
+void func_80025898(BuildingItem *arg0) {
     GameObject *temp_a0;
 
-    temp_a0 = arg0->unk_0;
+    temp_a0 = arg0->obj;
     if (temp_a0 != NULL) {
         func_8001E4B0(temp_a0);
     }

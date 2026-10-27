@@ -1185,7 +1185,7 @@ void func_8002EE14(s16 dy, BuildingItem *s) {
     GameObject *b = s->obj;
     BuildingPart *g;
     GameObject *r;
-    GameObject **pp;
+    Ai *pp;
     UnkStruct14 *q;
 
     if (b != NULL) {
@@ -1201,7 +1201,7 @@ void func_8002EE14(s16 dy, BuildingItem *s) {
         }
         pp = g->unk_08;
         if (pp != NULL) {
-            r = *pp;
+            r = pp->obj;
             if (r != NULL) {
                 r->pos_y.u.hi += dy;
             }
@@ -1224,7 +1224,7 @@ void func_8002EE14(s16 dy, BuildingItem *s) {
         }
         pp = g->unk_08;
         if (pp != NULL) {
-            r = *pp;
+            r = pp->obj;
             if (r != NULL) {
                 r->pos_y.u.hi += dy;
             }
@@ -1247,7 +1247,7 @@ void func_8002EE14(s16 dy, BuildingItem *s) {
         }
         pp = g->unk_08;
         if (pp != NULL) {
-            r = *pp;
+            r = pp->obj;
             if (r != NULL) {
                 r->pos_y.u.hi += dy;
             }
@@ -1670,7 +1670,7 @@ void func_8003089C(u16 i, Building *a) {
 }
 
 void func_800308EC(s16 arg0, BuildingPart *arg1) {
-    GameObject **temp_v0;
+    Ai *temp_v0;
     GameObject *obj;
     UnkStruct14 *temp_d;
 
@@ -1684,7 +1684,7 @@ void func_800308EC(s16 arg0, BuildingPart *arg1) {
     }
     temp_v0 = arg1->unk_08;
     if (temp_v0 != NULL) {
-        obj = *temp_v0;
+        obj = temp_v0->obj;
         if (obj != NULL) {
             obj->pos_x.u.hi = (u16) (obj->pos_x.u.hi + arg0);
         }
@@ -1720,7 +1720,7 @@ void func_800309AC(s16 arg0, BuildingItem *arg1) {
 }
 
 void func_80030A70(s32 arg0, BuildingPart *arg1) {
-    GameObject **temp_v0;
+    Ai *temp_v0;
     GameObject *obj;
     UnkStruct14 *temp_d;
 
@@ -1734,7 +1734,7 @@ void func_80030A70(s32 arg0, BuildingPart *arg1) {
     }
     temp_v0 = arg1->unk_08;
     if (temp_v0 != NULL) {
-        obj = *temp_v0;
+        obj = temp_v0->obj;
         if (obj != NULL) {
             obj->vel_y.w = arg0;
         }
@@ -1780,7 +1780,7 @@ INCLUDE_ASM("asm/main/nonmatchings/game_8002A330", func_80030B5C);
 #endif
 
 void func_80030BAC(BuildingPart *arg0) {
-    GameObject **temp_v0;
+    Ai *temp_v0;
     GameObject *obj;
     UnkStruct14 *temp_d;
 
@@ -1794,7 +1794,7 @@ void func_80030BAC(BuildingPart *arg0) {
     }
     temp_v0 = arg0->unk_08;
     if (temp_v0 != NULL) {
-        obj = *temp_v0;
+        obj = temp_v0->obj;
         if (obj != NULL) {
             obj->pos_y.w = obj->pos_y.w + obj->vel_y.w;
         }
@@ -2077,49 +2077,49 @@ void func_80031C8C(s32 arg0) {
 
 INCLUDE_ASM("asm/main/nonmatchings/game_8002A330", func_80031CB4);
 
-void func_80031EC0(s32 arg0, UnkStruct9 *arg1) {
-    if (arg1->unk_0A != 0) {
+void func_80031EC0(s32 arg0, Ai *arg1) {
+    if (arg1->state != 0) {
         if (arg1->unk_0C == 1) {
-            arg1->unk_0A = 4;
+            arg1->state = 4;
             arg1->unk_0C = 0;
-            arg1->unk_08 = 0x15;
+            arg1->action = 0x15;
             func_80032630(arg0, arg1);
         }
     } else {
         arg1->unk_0C = 0;
-        arg1->unk_0A = 1;
+        arg1->state = 1;
         func_80032630(arg0, arg1);
     }
 }
 
-void func_80031F20(s32 arg0, UnkStruct9 *arg1) {
+void func_80031F20(s32 arg0, Ai *arg1) {
     if (arg1->unk_0C == 1) {
-        arg1->unk_0A = 5;
+        arg1->state = 5;
         arg1->unk_0C = 0;
-        arg1->unk_08 = 0x16;
+        arg1->action = 0x16;
         func_80032630(arg0, arg1);
     }
 }
 
-void func_80031F5C(s32 arg0, UnkStruct9 *arg1) {
+void func_80031F5C(s32 arg0, Ai *arg1) {
     if (arg1->unk_0C == 1) {
-        arg1->unk_0A = 6;
+        arg1->state = 6;
         arg1->unk_0C = 0;
-        arg1->unk_08 = 0x17;
+        arg1->action = 0x17;
         func_80032630(arg0, arg1);
     }
 }
 
-void func_80031F98(s32 arg0, UnkStruct9 *arg1) {
+void func_80031F98(s32 arg0, Ai *arg1) {
     if (arg1->unk_0C == 1) {
-        arg1->unk_0A = 9;
+        arg1->state = 9;
         arg1->unk_0C = 0;
-        arg1->unk_08 = 0x32;
+        arg1->action = 0x32;
         func_80032630(arg0, arg1);
     }
 }
 
-void func_80031FD4(s32 arg0, UnkStruct9 *arg1) {
+void func_80031FD4(s32 arg0, Ai *arg1) {
     if (arg1->unk_0C == 1) {
         func_8003DB74(arg1);
     }
@@ -2128,41 +2128,41 @@ void func_80031FD4(s32 arg0, UnkStruct9 *arg1) {
 #ifdef NON_MATCHING
 /* 94.5 %: the original puts `move a0, v1` (the call's first argument) in the jal's delay slot, after the two stores;
  * every form tried schedules it before them. */
-void func_80032008(s16 arg0, s32 arg1, UnkStruct9 *arg2) {
+void func_80032008(s16 arg0, s32 arg1, Ai *arg2) {
     s16 var_v0;
 
     if (arg0 != -1) {
-        arg2->unk_0A = 9;
+        arg2->state = 9;
         var_v0 = 0x32;
     } else {
-        arg2->unk_0A = 0x10;
+        arg2->state = 0x10;
         var_v0 = 0x33;
     }
     arg2->unk_0C = 0;
-    arg2->unk_08 = var_v0;
+    arg2->action = var_v0;
     func_80032630(arg1, arg2);
 }
 #else
 INCLUDE_ASM("asm/main/nonmatchings/game_8002A330", func_80032008);
 #endif
 
-void func_80032064(s32 arg0, UnkStruct9 *arg1) {
+void func_80032064(s32 arg0, Ai *arg1) {
     s16 var_v0;
     s32 var_v1;
 
-    arg1->unk_36 = 0;
+    arg1->unk_34.s.hi = 0;
     if (arg1->unk_0C == 1) {
         arg1->unk_0C = 0;
         if (D_800AA248.cur_obj->pos_y.w <= 0x5F0000) {
             var_v1 = 0x30000;
-            arg1->unk_0A = 0xB;
+            arg1->state = 0xB;
             var_v0 = 0x3C;
         } else {
             var_v1 = 0x2C000;
-            arg1->unk_0A = 0xA;
+            arg1->state = 0xA;
             var_v0 = 0x3B;
         }
-        arg1->unk_08 = var_v0;
+        arg1->action = var_v0;
         arg1->unk_24 = 1;
         D_800AA248.cur_obj->vel_y.w = var_v1;
         func_8003E788(arg1);
@@ -2173,19 +2173,19 @@ void func_80032064(s32 arg0, UnkStruct9 *arg1) {
 
 INCLUDE_ASM("asm/main/nonmatchings/game_8002A330", func_8003212C);
 
-void func_800322AC(s32 arg0, UnkStruct9 *arg1) {
+void func_800322AC(s32 arg0, Ai *arg1) {
     if (arg1->unk_0C == 1) {
-        arg1->unk_0A = 0xE;
+        arg1->state = 0xE;
         arg1->unk_0C = 0;
-        arg1->unk_08 = 0x1E;
+        arg1->action = 0x1E;
         func_80032630(arg0, arg1);
     }
 }
 
-void func_800322E8(s32 arg0, UnkStruct9 *arg1) {
+void func_800322E8(s32 arg0, Ai *arg1) {
     if (arg1->unk_0C == 1) {
-        arg1->unk_0A = 0xF;
-        arg1->unk_08 = 0x46;
+        arg1->state = 0xF;
+        arg1->action = 0x46;
         arg1->unk_0C = 0;
         if (D_800AA248.cur_obj->flags & 0x10) {
             D_800AA248.cur_obj->vel_x.w = 0x28000;
@@ -2200,11 +2200,11 @@ INCLUDE_ASM("asm/main/nonmatchings/game_8002A330", func_80032350);
 
 INCLUDE_ASM("asm/main/nonmatchings/game_8002A330", func_80032530);
 
-void func_80032630(s32 handlers, UnkStruct9 *r) {
-    void (**h)(UnkStruct9 *);
+void func_80032630(s32 handlers, Ai *r) {
+    void (**h)(Ai *);
 
-    h = (void (**)(UnkStruct9 *)) handlers;
-    h += r->unk_0A;
+    h = (void (**)(Ai *)) handlers;
+    h += r->state;
     (*h)(r);
 }
 
@@ -2213,12 +2213,12 @@ void func_80032668(s32 arg0) {
     func_80031CB4(D_8007D280, arg0);
 }
 
-void func_80032690(s32 n, UnkStruct9 *r) {
+void func_80032690(s32 n, Ai *r) {
     s32 v;
 
     if (r->unk_0C == 1) {
-        r->unk_0A = 0xF;
-        r->unk_08 = 0x46;
+        r->state = 0xF;
+        r->action = 0x46;
         r->unk_0C = 0;
         v = -0x8000;
         if (D_800AA248.cur_obj->flags & 0x10) {

@@ -13,29 +13,6 @@
  * stores imply. */
 
 
-/* Three slots of freed resources (SpriteSlots.unk_C, unk_24, unk_3C ... released through func_8001E4B0). */
-typedef struct SpriteSlots {
-    GameObject *unk_0;
-    u8 pad_4[0x8];
-    GameObject *unk_C;
-    u8 pad_10[0x4];
-    struct Ai *unk_14;
-    s32 unk_18;
-    GameObject *unk_1C;
-    u8 pad_20[0x4];
-    GameObject *unk_24;
-    u8 pad_28[0x4];
-    struct Ai *unk_2C;
-    s32 unk_30;
-    GameObject *unk_34;
-    u8 pad_38[0x4];
-    GameObject *unk_3C;
-    u8 pad_40[0x4];
-    struct Ai *unk_44;
-    s32 unk_48;
-    GameObject *unk_4C;
-} SpriteSlots;
-
 /* A 0x14-byte record of the 1024-entry table at 0x801C542C. */
 typedef struct Unk1C542C {
     s16 unk_0;              /* -1 when free */
