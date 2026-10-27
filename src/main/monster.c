@@ -1540,7 +1540,7 @@ void func_800543FC(void) {
             D_8007A7D4 |= 1;
             func_8002BE30(e);
             D_8007A7D4 &= 0xFFFE;
-            func_80060F3C();
+            cdload_sort_players();
         }
     } while (--i != 0);
     D_801F9924 = 0;

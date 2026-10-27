@@ -457,7 +457,8 @@ void func_800447F0(Attacker *a) {
 }
 
 #ifdef NON_MATCHING
-/* 96%: the slot is kept in a3 from the entry (a copy of a0) and the ground level in a1; this keeps the slot in a0 */
+/* 98.87%: 98.9%: registers only at the start: the original loads cur_obj into v1 and reloads it into a0 after the
+ * pos_x store */
 void func_8004489C(Attacker *a) {
     s32 vel;
     s32 vy;
@@ -467,13 +468,11 @@ void func_8004489C(Attacker *a) {
         func_80044790(a);
         return;
     }
-    D_800AA248.cur_obj->pos_x.w += D_800AA248.cur_obj->vel_x.w;
-    vel = D_800AA248.cur_obj->vel_x.w + D_800AA248.cur_obj->unk_84;
+    vel = D_800AA248.cur_obj->vel_x.w;
+    D_800AA248.cur_obj->pos_x.w += vel;
+    vel += D_800AA248.cur_obj->unk_84;
     D_800AA248.cur_obj->vel_x.w = vel;
-    if (vel < 0) {
-        vel = -vel;
-    }
-    if (vel < 0x7001) {
+    if (abs(vel) < 0x7001) {
         D_800AA248.cur_obj->unk_84 = 0;
         D_800AA248.cur_obj->vel_x.w = 0;
     }
@@ -504,23 +503,23 @@ void func_8004489C(Attacker *a) {
 INCLUDE_ASM("asm/main/nonmatchings/attacker", func_8004489C);
 #endif
 
-#ifdef NON_MATCHING
-/* 96%: as func_8004489C, the slot register */
 void func_80044A08(Attacker *a) {
-    s32 vel;
+    s32 v;
     s16 ground;
 
     if (a->unk_18 != 0) {
         func_800447F0(a);
         return;
     }
-    D_800AA248.cur_obj->pos_x.w += D_800AA248.cur_obj->vel_x.w;
-    vel = D_800AA248.cur_obj->vel_y.w + a->unk_10;
-    if (vel > 0xC000) {
-        vel = 0xC000;
+    v = D_800AA248.cur_obj->pos_x.w;
+    v += D_800AA248.cur_obj->vel_x.w;
+    D_800AA248.cur_obj->pos_x.w = v;
+    v = D_800AA248.cur_obj->vel_y.w + a->unk_10;
+    if (v > 0xC000) {
+        v = 0xC000;
     }
-    D_800AA248.cur_obj->vel_y.w = vel;
-    D_800AA248.cur_obj->pos_y.w += vel;
+    D_800AA248.cur_obj->vel_y.w = v;
+    D_800AA248.cur_obj->pos_y.w += v;
     ground = 0xD9;
     if (a->type == 9) {
         ground = 0xE0;
@@ -538,9 +537,6 @@ void func_80044A08(Attacker *a) {
         }
     }
 }
-#else
-INCLUDE_ASM("asm/main/nonmatchings/attacker", func_80044A08);
-#endif
 
 void func_80044B28(Attacker *a) {
     if (func_8003E79C() == 1) {
@@ -1578,6 +1574,79 @@ end:
 INCLUDE_ASM("asm/main/nonmatchings/attacker", func_80046F68);
 #endif
 
+#ifdef NON_MATCHING
+/* 92.97%: 93%: registers only: the x distance lands in x's register (a1; v1 in the original) and the half sizes
+ * swap v1/a1 */
+void func_80047028(Monster *m) {
+    Attacker *a = D_801FA8A8;
+    GameObject *saved;
+    GameObject *obj;
+    u16 n;
+    s16 x;
+    s16 d;
+    s32 t;
+    s32 half;
+    u16 w;
+    s32 e;
+    s16 px;
+    s16 py;
+
+    saved = D_800AA268.p;
+    n = 4;
+    if (D_801E1C84 != 0) {
+        px = m->pos.s.lo;
+        py = m->pos.s.hi;
+        do {
+            obj = a->obj;
+            if (a->type != 0 && !(obj->unk_6C & 0x80)) {
+                x = obj->pos_x.s.hi;
+                if (x < D_801F9AC8.s.hi) {
+                    x += (D_801D8864.w + 1) >> 1;
+                }
+                w = obj->size.u.lo;
+                t = x - px;
+                if (t < 0) {
+                    t = -t;
+                }
+                d = t;
+                half = (s16)w >> 1;
+                if (half < d) {
+                    e = d - 4;
+                    if (e < 0) {
+                        e = -e;
+                    }
+                    if (half < e) {
+                        goto next;
+                    }
+                }
+                half = (s16)obj->size.u.hi >> 1;
+                t = (s16)(obj->pos_y.u.hi - half) - py;
+                if (t < 0) {
+                    t = -t;
+                }
+                d = t;
+                half += 4;
+                if (half < d) {
+                    e = d - 4;
+                    if (e < 0) {
+                        e = -e;
+                    }
+                    if (half < e) {
+                        goto next;
+                    }
+                }
+                a->unk_22 = 1;
+                a->hit_by = m;
+                break;
+            }
+        next:
+            a++;
+        } while (--n != 0);
+    }
+    D_800AA268.p = saved;
+}
+#else
 INCLUDE_ASM("asm/main/nonmatchings/attacker", func_80047028);
+#endif
 
 INCLUDE_ASM("asm/main/nonmatchings/attacker", func_8004718C);
