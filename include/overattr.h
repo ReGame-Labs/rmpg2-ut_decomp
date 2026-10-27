@@ -43,7 +43,7 @@ OverattrTexts *func_80025C08(void *list);
 void func_8001F39C(void *msg);         /* loads a text message into the printer */
 void func_8001EDB0(void);              /* prints it, its text through sprintf */
 void func_8001E4B0(GameObject *obj);   /* frees an object */
-void main_free_kind_masked(s32 kind, s32 arg1);
+void main_free_kind_masked(s16 kind, s16 mask);
 void func_8001F61C(u8 *text, s16 x, s16 y, s32 spacing, s32 arg4, s32 *glyphs, s32 kind, s32 arg7); /* draws a text */
 
 extern s32 D_8007ABCC[];               /* a font's glyphs */
@@ -185,15 +185,6 @@ extern s16 D_800A98A0[];
 extern u8 D_800A747C[];                 /* animations */
 extern u8 D_800A7444[];
 extern u8 D_800A7454[];
-/* A player's monster on the selection screen (menu_create_player_monster), 10 bytes. */
-typedef struct {
-    /* 0x00 */ u8 unk_00[0x04];
-    /* 0x04 */ s16 unk_04;              /* the monster: indexes D_800A8EE4, D_800A8FA8 */
-    /* 0x06 */ s16 unk_06;
-    /* 0x08 */ s16 unk_08;
-} OverattrPlayer;
-
-extern OverattrPlayer D_800A8FD4[];
 extern s32 D_800A8EE4[];
 extern s32 D_800A8FA8[];
 extern s32 D_800A8F00[];
