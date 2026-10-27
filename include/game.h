@@ -76,7 +76,10 @@ typedef struct GameObject {
     /* 0x38 */ s32 anim_frame;          /* the current animation frame id */
     /* 0x3C */ u16 unk_3C;
     /* 0x3E */ u8 unk_3E[0x02];
-    /* 0x40 */ struct GameObject *unk_40;
+    /* 0x40 */ union {
+                   struct GameObject *obj;  /* a link (game_8001781C's list from D_801D8584) */
+                   s32 w;                   /* a value (a volume bar's length in OVERATTR) */
+               } unk_40;
     /* 0x44 */ s32 script_pc;           /* the animation script's next command (an address) */
     /* 0x48 */ s32 unk_48;              /* the current animation (an address) */
     /* 0x4C */ u8 unk_4C;
@@ -101,7 +104,8 @@ typedef struct GameObject {
                } unk_68;
     /* 0x6C */ u16 unk_6C;              /* 0x80: gone */
     /* 0x6E */ u16 unk_6E;
-    /* 0x70 */ u16 unk_70;              /* an id (0x790 + a monster's slot for the status sprites) */
+    /* 0x70 */ u16 kind;                /* the id func_8001E450 and func_8001EC74 select objects by (0x790 + a
+                                         * monster's slot for the status sprites) */
     /* 0x72 */ u8 unk_72[0x02];
     /* 0x74 */ u16 unk_74;
     /* 0x76 */ u8 unk_76[0x02];
@@ -300,7 +304,7 @@ typedef struct MonsterLink {
 typedef struct ObjectDef {
     /* 0x00 */ s32 id;                         /* the sprite/animation id (the first word of anim) */
     /* 0x04 */ u16 unk_04;                     /* flags: 0x10 faces left */
-    /* 0x06 */ u16 unk_06;
+    /* 0x06 */ u16 unk_06;                     /* flags: 0x20 */
     /* 0x08 */ u8 unk_08[0x04];
     /* 0x0C */ s32 unk_0C;
     /* 0x10 */ Fixed pos_x;                    /* written whole from an object's position, or its integer half alone */
@@ -603,7 +607,50 @@ typedef struct DrawState {
 
 extern DrawState *D_801FAC80;
 
+/* The text printer's state at D_801D8588 (func_8001EDE4 ... func_8001F61C). */
+typedef struct TextState {
+    /* 0x00 */ s32 unk_00;
+    /* 0x04 */ void (*unk_04)(void);
+    /* 0x08 */ s32 unk_08;
+    /* 0x0C */ u16 pen_x;
+    /* 0x0E */ u16 pen_y;
+    /* 0x10 */ s32 unk_10;
+    /* 0x14 */ s32 *glyphs;                /* the font */
+    /* 0x18 */ s32 unk_18;
+    /* 0x1C */ u8 *text;                   /* the string being printed */
+    /* 0x20 */ u16 unk_20;
+    /* 0x22 */ u16 unk_22;
+    /* 0x24 */ s32 flags;
+    /* 0x28 */ u16 unk_28;
+    /* 0x2A */ u16 unk_2A;
+    /* 0x2C */ s16 unk_2C;
+    /* 0x2E */ s16 unk_2E;
+    /* 0x30 */ s16 unk_30;
+    /* 0x32 */ u16 unk_32;
+    /* 0x34 */ u16 unk_34;
+    /* 0x36 */ u16 unk_36;
+    /* 0x38 */ s16 unk_38;
+    /* 0x3A */ u8 unk_3A;
+    /* 0x3B */ u8 unk_3B;
+    /* 0x3C */ s32 unk_3C;
+} TextState;
+
+extern TextState D_801D8588;
+
+/* A text message as func_8001F39C loads it into the printer: the string follows at 0x18. */
+typedef struct TextMessage {
+    /* 0x00 */ s32 *glyphs;                /* the font */
+    /* 0x04 */ s32 spacing;
+    /* 0x08 */ u16 x;
+    /* 0x0A */ u16 y;
+    /* 0x0C */ s32 unk_0C;
+    /* 0x10 */ void (*layout)(void);       /* func_8001EDE4: centred */
+    /* 0x14 */ s32 kind;                   /* the kind of the objects that show it (func_8001E450 frees them) */
+    /* 0x18 */ u8 text[1];                 /* as long as the message */
+} TextMessage;
+
 /* Data shared by several files. */
+extern s16 D_801E1CB4;                   /* the music volume, 0..0x7F */
 extern u8 D_800937E8[];
 extern u8 D_800938AC[];
 extern u8 D_80095678[];

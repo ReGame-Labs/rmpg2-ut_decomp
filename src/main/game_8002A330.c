@@ -484,7 +484,7 @@ void func_8002CA8C(void) {
     spr = func_8001DCB4();
     owner->unk_084 = spr;
     spr->owner.item = (BuildingItem *) owner;  /* the owner: to be unified */
-    spr->unk_70 = 0x749;
+    spr->kind = 0x749;
     if (func_8001A3AC() < 0x23) {
         D_800AA248.cur_obj = saved;
         return;
@@ -500,7 +500,7 @@ void func_8002CA8C(void) {
     r->id = *anim;
     r->flags += 5;
     spr = func_8001DCB4();
-    spr->unk_70 = 0x749;
+    spr->kind = 0x749;
     spr->owner.item = (BuildingItem *) owner;
     if (D_8007A690 != 1) {
         spr->flags |= 0x400;

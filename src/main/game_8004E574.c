@@ -446,7 +446,7 @@ void func_8004F1CC(void) {
     def->flags = 0x101;
     def->pos_y.s.hi = obj->pos_y.s.hi - 0xA;
     o = func_8001DCB4();
-    o->unk_70 = 0x540;
+    o->kind = 0x540;
     if (D_801E289C == 6 && D_801FA8A6 != 0) {
         v = 3;
     } else {
@@ -636,7 +636,7 @@ void func_8004F7F4(GameObject *obj, Monster *m1, Monster *m2, GameObject *cur) {
     def->pos_y.s.hi = cur->pos_y.s.hi;
     D_800AA284 = def;
     o = func_8001DCB4();
-    o->unk_70 = 0x743;
+    o->kind = 0x743;
     m2->unk_0DC = 0;
     m1->unk_0DC = 0;
     o->unk_94.monster = m1;

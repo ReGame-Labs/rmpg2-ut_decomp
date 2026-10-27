@@ -57,13 +57,13 @@ void func_8005D20C(Monster *e) {
     s->pos_x.s.hi = x2;
     s->pos_y.s.hi = 0x18;
     s->unk_80 = 0x501;
-    s->unk_70 = e->id + 0x790;
+    s->kind = e->id + 0x790;
     e->unk_070 = s;
     s = func_8001EB9C(0, 0, 0, 2, 0xFF00FF);
     s->pos_x.s.hi = x2;
     s->pos_y.s.hi = 0x22;
     s->unk_80 = 0x501;
-    s->unk_70 = e->id + 0x790;
+    s->kind = e->id + 0x790;
     e->unk_06C = s;
     func_8001D110()->id = 0x4F000992;
     s = func_8001DCB4();
@@ -71,7 +71,7 @@ void func_8005D20C(Monster *e) {
     s->pos_y.s.hi = 0x1D;
     s->unk_80 = 0x500;
     s->unk_6C |= 0x20;
-    s->unk_70 = e->id + 0x790;
+    s->kind = e->id + 0x790;
     D_800AA248.cur_obj = saved;
 }
 
@@ -298,7 +298,7 @@ void func_800603FC(s32 *id, s32 dx, s32 dy, s32 x, s32 y) {
         hit = NULL;
         if (s != head) {
             do {
-            if (s->unk_70 == *id) {
+            if (s->kind == *id) {
                 c = s->colour;
                 ny = s->pos_y.s.hi + dy;
                 s->pos_y.s.hi = ny;
@@ -338,7 +338,7 @@ void func_80060A7C(s32 id, u32 color, s32 mode) {
     s = head->next;
     if (s != head) {
         do {
-            if (s->unk_70 == id) {
+            if (s->kind == id) {
                 if (mode & 1) {
                     s->colour = color;
                     if (color != 0x808080) {

@@ -40,7 +40,6 @@ s32 cdload_load_bank(s32, s32, s32, s32, s32, s32, s32);
 extern s32 D_801FB4AC;
 extern u8 *D_801FB4B0;
 extern s32 D_801FB4B4;
-extern u8 *D_801E1C78;
 
 /* The SPU upload's two sector buffers. */
 extern u8 D_801C41C0[0x800];
@@ -70,7 +69,6 @@ extern CdlFILTER D_801FB4BC;
 extern s32 D_8008A334[];        /* per XA track: its length (D_801E2A48 while it plays) */
 extern s32 D_801E2A48;
 extern s32 D_801E28EC;
-extern s16 D_801E1CB4;
 extern s32 D_801E0D48;
 extern s32 D_801F991C;
 extern s32 D_801FB4C0;

@@ -474,7 +474,7 @@ void func_80034E48(Npc *npc) {
         spawned = func_8001DCB4();
         *slot = spawned;
         spawned->flags = mover->flags;
-        spawned->unk_70 = 0x71A;
+        spawned->kind = 0x71A;
         spawned->unk_68.w = (i << 16) | kind;
         step = 0x68;
         if (npc->unk_6 == 0x17) {
@@ -1052,7 +1052,7 @@ void func_80036440(Npc *npc, s32 depth) {
     s32 d;
 
     mover = func_8001EB9C(0, 0, 0, 0, 0xFFFFFF);
-    mover->unk_40 = -0x3E7;
+    mover->unk_40.w = -0x3E7;
     d = depth - 1;
     mover->unk_80 = d;
     mover->flags = (mover->flags & ~0x20) | 0x400;

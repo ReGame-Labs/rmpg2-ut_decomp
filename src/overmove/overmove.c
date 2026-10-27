@@ -17,8 +17,6 @@ void func_80019ADC(s32 arg0);
 void func_80063DF8(s32 volume);
 void func_80063E48(s32 arg0, s32 volume);
 extern s32 D_801FA9A4;
-extern s16 D_801E1CB4;          /* the music volume */
-extern u8 *D_801E1C78;          /* the file read buffer */
 extern u32 D_801E0D7C;          /* the buttons pressed */
 extern s32 D_801FCEC0;          /* libcd's StCdIntrFlag */
 

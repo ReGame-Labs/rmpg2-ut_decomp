@@ -92,45 +92,4 @@ typedef struct Glyph {
     s16 unk_6;
 } Glyph;
 
-/* The text printer's state at 0x801D8588 (func_8001EDE4 ... func_8001F61C): the string at unk_1C, the pen at
- * unk_C/unk_E, the glyph table at unk_14, the flags at unk_24. */
-typedef struct TextState {
-    s32 unk_0;
-    void (*unk_4)(void);
-    s32 unk_8;
-    u16 unk_C;
-    u16 unk_E;
-    s32 unk_10;
-    s32 *unk_14;
-    s32 unk_18;
-    u8 *unk_1C;
-    u16 unk_20;
-    u16 unk_22;
-    s32 unk_24;
-    u16 unk_28;
-    u16 unk_2A;
-    s16 unk_2C;
-    s16 unk_2E;
-    s16 unk_30;
-    u16 unk_32;
-    u16 unk_34;
-    u16 unk_36;
-    s16 unk_38;
-    u8 unk_3A;
-    u8 pad_3B;
-    s32 unk_3C;
-} TextState;
-
-/* A text message record as func_8001F39C loads it into the printer: the string follows at 0x18. */
-typedef struct TextMessage {
-    s32 *unk_0;
-    s32 unk_4;
-    u16 unk_8;
-    u16 unk_A;
-    s32 unk_C;
-    void (*unk_10)(void);
-    s32 unk_14;
-    u8 unk_18[1];
-} TextMessage;
-
 #endif /* GAME_8001781C_H */

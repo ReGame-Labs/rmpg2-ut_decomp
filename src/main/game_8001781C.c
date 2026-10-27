@@ -34,7 +34,6 @@ extern u8 D_80083654[];
 extern TextMessage D_800895A8;
 extern TextMessage D_800897FC;
 extern s16 D_800AA2C2;
-extern TextState D_801D8588;
 extern u32 D_801D8868[];
 extern u8 D_801FAF7C[];
 extern s16 D_800AA2D4;
@@ -639,12 +638,12 @@ void func_800180E4(void) {
     request->unk_06 |= 0x20;
     sprite = func_8001DCB4(kind);
     D_801D373C = sprite;
-    sprite->unk_70 = 0x550;
+    sprite->kind = 0x550;
     func_8001F61C(D_800105A8, 0xB9, 0xD6, 1, 0x46, D_8007AD4C, 1, 0x550);
     sprite = D_801E28C0.next;
     if (sprite != &D_801E28C0) {
         do {
-            if (sprite->unk_70 == 0x550) {
+            if (sprite->kind == 0x550) {
                 sprite->colour = 0x808080;
             }
             sprite = sprite->next;
@@ -1836,7 +1835,7 @@ void func_8001E450(s32 kind) {
     sprite = head->next;
     do {
         next = sprite->next;
-        if (sprite->unk_70 == (u16) kind) {
+        if (sprite->kind == (u16) kind) {
             func_8001E4B0(sprite);
         }
         sprite = next;
@@ -1939,7 +1938,7 @@ void func_8001E700(GameObject *sprite) {
     sprite->unk_6C |= 0x4000;
     head = D_801D8584;
     D_801D8584 = sprite;
-    sprite->unk_40 = head;
+    sprite->unk_40.obj = head;
 }
 
 void func_8001E758(void) {
@@ -1965,18 +1964,18 @@ void func_8001E7C8(GameObject *arg0) {
     func_80020AF4(arg0);
     next = D_801D8584;
     if (arg0 == next) {
-        next = arg0->unk_40;
+        next = arg0->unk_40.obj;
         D_801D8584 = next;
         return;
     }
     do {
         p = next;
-        next = p->unk_40;
+        next = p->unk_40.obj;
         if (next == NULL) {
             func_8001B5E8(0x11);
         }
     } while (next != arg0);
-    p->unk_40 = arg0->unk_40;
+    p->unk_40.obj = arg0->unk_40.obj;
 }
 
 void func_8001E878(void) {
@@ -2091,7 +2090,7 @@ void func_8001EC74(s32 kind, s16 value) {
     sprite = head->next;
     if (sprite != head) {
         do {
-            if (sprite->unk_70 == kind) {
+            if (sprite->kind == kind) {
                 sprite->unk_74 = value;
             }
             sprite = sprite->next;
@@ -2122,21 +2121,21 @@ void func_8001EDB0(void) {
 
 void func_8001EDE4(void) {
     D_801D8588.unk_20 = 0x8002;
-    D_801D8588.unk_24 = 0x10001;
+    D_801D8588.flags = 0x10001;
     D_801D8588.unk_28 = 0x8101;
     func_8001EEA0();
 }
 
 void func_8001EE24(void) {
     D_801D8588.unk_20 = 0x8002;
-    D_801D8588.unk_24 = 0x10000;
+    D_801D8588.flags = 0x10000;
     D_801D8588.unk_28 = 0x8101;
     func_8001EEA0();
 }
 
 void func_8001EE60(void) {
     D_801D8588.unk_20 = 0x8002;
-    D_801D8588.unk_24 = 0x10002;
+    D_801D8588.flags = 0x10002;
     D_801D8588.unk_28 = 0x8101;
     func_8001EEA0();
 }
@@ -2150,8 +2149,8 @@ void func_8001F270(void) {
     u16 y;
 
     y = D_801D8588.unk_36 + D_801D8588.unk_32;
-    D_801D8588.unk_C = D_801D8588.unk_34;
-    D_801D8588.unk_E = y;
+    D_801D8588.pen_x = D_801D8588.unk_34;
+    D_801D8588.pen_y = y;
     D_801D8588.unk_36 = y;
     func_8001F464();
 }
@@ -2159,26 +2158,26 @@ void func_8001F270(void) {
 INCLUDE_ASM("asm/main/nonmatchings/game_8001781C", func_8001F2B0);
 
 void func_8001F358(void) {
-    sprintf(D_801FAF7C, D_801D8588.unk_1C);
-    D_801D8588.unk_1C = D_801FAF7C;
+    sprintf(D_801FAF7C, D_801D8588.text);
+    D_801D8588.text = D_801FAF7C;
 }
 
 void func_8001F39C(TextMessage *msg) {
-    D_801D8588.unk_0 = 0;
-    D_801D8588.unk_4 = msg->unk_10;
-    D_801D8588.unk_8 = msg->unk_C;
-    D_801D8588.unk_C = msg->unk_8;
-    D_801D8588.unk_E = msg->unk_A;
-    D_801D8588.unk_10 = msg->unk_4;
-    D_801D8588.unk_14 = msg->unk_0;
-    D_801D8588.unk_18 = msg->unk_14;
-    D_801D8588.unk_1C = msg->unk_18;
+    D_801D8588.unk_00 = 0;
+    D_801D8588.unk_04 = msg->layout;
+    D_801D8588.unk_08 = msg->unk_0C;
+    D_801D8588.pen_x = msg->x;
+    D_801D8588.pen_y = msg->y;
+    D_801D8588.unk_10 = msg->spacing;
+    D_801D8588.glyphs = msg->glyphs;
+    D_801D8588.unk_18 = msg->kind;
+    D_801D8588.text = msg->text;
 }
 
 void func_8001F400(void) {
     Glyph *glyph;
 
-    glyph = func_8001B128(D_801D8588.unk_14[0x27]);
+    glyph = func_8001B128(D_801D8588.glyphs[0x27]);
     D_801D8588.unk_30 = glyph->unk_4 >> 1;
     D_801D8588.unk_32 = glyph->unk_6 + (glyph->unk_6 >> 1);
 }
@@ -2187,18 +2186,18 @@ void func_8001F464(void) {
     s32 shift;
     s32 kind;
 
-    kind = D_801D8588.unk_24 & 3;
+    kind = D_801D8588.flags & 3;
     shift = 0;
     if (kind != 1) {
         if (kind != 0) {
             if (kind == 2) {
-                shift = func_8001F50C(D_801D8588.unk_1C);
+                shift = func_8001F50C(D_801D8588.text);
             }
         }
     } else {
-        shift = (s16) func_8001F50C(D_801D8588.unk_1C) >> 1;
+        shift = (s16) func_8001F50C(D_801D8588.text) >> 1;
     }
-    D_801D8588.unk_C -= shift;
+    D_801D8588.pen_x -= shift;
 }
 
 void func_8001F4EC(void) {
@@ -2217,7 +2216,7 @@ s32 func_8001F50C(u8 *text) {
     u8 *p;
     u8 c;
 
-    saved0 = D_801D8588.unk_0;
+    saved0 = D_801D8588.unk_00;
     saved30 = *(s32 *) &D_801D8588.unk_30;
     saved10 = D_801D8588.unk_10;
     p = text;
@@ -2225,41 +2224,41 @@ s32 func_8001F50C(u8 *text) {
     c = *p;
     width = 0;
     while (c != 0 && c != 13 && c != 10) {
-        if (D_801D8588.unk_24 & 0x2000) {
+        if (D_801D8588.flags & 0x2000) {
             width += (s16) D_801D8588.unk_10;
         } else {
             if (c == 0x20) {
                 width += D_801D8588.unk_30 + (s16) D_801D8588.unk_10;
             } else {
-                width += func_8001B128(D_801D8588.unk_14[*p - 0x21])->unk_4 + (s16) D_801D8588.unk_10;
+                width += func_8001B128(D_801D8588.glyphs[*p - 0x21])->unk_4 + (s16) D_801D8588.unk_10;
             }
         }
         p++;
         c = *p;
     }
-    D_801D8588.unk_0 = saved0;
+    D_801D8588.unk_00 = saved0;
     *(s32 *) &D_801D8588.unk_30 = saved30;
     D_801D8588.unk_10 = saved10;
     return width;
 }
 
 void func_8001F61C(u8 *text, s16 x, s16 y, s32 spacing, s32 arg4, s32 *glyphs, s32 kind, s32 arg7) {
-    D_801D8588.unk_0 = 0;
+    D_801D8588.unk_00 = 0;
     D_800AA2EC = arg4;
     if (kind == 0) {
-        D_801D8588.unk_4 = func_8001EDE4;
+        D_801D8588.unk_04 = func_8001EDE4;
     } else if (kind == 1) {
-        D_801D8588.unk_4 = func_8001EE24;
+        D_801D8588.unk_04 = func_8001EE24;
     } else {
-        D_801D8588.unk_4 = func_8001EE60;
+        D_801D8588.unk_04 = func_8001EE60;
     }
-    D_801D8588.unk_8 = arg4;
-    D_801D8588.unk_C = x;
-    D_801D8588.unk_E = y;
+    D_801D8588.unk_08 = arg4;
+    D_801D8588.pen_x = x;
+    D_801D8588.pen_y = y;
     D_801D8588.unk_10 = spacing;
-    D_801D8588.unk_14 = glyphs;
+    D_801D8588.glyphs = glyphs;
     D_801D8588.unk_18 = arg7;
-    D_801D8588.unk_1C = text;
+    D_801D8588.text = text;
     func_8001ED7C();
 }
 
@@ -2330,7 +2329,7 @@ INCLUDE_ASM("asm/main/nonmatchings/game_8001781C", func_8001F9DC);
 INCLUDE_ASM("asm/main/nonmatchings/game_8001781C", func_800205AC);
 
 void func_80020704(void) {
-    for (D_800AA248.cur_obj = D_801D8584; D_800AA248.cur_obj != NULL; D_800AA248.cur_obj = D_800AA248.cur_obj->unk_40) {
+    for (D_800AA248.cur_obj = D_801D8584; D_800AA248.cur_obj != NULL; D_800AA248.cur_obj = D_800AA248.cur_obj->unk_40.obj) {
         func_8002075C();
     }
 }
@@ -3507,13 +3506,13 @@ void func_80025124(Building *rec) {
         rec->unk_070 = item;
         if (def == &D_800135E8) {
             rec->unk_074 = sprite->pos_y.u.hi - 0x5C;
-            sprite->unk_70 = 0x72A;
+            sprite->kind = 0x72A;
             rec->unk_058 = 2;
             rec->unk_012 = 2;
             func_8002503C(rec, sprite);
         } else if (def == &D_8001687C) {
             rec->unk_074 = sprite->pos_y.u.hi - 0x3E;
-            sprite->unk_70 = 0x72A;
+            sprite->kind = 0x72A;
             rec->unk_058 = 3;
             rec->unk_012 = 0x7D;
         } else {

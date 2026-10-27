@@ -13,8 +13,8 @@ GameObject *func_80099138(OverattrPlacement *p) {
 
     D_800AA248.new_def = def = func_8001D110();
     def->id = p->id;
-    def->pos_x.v = p->x << 16;
-    def->pos_y.v = p->y << 16;
+    def->pos_x.w = p->x << 16;
+    def->pos_y.w = p->y << 16;
     def->flags = p->unk_0C;
     def->unk_06 |= 0x20;
     obj = func_8001DCB4();
@@ -43,19 +43,19 @@ INCLUDE_ASM("asm/overattr/nonmatchings/overattr_80099118", func_800996CC);
 void func_800999F8(u32 which) {
     switch (which) {
     case 0:
-        D_801E28F4.obj[8]->pos_y.v = 0x180000;
-        D_801E28F4.obj[9]->pos_y.v = 0x1180000;
-        D_801E28F4.obj[10]->pos_y.v = 0x1180000;
+        D_801E28F4.obj[8]->pos_y.w = 0x180000;
+        D_801E28F4.obj[9]->pos_y.w = 0x1180000;
+        D_801E28F4.obj[10]->pos_y.w = 0x1180000;
         break;
     case 1:
-        D_801E28F4.obj[8]->pos_y.v = 0x1180000;
-        D_801E28F4.obj[9]->pos_y.v = 0x190000;
-        D_801E28F4.obj[10]->pos_y.v = 0x1180000;
+        D_801E28F4.obj[8]->pos_y.w = 0x1180000;
+        D_801E28F4.obj[9]->pos_y.w = 0x190000;
+        D_801E28F4.obj[10]->pos_y.w = 0x1180000;
         break;
     case 2:
-        D_801E28F4.obj[8]->pos_y.v = 0x1180000;
-        D_801E28F4.obj[9]->pos_y.v = 0x1180000;
-        D_801E28F4.obj[10]->pos_y.v = 0x180000;
+        D_801E28F4.obj[8]->pos_y.w = 0x1180000;
+        D_801E28F4.obj[9]->pos_y.w = 0x1180000;
+        D_801E28F4.obj[10]->pos_y.w = 0x180000;
         break;
     }
 }

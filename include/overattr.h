@@ -3,71 +3,11 @@
 
 /* OVERLAYS/OVERATTR.BIN: the attract mode, the credits and the memory-card screens (src/overattr/overattr.c).
  *
- * The executable's records below declare only the fields this overlay uses, named after include/gameobject.h's
- * view; they will move to include/game.h with the other views of the same objects. */
+ * The executable's records are include/game.h's; this header declares the executable's functions and data the
+ * overlay uses, then the overlay's own. */
 
 #include "common.h"
-
-/* ---- the executable's records (to move to include/game.h) ---- */
-
-/* A sprite object of the level (gameobject.h GameObject; game_8001781C's Sprite), linked through `next` in the
- * sorted list whose sentinel head is D_801E28C0. */
-typedef union {
-    s32 v;
-    struct {
-        s16 frac;
-        s16 i;
-    } p;
-} Fixed16;
-
-typedef struct GameObject {
-    /* 0x00 */ struct GameObject *next;
-    /* 0x04 */ u8 unk_04[0x10];
-    /* 0x14 */ Fixed16 pos_x;
-    /* 0x18 */ Fixed16 pos_y;
-    /* 0x1C */ u8 unk_1C[0x06];
-    /* 0x22 */ u16 flags;              /* gameobject.h unk_20.f.flags */
-    /* 0x24 */ u8 unk_24[0x04];
-    /* 0x28 */ s32 unk_28;
-    /* 0x2C */ u8 unk_2C[0x14];
-    /* 0x40 */ s32 unk_40;
-    /* 0x44 */ u8 unk_44[0x04];
-    /* 0x48 */ void *unk_48;           /* gameobject.h unk_48 */
-    /* 0x4C */ u8 unk_4C;
-    /* 0x4D */ s8 unk_4D;
-    /* 0x4E */ u8 unk_4E[0x22];
-    /* 0x70 */ u16 kind;               /* the id func_8001E450/func_8001EC74 select objects by */
-    /* 0x72 */ u8 unk_72[0x02];
-    /* 0x74 */ u16 unk_74;
-    /* 0x76 */ u8 unk_76[0x02];
-    /* 0x78 */ u32 unk_78;             /* a colour, 0xBBGGRR (0x808080 normal); -1 left alone by the fades */
-    /* 0x7C */ u8 unk_7C[0x04];
-    /* 0x80 */ s16 unk_80;
-} GameObject;
-
-
-/* What func_8001D110 hands out to describe an object to create (gameobject.h ObjectDef). */
-typedef struct {
-    /* 0x00 */ s32 id;                 /* the sprite/animation id */
-    /* 0x04 */ u16 unk_04;
-    /* 0x06 */ u16 unk_06;             /* flags: 0x20 */
-    /* 0x08 */ u8 unk_08[0x08];
-    /* 0x10 */ Fixed16 pos_x;
-    /* 0x14 */ Fixed16 pos_y;
-    /* 0x18 */ u8 unk_18[0x08];
-    /* 0x20 */ s32 flags;
-} ObjectDef;
-
-/* The level state at D_800AA248 (gameobject.h GameState). */
-typedef struct {
-    /* 0x00 */ u8 unk_00[0x20];
-    /* 0x20 */ GameObject *cur_obj;    /* the object being updated (D_800AA268) */
-    /* 0x24 */ u8 unk_24[0x18];
-    /* 0x3C */ ObjectDef *new_def;     /* the object being created (D_800AA284) */
-} GameState;
-
-extern GameState D_800AA248;
-extern GameObject D_801E28C0;          /* the object list's sentinel head */
+#include "game.h"
 
 /* ---- the executable's functions and data ---- */
 
@@ -91,7 +31,6 @@ void func_8001E8C0(s32 kind, s32 arg1);
 void func_8001F61C(u8 *text, s16 x, s16 y, s32 spacing, s32 arg4, s32 *glyphs, s32 kind, s32 arg7); /* draws a text */
 
 extern s32 D_8007ABCC[];               /* a font's glyphs */
-extern s32 D_8007AD4C[];               /* another font */
 extern GameObject *D_801D373C[2];      /* the SELECT and BACK buttons */
 extern s16 D_801F9AAC;                 /* the printer's normal colour */
 
@@ -103,16 +42,13 @@ void func_80062DA8(s32 volume);
 extern s16 D_8007A684;                 /* the music test's track, 0..0x72 */
 extern s16 D_8007A686;                 /* options, 15..90 by 5 */
 extern s16 D_8007A688;                 /* options, 1..100 */
-extern u16 D_8007A68A;                 /* a toggle */
 extern u16 D_8007A68C;                 /* a toggle */
 extern s16 D_8007A68E;                 /* 0..2, selects D_800A6F3C */
 extern s16 D_8007A692;                 /* 0..0x1C */
 extern u16 D_8007A694;                 /* a toggle */
 extern u8 *D_8007C704[];               /* names, by index */
-extern s16 D_801E1CB4;                 /* a volume, 0..0x7F (func_80062DA8) */
 extern s16 D_801E2150;                 /* a volume, 0..0x7F (func_80062D88) */
 extern s16 D_801F9944;
-extern s16 D_801FA960;                 /* 0..0x7C */
 extern s16 D_801D3D7C;
 extern s16 D_801D885C;                 /* the lit menu item's value (func_8001EC74) */
 extern s16 D_801E2148;
@@ -120,34 +56,12 @@ extern s16 D_801E289C;
 extern s16 D_801FA984[3];              /* per player: playing */
 extern s16 D_8007C974;
 extern s16 D_8007A690;                 /* the number of players, 1..3 */
-extern s32 D_800AA2DC;
-extern u16 D_800AA2EC;                 /* the printer's colour */
-extern s32 D_801F9AC8;
-extern s32 D_801F9ACC;
 
-/* A text message as func_8001F39C loads it into the printer (game_8001781C.h TextMessage). */
-typedef struct {
-    /* 0x00 */ s32 *glyphs;            /* the font */
-    /* 0x04 */ s32 spacing;
-    /* 0x08 */ u16 x;
-    /* 0x0A */ u16 y;
-    /* 0x0C */ s32 unk_0C;
-    /* 0x10 */ void (*layout)(void);   /* func_8001EDE4: centred */
-    /* 0x14 */ s32 kind;               /* the kind of the objects that show it (func_8001E450 frees them) */
-    /* 0x18 */ u8 text[1];             /* as long as the message */
-} TextMessage;
 
 void func_8001ED54(TextMessage *msg);  /* loads and prints a message */
 void func_8001ECB4(u8 *dst, s16 value, s32 arg2); /* writes a number into a message's text */
 extern u16 D_801E2A44;                 /* the printer's colour for the item under the cursor */
 
-/* The text printer's state (game_8001781C.h TextState). */
-typedef struct {
-    /* 0x00 */ u8 unk_00[0x1C];
-    /* 0x1C */ u8 *text;
-} TextState;
-
-extern TextState D_801D8588;
 /* The screen's objects. */
 extern struct {
     GameObject *unk_00;
@@ -157,7 +71,6 @@ extern s16 D_801F9A4A;
 extern s16 D_801F9A4C;
 extern s16 D_801F9A4E;
 extern s16 D_801F9A50;
-extern s16 D_801F9ABC;
 extern s16 D_801F9ADC;
 extern s16 D_801FA88C;
 extern u16 D_801D3780;

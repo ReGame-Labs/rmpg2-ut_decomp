@@ -12,5 +12,6 @@
 extern CdlLOC D_80089820[];
 extern s32 D_80089DA0[];
 extern s32 D_80010000[];
+extern u8 *D_801E1C78;                  /* the file read buffer */
 
 #endif /* CDLOAD_H */
