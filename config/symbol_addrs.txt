@@ -382,3 +382,16 @@ cdload_read_file = 0x8006118C; // type:func  (index, buffer) CdlSetmode, CdlSetl
 cdload_city_file_index = 0x800615FC; // type:func  (which) the current city's .BIN (1) or .CMB file index
 cdload_load_overlay = 0x8006180C; // type:func  (n) 0 OVERATTR.BIN, 1 OVERMOVE.BIN, 2 none, copied to 0x80097EA4
 cdload_load_city_table = 0x800618F4; // type:func  (index) a city's .BIN table into the overlay region
+
+// game_80063A88: the SPU reverb attributes (an SpuReverbAttr)
+D_801FB530 = 0x801FB530; // size:0x14
+
+// game_8006BB14: the voice attributes (an SpuVoiceAttr), the queue of cut music notes, the sequence file's header
+D_801FDA98 = 0x801FDA98; // size:0x40
+D_801FDC70 = 0x801FDC70; // size:0x208
+D_801FDE78 = 0x801FDE78; // size:0x20
+
+// game_80076C8C: the command handler tables and the commands' lengths
+D_80087130 = 0x80087130; // size:0x28
+D_80087F00 = 0x80087F00; // size:0x90
+D_80088364 = 0x80088364; // size:0x24

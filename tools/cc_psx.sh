@@ -56,8 +56,10 @@ gcc="$T/gcc/$ver"
 # they resolve to the definitions in the data asm (a unit whose data is still asm) while maspsx still counts them as
 # defined in this file for $gp. --data-in-c drops it: the object then holds its .bss/.sbss itself, in definition
 # order. maspsx then makes a global's .sbss symbol local, so the globals (cc1's `.comm`, not `.lcomm`) get their
-# .globl back.
-"$T/venv/bin/python" "$T/ext/maspsx/maspsx.py" --aspsx-version="$aspsx" -G"$g" "${comm[@]}" \
+# .globl back. --expand-div: ASPSX expanded cc1's three-operand div/divu macros with the divide-by-zero check
+# (bnez/break 7, plus the -1/0x80000000 overflow check, break 6, for div): every division by a variable in the
+# executable has them.
+"$T/venv/bin/python" "$T/ext/maspsx/maspsx.py" --aspsx-version="$aspsx" -G"$g" --expand-div "${comm[@]}" \
     < "$out.s" > "$out.m.s"
 if [[ ${#comm[@]} -eq 0 ]]; then
     sed -n 's/^[[:space:]]*\.comm[[:space:]]\{1,\}\([A-Za-z_.$][A-Za-z0-9_.$]*\),.*/\t.globl\t\1/p' "$out.s" >> "$out.m.s"
