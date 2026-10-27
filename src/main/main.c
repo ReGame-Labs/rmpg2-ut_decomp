@@ -6041,7 +6041,7 @@ u16 main_check_bonus_round(void *arg0) {
     }
     if (D_800AA2DC != 0) {
         D_801D8728 = D_801D8740;
-        D_801FA964 = func_8005F208();
+        D_801FA964 = bonus_get_round_kind();
         D_801D3780 = 99;
         return 1;
     }
@@ -7854,7 +7854,7 @@ void func_80029D5C(s32 mode, s32 player) {
     dy = 0;
     bonus = 0;
     if (D_800AA2DC != 0) {
-        bonus = func_8005F208();
+        bonus = bonus_get_round_kind();
     }
     camx = D_801F9ACA;
     camy = D_801F9ACE;
