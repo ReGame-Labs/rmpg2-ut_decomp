@@ -20,7 +20,7 @@ extern s16 D_801CA464;
 extern s16 D_801D87C8;
 void func_80017758(void);
 extern u16 D_800AA2C8;
-void func_80017C04(void);
+void main_update_pressed(void);
 u16 func_8001828C(void);
 void func_8001B858(void);
 extern u32 D_801FA894;
@@ -101,7 +101,7 @@ void MemCardInit(s32);
 void MemCardStart(void);
 void cdload_load_overlay(s32);
 void func_800193B8(void);
-void func_80019764(void);
+void main_begin_frame(void);
 void func_80019890(void);
 void func_80019984(s32);
 void func_8001A1C8(void);
@@ -129,7 +129,7 @@ void func_8001F358(void);
 void func_8001F39C(TextMessage *);
 void func_8001F6B4(void);
 void func_8001F7F8(s32);
-void func_8001F848(void);
+void main_draw_lists(void);
 void func_8001F9DC(GameObject *head, GameObject *end);
 void func_800205AC(void);
 void func_80022EC0(Npc *npc);
@@ -140,8 +140,8 @@ void func_8002469C(s32 *, s16, s16);
 void func_80023CFC(Npc *npc);
 void func_800256CC(BuildingItem *);
 void *func_80025C08(void *);
-s32 func_80019B08(s32, s32, s16, s16);
-s32 func_80019DAC(s32, s32, s16, s16);
+s32 main_load_image_8bit(s32, s32, s16, s16);
+s32 main_load_image_4bit(s32, s32, s16, s16);
 extern s16 D_801D876C[];
 void func_80025E68(void);
 void func_8002A72C(void);
@@ -323,7 +323,7 @@ extern u8 D_800B09C0[];
 extern u16 D_8007C1D4[];
 extern u16 D_8007BA20[];
 extern u16 D_801E289A;
-s32 func_8001A870(s32, u8 *);
+s32 main_load_cluts(s32, u8 *);
 s32 cdload_file_size(s32);
 s32 cdload_read_file(s32, u8 *);
 extern s32 D_801D3D9C[];
@@ -439,7 +439,7 @@ void func_800232D8(Npc *);
 extern u8 D_8007B080[];
 void func_80063270(void);
 void func_8003DAA0(Ai *);
-void func_8002075C(void);
+void main_step_anim(void);
 extern u16 *D_8007A7C0[];
 extern u8 D_801E2154[];
 extern u16 D_801FB188;
@@ -522,7 +522,7 @@ restart:
         func_80018CD0();
         if (D_800AA2C8 == 0) {
             D_800AA2C8++;
-            func_80017C04();
+            main_update_pressed();
             if (D_801F9A34 > 0) {
                 D_801F9A34--;
             }
@@ -622,7 +622,7 @@ void func_80017B98(void) {
     D_800AA2E0 += 1;
 }
 
-void func_80017C04(void) {
+void main_update_pressed(void) {
     u32 pressed;
     u32 cur;
     u32 prev;
@@ -820,7 +820,7 @@ void func_80018CB0(void) {
 }
 
 void func_80018CD0(void) {
-    func_80019764();
+    main_begin_frame();
 }
 
 void func_80018CF0(void) {
@@ -893,7 +893,7 @@ u16 *func_800192A0(void) {
 
 INCLUDE_ASM("asm/main/nonmatchings/main", func_800193B8);
 
-void func_80019764(void) {
+void main_begin_frame(void) {
     D_801FAC80 = (D_801FAC80 == &D_801CA474[0]) ? &D_801CA474[1] : &D_801CA474[0];
     ClearOTagR(D_801FAC80->ot, 4);
     D_801FAC80->next_prim = D_801FAC80->prims;
@@ -976,7 +976,7 @@ void func_80019ADC(s32 arg0) {
     memset(D_801E1C78, 0, 0x10000);
 }
 
-s32 func_80019B08(s32 pixels, s32 w, s16 h, s16 slot) {
+s32 main_load_image_8bit(s32 pixels, s32 w, s16 h, s16 slot) {
     Unk1C542C *e;
     RECT rect;
     s32 cols;
@@ -1043,8 +1043,8 @@ s32 func_80019B08(s32 pixels, s32 w, s16 h, s16 slot) {
 #ifdef NON_MATCHING
 /* 98.46%: 98.5 %: the original computes the halved width into a1 and copies it into s7, so it extends (s16) width
  * again for rect.w; here GCC knows the value is extended and drops the shifts (two instructions). The 8-bit version
- * of func_80019B08: half-width 128-pixel tpages, two per page */
-s32 func_80019DAC(s32 pixels, s32 w, s16 h, s16 slot) {
+ * of main_load_image_8bit: half-width 128-pixel tpages, two per page */
+s32 main_load_image_4bit(s32 pixels, s32 w, s16 h, s16 slot) {
     Unk1C542C *e;
     RECT rect;
     s32 width;
@@ -1112,7 +1112,7 @@ s32 func_80019DAC(s32 pixels, s32 w, s16 h, s16 slot) {
     return -1;
 }
 #else
-INCLUDE_ASM("asm/main/nonmatchings/main", func_80019DAC);
+INCLUDE_ASM("asm/main/nonmatchings/main", main_load_image_4bit);
 #endif
 
 s32 func_8001A0A0(void) {
@@ -1325,9 +1325,9 @@ SpriteFrame *func_8001A554(s32 id, GameObject *obj) {
             if (!(flags & 0x80)) {
                 obj->unk_6C = (flags & 0xFFF7) | 0x400;
                 if (frame->unk_00 & 0x20000000) {
-                    obj->unk_24 = (D_801F9AE4 + (obj->unk_6E = func_8001B3C4(frame, D_801FA738[b].unk_0, 1)))->unk_0.w | 0x20000000;
+                    obj->unk_24 = (D_801F9AE4 + (obj->unk_6E = main_alloc_vram_slot(frame, D_801FA738[b].unk_0, 1)))->unk_0.w | 0x20000000;
                 } else {
-                    obj->unk_24 = (D_801F9AE4 + (obj->unk_6E = func_8001B3C4(frame, D_801FA738[b].unk_0, 0)))->unk_0.w;
+                    obj->unk_24 = (D_801F9AE4 + (obj->unk_6E = main_alloc_vram_slot(frame, D_801FA738[b].unk_0, 0)))->unk_0.w;
                 }
             }
         }
@@ -1367,7 +1367,7 @@ u16 func_8001A848(s32 index, s32 id) {
 /* Loads a bank's CLUTs into VRAM at (D_800AA944, D_800AA948) and appends their ids to D_801C51D4, the bank's first
  * one at D_800AFB54[bank]. The data: a word offset to a header (its size at +4), then runs of a count and the
  * colours; every colour after a run's first gets the transparency bit. */
-s32 func_8001A870(s32 bank, u8 *data) {
+s32 main_load_cluts(s32 bank, u8 *data) {
     u16 *slot;
     u16 buf[256];
     RECT rect;
@@ -1442,7 +1442,7 @@ s32 func_8001AA4C(s32 arg0, s32 arg1) {
     if (cdload_read_file(file, D_801F9948) == 0) {
         return 0;
     }
-    func_8001A870(bank, D_801F9948);
+    main_load_cluts(bank, D_801F9948);
     D_801F9948 += 4;
     func_8001A514(bank, file, (s32) D_801F9948);
     func_8001B0D8((s32 *) (D_801F9948 + *(s32 *) D_801F9948), 0);
@@ -1490,7 +1490,7 @@ s32 func_8001AC18(s32 arg0, s32 arg1) {
         if (cdload_read_file(file, D_801F9948) == 0) {
             return 0;
         }
-        func_8001A870(bank, D_801F9948);
+        main_load_cluts(bank, D_801F9948);
         base = D_801F9948;
         data = base + 4;
         func_8001A514(bank, file, (s32) data);
@@ -1512,7 +1512,7 @@ void func_8001AD1C(Unk1AD1C *bank, s32 addr, s16 id) {
     i = 0;
     if (bank->unk_4 != 0) {
         do {
-            slot = func_80019B08(addr, 0x100, 0x100, id);
+            slot = main_load_image_8bit(addr, 0x100, 0x100, id);
             if (slot == -1) {
                 func_8001B5E8(5);
             }
@@ -1525,7 +1525,7 @@ void func_8001AD1C(Unk1AD1C *bank, s32 addr, s16 id) {
     i = 0;
     if (bank->unk_8 != 0) {
         do {
-            slot = func_80019DAC(addr, 0x100, 0x100, id);
+            slot = main_load_image_4bit(addr, 0x100, 0x100, id);
             if (slot == -1) {
                 func_8001B5E8(6);
             }
@@ -1536,7 +1536,7 @@ void func_8001AD1C(Unk1AD1C *bank, s32 addr, s16 id) {
     }
 }
 
-u16 func_8001AE70(GameObject *obj, u16 mode) {
+u16 main_get_tpage(GameObject *obj, u16 mode) {
     Unk1F9AE4 *rec;
     u32 word;
     u16 id;
@@ -1608,7 +1608,7 @@ Glyph *func_8001B128(u32 arg0) {
     return (Glyph *) (D_801FA738[(arg0 >> 24) & 0x3F].unk_0 + (D_801D8868[index] & 0x7FFFFFFF));
 }
 
-s32 func_8001B178(void) {
+s32 main_load_font(void) {
     RECT rect;
     u8 *data;
     u8 *pixels;
@@ -1619,7 +1619,7 @@ s32 func_8001B178(void) {
     if (cdload_read_file(0x19, D_800B09C0) == 0) {
         return 0;
     }
-    func_8001A870(0xF, D_800B09C0);
+    main_load_cluts(0xF, D_800B09C0);
     data = D_800B09C0 + 4;
     func_8001A514(0xF, 0x19, (s32) data);
     rect.w = 0x40;
@@ -1668,7 +1668,7 @@ void func_8001B350(s32 index) {
     }
 }
 
-s32 func_8001B3C4(SpriteFrame *frame, s32 base, u16 mode) {
+s32 main_alloc_vram_slot(SpriteFrame *frame, s32 base, u16 mode) {
     Unk1F9AE4 *rec;
     Unk1C542C *slot;
     s32 i;
@@ -1705,9 +1705,9 @@ s32 func_8001B3C4(SpriteFrame *frame, s32 base, u16 mode) {
     D_801FA974 -= size;
     cdload_unpack((u8 *) D_801FA974, 0, (u8 *) (frame->unk_00 + base), 0);
     if (mode == 1) {
-        func_80019DAC(D_801FA974, frame->size.s.lo, frame->size.s.hi, rec->unk_C);
+        main_load_image_4bit(D_801FA974, frame->size.s.lo, frame->size.s.hi, rec->unk_C);
     } else {
-        func_80019B08(D_801FA974, frame->size.s.lo, frame->size.s.hi, rec->unk_C);
+        main_load_image_8bit(D_801FA974, frame->size.s.lo, frame->size.s.hi, rec->unk_C);
     }
     used = D_801E299C - D_801FA974;
     if (D_8007A710 < used) {
@@ -2328,7 +2328,7 @@ void func_8001D8E8(void) {
         D_801D8744 = 0;
         temp_s0 = func_8001D950();
         D_801E29B4 = temp_s0 + func_8001D974();
-        func_8001F848();
+        main_draw_lists();
     }
 }
 
@@ -2465,7 +2465,7 @@ void main_sort_objects(void) {
     }
 }
 
-void func_8001E010(void) {
+void main_resort_objects(void) {
     GameObject *head;
     GameObject *sprite;
     GameObject *next;
@@ -3160,7 +3160,7 @@ void func_8001F7F8(s32 id) {
     }
 }
 
-void func_8001F848(void) {
+void main_draw_lists(void) {
     s32 bottom;
 
     bottom = 0x91;
@@ -3245,11 +3245,103 @@ INCLUDE_ASM("asm/main/nonmatchings/main", func_800205AC);
 
 void func_80020704(void) {
     for (D_800AA248.cur_obj = D_801D8584; D_800AA248.cur_obj != NULL; D_800AA248.cur_obj = D_800AA248.cur_obj->unk_40.obj) {
-        func_8002075C();
+        main_step_anim();
     }
 }
 
-INCLUDE_ASM("asm/main/nonmatchings/main", func_8002075C);
+/* One step of the current object's animation script. A command's first word is a frame reference: an id, or the
+ * frame's address (negative as an s32, see func_8001A554); odd for none. */
+void main_step_anim(void) {
+    s32 *p;
+    s32 cmd;
+    s32 flags;
+    s32 set;
+    SpriteFrame *frame;
+    GameObject *obj;
+    Fixed off;
+    Fixed pos;
+    Fixed o;
+
+    D_800AA248.unk_18 = D_800AA248.cur_obj->frames_left - D_800AA248.unk_10;
+    if (D_800AA248.unk_18 <= 0) {
+        D_800AA248.cur_obj->unk_64.w++;
+        p = (s32 *) func_8001B660(D_800AA248.cur_obj->script.pc);
+        frame = (SpriteFrame *) *p++;
+        if (frame == NULL) {
+            p = (s32 *) func_8001B660(D_800AA248.cur_obj->anim);
+            frame = (SpriteFrame *) *p++;
+        }
+        D_800AA248.unk_10 = D_800AA248.cur_obj->unk_6C;
+        D_800AA248.unk_1C.flags = flags = D_800AA248.cur_obj->flags;
+        D_800AA248.unk_18 = cmd = *(u16 *) p;
+        if (cmd & 0x8000) {
+            set = ((u16 *) p)[1];
+            D_800AA248.unk_38 = set ^ flags;
+            D_800AA248.action = set;
+            D_800AA248.unk_1C.flags = (flags & 0xFFEF) | set;
+        }
+        p++;
+        if (cmd & 0x1000) {
+            D_800AA248.unk_38 = *p++;
+            *D_800AA248.unk_28.p = D_800AA248.unk_38;
+            *++D_800AA248.unk_28.p = (s32) D_800AA248.cur_obj;
+            D_800AA248.unk_28.p++;
+            D_800AA248.unk_38 &= 0x70000003;
+            if (D_800AA248.unk_38 != 0) {
+                D_800AA248.cur_obj->arg.p = p;
+                p += (u32) (D_800AA248.unk_38 + 1) >> 1;
+            }
+        }
+        if (!((s32) frame & 1)) {
+            frame = func_8001A554((s32) frame, D_800AA248.cur_obj);
+            D_800AA248.cur_obj->frame = frame;
+            D_800AA248.unk_08 = D_800AA248.unk_2C & D_800AA248.unk_1C.flags;
+            if (D_800AA248.unk_10 & 0x8000) {
+                D_800AA248.unk_38 = D_800AA248.cur_obj->flags;
+                D_800AA248.cur_obj->flags = D_800AA248.unk_08;
+                D_800AA248.cur_obj->unk_2C.w = frame->size.w;
+                D_800AA248.cur_obj->size.w = frame->size.w;
+                obj = D_800AA248.cur_obj;
+                off.w = obj->unk_7C;
+                if (D_800AA248.unk_38 & 0x10) {
+                    off.s.lo = -off.s.lo;
+                }
+                if (D_800AA248.unk_38 & 0x20) {
+                    off.s.hi = -off.s.hi;
+                }
+                pos = obj->unk_28;
+                pos.s.lo += off.s.lo;
+                pos.s.hi += off.s.hi;
+                o = frame->origin;
+                if (D_800AA248.unk_08 & 0x10) {
+                    o.s.lo = -o.s.lo;
+                }
+                if (D_800AA248.unk_08 & 0x20) {
+                    o.s.hi = -o.s.hi;
+                }
+                pos.s.lo -= o.s.lo;
+                pos.s.hi -= o.s.hi;
+                obj->unk_28 = pos;
+                D_800AA248.cur_obj->pos_x.s.hi = pos.s.lo;
+                D_800AA248.cur_obj->pos_y.s.hi = pos.s.hi;
+            } else {
+                D_800AA248.cur_obj->flags = D_800AA248.unk_08;
+                D_800AA248.cur_obj->unk_2C.w = frame->size.w;
+            }
+            D_800AA248.cur_obj->unk_7C = frame->origin.w;
+            D_800AA248.cur_obj->unk_1C.w = frame->origin.w;
+        }
+        if (p != NULL) {
+            D_800AA268.p->script.pc = (s32) p;
+        }
+        D_800AA248.unk_18 &= 0xFFF;
+        if (D_800AA248.unk_18 == 0) {
+            D_800AA248.unk_18 = D_800AA248.cur_obj->unk_4C;
+        }
+        D_800AA248.unk_10 = (s16) D_801F9950;
+    }
+    D_800AA248.cur_obj->frames_left = D_800AA248.unk_18;
+}
 
 void func_80020AF4(s32 id) {
     s32 *p;

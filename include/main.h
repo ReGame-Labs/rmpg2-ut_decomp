@@ -116,12 +116,12 @@ extern s32 D_801F991C;
 extern s32 D_8007A71C;                  /* the music to restart after the XA track */
 void cdload_stop_xa(s32 mode);
 void func_80063744(void);
-s32 func_8001B3C4(SpriteFrame *frame, s32 base, u16 mode);
+s32 main_alloc_vram_slot(SpriteFrame *frame, s32 base, u16 mode);
 unsigned short GetTPage(int tp, int abr, int x, int y);
 s32 cdload_unpack(u8 *dst, s32 arg1, u8 *src, s32 arg3);   /* cdload.c reads three; the callers here pass a fourth */
 extern s32 D_8007A710;                  /* the most of the unpack buffer ever used */
 extern u16 D_800AFB54[];                /* per bank: its first CLUT's index in D_801C51D4 */
-extern u16 D_801C51D4[];                /* the CLUT ids func_8001A870 loaded */
+extern u16 D_801C51D4[];                /* the CLUT ids main_load_cluts loaded */
 extern u16 D_801D370C;
 extern u16 D_801FA730;                  /* the calls func_800205AC ran this frame */
 extern s32 D_801F9A2C;

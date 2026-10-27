@@ -128,7 +128,7 @@ typedef struct GameObject {
     /* 0x76 */ u8 unk_76[0x02];
     /* 0x78 */ u32 colour;              /* 0x808080: neutral */
     /* 0x7C */ s32 unk_7C;
-    /* 0x80 */ u16 priority;            /* the draw order: the list is kept sorted by it, highest first (func_8001E010) */
+    /* 0x80 */ u16 priority;            /* the draw order: the list is kept sorted by it, highest first (main_resort_objects) */
     /* 0x82 */ u16 unk_82;
     /* 0x84 */ s32 unk_84;              /* a horizontal acceleration, 16.16 */
     /* 0x88 */ s32 unk_88;
@@ -374,14 +374,14 @@ typedef struct GameState {
     /* 0x1C */ union {
                    ObjectDef *def;
                    s32 n;                   /* a count (main_count_monsters) */
-                   s32 flags;               /* the object's flags while its script runs (func_8002075C) */
+                   s32 flags;               /* the object's flags while its script runs (main_step_anim) */
                } unk_1C;
     /* 0x20 */ GameObject *cur_obj;            /* the object being updated (D_800AA268) */
     /* 0x24 */ s32 dir;                        /* a monster's direction, copied before its handlers run (D_800AA26C);
                                                 * scratch: main_count_monsters's count */
     /* 0x28 */ union {
                    s32 n;                   /* a counter (func_8003C3B0: the items left in the building) */
-                   s32 *p;                  /* a write pointer into a word list (func_8002075C) */
+                   s32 *p;                  /* a write pointer into a word list (main_step_anim) */
                } unk_28;
     /* 0x2C */ s32 unk_2C;
     /* 0x30 */ s32 *unk_30;
