@@ -1454,13 +1454,13 @@ void func_80054608(u16 kind, Monster *e, Building *u) {
 }
 
 #ifdef NON_MATCHING
-/* 89 %: the count is loaded into its own register at once, and i steps as ++i != n (addiu/move/andi) in the original */
+/* 80.6 %: the original tests the count signed (lh) and loads it again unsigned (lhu) into its own register, and i steps as ++i != n (addiu/move/andi) */
 Building *func_80054728(u16 n) {
     Building *city;
     u16 i;
     u16 count;
 
-    if (n == 0 || D_801E29A4 == 0) {
+    if (n == 0 || (s16) D_801E29A4 == 0) {
         return NULL;
     }
     count = D_801E29A4;
@@ -1883,7 +1883,7 @@ void func_80055970(Monster *e, Building *city) {
         kind = city->unk_008;
         start = city;
         if (city == D_801D3DC8) {
-            city = &D_801D3DC8[D_801E29A4 - 1];
+            city = &D_801D3DC8[(s16) D_801E29A4 - 1];
         } else {
             city--;
         }
@@ -1927,7 +1927,7 @@ void func_80055B68(Monster *e, Building *city) {
     u16 kind;
 
     kind = city->unk_008;
-    if (city == &D_801D3DC8[D_801E29A4 - 1]) {
+    if (city == &D_801D3DC8[(s16) D_801E29A4 - 1]) {
         city = D_801D3DC8;
     } else {
         city++;
@@ -2167,6 +2167,7 @@ void func_800567E8(Monster *e, Building *city) {
 u16 func_80056840(Monster *e) {
     Building *city;
     s32 d;
+    s16 n;
 
     D_800AA248.unk_0C = e->unk_0F4;
     D_800AA248.unk_10 = D_800AA248.cur_obj->pos_y.w;
@@ -2175,8 +2176,9 @@ u16 func_80056840(Monster *e) {
         return 0;
     }
     D_800AA248.unk_10 = D_800AA248.cur_obj->pos_y.s.hi;
-    D_800AA248.unk_40 = D_801E29A4;
-    if (D_801E29A4 == 0) {
+    n = D_801E29A4;
+    D_800AA248.unk_40 = n;
+    if (n == 0) {
         return 0;
     }
     D_800AA248.unk_04 = 0;
@@ -2243,6 +2245,7 @@ u16 func_80056A44(Monster *e, Building *city) {
 u16 func_80056AC8(Monster *e) {
     Building *city;
     s32 d;
+    s16 n;
 
     D_800AA248.unk_0C = e->unk_0F4;
     D_800AA248.unk_10 = D_800AA248.cur_obj->pos_y.w;
@@ -2251,8 +2254,9 @@ u16 func_80056AC8(Monster *e) {
         return 0;
     }
     D_800AA248.unk_10 = D_800AA248.cur_obj->pos_y.s.hi;
-    D_800AA248.unk_40 = D_801E29A4;
-    if (D_801E29A4 == 0) {
+    n = D_801E29A4;
+    D_800AA248.unk_40 = n;
+    if (n == 0) {
         return 0;
     }
     D_800AA248.unk_04 = 0;

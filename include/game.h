@@ -534,7 +534,7 @@ typedef struct Building {
 } Building;                             /* 0x584 bytes */
 
 extern Building D_801D3DC8[];
-extern s16 D_801E29A4;
+extern u16 D_801E29A4;
 
 /* Level-wide flags and per-player counters at D_8007BD78 (.data of game_8001781C; cleared as 0x94 bytes). */
 typedef struct LevelFlags {
