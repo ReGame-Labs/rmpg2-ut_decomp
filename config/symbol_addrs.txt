@@ -417,6 +417,7 @@ StartCARD2 = 0x8007A674; // type:func
 
 // building (src/main/building.c), the buildings, the sky, the monsters' setup
 building_set_sky_colours = 0x8002A4E8; // type:func  () the sky gradient's colours from D_8007CAFC, when D_8007CD40 gives the level one
+building_update_sky_colours = 0x8002A72C; // type:func  () the day's clock D_801FB198 (seconds, D_8007C974 counts the days), the sky colours blended between its four keyframes (D_8007C97C, D_8007CA3C in rain or snow)
 building_update_sky = 0x8002AF28; // type:func  () 80 cloud strips, the thunder, then 40 snow flakes or 80 rain drops
 building_update_cloud = 0x8002B0E0; // type:func  (i) cloud strip i, made, moved, its four frames at the bottom
 building_update_raindrop = 0x8002B3AC; // type:func  (i) rain drop i, made, falling, its splash at the bottom
@@ -443,6 +444,10 @@ pickup_collect = 0x8003BAB0; // type:func  (m) hands every pickup the monster to
 pickup_hide_items = 0x8003C3B0; // type:func  () hides up to 28 items of the spawn list D_800830AC (random start) in the building parts func_8003C67C picks, records D_801D3824
 
 // npc (src/main/npc.c), the per-kind handlers of the pickups (D_801FA9BC) and of the non-player characters (D_801FAC9C)
+npc_create_searchlight = 0x80036440; // type:func  (npc, depth) kinds 0x11, 0x12 the quad box (unk_70) and the spot object (unk_74)
+npc_place_searchlight = 0x80036504; // type:func  (box, obj, spot) at night a beam from the frame's point (D_8007D5F0 by frame id) to the ground, its foot easing after the object
+npc_update_searchlight = 0x80036818; // type:func  (npc)
+npc_pick_target = 0x800377B4; // type:func  (npc) the next live player (unk_04), or every other call the next one near the best score (unk_56), into unk_10
 npc_create_throw = 0x80039358; // type:func  (m, kind 1..3, throw kind, t) a falling throw from the frame's third point, speeds D_8007DAC8
 npc_update_throw = 0x8003956C; // type:func  (t) falls with Throw.unk_0C and hits the monsters
 npc_update_aim = 0x80039EC4; // type:func  (npc) when the countdown ends, the slope to the nearest player picks the aim 0..2 (unk_24) and a new aim starts D_8007DB04[old * 3 + new]

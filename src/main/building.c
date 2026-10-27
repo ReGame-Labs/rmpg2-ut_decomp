@@ -112,7 +112,7 @@ extern s32 D_8007C97C[4][12];
 extern s32 D_8007CA3C[4][12];
 void func_8002AC34(GameObject *obj);
 
-void func_8002A72C(void) {
+void building_update_sky_colours(void) {
     s32 (*keys)[12];
     s32 *from;
     s32 *to;
@@ -192,7 +192,7 @@ void func_8002A72C(void) {
     func_8002AC34(D_801FB194);
 }
 #else
-INCLUDE_ASM("asm/main/nonmatchings/building", func_8002A72C);
+INCLUDE_ASM("asm/main/nonmatchings/building", building_update_sky_colours);
 #endif
 
 void func_8002AC34(GameObject *obj) {
@@ -3598,9 +3598,6 @@ void func_800315D8(void) {
     D_801F9AB0 = *p++;
 }
 
-#ifdef NON_MATCHING
-/* 92.42%: 92.4%: only the prologue's order differs: the original computes lists (s1) before the call's argument
- * (a0) */
 void func_80031690(void) {
     GameObject **lists;
     UnkStruct18 *r;
@@ -3611,13 +3608,11 @@ void func_80031690(void) {
     D_801D37C0 = r->unk_02;
     D_801D857C = r->unk_04;
     if (D_801D857C != 0) {
-        func_8003197C(r->unk_0C, r->unk_04, &lists[0]);
-        func_8003197C(r->unk_18, r->unk_08, &lists[1]);
+        func_8003197C(r->unk_0C, r->unk_04, lists);
+        lists++;
+        func_8003197C(r->unk_18, r->unk_08, lists);
     }
 }
-#else
-INCLUDE_ASM("asm/main/nonmatchings/building", func_80031690);
-#endif
 
 
 

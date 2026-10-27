@@ -53,7 +53,7 @@ void func_800383F4(Npc *npc);
 void func_80038494(Npc *npc);
 void func_800384E8(Npc *npc);
 void func_80038AE8(Npc *npc);
-void func_80036818(Npc *npc);
+void npc_update_searchlight(Npc *npc);
 void func_80037A88(Npc *npc);
 void func_80037F20(Npc *npc);
 void func_80038348(Npc *npc);
@@ -74,7 +74,7 @@ void func_8003AAF8(Npc *npc);
 void func_80039A58(Npc *npc);
 void func_8003831C(void);
 void func_800347E4(Pickup *npc, Anim *def);
-void func_80036504(GameObject *a, GameObject *b, GameObject *c);
+void npc_place_searchlight(GameObject *a, GameObject *b, GameObject *c);
 void func_80035B6C(Pickup *npc);
 void func_80035EBC(Pickup *npc);
 void func_8003585C(Pickup *npc);
@@ -1044,7 +1044,7 @@ void func_80036298(void) {
 void func_80036300(Npc *npc) {
     D_800AA268.p = npc->obj;
     func_80029D1C();
-    func_80036818(npc);
+    npc_update_searchlight(npc);
     switch (npc->kind) {
     case 3:
         func_8004BBC8(npc);
@@ -1090,7 +1090,7 @@ void func_800363E4(void) {
     D_801E2A50 = n;
 }
 
-void func_80036440(Npc *npc, s32 depth) {
+void npc_create_searchlight(Npc *npc, s32 depth) {
     GameObject *mover;
     ObjectDef *effect;
     s32 d;
@@ -1113,10 +1113,13 @@ void func_80036440(Npc *npc, s32 depth) {
     func_8001BB68(mover);
 }
 
-extern u32 D_801FB198;
-extern s32 D_8007D5F0[];
+extern u32 D_801FB198;                  /* the day's clock in seconds (building_update_sky_colours) */
+extern s32 D_8007D5F0[];                /* per searchlight frame: its id (0 ends), the beam's slope divisor, the point's dx and
+                                         * dy */
 
-void func_80036504(GameObject *line, GameObject *obj, GameObject *end) {
+/* The beam shows at night only (before 6:00, after 18:04); the box is its quad, 3 pixels wide at the point and 48 on the
+ * ground (y 0xE1), where the spot object sits. */
+void npc_place_searchlight(GameObject *line, GameObject *obj, GameObject *end) {
     s32 i;
     s32 x;
     s32 y;
@@ -1192,13 +1195,13 @@ hide:
     func_8001BB68(end);
 }
 
-void func_80036818(Npc *npc) {
+void npc_update_searchlight(Npc *npc) {
     GameObject *a = npc->unk_70;
     GameObject *b = npc->obj;
     GameObject *c = npc->unk_74;
 
     if (a != NULL) {
-        func_80036504(a, b, c);
+        npc_place_searchlight(a, b, c);
     }
 }
 
@@ -1245,7 +1248,7 @@ void func_8003684C(void) {
             npc->unk_1C = item->unk_0E;
         }
         if (npc->kind == 0x11 || npc->kind == 0x12) {
-            func_80036440(npc, item->unk_0C);
+            npc_create_searchlight(npc, item->unk_0C);
         } else {
             obj->priority = obj->pos_y.u.hi + 0xF23;
         }
@@ -1611,7 +1614,7 @@ void func_800376E0(Npc *npc) {
     }
 }
 
-void func_800377B4(Npc *npc) {
+void npc_pick_target(Npc *npc) {
     u16 i;
     u16 slot;
     u16 best;

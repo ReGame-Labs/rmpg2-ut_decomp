@@ -96,7 +96,7 @@ typedef struct GameObject {
                    struct GameObject *obj;  /* a link */
                    s32 cam_start;           /* OVERATTR's camera: its start point, y << 16 | x (tour_update_map) */
                    s32 count;               /* a monster's bomb (kind 0x73A): its bounces */
-                   s32 xy;                  /* a quad box's corner, y << 16 | x (func_80036504) */
+                   s32 xy;                  /* a quad box's corner, y << 16 | x (npc_place_searchlight) */
                } unk_50;
     /* 0x54 */ union {
                    s32 w;
@@ -108,7 +108,7 @@ typedef struct GameObject {
                    u16 *h;
                    s32 *w;
                    s32 cam_point;           /* OVERATTR's camera: its current point, y << 16 | x */
-                   s32 xy;                  /* a quad box's corner, y << 16 | x (func_80036504) */
+                   s32 xy;                  /* a quad box's corner, y << 16 | x (npc_place_searchlight) */
                } arg;
     /* 0x60 */ s32 unk_60;
     /* 0x64 */ union {                  /* by kind */
