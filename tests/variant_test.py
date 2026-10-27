@@ -4,8 +4,10 @@ toolchain). The "original" is a C file compiled with GCC 2.8.1 and again with 2.
 function of each form (C, INCLUDE_ASM of the original's words, a WIP block with its score comment, a K&R
 definition). With each compiler: the unit as written links; `put` keeps C that matches and leaves the file alone
 otherwise; `--wip` writes the block (score, note, INCLUDE_ASM) and the unit still links; `try` ranks the matching
-variant first; `perm` finds the original's statement order and alternative. Then draft.py's context (definitions to
-prototypes, K&R and __asm__ handled) and a typed m2c draft that names a struct field.
+variant first; `perm` finds the original's statement order and alternative. With 2.8.1, `--cc1`: a function whose
+original was compiled with -fno-schedule-insns2 matches only under that flag, and nothing is kept under it. Then
+draft.py's context (definitions to prototypes, K&R and __asm__ handled) and a typed m2c draft that names a struct
+field.
 
   tools/venv/bin/python tests/variant_test.py
 """
@@ -214,6 +216,47 @@ def run(cc: str):
           " in s registers; the variables' registers; the loop dump", "\n".join(lines[:40]))
     check(variant.dump_letters("Lc") == "Lc" and variant.dump_letters("loop,combine,l") == "Lcl",
           "--dump: the sections by letter or name")
+    if cc == "2.8.1":
+        cc1_flags(d)
+
+
+MIX = """int mix(int *p, int n) {
+    return p[0] * n + p[1] - p[2] * 3;
+}
+"""
+NO_SCHED2 = "-fno-schedule-insns2"  # moves mix's sll/addu after the mflo with 2.8.1
+
+
+def cc1_flags(d: Path):
+    """--cc1: the original of `mix` is compiled with an extra cc1 flag; the unit has it as INCLUDE_ASM."""
+    (d / "mix_original.c").write_text(MIX)
+    sh(["tools/cc_psx.sh", "-V", "2.8.1", "--cc1", NO_SCHED2, d / "mix_original.c", "-o", d / "mix_original.o"])
+    asm_of(d / "mix_original.o", "mix", ROOT / ASM / "mix.s")
+    path = d / "mix.c"
+    path.write_text(INCLUDE_ASM + f'INCLUDE_ASM("{ASM}", mix);\n')
+    before = path.read_text()
+    checker = unit_diff.Checker("test", "mix", expected=d / "mix_original.o", resolver=unit_diff.Resolver({}),
+                                bases={}, c_sections=None, align={})
+    units = [variant.Unit("test", "mix", path=path, cc="2.8.1", g=0, flags=["-I."], checker=checker,
+                          work=d / "work_mix", cc1=cc1) for cc1 in ([], [NO_SCHED2])]
+    region = variant.find(before, "mix")
+    plain, flagged = (u.score(variant.put_text(before, region, MIX), "mix", "cc1") for u in units)
+    check(not plain.match and plain.reasons and flagged.match,
+          "--cc1: the flag the original was compiled with changes the score (a match only with it)",
+          f"{plain}; {flagged}")
+    kept = [variant.keep(units[1], "mix", region, MIX, flagged, wip) for wip in (False, True)]
+    check(all(k.startswith("not kept: scored with --cc1") for k in kept) and path.read_text() == before
+          and NO_SCHED2 in variant.diagnostic(units[1]),
+          "--cc1: a match under the flag is not kept, as C or as a WIP; the scores say they are a diagnostic",
+          "; ".join(kept))
+    check(unit_diff.cc1_argv(["--cc1", NO_SCHED2, "-D", "X", "--cc1"]) == [f"--cc1={NO_SCHED2}", "-D", "X", "--cc1"],
+          "--cc1: a flag starting with `-` reaches argparse joined")
+    (d / "mix_try.c").write_text(MIX)
+    for opts in (["try", "mix", d / "mix_try.c", "-k"], ["put", "mix", d / "mix_try.c", "--wip"]):
+        r = subprocess.run([sys.executable, "tools/variant.py", *map(str, opts), "--cc1", NO_SCHED2],
+                           capture_output=True, text=True, cwd=ROOT)
+        check(r.returncode == 2 and "nothing is kept" in r.stderr, f"--cc1: variant.py {opts[0]} {opts[-1]} refused",
+              r.stdout + r.stderr)
 
 
 

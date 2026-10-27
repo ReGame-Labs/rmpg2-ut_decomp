@@ -12,7 +12,8 @@
 #   -E   preprocess only: cpp's output, with the build's flags, into the -o file (tools/draft.py's context)
 #   -S   stop after cc1: its assembly into the -o file, cpp's output in <out>.i
 #   --cc1 FLAG  one more cc1 flag, e.g. -dg -dl (its dumps land next to the .i, <out>.i.greg; tools/variant.py
-#        --dump) or -g; not for the build
+#        --dump) or -g, or a diagnostic such as -fno-schedule-insns2 (variant.py and unit_diff.py --cc1); not for
+#        the build
 # Intermediates are kept next to the output: <out>.i, <out>.s (cc1), <out>.m.s (maspsx), except for outputs under /tmp
 # (decomp-permuter compiles every candidate to /tmp/permuterXXXX.o: kept files once filled the disk).
 #

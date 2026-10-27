@@ -103,6 +103,10 @@ GCC 2.8.1's sources, for reading why the compiler chose something:
      alternative), stops at the first match and writes the best to `build/variant/`. The marker starts the line
      (`//@P a->x = 0;`) or ends it (`a->x = 0; //@P`). Up to `--max` candidates (5040), sampled beyond; `-j` compiles
      in parallel (`RMPG2_JOBS`); `-k` keeps the best.
+   - `--cc1 FLAG` (repeatable; `put`, `try`, `perm`, `get --dump` and `unit_diff.py`) adds a cc1 flag to every compile,
+     as a diagnostic that is never kept: a candidate that matches only with `-fno-cse-follow-jumps`,
+     `-fno-cse-skip-blocks`, `-fno-schedule-insns` or `-fno-schedule-insns2` has the original's operations, and
+     something in the original's control flow (a label, a block boundary, a loop's notes) stopped that pass there.
 4. **Stop** after about 30-45 minutes on one function: `variant.py put <func> <file.c> --wip [--note "..."]` writes
    the C under `#ifdef NON_MATCHING` with the `INCLUDE_ASM` in the `#else` and a comment with the score and the
    remaining difference (the note; else the block's old note; else what unit_diff reports). It writes the block only
