@@ -1324,7 +1324,43 @@ INCLUDE_RODATA("asm/overattr/nonmatchings/overattr_8009B478", D_80098260);
 
 INCLUDE_RODATA("asm/overattr/nonmatchings/overattr_8009B478", D_80098264);
 
-INCLUDE_ASM("asm/overattr/nonmatchings/overattr_8009B478", func_800A1F8C);
+void func_800A1F8C(void) {
+    s32 state;
+    s32 status;
+
+    state = D_800A9868;
+    switch (state) {
+    case 0:
+        status = card_get_status();
+        if (status != 2) {
+            func_8001E8C0(0x400, -0x100);
+            D_801D3780 -= 2;
+            break;
+        }
+        D_801E29BC = 0x1E;
+        D_800A9868 = status;
+        func_8001F61C("FORMATTING THE MEMORY", 0xC8, 0x5A, 1, D_801F9AAC, D_8007ABCC, 0, 0x400);
+        func_8001F61C("CARD IN MEMORY", 0xC8, 0x78, 1, D_801F9AAC, D_8007ABCC, 0, 0x400);
+        if (D_801E28B8 == 0) {
+            func_8001F61C(D_8009811C, 0xC8, 0x96, 1, D_801F9AAC, D_8007ABCC, 0, 0x400);
+        } else {
+            func_8001F61C(D_80098128, 0xC8, 0x96, 1, D_801F9AAC, D_8007ABCC, 0, 0x400);
+        }
+        break;
+    case 2:
+        if (D_801E29BC-- < 0) {
+            if (card_format() == 0) {
+                D_800A9858 = 0;
+                D_800A9898 = 1;
+                D_800A98B8 = state;
+            } else {
+                D_801D3780 -= 2;
+                func_8001E8C0(0x400, -0x100);
+            }
+        }
+        break;
+    }
+}
 
 INCLUDE_ASM("asm/overattr/nonmatchings/overattr_8009B478", func_800A2138);
 
@@ -1347,7 +1383,48 @@ void func_800A309C(void) {
     D_801D3780 += 1;
 }
 
-INCLUDE_ASM("asm/overattr/nonmatchings/overattr_8009B478", func_800A30B4);
+void func_800A30B4(void) {
+    s32 limit;
+    s32 slot;
+    s32 best;
+    s32 i;
+    s32 j;
+
+    limit = 10000000;
+    slot = 0;
+    if (card_get_status() == 0) {
+        if (card_read_save(&D_800A9300) != 0) {
+            card_init_save(&D_800A9300);
+            return;
+        }
+        best = -1;
+        for (i = 0; i < 6; i++) {
+            if (D_800A9300.unk_204[i] == 0 && best < D_800A9300.slots[i].unk_00 && D_800A9300.slots[i].unk_00 < limit) {
+                slot = i;
+                best = D_800A9300.slots[i].unk_00;
+            }
+        }
+        if (best != -1) {
+            for (j = 0; j < 7; j++) {
+                D_801F9A44[j] = D_800A9300.slots[slot].unk_58[j];
+            }
+            for (j = 0; j < 3; j++) {
+                D_801D8800[j] = D_800A9300.slots[slot].unk_46[j];
+            }
+            D_8007A694 = D_800A9300.slots[slot].unk_3E;
+            D_801E2150 = D_800A9300.slots[slot].unk_40;
+            D_801E1CB4 = D_800A9300.slots[slot].unk_42;
+            D_8007A68A = D_800A9300.slots[slot].unk_44;
+            D_8007A68C = D_800A9300.slots[slot].unk_68;
+            D_801F9ABC = D_800A9300.slots[slot].unk_6A;
+            D_8007A686 = D_800A9300.slots[slot].unk_6C;
+            D_8007A688 = D_800A9300.slots[slot].unk_6E;
+            D_8007A68E = D_800A9300.slots[slot].unk_70;
+            D_8007A688 = D_800A6F3C[D_8007A68E * 2];
+            D_8007A686 = D_800A6F3C[D_8007A68E * 2 + 1];
+        }
+    }
+}
 
 INCLUDE_RODATA("asm/overattr/nonmatchings/overattr_8009B478", D_800983F0);
 

@@ -147,6 +147,11 @@ extern MenuRecord *D_800A92D8;          /* the menu to open next */
 extern s16 D_800A9870;                  /* the cursor in the next menu */
 extern s16 D_800A9878;
 extern s16 D_800A9898;
+extern s16 D_800A9868;                 /* the format screen's state */
+extern s16 D_800A9858;
+extern u16 D_801E28B8;                 /* the memory card's slot */
+extern u8 D_8009811C[];                /* "CARD SLOT 1", "CARD SLOT 1A": func_800A0CC0's literals */
+extern u8 D_80098128[];
 extern s16 D_800A9810[6];              /* the listed saves' text y */
 extern s16 D_800A9820[6];              /* their text x */
 extern s16 D_800A9830[6];              /* their slot */
