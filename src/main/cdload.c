@@ -26,7 +26,7 @@ void func_800700CC(s32);
 void func_80063DF8(s32);
 void func_8006FC6C(void);
 void func_8006FC8C(s32, s32 *);
-void func_8006FEB4(void);
+void func_8006FEB4(s32);
 void func_800700A8(void);
 void func_8006BBA0(s32, s32);
 void func_8006BD60(s32);
@@ -720,8 +720,8 @@ void func_80062DEC(s32 arg0, s32 arg1) {
     func_8006FC8C(arg0, param);
 }
 
-void func_80062E24(void) {
-    func_8006FEB4();
+void func_80062E24(s32 arg0) {
+    func_8006FEB4(arg0);
 }
 
 void func_80062E44(void) {

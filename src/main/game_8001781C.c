@@ -250,7 +250,7 @@ void func_80024508(GameObject *arg0);
 void func_800245F8(void);
 void func_80024954(void);
 void func_8002495C(void);
-void func_80024964(void);
+void func_80024964(s32, GameObject *);
 void func_8002496C(GameObject *);
 s32 func_80024974(s32 arg0);
 void func_8002497C(void);
@@ -3678,7 +3678,7 @@ void func_80024954(void) {
 void func_8002495C(void) {
 }
 
-void func_80024964(void) {
+void func_80024964(s32 arg0, GameObject *obj) {
 }
 
 void func_8002496C(GameObject *sprite) {
