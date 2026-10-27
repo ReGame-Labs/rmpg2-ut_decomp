@@ -3,27 +3,10 @@
 
 #include "common.h"
 #include "game_8002A330.h"   /* the declarations game_8002A330 shares with it */
+#include "game_80057C94.h"   /* the records of D_801FA9BC */
 
 /* Declarations of src/main/game_8003B568.c: provisional types from the code's own use; refined as functions match. */
 
-typedef struct UnkStructB1 {  /* provisional: a 0x58-byte record of the table at D_801FA9BC */
-    GameObject *unk_00;
-    s16 unk_04;
-    u16 unk_06;
-    u16 unk_08;
-    s16 unk_0A;
-    u8 pad_0C[0x8];
-    Monster *unk_14;
-    u8 pad_18[0x2];
-    u16 unk_1A;
-    u8 pad_1C[0x14];
-    s32 unk_30;     /* y acceleration, 16.16 */
-    s32 unk_34;     /* x acceleration, 16.16 */
-    u8 pad_38[0x6];
-    u16 unk_3E;
-    GameObject *unk_40;
-    u8 pad_44[0x14];
-} UnkStructB1;
 
 typedef struct UnkStructB3 {  /* provisional: what a 0x30-byte record's unk_10 points to (a kind at 6) */
     u8 pad_00[0x4];
@@ -47,8 +30,6 @@ extern UnkStructB2 D_801D3824[];
 extern s16 D_801F9980;
 extern s16 D_801F9984;
 extern s16 D_801F9988;
-extern u16 D_801E29B0;
-extern UnkStructB1 D_801FA9BC[];
 
 void func_8001E4B0(void *);
 void func_8001F724(s32);

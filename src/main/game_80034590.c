@@ -182,8 +182,6 @@ extern u8 D_80095E24[];
 extern u8 D_80095E68[];
 extern u8 D_80095EAC[];
 extern u8 D_80095874[];
-extern u16 D_801D8730;              /* how many of D_801FAC9C are live */
-extern Npc D_801FAC9C[6];
 extern GameObject *D_801FB44C[3];
 extern u8 D_8008A9D4[];
 extern u8 D_8008AA40[];
@@ -1198,24 +1196,25 @@ void func_80037078(Monster *player, NpcS *npc) {
 
 INCLUDE_ASM("asm/main/nonmatchings/game_80034590", func_8003712C);
 
-/* 82.46%: the two rectangle tests and their shared call are right; the saved registers are assigned in another order (the record in s1, the player in s5 in the original) and the first test keeps x sign-extended in s0 */
 #ifdef NON_MATCHING
+/* 99.85 %: the control flow and the saved registers are right; the first rectangle's x tests load the field into v1 (a0 in the original) */
 u16 func_800372DC(s16 x, s16 y, Monster *player, NpcS *npc, s32 arg4) {
     func_80037960(npc, arg4);
     if ((x >= npc->unk_3E || x >= (s16)(npc->unk_3E - 4)) && (x <= npc->unk_40 || x <= (s16)(npc->unk_40 + 4)) &&
         (y >= npc->unk_44 || y >= (s16)(npc->unk_44 - 4)) && (y <= npc->unk_42 || y <= (s16)(npc->unk_42 + 4))) {
-        return func_8003761C(x, y, player, npc);
+        goto hit;
     }
-    if ((x >= npc->unk_46 || x >= (s16)(npc->unk_46 - 4)) && (x <= npc->unk_48 || x <= (s16)(npc->unk_48 + 4)) &&
-        (y >= npc->unk_4C || y >= (s16)(npc->unk_4C - 4)) && (y <= npc->unk_4A || y <= (s16)(npc->unk_4A + 4))) {
-        if (player != NULL) {
-            player->unk_024++;
-            func_80054374(0x28, player);
-            func_800634D4(player, 4);
-        }
-        return func_8003761C(x, y, player, npc);
+    if (x < npc->unk_46 && x < (s16)(npc->unk_46 - 4)) return 0;
+    if (x > npc->unk_48 && x > (s16)(npc->unk_48 + 4)) return 0;
+    if (y < npc->unk_4C && y < (s16)(npc->unk_4C - 4)) return 0;
+    if (y > npc->unk_4A && y > (s16)(npc->unk_4A + 4)) return 0;
+    if (player != NULL) {
+        player->unk_024++;
+        func_80054374(0x28, player);
+        func_800634D4(player, 4);
     }
-    return 0;
+hit:
+    return func_8003761C(x, y, player, npc);
 }
 #else
 INCLUDE_ASM("asm/main/nonmatchings/game_80034590", func_800372DC);
@@ -1710,10 +1709,11 @@ void func_80038838(NpcS *npc) {
 }
 
 #ifdef NON_MATCHING
-/* 95.60 %: register choices only: the table entries' addresses are built in a0 in the original (v1/v0 here) */
+/* 98.73 %: register choices only: the original builds both table addresses in a0 and adds the row before the index (row + which * 4); here which * 4 + row */
 void func_80038920(NpcS *npc) {
     u16 which;
     u8 *anim;
+    u8 **row;
 
     if (func_80038C1C() != 0) {
         return;
@@ -1723,7 +1723,8 @@ void func_80038920(NpcS *npc) {
             func_8003EB5C(*(D_8007DA68 + (npc->unk_2E & 3)), D_800AA268.p);
         }
     } else {
-        anim = *(*(D_8007DA78 + (npc->unk_2C & 3)) + which);
+        row = *(D_8007DA78 + (npc->unk_2C & 3));
+        anim = row[which];
         if (anim != (u8 *)D_800AA268.p->unk_48) {
             func_8003EB5C(anim, D_800AA268.p);
             return;

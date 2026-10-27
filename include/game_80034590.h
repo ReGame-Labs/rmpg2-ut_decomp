@@ -174,4 +174,7 @@ typedef struct NpcS {
     /* 0x68 */ u8 unk_68[0x10];
 } NpcS;
 
+extern Npc D_801FAC9C[6];
+extern u16 D_801D8730;                   /* how many of D_801FAC9C are live */
+
 #endif /* GAME_80034590_H */
