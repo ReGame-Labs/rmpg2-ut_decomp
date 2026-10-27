@@ -21,11 +21,11 @@ void func_80030E04(Monster *m, void *, void *);
 void func_80031280(Monster *m, Building *b);
 void func_8004CFE8(void);
 s32 func_8004D150(u16 *, Monster *m, void *);
-void func_800524B4(Monster *m);
+void monster_start_jump(Monster *m);
 void func_80053C50(s32, Monster *m);
 void func_8005404C(Monster *m);
 u16 func_8005453C(s16 x, s16 y, Monster *m);
-Building *func_80054728(u16);
+Building *monster_get_building(u16);
 void func_80056488(Monster *m);
 void func_800564D8(Monster *m);
 void func_80056560(Monster *m);
@@ -170,7 +170,7 @@ void func_8004E8B8(void) {
         D_800AA248.cur_obj->flags &= ~0x10;
     }
     y = D_800AA248.cur_obj->pos_y.s.hi;
-    bld = func_80054728(m->climb_building);
+    bld = monster_get_building(m->climb_building);
     if (bld != NULL) {
         kind = *(u16 *) ((u8 *) bld + 8);
         if (kind != 0x300) {
@@ -322,7 +322,7 @@ void func_8004ED8C(void) {
                     func_8002CFAC(m, b);
                     m->unk_18A = 1;
                     if ((u32) (b->unk_058 - 2) >= 2) {
-                        func_800524B4(m);
+                        monster_start_jump(m);
                     }
                 }
                 func_8005404C(m);
@@ -532,7 +532,7 @@ void func_8004F65C(void) {
     s16 y;
 
     if ((u32) (m->unk_0EA - 1) >= 2 && m->climb_side != 0 && m->climb_side != 3 && m->climb_building != 0) {
-        bld = func_80054728(m->climb_building);
+        bld = monster_get_building(m->climb_building);
         if (bld != NULL) {
             part = *(u8 **) ((u8 *) bld + 0x18);
             if (part != NULL && *(s16 *) (part + 0x1C) == m->climb_side) {
@@ -878,7 +878,7 @@ void func_8004FF3C(void) {
         if (ea != 4) {
             if (ea != 3) {
                 if (ea != side) {
-                    bld = func_80054728(m->climb_building);
+                    bld = monster_get_building(m->climb_building);
                     if (bld != NULL) {
                         m->unk_0FA = m->pos.s.lo;
                         m->unk_0FC = m->pos.s.hi;
