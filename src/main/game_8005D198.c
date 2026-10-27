@@ -5,6 +5,8 @@
 #include "game_8005D198.h"
 #include "psyq/libc2.h"
 
+extern u16 D_801D3D80;                   /* D_801D3D64.unk_1C */
+
 s32 func_8005D198(void) {
     return func_8001A3AC() >= 0x46;
 }
@@ -105,7 +107,48 @@ Monster *func_8005D918(Monster *skip) {
 
 INCLUDE_ASM("asm/main/nonmatchings/game_8005D198", func_8005D9BC);
 
+#ifdef NON_MATCHING
+/* 99.9 %: one register: the original loads D_801D3D80 into v0 (free after the colour store), this one into v1 */
+void func_8005DBC4(s32 old, Monster *m, s32 value) {
+    if (m->id == 0) {
+        return;
+    }
+    if (m->meter_bar != NULL) {
+        D_800AA248.cur_obj = m->meter_bar;
+        D_800AA248.cur_obj->unk_40.w = m->meter_shown.s.hi;
+        if ((u32) D_800AA248.cur_obj->unk_40.w > 0x44) {
+            D_800AA248.cur_obj->unk_40.w = 0x44;
+        }
+        if (D_800AA248.cur_obj->unk_40.w == 0x44) {
+            D_800AA248.cur_obj->colour &= 0xFF00FF;
+            D_800AA248.cur_obj->colour |= (D_801D3D80 << 10) & 0xE000;
+        } else {
+            D_800AA248.cur_obj->colour = 0xFF00FF;
+        }
+        if (m->meter_shown.w != m->meter.w) {
+            m->meter_shown.w += (m->meter.w - m->meter_shown.w) >> 4;
+            if (abs(m->meter_shown.w - m->meter.w) <= 0xFFFF) {
+                m->meter_shown.w = m->meter.w;
+            }
+        }
+    }
+    if (m->health_bar != NULL) {
+        D_800AA248.cur_obj = m->health_bar;
+        D_800AA248.cur_obj->unk_40.w = m->health_shown.s.hi;
+        if ((u32) D_800AA248.cur_obj->unk_40.w > 0x44) {
+            D_800AA248.cur_obj->unk_40.w = 0x44;
+        }
+        if (m->health_shown.w != m->health.w) {
+            m->health_shown.w += (m->health.w - m->health_shown.w) >> 4;
+            if (abs(m->health_shown.w - m->health.w) <= 0xFFFF) {
+                m->health_shown.w = m->health.w;
+            }
+        }
+    }
+}
+#else
 INCLUDE_ASM("asm/main/nonmatchings/game_8005D198", func_8005DBC4);
+#endif
 
 INCLUDE_ASM("asm/main/nonmatchings/game_8005D198", func_8005DD48);
 

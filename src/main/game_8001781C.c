@@ -355,8 +355,8 @@ extern u16 D_8007AB60;
 void func_8001D1C8(void);
 void func_8001E174(GameObject *obj);
 void func_8001E2F8(GameObject *arg0);
-void func_8005DBC4(s32, Unk29510 *, s32);
-void func_80029510(Unk29510 *arg0);
+void func_8005DBC4(s32, Monster *, s32);
+void func_80029510(Monster *arg0);
 void func_80024BB4(void);
 void func_80025B3C(Building *);
 void func_80025B7C(BuildingItem *);
@@ -4724,25 +4724,25 @@ void func_80029170(void) {
 INCLUDE_ASM("asm/main/nonmatchings/game_8001781C", func_800291DC);
 
 #ifdef NON_MATCHING
-/* 97.6 %: the original re-materializes a zero step (move v0, zero) on the unk_64 path; the step lives in another register here. */
-void func_80029510(Unk29510 *arg0) {
+/* 97.6 %: the original re-materializes a zero step (move v0, zero) on the unk_064 path; the step lives in another register here. */
+void func_80029510(Monster *arg0) {
     s32 old;
     s32 value;
 
-    value = arg0->unk_8;
+    value = arg0->health.w;
     old = value;
-    if ((arg0->unk_F0 != 0) || (arg0->unk_64 != 0)) {
-        value = arg0->unk_8 + arg0->unk_F0;
+    if ((arg0->unk_0F0 != 0) || (arg0->unk_064 != 0)) {
+        value = arg0->health.w + arg0->unk_0F0;
         if (value >= 0) {
             if (value > 0x440000) {
                 value = 0x440000;
             }
-            arg0->unk_F0 = 0;
-            arg0->unk_8 = value;
+            arg0->unk_0F0 = 0;
+            arg0->health.w = value;
         } else {
             value = 0;
-            arg0->unk_F0 = 0;
-            arg0->unk_8 = 0;
+            arg0->unk_0F0 = 0;
+            arg0->health.w = 0;
         }
     }
     func_8005DBC4(old, arg0, value);

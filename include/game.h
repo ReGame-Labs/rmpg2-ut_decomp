@@ -190,7 +190,9 @@ typedef struct Monster {
     /* 0x05A */ u16 action;                    /* the state the script dispatcher runs */
     /* 0x05C */ u16 unk_05C;
     /* 0x05E */ s16 unk_05E;
-    /* 0x060 */ u8 unk_060[0x08];
+    /* 0x060 */ u8 unk_060[0x04];
+    /* 0x064 */ u16 unk_064;
+    /* 0x066 */ u8 unk_066[0x02];
     /* 0x068 */ GameObject *obj;               /* its body */
     /* 0x06C */ GameObject *meter_bar;         /* status bars: boxes whose width (unk_40.w) is the value shown, */
     /* 0x070 */ GameObject *health_bar;        /* at most 0x44 (func_8005D20C, func_8005DBC4) */
@@ -222,7 +224,7 @@ typedef struct Monster {
     /* 0x0EA */ u16 unk_0EA;
     /* 0x0EC */ u8 unk_0EC[0x02];
     /* 0x0EE */ s16 unk_0EE;
-    /* 0x0F0 */ s32 unk_0F0;
+    /* 0x0F0 */ s32 unk_0F0;                   /* a change to its health, applied once (func_80029510) */
     /* 0x0F4 */ s16 front_x;                   /* its front: pos_x plus or minus half its width, by its facing */
     /* 0x0F6 */ u16 unk_0F6;
     /* 0x0F8 */ u8 unk_0F8[0x02];
