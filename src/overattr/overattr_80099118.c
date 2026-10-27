@@ -27,7 +27,7 @@ void func_800991BC(void) {
     GameObject **p;
 
     n = 0x13;
-    p = &D_801E28F4.unk_00;
+    p = D_801E28F4;
     do {
         *p++ = NULL;
     } while (--n != 0);
@@ -218,19 +218,19 @@ void func_800996CC(void) {
 void func_800999F8(u32 which) {
     switch (which) {
     case 0:
-        D_801E28F4.obj[8]->pos_y.w = 0x180000;
-        D_801E28F4.obj[9]->pos_y.w = 0x1180000;
-        D_801E28F4.obj[10]->pos_y.w = 0x1180000;
+        D_801E28F4[9]->pos_y.w = 0x180000;
+        D_801E28F4[10]->pos_y.w = 0x1180000;
+        D_801E28F4[11]->pos_y.w = 0x1180000;
         break;
     case 1:
-        D_801E28F4.obj[8]->pos_y.w = 0x1180000;
-        D_801E28F4.obj[9]->pos_y.w = 0x190000;
-        D_801E28F4.obj[10]->pos_y.w = 0x1180000;
+        D_801E28F4[9]->pos_y.w = 0x1180000;
+        D_801E28F4[10]->pos_y.w = 0x190000;
+        D_801E28F4[11]->pos_y.w = 0x1180000;
         break;
     case 2:
-        D_801E28F4.obj[8]->pos_y.w = 0x1180000;
-        D_801E28F4.obj[9]->pos_y.w = 0x1180000;
-        D_801E28F4.obj[10]->pos_y.w = 0x180000;
+        D_801E28F4[9]->pos_y.w = 0x1180000;
+        D_801E28F4[10]->pos_y.w = 0x1180000;
+        D_801E28F4[11]->pos_y.w = 0x180000;
         break;
     }
 }
@@ -282,7 +282,7 @@ s32 func_8009AE40(s32 *step) {
     s32 y;
 
     t = *step;
-    obj = D_801E28F4.unk_00;
+    obj = D_801E28F4[0];
     if (D_801CA464 & 1) {
         if ((t & 0xF) < 5) {
             obj->pos_x.s.hi = -100;
@@ -316,7 +316,7 @@ s32 func_8009AE40(s32 *step) {
                 D_800A9240 = 6;
             }
         }
-        obj = D_801E28F4.unk_00;
+        obj = D_801E28F4[0];
         for (i = 0, p = D_801E2904; i < 3; i++, p++) {
             if (*p != NULL) {
                 func_8009EE5C(*p, 0xFF);

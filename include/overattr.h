@@ -20,6 +20,15 @@ void func_80017B24(void);
 void func_8001AC18(s32, s32);
 void func_8001F7F8(s32 id);
 void func_8002A354(s32 arg0);
+void func_80019268(void);
+void func_8001A474(void);
+void func_8001F760(void);
+s32 func_8001AA4C(s32 arg0, s32 arg1);
+void func_8001EB3C(void);
+void func_8001E94C(s32 x, s32 y, GameObject *obj);   /* moves an object's sprite */
+extern s16 D_801CA45C;                 /* the attract screen's state */
+extern s16 D_801D872C;
+extern u16 D_801F9AE0;
 s32 func_8002A300(void);
 extern s16 D_801CA464;
 extern s16 D_801CA468;
@@ -63,12 +72,9 @@ void func_8001ED54(TextMessage *msg);  /* loads and prints a message */
 u8 *func_8001ECB4(u8 *dst, s32 value, s32 digits); /* writes a number into a text, returns the end */
 extern u16 D_801E2A44;                 /* the printer's colour for the item under the cursor */
 
-/* The screen's objects. */
-extern struct {
-    GameObject *unk_00;
-    GameObject *obj[18];
-} D_801E28F4;
-/* Its obj[0] and obj[3] reached as symbols of their own (func_8009AE40): only these give its code. */
+/* The screen's objects (func_800991BC clears 19). */
+extern GameObject *D_801E28F4[];
+/* Its [1] and [4] reached as symbols of their own (func_8009AE40): only these give its code. */
 extern GameObject *D_801E28F8[];
 extern GameObject *D_801E2904[];
 extern s16 D_801F9A4A;
@@ -107,7 +113,7 @@ typedef struct { u32 pixels[32]; } CardIcon;  /* a 16x16 4-bit icon frame */
 
 /* A menu: record 0 holds the item count, a parent menu and the cursor, the items start at record 2. */
 typedef struct MenuRecord {
-    /* 0x00 */ s32 unk_00;             /* record 0: the item count */
+    /* 0x00 */ s32 unk_00;             /* record 0: the item count; an item: its TextMessage */
     /* 0x04 */ struct MenuRecord *sub; /* record 0: another menu, whose item at the cursor is lit too */
     /* 0x08 */ s16 kind;               /* an item: the kind of its objects; record 0: the cursor */
     /* 0x0A */ u8 unk_0A[0x02];
@@ -119,6 +125,16 @@ extern TextMessage D_800A6338;
 extern TextMessage D_800A6360;
 extern TextMessage D_800A6384;
 extern TextMessage D_800A63A8;
+/* The options screen's lines, by the option's value. */
+extern TextMessage D_800A6494;
+extern TextMessage D_800A64C0;
+extern TextMessage D_800A64EC;
+extern TextMessage D_800A6514;
+extern TextMessage D_800A6540;
+extern TextMessage D_800A656C;
+extern TextMessage D_800A6598;
+extern TextMessage D_800A65C4;
+extern TextMessage D_800A65EC;
 /* The values inside the first four lines' texts, reached as symbols of their own. */
 extern u8 D_800A631E[];
 extern u8 D_800A6359[];
@@ -137,10 +153,21 @@ extern s16 D_800A9830[6];              /* their slot */
 extern s16 D_800A98B8;                 /* the memory-card screen's state */
 extern s32 D_800A9228;                 /* the player slot before the last move */
 extern u8 D_800A74E4[];                /* an animation script */
+extern u8 D_800A7510[];
+extern u8 D_800A751C[];
+extern s32 D_800A74A8[3];              /* per player slot: the sprite of a player in the game */
+extern s32 D_800A74B4[3];              /* and of an empty slot */
+extern u8 *D_800A74C0[3];              /* their animations */
+extern u8 *D_800A74CC[3];
+/* The player slots' objects (func_8009E5BC): D_801E294C[0..2] and [6..8], D_801E2958 between them. */
+extern GameObject *D_801E294C[];
+extern GameObject *D_801E2958[3];
+extern s16 D_800A92A8[3];
 extern s16 D_800A92B0[3];              /* per player: the selection's state, 3 done */
 extern s16 D_800A9840;
 extern s16 D_800A9800;
 extern GameObject *D_800A9808[2];      /* the two volume bars */
+extern GameObject *D_800A92F8[2];      /* their markers */
 extern u8 D_800A9890[6];                /* a name being entered, 5 letters */
 extern TextMessage *D_800A6F48[5];      /* the name entry's letters */
 extern MenuRecord D_800A6FCC[];
@@ -150,6 +177,8 @@ extern MenuRecord D_800A70A4[];
 extern MenuRecord D_800A7104[];
 extern MenuRecord D_800A714C[];
 extern MenuRecord D_800A71A0[];
+extern MenuRecord D_800A7200[];
+extern MenuRecord D_800A7248[];
 extern MenuRecord D_800A7284[];
 
 extern s16 D_800A9888;                 /* the fade the objects' colours run (func_8009B478): 1 to black, 2 to white */
@@ -217,6 +246,16 @@ extern CardClut D_800A33E0;            /* its CLUT */
 extern s16 D_800A6F3C[3 * 2];          /* per D_8007A68E: the values of D_8007A688 and D_8007A686 */
 extern s16 D_800A6F78;
 extern u8 *D_800A72D8[];               /* the movies' names */
+extern u8 D_800A6F39;                  /* frames before the title's next screen */
+extern s16 D_800A92B8;                 /* the credits' next line */
+extern s16 D_800A9298;                 /* frames to the credits' next line */
+extern s16 D_800A90F4[];               /* per credits line: the frames to the next, -1 at the end */
+extern u8 *D_800A9010[];               /* the credits' lines */
+extern s16 D_800A9168[];               /* their colours */
+extern OverattrPlacement D_800A40FC[4];
+extern s16 D_800A92C8;                 /* the PRESS START blink */
+extern OverattrPlacement D_800A7384[4];
+extern TextMessage D_800897FC;
 extern s16 D_800A9860;                 /* frames left before the attract mode resumes, reset by a key */
 
 extern s32 D_800A9220;                 /* the pad buttons pressed this frame (func_80099118) */
@@ -239,6 +278,7 @@ void func_8009F968(OverattrPlacement *p, s32 n, s32 color);
 void func_8009E3C0(s32 kind, s32 value);
 void func_8009E40C(void *list, s32 selected);
 void func_8009E4D4(void);
+void func_8009CE5C(void);
 void func_8009D0B0(void);
 void func_800A1804(void);
 void func_800A1B9C(void);
