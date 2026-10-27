@@ -35,3 +35,6 @@ overmove_start_frame = 0x800AA22C;
 overmove_end_frame = 0x800AA230;
 overmove_end_reached = 0x800AA234;
 overmove_frames = 0x800AA238;
+// Constants spimdisasm would pair into symbols (lui + addiu/ori): left as numbers. overmove_next_vlc and
+// overmove_next_frame count from 0x800000; func_800A9890 carves its buffers at 0x10000 and 0x2D00 offsets.
+D_12D00 = 0x00012D00; // ignore:true
