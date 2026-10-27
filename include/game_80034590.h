@@ -3,6 +3,7 @@
 
 #include "common.h"
 #include "game.h"
+#include "game_80057C94.h"
 
 /* Types of game_80034590, game_8003CD08, game_8004160C and game_80043118. */
 

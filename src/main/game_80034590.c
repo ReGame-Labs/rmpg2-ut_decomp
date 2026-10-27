@@ -20,6 +20,8 @@ void func_8001BB68(GameObject *mover);
 GameObject *func_8001EB9C(s32 a, s32 b, s32 c, s32 d, s32 color);
 void func_8001BB88(GameObject *mover);
 s16 func_8001EB10(s32 arg0, s32 arg1);
+s32 *func_80025C08(void *list);
+extern s32 D_8007DA48[];                /* the spawn list of D_801FAC9C */
 void func_8001F724(s32 sound);
 void func_80020D20();                /* called with the record and without it: no prototype in the original */
 void func_800242A8(void);
@@ -1082,7 +1084,57 @@ void func_80036818(Npc *npc) {
     }
 }
 
-INCLUDE_ASM("asm/main/nonmatchings/game_80034590", func_8003684C);
+void func_8003684C(void) {
+    SpawnItem *item;
+    Npc *npc;
+    GameObject *obj;
+    ObjectDef *def;
+    Anim *anim;
+    u16 n;
+
+    func_800363E4();
+    item = (SpawnItem *)func_80025C08(D_8007DA48);
+    n = item->unk_04;
+    item++;
+    if (n == 0) {
+        return;
+    }
+    if (n > 6) {
+        n = 6;
+    }
+    npc = D_801FAC9C;
+    D_801D8730 = n;
+    do {
+        D_800AA248.new_def = func_8001D110();
+        def = D_800AA248.new_def;
+        anim = item->anim;
+        def->anim = anim;
+        def->id = anim->id;
+        npc->unk_A = 0;
+        npc->unk_8 = 1;
+        npc->unk_6 = item->unk_04;
+        obj = func_8001DCB4();
+        npc->unk_0 = obj;
+        obj->owner.npc = npc;
+        obj->pos_x.u.hi = item->unk_06;
+        obj->pos_y.u.hi = item->unk_08;
+        obj->flags |= item->unk_0A;
+        obj->unk_80 = item->unk_0C;
+        obj->kind = 0x713;
+        if (item->unk_0E == -1) {
+            npc->unk_1C = func_8001EB10(0xC8, 0x64);
+        } else {
+            npc->unk_1C = item->unk_0E;
+        }
+        if (npc->unk_6 == 0x11 || npc->unk_6 == 0x12) {
+            func_80036440(npc, item->unk_0C);
+        } else {
+            obj->unk_80 = obj->pos_y.u.hi + 0xF23;
+        }
+        item++;
+        npc++;
+    } while (--n != 0);
+}
 
 void func_800369F8(Npc *npc) {
     memset(npc, 0, sizeof(Npc));
@@ -1276,7 +1328,44 @@ u16 func_8003761C(s16 x, s16 y, Monster *player, NpcS *npc) {
 void func_800376D8(void) {
 }
 
+#ifdef NON_MATCHING
+/* 82.2 %: the twin of func_8003BD48 (game_8003B568), with the same difference: the original tests the loaded limit in v0 and copies it into a1, where every form tried loads it straight into one register */
+void func_800376E0(NpcS *npc) {
+    s32 limit;
+    u16 x;
+    u16 d;
+
+    if (npc->unk_8 == 2) {
+        limit = D_801FAC84;
+        if (D_801FAC84 != 0) {
+            x = D_800AA268.p->pos_x.u.hi;
+            if (!(D_800AA268.p->flags & 0x10)) {
+                d = limit - x;
+            } else {
+                d = (u16) D_801F9AB0 - x + 0x31;
+            }
+            if (d < 0x32) {
+                npc->unk_A = 1;
+            }
+        } else if (D_801D37BC == 0) {
+            limit = (s16)D_801FA98C;
+            if ((s16)D_801FA98C != 0) {
+                x = D_800AA268.p->pos_x.u.hi;
+                if (!(D_800AA268.p->flags & 0x10)) {
+                    d = limit - x;
+                } else {
+                    d = D_801FA990 - x + 0x31;
+                }
+                if (d < 0x32) {
+                    npc->unk_A = 1;
+                }
+            }
+        }
+    }
+}
+#else
 INCLUDE_ASM("asm/main/nonmatchings/game_80034590", func_800376E0);
+#endif
 
 INCLUDE_ASM("asm/main/nonmatchings/game_80034590", func_800377B4);
 
