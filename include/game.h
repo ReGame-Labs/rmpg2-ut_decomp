@@ -649,7 +649,9 @@ typedef struct Unk1D3D64 {
     /* 0x28 */ s16 unk_28;
     /* 0x2A */ u8 unk_2A[0x02];
     /* 0x2C */ s32 unk_2C;
-    /* 0x30 */ u8 unk_30[0x28];
+    /* 0x30 */ s32 unk_30;
+    /* 0x34 */ s32 unk_34;                     /* D_801D3D98[0] */
+    /* 0x38 */ u8 unk_38[0x20];
     /* 0x58 */ s32 unk_58;
     /* 0x5C */ u16 unk_5C;
     /* 0x5E */ u16 unk_5E;

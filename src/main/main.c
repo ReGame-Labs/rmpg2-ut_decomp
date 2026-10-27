@@ -272,8 +272,8 @@ void func_80026E0C(Monster *arg0);
 void func_80026F58(Monster *arg0);
 void func_80027FC8(void);
 void func_80028140(u16 arg0, Monster *arg1, u16 arg2);
-void func_800284D8(void);
-void func_80028508(void);
+void main_start_scroll_down(void);
+void main_start_scroll_up(void);
 void func_8002994C(void);
 void func_80029B54(void);
 void func_80029CF8(void);
@@ -6322,7 +6322,7 @@ void func_80028140(u16 arg0, Monster *arg1, u16 arg2) {
     arg1->unk_0CE = 0;
 }
 
-void func_80028160(void) {
+void main_reset_camera_y(void) {
     D_801D3D64.unk_26 = 0;
     D_801F9A30.unk_0 = 0;
     D_801D3D64.unk_28 = 0;
@@ -6331,7 +6331,7 @@ void func_80028160(void) {
 
 INCLUDE_ASM("asm/main/nonmatchings/main", func_80028184);
 
-void func_800284D8(void) {
+void main_start_scroll_down(void) {
     s32 var_v1;
 
     var_v1 = 0x20000;
@@ -6342,12 +6342,133 @@ void func_800284D8(void) {
     D_801D3D8C = 2;
 }
 
-void func_80028508(void) {
+void main_start_scroll_up(void) {
     D_801F9A30.unk_0 = 0xFFFE0000;
     D_801D3D8C = 1;
 }
 
-INCLUDE_ASM("asm/main/nonmatchings/main", func_80028524);
+extern u16 D_801D3700;
+extern s16 D_801D3DBE;
+
+void main_update_camera_y(void) {
+    s32 *p;
+    s32 y;
+    s32 max;                /* the lowest player's y; the camera's y below, as in the original */
+    s32 min;                /* the highest player's y */
+    u16 maxi;
+    u16 mini;
+    Monster *mon;
+    GameObject *obj;
+
+    max = -1;
+    maxi = 1;
+    mini = 1;
+    min = 0x77770000;
+    p = D_801D3DA8;
+    y = *p++;
+    if (y != 0) {
+        max = y;
+        min = max;
+    }
+    y = *p++;
+    if (y != 0) {
+        if (y >= max) {
+            maxi = 2;
+            max = y;
+        }
+        if (y <= min) {
+            mini = 2;
+            min = y;
+        }
+    }
+    y = *p;
+    if (y != 0) {
+        if (y >= max) {
+            maxi = 3;
+            max = y;
+        }
+        if (y <= min) {
+            mini = 3;
+            min = y;
+        }
+    }
+    D_801D3D64.unk_30 = max;
+    D_801D3D64.unk_34 = min;
+    if (D_801D3D64.unk_28 == 0) {
+        if (D_801E28C8 != 0) {
+        high:
+            if (min > 0x87FFFF && max > 0xEFFFFF) {
+                mon = &D_801E0B78[func_80025DF8(maxi)];
+                obj = mon->obj;
+                if (obj->vel_y.w > 0) {
+                    goto rise;
+                }
+            }
+            if (min > 0xA7FFFF && max <= 0xDFFFFF) {
+                return;
+            }
+            goto rise;
+        } else if (D_801E1CB0 != 0 || D_801D3700 != 0
+                   || ((Fixed *) &D_801D3D64.unk_58)->u.hi != 0) {   /* D_801D3DBE, read through the block */
+            max = D_801F9ACC.w;
+            if (max == 0) {
+                return;
+            }
+            D_801D3DBE = 1;
+        rise:
+            main_start_scroll_down();
+        } else {
+            if (max <= 0xF00000 && min <= 0x700000) {
+                mon = &D_801E0B78[func_80025DF8(mini)];
+                obj = mon->obj;
+                if (obj->vel_y.w < 0) {
+                    goto sink;
+                }
+            }
+            if (max > 0xB80000 || min > 0x800000) {
+                goto high;
+            }
+        sink:
+            main_start_scroll_up();
+        }
+    } else if (D_801D3D64.unk_28 == 1) {
+        if (min <= 0x77FFFF && max <= 0xEFFFFF) {
+            max = D_801F9ACC.w + D_801F9A30.unk_0;
+            D_801F9ACC.w = max;
+            if (max > -0x14C0000) {
+                return;
+            }
+            max = -0x14C0000;
+            D_801F9ACC.w = max;
+        }
+        goto stop;
+    } else if (D_801D3D64.unk_28 == 2) {
+        if (((Fixed *) &D_801D3D64.unk_58)->u.hi == 0 && (max <= 0xC00000 || min <= 0x800000)) {
+            goto stop;
+        }
+        max = D_801F9ACC.w + D_801F9A30.unk_0;
+        D_801F9ACC.w = max;
+        if (max > 0) {
+            goto zero;
+        }
+        if (max <= 0xFFE7FFF) {     /* always, max being <= 0 here: the original's constant */
+            return;
+        }
+        mon = &D_801E0B78[func_80025DF8(mini)];
+        obj = mon->obj;
+        if (obj->pos_x.s.hi >= 0x71) {
+            return;
+        }
+        goto zero;
+    stop:
+        if (D_801F9ACC.w >= 0) {
+        zero:
+            D_801F9ACC.w = 0;
+        }
+        D_801F9A30.unk_0 = 0;
+        D_801D3D8C = 0;
+    }
+}
 
 #ifdef NON_MATCHING
 /* 96.69%: 96.7 %: each case's load of m1->obj sits before the second call's li a0 (the original has li a0 first, so

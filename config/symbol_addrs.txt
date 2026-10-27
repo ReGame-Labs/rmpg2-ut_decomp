@@ -28,6 +28,10 @@ main_update_screen_pos = 0x80027908; // type:func
 main_reset_screen_pos = 0x80027B20; // type:func
 main_update_priority = 0x80027B78; // type:func
 main_update_boxes = 0x80027CB8; // type:func
+main_reset_camera_y = 0x80028160; // type:func  the vertical scroll stopped (D_801D3D64.unk_26, unk_28, D_801F9A30) and the camera's y back to 0
+main_start_scroll_down = 0x800284D8; // type:func  scroll state 2, speed 0x80000 (0x20000 with D_801D8720)
+main_start_scroll_up = 0x80028508; // type:func  scroll state 1, speed -0x20000
+main_update_camera_y = 0x80028524; // type:func  the camera's y from the players' (D_801D3DA8 by player) highest and lowest, scrolls up to -0x14C and back down to 0
 main_apply_health = 0x80029510; // type:func
 main_count_monsters = 0x8002958C; // type:func
 
