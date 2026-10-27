@@ -2458,7 +2458,216 @@ void func_8001C784(void) {
 void func_8001C834(void) {
 }
 
+#ifdef NON_MATCHING
+/* 96.86%: the state test is unsigned in the original (sltiu 5) and its switch runs on a copy of it; the default
+ * case is entered with D_801D3780's address already in a0 from every jump; one instruction more. The attract
+ * screen's state machine (D_801D3780), its screens in OVERATTR (func_800996CC, func_800991EC, func_8009C828) */
+void func_800991EC(void);
+void func_800996CC(void);
+s32 func_8009C828(u16 *state);
+void func_800A1720(s16 id);
+extern s32 D_8007AAE0[];
+extern s32 D_8007AAFC[];
+extern TextMessage D_800897A0;
+extern TextMessage D_800897C4;
+extern TextMessage D_800897E0;
+extern s32 D_800A9220;
+extern s32 D_800A9250;
+extern s16 D_800A9298;
+extern s16 D_800A92A0;
+extern s16 D_800A92B8;
+extern s16 D_800A92D0;
+extern u16 D_800A9840;
+extern s16 D_800A9898;
+extern s16 D_800A98B8;
+extern s16 D_801F9AAC;
+extern s16 D_801FB468;
+
+void func_8001C83C(void) {
+    s32 state;
+    s32 prev;
+    s32 i;
+    s32 id;
+
+    if (D_800AA2DC != 0) {
+        func_80017B24();
+        D_801D3780 = 5;
+    }
+    state = D_801D3780;
+    if (state != 0) {
+        if (state >= 5) {
+            switch (state) {
+            case 5:
+                if (D_800AA2DC != 0) {
+                    switch ((s16) (D_801FA960 % 25)) {
+                    case 4:
+                    case 9:
+                    case 14:
+                    case 19:
+                    case 23:
+                        if (D_801FB468 != -1) {
+                            for (i = 0; i < 7; i++) {
+                                if (D_801FA8A0[i] == D_801FB468) {
+                                    cdload_load_overlay(1);
+                                    func_800A9890(D_8007AAFC[(func_8001EA78() & 1) + i * 2]);
+                                    cdload_load_overlay(0);
+                                    break;
+                                }
+                            }
+                        }
+                        break;
+                    }
+                }
+                switch (D_801FA960) {
+                case 0x18:
+                case 0x31:
+                case 0x4A:
+                case 0x63:
+                    cdload_load_overlay(1);
+                    func_800A9890(D_8007AAE0[D_801E289C]);
+                    if (D_801FA960 == 0x63) {
+                        id = 0x10;
+                        goto play;
+                    }
+                    if (D_801FA984[0] != 0 && D_801FA984[1] != 0 && D_801FA984[2] != 0) {
+                        id = 0xF;
+                        goto play;
+                    }
+                    goto done;
+                case 0x70:
+                    cdload_load_overlay(1);
+                    id = 0x1B;
+                    goto play;
+                case 0x7C:
+                    cdload_load_overlay(1);
+                    id = 0;
+                play:
+                    func_800A9890(id);
+                done:
+                    cdload_load_overlay(0);
+                    D_801CA45C = 1;
+                    D_801D3780 = 0x65;
+                    func_80017B24();
+                    return;
+                }
+                goto reset;
+            case 8:
+                if (func_8009C828(&D_801D3780) == 0) {
+                    D_801FA960 = 0;
+                    D_801F9AE0 = 0;
+                    D_801E29BC = 0x78;
+                    D_801D36FC = 0x130;
+                    D_801D3780 = 0;
+                    D_801CA45C = 0;
+                    func_8001D17C();
+                    func_8001E758();
+                }
+                return;
+            case 6:
+            case 7:
+            default:
+            reset:
+                D_801E29BC = 0x78;
+                D_801D3780 = 0;
+                if (D_801FA960 == 0x7C) {
+                    D_801D3780 = 8;
+                    D_800A92B8 = 0;
+                    D_800A9298 = 0;
+                    func_8009C828(&D_801D3780);
+                    return;
+                }
+                if (D_800AA2DC != 0) {
+                    D_801D36FC = func_800249B8(func_8001CFAC() & 0xFFFF);
+                    cdload_load_overlay(0);
+                    func_8001C02C();
+                    return;
+                }
+                D_801D36FC = func_800249B8(func_8001CFAC() & 0xFFFF);
+                return;
+            }
+        }
+        if (state == 1) {
+            func_800991EC();
+            return;
+        }
+        if ((s16) (D_801FA960 % 5) != 0 || D_801FA960 == 0) {
+            D_801D3780 = 5;
+            return;
+        }
+        if (state == 2) {
+            func_800180E4();
+            D_800AA2EC = 0x44;
+            func_8001ED54(&D_800897A0);
+            D_800AA2EC = 0x47;
+            func_8001ED54(&D_800897E0);
+            D_800AA2EC = 0x45;
+            func_8001ED54(&D_800897C4);
+            D_800A92D0 = 0;
+            D_800A9840 = state;
+            D_801E2A44 = 0x45;
+            D_801F9AAC = 0x47;
+            D_801D3780++;
+            return;
+        }
+        if (state == 3) {
+            if (D_801F9944 != 0) {
+                D_801F9944--;
+            }
+            func_80019268();
+            prev = D_800A9220;
+            D_800A9220 = D_801E0D7C & 0x3FFFFFFF;
+            D_800A9250 = prev;
+            if ((D_800A9220 & 0x100401) && D_801F9944 == 0) {
+                if (--D_800A92D0 < 0) {
+                    D_800A92D0 = D_800A9840 - 1;
+                }
+                D_801F9944 = 0xB;
+                D_801D872C /= 2;
+                func_8001F724(0x1E);
+            } else if ((D_800A9220 & 0x200802) && D_801F9944 == 0) {
+                if (++D_800A92D0 >= (s16) D_800A9840) {
+                    D_800A92D0 = 0;
+                }
+                D_801F9944 = 0xB;
+                D_801D872C /= 2;
+                func_8001F724(0x1E);
+            } else if ((D_800A9220 & 0x01004010) && D_801F9944 == 0) {
+                D_801F9944 = 0xB;
+                D_801D872C /= 2;
+                D_801D3780++;
+                main_free_kind(0x550);
+                if (D_800A92D0 == 0) {
+                    D_800A9898 = 1;
+                    D_800A98B8 = 0;
+                    D_800A92A0 = 0;
+                    D_801E29BC = 5;
+                } else {
+                    D_800A9898 = 1;
+                    D_800A98B8 = 4;
+                }
+            }
+            if (D_800A92D0 == 0) {
+                func_8001EC74(0x405, (s16) D_801E2A44);
+                func_8001EC74(0x406, D_801F9AAC);
+            } else {
+                func_8001EC74(0x405, D_801F9AAC);
+                func_8001EC74(0x406, (s16) D_801E2A44);
+            }
+            func_80018C14();
+            return;
+        }
+        func_800A1720(D_801FA960);
+    } else {
+        cdload_load_overlay(0);
+        func_8001F6B4();
+        func_80062EA8(1);
+        func_800996CC();
+        D_801D3780 = 1;
+    }
+}
+#else
 INCLUDE_ASM("asm/main/nonmatchings/main", func_8001C83C);
+#endif
 
 s32 func_8001CFAC(void) {
     return 0x200;
@@ -3511,7 +3720,111 @@ void func_8001EE60(void) {
     func_8001EEA0();
 }
 
+#ifdef NON_MATCHING
+/* 96.28%: the frame is 8 bytes smaller (0x40, original 0x48), the saved registers are assigned in another order
+ * (the original moves the glyph id from s1 to s3 after func_8001B128), and the original loads the glyph's width
+ * before the 0x2000 test and pen_y in that branch. Prints D_801D8588's text: a sprite per glyph, control codes
+ * below 0x20 through D_8007B04C */
+extern void (*D_8007B04C[])(void);
+extern GameObject *D_801FB17C;
+
+void func_8001EEA0(void) {
+    Fixed off;
+    Glyph *glyph;
+    u32 id;
+    u32 code;
+    s32 saved0;
+    s32 saved34;
+    s32 saved8;
+    s32 saved30;
+    s32 saved10;
+
+    D_801FB17C = NULL;
+    func_8001F400();
+    func_8001F4EC();
+    func_8001F4F4();
+    if (D_801D8588.unk_10.s.hi != 0) {
+        D_801D8588.unk_32 = D_801D8588.unk_10.s.hi;
+        D_801D8588.unk_10.s.hi = 0;
+    }
+    *(s32 *) &D_801D8588.unk_34 = *(s32 *) &D_801D8588.pen_x;
+    func_8001F464();
+    for (D_801D8588.unk_3A = *D_801D8588.text; D_801D8588.unk_3A != 0; D_801D8588.unk_3A = *D_801D8588.text) {
+        D_801D8588.unk_38 = 0;
+        D_801D8588.text++;
+        if (D_801D8588.unk_3A > 0x20) {
+            saved0 = D_801D8588.unk_00;
+            saved34 = *(s32 *) &D_801D8588.unk_34;
+            saved8 = D_801D8588.unk_08;
+            saved30 = *(s32 *) &D_801D8588.unk_30;
+            code = D_801D8588.glyphs[D_801D8588.unk_3A - 0x21];
+            saved10 = D_801D8588.unk_10.w;
+            glyph = func_8001B128(code);
+            id = code;
+            func_8001E638((Unk1E638 *) glyph, D_801D8588.unk_20, (Fixed *) &D_801D8588.unk_30, &off.w);
+            if (D_801D8588.flags & 0x10000) {
+            if ((D_800AA248.cur_obj = func_8001E204()) != NULL) {
+                D_800AA248.cur_obj->frame = (SpriteFrame *) glyph;
+                D_800AA248.cur_obj->anim_frame = id;
+                D_800AA248.cur_obj->unk_2C.w = ((Unk1E638 *) glyph)->unk_4.w;
+                D_800AA248.cur_obj->unk_24 = glyph->unk_0;
+                D_800AA248.cur_obj->unk_74 = D_800AA2EC;
+                D_800AA248.cur_obj->colour = 0xFFFFFFFF;
+                D_800AA248.cur_obj->unk_72 = 0xF;
+                D_800AA248.cur_obj->unk_28.s.lo = D_800AA248.cur_obj->pos_x.s.hi = D_801D8588.pen_x - D_801D8588.unk_32;
+                D_800AA248.cur_obj->unk_28.s.hi = D_800AA248.cur_obj->pos_y.s.hi = D_801D8588.pen_y - off.s.hi;
+                D_800AA248.cur_obj->unk_20 = D_801D8588.unk_20;
+                D_800AA248.cur_obj->unk_20 = 0;
+                D_800AA248.cur_obj->kind = D_801D8588.unk_18;
+                D_800AA248.cur_obj->unk_6C = D_801D8588.unk_28 | 8;
+                D_800AA248.cur_obj->size.w = D_800AA248.cur_obj->unk_2C.w;
+                D_800AA248.cur_obj->priority = 0x7000;
+                D_800AA248.cur_obj->unk_82 = 0;
+                if (D_801FB17C == NULL) {
+                    D_801FB17C = D_800AA248.cur_obj;
+                }
+                if (D_801D8588.unk_38 == 0 && !(D_801D8588.flags & 0x20000)) {
+                    func_8001E2F8(D_800AA248.cur_obj);
+                }
+            }
+            if (D_801D8588.unk_38 != 0) {
+                D_801D8588.unk_00 = saved0;
+                *(s32 *) &D_801D8588.unk_34 = saved34;
+                D_801D8588.unk_08 = saved8;
+                *(s32 *) &D_801D8588.unk_30 = saved30;
+                D_801D8588.unk_10.w = saved10;
+                *(s32 *) &D_801D8588.pen_x = D_801D8588.unk_3C;
+                continue;
+            }
+            if (!(D_801D8588.flags & 0x2000)) {
+                D_801D8588.pen_x += glyph->unk_4;
+            }
+            D_801D8588.unk_00 = saved0;
+            D_801D8588.unk_10.w = saved10;
+            *(s32 *) &D_801D8588.unk_34 = saved34;
+            D_801D8588.unk_08 = saved8;
+            *(s32 *) &D_801D8588.unk_30 = saved30;
+            } else {
+                func_8001B5E8(2);
+                continue;
+            }
+        } else if (D_801D8588.unk_3A < 0x20) {
+            D_8007B04C[D_801D8588.unk_3A - 1]();
+            continue;
+        } else {
+            D_801D8588.unk_3A = 0;
+            D_801D8588.unk_3C = *(s32 *) &D_801D8588.pen_x;
+            if (!(D_801D8588.flags & 0x2000)) {
+                D_801D8588.pen_x += D_801D8588.unk_30;
+            }
+        }
+        D_801D8588.pen_x += D_801D8588.unk_10.s.lo;
+        D_801D8588.pen_y += D_801D8588.unk_10.s.hi;
+    }
+}
+#else
 INCLUDE_ASM("asm/main/nonmatchings/main", func_8001EEA0);
+#endif
 
 void func_8001F268(void) {
 }
@@ -3556,7 +3869,7 @@ void func_8001F39C(TextMessage *msg) {
     D_801D8588.unk_08 = msg->unk_0C;
     D_801D8588.pen_x = msg->x;
     D_801D8588.pen_y = msg->y;
-    D_801D8588.unk_10 = msg->spacing;
+    D_801D8588.unk_10.w = msg->spacing;
     D_801D8588.glyphs = msg->glyphs;
     D_801D8588.unk_18 = msg->kind;
     D_801D8588.text = msg->text;
@@ -3606,19 +3919,19 @@ s32 func_8001F50C(u8 *text) {
 
     saved0 = D_801D8588.unk_00;
     saved30 = *(s32 *) &D_801D8588.unk_30;
-    saved10 = D_801D8588.unk_10;
+    saved10 = D_801D8588.unk_10.w;
     p = text;
     func_8001F400();
     c = *p;
     width = 0;
     while (c != 0 && c != 13 && c != 10) {
         if (D_801D8588.flags & 0x2000) {
-            width += (s16) D_801D8588.unk_10;
+            width += D_801D8588.unk_10.s.lo;
         } else {
             if (c == 0x20) {
-                width += D_801D8588.unk_30 + (s16) D_801D8588.unk_10;
+                width += D_801D8588.unk_30 + D_801D8588.unk_10.s.lo;
             } else {
-                width += func_8001B128(D_801D8588.glyphs[*p - 0x21])->unk_4 + (s16) D_801D8588.unk_10;
+                width += func_8001B128(D_801D8588.glyphs[*p - 0x21])->unk_4 + D_801D8588.unk_10.s.lo;
             }
         }
         p++;
@@ -3626,7 +3939,7 @@ s32 func_8001F50C(u8 *text) {
     }
     D_801D8588.unk_00 = saved0;
     *(s32 *) &D_801D8588.unk_30 = saved30;
-    D_801D8588.unk_10 = saved10;
+    D_801D8588.unk_10.w = saved10;
     return width;
 }
 
@@ -3643,7 +3956,7 @@ void func_8001F61C(u8 *text, s16 x, s16 y, s32 spacing, s32 arg4, s32 *glyphs, s
     D_801D8588.unk_08 = arg4;
     D_801D8588.pen_x = x;
     D_801D8588.pen_y = y;
-    D_801D8588.unk_10 = spacing;
+    D_801D8588.unk_10.w = spacing;
     D_801D8588.glyphs = glyphs;
     D_801D8588.unk_18 = arg7;
     D_801D8588.text = text;

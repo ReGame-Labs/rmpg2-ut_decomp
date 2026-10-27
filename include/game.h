@@ -724,7 +724,7 @@ typedef struct TextState {
     /* 0x08 */ s32 unk_08;
     /* 0x0C */ u16 pen_x;
     /* 0x0E */ u16 pen_y;
-    /* 0x10 */ s32 unk_10;
+    /* 0x10 */ Fixed unk_10;                /* the advance per glyph: x in s.lo, a line feed in s.hi */
     /* 0x14 */ s32 *glyphs;                /* the font */
     /* 0x18 */ s32 unk_18;
     /* 0x1C */ u8 *text;                   /* the string being printed */
