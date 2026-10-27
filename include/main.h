@@ -125,5 +125,7 @@ extern u16 D_801C51D4[];                /* the CLUT ids func_8001A870 loaded */
 extern u16 D_801D370C;
 extern u16 D_801FA730;                  /* the calls func_800205AC ran this frame */
 extern s32 D_801F9A2C;
+s32 func_8001E59C(GameObject *sprite, s32 image);
+extern s32 D_800AA2A8;                  /* D_800AA248.unk_60 by its own name */
 
 #endif /* MAIN_H */

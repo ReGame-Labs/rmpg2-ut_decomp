@@ -140,8 +140,8 @@ void func_8002469C(s32 *, s16, s16);
 void func_80023CFC(Npc *npc);
 void func_800256CC(BuildingItem *);
 void *func_80025C08(void *);
-s32 func_80019B08(s32, s32, s32, s16);
-s32 func_80019DAC(s32, s32, s32, s16);
+s32 func_80019B08(s32, s32, s16, s16);
+s32 func_80019DAC(s32, s32, s16, s16);
 extern s16 D_801D876C[];
 void func_80025E68(void);
 void func_8002A72C(void);
@@ -976,9 +976,144 @@ void func_80019ADC(s32 arg0) {
     memset(D_801E1C78, 0, 0x10000);
 }
 
-INCLUDE_ASM("asm/main/nonmatchings/main", func_80019B08);
+s32 func_80019B08(s32 pixels, s32 w, s16 h, s16 slot) {
+    Unk1C542C *e;
+    RECT rect;
+    s32 cols;
+    s32 rows;
+    s32 page;
+    s32 row;
+    s32 col;
+    s32 i;
+    s32 j;
+    s32 busy;
+    s32 width;
+    s32 x;
+    s32 y;
 
+    cols = (s16) ((w + 1) & ~1) >> 5;
+    e = &D_801C542C[slot];
+    width = (w + 1) & ~1;
+    if (width & 0x1F) {
+        cols++;
+    }
+    rows = (s16) h >> 5;
+    if (h & 0x1F) {
+        rows++;
+    }
+    for (page = 0; page < 11; page++) {
+        for (row = 0; row <= 8 - rows; row++) {
+            for (col = 0; col <= 8 - cols; col++) {
+                busy = 0;
+                for (i = 0; i < rows; i++) {
+                    for (j = 0; j < cols; j++) {
+                        if (D_800AA300[page][i + row][j + col] != 0) {
+                            busy = 1;
+                            break;
+                        }
+                    }
+                }
+                if (busy == 0) {
+                    for (i = 0; i < rows; i++) {
+                        for (j = 0; j < cols; j++) {
+                            D_800AA300[page][i + row][j + col] = 1;
+                        }
+                    }
+                    x = (page % 6) << 7;
+                    y = (page / 6) << 8;
+                    e->unk_0 = GetTPage(1, 0, x + 0x100, y);
+                    e->unk_2 = (col << 13) | (row << 5);
+                    rect.w = (s16) width >> 1;
+                    rect.h = h;
+                    rect.x = x + 0x100 + col * 16;
+                    rect.y = y + (row << 5);
+                    e->unk_8 = rect.y;
+                    e->unk_4 = rect.x;
+                    e->unk_C = rect.w;
+                    e->unk_10 = rect.h;
+                    LoadImage(&rect, (unsigned long *) pixels);
+                    return page;
+                }
+            }
+        }
+    }
+    return -1;
+}
+
+#ifdef NON_MATCHING
+/* 98.46%: 98.5 %: the original computes the halved width into a1 and copies it into s7, so it extends (s16) width
+ * again for rect.w; here GCC knows the value is extended and drops the shifts (two instructions). The 8-bit version
+ * of func_80019B08: half-width 128-pixel tpages, two per page */
+s32 func_80019DAC(s32 pixels, s32 w, s16 h, s16 slot) {
+    Unk1C542C *e;
+    RECT rect;
+    s32 width;
+    s32 cols;
+    s32 rows;
+    s32 page;
+    s32 half;
+    s32 row;
+    s32 col;
+    s32 i;
+    s32 j;
+    s32 busy;
+    s32 x;
+    s32 y;
+
+    cols = ((s16) ((w + 1) & ~1) >> 1) >> 5;
+    e = &D_801C542C[slot];
+    width = (s16) ((w + 1) & ~1) >> 1;
+    if (width & 0x1F) {
+        cols++;
+    }
+    rows = (s16) h >> 5;
+    if (h & 0x1F) {
+        rows++;
+    }
+    for (page = 0; page < 11; page++) {
+        for (half = 0; half < 8; half += 4) {
+            for (row = 0; row <= 8 - rows; row++) {
+                for (col = half; col <= half + 4 - cols; col++) {
+                    busy = 0;
+                    for (i = 0; i < rows; i++) {
+                        for (j = 0; j < cols; j++) {
+                            if (D_800AA300[page][i + row][j + col] != 0) {
+                                busy = 1;
+                                break;
+                            }
+                        }
+                    }
+                    if (busy == 0) {
+                        for (i = 0; i < rows; i++) {
+                            for (j = 0; j < cols; j++) {
+                                D_800AA300[page][i + row][j + col] = 1;
+                            }
+                        }
+                        page = page * 2 + half / 4;
+                        x = (page % 12) << 6;
+                        y = (page / 12) << 8;
+                        e->unk_0 = GetTPage(0, 0, x + 0x100, y);
+                        rect.w = ((s16) width + 1) >> 1;
+                        rect.h = h;
+                        rect.x = x + 0x100 + (col - half) * 16;
+                        rect.y = y + (row << 5);
+                        e->unk_2 = ((col - half) << 14) | (row << 5);
+                        e->unk_4 = rect.x;
+                        e->unk_8 = rect.y;
+                        e->unk_C = rect.w;
+                        e->unk_10 = rect.h;
+                        LoadImage(&rect, (unsigned long *) pixels);
+                        return page;
+                    }
+                }
+            }
+        }
+    }
+    return -1;
+}
+#else
 INCLUDE_ASM("asm/main/nonmatchings/main", func_80019DAC);
+#endif
 
 s32 func_8001A0A0(void) {
     s32 index;
@@ -2207,7 +2342,96 @@ s32 func_8001D974(void) {
 
 INCLUDE_ASM("asm/main/nonmatchings/main", func_8001D998);
 
-INCLUDE_ASM("asm/main/nonmatchings/main", func_8001DCB4);
+GameObject *func_8001DCB4(void) {
+    u16 *p;
+    GameObject *obj;
+
+    p = (u16 *) D_800AA248.new_def;
+    D_800AA248.unk_04 = *(s32 *) p;
+    p += 2;
+    obj = func_8001E204();
+    if (obj == NULL) {
+        func_8001B5E8(0);
+    }
+    func_8001E59C(obj, D_800AA248.unk_04);
+    D_800AA248.unk_74 = *p++;
+    D_800AA248.unk_44 = *p++;
+    obj->unk_6C |= D_800AA248.unk_44;
+    if (D_800AA248.unk_74 & 0x10) {
+        main_set_frame(D_800AA248.unk_04, (u16) D_800AA248.unk_74, obj);
+    } else {
+        obj->flags |= D_800AA248.unk_74;
+    }
+    D_800AA248.unk_60 = *(s32 *) p;
+    p += 2;
+    D_800AA248.unk_38 = 0x7FF;
+    if (D_800AA248.unk_60 & 0x40) {
+        D_800AA248.unk_74 = *(s32 *) p;
+        p += 2;
+        if (D_800AA248.unk_74 != 0) {
+            D_800AA248.unk_38 = D_800AA248.unk_74;
+        }
+    }
+    obj->kind = D_800AA248.unk_38;
+    if (D_800AA248.unk_60 & 0x20) {
+        D_800AA248.unk_54 = *(s32 *) p;
+        p += 2;
+        D_800AA248.unk_50 = *(s32 *) p;
+        p += 2;
+        D_800AA248.unk_4C = *(s32 *) p;
+        p += 2;
+        if (D_800AA248.unk_44 & 0x8000) {
+            D_800AA248.unk_54 >>= 16;
+            D_800AA248.unk_50 >>= 16;
+            obj->pos_x.s.hi = obj->unk_28.s.lo = (u16) D_800AA248.unk_54 - obj->unk_1C.u.lo;
+            obj->pos_y.s.hi = obj->unk_28.s.hi = (u16) D_800AA248.unk_50 - obj->unk_1C.u.hi;
+        } else {
+            obj->pos_x.w = D_800AA248.unk_54;
+            obj->pos_y.w = D_800AA248.unk_50;
+        }
+    }
+    D_800AA248.unk_38 = 0;
+    D_800AA248.unk_74 = 0;
+    if (D_800AA248.unk_60 & 1) {
+        D_800AA248.unk_74 = *(s32 *) p;
+        p += 2;
+        if (D_800AA248.unk_74 != 0) {
+            D_800AA248.unk_38 = D_800AA248.unk_74;
+        }
+    }
+    obj->unk_82 = D_800AA248.unk_38;
+    D_800AA248.unk_38 = 0;
+    if (D_800AA248.unk_60 & 2) {
+        D_800AA248.unk_38 = *(s32 *) p;
+        p += 2;
+    }
+    obj->priority = D_800AA248.unk_38;
+    if (D_800AA248.unk_60 & 4) {
+        D_800AA248.unk_74 = *(s32 *) p;
+        p += 2;
+        if (D_800AA248.unk_74 != 0) {
+            func_80024964(D_800AA248.unk_74, obj);
+        }
+    }
+    if (D_800AA248.unk_60 & 8) {
+        D_800AA248.unk_74 = *(s32 *) p;
+        p += 2;
+        if (D_800AA248.unk_74 != 0) {
+            func_8001E698(obj, D_800AA248.unk_74);
+        }
+    }
+    if (D_800AA248.unk_60 & 0x10) {
+        D_800AA248.unk_58 = *(void (**)(void)) p;
+        if (D_800AA248.unk_58 != NULL) {
+            D_800AA248.unk_00 = (s32) obj;
+            D_800AA248.unk_58();
+        }
+    }
+    if (D_800AA2A8 & 0x80) {
+        func_8001E2F8(obj);
+    }
+    return obj;
+}
 
 /* One pass of a bubble sort of the object list by priority. The loop is entered at its advance at the bottom, as
  * the original's layout has it (jump.c's copy of the exit test before the loop would differ). */

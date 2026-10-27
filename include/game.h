@@ -394,7 +394,8 @@ typedef struct GameState {
     /* 0x4C */ s32 unk_4C;
     /* 0x50 */ s32 unk_50;
     /* 0x54 */ s32 unk_54;
-    /* 0x58 */ u8 unk_58[0x08];
+    /* 0x58 */ void (*unk_58)(void);          /* the creation callback of an ObjectDef (func_8001DCB4) */
+    /* 0x5C */ u8 unk_5C[0x04];
     /* 0x60 */ s32 unk_60;
     /* 0x64 */ u8 unk_64[0x10];
     /* 0x74 */ s32 unk_74;
