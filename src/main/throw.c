@@ -21,7 +21,7 @@ extern s32 D_80091B60[];
 extern s32 D_8008C810[];
 extern s32 D_8008C828[];
 void func_8004A93C(Monster *m);
-u16 func_80053BE8(s16 x, Monster *m);
+u16 monster_test_box_x(s16 x, Monster *m);
 extern s32 D_80091788[];
 extern s32 D_800917D0[];
 extern s32 D_8009192C[];
@@ -1595,7 +1595,7 @@ void func_8004A698(Throw *t) {
                             D_800AA248.cur_obj->flags |= 0x800;
                             goto sound;
                         }
-                        if (D_800AA248.cur_obj->vel_x.w != 0 && func_80053BE8(D_800AA248.cur_obj->pos_x.s.hi, m) != 0) {
+                        if (D_800AA248.cur_obj->vel_x.w != 0 && monster_test_box_x(D_800AA248.cur_obj->pos_x.s.hi, m) != 0) {
                             D_800AA248.cur_obj->vel_x.w >>= 1;
                         }
                     }

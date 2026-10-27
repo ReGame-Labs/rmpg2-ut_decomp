@@ -525,7 +525,7 @@ void building_spawn_monster(Monster *m) {
         func_8005E124(m, 0x7A0);
         return;
     }
-    switch (func_8005F208()) {
+    switch (bonus_get_round_kind()) {
     case 2:
         bonus_create_counter(1, D_801FA8A0[m->id - 1]);
         bonus_create_lives(m);
@@ -3433,7 +3433,7 @@ s32 func_80031714(Monster *m) {
     u16 px;
     s32 hit;
 
-    if (func_8005F208() == 1) {
+    if (bonus_get_round_kind() == 1) {
         x = m->obj->pos_x.s.hi;
         for (i = 0; i < 4; i++) {
             if (x >= D_8007D0A8[i][0] && x <= D_8007D0A8[i][1]) {

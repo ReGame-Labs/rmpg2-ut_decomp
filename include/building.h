@@ -22,7 +22,7 @@ extern u8 D_8007D280[];
 extern s32 D_8007CB2C[4];   /* the four frames of a cloud strip (building_update_cloud), one set */
 extern s32 D_8007CB3C[4];   /* the other set */
 extern s16 D_8007D0A8[4][2];   /* four x ranges (first, last) func_80031714 tests */
-s32 func_8005F208(void);
+s32 bonus_get_round_kind(void);
 extern u8 D_8007D2CC[];
 extern u8 D_8007D318[];
 extern u8 D_8007D364[];

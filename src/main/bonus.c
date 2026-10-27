@@ -556,7 +556,180 @@ s32 func_8005E5C8(void) {
     return 0;
 }
 
-INCLUDE_ASM("asm/main/nonmatchings/bonus", func_8005E60C);
+void bonus_check_round_end(void) {
+    Building *b;
+    Building *cur;
+    Monster *m;
+    Monster *other;
+    s32 i;
+    s32 n;
+    u16 k;
+    s16 count;
+
+    D_800AA250 = 7;
+    if (D_801FB468 != 0) {
+        return;
+    }
+    switch (D_800AA2DC) {
+    case 1:
+    case 2:
+    case 4:
+        b = D_801D3DC8;
+        cur = b;
+        k = 0;
+        count = 0;
+        do {
+            if (cur->unk_058 == 0 && cur->state == 0x11) {
+                count++;
+                if (D_801D8740 >= 2) {
+                    break;
+                }
+            }
+            cur = ++b;
+        } while (k++ < (s16)D_801E29A4);
+        if (D_801D8740 == 1 && count == 2) {
+            if (D_801FB468 == 0) {
+                D_801FB468 = D_801FB49C[0];
+            }
+            D_801FA890 = 0x1E0;
+            return;
+        }
+        if (D_801D8740 >= 2 && count != 0) {
+            if (D_801FB468 == 0) {
+                D_801FB468 = D_801FB49C[k];
+            }
+            D_801FA890 = 0x1E0;
+            return;
+        }
+        if (D_8007BD78.round_timer == 0) {
+            D_801FA890 = 0x1E0;
+            D_801FB468 = 1;
+            D_8007BD78.unk_18[0] = count;
+            D_8007BD78.flags |= 0x100000;
+            return;
+        }
+        bonus_update_counters(0);
+        break;
+    case 8:
+    case 0x10:
+    case 0x20:
+        if (D_8007BD78.round_timer == 0) {
+            if (D_8007BD78.unk_04 == D_801FB49C[D_801D8740 - 1]) {
+                D_801FA890 = 0x1E0;
+                D_801FB468 = 1;
+                return;
+            }
+            D_8007BD78.unk_04 = cdload_get_next_player(D_8007BD78.unk_04);
+            D_8007BD78.round_timer = 0x14;
+            D_8007BD78.unk_18[3] = 0;
+            D_8007BD78.flags |= 0x200;
+            if (D_8007BD78.digits[3][1] != NULL) {
+                func_8001E4B0(D_8007BD78.digits[3][1]);
+                D_8007BD78.digits[3][1] = NULL;
+            }
+            if (D_8007BD78.digits[3][0] != NULL) {
+                func_8001E4B0(D_8007BD78.digits[3][0]);
+                D_8007BD78.digits[3][0] = NULL;
+            }
+            bonus_create_counter(4, 4);
+        }
+        bonus_update_counters(1);
+        m = &D_801E0B78[func_80025DF8(D_801FB49C[D_801D8740 - 1])];
+        if (m->unk_1DE != 0) {
+            m = &D_801E0B78[func_80025DF8(D_8007BD7C)];
+            m->unk_100 = 0;
+            m->obj->vel_x.w = 0;
+            if ((u16)func_80031714(m) == 0) {
+                m->action = 0;
+            }
+            D_801FB468 = 1;
+            D_801FA890 = 0x1E0;
+            return;
+        }
+        m = &D_801E0B78[func_80025DF8(D_8007BD78.unk_04)];
+        if (m->unk_1DE != 0) {
+            D_8007BD78.flags |= 0x200;
+            m = &D_801E0B78[func_80025DF8(D_8007BD78.unk_04)];
+            m->unk_100 = 0;
+            m->obj->vel_x.w = 0;
+            if ((u16)func_80031714(m) == 0) {
+                m->action = 0;
+            }
+            D_8007BD78.unk_18[3] = 0;
+            D_8007BD78.round_timer = 0;
+        }
+        break;
+    case 0x40:
+    case 0x80:
+    case 0x100:
+        if (D_8007BD78.round_timer != 0) {
+            bonus_update_counters(2);
+            break;
+        }
+        for (i = 0; i < D_801D8740; i++) {
+            D_8007BD78.unk_08[D_801FB49C[i] - 1] = (D_8007BD78.unk_08[D_801FB49C[i] - 1] << 16) | D_8007BD78.unk_18[D_801FB49C[i] - 1];
+        }
+        D_801FB468 = 0;
+        for (i = 1; i < D_801D8740; i++) {
+            if ((u32)D_8007BD78.unk_08[D_801FB49C[D_801FB468] - 1] <= (u32)D_8007BD78.unk_08[D_801FB49C[i] - 1]) {
+                D_801FB468 = i;
+            }
+        }
+        D_801FB468 = D_801FB49C[D_801FB468];
+        D_801FA890 = 0x1E0;
+        break;
+    case 0x200:
+    case 0x400:
+    case 0x800:
+        if (D_8007BD8C != 0) {
+            bonus_update_counters(3);
+            break;
+        }
+        D_801FA890 = 0x1E0;
+        D_801FB468 = 1;
+        break;
+    case 0x1000:
+    case 0x2000:
+    case 0x4000:
+        func_80060BA8();
+        if (D_8007BD78.round_timer == 0) {
+            D_801FB468 = 0;
+            D_8007BD78.flags |= 0x100000;
+            for (i = 1; i < D_801D8740; i++) {
+                m = &D_801E0B78[func_80025DF8(D_801FB49C[D_801FB468])];
+                other = &D_801E0B78[func_80025DF8(D_801FB49C[i])];
+                if (m->health.w > other->health.w) {
+                    D_8007BD78.flags &= ~0x100000;
+                } else {
+                    if (m->health.w < other->health.w) {
+                        D_8007BD78.flags &= ~0x100000;
+                    }
+                    D_801FB468 = i;
+                }
+            }
+            D_801FA890 = 0x1E0;
+            D_8007A68A = D_801FB464;
+            D_801FB468 = D_801FB49C[D_801FB468];
+            break;
+        }
+        n = 0;
+        for (i = 0; i < D_801D8740; i++) {
+            m = &D_801E0B78[func_80025DF8(D_801FB49C[i])];
+            if ((m->unk_058 & 1) && m->unk_184 == 0) {
+                n++;
+                D_801FB468 = D_801FB49C[i];
+            }
+        }
+        if (n < 2) {
+            D_801FA890 = 0x1E0;
+            D_8007A68A = D_801FB464;
+            break;
+        }
+        D_801FB468 = 0;
+        bonus_update_counters(4);
+        break;
+    }
+}
 
 void bonus_start_round(void) {
     Monster *e;
@@ -564,7 +737,7 @@ void bonus_start_round(void) {
 
     D_800AA250 = 7;
     func_8005E214();
-    func_8005F9FC();
+    bonus_save_health();
     func_80062E44();
     switch (D_800AA2DC) {
     case 1:
@@ -642,7 +815,7 @@ void func_8005F12C(void) {
     }
 }
 
-s32 func_8005F208(void) {
+s32 bonus_get_round_kind(void) {
     switch (D_800AA2DC) {
     case 1:
     case 2:
@@ -729,9 +902,99 @@ void bonus_create_counter(s32 kind, s32 n) {
 INCLUDE_ASM("asm/main/nonmatchings/bonus", bonus_create_counter);
 #endif
 
-INCLUDE_ASM("asm/main/nonmatchings/bonus", func_8005F5B8);
+#ifdef NON_MATCHING
+/* 99.83%: 99.83 %: the rest is register allocation in case 2: the original gives the D_8007BD78 base s4 and the
+ * inner loop's copy of &D_801FB49C[n] s5, here the other way */
+void bonus_update_counters(s32 round) {
+    Monster *m;
+    GameObject *obj;
+    s32 v;
+    s32 i;
+    s32 j;
+    s32 n;
 
-void func_8005F9FC(void) {
+    if (D_801FB46C != 0) {
+        return;
+    }
+    switch (round) {
+    case 0:
+    case 1:
+    case 2:
+    case 3:
+    case 4:
+        if (!(D_8007BD78.flags & 0x10)) {
+            return;
+        }
+        if (!(D_8007BD78.flags & 0x200)) {
+            D_8007BD78.unk_18[3]++;
+        }
+        if (D_8007BD78.unk_18[3] == 0x3C) {
+            D_8007BD78.unk_18[3] = 0;
+            if (D_8007BD78.round_timer != 0) {
+                D_8007BD78.round_timer--;
+            }
+            v = D_8007BD78.round_timer;
+            if (v < 10 && D_8007BD78.digits[3][1] != NULL) {
+                func_8001E4B0(D_8007BD78.digits[3][1]);
+                D_8007BD78.digits[3][1] = NULL;
+            }
+            if (v == 0 && D_8007BD78.digits[3][0] != NULL) {
+                func_8001E4B0(D_8007BD78.digits[3][0]);
+                D_8007BD78.digits[3][0] = NULL;
+            }
+            for (i = 0; i < 2; i++) {
+                obj = D_8007BD78.digits[3][i];
+                if (obj != NULL) {
+                    main_set_frame(D_800842DC[v % 10], obj->flags, obj);
+                    v /= 10;
+                }
+            }
+        }
+        break;
+    }
+    switch (round) {
+    case 2:
+        for (n = 0; n < D_801D8740; n++) {
+            m = &D_801E0B78[func_80025DF8(D_801FB49C[n])];
+            if (bonus_get_round_kind() != 2 || m->climb_side == 3) {
+                D_8007BD78.unk_18[D_801FB49C[n] - 1]++;
+            }
+            if (D_8007BD78.unk_18[D_801FB49C[n] - 1] == 0x3C) {
+                D_8007BD78.unk_08[D_801FB49C[n] - 1]++;
+                D_8007BD78.unk_18[D_801FB49C[n] - 1] = 0;
+                v = D_8007BD78.unk_08[D_801FB49C[n] - 1];
+                for (i = 0; i < 3; i++) {
+                    obj = D_8007BD78.digits[D_801FB49C[n] - 1][i];
+                    if (obj != NULL) {
+                        main_set_frame(D_800842B4[v % 10], obj->flags, obj);
+                        v /= 10;
+                    }
+                }
+            }
+        }
+        break;
+    case 3:
+        if (D_8007BD78.flags & 0x20) {
+            for (n = 0; n < D_801D8740; n++) {
+                v = D_8007BD78.unk_08[D_801FB49C[n] - 1];
+                for (j = 0; j < 3; j++) {
+                    obj = D_8007BD78.digits[D_801FB49C[n] - 1][j];
+                    if (obj != NULL) {
+                        main_set_frame(D_800842B4[v % 10], obj->flags, obj);
+                        v /= 10;
+                    }
+                }
+            }
+            D_8007BD78.flags &= ~0x20;
+        }
+        break;
+    }
+}
+#else
+INCLUDE_ASM("asm/main/nonmatchings/bonus", bonus_update_counters);
+#endif
+
+void bonus_save_health(void) {
     Monster *e;
     s32 i;
 
@@ -743,7 +1006,7 @@ void func_8005F9FC(void) {
     }
 }
 
-void func_8005FA8C(void) {
+void bonus_restore_health(void) {
     Monster *e;
     s32 i;
 
@@ -1015,7 +1278,100 @@ void func_800603FC(s32 *id, s32 dx, s32 dy, s32 x, s32 y) {
     }
 }
 
-INCLUDE_ASM("asm/main/nonmatchings/bonus", func_80060524);
+void bonus_update_awards(void) {
+    GameObject *box;
+    Monster *m;
+    s32 i;
+    s32 bit;
+
+    if (D_800AA2DC == 0 || !(D_8007BD78.flags & 0x8000)) {
+        return;
+    }
+    if (!(D_8007BD78.flags & 0x10000)) {
+        bonus_award_places();
+    }
+    if (!(D_8007BD78.flags & 0x800)) {
+        func_800636B0();
+        box = main_create_box(0x46, 0x3C, 0x104, 0x73, 0);
+        box->priority = 0x7000;
+        box->kind = 0x7D4;
+        box->flags |= 0x40C;
+        box->unk_6C |= 0x20;
+        D_8007BD78.unk_20 = 0;
+        D_8007BD78.flags |= 0x800;
+        func_8006036C(D_8007AD4C, 0x78, 0x46, 0x44, 0x7D0, D_800115B0);
+        D_8007BD78.unk_54 = 0x7D0;
+        func_80060A7C(0x7D0, 0x404040, 1);
+    }
+    if (!(D_8007BD78.flags & 0x4000) && D_8007BD78.unk_20 > 0x3C) {
+        D_8007BD78.flags |= 0x24000;
+        func_8006036C(D_8007AD4C, 0x6E, 0x69, 0x47, 0x7D1, D_800115C0);
+        D_8007BD78.unk_58[2] = 0x7D1;
+        func_80060A7C(0x7D1, 0x404040, 1);
+    }
+    if (!(D_8007BD78.flags & 0x1000) && D_8007BD78.unk_20 > 0x78) {
+        D_8007BD78.flags |= 0x41000;
+        func_8006036C(D_8007AD4C, 0x6E, 0x82, 0x47, 0x7D2, D_800115C8);
+        D_8007BD78.unk_58[0] = 0x7D2;
+        func_80060A7C(0x7D2, 0x404040, 1);
+    }
+    if (!(D_8007BD78.flags & 0x2000) && D_8007BD78.unk_20 > 0xB4) {
+        D_8007BD78.flags |= 0x82000;
+        func_8006036C(D_8007AD4C, 0x6E, 0x9B, 0x47, 0x7D3, D_800115D0);
+        D_8007BD78.unk_58[1] = 0x7D3;
+        func_80060A7C(0x7D3, 0x404040, 1);
+    }
+    if (D_8007BD78.unk_54 != 0) {
+        func_800603FC(&D_8007BD78.unk_54, 0, 5, 0x78, 0x4B);
+    }
+    if (D_8007BD78.unk_58[2] != 0) {
+        func_800603FC(&D_8007BD78.unk_58[2], 0xA, 0, 0x78, 0x69);
+    }
+    if (D_8007BD78.unk_58[0] != 0) {
+        func_800603FC(&D_8007BD78.unk_58[0], 0xA, 0, 0x78, 0x82);
+    }
+    if (D_8007BD78.unk_58[1] != 0) {
+        func_800603FC(&D_8007BD78.unk_58[1], 0xA, 0, 0x78, 0x9B);
+    }
+    if (D_8007BD78.unk_58[2] == 0 && (D_8007BD78.flags & 0x20000)) {
+        func_80060A7C(0x7E0, 0x40404, 2);
+    }
+    if (D_8007BD78.unk_58[0] == 0 && (D_8007BD78.flags & 0x40000)) {
+        func_80060A7C(0x7E1, 0x40404, 2);
+    }
+    if (D_8007BD78.unk_58[1] == 0 && (D_8007BD78.flags & 0x80000)) {
+        func_80060A7C(0x7E2, 0x40404, 2);
+    }
+    if (D_8007BD78.flags & 0x07000000) {
+        for (i = 0; i < D_801D8740; i++) {
+            m = &D_801E0B78[func_80025DF8(D_801FB49C[i])];
+            if (m != NULL && (m->action == 0 || m->obj->pos_y.s.hi == 0xE1 || m->climb_side == 3)) {
+                switch (D_801FB49C[i]) {
+                case 1:
+                    if (D_8007BD78.flags & 0x01000000) {
+                        m->action = 0x62;
+                    }
+                    break;
+                case 2:
+                    if (D_8007BD78.flags & 0x02000000) {
+                        m->action = 0x62;
+                    }
+                    break;
+                case 3:
+                    if (D_8007BD78.flags & 0x04000000) {
+                        m->action = 0x62;
+                    }
+                    break;
+                }
+            }
+        }
+    }
+    if (D_801FA890 <= 0) {
+        bonus_restore_health();
+        memset(&D_8007BD78, 0, sizeof(D_8007BD78));
+    }
+    D_8007BD78.unk_20++;
+}
 
 void func_80060A7C(s32 id, u32 color, s32 mode) {
     GameObject *s;

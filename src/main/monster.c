@@ -1852,37 +1852,34 @@ u16 func_80053AC4(s16 a, s16 b, s16 c, s16 d, Monster *e) {
     if (e->unk_0DC == 0 || e->action == 0x37) {
         return 0;
     }
-    return func_80053B30(a, b, c, d, e);
+    return monster_test_point(a, b, c, d, e);
 }
 
-#ifdef NON_MATCHING
-/* 99.6 %: (ay - dy) and (ay + dy) land in v1/v0 here; the original computes each into a0, ay's own register */
-s32 func_80053B30(s16 x, s16 y, s16 dx, s16 dy, Monster *e) {
-    s16 px;
+s32 monster_test_point(s16 x, s16 y, s16 dx, s16 dy, Monster *e) {
     u16 ax;
     u16 ay;
 
-    px = x;
     if (x < D_801F9ACA) {
-        px = x + ((D_801D8864.w + 1) >> 16);
+        x += (D_801D8864.w + 1) >> 16;
     }
     ax = e->box_x0;
     ay = e->box_y0;
-    if (px < (s16) (ax - dx) || y < (s16) (ay - dy)) {
+    ax -= dx;
+    ay -= dy;
+    if (x < (s16) ax || y < (s16) ay) {
         return 0;
     }
     ax = e->box_x1;
     ay = e->box_y1;
-    if ((s16) (ax + dx) < px || (s16) (ay + dy) < y) {
+    ax += dx;
+    ay += dy;
+    if ((s16) ax < x || (s16) ay < y) {
         return 0;
     }
     return 1;
 }
-#else
-INCLUDE_ASM("asm/main/nonmatchings/monster", func_80053B30);
-#endif
 
-u16 func_80053BE8(s16 x, Monster *e) {
+u16 monster_test_box_x(s16 x, Monster *e) {
     s16 v;
 
     v = x;
