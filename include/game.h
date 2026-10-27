@@ -657,7 +657,7 @@ typedef struct Unk1D3D64 {
 extern Unk1D3D64 D_801D3D64;
 
 /* The frame's drawing state D_801FAC80 points to: the draw and display environments, two gouraud quads (the sky's
- * gradient: their colour bytes at 0x74..0xB2), the ordering table at 0x154. */
+ * gradient: their colour bytes at 0x74..0xB2), the ordering table at 0x148. */
 typedef struct DrawState {
     /* 0x00 */ DRAWENV draw;
     /* 0x5C */ DISPENV disp;
@@ -665,37 +665,51 @@ typedef struct DrawState {
     /* 0x74 */ u8 unk_74;
     /* 0x75 */ u8 unk_75;
     /* 0x76 */ u8 unk_76;
-    /* 0x77 */ u8 unk_77[0x5];
+    /* 0x77 */ u8 unk_77[0x3];
+    /* 0x7A */ s16 unk_7A;
     /* 0x7C */ u8 unk_7C;
     /* 0x7D */ u8 unk_7D;
     /* 0x7E */ u8 unk_7E;
-    /* 0x7F */ u8 unk_7F[0x5];
+    /* 0x7F */ u8 unk_7F[0x3];
+    /* 0x82 */ s16 unk_82;
     /* 0x84 */ u8 unk_84;
     /* 0x85 */ u8 unk_85;
     /* 0x86 */ u8 unk_86;
-    /* 0x87 */ u8 unk_87[0x5];
+    /* 0x87 */ u8 unk_87[0x3];
+    /* 0x8A */ s16 unk_8A;
     /* 0x8C */ u8 unk_8C;
     /* 0x8D */ u8 unk_8D;
     /* 0x8E */ u8 unk_8E;
-    /* 0x8F */ u8 unk_8F[0x9];
+    /* 0x8F */ u8 unk_8F[0x3];
+    /* 0x92 */ s16 unk_92;
+    /* 0x94 */ u8 unk_94[0x4];
     /* 0x98 */ u8 unk_98;
     /* 0x99 */ u8 unk_99;
     /* 0x9A */ u8 unk_9A;
-    /* 0x9B */ u8 unk_9B[0x5];
+    /* 0x9B */ u8 unk_9B[0x3];
+    /* 0x9E */ s16 unk_9E;
     /* 0xA0 */ u8 unk_A0;
     /* 0xA1 */ u8 unk_A1;
     /* 0xA2 */ u8 unk_A2;
-    /* 0xA3 */ u8 unk_A3[0x5];
+    /* 0xA3 */ u8 unk_A3[0x3];
+    /* 0xA6 */ s16 unk_A6;
     /* 0xA8 */ u8 unk_A8;
     /* 0xA9 */ u8 unk_A9;
     /* 0xAA */ u8 unk_AA;
-    /* 0xAB */ u8 unk_AB[0x5];
+    /* 0xAB */ u8 unk_AB[0x3];
+    /* 0xAE */ s16 unk_AE;
     /* 0xB0 */ u8 unk_B0;
     /* 0xB1 */ u8 unk_B1;
     /* 0xB2 */ u8 unk_B2;
-    /* 0xB3 */ u8 unk_B3[0xA1];
-    /* 0x154 */ unsigned long ot[1];
-} DrawState;
+    /* 0xB3 */ u8 unk_B3[0x3];
+    /* 0xB6 */ s16 unk_B6;
+    /* 0xB8 */ u8 unk_B8[0x90];
+    /* 0x148 */ unsigned long ot[4];        /* cleared reversed, drawn from ot[3] */
+    /* 0x158 */ u8 prims[0x47E0];           /* the frame's primitives */
+    /* 0x4938 */ u8 *next_prim;
+    /* 0x493C */ u16 unk_493C;
+    /* 0x493E */ u16 unk_493E;
+} DrawState;                                /* two at D_801CA474, the frames' double buffer */
 
 extern DrawState *D_801FAC80;
 

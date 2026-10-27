@@ -6,7 +6,7 @@
 
 /* decls:begin */
 extern s32 D_801D3DA8[];
-void func_80063084(s32, s32);
+s32 func_80063084(s32);
 extern s32 D_8007B100[];
 extern u8 D_801F998C[];
 extern u8 *D_801F9AD8;
@@ -130,7 +130,7 @@ void func_8001F39C(TextMessage *);
 void func_8001F6B4(void);
 void func_8001F7F8(s32);
 void func_8001F848(void);
-void func_8001F9DC(void);
+void func_8001F9DC(GameObject *head, GameObject *end);
 void func_800205AC(void);
 void func_80022EC0(Npc *npc);
 void func_80023080(Npc *);
@@ -234,7 +234,7 @@ void func_8001F6E4(void);
 void func_8001F704(void);
 void func_8001F760(void);
 void func_8001F7CC(s32 arg0, s32 arg1);
-void func_8001F9BC(void);
+void func_8001F9BC(GameObject *head, GameObject *end);
 void func_80020FC8(Npc *npc);
 void func_80021034(Npc *npc);
 void func_8002107C(Npc *npc);
@@ -623,7 +623,27 @@ void func_80017B98(void) {
     D_800AA2E0 += 1;
 }
 
-INCLUDE_ASM("asm/main/nonmatchings/main", func_80017C04);
+void func_80017C04(void) {
+    u32 pressed;
+    u32 cur;
+    u32 prev;
+
+    cur = D_801E0D7C;
+    prev = D_801D377C;
+    cur &= 0x10040100;
+    D_801D377C = cur;
+    pressed = 0;
+    if (cur & 0x100) {
+        pressed = ((prev & 0x100) == 0) << 8;
+    }
+    if ((cur & 0x40000) && !(prev & 0x40000)) {
+        pressed |= 0x40000;
+    }
+    if ((cur & 0x10000000) && !(prev & 0x10000000)) {
+        pressed |= 0x10000000;
+    }
+    D_801E28E0 = pressed;
+}
 
 u16 func_80017C80(u16 id) {
     u16 temp_v1;
@@ -878,7 +898,32 @@ u16 *func_800192A0(void) {
 
 INCLUDE_ASM("asm/main/nonmatchings/main", func_800193B8);
 
-INCLUDE_ASM("asm/main/nonmatchings/main", func_80019764);
+void func_80019764(void) {
+    D_801FAC80 = (D_801FAC80 == &D_801CA474[0]) ? &D_801CA474[1] : &D_801CA474[0];
+    ClearOTagR(D_801FAC80->ot, 4);
+    D_801FAC80->next_prim = D_801FAC80->prims;
+    D_801FAC80->unk_493E = 0xFFFF;
+    D_801FAC80->unk_493C = 0xFFFF;
+    func_80018D38();
+    func_80063744();
+    if (D_801E28EC != 0) {
+        if ((u32) D_801E0D48 >= (u32) D_801E2A48 || D_801F991C == 4) {
+            if (D_801D8750 != 0xFFFF) {
+                D_8007A71C = D_801D8750;
+                cdload_stop_xa(0);
+            }
+            if (!(D_8007A71C & 0x8000)) {
+                func_8001F7F8((u16) D_8007A71C);
+            }
+        } else if (D_801F991C == 5) {
+            D_8007A71C = D_801D8750;
+            cdload_stop_xa(0);
+            if (!(D_8007A71C & 0x8000)) {
+                func_8001F7F8((u16) D_8007A71C);
+            }
+        }
+    }
+}
 
 void func_80019890(void) {
     u32 color;
@@ -892,7 +937,7 @@ void func_80019890(void) {
     D_801FAC80->draw.b0 = color;
     PutDispEnv(&D_801FAC80->disp);
     PutDrawEnv(&D_801FAC80->draw);
-    DrawOTag(D_801FAC80->ot);
+    DrawOTag(&D_801FAC80->ot[3]);
 }
 
 u16 func_80019920(u16 bits, u16 which) {
@@ -1109,7 +1154,18 @@ void func_8001A534(s32 arg0, s32 arg1, s32 arg2) {
 
 INCLUDE_ASM("asm/main/nonmatchings/main", func_8001A554);
 
-INCLUDE_ASM("asm/main/nonmatchings/main", func_8001A784);
+s32 func_8001A784(u32 id) {
+    u32 index;
+
+    if ((s32) id >= 0) {
+        index = (id & 0xFFFFFF) >> 1;
+        id = D_801FA738[(id >> 24) & 0x3F].unk_0 + (D_801D8868[index] & 0x7FFFFFFF);
+        if ((D_801D8868[index] & 0x7FFFFFFF) == 0) {
+            id = D_8007AD4C[(func_8001EB10(0x8000, 0xE) & 0x1F) + 10];
+        }
+    }
+    return id;
+}
 
 u16 func_8001A820(s32 index, s32 id) {
     UnkFA738 *e = &D_801FA738[index & 0xFFFF];
@@ -1929,18 +1985,20 @@ INCLUDE_ASM("asm/main/nonmatchings/main", func_8001D998);
 
 INCLUDE_ASM("asm/main/nonmatchings/main", func_8001DCB4);
 
-#ifdef NON_MATCHING
-/* 85.83%: one pass of a bubble sort of the object list by priority. The body matches; the original enters the loop
- * at its test at the bottom (jump.c did not copy the exit test before the loop), the C gets the copy */
+/* One pass of a bubble sort of the object list by priority. The loop is entered at its advance at the bottom, as
+ * the original's layout has it (jump.c's copy of the exit test before the loop would differ). */
 void main_sort_objects(void) {
+    GameObject *head;
     GameObject *cur;
     GameObject *obj;
     GameObject *p;
     s16 last;
 
-    cur = &D_801E28C0;
+    head = &D_801E28C0;
+    cur = head;
     last = 0x7FFF;
-    while ((obj = cur->next) != &D_801E28C0) {
+    goto next;
+    while (obj != head) {
         if (last < (s16) obj->priority) {
             p = cur->prev;
             p->next = obj;
@@ -1954,25 +2012,24 @@ void main_sort_objects(void) {
             cur = obj;
             last = obj->priority;
         }
+    next:
+        obj = cur->next;
     }
 }
-#else
-INCLUDE_ASM("asm/main/nonmatchings/main", main_sort_objects);
-#endif
 
-#ifdef NON_MATCHING
-/* 98.1 %: register names only (the list head's address is kept in t0/t1 in the original, v1/t0 here) */
 void func_8001E010(void) {
+    GameObject *head;
     GameObject *sprite;
     GameObject *next;
     GameObject *pos;
     GameObject *prev;
 
-    sprite = D_801E28C0.next;
+    head = &D_801E28C0;
+    sprite = head->next;
     if (sprite->next != sprite) {
-        D_801E28C0.next = &D_801E28C0;
-        D_801E28C0.prev = &D_801E28C0;
-        if (sprite != &D_801E28C0) {
+        head->next = head;
+        head->prev = head;
+        if (sprite != head) {
             do {
                 pos = D_801E28C0.next;
                 next = sprite->next;
@@ -1985,13 +2042,10 @@ void func_8001E010(void) {
                 pos->prev->next = sprite;
                 pos->prev = sprite;
                 sprite = next;
-            } while (sprite != &D_801E28C0);
+            } while (sprite != head);
         }
     }
 }
-#else
-INCLUDE_ASM("asm/main/nonmatchings/main", func_8001E010);
-#endif
 
 void main_init_objects(void) {
     GameObject *obj;
@@ -2268,7 +2322,27 @@ void func_8001E878(void) {
     }
 }
 
-INCLUDE_ASM("asm/main/nonmatchings/main", main_free_kind_masked);
+/* Frees every object whose kind matches under the mask. Entered at the advance, as main_sort_objects. */
+void main_free_kind_masked(s16 kind, s16 mask) {
+    GameObject *head;
+    GameObject *next;
+    GameObject *sprite;
+
+    kind &= mask;
+    head = &D_801E28C0;
+    sprite = head;
+    goto advance;
+    while (sprite != head) {
+        if ((sprite->kind & mask) == kind) {
+            next = sprite->next;
+            func_8001E4B0(sprite);
+            sprite = next;
+        } else {
+        advance:
+            sprite = sprite->next;
+        }
+    }
+}
 
 void func_8001E94C(s32 arg0, s32 arg1, GameObject *arg2) {
     SpriteFrame *temp_v1;
@@ -2466,7 +2540,24 @@ void func_8001F270(void) {
     func_8001F464();
 }
 
+#ifdef NON_MATCHING
+/* 98.57%: 98.6 %: the original adds 0x80000000 (addu), every C form of the RAM range test gives subu here (also in
+ * a standalone file); the rest matches. Formats the text with the word after its terminator, dereferenced when it
+ * is a word-aligned RAM address */
+void func_8001F2B0(void) {
+    s32 word;
+
+    word = *(s32 *) (((s32) D_801D8588.text + strlen(D_801D8588.text) + 4) & ~3);
+    if ((u32) (word + 0x80000000) <= 0x1FFFFF && !(word & 3)) {
+        sprintf(D_801FAF7C, D_801D8588.text, *(s32 *) word);
+    } else {
+        sprintf(D_801FAF7C, D_801D85A4);
+    }
+    D_801D85A4 = D_801FAF7C;
+}
+#else
 INCLUDE_ASM("asm/main/nonmatchings/main", func_8001F2B0);
+#endif
 
 void func_8001F358(void) {
     sprintf(D_801FAF7C, D_801D8588.text);
@@ -2614,25 +2705,41 @@ void func_8001F7CC(s32 arg0, s32 arg1) {
     func_80062DEC(arg1 & 0xFFFF, arg0 & 0xFFFF, 0);
 }
 
-/* 97 %: the table base and the index swap registers (base in v1, index in v0 in the original) */
-#ifdef NON_MATCHING
 void func_8001F7F8(s32 id) {
-    s32 word;
-
-    if ((id & 0xFFFF) != D_801D8750) {
-        word = D_8007B100[(id & 0x7FFF) - 1];
+    if ((u16) id != D_801D8750) {
         D_801D8750 = id;
-        func_80063084(word, id);
+        func_80063084(D_8007B100[(id & 0x7FFF) - 1]);
     }
 }
-#else
-INCLUDE_ASM("asm/main/nonmatchings/main", func_8001F7F8);
-#endif
 
-INCLUDE_ASM("asm/main/nonmatchings/main", func_8001F848);
+void func_8001F848(void) {
+    s32 bottom;
 
-void func_8001F9BC(void) {
-    func_8001F9DC();
+    bottom = 0x91;
+    if (D_801FA960 >= 100) {
+        bottom = 0xF0;
+    }
+    func_8001F9BC(&D_801E28C0, &D_801E28C0);
+    func_8001F9BC(&D_801E29A8, &D_801E29A8);
+    if (D_801D36FC == 0x150 || (D_801D36FC == 0x160 && D_801FA960 != 0x7C)
+        || (D_801D36FC == 0x120 && D_801F9AE0 == 2)) {
+        if (D_801F9A38 != 0) {
+            D_801FAC80->unk_7A = -(D_801F9ACC.w >> 16);
+            D_801FAC80->unk_82 = -(D_801F9ACC.w >> 16);
+            D_801FAC80->unk_8A = bottom - (D_801F9ACC.w >> 16);
+            D_801FAC80->unk_92 = bottom - (D_801F9ACC.w >> 16);
+            D_801FAC80->unk_9E = -0xA0 - (D_801F9ACC.w >> 16);
+            D_801FAC80->unk_A6 = -0xA0 - (D_801F9ACC.w >> 16);
+            D_801FAC80->unk_AE = -(D_801F9ACC.w >> 16);
+            D_801FAC80->unk_B6 = -(D_801F9ACC.w >> 16);
+            AddPrim(D_801FAC80->ot, D_801FAC80->unk_70);
+            AddPrim(D_801FAC80->ot, &D_801FAC80->unk_94);
+        }
+    }
+}
+
+void func_8001F9BC(GameObject *head, GameObject *end) {
+    func_8001F9DC(head, end);
 }
 
 INCLUDE_ASM("asm/main/nonmatchings/main", func_8001F9DC);

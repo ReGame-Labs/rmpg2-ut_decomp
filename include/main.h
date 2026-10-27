@@ -106,4 +106,15 @@ typedef struct NpcStep {
     Anim *anim;
 } NpcStep;
 
+/* Data the functions below 0x80020D20 read (also declared in building.h). */
+extern s16 D_801F9A38;
+extern DrawState D_801CA474[2];         /* the frames' double buffer (D_801FAC80 points to one) */
+extern s32 D_801E28EC;                  /* an XA track is playing */
+extern s32 D_801E0D48;                  /* the XA track's frame count */
+extern s32 D_801E2A48;                  /* the XA track's length */
+extern s32 D_801F991C;
+extern s32 D_8007A71C;                  /* the music to restart after the XA track */
+void cdload_stop_xa(s32 mode);
+void func_80063744(void);
+
 #endif /* MAIN_H */
