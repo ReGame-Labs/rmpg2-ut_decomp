@@ -24,7 +24,6 @@ typedef struct {
 
 extern ThrowSpeed D_8007F2A4[];
 int abs(int);
-extern GameObject *D_800AA268;     /* D_800AA248.cur_obj, as a scalar: some functions name it so */
 void func_8004AE2C(void);
 u16 func_80053854(s16 x, s16 y, Monster *m);
 extern s16 D_801D3D8A;
@@ -555,7 +554,7 @@ u16 func_80048070(u16 kind, u16 b, Throw *t) {
     } else {
         D_800AA248.cur_obj->vel_x.w = D_8007F2A4[kind].vx;
     }
-    D_800AA268 = saved;
+    D_800AA268.p = saved;
     return 0;
 }
 
@@ -918,7 +917,7 @@ u16 func_80048B98(u16 b, Throw *t) {
             D_800AA248.cur_obj->vel_x.w = vx;
         }
     }
-    D_800AA268 = saved;
+    D_800AA268.p = saved;
     return 0;
 }
 
@@ -1077,7 +1076,7 @@ void func_800490D4(Throw *t) {
             } while (--i != 0);
         }
     }
-    D_800AA268 = saved;
+    D_800AA268.p = saved;
 }
 
 void func_8004928C(void) {
@@ -1209,9 +1208,9 @@ void func_80049650(Throw *t) {
             }
         } while (--i != 0);
         if (x != 0) {
-            D_800AA268->pos_x.s.hi = x;
+            D_800AA268.p->pos_x.s.hi = x;
         }
-        D_800AA268->flags |= 0x20;
+        D_800AA268.p->flags |= 0x20;
     } else if (D_801F9ACC + cur->pos_y.w > 0xD8FFFF) {
         cur->pos_y.w = 0xCF0000;
         D_800AA248.cur_obj->flags &= ~0x20;
@@ -1373,7 +1372,7 @@ void func_80049D90(Throw *t) {
 }
 
 void func_80049E10(Throw *t) {
-    GameObject *saved = D_800AA268;
+    GameObject *saved = D_800AA268.p;
     Monster *m;
     s32 vx;
     u16 i;
@@ -1415,7 +1414,7 @@ void func_80049E10(Throw *t) {
             }
         }
     }
-    D_800AA268 = saved;
+    D_800AA268.p = saved;
 }
 
 void func_8004A044(Throw *t) {
@@ -1427,7 +1426,7 @@ void func_8004A044(Throw *t) {
     if (t->unk_0A != 1) {
         return;
     }
-    obj = D_800AA268;
+    obj = D_800AA268.p;
     if (obj->unk_6C & 0x80) {
         func_8004AE2C();
         return;
@@ -1457,7 +1456,7 @@ void func_8004A044(Throw *t) {
 }
 
 void func_8004A1F8(Throw *t) {
-    GameObject *saved = D_800AA268;
+    GameObject *saved = D_800AA268.p;
     Monster *m;
     s32 vx;
     u16 i;
@@ -1507,7 +1506,7 @@ void func_8004A1F8(Throw *t) {
             }
         }
     }
-    D_800AA268 = saved;
+    D_800AA268.p = saved;
 }
 
 s32 func_8004A468(Monster *m) {
@@ -1639,7 +1638,7 @@ sound:
         }
     }
 end:
-    D_800AA268 = saved;
+    D_800AA268.p = saved;
 }
 #else
 INCLUDE_ASM("asm/main/nonmatchings/game_8004750C", func_8004A698);
@@ -1690,7 +1689,7 @@ u16 func_8004A9B0(m, a, kind, b, c)
     u16 b;
     u16 c;
 {
-    GameObject *saved = D_800AA268;
+    GameObject *saved = D_800AA268.p;
     Throw *t;
     u16 n;
     u16 i;
@@ -1712,7 +1711,7 @@ u16 func_8004A9B0(m, a, kind, b, c)
         } while (t->obj != NULL);
     }
     func_8004AEA4(t);
-    t->thrower = D_800AA268;
+    t->thrower = D_800AA268.p;
     r = 1;
     switch (kind) {
     case 1:
@@ -1770,7 +1769,7 @@ u16 func_8004A9B0(m, a, kind, b, c)
     if (r == 1) {
         D_801D8724--;
     }
-    D_800AA268 = saved;
+    D_800AA268.p = saved;
     return r;
 }
 

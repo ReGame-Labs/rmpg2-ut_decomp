@@ -8,7 +8,6 @@
 
 /* The current object as a scalar: the same word as D_800AA248.cur_obj, which some functions read on its own
  * (func_8004C738). */
-extern GameObject *D_800AA268;
 
 s32 func_8001EB10(s32 range, s32 arg1);                     /* a random number */
 void func_8001E4B0(GameObject *obj);                        /* free an object */
@@ -223,7 +222,7 @@ void func_8004C478(void) {
 }
 
 void func_8004C4AC(void) {
-    GameObject *obj = D_800AA268;
+    GameObject *obj = D_800AA268.p;
     s32 *arg = obj->arg.w;
     s32 first = *arg++;
     s32 second = *arg;
@@ -340,7 +339,7 @@ void func_8004C718(void) {
 }
 
 void func_8004C738(void) {
-    GameObject *obj = D_800AA268;
+    GameObject *obj = D_800AA268.p;
     Monster *m = obj->owner.monster;
     u16 *arg = obj->arg.h;
     u16 action;
@@ -471,7 +470,7 @@ void func_8004CA70(void) {
             return;
         }
     }
-    obj = D_800AA268;
+    obj = D_800AA268.p;
     pc = *obj->arg.w;
     obj->unk_48 = pc;
     obj->script_pc = pc;
@@ -1291,7 +1290,7 @@ void func_8004E264(void) {
 }
 
 void func_8004E2A0(void) {
-    GameObject *obj = D_800AA268;
+    GameObject *obj = D_800AA268.p;
     s32 *arg = obj->arg.w;
 
     obj->vel_y.w = *arg++;

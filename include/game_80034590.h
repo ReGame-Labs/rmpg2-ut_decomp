@@ -122,25 +122,6 @@ typedef struct ActorLink {
     /* 0x10 */ u16 unk_10;
 } ActorLink;
 
-/* The game's globals at 0x800AA248 (.bss): the fields are those the code reaches through its address. */
-typedef struct GameGlobals {
-    /* 0x00 */ s32 unk_0;       /* game_8003CD08: func_80040294 */
-    /* 0x04 */ s32 unk_4;
-    /* 0x08 */ u8 unk_8[0x4];
-    /* 0x0C */ s32 unk_C;       /* game_8003CD08: func_8004022C */
-    /* 0x10 */ u8 unk_10[0x10];
-    /* 0x20 */ GameObject *unk_20;   /* the monster being moved */
-    /* 0x24 */ u8 unk_24[0x18];
-    /* 0x3C */ struct Effect *unk_3C;  /* the effect being set up (game_80034590: what func_8001D110 returns) */
-    /* 0x40 */ u8 unk_40[0xC];
-    /* 0x4C */ s32 unk_4C;
-    /* 0x50 */ u8 unk_50[0x28];
-    /* 0x78 */ s16 unk_78;      /* game_8003CD08: func_8003E79C's result */
-    /* 0x7A */ u16 unk_7A;      /* func_8003EB5C's result: 1 when the animation was already current */
-} GameGlobals;
-
-extern GameGlobals D_800AA248;
-
 
 /* The records of game_80034590: 0x78 bytes each, six at D_801FAC9C (D_801D8730 counts them), each with a mover
  * (unk_0), a kind (unk_6), an action (unk_8) and a state (unk_A), updated by a dispatcher per kind on the action.
@@ -245,19 +226,5 @@ typedef struct NpcS {
 typedef struct EffectDef {
     /* 0x00 */ s32 unk_0;       /* copied into the effect's unk_0 */
 } EffectDef;
-
-typedef struct Effect {
-    /* 0x00 */ s32 unk_0;
-    /* 0x04 */ u8 unk_4[0x8];
-    /* 0x0C */ s32 unk_C;       /* game_8003CD08: func_8003ED4C */
-    /* 0x10 */ u8 unk_10[0x2];
-    /* 0x12 */ s16 unk_12;
-    /* 0x14 */ u8 unk_14[0x2];
-    /* 0x16 */ s16 unk_16;
-    /* 0x18 */ u8 unk_18[0x8];
-    /* 0x20 */ s32 unk_20;
-    /* 0x24 */ u8 unk_24[0x4];
-    /* 0x28 */ EffectDef *unk_28;
-} Effect;
 
 #endif /* GAME_80034590_H */

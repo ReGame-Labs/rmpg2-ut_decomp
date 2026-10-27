@@ -5,28 +5,6 @@
 #include "game.h"
 #include "psyq/libc.h"
 
-/* The state block at D_800AA248 (.bss), as func_80032064 reaches it: a base address with field offsets (its member
- * at +0x20 is the object pointer that the rest of the code reaches as the scalar D_800AA268: the two forms give
- * different code, so each function keeps the form the original used). This unit's view of it; include/game.h has
- * another unit's (GameGlobals), to be unified. */
-
-typedef struct GameState {
-    u8 pad_00[0x18];
-    s32 unk_18;     /* D_800AA260: the argument of the current actor's handler (func_8002C0F8) */
-    u8 pad_1C[0x4];
-    struct GameObject *unk_20;  /* D_800AA268 */
-    u8 pad_24[0x18];
-    struct UnkStructD110 *unk_3C;  /* the record func_8001D110 handed out last */
-    u8 pad_40[0x38];
-    s16 unk_78;     /* set when the current object is gone (func_8003BE34) */
-} GameState;
-
-extern GameState D_800AA248;
-
-/* A struct member in the original, not a scalar: GCC 2.8 keeps its stores ordered with struct-field accesses only
- * then (docs/MATCHING.md "Structs, globals and aliasing"; func_8002C75C, func_8002D144 of game_8002A330). */
-extern struct { struct GameObject *obj; } D_800AA268;
-
 /* Declarations of src/main/game_8002A330.c: provisional types from the code's own use; refined as functions match. */
 
 extern u8 D_80011BA4[];
@@ -231,21 +209,6 @@ typedef struct UnkStructPair {  /* provisional: s16 pairs: D_801D8804 (func_8003
     s16 unk_00;
     s16 unk_02;
 } UnkStructPair;
-
-typedef struct UnkStructD110 {  /* provisional: the record func_8001D110 hands out (a sprite request: an animation and a position) */
-    s32 unk_00;
-    u16 unk_04;
-    u8 pad_06[0x6];
-    s32 unk_0C;
-    u8 pad_10[0x2];
-    u16 unk_12;
-    u8 pad_14[0x2];
-    u16 unk_16;
-    u8 pad_18[0x8];
-    s32 unk_20;
-    u8 pad_24[0x4];
-    s32 *unk_28;
-} UnkStructD110;
 
 typedef struct UnkStructFEA4 {  /* provisional: func_8002FEA4's and func_800305C8's argument */
     u8 pad_00[0x2];
@@ -689,8 +652,6 @@ void func_8002E9F8(UnkStruct1 *);
 void func_80032630(s32, UnkStruct9 *);
 void func_8002E0C8(s32, UnkStruct1 *);
 void func_8003E788(UnkStruct9 *);
-extern s32 D_800AA260;
-extern s32 D_800AA2DC;
 void func_8002F688();
 void func_8002FB38(void *, GameObject *);
 void func_8002E348(s32, UnkStruct2 *);
@@ -747,7 +708,7 @@ void func_80031364(UnkStruct1 *);
 extern void *D_8007D008[];
 extern void *D_8007D060[];
 s32 func_8001A3AC(void);
-UnkStructD110 *func_8001D110(void);
+ObjectDef *func_8001D110(void);
 GameObject *func_8001DCB4(void);
 void func_8002CBF4(Monster *);
 void func_8002EBD8(UnkStruct1 *);

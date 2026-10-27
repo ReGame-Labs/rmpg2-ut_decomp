@@ -134,7 +134,7 @@ typedef struct Monster {
     /* 0x008 */ Fixed unk_008;
     /* 0x00C */ u8 unk_00C[0x04];
     /* 0x010 */ Fixed unk_010;                 /* a vertical speed, 16.16 */
-    /* 0x014 */ struct Monster * target;       /* the monster this one is attacking */
+    /* 0x014 */ struct Monster *target;       /* the monster this one is attacking */
     /* 0x018 */ u8 unk_018[0x02];
     /* 0x01A */ u16 unk_01A;
     /* 0x01C */ u16 unk_01C;                   /* a countdown set from a random draw */
@@ -159,12 +159,12 @@ typedef struct Monster {
     /* 0x05C */ u16 unk_05C;
     /* 0x05E */ s16 unk_05E;
     /* 0x060 */ u8 unk_060[0x08];
-    /* 0x068 */ GameObject * obj;              /* its body */
-    /* 0x06C */ GameObject * unk_06C;
-    /* 0x070 */ GameObject * unk_070;
+    /* 0x068 */ GameObject *obj;              /* its body */
+    /* 0x06C */ GameObject *unk_06C;
+    /* 0x070 */ GameObject *unk_070;
     /* 0x074 */ u8 unk_074[0x0C];
-    /* 0x080 */ GameObject * unk_080[6];       /* the score's digit sprites */
-    /* 0x098 */ GameObject * unk_098;
+    /* 0x080 */ GameObject *unk_080[6];       /* the score's digit sprites */
+    /* 0x098 */ GameObject *unk_098;
     /* 0x09C */ u8 unk_09C[0x18];
     /* 0x0B4 */ s32 unk_0B4[2];
     /* 0x0BC */ u8 unk_0BC[0x0C];
@@ -228,11 +228,11 @@ typedef struct Monster {
     /* 0x166 */ u16 unk_166;
     /* 0x168 */ u16 unk_168;
     /* 0x16A */ u8 unk_16A[0x02];
-    /* 0x16C */ GameObject * unk_16C;
+    /* 0x16C */ GameObject *unk_16C;
     /* 0x170 */ u16 unk_170;
     /* 0x172 */ u8 unk_172[0x0A];
     /* 0x17C */ s32 unk_17C;
-    /* 0x180 */ struct Monster * unk_180;
+    /* 0x180 */ struct Monster *unk_180;
     /* 0x184 */ u16 unk_184;
     /* 0x186 */ u8 unk_186[0x02];
     /* 0x188 */ u16 unk_188;
@@ -255,8 +255,8 @@ typedef struct Monster {
     /* 0x1CA */ s16 unk_1CA;
     /* 0x1CC */ u16 unk_1CC;
     /* 0x1CE */ u8 unk_1CE[0x02];
-    /* 0x1D0 */ GameObject ** unk_1D0;
-    /* 0x1D4 */ struct MonsterLink * unk_1D4;  /* cleared when the player is dropped */
+    /* 0x1D0 */ GameObject **unk_1D0;
+    /* 0x1D4 */ struct MonsterLink *unk_1D4;  /* cleared when the player is dropped */
     /* 0x1D8 */ u16 unk_1D8;
     /* 0x1DA */ u8 unk_1DA[0x04];
     /* 0x1DE */ u16 unk_1DE;
@@ -273,7 +273,7 @@ typedef struct Monster {
     /* 0x20C */ s32 unk_20C;
     /* 0x210 */ s32 unk_210;
     /* 0x214 */ s32 unk_214;
-    /* 0x218 */ GameObject * unk_218;
+    /* 0x218 */ GameObject *unk_218;
     /* 0x21C */ u8 unk_21C[0x04];
 } Monster;                              /* 0x220 bytes */
 
@@ -286,5 +286,73 @@ typedef struct MonsterLink {
     /* 0x04 */ u8 unk_04[0x02];
     /* 0x06 */ u16 unk_06;
 } MonsterLink;
+
+/* What func_8001D110 hands out to describe an object to create (D_800AA248.new_def); func_8001DCB4 creates it. */
+typedef struct ObjectDef {
+    /* 0x00 */ s32 id;                         /* the sprite/animation id (the first word of anim) */
+    /* 0x04 */ u16 unk_04;                     /* flags: 0x10 faces left */
+    /* 0x06 */ u16 unk_06;
+    /* 0x08 */ u8 unk_08[0x04];
+    /* 0x0C */ s32 unk_0C;
+    /* 0x10 */ Fixed pos_x;                    /* written whole from an object's position, or its integer half alone */
+    /* 0x14 */ Fixed pos_y;
+    /* 0x18 */ u8 unk_18[0x04];
+    /* 0x1C */ s32 unk_1C;
+    /* 0x20 */ s32 flags;
+    /* 0x24 */ u8 unk_24[0x04];
+    /* 0x28 */ void *anim;                     /* the animation data */
+} ObjectDef;
+
+/* The game's state block at 0x800AA248 (.bss). Some of its members are also reached by their own symbols
+ * (D_800AA268 = cur_obj, D_800AA284 = new_def, D_800AA2DC = unk_94): the two forms give different code, so each
+ * function keeps the form the original used. */
+typedef struct GameState {
+    /* 0x00 */ s32 unk_00;
+    /* 0x04 */ s32 unk_04;
+    /* 0x08 */ s32 unk_08;
+    /* 0x0C */ s32 unk_0C;                     /* D_800AA254 */
+    /* 0x10 */ s32 unk_10;                     /* D_800AA258 */
+    /* 0x14 */ s32 unk_14;                     /* D_800AA25C */
+    /* 0x18 */ s32 unk_18;                     /* the argument of the current actor's handler (D_800AA260) */
+    /* 0x1C */ ObjectDef *unk_1C;
+    /* 0x20 */ GameObject *cur_obj;            /* the object being updated (D_800AA268) */
+    /* 0x24 */ s32 unk_24;                     /* D_800AA26C */
+    /* 0x28 */ s32 *unk_28;
+    /* 0x2C */ s32 unk_2C;
+    /* 0x30 */ s32 *unk_30;
+    /* 0x34 */ void *unk_34;
+    /* 0x38 */ s32 unk_38;
+    /* 0x3C */ ObjectDef *new_def;             /* the object being created (func_8001D110 hands it out; D_800AA284) */
+    /* 0x40 */ s32 unk_40;
+    /* 0x44 */ s32 unk_44;
+    /* 0x48 */ s32 unk_48;
+    /* 0x4C */ s32 unk_4C;
+    /* 0x50 */ s32 unk_50;
+    /* 0x54 */ s32 unk_54;
+    /* 0x58 */ u8 unk_58[0x08];
+    /* 0x60 */ s32 unk_60;
+    /* 0x64 */ u8 unk_64[0x10];
+    /* 0x74 */ s32 unk_74;
+    /* 0x78 */ s16 unk_78;                     /* set when the current object is gone */
+    /* 0x7A */ u16 unk_7A;                     /* 1 when the animation func_8003EB5C starts was already current */
+    /* 0x7C */ u8 unk_7C[0x18];
+    /* 0x94 */ s32 unk_94;                     /* D_800AA2DC */
+} GameState;
+
+extern GameState D_800AA248;
+
+/* D_800AA248.cur_obj by its own name. A one-member struct rather than a plain pointer: GCC 2.8 keeps its stores
+ * ordered with struct-field accesses only then (docs/MATCHING.md "Structs, globals and aliasing"). */
+typedef struct GameObjectRef {
+    GameObject *p;
+} GameObjectRef;
+
+extern GameObjectRef D_800AA268;
+
+/* Other members of the state block by their own names. */
+extern s32 D_800AA260;                  /* unk_18 */
+extern ObjectDef *D_800AA284;           /* new_def */
+extern u16 D_800AA2C0;                  /* 1 when a hit landed this frame */
+extern s32 D_800AA2DC;                  /* unk_94 */
 
 #endif /* GAME_H */

@@ -36,7 +36,6 @@ extern u16 D_801FA98C;
 extern u16 D_801FA990;
 extern u16 D_801E29A4;
 extern u16 D_801F9ABC;
-extern GameObject *D_800AA284;
 extern u16 D_801D8866;
 extern s16 D_801F9ACA;
 extern GameObject *D_801D874C;
@@ -645,7 +644,7 @@ void func_8004F7F4(GameObject *obj, Monster *m1, Monster *m2, GameObject *cur) {
     def->anim = D_8009556C;
     def->id = 0x0100005E;
     def->pos_y.s.hi = cur->pos_y.s.hi;
-    D_800AA284 = (GameObject *) def;
+    D_800AA284 = def;
     o = func_8001DCB4();
     o->unk_70 = 0x743;
     m2->unk_0DC = 0;

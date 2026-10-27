@@ -36,39 +36,6 @@ typedef struct SpriteSlots {
     GameObject *unk_4C;
 } SpriteSlots;
 
-/* The game's state block at 0x800AA248 (the current sprite at unk_20, 0x800AA268). */
-typedef struct GameState {
-    s32 unk_0;
-    s32 unk_4;
-    s32 unk_8;
-    s32 unk_C;
-    s32 unk_10;
-    s32 unk_14;
-    s32 unk_18;
-    struct Unk1D110 *unk_1C;
-    GameObject *unk_20;
-    s32 unk_24;
-    s32 *unk_28;
-    s32 unk_2C;
-    s32 *unk_30;
-    void *unk_34;
-    s32 unk_38;
-    void *unk_3C;
-    s32 unk_40;
-    s32 unk_44;
-    s32 unk_48;
-    s32 unk_4C;
-    s32 unk_50;
-    s32 unk_54;
-    u8 pad_58[0x8];
-    s32 unk_60;
-    u8 pad_64[0x10];
-    s32 unk_74;
-    u8 pad_78[0x2];
-    u16 unk_7A;
-    u8 pad_7C[0x4];
-} GameState;
-
 /* The block at 0x801D3D64. */
 typedef struct Unk801D3D64 {
     u8 pad_0[0x8];
@@ -204,22 +171,6 @@ typedef struct Unk1FAC80 {
     u8 pad_70[0xE4];
     unsigned long ot[1];
 } Unk1FAC80;
-
-/* The record func_8001D110 hands out (a sprite's draw request?). */
-typedef struct Unk1D110 {
-    s32 unk_0;
-    u8 pad_4[0x2];
-    u16 unk_6;
-    u8 pad_8[0x4];
-    s32 unk_C;
-    Fixed unk_10;           /* a position, whole or its integer half */
-    Fixed unk_14;
-    u8 pad_18[0x4];
-    s32 unk_1C;
-    s32 unk_20;
-    u8 pad_24[0x4];
-    struct Anim *unk_28;
-} Unk1D110;
 
 /* The object of func_80029510: a value at unk_8 clamped to 0x440000. */
 typedef struct Unk29510 {
