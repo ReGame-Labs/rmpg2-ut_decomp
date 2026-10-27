@@ -1,4 +1,4 @@
-/* The behaviour slots (Ai): the action dispatcher (func_800416AC) and the state handlers of the Ai kinds 13 to 21,
+/* The behaviour slots (Ai): the action dispatcher (ai_dispatch_action) and the state handlers of the Ai kinds 13 to 21,
  * with their animation states.
  * The boundaries and their evidence: config/main.yaml (docs/MATCHING.md "Splitting a target into files"). */
 #include "common.h"
@@ -15,7 +15,7 @@ u16 func_8004B6C4(GameObject *, s16, s32);
 void func_8004E99C(void);
 s32 abs(s32 x);                 /* GCC's builtin: inlined */
 
-void func_800416AC(const AiHandler *handlers, Ai *ai);
+void ai_dispatch_action(const AiHandler *handlers, Ai *ai);
 void func_80041928(const AiHandler *handlers, Ai *ai);
 void func_80041988(const AiHandler *handlers, Ai *ai);
 void func_800419C4(const AiHandler *handlers, Ai *ai);
@@ -31,7 +31,7 @@ void func_80042008(const AiHandler *handlers, Ai *ai);
 void func_800420F8(const AiHandler *handlers, Ai *ai);
 void func_80042134(const AiHandler *handlers, Ai *ai);
 void func_80041AD0(s16 hit, const AiHandler *handlers, Ai *ai);
-void func_80042238(Ai *ai);
+void ai_face_target(Ai *ai);
 
 extern const AiHandler D_8007E828[];
 extern const AiHandler D_8007E720[];
@@ -139,22 +139,22 @@ extern u8 D_80097228[];
 extern u8 D_800972B4[];
 
 void func_8004160C(Ai *ai) {
-    func_800416AC(D_8007E828, ai);
+    ai_dispatch_action(D_8007E828, ai);
 }
 
 void func_80041634(Ai *ai) {
-    func_800416AC(D_8007E720, ai);
+    ai_dispatch_action(D_8007E720, ai);
 }
 
 void func_8004165C(Ai *ai) {
-    func_800416AC(D_8007E880, ai);
+    ai_dispatch_action(D_8007E880, ai);
 }
 
 void func_80041684(Ai *ai) {
-    func_800416AC(D_8007E8D8, ai);
+    ai_dispatch_action(D_8007E8D8, ai);
 }
 
-void func_800416AC(const AiHandler *handlers, Ai *ai) {
+void ai_dispatch_action(const AiHandler *handlers, Ai *ai) {
     u16 hit;
 
     switch (ai->action) {
@@ -207,7 +207,7 @@ void func_800416AC(const AiHandler *handlers, Ai *ai) {
             func_80041AD0(hit, handlers, ai);
             return;
         }
-        func_80042238(ai);
+        ai_face_target(ai);
         if (ai->action == 0x15) {
             func_80041988(handlers, ai);
         } else if (ai->action == 0x16) {
@@ -278,7 +278,7 @@ void func_80041A70(const AiHandler *handlers, Ai *ai) {
 }
 
 void func_80041AA8(Ai *ai) {
-    func_800416AC(D_8007E930, ai);
+    ai_dispatch_action(D_8007E930, ai);
 }
 
 void func_80041AD0(s16 hit, const AiHandler *handlers, Ai *ai) {
@@ -474,26 +474,26 @@ void func_80042134(const AiHandler *handlers, Ai *ai) {
 }
 
 void func_80042170(Ai *ai) {
-    func_800416AC(D_8007E6C8, ai);
+    ai_dispatch_action(D_8007E6C8, ai);
 }
 
 void func_80042198(Ai *ai) {
-    func_800416AC(D_8007E778, ai);
+    ai_dispatch_action(D_8007E778, ai);
 }
 
 void func_800421C0(Ai *ai) {
-    func_800416AC(D_8007E7D0, ai);
+    ai_dispatch_action(D_8007E7D0, ai);
 }
 
 void func_800421E8(Ai *ai) {
-    func_800416AC(D_8007E988, ai);
+    ai_dispatch_action(D_8007E988, ai);
 }
 
 void func_80042210(Ai *ai) {
-    func_800416AC(D_8007E9E0, ai);
+    ai_dispatch_action(D_8007E9E0, ai);
 }
 
-void func_80042238(Ai *ai) {
+void ai_face_target(Ai *ai) {
     GameObject *target;
     s16 tx;
     s16 x;

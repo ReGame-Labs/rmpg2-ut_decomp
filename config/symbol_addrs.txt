@@ -373,6 +373,16 @@ _copy_memcard_patch = 0x8007A640; // type:func
 // LIBCARD A75.OBJ
 StartCARD2 = 0x8007A674; // type:func
 
+// actor (src/main/actor.c): the actors of the level's list and the behaviour slots around the current object.
+actor_take_hit = 0x8003F74C; // type:func  (player, actor) what the player's hit does, by the actor's kind and state
+
+// ai (src/main/ai.c): the behaviour slots' action dispatcher and state handlers.
+ai_dispatch_action = 0x800416AC; // type:func  (handlers, ai) the handler for ai->action, else the hit test and the walk
+ai_face_target = 0x80042238; // type:func  (ai) turns the current object round when its target is behind it
+
+// attacker (src/main/attacker.c): the pool of four attackers.
+attacker_spawn = 0x80044240; // type:func  (kind, x, y, flags, vel_x, state) a free slot's object, 0 when made, 1 when none
+
 // monster (src/main/monster.c): the action handlers, the hits, climbing the buildings.
 monster_dispatch_action = 0x800500EC; // type:func  (e, obj) runs D_8007F8FC[e->action], the action clamped to 0..0x67
 monster_follow_holder = 0x80050774; // type:func  (e) places its body at the point of the carrying object's frame for its id

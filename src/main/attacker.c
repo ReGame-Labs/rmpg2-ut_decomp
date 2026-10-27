@@ -35,7 +35,7 @@ extern u8 D_800953BC[], D_800951A8[], D_800950EC[], D_80094EC0[], D_80094ECC[], 
 
 /* This file's handlers, in the order the state machines reach them. */
 void func_80044204(Attacker *a);
-s32 func_80044240(u16 kind, s16 x, s16 y, u16 flags, s32 vel_x, u16 state);
+s32 attacker_spawn(u16 kind, s16 x, s16 y, u16 flags, s32 vel_x, u16 state);
 void func_80044418();                   /* (Attacker *a); some callers pass nothing */
 void func_800455CC(Attacker *a);
 void func_80044790(Attacker *a);
@@ -248,7 +248,7 @@ void func_80044204(Attacker *a) {
     func_8003EB5C(D_800953BC, D_800AA248.cur_obj);
 }
 
-s32 func_80044240(u16 kind, s16 x, s16 y, u16 flags, s32 vel_x, u16 state) {
+s32 attacker_spawn(u16 kind, s16 x, s16 y, u16 flags, s32 vel_x, u16 state) {
     GameObject *saved;
     Attacker *a;
     u16 n;
@@ -597,7 +597,7 @@ void func_80044D34(void) {
     if (func_8003E79C() == 0) {
         y = D_800AA248.cur_obj->pos_y.s.hi;
         if (y < 0x99) {
-            func_80044240(8, D_800AA248.cur_obj->pos_x.s.hi, y, 0x1004, D_800AA248.cur_obj->vel_x.w, 0);
+            attacker_spawn(8, D_800AA248.cur_obj->pos_x.s.hi, y, 0x1004, D_800AA248.cur_obj->vel_x.w, 0);
         }
     }
 }
@@ -608,7 +608,7 @@ void func_80044D94(void) {
     if (func_8003E79C() == 0) {
         y = D_800AA248.cur_obj->pos_y.s.hi;
         if (y < 0x99) {
-            func_80044240(9, D_800AA248.cur_obj->pos_x.s.hi, y, 0x1004, D_800AA248.cur_obj->vel_x.w, 0);
+            attacker_spawn(9, D_800AA248.cur_obj->pos_x.s.hi, y, 0x1004, D_800AA248.cur_obj->vel_x.w, 0);
         }
     }
 }
@@ -700,7 +700,7 @@ void func_80045084(void) {
         if (y >= 0xE1) {
             y -= 0x10;
         }
-        func_80044240(1, D_800AA248.cur_obj->pos_x.s.hi, y, 0x1004, D_800AA248.cur_obj->vel_x.w, 0);
+        attacker_spawn(1, D_800AA248.cur_obj->pos_x.s.hi, y, 0x1004, D_800AA248.cur_obj->vel_x.w, 0);
     }
 }
 
@@ -828,7 +828,7 @@ void func_800454BC(void) {
         if (y >= 0xE1) {
             y -= 0x10;
         }
-        func_80044240(7, D_800AA248.cur_obj->pos_x.s.hi, y, 0x1004, D_800AA248.cur_obj->vel_x.w, 0);
+        attacker_spawn(7, D_800AA248.cur_obj->pos_x.s.hi, y, 0x1004, D_800AA248.cur_obj->vel_x.w, 0);
     }
 }
 
@@ -1064,15 +1064,15 @@ void func_80045D14(Attacker *a) {
 }
 
 void func_80045D68(void) {
-    func_80044240(6, D_800AA248.cur_obj->pos_x.s.hi, D_800AA248.cur_obj->pos_y.s.hi - 4, 0x1002, D_800AA248.cur_obj->vel_x.w, 0);
+    attacker_spawn(6, D_800AA248.cur_obj->pos_x.s.hi, D_800AA248.cur_obj->pos_y.s.hi - 4, 0x1002, D_800AA248.cur_obj->vel_x.w, 0);
 }
 
 void func_80045DB4(void) {
-    func_80044240(6, D_800AA248.cur_obj->pos_x.s.hi, D_800AA248.cur_obj->pos_y.s.hi - 4, 0x1003, D_800AA248.cur_obj->vel_x.w, 8);
+    attacker_spawn(6, D_800AA248.cur_obj->pos_x.s.hi, D_800AA248.cur_obj->pos_y.s.hi - 4, 0x1003, D_800AA248.cur_obj->vel_x.w, 8);
 }
 
 void func_80045E04(void) {
-    func_80044240(6, D_800AA248.cur_obj->pos_x.s.hi, D_800AA248.cur_obj->pos_y.s.hi - 4, 0x1003, D_800AA248.cur_obj->vel_x.w, 0xB);
+    attacker_spawn(6, D_800AA248.cur_obj->pos_x.s.hi, D_800AA248.cur_obj->pos_y.s.hi - 4, 0x1003, D_800AA248.cur_obj->vel_x.w, 0xB);
 }
 
 void func_80045E54(Attacker *a) {
@@ -1138,7 +1138,7 @@ void func_80045FCC(Attacker *a) {
 }
 
 void func_800460B8(void) {
-    func_80044240(3, D_800AA248.cur_obj->pos_x.s.hi, D_800AA248.cur_obj->pos_y.s.hi, 0x1004, D_800AA248.cur_obj->vel_x.w, 0);
+    attacker_spawn(3, D_800AA248.cur_obj->pos_x.s.hi, D_800AA248.cur_obj->pos_y.s.hi, 0x1004, D_800AA248.cur_obj->vel_x.w, 0);
 }
 
 void func_800460F8(Attacker *a) {
@@ -1203,7 +1203,7 @@ void func_800462A8(Attacker *a) {
 }
 
 void func_80046300(void) {
-    func_80044240(0xA, D_800AA248.cur_obj->pos_x.s.hi, D_800AA248.cur_obj->pos_y.s.hi, 0x1004, D_800AA248.cur_obj->vel_x.w, 0);
+    attacker_spawn(0xA, D_800AA248.cur_obj->pos_x.s.hi, D_800AA248.cur_obj->pos_y.s.hi, 0x1004, D_800AA248.cur_obj->vel_x.w, 0);
 }
 
 void func_80046340(Attacker *a) {
@@ -1400,7 +1400,7 @@ void func_8004694C(Attacker *a) {
 }
 
 void func_80046A38(void) {
-    func_80044240(4, D_800AA248.cur_obj->pos_x.s.hi, D_800AA248.cur_obj->pos_y.s.hi, 0x1004, D_800AA248.cur_obj->vel_x.w, 0);
+    attacker_spawn(4, D_800AA248.cur_obj->pos_x.s.hi, D_800AA248.cur_obj->pos_y.s.hi, 0x1004, D_800AA248.cur_obj->vel_x.w, 0);
 }
 
 void func_80046A78(Attacker *a) {
@@ -1475,7 +1475,7 @@ void func_80046C30(Attacker *a) {
 }
 
 void func_80046D1C(void) {
-    func_80044240(5, D_800AA248.cur_obj->pos_x.s.hi, D_800AA248.cur_obj->pos_y.s.hi, 0x1004, D_800AA248.cur_obj->vel_x.w, 0);
+    attacker_spawn(5, D_800AA248.cur_obj->pos_x.s.hi, D_800AA248.cur_obj->pos_y.s.hi, 0x1004, D_800AA248.cur_obj->vel_x.w, 0);
 }
 
 void func_80046D5C(Attacker *a) {

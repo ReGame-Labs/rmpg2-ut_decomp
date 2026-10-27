@@ -579,8 +579,8 @@ s32 func_8004F7A4(u8 *list) {
 }
 
 #ifdef NON_MATCHING
-/* 96.33%: 96.3%: one load of the x and a copy as in the original, but the copy, x2 and the definition take a3/a1/a2
- * for the original's a1/a2/a3, and one nop more */
+/* 97.11%: 97%: registers: the copy of the x, the other x and the definition take a3/a1/a2 for the original's
+ * a1/a2/a3, and one nop more */
 void func_8004F7F4(GameObject *obj, Monster *m1, Monster *m2, GameObject *cur) {
     ObjectDef *def;
     GameObject *o;
@@ -592,7 +592,8 @@ void func_8004F7F4(GameObject *obj, Monster *m1, Monster *m2, GameObject *cur) {
     def = func_8001D110();
     t = cur->pos_x.s.hi;
     x1 = t;
-    x2 = obj->pos_x.s.hi;
+    x = obj->pos_x.s.hi;
+    x2 = x;
     if (t <= D_801F9ACA) {
         x1 += D_801D8866;
     }
