@@ -86,11 +86,13 @@ typedef struct GameObject {
     /* 0x4D */ s8 unk_4D;
     /* 0x4E */ u8 unk_4E[0x02];
     /* 0x50 */ struct GameObject *unk_50;
-    /* 0x54 */ u8 unk_54[0x08];
+    /* 0x54 */ s32 unk_54;
+    /* 0x58 */ u8 unk_58[0x04];
     /* 0x5C */ union {                  /* the operands of the script command being run */
                    void *p;
                    u16 *h;
                    s32 *w;
+                   s32 v;                   /* a value (OVERATTR's camera point, y << 16 | x) */
                } arg;
     /* 0x60 */ s32 unk_60;
     /* 0x64 */ s32 unk_64;

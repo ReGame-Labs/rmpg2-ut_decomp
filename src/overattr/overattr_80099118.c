@@ -267,7 +267,98 @@ INCLUDE_ASM("asm/overattr/nonmatchings/overattr_80099118", func_8009A238);
 
 INCLUDE_ASM("asm/overattr/nonmatchings/overattr_80099118", func_8009A708);
 
-INCLUDE_ASM("asm/overattr/nonmatchings/overattr_80099118", func_8009AE40);
+s32 func_8009AE40(s32 *step) {
+    s32 t;
+    GameObject *obj;
+    GameObject *cam;
+    GameObject **p;
+    s32 i;
+    s32 f;
+    s32 x0;
+    s32 y0;
+    s32 x1;
+    s32 y1;
+    s32 x;
+    s32 y;
+
+    t = *step;
+    obj = D_801E28F4.unk_00;
+    if (D_801CA464 & 1) {
+        if ((t & 0xF) < 5) {
+            obj->pos_x.s.hi = -100;
+            obj->pos_y.s.hi = -100;
+        } else {
+            obj->pos_x.s.hi = obj->unk_40.w;
+            obj->pos_y.s.hi = obj->script_pc;
+        }
+        t++;
+        if (t >= 0x65) {
+            return 0;
+        }
+    } else {
+        obj = D_800A9270;
+        if (D_800A9218 != 0) {
+            if (D_800A9240 != 0) {
+                if (--D_800A9238 == -1) {
+                    if (D_800A9240 > 0) {
+                        D_800A9240 = -(D_800A9240 + -1);
+                    } else {
+                        D_800A9240 = -(D_800A9240 + 1);
+                    }
+                    D_800A9238 = 2;
+                }
+                obj->pos_y.s.hi -= D_800A9240;
+            }
+        } else {
+            obj->pos_y.s.hi -= D_800A9240;
+            if (obj->pos_y.s.hi < 0x46) {
+                D_800A9218 = 1;
+                D_800A9240 = 6;
+            }
+        }
+        obj = D_801E28F4.unk_00;
+        for (i = 0, p = D_801E2904; i < 3; i++, p++) {
+            if (*p != NULL) {
+                func_8009EE5C(*p, 0xFF);
+            }
+        }
+        x1 = D_801E28F8[1]->pos_x.s.hi;
+        f = ((t / 2) << 16) / 100;
+        x0 = obj->pos_x.s.hi;
+        y0 = obj->pos_y.s.hi;
+        y1 = D_801E28F8[1]->pos_y.s.hi;
+        cam = D_801E28F8[0];
+        /* the camera's start, end and current points, y << 16 | x (unk_50 is a link in other objects) */
+        cam->unk_50 = (GameObject *) ((y0 << 16) | x0);
+        x = x0 + (((x1 - x0) * f) >> 16);
+        cam->unk_54 = (y1 << 16) | x1;
+        y = y0 + (((y1 - y0) * f) >> 16);
+        cam->arg.v = (y << 16) | x;
+        x -= 0xC8;
+        y -= 0x80;
+        if (x < 0) {
+            x = 0;
+        }
+        if (x > 0x190) {
+            x = 0x190;
+        }
+        if (y < 0) {
+            y = 0;
+        }
+        if (y > 0x100) {
+            y = 0x100;
+        }
+        t++;
+        D_801F9AC8.w = x << 16;
+        D_801F9ACC = y << 16;
+        if (t >= 0xC9) {
+            func_80062E44();
+            return 0;
+        }
+    }
+    *step = t;
+    return 1;
+}
 
 void func_8009B0F0(void) {
     s32 i;
@@ -308,4 +399,69 @@ void func_8009B19C(void) {
     func_8001EDB0();
 }
 
-INCLUDE_ASM("asm/overattr/nonmatchings/overattr_80099118", func_8009B23C);
+void func_8009B23C(void) {
+    ObjectDef *def;
+    GameObject *obj;
+    u8 *p;
+    s32 hours;
+    s32 minutes;
+    u8 pm;
+
+    func_8009B0F0();
+    D_800AA2EC = 0x44;
+    if (D_800AA2DC == 0) {
+        func_8002A354(1);
+    } else {
+        def = func_8001D110();
+        def->pos_x.s.hi = 0xC8;
+        def->pos_y.s.hi = 0x3C;
+        def->id = 0x0A003E84;
+        def->flags = 0x7000;
+        def->unk_06 |= 0x20;
+        obj = func_8001DCB4();
+        D_800AA268.p = obj;
+        obj->kind = 0x400;
+    }
+    D_800AA2EC = 0x47;
+    func_8009B19C();
+    D_800AA2EC = 0x45;
+    p = D_800A4488;
+    p = func_8001ECB4(p + 4, D_8007C974 + 1, 0);
+    *p++ = ' ';
+    *p++ = ' ';
+    *p++ = ' ';
+    *p++ = ' ';
+    *p++ = 'T';
+    *p++ = 'I';
+    *p++ = 'M';
+    *p++ = 'E';
+    *p++ = ' ';
+    hours = D_801FB198 / 3600;
+    minutes = (D_801FB198 % 3600) / 60;
+    pm = 0;
+    if (hours >= 12) {
+        pm = 1;
+        hours -= 12;
+    }
+    if (hours == 0) {
+        hours = 12;
+    }
+    p = func_8001ECB4(p, hours, 0);
+    *p = ':';
+    p = func_8001ECB4(p + 1, minutes, 2);
+    *p++ = ' ';
+    if (pm) {
+        *p = 'P';
+    } else {
+        *p = 'A';
+    }
+    p++;
+    *p = 'M';
+    p[1] = '\0';
+    func_8001F39C(D_800A4470);
+    D_801D8588.text = D_800A4488;
+    func_8001EDB0();
+    D_801D3780 = 1;
+    D_801E29BC = 4;
+    D_801CA468 = func_8002A300();
+}

@@ -19,6 +19,11 @@ void func_8001A420(void);
 void func_80017B24(void);
 void func_8001AC18(s32, s32);
 void func_8001F7F8(s32 id);
+void func_8002A354(s32 arg0);
+s32 func_8002A300(void);
+extern s16 D_801CA464;
+extern s16 D_801CA468;
+extern u32 D_801FB198;                 /* the time of day in minutes */
 /* What func_80025C08 picks from the list D_800A49D4: the three texts func_8009B19C prints. */
 typedef struct {
     u8 *text[3];
@@ -55,7 +60,7 @@ extern s16 D_8007C974;
 
 
 void func_8001ED54(TextMessage *msg);  /* loads and prints a message */
-void func_8001ECB4(u8 *dst, s16 value, s32 arg2); /* writes a number into a message's text */
+u8 *func_8001ECB4(u8 *dst, s32 value, s32 digits); /* writes a number into a text, returns the end */
 extern u16 D_801E2A44;                 /* the printer's colour for the item under the cursor */
 
 /* The screen's objects. */
@@ -63,11 +68,19 @@ extern struct {
     GameObject *unk_00;
     GameObject *obj[18];
 } D_801E28F4;
+/* Its obj[0] and obj[3] reached as symbols of their own (func_8009AE40): only these give its code. */
+extern GameObject *D_801E28F8[];
+extern GameObject *D_801E2904[];
 extern s16 D_801F9A4A;
 extern s16 D_801F9A4C;
 extern s16 D_801F9A4E;
 extern s16 D_801F9A50;
 extern s16 D_801FA88C;
+extern GameObject *D_800A9270;          /* the logo object that drops in */
+extern s32 D_800A9218;                 /* 1 once it has landed */
+extern s32 D_800A9240;                 /* its speed, bouncing to rest */
+extern s32 D_800A9238;                 /* frames to the next bounce */
+void func_8009EE5C(GameObject *obj, s32 arg1);
 
 /* ---- the overlay's own types and data ---- */
 
@@ -144,6 +157,8 @@ extern u8 D_800A49D4[];
 extern u8 D_800A49E4[];
 extern u8 D_800A49FC[];
 extern u8 D_800A4A14[];
+extern u8 D_800A4470[];                /* the time line's message */
+extern u8 D_800A4488[];                /* its text */
 
 /* A saved game in the save file (0x74 bytes). */
 typedef struct {
