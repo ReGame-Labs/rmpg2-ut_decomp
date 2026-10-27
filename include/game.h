@@ -519,7 +519,7 @@ typedef struct Building {
     /* 0x088 */ u16 unk_088;
     /* 0x08A */ u16 unk_08A;
     /* 0x08C */ s32 unk_08C;
-    /* 0x090 */ s32 unk_090;
+    /* 0x090 */ GameObject *unk_090;
     /* 0x094 */ s16 unk_094;                   /* claimed (func_8002F01C) */
     /* 0x096 */ u8 unk_096[0x02];
     /* 0x098 */ BuildingItem items[15];

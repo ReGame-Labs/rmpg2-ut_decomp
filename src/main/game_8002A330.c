@@ -4,6 +4,10 @@
 #include "game_8002A330.h"
 #include "game_80034590.h"
 
+/* Declared here, not in the group header: include/game_8003B568.h has its own view of func_80054374. */
+void func_80054374(s32 points, Monster *m);
+void func_800634D4(Monster *m, s32 preset);
+
 s32 *func_8002A330(void) {
     return func_80025C08(D_8007C934);
 }
@@ -288,7 +292,31 @@ void func_8002BE30(Monster *arg0) {
 INCLUDE_ASM("asm/main/nonmatchings/game_8002A330", func_8002BE30);
 #endif
 
-INCLUDE_ASM("asm/main/nonmatchings/game_8002A330", func_8002BE78);
+void func_8002BE78(Building *b) {
+    GameObject *obj;
+
+    if (b->unk_010 >= b->unk_012) {
+        if (b->unk_076 != 0) {
+            b->unk_014 = 0xF;
+        } else if (b->def == (BuildingDef *) D_80011BA4) {
+            b->unk_014 = 9;
+        } else if (b->def == (BuildingDef *) D_80011BA4_alt) {
+            b->unk_014 = 9;
+        } else {
+            obj = b->unk_084;
+            if (obj != NULL) {
+                D_800AA268.p = obj;
+                obj->vel_y.w = 0x28000;
+                obj->unk_88 = 0xB00;
+                func_8003CCC0(obj->owner.p);
+                b->unk_016 = 0;
+                b->unk_014 = 0xD;
+            } else {
+                b->unk_014 = 9;
+            }
+        }
+    }
+}
 
 void func_8002BF24(s32 arg0, Building *arg1) {
     if (arg1->unk_016 < arg1->unk_000) {
@@ -481,7 +509,7 @@ void func_8002C3C4(Building *arg0) {
 }
 
 void func_8002C430(Building *arg0) {
-    if (arg0->unk_090 != 0) {
+    if (arg0->unk_090 != NULL) {
         arg0->unk_014 = 4;
         return;
     }
@@ -1665,7 +1693,18 @@ Building *func_8002F01C(void) {
 }
 
 
-INCLUDE_ASM("asm/main/nonmatchings/game_8002A330", func_8002F084);
+void func_8002F084(Building *a) {
+    GameObject *saved;
+
+    saved = D_800AA268.p;
+    a->unk_014 = 0x10;
+    a->unk_030 = 0;
+    a->unk_082 = 0;
+    a->unk_016 = 0;
+    func_8001E698(a->unk_090, a->unk_002 == 2 ? D_8001236C : D_8001236C_alt);
+    a->unk_090 = NULL;
+    D_800AA268.p = saved;
+}
 
 INCLUDE_ASM("asm/main/nonmatchings/game_8002A330", func_8002F100);
 
@@ -2049,7 +2088,22 @@ void func_800302AC(u16 kind, Monster *m) {
 }
 
 
-INCLUDE_ASM("asm/main/nonmatchings/game_8002A330", func_80030338);
+u16 func_80030338(GameObject *obj) {
+    UnkStructPair *p;
+    s16 x;
+
+    p = D_801D8804;
+    D_800AA248.unk_4C = 0;
+    x = ((s16) obj->size.u.lo >> 1) + (obj->pos_x.u.hi - obj->unk_1C.u.lo);
+    while (p->unk_00 != 0) {
+        if (x >= p->unk_00 && x <= p->unk_02) {
+            D_800AA248.unk_4C = 1;
+            return 1;
+        }
+        p++;
+    }
+    return D_800AA294;
+}
 
 void func_800303DC(GameObject *obj, Building *b) {
     UnkStructPair *p;
@@ -2442,7 +2496,37 @@ void func_8003111C(s32 arg0, Monster *arg1) {
     }
 }
 
-INCLUDE_ASM("asm/main/nonmatchings/game_8002A330", func_80031154);
+void func_80031154(kind, m)
+    u16 kind;
+    Monster *m;
+{
+    s32 points;
+
+    if ((u8 *) m >= D_801E0D98 && (u8 *) m <= D_801E0D98 + 0xCC0) {
+        if (kind < 4) {
+            points = 10;
+            func_800634D4(m, 0);
+        } else {
+            switch (kind) {
+            case 5:
+                points = 20;
+                func_800634D4(m, 1);
+                break;
+            case 10:
+                points = 20;
+                func_800634D4(m, 2);
+                break;
+            case 6:
+                points = 10;
+                func_800634D4(m, 3);
+                break;
+            default:
+                return;
+            }
+        }
+        func_80054374(points, m);
+    }
+}
 
 void func_80031224(void) {
     Building *temp_v0;

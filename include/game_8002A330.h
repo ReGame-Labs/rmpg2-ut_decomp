@@ -8,6 +8,7 @@
 /* Declarations of src/main/game_8002A330.c: provisional types from the code's own use; refined as functions match. */
 
 extern u8 D_80011BA4[];
+extern u8 D_80011BA4_alt[];   /* another name for D_80011BA4 (config/aliases.ld) */
 extern u8 D_80011E18[];
 extern u8 D_8007C934[];
 extern u8 D_8007D0B8[];
@@ -629,4 +630,6 @@ void func_8002B0E0(s32);
 void func_8002B3AC(s32);
 void func_8002B6E8(s32);
 extern Anim *D_8007CFD8[];
+void func_8003CCC0(void *);
+extern s32 D_800AA294;   /* D_800AA248.unk_4C by its own name */
 #endif /* GAME_8002A330_H */
