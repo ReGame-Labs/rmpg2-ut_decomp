@@ -579,21 +579,21 @@ s32 func_8004F7A4(u8 *list) {
 }
 
 #ifdef NON_MATCHING
-/* 75%: the x coordinates are read after func_8001D110 and the midpoint arithmetic differs */
+/* 88%: the original loads x1 once (lh) and keeps a copy in a1 to add to; here the compare reloads it, and the D_800AA284 store goes before the jal instead of into its delay slot */
 void func_8004F7F4(GameObject *obj, Monster *m1, Monster *m2, GameObject *cur) {
     ObjectDef *def;
     GameObject *o;
     s16 x1;
     u16 x2;
-    s32 x;
+    s16 x;
 
     def = func_8001D110();
     x1 = cur->pos_x.s.hi;
     x2 = obj->pos_x.s.hi;
-    if (D_801F9ACA >= x1) {
+    if (x1 <= D_801F9ACA) {
         x1 += D_801D8866;
     }
-    if (D_801F9ACA >= (s16) x2) {
+    if ((s16) x2 <= D_801F9ACA) {
         x2 += D_801D8866;
     }
     x = (s16) (x1 + x2) >> 1;
@@ -603,10 +603,10 @@ void func_8004F7F4(GameObject *obj, Monster *m1, Monster *m2, GameObject *cur) {
     def->pos_x.s.hi = x;
     cur->pos_x.s.hi = x;
     obj->pos_x.s.hi = x;
+    def->pos_y.s.hi = cur->pos_y.s.hi;
     def->flags = 0x5500;
     def->anim = &D_8009556C;
     def->id = 0x0100005E;
-    def->pos_y.s.hi = cur->pos_y.s.hi;
     D_800AA284 = def;
     o = func_8001DCB4();
     o->kind = 0x743;
