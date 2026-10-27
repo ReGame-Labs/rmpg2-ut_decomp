@@ -141,4 +141,10 @@ typedef struct Npc {
 extern Npc D_801FAC9C[6];
 extern u16 D_801D8730;                   /* how many of D_801FAC9C are live */
 
+/* The throw kinds npc.c makes (func_8004A9B0 calls the first two) and runs (func_8004AD18's handlers). */
+u16 func_80039358(Monster *m, u16 a, u16 kind, Throw *t);
+u16 func_8003A5A0(u16 a, u16 kind, Throw *t, s32 alt);
+void func_8003956C(Throw *t);
+void func_8003A744(Throw *t);
+
 #endif /* NPC_H */

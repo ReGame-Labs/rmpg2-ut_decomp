@@ -476,6 +476,20 @@ typedef struct Ai {
 extern Ai D_801D85C8[];
 extern u16 D_801D870C;
 
+/* A thrown object's slot: 0x10 bytes, 21 in D_801E1CC4 (D_801D8724 in use), filled by func_8004A9B0 and run by
+ * func_8004AD18 by its kind; npc.c makes and runs some kinds too (func_80039358, func_8003956C, func_8003A5A0,
+ * func_8003A744). */
+typedef struct Throw {
+    /* 0x00 */ GameObject *obj;
+    /* 0x04 */ GameObject *thrower;            /* the current object when the throw was made (func_8004A9B0) */
+    /* 0x08 */ u16 kind;                       /* func_8004AD18 dispatches on it */
+    /* 0x0A */ u16 state;                      /* 1 in flight, 0x10 done */
+    /* 0x0C */ s32 unk_0C;                     /* npc.c's kinds: added to the object's vel_y each frame, 16.16
+                                                * (func_80039358 sets it, func_8003956C) */
+} Throw;
+
+extern Throw D_801E1CC4[];
+
 struct Building;
 
 /* The definition a building is made from (Building.def). */
