@@ -103,6 +103,10 @@ Each target is split into the C files the original had, and every boundary carri
   module's function table, `$gp` users (ASPSX uses `$gp` only for symbols defined earlier in the same file, so a
   `$gp` user and its variable share a file), helpers duplicated byte for byte (a copy of a known file proves both
   its boundaries). Function alignment is not evidence (every function is 4-aligned).
+- **Overlay padding:** in `OVERATTR.BIN` each game object's `.rodata` and `.text` start 8-aligned, so a zero word
+  after a function's last instruction, or an unused `""`/zero word before the next file's first string, is a file
+  boundary (`configure.py` `align_overlay_sections` inserts the `ALIGN(8)`). Where the previous object already ends
+  8-aligned the boundary leaves no trace.
 - `.bss` is no evidence here: uninitialised globals are COMMON symbols, placed by the linker in an order of its own.
 
 Then replace the `asm` subsegments in `config/<target>.yaml` with per-file `.rodata`, `c` and `data` subsegments, a
