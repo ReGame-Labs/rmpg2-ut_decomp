@@ -13,6 +13,8 @@ s32 SpuIsTransferCompleted(s32 flag);
 void SpuSetKey(s32 on_off, u32 voice_bit);
 void SpuQuit(void);
 
+/* Appended for the movie player (overmove). */
+s32 SpuSetMute(s32 on_off);
 /* The attribute blocks the sound driver fills (field offsets from its stack frames). */
 typedef struct SpuVolume {
     s16 left;
