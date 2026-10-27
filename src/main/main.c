@@ -391,7 +391,7 @@ u16 func_800272B0(Monster *);
 void func_800580F8(void *);
 void func_80026F98(Monster *arg0);
 void func_80020AF4(s32);
-void main_read_pad(Monster *, s32);
+void main_update_input(Monster *, s32);
 void func_80027394(void);
 extern s32 D_801C51D0;
 s32 func_8001A0A0(void);
@@ -7580,13 +7580,13 @@ void func_80027394(void) {
     i = 0;
     do {
         i += 1;
-        main_read_pad(&D_801E0B78[func_80025DF8(i)], i & 0xFFFF);
+        main_update_input(&D_801E0B78[func_80025DF8(i)], i & 0xFFFF);
     } while (i < 3);
 }
 
 /* Reads a monster's pad (or its demo script when the demo runs): buttons and direction, with their change
  * handlers. One variable holds the new buttons, then the previous direction. */
-void main_read_pad(Monster *monster, s32 arg1) {
+void main_update_input(Monster *monster, s32 arg1) {
     s16 *script;
     u16 buttons;
     u16 held;
