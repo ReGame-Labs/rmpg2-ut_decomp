@@ -9,6 +9,7 @@
 
 extern u8 D_80011BA4[];
 extern u8 D_80011BA4_alt[];   /* another name for D_80011BA4 (config/aliases.ld) */
+extern u8 D_80011BDC[];   /* func_8002F688: the animation of kind-3 buildings, D_80011BA4 the kind-2 one's */
 extern u8 D_80011E18[];
 extern u8 D_8007C934[];
 extern u8 D_8007D0B8[];
@@ -220,6 +221,7 @@ void func_80030B5C(Building *);
 void func_8002C25C(Building *arg0);
 void func_8002F084();
 void func_8002C3C4(Building *arg0);
+void func_8002C8B4(Building *);
 void func_8002D9F8(Building *);
 void func_8002C6A0();   /* old-style: called without its argument */
 void func_8002C738(Building *arg0);
@@ -272,19 +274,19 @@ void func_8001E7A0(void);
 void func_80020BA0();
 void func_80031A68(void);
 void func_80031AC8(void);
-void func_80031CB4(void *, s32);
-void func_80031B74(s32 arg0);
-void func_80031B9C(s32 arg0);
-void func_80031BC4(s32 arg0);
-void func_80031BEC(s32 arg0);
-void func_80031C14(s32 arg0);
-void func_80031C3C(s32 arg0);
-void func_80031C64(s32 arg0);
-void func_80031C8C(s32 arg0);
-void func_80032668(s32 arg0);
-void func_80032710(s32 arg0);
-void func_80032738(s32 arg0);
-void func_80032760(s32 arg0);
+void func_80031CB4(void *, Ai *);
+void func_80031B74(Ai *arg0);
+void func_80031B9C(Ai *arg0);
+void func_80031BC4(Ai *arg0);
+void func_80031BEC(Ai *arg0);
+void func_80031C14(Ai *arg0);
+void func_80031C3C(Ai *arg0);
+void func_80031C64(Ai *arg0);
+void func_80031C8C(Ai *arg0);
+void func_80032668(Ai *arg0);
+void func_80032710(Ai *arg0);
+void func_80032738(Ai *arg0);
+void func_80032760(Ai *arg0);
 void func_8003EB5C(void *, void *);
 void func_80032788(void);
 void func_800327B4(void);
@@ -477,7 +479,7 @@ void func_8002E9F8(Building *);
 void func_80032630(s32, Ai *);
 void func_8002E0C8(Monster *, Building *);
 void func_8003E788(Ai *);
-void func_8002F688();
+void func_8002F688();   /* a K&R definition: (Building *, u16 flag, Monster *, BuildingItem *) */
 void func_8002FB38(void *, GameObject *);
 void func_8002E348(Monster *, BuildingItem *);
 void func_80030D14();   /* called with one and with two arguments: no prototype in the original */
@@ -493,6 +495,7 @@ void func_80030B00(s32, BuildingItem *);
 extern void (*D_8007CFD0[])(Building *);
 extern s32 *D_80011D98[];
 void func_8003DB74(Ai *);
+s32 func_8003DC3C(Ai *);
 void func_80031FD4(s32, Ai *);
 void func_80030834(Building *, s32);
 void func_8002E9A4(Building *);
@@ -509,7 +512,7 @@ void func_80034418(Building *);
 void func_8002F898(Building *, BuildingItem *);
 BuildingPart *func_8002ED30(u16, BuildingItem *);   /* the part `which` (1-3) of a record, NULL for another value */
 u16 func_8002F558(Building *);
-void func_8002DBF4(u16, s32, Monster *, BuildingItem *);
+void func_8002DBF4(u16, u16, Monster *, BuildingItem *);
 void func_80025848(BuildingItem *);
 void func_80024964(s32, GameObject *);
 extern u8 D_8001236C[];
@@ -539,7 +542,7 @@ extern s32 D_80011ED0[];
 extern s32 D_80011ED8[];
 extern s32 D_80012068[];
 void func_800305C8(s32 *, s16, GameObject *, Building *);
-void func_8002DE08(u16, s16, Monster *, BuildingItem *);
+void func_8002DE08();   /* a K&R definition: (u16 which, s16 n, Monster *, BuildingItem *) */
 void *func_8002DAAC(u16, u16, BuildingItem *);
 void func_80030754(BuildingPart *, s16, Monster *, BuildingItem *);
 s32 func_8001EB10(s32, s32);

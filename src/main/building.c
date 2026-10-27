@@ -648,7 +648,80 @@ void func_8002C430(Building *arg0) {
     func_8002E9F8(arg0);
 }
 
-INCLUDE_ASM("asm/main/nonmatchings/building", func_8002C4B8);
+void func_8002C4B8(void) {
+    GameObject *saved;
+    Building *b;
+    Building *p;
+    u16 n;
+
+    saved = D_800AA248.cur_obj;
+    if (D_801D36FC == 0x150) {
+        func_80030D74();
+        b = p = D_801D3DC8;
+        n = D_801E29A4;
+        if (n == 0) {
+            D_800AA248.cur_obj = saved;
+            return;
+        }
+        do {
+        if (b->unk_058 == 0) {
+            switch (b->state) {
+            case 17:
+                if (b->unk_07C != NULL) {
+                    func_800300A0((UnkStruct15 *) b->unk_07C, b);
+                }
+                break;
+            case 0:
+                func_8002BE78(b);
+                break;
+            case 9:
+                func_8002BF24(NULL, b);
+                break;
+            case 10:
+                func_8002BFE4(NULL, b);
+                break;
+            case 12:
+                func_8002C0AC(NULL, b);
+                break;
+            case 15:
+                func_8002C0F8(0, b);
+                break;
+            case 2:
+                func_8002C19C(b);
+                break;
+            case 3:
+                func_8002C1E8(b);
+                break;
+            case 14:
+                func_8002C228(b);
+                break;
+            case 11:
+                func_8002C25C(b);
+                break;
+            case 16:
+                if ((u16) func_8002C2B4(b) == 1) {
+                    n = 1;
+                }
+                break;
+            case 13:
+                func_8002C32C(b);
+                break;
+            case 4:
+                func_8002C3C4(b);
+                break;
+            case 1:
+                func_8002C430(b);
+                break;
+            }
+        } else {
+            func_8002C8B4(b);
+        }
+            p++;
+            b = p;
+        } while (--n != 0);
+        D_800AA268.p = saved;
+    }
+}
 
 /* An old-style definition: its callers pass the actor they already hold in a0 without naming it. */
 void func_8002C6A0(a)
@@ -1255,49 +1328,49 @@ s32 func_8002DB3C(u16 which, u16 n, BuildingItem *rec) {
 INCLUDE_ASM("asm/main/nonmatchings/building", func_8002DB3C);
 #endif
 
-/* 82 %: the sprite request for a record's slot; the original keeps n (a1) in s3 and needs one saved register less (no s8), and its u16 n compares unsigned; the u16, s16 and int parameter forms each add a copy or a sign extension */
-#ifdef NON_MATCHING
-void func_8002DBF4(u16 which, s32 n, Monster *a, BuildingItem *rec) {
+void func_8002DBF4(u16 which, u16 n, Monster *a, BuildingItem *rec) {
     GameObject *saved;
     GameObject *obj;
     ObjectDef *req;
     SpriteFrame *ofs;
     BuildingPart *slot;
     u16 r;
-    u16 m;
     u16 dx;
     u16 dy;
     s32 anim;
 
     saved = D_800AA248.cur_obj;
     if (rec->building->unk_070 != rec) {
-        m = n;
-        r = func_8002DB3C(which, m, rec);
+        r = func_8002DB3C(which, n, rec);
         if (r != 1) {
             if (r == 3) {
-                if (m >= 5) {
+                if (n >= 5) {
                     func_8002E5F4(which, rec);
                 }
-                anim = (s32) func_8002DAAC(which, m, rec);
+                anim = (s32) func_8002DAAC(which, n, rec);
                 if (anim != 0) {
                     D_800AA248.new_def = func_8001D110();
                     req = D_800AA248.new_def;
                     req->id = anim;
                     req->unk_0C = 0x715;
                     ofs = rec->obj->frame;
-                    if (which == 1) {
+                    switch (which) {
+                    case 1:
                         dx = ofs->unk_10;
                         dy = ofs->unk_12;
                         slot = &rec->unk_0C;
-                    } else if (which == 2) {
+                        break;
+                    case 2:
                         req->unk_04 |= 0x10;
                         dx = ofs->unk_20;
                         dy = ofs->unk_22;
                         slot = &rec->unk_24;
-                    } else {
+                        break;
+                    default:
                         dx = ofs->unk_18;
                         dy = ofs->unk_1A;
                         slot = &rec->unk_3C;
+                        break;
                     }
                     req->pos_x.u.hi = rec->obj->pos_x.u.hi + dx;
                     req->pos_y.u.hi = rec->obj->pos_y.u.hi + dy;
@@ -1305,7 +1378,7 @@ void func_8002DBF4(u16 which, s32 n, Monster *a, BuildingItem *rec) {
                     obj = func_8001DCB4();
                     D_800AA268.p = obj;
                     if (obj != NULL) {
-                        if ((u16) n < 2) {
+                        if (n < 2) {
                             slot->unk_10 = obj;
                             slot->unk_16 = n;
                         } else {
@@ -1313,28 +1386,33 @@ void func_8002DBF4(u16 which, s32 n, Monster *a, BuildingItem *rec) {
                             slot->unk_06 = n;
                         }
                     }
-                    func_80030698(m, a, rec);
-                    func_8002FA20(a, rec);
+                } else {
+                    goto end;
                 }
             } else if (r == 2) {
-                func_8002DE08(which, m, a, rec);
-                func_80030698(m, a, rec);
-                func_8002FA20(a, rec);
+                func_8002DE08(which, n, a, rec);
+            } else {
+                goto end;
             }
+            func_80030698(n, a, rec);
+            func_8002FA20(a, rec);
         }
     }
+end:
     D_800AA268.p = saved;
 }
-#else
-INCLUDE_ASM("asm/main/nonmatchings/building", func_8002DBF4);
-#endif
 
 
 
 
 
 
-void func_8002DE08(u16 which, s16 n, Monster *arg2, BuildingItem *rec) {
+void func_8002DE08(which, n, arg2, rec)
+u16 which;
+s16 n;
+Monster *arg2;
+BuildingItem *rec;
+{
     GameObject *saved = D_800AA268.p;
     void *t;
     BuildingPart *g;
@@ -2149,7 +2227,66 @@ void func_8002F65C(Building *arg0, s32 arg1, BuildingItem *arg2) {
     func_8002F688(arg0, 1, arg1, arg2);
 }
 
-INCLUDE_ASM("asm/main/nonmatchings/building", func_8002F688);
+void func_8002F688(b, flag, m, rec)
+Building *b;
+u16 flag;
+Monster *m;
+BuildingItem *rec;
+{
+    GameObject *saved;
+    GameObject *obj;
+    ObjectDef *def;
+    BuildingBlock *blk;
+    s32 *anim;
+
+    saved = D_800AA248.cur_obj;
+    if (rec->unk_06 == 2) {
+        func_8001F724(0xF);
+    } else {
+        func_8002F9F4(rec);
+        func_800256CC(rec);
+        if (b->kind == 2) {
+            D_800AA248.unk_0C = (s32) D_80011BA4;
+        } else if (b->kind != 3) {
+            D_800AA248.cur_obj = saved;
+            return;
+        } else {
+            D_800AA248.unk_0C = (s32) D_80011BDC;
+        }
+        D_800AA248.cur_obj = rec->obj;
+        if (flag) {
+            def = func_8001D110();
+            def->pos_x.s.hi = D_800AA248.cur_obj->pos_x.u.hi;
+            def->pos_y.s.hi = D_800AA248.cur_obj->pos_y.u.hi;
+            anim = (s32 *) D_800AA248.unk_0C;
+            def->anim = anim;
+            def->id = *anim;
+            def->flags = D_800AA248.cur_obj->priority + 0x80;
+            def->unk_24 = b->unk_06C;
+            if (b->unk_02E != 1) {
+                def->unk_04 |= 0x10;
+                def->pos_x.s.hi = b->unk_00E;
+            }
+            obj = D_800AA248.cur_obj;
+            D_800AA248.new_def = def;
+            func_8001DCB4();
+            D_800AA248.cur_obj = obj;
+        }
+        func_8002FB38(b->def->unk_1C, D_800AA268.p);
+        func_8001F724(5);
+        func_8003CDAC(rec);
+        rec->unk_06 = 2;
+        func_8003111C(2, m);
+        func_80054374(0x1E, m);
+        if (flag) {
+            blk = b->unk_018;
+            if (blk != NULL && blk->unk_0A == rec->unk_04) {
+                func_80030D14(blk);
+            }
+        }
+    }
+    D_800AA268.p = saved;
+}
 
 void func_8002F898(Building *arg0, BuildingItem *rec) {
     GameObject *saved = D_800AA248.cur_obj;
@@ -2358,30 +2495,25 @@ void func_8002FEA4(Building *a) {
     }
 }
 
-/* 91.8 %: a building's top sprite; the original keeps the kind == 2 arm as its own block (bne, then j with dx in the slot), this one threads it into a beq, and it stores the animation before the flags */
-#ifdef NON_MATCHING
 void func_8002FF74(void) {
     GameObject *saved;
     Building *b;
     ObjectDef *def;
     Anim **anim;
     u16 dx;
-    u16 kind;
 
     saved = D_800AA248.cur_obj;
     b = saved->owner.p;
     if (b->unk_008 == 0x300 && b->roof != 0) {
         def = func_8001D110();
         D_800AA248.new_def = def;
-        kind = b->kind;
-        if (kind == 2) {
+        if (b->kind == 2) {
             dx = 0x28;
+        } else if (b->kind != 3) {
+            D_800AA248.cur_obj = saved;
+            return;
         } else {
             dx = 0x3C;
-            if (kind != 3) {
-                D_800AA248.cur_obj = saved;
-                return;
-            }
         }
         def->pos_x.s.hi = dx + b->unk_004;
         def->pos_y.s.hi = b->unk_006;
@@ -2389,8 +2521,8 @@ void func_8002FF74(void) {
         if (b->roof >= 1 && b->roof <= 3) {
             anim += b->roof;
             def->anim = *anim;
-            def->flags = 0x38F;
             def->id = (*anim)->id;
+            def->flags = 0x38F;
             D_800AA248.cur_obj = func_8001DCB4();
             b->unk_07C = D_800AA248.cur_obj;
             func_800303DC(D_800AA248.cur_obj, b);
@@ -2398,9 +2530,6 @@ void func_8002FF74(void) {
     }
     D_800AA268.p = saved;
 }
-#else
-INCLUDE_ASM("asm/main/nonmatchings/building", func_8002FF74);
-#endif
 
 void func_800300A0(UnkStruct15 *arg0, Building *arg1) {
     if ((arg0 != NULL) && (arg1->roof != 0)) {
@@ -3134,8 +3263,9 @@ void func_800315D8(void) {
     D_801F9AB0 = *p++;
 }
 
-/* 83 %: the level's two lists; the original loads r->unk_04 after the two stores to D_801D37BC/D_801D37C0 (so they may alias it: likely fields of one struct, not scalars) and sets up D_801E1E34 before the call's argument */
 #ifdef NON_MATCHING
+/* 86.21%: only the first lines differ: the original materializes the lists' address (s1) before the call's
+ * argument, every spelling tried gives the argument first */
 void func_80031690(void) {
     GameObject **lists;
     UnkStruct18 *r;
@@ -3145,8 +3275,8 @@ void func_80031690(void) {
     D_801D37BC = r->unk_00;
     D_801D37C0 = r->unk_02;
     D_801D857C = r->unk_04;
-    if (D_801D857C != 0) {
-        func_8003197C(r->unk_0C, D_801D857C, &lists[0]);
+    if (r->unk_04 != 0) {
+        func_8003197C(r->unk_0C, r->unk_04, &lists[0]);
         func_8003197C(r->unk_18, r->unk_08, &lists[1]);
     }
 }
@@ -3214,39 +3344,91 @@ void func_80031B10(void) {
     D_801F9AB0 = 0;
 }
 
-void func_80031B74(s32 arg0) {
+void func_80031B74(Ai *arg0) {
     func_80031CB4(D_8007D1E8, arg0);
 }
 
-void func_80031B9C(s32 arg0) {
+void func_80031B9C(Ai *arg0) {
     func_80031CB4(D_8007D0B8, arg0);
 }
 
-void func_80031BC4(s32 arg0) {
+void func_80031BC4(Ai *arg0) {
     func_80031CB4(D_8007D104, arg0);
 }
 
-void func_80031BEC(s32 arg0) {
+void func_80031BEC(Ai *arg0) {
     func_80031CB4(D_8007D150, arg0);
 }
 
-void func_80031C14(s32 arg0) {
+void func_80031C14(Ai *arg0) {
     func_80031CB4(D_8007D19C, arg0);
 }
 
-void func_80031C3C(s32 arg0) {
+void func_80031C3C(Ai *arg0) {
     func_80031CB4(D_8007D364, arg0);
 }
 
-void func_80031C64(s32 arg0) {
+void func_80031C64(Ai *arg0) {
     func_80031CB4(D_8007D3B0, arg0);
 }
 
-void func_80031C8C(s32 arg0) {
+void func_80031C8C(Ai *arg0) {
     func_80031CB4(D_8007D3FC, arg0);
 }
 
-INCLUDE_ASM("asm/main/nonmatchings/building", func_80031CB4);
+void func_80031CB4(void *handlers, Ai *ai) {
+    u16 hit;
+
+    switch (ai->action) {
+    case 0x0A:
+        func_80031EC0((s32) handlers, ai);
+        break;
+    case 0x0B:
+        func_80031FD4((s32) handlers, ai);
+        break;
+    case 0x32:
+        func_80032064((s32) handlers, ai);
+        break;
+    case 0x33:
+        func_80032064((s32) handlers, ai);
+        break;
+    case 0x3B:
+    case 0x3C:
+        func_8003212C((s32) handlers, ai);
+        break;
+    case 0x36:
+    case 0x37:
+        func_800322AC((s32) handlers, ai);
+        break;
+    case 0x1E:
+        if (handlers == D_8007D280) {
+            func_80032690((s32) handlers, ai);
+        } else {
+            func_800322E8((s32) handlers, ai);
+        }
+        break;
+    case 0xF2:
+        func_80032530((s32) handlers, ai);
+        break;
+    case 0x46:
+        func_80032350((s32) handlers, ai);
+        break;
+    default:
+        hit = func_8003DC3C(ai);
+        if (hit != 0) {
+            func_80032008(hit, (s32) handlers, ai);
+        } else if (ai->action == 0x15) {
+            func_80031F20((s32) handlers, ai);
+        } else if (ai->action == 0x16) {
+            func_80031F5C((s32) handlers, ai);
+        } else if (ai->action == 0x17) {
+            func_80031F98((s32) handlers, ai);
+        } else {
+            func_8003DB74(ai);
+        }
+        break;
+    }
+}
 
 void func_80031EC0(s32 arg0, Ai *arg1) {
     if (arg1->state != 0) {
@@ -3494,7 +3676,7 @@ void func_80032630(s32 handlers, Ai *r) {
 }
 
 
-void func_80032668(s32 arg0) {
+void func_80032668(Ai *arg0) {
     func_80031CB4(D_8007D280, arg0);
 }
 
@@ -3516,15 +3698,15 @@ void func_80032690(s32 n, Ai *r) {
 }
 
 
-void func_80032710(s32 arg0) {
+void func_80032710(Ai *arg0) {
     func_80031CB4(D_8007D234, arg0);
 }
 
-void func_80032738(s32 arg0) {
+void func_80032738(Ai *arg0) {
     func_80031CB4(D_8007D2CC, arg0);
 }
 
-void func_80032760(s32 arg0) {
+void func_80032760(Ai *arg0) {
     func_80031CB4(D_8007D318, arg0);
 }
 
@@ -4215,4 +4397,33 @@ void func_80034418(Building *b) {
     D_800AA268.p->pos_y.w += D_800AA268.p->vel_y.w;
 }
 
-INCLUDE_ASM("asm/main/nonmatchings/building", func_800344B8);
+void func_800344B8(Pickup *r) {
+    D_800AA268.p = r->unk_00;
+    if (r->unk_06 == 0x12 || r->unk_06 == 0x13) {
+        func_80034418((Building *) r);   /* bobs the object: counts in the record's halfword at 0x14 */
+    }
+    switch (r->unk_08) {
+    case 1:
+    case 0x3B:
+        func_80034590(r);
+        break;
+    case 3:
+        func_80034924(r);
+        break;
+    case 6:
+        func_800349E0(r);
+        break;
+    case 4:
+        func_80034898(r);
+        break;
+    case 5:
+    case 9:
+        func_800345F8(r);
+        break;
+    case 0x33:
+        break;
+    default:
+        func_800360D8(r);
+        break;
+    }
+}
