@@ -806,7 +806,7 @@ s32 cdload_unpack_rle4(u8 *src, u8 *dst) {
 INCLUDE_ASM("asm/main/nonmatchings/cdload", cdload_unpack_vlc);
 
 #ifdef NON_MATCHING
-/* 95.82%: 95.8%: registers (cur/next/left take t1/t8/t0 for the original's t0/t7/t2) and the count/skip setup
+/* 95.82%: registers (cur/next/left take t1/t8/t0 for the original's t0/t7/t2) and the count/skip setup
  * order; the table copies match */
 void cdload_unpack_vlc8(VlcHeader *hdr, u32 *in, u32 dims, u8 *dst) {
     VlcTable *t;

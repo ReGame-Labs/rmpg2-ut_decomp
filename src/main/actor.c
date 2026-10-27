@@ -1285,7 +1285,7 @@ u16 func_8003F4A8(s16 x0, s16 y0, s16 x1, s16 y1, s16 x2, s16 y2) {
 }
 
 #ifdef NON_MATCHING
-/* 99.93%: 99.9%: one operand order: the original adds the size to y0 as (size + y0) with the result in y0's
+/* 99.93%: one operand order: the original adds the size to y0 as (size + y0) with the result in y0's
  * register */
 s32 func_8003F50C(Monster *player) {
     Actor *actor = D_801E1E48;

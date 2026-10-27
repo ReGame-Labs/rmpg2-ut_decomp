@@ -875,7 +875,7 @@ void func_8004D614(void) {
 }
 
 #ifdef NON_MATCHING
-/* 91.12%: 91%: the box test with the monster's edges loaded first (m_bottom, m_right, m_left, m_top, as in pickup's
+/* 91.12%: the box test with the monster's edges loaded first (m_bottom, m_right, m_left, m_top, as in pickup's
  * func_8003B9C8); the original keeps m in a0 and loads the object's y before the flip test */
 u16 func_8004D6F8(Monster *m, Ai **out) {
     u16 n;

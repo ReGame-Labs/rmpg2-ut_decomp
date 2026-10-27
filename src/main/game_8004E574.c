@@ -579,7 +579,7 @@ s32 func_8004F7A4(u8 *list) {
 }
 
 #ifdef NON_MATCHING
-/* 97.11%: 97%: registers: the copy of the x, the other x and the definition take a3/a1/a2 for the original's
+/* 97.11%: registers: the copy of the x, the other x and the definition take a3/a1/a2 for the original's
  * a1/a2/a3, and one nop more */
 void func_8004F7F4(GameObject *obj, Monster *m1, Monster *m2, GameObject *cur) {
     ObjectDef *def;

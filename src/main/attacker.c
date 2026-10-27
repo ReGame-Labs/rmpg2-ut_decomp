@@ -457,7 +457,7 @@ void func_800447F0(Attacker *a) {
 }
 
 #ifdef NON_MATCHING
-/* 98.87%: 98.9%: registers only at the start: the original loads cur_obj into v1 and reloads it into a0 after the
+/* 98.87%: registers only at the start: the original loads cur_obj into v1 and reloads it into a0 after the
  * pos_x store */
 void func_8004489C(Attacker *a) {
     s32 vel;
@@ -1570,8 +1570,8 @@ void func_80046F68(Monster *m) {
 }
 
 #ifdef NON_MATCHING
-/* 93.31%: 93%: registers only: the x distance lands in x's register (a1; v1 in the original) and the half sizes
- * swap v1/a1 */
+/* 93.31%: the original loads the width before the x distance and makes the half width after it, and keeps the
+ * second half size in v0 with half + 4 in a1 */
 void func_80047028(Monster *m) {
     Attacker *a = D_801FA8A8;
     GameObject *saved;
