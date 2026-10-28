@@ -270,11 +270,11 @@ void bonus_update_bars(s32 old, Monster *m, s32 value) {
             D_800AA248.cur_obj->unk_40.w = 0x44;
         }
         if (D_800AA248.cur_obj->unk_40.w == 0x44) {
-            D_800AA248.cur_obj->colour &= 0xFF00FF;
+            D_800AA248.cur_obj->colour.w &= 0xFF00FF;
             v = D_801D3D80 << 10;
-            D_800AA248.cur_obj->colour |= v & 0xE000;
+            D_800AA248.cur_obj->colour.w |= v & 0xE000;
         } else {
-            D_800AA248.cur_obj->colour = 0xFF00FF;
+            D_800AA248.cur_obj->colour.w = 0xFF00FF;
         }
         if (m->meter_shown.w != m->meter.w) {
             m->meter_shown.w += (m->meter.w - m->meter_shown.w) >> 4;
@@ -1259,15 +1259,15 @@ void func_800603FC(s32 *id, s32 dx, s32 dy, s32 x, s32 y) {
         if (s != head) {
             do {
                 if (s->kind == *id) {
-                    c = s->colour;
+                    c = s->colour.w;
                     s->pos_y.s.hi += dy;
                     s->unk_28.w = (s->unk_28.w & 0xFFFF) | (s->pos_y.s.hi << 16);
                     s->pos_x.s.hi += dx;
                     s->unk_28.w = (s->unk_28.w & 0xFFFF0000) | s->pos_x.u.hi;
                     if (c <= 0x80807F) {
-                        s->colour = c + 0x40404;
+                        s->colour.w = c + 0x40404;
                     } else if (c > 0x808080) {
-                        s->colour = 0x808080;
+                        s->colour.w = 0x808080;
                     }
                     hit = s;
                 }
@@ -1387,23 +1387,23 @@ void func_80060A7C(s32 id, u32 color, s32 mode) {
         do {
             if (s->kind == id) {
                 if (mode & 1) {
-                    s->colour = color;
+                    s->colour.w = color;
                     if (color != 0x808080) {
                         s->flags |= 0x500;
                     } else {
                         s->flags &= 0xFAFF;
                     }
                 } else if (mode & 4) {
-                    s->colour = color;
+                    s->colour.w = color;
                     if (color != 0x808080) {
                         s->flags |= 0x40C;
                     } else {
                         s->flags &= 0xFBF3;
                     }
                 } else {
-                    s->colour += color;
-                    if (s->colour > 0x808080U) {
-                        s->colour = 0x808080;
+                    s->colour.w += color;
+                    if (s->colour.w > 0x808080U) {
+                        s->colour.w = 0x808080;
                         s->flags &= 0xFAFF;
                         switch (id) {
                         case 0x7E0:

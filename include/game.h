@@ -70,7 +70,14 @@ typedef struct GameObject {
     /* 0x1C */ Fixed unk_1C;
     /* 0x20 */ u16 unk_20;
     /* 0x22 */ u16 flags;               /* 0x10: faces left; 0x20 */
-    /* 0x24 */ s32 unk_24;               /* the frame's first word, or its VRAM slot's (func_8001A554) */
+    /* 0x24 */ union {
+                   s32 w;                   /* the frame's first word, or its VRAM slot's (func_8001A554): the
+                                             * texture's v and u, then the page (main_get_tpage) */
+                   struct {
+                       u8 v;
+                       u8 u;
+                   } uv;                    /* main_draw_objects reads the bytes */
+               } tex;
     /* 0x28 */ Fixed unk_28;
     /* 0x2C */ Fixed unk_2C;            /* the frame's size too (func_8001E59C sets both): u.lo the width, u.hi the height */
     /* 0x30 */ Fixed size;              /* the frame's size: u.lo the width, u.hi the height */
@@ -131,7 +138,14 @@ typedef struct GameObject {
     /* 0x72 */ u16 unk_72;
     /* 0x74 */ u16 unk_74;
     /* 0x76 */ u8 unk_76[0x02];
-    /* 0x78 */ u32 colour;              /* 0x808080: neutral */
+    /* 0x78 */ union {
+                   u32 w;                   /* 0x808080: neutral; -1: unlit (main_draw_objects) */
+                   struct {
+                       u8 b;
+                       u8 g;
+                       u8 r;
+                   } rgb;
+               } colour;
     /* 0x7C */ s32 unk_7C;
     /* 0x80 */ u16 priority;            /* the draw order: the list is kept sorted by it, highest first (main_resort_objects) */
     /* 0x82 */ u16 unk_82;

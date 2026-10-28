@@ -702,7 +702,7 @@ void main_create_pause_box(s16 x, s16 y, GameObject *link, s32 script) {
         D_800AA248.cur_obj = obj;
         obj->unk_40.obj = link;
         D_800AA248.cur_obj->script.pc = script;
-        D_800AA248.cur_obj->colour = 0;
+        D_800AA248.cur_obj->colour.w = 0;
         D_800AA248.cur_obj->flags |= 0x40C;
         D_8007A698 = 1;
         D_800AA248.cur_obj->unk_6C |= 0x20;
@@ -751,7 +751,7 @@ void func_800180E4(void) {
     if (sprite != head) {
         do {
             if (sprite->kind == 0x550) {
-                sprite->colour = 0x808080;
+                sprite->colour.w = 0x808080;
             }
             sprite = sprite->next;
         } while (sprite != head);
@@ -1768,7 +1768,7 @@ SpriteFrame *func_8001A554(s32 id, GameObject *obj) {
     if (id < 0) {
         frame = (SpriteFrame *) id;
         obj->unk_6C |= 8;
-        obj->unk_24 = frame->unk_00;
+        obj->tex.w = frame->unk_00;
     } else {
         index = (u32) (id & 0xFFFFFF) >> 1;
         obj->unk_72 = b = ((u32) id >> 24) & 0x3F;
@@ -1781,11 +1781,11 @@ SpriteFrame *func_8001A554(s32 id, GameObject *obj) {
         if ((D_801D8868[index] & 0x7FFFFFFF) == 0) {
             id = D_8007AD4C[(main_random_between(0x8000, 0xE) & 0x1F) + 10];
             frame = (SpriteFrame *) func_8001B128(id);
-            obj->unk_24 = frame->unk_00;
+            obj->tex.w = frame->unk_00;
         }
         if (frame->unk_00 & 0x40000000) {
             obj->unk_6C |= 8;
-            obj->unk_24 = frame->unk_00;
+            obj->tex.w = frame->unk_00;
         } else if (obj->unk_3C != id || !(obj->unk_6C & 0x400)) {
             flags = obj->unk_6C;
             obj->unk_6C = flags & 0xFFF7;
@@ -1794,11 +1794,11 @@ SpriteFrame *func_8001A554(s32 id, GameObject *obj) {
                 if (frame->unk_00 & 0x20000000) {
                     obj->unk_6E = main_alloc_vram_slot(frame, D_801FA738[b].unk_0, 1);
                     e = &D_801F9AE4[obj->unk_6E];
-                    obj->unk_24 = e->unk_0.w | 0x20000000;
+                    obj->tex.w = e->unk_0.w | 0x20000000;
                 } else {
                     obj->unk_6E = main_alloc_vram_slot(frame, D_801FA738[b].unk_0, 0);
                     e = &D_801F9AE4[obj->unk_6E];
-                    obj->unk_24 = e->unk_0.w;
+                    obj->tex.w = e->unk_0.w;
                 }
             }
         }
@@ -2013,7 +2013,7 @@ u16 main_get_tpage(GameObject *obj, u16 mode) {
     s32 n;
 
     n = 0;
-    word = obj->unk_24;
+    word = obj->tex.w;
     if (obj->unk_6C & 0x400) {
         rec = &D_801F9AE4[obj->unk_6E];
         if (mode & 0x400) {
@@ -3683,7 +3683,7 @@ s32 func_8001E59C(GameObject *sprite, s32 image) {
         return 1;
     }
     sprite->unk_74 = 0xFFFF;
-    sprite->colour = -1;
+    sprite->colour.w = -1;
     sprite->frame = img;
     offset = img->size.w;
     sprite->flags = 0;
@@ -3904,7 +3904,7 @@ GameObject *main_create_box(s16 x, s16 y, s16 width, s16 height, u32 colour) {
     g->cur_obj = func_8001DCB4();
     g->cur_obj->unk_40.w = width;
     g->cur_obj->script.height = height;
-    g->cur_obj->colour = colour;
+    g->cur_obj->colour.w = colour;
     g->cur_obj->flags |= 0xC;
     g->cur_obj->unk_6C |= 0x20;
     return g->cur_obj;
@@ -4037,9 +4037,9 @@ void main_print_text(void) {
                 D_800AA248.cur_obj->frame = (SpriteFrame *) glyph;
                 D_800AA248.cur_obj->anim_frame = id;
                 D_800AA248.cur_obj->unk_2C.w = ((Unk1E638 *) glyph)->unk_4.w;
-                D_800AA248.cur_obj->unk_24 = glyph->unk_0;
+                D_800AA248.cur_obj->tex.w = glyph->unk_0;
                 D_800AA248.cur_obj->unk_74 = D_800AA2EC;
-                D_800AA248.cur_obj->colour = 0xFFFFFFFF;
+                D_800AA248.cur_obj->colour.w = 0xFFFFFFFF;
                 D_800AA248.cur_obj->unk_72 = 0xF;
                 D_800AA248.cur_obj->unk_28.s.lo = D_800AA248.cur_obj->pos_x.s.hi = D_801D8588.pen_x - D_801D8588.unk_32;
                 D_800AA248.cur_obj->unk_28.s.hi = D_800AA248.cur_obj->pos_y.s.hi = D_801D8588.pen_y - off.s.hi;
@@ -4318,9 +4318,8 @@ extern u32 D_801FB41C;  /* the lit sprites' colour (building.c) */
 
 /* Draws the object list: boxes (POLY_F4; a line of width 3 for 0x1000, a free quad for 0x2000), sprites (SPRT) and
  * flipped sprites (POLY_FT4), with a DR_TPAGE whenever the texture page changes. The colour block's gotos give the
- * original's block order (the unlit case last, falling into the test). The colour and unk_24 bytes are read through
- * casts (lbu). The final reset of page is never read again: it is the original's (it keeps page and tpage in two
- * registers) */
+ * original's block order (the unlit case last, falling into the test). The final reset of page is never read again:
+ * it is the original's (it keeps page and tpage in two registers) */
 void main_draw_objects(GameObject *head, GameObject *end) {
     GameObject *obj;
     POLY_F4 *box;
@@ -4396,9 +4395,9 @@ void main_draw_objects(GameObject *head, GameObject *end) {
                 box->y3 = obj->pos_y.u.hi + obj->script.height;
             }
             /* the colour's bytes: 0x78 blue, 0x79 green, 0x7A red */
-            cr = ((u8 *) &obj->colour)[2];
-            cg = ((u8 *) &obj->colour)[1];
-            cb = ((u8 *) &obj->colour)[0];
+            cr = obj->colour.rgb.r;
+            cg = obj->colour.rgb.g;
+            cb = obj->colour.rgb.b;
             box->r0 = cr;
             box->g0 = cg;
             box->b0 = cb;
@@ -4434,10 +4433,9 @@ void main_draw_objects(GameObject *head, GameObject *end) {
             sprt->y0 = obj->unk_28.u.hi - 8;
             sprt->w = obj->size.u.lo;
             sprt->h = obj->size.u.hi;
-            /* unk_24's bytes: the frame's texture v at 0x24, u at 0x25 */
-            sprt->u0 = ((u8 *) &obj->unk_24)[1];
-            sprt->v0 = ((u8 *) &obj->unk_24)[0];
-            if (obj->colour == 0xFFFFFFFF) {
+            sprt->u0 = obj->tex.uv.u;
+            sprt->v0 = obj->tex.uv.v;
+            if (obj->colour.w == 0xFFFFFFFF) {
                 if (obj->kind >= 0x500 && obj->kind < 0x780) {
                     rgb[0] = (D_801FB41C >> 16) & 0xFF;
                     rgb[1] = (D_801FB41C >> 8) & 0xFF;
@@ -4446,10 +4444,10 @@ void main_draw_objects(GameObject *head, GameObject *end) {
                     goto sprt_lit;
                 }
             } else {
-                rgb[0] = (obj->colour >> 16) & 0xFF;
-                rgb[1] = (obj->colour >> 8) & 0xFF;
+                rgb[0] = (obj->colour.w >> 16) & 0xFF;
+                rgb[1] = (obj->colour.w >> 8) & 0xFF;
                 lit = 1;
-                rgb[2] = obj->colour & 0xFF;
+                rgb[2] = obj->colour.w & 0xFF;
                 goto sprt_lit;
             }
             lit = 0;
@@ -4512,7 +4510,7 @@ sprt_lit:
             func_8001B5E8(0xA);
             break;
         }
-        if (obj->colour == 0xFFFFFFFF) {
+        if (obj->colour.w == 0xFFFFFFFF) {
             if (obj->kind >= 0x500 && obj->kind < 0x780) {
                 rgb[0] = (D_801FB41C >> 16) & 0xFF;
                 rgb[1] = (D_801FB41C >> 8) & 0xFF;
@@ -4521,10 +4519,10 @@ sprt_lit:
                 goto quad_lit;
             }
         } else {
-            rgb[0] = (obj->colour >> 16) & 0xFF;
-            rgb[1] = (obj->colour >> 8) & 0xFF;
+            rgb[0] = (obj->colour.w >> 16) & 0xFF;
+            rgb[1] = (obj->colour.w >> 8) & 0xFF;
             lit = 1;
-            rgb[2] = obj->colour & 0xFF;
+            rgb[2] = obj->colour.w & 0xFF;
             goto quad_lit;
         }
         lit = 0;
@@ -4542,8 +4540,8 @@ quad_lit:
         } else {
             ft4->code &= ~2;
         }
-        u = ((u8 *) &obj->unk_24)[1];
-        v = ((u8 *) &obj->unk_24)[0];
+        u = obj->tex.uv.u;
+        v = obj->tex.uv.v;
         w = obj->size.s.lo;
         h = obj->size.s.hi;
         du = ft4->x3 - ft4->x0;

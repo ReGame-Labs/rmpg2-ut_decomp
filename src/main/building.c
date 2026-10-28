@@ -2443,7 +2443,7 @@ void func_8002F100(Building *b) {
             t = b->unk_010;
             if (t >= 0x32 && t < 0x4B) {
                 if (b->items[0].obj->anim != (s32) &D_800168B8) {
-                    D_801FB448->colour = 0xFFFF00;
+                    D_801FB448->colour.w = 0xFFFF00;
                     func_8002CBF4((Monster *) b);
                     func_80029118(8, 8);
                     building_set_players_action(10);
@@ -2470,8 +2470,8 @@ void func_8002F100(Building *b) {
                     b->top += 0x14;
                     func_8001E698(b->items[0].obj, &D_800168D8);
                 } else {
-                    if (t > 0x64 && D_801FB448->colour != 0xFF0000) {
-                        D_801FB448->colour = 0xFF0000;
+                    if (t > 0x64 && D_801FB448->colour.w != 0xFF0000) {
+                        D_801FB448->colour.w = 0xFF0000;
                     }
                     func_8001E698(b->falling, &D_80016964);
                     if (b->unk_010 >= b->unk_012) {

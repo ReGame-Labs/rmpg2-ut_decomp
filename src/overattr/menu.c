@@ -13,11 +13,11 @@ void menu_update_fade(void) {
         obj = head->next;
         if (obj != head) {
             do {
-                if ((obj->flags & 0x100) && obj->colour != -1) {
-                    if (obj->colour != 0) {
-                        obj->colour -= 0x40404;
+                if ((obj->flags & 0x100) && obj->colour.w != -1) {
+                    if (obj->colour.w != 0) {
+                        obj->colour.w -= 0x40404;
                     } else {
-                        obj->colour = 0;
+                        obj->colour.w = 0;
                         D_800A9888 = 0;
                     }
                 }
@@ -29,11 +29,11 @@ void menu_update_fade(void) {
         obj = head->next;
         if (obj != head) {
             do {
-                if ((obj->flags & 0x100) && obj->colour != -1) {
-                    if (obj->colour <= 0x80807F) {
-                        obj->colour += 0x40404;
+                if ((obj->flags & 0x100) && obj->colour.w != -1) {
+                    if (obj->colour.w <= 0x80807F) {
+                        obj->colour.w += 0x40404;
                     } else {
-                        obj->colour = 0x808080;
+                        obj->colour.w = 0x808080;
                         D_800A9888 = 0;
                         obj->flags &= ~0x500;
                     }
@@ -1046,7 +1046,7 @@ void menu_set_colour(s32 kind, s32 value) {
     if (obj != head) {
         do {
             if (obj->kind == kind) {
-                obj->colour = value;
+                obj->colour.w = value;
                 obj->flags |= 0x500;
             }
             obj = obj->next;
@@ -1080,7 +1080,7 @@ void menu_fade_out(void) {
     if (obj != head) {
         do {
             if ((u32) (obj->kind - 0x400) < 0x100) {
-                obj->colour = 0x808080;
+                obj->colour.w = 0x808080;
                 obj->flags |= 0x500;
             }
             obj = obj->next;
@@ -1539,7 +1539,7 @@ void menu_place_objects(OverattrPlacement *p, s32 n, s32 color) {
     D_801F9ACC.w = 0;
     q = p;
     for (i = 0; i < n; i++) {
-        tour_place_object(q++)->colour = color;
+        tour_place_object(q++)->colour.w = color;
     }
 }
 
@@ -1556,7 +1556,7 @@ void menu_create_buttons(void) {
     def->unk_06 |= 0x20;
     D_801D373C[0] = func_8001DCB4();
     D_801D373C[0]->kind = 0x550;
-    D_801D373C[0]->colour = 0x808080;
+    D_801D373C[0]->colour.w = 0x808080;
     D_800AA248.new_def = def = func_8001D110();
     def->id = 0x4F00280A;
     def->pos_x.w = 0x10E0000;
@@ -1565,7 +1565,7 @@ void menu_create_buttons(void) {
     def->unk_06 |= 0x20;
     D_801D373C[1] = func_8001DCB4();
     D_801D373C[1]->kind = 0x550;
-    D_801D373C[1]->colour = 0x808080;
+    D_801D373C[1]->colour.w = 0x808080;
     func_8001F61C("SELECT", 0x4B, 0xD6, 1, 0x46, D_8007AD4C, 1, 0x550);
     func_8001F61C("BACK", 0x127, 0xD6, 1, 0x46, D_8007AD4C, 1, 0x550);
     head = &D_801E28C0;
@@ -1573,7 +1573,7 @@ void menu_create_buttons(void) {
     if (obj != head) {
         do {
             if (obj->kind == 0x550) {
-                obj->colour = 0x808080;
+                obj->colour.w = 0x808080;
             }
             obj = obj->next;
         } while (obj != head);
@@ -1593,14 +1593,14 @@ void menu_create_select_button(void) {
     def->unk_06 |= 0x20;
     D_801D373C[0] = func_8001DCB4();
     D_801D373C[0]->kind = 0x550;
-    D_801D373C[0]->colour = 0x808080;
+    D_801D373C[0]->colour.w = 0x808080;
     func_8001F61C("SELECT", 0x4B, 0xD6, 1, 0x46, D_8007AD4C, 1, 0x550);
     head = &D_801E28C0;
     obj = head->next;
     if (obj != head) {
         do {
             if (obj->kind == 0x550) {
-                obj->colour = 0x808080;
+                obj->colour.w = 0x808080;
             }
             obj = obj->next;
         } while (obj != head);
@@ -1747,7 +1747,7 @@ s16 func_8009FF38(void) {
             for (i = 0; i < 12; i++) {
                 D_801E28F4[i]->kind = 0x400;
                 D_801E28F4[i]->flags |= 0x500;
-                D_801E28F4[i]->colour = 0;
+                D_801E28F4[i]->colour.w = 0;
             }
             for (i = 0; i < 3; i++) {
                 menu_set_colour(D_800A6FBC[i], 0);
@@ -1759,7 +1759,7 @@ s16 func_8009FF38(void) {
             for (i = 0; i < 2; i++) {
                 D_800A92F8[i]->kind = 0x400;
                 D_800A92F8[i]->flags |= 0x500;
-                D_800A92F8[i]->colour = 0;
+                D_800A92F8[i]->colour.w = 0;
                 D_800A92F8[i]->pos_x.s.hi = 0x6E;
                 D_800A9808[i]->pos_x.s.hi = 0x7C;
             }
