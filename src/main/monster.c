@@ -225,8 +225,9 @@ void func_800506BC(Monster *e) {
 }
 
 #ifdef NON_MATCHING
-/* 83.56%: 83.6 %: the original keeps the x offset and its copy (negated when the holder faces left) in two
- * registers and reads the holder's x before the index; here they share one */
+/* 83.56%: the original keeps the x offset and its copy (negated when the holder faces left) in two registers, reads
+ * the holder's x before the index and copies e into a1 (frame takes a0); here they share one. dx = d before the
+ * facing test (the original's delay-slot move) and the x read before the frame: 81.5 % */
 void monster_follow_holder(Monster *e) {
     GameObject *holder;
     SpriteFrame *frame;
@@ -1439,11 +1440,11 @@ void func_80052E94(void) {
 }
 
 #ifdef NON_MATCHING
-/* 98.78%: 98.8 %: the definition pointer: local-alloc gives it v0 (its copy-suggestion from the call's value,
- * honoured in the suggested-register pass because v0 is free over its life); the original's sits in a1 after the
- * temporaries took v0/v1/a0, which only a global pseudo would get (case 3's building pointer, global, is not in v0
- * either). Read-back through D_800AA284/new_def, chained stores, a second set, a dead assignment in another block,
- * an argument to func_8001DCB4: no change */
+/* 98.78%: the definition pointer: local-alloc gives it v0 in its suggested-register pass (the copy from the call's
+ * value suggests v0, free over its life); the original's sits in a1 after the temporaries took v0/v1/a0, which is
+ * what a block-local pseudo without that suggestion (allocated by priority after the short temporaries) or a global
+ * pseudo gets (case 3's building pointer, global, takes a0 the same way). Read-back through D_800AA284/new_def,
+ * chained stores, a second set, a dead assignment in another block, an argument to func_8001DCB4: no change */
 void func_80052E9C(Monster *e) {
     s32 *speeds;
     s32 speed;
@@ -1546,10 +1547,18 @@ void func_800531C0(Monster *e) {
 }
 
 #ifdef NON_MATCHING
-/* 96.30%: 96.3 %: everything but the camera clamp matches (the if/else adds give both ternary shapes, b declared
- * before a gives the bump's registers); the clamp is func_800535E4's: the original keeps only the %hi of D_801F9AC8
- * and reloads the camera x for the clamped values and the second bound, where cse here reuses the first compare's
- * sum (6 instructions short) */
+/* 96.30%: everything but the camera clamp matches (the if/else adds give both ternary shapes, b declared before a
+ * gives the bump's registers). the camera clamp, as in func_800535E4: the original reuses the wrap test's camera
+ * load for the first bound (cse-skip-blocks over the wrap) and keeps the %hi of D_801F9AC8 in a0 for every later
+ * access, yet reloads the camera word for the second bound and in both clamp arms and loads each bound's constant
+ * afresh there: cse knew the HIGH but no longer the MEM, the sums or the constants. No cc1 flag reproduces it
+ * (-fno-cse-follow-jumps, -fno-cse-skip-blocks, -fno-thread-jumps, -fno-rerun-cse-after-loop, -fno-expensive-
+ * optimizations, -fno-strength-reduce, scheduling, -fno-force-mem: never the reload). Volatile reads of D_801F9AC8
+ * after a local camera copy for the wrap test and first bound, with the inverted if (bound test first, the low arm
+ * in the else) and v = K; v += camera in the arms, give the original's layout and reloads (97.7 %, left: the high
+ * arm's constant reused, the first bound's sum register), but the camera is not volatile: func_80039C98 (npc.c,
+ * matched) reuses one load across its joins. Ternary, MIN/MAX, inverted, two-if and stepwise forms tried with plain
+ * reads: no reload */
 void func_80053204(Monster *e) {
     GameObject *shadow;
     Monster *m;
@@ -1671,12 +1680,19 @@ INCLUDE_ASM("asm/main/nonmatchings/monster", func_80053204);
 #endif
 
 #ifdef NON_MATCHING
-/* 92.33%: 92.3 %: abs() gives the original's in-place negates with the stores before the branches; the if/else adds
- * give both ternary shapes (jump.c turns the one-insn 0x40000 arm into the delay-slot set, the lui/ori 0x18000 arm
- * stays a branch). Left: the step pseudo takes v0 where the original has v1; the camera clamp: the original keeps
- * only the %hi of D_801F9AC8 (a0) and reloads the camera x for the clamped values and the second bound (its first
- * compare reuses the value loaded for the wrap test), where cse here reuses the compare's sum and keeps the camera
- * x in a0 */
+/* 92.33%: abs() gives the original's in-place negates with the stores before the branches; the if/else adds give
+ * both ternary shapes (jump.c turns the one-insn 0x40000 arm into the delay-slot set, the lui/ori 0x18000 arm stays
+ * a branch). Left: the step pseudo takes v0 where the original has v1, and the camera clamp, as in func_800535E4:
+ * the original reuses the wrap test's camera load for the first bound (cse-skip-blocks over the wrap) and keeps the
+ * %hi of D_801F9AC8 in a0 for every later access, yet reloads the camera word for the second bound and in both
+ * clamp arms and loads each bound's constant afresh there: cse knew the HIGH but no longer the MEM, the sums or the
+ * constants. No cc1 flag reproduces it (-fno-cse-follow-jumps, -fno-cse-skip-blocks, -fno-thread-jumps, -fno-rerun-
+ * cse-after-loop, -fno-expensive-optimizations, -fno-strength-reduce, scheduling, -fno-force-mem: never the
+ * reload). Volatile reads of D_801F9AC8 after a local camera copy for the wrap test and first bound, with the
+ * inverted if (bound test first, the low arm in the else) and v = K; v += camera in the arms, give the original's
+ * layout and reloads (97.7 %, left: the high arm's constant reused, the first bound's sum register), but the camera
+ * is not volatile: func_80039C98 (npc.c, matched) reuses one load across its joins. Ternary, MIN/MAX, inverted,
+ * two-if and stepwise forms tried with plain reads: no reload */
 void func_800535E4(Monster *e) {
     GameObject *shadow;
     s32 v;
@@ -2194,10 +2210,12 @@ void func_800544D8(Monster *e, GameObject *dst, GameObject *src) {
 }
 
 #ifdef NON_MATCHING
-/* 95.39%: 95.4 %: cse: the original reloads box_x0 in the facing-left block (its first load dies in the
- * subtraction) but reuses the extended px there. Here cse carries box_x0 into that block by skip-blocks as well as
- * follow-jumps (-fno-cse-follow-jumps alone changes nothing); with both off box_x0 is reloaded as in the original
- * but px is extended again. Ternary, ||, goto, result-variable and early-return forms tried */
+/* 95.39%: cse, the camera clamp's class: in the facing-left block the original reloads box_x0 but reuses the sign-
+ * extended px (a0): cse knew the register expression but not the MEM. Here cse carries box_x0 into that block by
+ * skip-blocks as well as follow-jumps (-fno-cse-follow-jumps alone changes nothing); with both off box_x0 is
+ * reloaded but px is extended again. A u16 copy of box_x0 for the first bound keeps the size (the reload slot
+ * becomes its re-extension, 93.1 %); s16/s32 copies, in-place x0 -= 0x30, casts on either bound, ternary, ||, goto,
+ * result-variable and early-return forms tried */
 s32 func_8005453C(s16 x, s32 unused, Monster *m) {
     GameObject *obj;
     s16 px;

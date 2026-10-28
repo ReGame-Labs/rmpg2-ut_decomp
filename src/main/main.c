@@ -4820,23 +4820,20 @@ void func_80020CE4(s32 arg0, s32 arg1) {
     D_801FA9A4 = arg1 & 0xFFFF;
 }
 
-#ifdef NON_MATCHING
-/* 99.36%: 99.36 %: expand_binop swaps (vel + v) into (v + vel) whenever the target is v or vel is still a MEM; the
- * original's (plus vel v) in v's register needs vel in a register and a target other than v (combine then folding
- * the copy) */
 s32 func_80020D20(Npc *npc) {
     s32 v;
+    s32 t;
 
-    v = npc->unk_30;
-    v = D_800AA248.cur_obj->vel_y.w + v;
+    t = npc->unk_30;
+    v = D_800AA248.cur_obj->vel_y.w + t;
     D_800AA248.cur_obj->vel_y.w = v;
     D_800AA248.cur_obj->pos_y.w += v;
-    v = npc->unk_34;
-    v = D_800AA248.cur_obj->vel_x.w + v;
+    t = npc->unk_34;
+    v = D_800AA248.cur_obj->vel_x.w + t;
     D_800AA248.cur_obj->vel_x.w = v;
-    v = D_800AA248.cur_obj->pos_x.w + v;
-    v &= D_801D8864.w;
-    D_800AA248.cur_obj->pos_x.w = v;
+    t = D_800AA248.cur_obj->pos_x.w + v;
+    t &= D_801D8864.w;
+    D_800AA248.cur_obj->pos_x.w = t;
     if (npc->unk_4E != 0) {
         return (u8) D_800AA248.cur_obj->unk_6C >> 7;
     }
@@ -4845,9 +4842,6 @@ s32 func_80020D20(Npc *npc) {
     }
     return 1;
 }
-#else
-INCLUDE_ASM("asm/main/nonmatchings/main", func_80020D20);
-#endif
 
 void func_80020DDC(Npc *npc) {
     D_800AA268.p = npc->obj;
@@ -5802,7 +5796,10 @@ void func_80023080(Npc *npc) {
 }
 
 #ifdef NON_MATCHING
-/* 88.9 %: the second branch keeps the address of D_801F9AC8 in a register across the block and reuses it; the C reloads it */
+/* 92.01%: 92 %: the second branch keeps the %hi of D_801F9AC8 in a1 from its top and reloads the value through it
+ * at the end of the inner block (reorg then skips that load on the path that still holds it in v1); the C reloads
+ * with a fresh lui. The original's distance is the builtin abs() in its two-register form (bgez v0; move v1,v0;
+ * negu v1,v1, where the C's copy negates v0); written as abs() here the inner block changes shape (82.5 %) */
 u16 func_80023114() {
     s32 x;
     s32 d;
@@ -6366,13 +6363,17 @@ void func_800240F0(Npc *npc) {
 }
 
 #ifdef NON_MATCHING
-/* 86.15%: 86.2 %: used and k now copy the masked value as the original does; the loop still uses used in s0
- * directly (the original copies it to a1 and hoists the table address to a2), and the bit selection reuses the
- * loop's sign-extended k where the original copies k at the exit */
+/* 99.69%: 99.7 %: a for (;;) whose exit is a break after a continue gives the original's loop (loop.c hoists the
+ * table and the copy of used, jump.c duplicates no exit test; a goto loop hoists nothing, a plain break duplicates
+ * the test); sel = k at the top of each pass is the original's copy in the test's delay slot, and used |= bit the
+ * exit's registers. Only the hoisted copy of used and sel swap a1/v1: sel (3 refs, live 6) is allocated before that
+ * copy and takes a1, the original gives the copy a1 (sel s32/u16, the bit forms, the assignment inside the index
+ * tried) */
 u16 func_80024138(Npc *npc) {
     s16 used;
     s16 k;
     s32 bit;
+    s16 sel;
 
     if (D_801E289A == 0) {
         used = D_801E2A50 & 7;
@@ -6383,22 +6384,26 @@ u16 func_80024138(Npc *npc) {
         if (k == 3) {
             k = 0;
         }
-    loop:
-        if (used & D_8007BA20[k]) {
-            if (++k >= 3) {
-                k = 0;
+        for (;;) {
+            sel = k;
+            if (used & D_8007BA20[k]) {
+                if (++k >= 3) {
+                    k = 0;
+                }
+                continue;
             }
-            goto loop;
+            break;
         }
         npc->aim = k;
         bit = 1;
-        if (k != 0) {
+        if (sel != 0) {
             bit = 4;
-            if (k == 1) {
+            if (sel == 1) {
                 bit = 2;
             }
         }
-        D_801E2A50 = used | bit;
+        used |= bit;
+        D_801E2A50 = used;
         return k;
     }
     npc->aim = 3;
@@ -6439,8 +6444,10 @@ void func_800242A8(void) {
 
 #ifdef NON_MATCHING
 /* 97.14%: 97.1 %: abs() and an if/else for x give the original's reload of pos_x in the last branch, but then x and
- * dx share v1 (the original keeps dx in a1 and copies it, as with x = dx before an if; that form keeps pos_x in a
- * register through cse's skipped block) */
+ * dx share v1. The original has dx in a1 and x in v1, which global-alloc gives only when x conflicts with dx (x =
+ * dx before the test, x allocated first); that form keeps pos_x in a register through cse's skipped block (98.97 %
+ * with -fno-cse-skip-blocks or -fno-cse-follow-jumps, and then dx/x swap: dx's subtraction temporary, 4 refs over
+ * 10 insns, outranks x, 7 over 19) */
 s32 abs(s32);
 
 void func_800242D8(Npc *npc) {
@@ -6470,9 +6477,12 @@ INCLUDE_ASM("asm/main/nonmatchings/main", func_800242D8);
 #endif
 
 #ifdef NON_MATCHING
-/* 96.45%: 96.5 %: the distance is abs() (GCC's builtin); the sprite's x still loads straight into its s32 variable
- * where the original loads it into a temporary and copies it (lh v0; move v1,v0); as an s16 it loads twice (lh,
- * lhu) */
+/* 96.45%: 96.5 %: abs() is GCC's builtin. The first coordinate (s16 x = npc->unk_26) loads as the original's lh
+ * into a temporary and a copy: combine's three-insn split of the load and its sign extension (combine.c, a PARALLEL
+ * of both loads split into a load and a register copy). The second, written the same way, gets the other split (two
+ * loads, lh and lhu) as an s16, and loads straight into its variable as an s32; swapping the two blocks swaps which
+ * one gets the copy, so the choice depends on the position, not the C (types, a local pointer, the field read
+ * twice, an assignment in the test tried) */
 s32 abs(s32);
 
 s16 func_8002439C(Npc *npc) {
@@ -6496,20 +6506,20 @@ INCLUDE_ASM("asm/main/nonmatchings/main", func_8002439C);
 #endif
 
 #ifdef NON_MATCHING
-/* 85.97%: 86.0 %: abs() (GCC's builtin: bgez, nop, negu) and an s32 x (its lhu apart from the lh of the
- * difference) give the original's shape; sched1 still loads D_801D8866 after npc->unk_26 where the original loads it
- * before, so half takes npc's a2 instead of t1 */
-s32 abs(s32);
-
+/* 86.11%: 86.1 %: abs() is GCC's builtin (bgez, nop, negu); an s32 x (its lhu apart from the lh of the difference)
+ * and an s32 half (x += half adds in the original's order) give the original's operations. Only sched1's order
+ * differs: the original loads D_801D8866 before the second npc->unk_26 (lh) and shifts it in that load's delay, so
+ * half takes t1 and cur t2; here half, a once-set live pseudo (birthing_insn_p, top priority), is loaded last, into
+ * npc's a2. Statement orders do not change it */
 void main_unwrap_target_x(s16 *px, s16 *pcur, Npc *npc) {
     s32 x;
     s16 cur;
-    u16 half;
+    s32 half;
     s16 d;
 
     x = (u16) npc->unk_26;
     cur = D_800AA268.p->pos_x.s.hi;
-    half = D_801D8866;
+    half = (u16) D_801D8866;
     d = abs(npc->unk_26 - cur);
     if (d >= (s16) half >> 1) {
         d = abs(D_801F9ACA - cur);
@@ -6626,8 +6636,13 @@ void func_8002469C(s32 *p, s16 arg1, s16 arg2) {
 }
 
 #ifdef NON_MATCHING
-/* 96.07%: the order and the operations match; the width and the distance swap registers (a0/v1), and the left
- * branch shifts the width into v0 where the original uses v1 */
+/* 97.61%: 97.6 %: the order and the operations match (abs() is GCC's builtin; d reused in the left branch). Only d
+ * and width swap registers (a0/v1): with d = size << 16; d -= 1, d is set twice, so local-alloc does not tie the lh
+ * temporary to it (lh v0, as the original) and sched2 places the load as the original, but nothing local holds v1,
+ * so the 0x3FFFFFF constant takes v1, width prefers it and d gets a0. Writing (size << 16) - 1 makes the shift a
+ * block-local in v1 (the constant then takes a0 and d v1, as the original) but local-alloc ties the lh temporary to
+ * it (lh v1; sll v1,v1) and sched2 moves the load down (99.76 % with -fno-schedule-insns2). The original has both:
+ * the lh in v0 and the shift in a v1 local not tied to it */
 void main_wrap_layer_x(GameObject *obj, s32 left, s32 right) {
     s32 x;
     s32 width;
@@ -6641,17 +6656,19 @@ void main_wrap_layer_x(GameObject *obj, s32 left, s32 right) {
             d -= 1;
             width = D_801D8864.w & 0x3FFFFFF;
             d -= width;
-            if (d < 0) {
-                d = -d;
-            }
+            d = abs(d);
             if (x >= d) {
                 x = x - (width + 1);
             }
         }
     } else {
         x += left;
-        if (x < 0 && (obj->size.s.lo << 16) + x <= 0) {
-            x = x + (1 + (D_801D8864.w & 0x3FFFFFF));
+        if (x < 0) {
+            d = obj->size.s.lo << 16;
+            d += x;
+            if (d <= 0) {
+                x = x + (1 + (D_801D8864.w & 0x3FFFFFF));
+            }
         }
     }
     obj->pos_x.w = x;
@@ -7075,8 +7092,11 @@ void func_8002546C(Building *rec) {
 }
 
 #ifdef NON_MATCHING
-/* 94.53%: 94.5 %: the sum y and last swap registers (a1/a3), which moves last's subtract out of the branch's delay
- * slot; statement and declaration orders tried */
+/* 99.89%: 99.9 %: only the loop counter's register differs (v1, the original a1). The size goes through its own
+ * variable so that expand_binop keeps (pos + size) with the size loaded first (no swap: the target is not the
+ * second operand), which frees a1 for last; n > last orders the shifts; blk->unk_00 is stored after unk_1E. The
+ * counter (5 refs, live 8) is global-alloc's first pseudo and takes the first free register, v1; the original's
+ * counter shares last's a1, as if allocated after last (counter forms, types and reuses of last or n tried) */
 void func_80025474(Building *b) {
     BuildingBlock *blk;
     ObjectDef *def;
@@ -7086,6 +7106,7 @@ void func_80025474(Building *b) {
     s16 last;
     s16 k;
     s32 y;
+    s32 sz;
     s16 h;
 
     if (b->unk_018 != NULL) {
@@ -7098,11 +7119,12 @@ void func_80025474(Building *b) {
         n = b->unk_08A;
         last = b->unk_000 - 1;
         top = b->unk_070->obj;
-        y = top->pos_y.u.hi + top->size.u.hi;
+        sz = top->size.u.hi;
+        y = top->pos_y.u.hi + sz;
         if (n < 2) {
             n = 2;
         }
-        if (last < n) {
+        if (n > last) {
             n = last;
         }
         blk->unk_0A = n;
@@ -7119,8 +7141,8 @@ void func_80025474(Building *b) {
         obj = func_8001DCB4();
         h = obj->pos_y.s.hi - obj->unk_1C.s.hi;
         blk->unk_0E = h;
-        blk->unk_00 = obj;
         blk->unk_1E = h + obj->size.u.hi;
+        blk->unk_00 = obj;
         b->unk_018 = blk;
         obj->unk_94.p = blk;
         obj->owner.building = b;
@@ -7999,7 +8021,9 @@ void func_80026F58(Monster *arg0) {
 }
 
 #ifdef NON_MATCHING
-/* 89.9 %: the call's argument is set up early and the (u16)(state - 5) truncation is kept in the original. */
+/* 89.85%: 89.9 %: the call's argument (move a0,s0) sits first in the block after the 0x53 test in the original, so
+ * reorg puts it in the bne's delay slot; sched1 here keeps it next to the jal and the delay slot takes the addiu.
+ * The (u16)(state - 5) truncation stays; types, the statement order, if/else and early-return forms tried */
 void func_80026F98(Monster *arg0) {
     u16 temp_v1;
 
@@ -8681,10 +8705,6 @@ void main_reset_camera_y(void) {
     D_801F9ACC.w = 0;
 }
 
-#ifdef NON_MATCHING
-/* 99.01%: 99.0 %: only flags and the D_801D3D64 pointer swap s0/s1: both have 5 refs, and the pointer is live 150
- * insns to the flags' 141 (the blocks that jump to stop), so global-alloc takes flags first; the original took the
- * pointer first */
 extern s32 D_8007BD7C;
 extern s32 D_801D3D90;
 extern s16 D_801FA724;
@@ -8692,7 +8712,7 @@ extern s16 D_801FA728;
 extern s16 D_801FA9A8;
 void main_find_camera_pair(void);
 void func_800288B0(s32 *vel2, s32 *vel1);
-void func_80029D5C(s32, s32);
+void main_track_player(s32, s32);
 
 void main_update_camera(void) {
     s32 flags;
@@ -8711,7 +8731,7 @@ void main_update_camera(void) {
         return;
     }
     if (flags & 2) {
-        func_80029D5C(flags, D_8007BD7C);
+        main_track_player(flags, D_8007BD7C);
         return;
     }
     main_find_camera_pair();
@@ -8733,7 +8753,9 @@ void main_update_camera(void) {
             } else if (x >= 0xBF) {
                 goto clamp_right;
             } else {
-                goto stop;
+                scroll->unk_26 = 0;
+                scroll->unk_2C = 0;
+                goto done;
             }
         } else {
             if (vel1 <= vel2) {
@@ -8777,9 +8799,10 @@ void main_update_camera(void) {
                 goto stop;
             }
         right:
-            d = vel2;
-            if (vel1 >= d) {
+            if (vel1 >= vel2) {
                 d = vel1;
+            } else {
+                d = vel2;
             }
             D_801D3D90 = d;
             if (x > 0x12C) {
@@ -8807,9 +8830,10 @@ void main_update_camera(void) {
                 goto stop;
             }
         left:
-            d = vel2;
-            if (vel1 <= d) {
+            if (vel1 <= vel2) {
                 d = vel1;
+            } else {
+                d = vel2;
             }
             D_801D3D90 = d;
             if (x < 0x64) {
@@ -8844,9 +8868,6 @@ void main_update_camera(void) {
 done:
     main_update_camera_y();
 }
-#else
-INCLUDE_ASM("asm/main/nonmatchings/main", main_update_camera);
-#endif
 
 void main_start_scroll_down(void) {
     s32 var_v1;
@@ -8988,12 +9009,14 @@ void main_update_camera_y(void) {
 }
 
 #ifdef NON_MATCHING
-/* 96.69%: 96.7 %: each case's load of m1->obj sits before the second call's li a0 (the original has li a0 first, so
- * its three tails cross-jump from the load); then x1/x2 get a3/a2 instead of t1/t0 */
+/* 96.69%: 96.7 %: each case's load of m1->obj sits before the second call's li a0. In the original, reorg put li
+ * a0,2 in case 1's jump delay slot and the tails cross-jump from the lw, so sched1 had placed the li before the lw
+ * in each case. Both are ready together, of equal priority, and sched1 breaks the tie by RTL order (the arg move is
+ * emitted right before the call, after the lw), unless the lw sets a once-set live pseudo (birthing_insn_p: top
+ * priority, placed last), which o1, set in each case and by the NULL fix-up, is not. Moving the second call after
+ * the switch (a per-case player index) gives the li/lw order but loses the D_801E0B78 base held in s0 across the
+ * join, which only the per-case tails cross-jumped after allocation give. x1/x2 then get a3/a2 instead of t1/t0 */
 extern s16 D_801D8844;
-extern s16 D_801FA724;
-extern s16 D_801FA728;
-extern s16 D_801FA9A8;
 s16 main_get_midpoint(s32, s32);
 
 void func_800288B0(s32 *vel2, s32 *vel1) {
@@ -9069,8 +9092,11 @@ void func_800288B0(s32 *vel2, s32 *vel1) {
 INCLUDE_ASM("asm/main/nonmatchings/main", func_800288B0);
 #endif
 
-/* 91.3 %: the result is computed from a copy of the larger value (move v0,a2) in the original; the C computes it in place */
 #ifdef NON_MATCHING
+/* 91.25%: 91.3 %: the original copies the larger value into v0 (move v0,a2) and uses the copy for both the
+ * difference and the result; here both uses read hi's own register. A second variable (r = hi) is merged by cse,
+ * which keeps hi canonical since r does not outlive the block; s16 parameters, s32/u16 locals, the swap through a
+ * temporary, a ternary and a static inline helper tried */
 s16 main_get_midpoint(s32 a, s32 b) {
     s16 lo;
     s16 hi;
@@ -9605,27 +9631,24 @@ void func_80029D1C(void) {
     }
 }
 
-#ifdef NON_MATCHING
-/* 91.81%: 91.8 %: a first draft, the logic complete; registers differ from the start (the original keeps mode in s5
- * and sx in s6), the screen x is computed into a2 and copied to sx, and the dy, dx sums still reassociate */
-extern s32 D_8007BD7C;
 void func_8005E214(void);
 
-void func_80029D5C(s32 mode, s32 player) {
+void main_track_player(s32 mode, s32 player) {
     Monster *m;
     s32 bonus;
-    s32 boost;
+    u16 boost;
     u16 camx;
     u16 camy;
     u16 sx;
-    u16 ox;
     u16 oy;
     u16 right;
     u16 edge;
     u16 dx;
-    u16 dy;
+    s16 dy;
     u16 x;
     s32 flags;
+    u16 cam;
+    s32 top;
 
     sx = 0;
     boost = 0;
@@ -9644,15 +9667,15 @@ void func_80029D5C(s32 mode, s32 player) {
         }
         m = &D_801E0B78[func_80025DF8(player)];
         right = camx + 0x131;
+        sx = m->obj->pos_x.u.hi;
         edge = right;
-        ox = m->obj->pos_x.u.hi;
+        x = sx;
         oy = m->obj->pos_y.u.hi;
         if ((s16) D_801D8866 < (s16) right) {
             edge = right - D_801D8866;
         }
-        x = ox;
-        if ((s16) camx < (s16) ox && (s16) ox < (s16) edge) {
-            x = ox - camx;
+        if ((s16) sx > (s16) camx && (s16) sx < (s16) edge) {
+            x = sx - camx;
         }
         sx = x;
         if (m->action == 2 || m->action == 0x19) {
@@ -9682,21 +9705,23 @@ void func_80029D5C(s32 mode, s32 player) {
         }
         oy -= 0xE1;
         if (((s16) camy - (s16) oy >= 0x6F || (D_8007BD78.flags & 4)) && m->action != 2 && m->action != 0x2C) {
+            D_8007BD78.flags |= 4;
             dy = camy - 0x6E;
             dy = oy - dy;
-            D_8007BD78.flags |= 4;
-            if ((s16) dy < -4) {
+            if (dy < -4) {
                 dy = -4;
-            } else if ((s16) dy == 0) {
+            } else if (dy == 0) {
                 D_8007BD78.flags &= ~4;
             }
-        } else if ((s16) oy - ((s16) camy - 0x32) > 0) {
+        } else if ((s16) oy - (top = (s16) camy - 0x32) > 0) { /* FAKE: top keeps camy - 0x32 a value of its own:
+            * inline, fold reassociates oy - (camy - 0x32) into (oy + 0x32) - camy; a statement before the test
+            * computes it in another block */
             dy = camy - 0x32;
             dy = oy - dy;
-            if ((s16) dy >= 5) {
+            if (dy >= 5) {
                 dy = 4;
             }
-            if (-(s16) camy < (s16) dy) {
+            if (dy > -(s16) camy) {
                 dy = -camy;
             }
         }
@@ -9710,7 +9735,7 @@ void func_80029D5C(s32 mode, s32 player) {
             dx = boost + dx;
         } else {
             dx = m->obj->vel_x.s.hi;
-            if (dx == 0) {
+            if (m->obj->vel_x.s.hi == 0) {
                 D_8007BD78.flags &= ~3;
             }
         }
@@ -9718,13 +9743,13 @@ void func_80029D5C(s32 mode, s32 player) {
     if (bonus == 1 && (s16) dx < 0) {
         dx = 0;
     }
-    x = D_801F9AC8.u.hi + dx;
-    D_801F9AC8.u.hi = x;
+    cam = D_801F9AC8.u.hi + dx;
+    D_801F9AC8.u.hi = cam;
     D_801F9ACC.u.hi += dy;
-    if ((s16) D_801D8866 < (s16) x) {
-        D_801F9AC8.s.hi = x - D_801D8866;
-    } else if ((s16) x < 0) {
-        D_801F9AC8.s.hi = x + D_801D8866;
+    if ((s16) D_801D8866 < (s16) cam) {
+        D_801F9AC8.s.hi = cam - D_801D8866;
+    } else if ((s16) cam < 0) {
+        D_801F9AC8.s.hi = cam + D_801D8866;
     }
     if (D_801F9ACC.s.hi > 0) {
         D_801F9ACC.s.hi = 0;
@@ -9733,9 +9758,6 @@ void func_80029D5C(s32 mode, s32 player) {
         D_801F9AC8.s.hi = 0x666;
     }
 }
-#else
-INCLUDE_ASM("asm/main/nonmatchings/main", func_80029D5C);
-#endif
 
 void func_8002A1AC(Monster *m, s16 count) {
     GameObject *saved;

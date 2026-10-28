@@ -241,7 +241,8 @@ void pickup_clear(Pickup *p) {
 
 #ifdef NON_MATCHING
 /* 93.06%: the shape is right (the negu-then-add copies, the swap); registers differ, and the original loads the y
- * before the flags */
+ * before the flags; the original reads the box in func_8004D6F8's order (bottom, right, left, top), but in that
+ * order local-alloc sinks some loads into the compare blocks (91.7 %), and an earlier y read costs more */
 s32 pickup_test_touch(GameObject *obj, Monster *m) {
     SpriteFrame *box;
     s16 x;

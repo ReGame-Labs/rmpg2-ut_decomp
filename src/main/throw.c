@@ -694,11 +694,17 @@ u16 func_80048558(u16 b, Throw *t) {
 }
 
 #ifdef NON_MATCHING
-/* 93 %: the original copies the state block's address into a second saved register after the facing test (move s0,s2) and uses both; here one register holds it throughout, so the frame has one saved register less */
+/* 97.23%: 97.2 %: h (set at the facing join, a copy of the top's &D_800AA248) is cse's canonical register for the
+ * middle's references, as in the original (move s0,s2); left: the original loads vel_x's object before the facing
+ * branch through h (the store's address first: a ?: store), but with the ?: form the end's references join h and
+ * the copy is coalesced away; here vel_x is reloaded after the join through the top's pseudo, which gives it 8 refs
+ * (0.18) against saved's 0.15, so the two swap s1/s2 */
 extern s32 D_8009186C[];
 
 u16 func_8004874C(u16 b, Throw *t) {
-    GameObject *saved = D_800AA248.cur_obj;
+    GameState *h;
+    s32 vx;
+    GameObject *saved;
     ObjectDef *def;
     GameObject *cur;
     GameObject *obj;
@@ -706,8 +712,8 @@ u16 func_8004874C(u16 b, Throw *t) {
     s16 dx;
     s16 dy;
     s16 x;
-    s32 vx;
 
+    saved = D_800AA248.cur_obj;
     def = func_8001D110();
     D_800AA248.new_def = def;
     cur = D_800AA248.cur_obj;
@@ -718,6 +724,7 @@ u16 func_8004874C(u16 b, Throw *t) {
     if (cur->flags & 0x10) {
         x = -dx;
     }
+    h = &D_800AA248;
     def->pos_x.s.hi = cur->pos_x.s.hi + x;
     def->pos_y.s.hi = D_800AA248.cur_obj->pos_y.s.hi + dy;
     def->flags = 0x1005;
@@ -741,8 +748,8 @@ u16 func_8004874C(u16 b, Throw *t) {
         vx = -0x70000;
     }
     D_800AA248.cur_obj->vel_x.w = vx;
-    D_800AA248.cur_obj->vel_y.w = -0x40000;
-    D_800AA248.cur_obj = saved;
+    h->cur_obj->vel_y.w = -0x40000;
+    h->cur_obj = saved;
     return 0;
 }
 #else
@@ -2239,7 +2246,10 @@ void func_8004BAC0(void) {
 
 #ifdef NON_MATCHING
 /* 99.86%: 99.86 %: registers only: obj (3 refs over 12 insns, 0.25) is allocated before the &D_800AA248 pseudo (4
- * over 34, 0.235); the original needs obj below 0.235 (13 insns) or the base above 0.25 */
+ * over 34, 0.235); the base's life is sched1's 17 doubled by update_equiv_regs (its REG_EQUIV constant address), so
+ * the original needs obj below 0.235 (13 insns: one more insn between npc->obj's load and case 1's store) or the
+ * base without its equivalence (set twice) or with a fifth ref; obj first as its own statement, case 1 through obj
+ * or npc->obj and a local for the action change nothing or more */
 void func_8003831C(void);
 extern Anim D_8008AA58;
 extern Anim D_8008AA78;
