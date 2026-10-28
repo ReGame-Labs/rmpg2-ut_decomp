@@ -42,7 +42,7 @@ void func_80049B9C(Throw *t);
 void func_80049E10(Throw *t);
 void func_8004A044(Throw *t);
 void func_8004A1F8(Throw *t);
-void func_8004A698(Throw *t);
+void throw_update_flight(Throw *t);
 extern s32 D_8008C804;
 extern u16 D_801D8850;
 
@@ -63,7 +63,7 @@ void func_8003EB5C(void *anim, GameObject *obj);
 void func_8004B540(void);
 void func_8004B754(void);
 void func_8004B990(void);
-void func_8004B3D0(void);
+void throw_start_next_pass(void);
 void func_8004AEA4(void *slot);
 void func_8004AD18(Throw *slot);
 ObjectDef *func_8001D110(void);
@@ -1557,9 +1557,7 @@ u16 func_8004A51C(u16 kind, u16 b, Throw *t) {
     return 0;
 }
 
-#ifdef NON_MATCHING
-/* 70 %: the logic is right; the layout is not: the original keeps the landing and the hit blocks inline before their jumps to the sound, here they are placed after the loop */
-void func_8004A698(Throw *t) {
+void throw_update_flight(Throw *t) {
     GameObject *saved = D_800AA248.cur_obj;
     Monster *m;
     s32 vy;
@@ -1579,6 +1577,9 @@ void func_8004A698(Throw *t) {
                 t->state = 0x10;
                 D_800AA248.cur_obj->script.pc = (s32) D_80091788;
                 D_800AA248.cur_obj->flags |= 0x800;
+                if (!(D_800AA248.cur_obj->unk_6C & 0x80)) {
+                    func_8001F7CC(0x28, 5);
+                }
             } else {
                 i = 7;
                 do {
@@ -1591,29 +1592,26 @@ void func_8004A698(Throw *t) {
                             func_8004A93C(m);
                             D_800AA248.cur_obj->script.pc = (s32) D_800917D0;
                             D_800AA248.cur_obj->flags |= 0x800;
-                            goto sound;
+                            if (!(D_800AA248.cur_obj->unk_6C & 0x80)) {
+                                func_8001F7CC(0x28, 5);
+                            }
+                            break;
                         }
                         if (D_800AA248.cur_obj->vel_x.w != 0 && monster_test_box_x(D_800AA248.cur_obj->pos_x.s.hi, m) != 0) {
                             D_800AA248.cur_obj->vel_x.w >>= 1;
                         }
                     }
                 } while (--i != 0);
-                goto end;
             }
         } else {
             func_8004AE2C();
-        }
-sound:
-        if (!(D_800AA248.cur_obj->unk_6C & 0x80)) {
-            func_8001F7CC(0x28, 5);
+            if (!(D_800AA248.cur_obj->unk_6C & 0x80)) {
+                func_8001F7CC(0x28, 5);
+            }
         }
     }
-end:
     D_800AA268.p = saved;
 }
-#else
-INCLUDE_ASM("asm/main/nonmatchings/throw", func_8004A698);
-#endif
 
 void func_8004A90C(Monster *m) {
     m->action = 0x20;
@@ -1785,7 +1783,7 @@ void func_8004AD18(Throw *t) {
         func_80049B9C(t);
         break;
     case 5:
-        func_8004A698(t);
+        throw_update_flight(t);
         break;
     case 6:
         func_8004A1F8(t);
@@ -1926,7 +1924,7 @@ void func_8004B17C(void) {
         return;
     }
     if (D_801E1C8C < 4) {
-        func_8004B3D0();
+        throw_start_next_pass();
     }
 }
 
@@ -1988,16 +1986,12 @@ void func_8004B204(void) {
     D_800AA248.cur_obj = saved;
 }
 
-#ifdef NON_MATCHING
-/* 91.98%: 92 %: loop.c moves the camera's high half (life 3, savings 1) only if threshold x 3 >= 67 insns, and
- * after four moves the threshold is 18: the original's loop had fewer insns or a longer life for it (it keeps both
- * highs in s7/s8) */
-void func_8004B3D0(void) {
+void throw_start_next_pass(void) {
     u16 s = 7;
     ThrowRec *rec;
     GameObject *obj;
     u16 n;
-    u16 x;
+    s16 x;
     u16 y;
 
     if (D_801E2A54 != 4) {
@@ -2033,9 +2027,6 @@ void func_8004B3D0(void) {
         obj->vel_x.w = -obj->vel_x.w;
     } while (--n != 0);
 }
-#else
-INCLUDE_ASM("asm/main/nonmatchings/throw", func_8004B3D0);
-#endif
 
 void func_8004B540(void) {
     ThrowRec *rec = D_801F9A54;
