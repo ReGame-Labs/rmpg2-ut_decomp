@@ -6501,36 +6501,29 @@ s16 func_8002439C(Npc *npc) {
 INCLUDE_ASM("asm/main/nonmatchings/main", func_8002439C);
 #endif
 
-#ifdef NON_MATCHING
-/* 86.11%: 86.1 %: abs() is GCC's builtin (bgez, nop, negu); an s32 x (its lhu apart from the lh of the difference)
- * and an s32 half (x += half adds in the original's order) give the original's operations. Only sched1's order
- * differs: the original loads D_801D8866 before the second npc->target_x (lh) and shifts it in that load's delay, so
- * half takes t1 and cur t2; here half, a once-set live pseudo (birthing_insn_p, top priority), is loaded last, into
- * npc's a2. Statement orders do not change it */
 void main_unwrap_target_x(s16 *px, s16 *pcur, Npc *npc) {
     s32 x;
     s16 cur;
-    s32 half;
+    s32 width;
     s16 d;
+    s32 w;
 
     x = (u16) npc->target_x;
     cur = D_800AA268.p->pos_x.s.hi;
-    half = (u16) D_801D8866;
+    width = D_801D8866;
+    w = (s16) width;
     d = abs(npc->target_x - cur);
-    if (d >= (s16) half >> 1) {
+    if (d >= w >> 1) {
         d = abs(D_801F9ACA - cur);
-        if (d >= (s16) half >> 1) {
-            x += half;
+        if (d >= w >> 1) {
+            x += width;
         } else {
-            cur += half;
+            cur += width;
         }
     }
     *px = x;
     *pcur = cur;
 }
-#else
-INCLUDE_ASM("asm/main/nonmatchings/main", main_unwrap_target_x);
-#endif
 
 void func_800244A8(void) {
     GameObject *obj;
@@ -6859,9 +6852,12 @@ void main_create_buildings(void) {
 }
 
 #ifdef NON_MATCHING
-/* 72.10%: 72 %: the original keeps the address of D_80011BA4 computed twice and one compare of def against it (an
- * if/else-if on D_80011BA4/_alt whose bodies vanished after flow); without that remnant the loop is smaller,
- * %hi(D_801F9948) is hoisted into a saved register and priority spills to the stack */
+/* 94.13%: 94.1 %: the structure matches (two compares against D_80011BA4 whose bodies flow deletes, the parts
+ * through a BuildingPart pointer so loop.c reduces only the +4/+8 givs, count kept apart from i). Left: global-
+ * alloc puts y in s3 and rec in s4 (y 9 refs/61 live, 0.44, above rec 24/222, 0.43; the original's y life is about
+ * 63, statement orders trade it against req's); cse2 merges the memset's %hi(D_801F9948) with the copy loop.c
+ * hoists, and that pseudo takes s7 where the original rematerializes it; the division's p takes v1 and its sign
+ * shift is scheduled before the mfhi (the original a1, after) */
 extern u8 D_80011BA4[];
 extern u8 D_80011BA4_alt[];
 extern s16 D_8007A686;
@@ -6874,22 +6870,25 @@ void func_80024E08(Building *rec) {
     GameObject *obj;
     SpriteFrame *frame;
     BuildingDef *def;
+    BuildingPart *part;
     s32 *ids;
     s32 id;
     s16 i;
     s16 y;
     u16 prio;
     u16 count;
-    s32 unused;
+    s32 n;
+    s32 kind;
 
     req = func_8001D110();
     item = rec->items;
-    i = 1;
     req->unk_0C = 0x710;
+    i = 1;
+    y = rec->bottom;
     req->pos_x.s.hi = rec->left;
-    y = rec->bottom - 0x1D;
     prio = rec->priority;
     def = rec->def;
+    y -= 0x1D;
     memset(D_801F9948, 0, 0xCC);
     ids = def->unk_20;
     id = def->unk_20[0];
@@ -6901,10 +6900,13 @@ void func_80024E08(Building *rec) {
                 y -= frame->size.u.hi;
             }
             req->pos_y.s.hi = y;
+            /* The bodies only set frame, which the next pass overwrites: cse keeps them (frame's use comes
+             * earlier in the loop), flow deletes them, and jump2 then leaves the first compare and the
+             * second one's address load, as in the original */
             if (rec->def == (BuildingDef *) D_80011BA4) {
-                unused = 1;
+                frame = (SpriteFrame *) 0;
             } else if (rec->def == (BuildingDef *) D_80011BA4_alt) {
-                unused = 2;
+                frame = (SpriteFrame *) 0;
             }
             D_800AA284.p = req;
             obj = func_8001DCB4();
@@ -6916,9 +6918,12 @@ void func_80024E08(Building *rec) {
                 obj->priority = rec->priority - 9;
             }
             item->building = rec;
-            item->unk_24.unk_04 = 2;
-            item->unk_0C.unk_04 = 1;
-            item->unk_3C.unk_04 = 3;
+            part = &item->unk_0C;
+            part->unk_04 = 1;
+            part = &item->unk_24;
+            part->unk_04 = 2;
+            part++;
+            part->unk_04 = 3;
             item++;
             ids++;
             id = *ids;
@@ -6928,15 +6933,19 @@ void func_80024E08(Building *rec) {
     item--;
     rec->unk_070 = item;
     obj = item->obj;
-    count = i - 1;
+    i--; /* count = i - 1 would let cse fold the later count - 1 into i - 2 */
+    count = i;
+    rec->top = obj->pos_y.u.hi + obj->size.u.hi - 0xC;
     rec->state = 0;
     rec->unk_000 = count;
-    rec->top = obj->pos_y.u.hi + obj->size.u.hi - 0xC;
     func_80025BBC(rec);
     func_8002546C(rec);
     func_800252CC(rec);
-    D_800AA25C = rec->kind;
-    rec->unk_012 = ((rec->kind * (((s16) (count - 1) - 1) * 3) + 2) * (D_8007A686 << 16)) / 100 >> 16;
+    count--;
+    n = ((s16) count - 1) * 3;
+    kind = rec->kind;
+    D_800AA25C = kind;
+    rec->unk_012 = ((kind * n + 2) * (D_8007A686 << 16)) / 100 >> 16;
     if (rec->unk_018 != NULL) {
         func_80025474(rec);
     }
@@ -9088,12 +9097,8 @@ void func_800288B0(s32 *vel2, s32 *vel1) {
 INCLUDE_ASM("asm/main/nonmatchings/main", func_800288B0);
 #endif
 
-#ifdef NON_MATCHING
-/* 91.25%: 91.3 %: the original copies the larger value into v0 (move v0,a2) and uses the copy for both the
- * difference and the result; here both uses read hi's own register. A second variable (r = hi) is merged by cse,
- * which keeps hi canonical since r does not outlive the block; s16 parameters, s32/u16 locals, the swap through a
- * temporary, a ternary and a static inline helper tried */
 s16 main_get_midpoint(s32 a, s32 b) {
+    s16 mid = 0; /* never read: set before the blocks, it becomes cse's canonical copy of hi (the move v0) */
     s16 lo;
     s16 hi;
 
@@ -9103,11 +9108,9 @@ s16 main_get_midpoint(s32 a, s32 b) {
         lo = b;
         hi = a;
     }
-    return hi - ((s16) (hi - lo) >> 1);
+    mid = hi;
+    return mid - ((s16) (mid - lo) >> 1);
 }
-#else
-INCLUDE_ASM("asm/main/nonmatchings/main", main_get_midpoint);
-#endif
 
 extern s16 D_801D8844;
 extern s16 D_801E1E24[8];
