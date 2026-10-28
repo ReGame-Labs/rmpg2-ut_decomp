@@ -790,7 +790,7 @@ void func_8004D38C(Monster *m) {
         o->vel_x.w = vel;
         o->unk_88 = 0x4000;
         if (D_800AA2DC != 0 && bonus_get_round_kind(D_800AA2DC, vel) == 3) {
-            D_8007BD78.unk_08[D_801FA8A0[m->id - 1] - 1] += 1;
+            D_8007BD78.tally[D_801FA8A0[m->id - 1] - 1] += 1;
             D_8007BD78.flags |= 0x20;
         }
     }
@@ -803,7 +803,7 @@ void func_8004D488(Monster *m) {
         p->action = 0x4E;
         p->unk_0C = 0;
         if (D_800AA2DC != 0 && bonus_get_round_kind(D_800AA2DC) == 3) {
-            D_8007BD78.unk_08[D_801FA8A0[m->id - 1] - 1] += 3;
+            D_8007BD78.tally[D_801FA8A0[m->id - 1] - 1] += 3;
             D_8007BD78.flags |= 0x20;
         }
     }

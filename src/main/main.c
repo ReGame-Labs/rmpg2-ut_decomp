@@ -531,7 +531,7 @@ restart:
                 goto restart;
             }
             func_8001B7F4();
-            if (D_801D3D64.unk_62 == 0) {
+            if (D_801D3D64.pause_state == 0) {
                 func_8001B858();
             }
         }
@@ -614,7 +614,7 @@ void func_80017B90(void) {
 }
 
 void func_80017B98(void) {
-    if (D_801D3D64.unk_62 == 0) {
+    if (D_801D3D64.pause_state == 0) {
         D_801D3D64.unk_1C += 1;
         D_800AA2E8 += 1;
         D_801FA72C += 1;
@@ -789,7 +789,7 @@ typedef struct {
     /* 0x00 */ u32 pause;     /* START */
     /* 0x04 */ u32 confirm;
     /* 0x08 */ u32 move;      /* up and down */
-    /* 0x0C */ u16 owner;     /* player << 12, as D_801D3D64.unk_62 holds the pausing player */
+    /* 0x0C */ u16 owner;     /* player << 12, as D_801D3D64.pause_state holds the pausing player */
     /* 0x0E */ u16 pad_0E;
 } MainPauseKeys;
 
@@ -821,7 +821,7 @@ void func_800636B0(void);
  * is shared with the replugged pad's path through the label, as the original's code is. */
 u16 main_update_pause(void) {
     s16 who;    /* the player whose pad was unplugged (0xFF: no pad at all), then each monster's player */
-    u16 flags;  /* D_801D3D64.unk_62: bits 0-1 the menu state, 8-11 the unplugged pad's player, 12-13 the pausing player */
+    u16 flags;  /* D_801D3D64.pause_state: bits 0-1 the menu state, 8-11 the unplugged pad's player, 12-13 the pausing player */
     s16 player;
     s16 i;      /* also the pausing player in the menu states */
     OverattrPlayer *p;
@@ -830,10 +830,10 @@ u16 main_update_pause(void) {
         main_pause_delay--;
     }
     who = main_find_unplugged_pad();
-    if ((who != 0 && (D_801D36FC == 0x150 || D_801D36FC == 0x240 || D_801D36FC == 0x220)) || (D_801D3D64.unk_62 & 0xF00)) {
-        if (!(D_801D3D64.unk_62 & 0xF00)) {
+    if ((who != 0 && (D_801D36FC == 0x150 || D_801D36FC == 0x240 || D_801D36FC == 0x220)) || (D_801D3D64.pause_state & 0xF00)) {
+        if (!(D_801D3D64.pause_state & 0xF00)) {
             main_cycle_highlight();
-            if (D_801D3D64.unk_62 & 3) {
+            if (D_801D3D64.pause_state & 3) {
                 main_free_kind(0x300);
                 main_free_kind(0x301);
                 main_free_kind(0x302);
@@ -858,15 +858,15 @@ u16 main_update_pause(void) {
                 func_8001ED54(&D_80089534);
                 func_8001ED54(&D_80089560);
             }
-            D_801D3D64.unk_62 |= who << 8;
+            D_801D3D64.pause_state |= who << 8;
         } else {
-            player = (D_801D3D64.unk_62 & 0xF00) >> 8;
+            player = (D_801D3D64.pause_state & 0xF00) >> 8;
             if (D_801FA898[player - 1] == D_801E1C90[player - 1]) {
                 main_free_kind(0x300);
                 main_free_kind(0x550);
-                D_801D3D64.unk_62 &= 0xF0FF;
+                D_801D3D64.pause_state &= 0xF0FF;
                 main_cycle_highlight();
-                switch (D_801D3D64.unk_62 & 3) {
+                switch (D_801D3D64.pause_state & 3) {
                 case 2:
                     D_800AA2EC = 0x44;
                     func_8001ED54(&D_80089374);
@@ -893,7 +893,7 @@ u16 main_update_pause(void) {
         }
         return 0;
     }
-    flags = D_801D3D64.unk_62;
+    flags = D_801D3D64.pause_state;
     switch (flags & 3) {
     case 0:
         if (D_801E28E0 != 0) {
@@ -925,7 +925,7 @@ u16 main_update_pause(void) {
         }
         break;
     case 1:
-        D_801D3D64.unk_62 = (flags & 0xFFFC) | 2;
+        D_801D3D64.pause_state = (flags & 0xFFFC) | 2;
         main_cycle_highlight();
         D_800AA2EC = D_801E2A44;
         func_8001ED54(&D_800893BC);
@@ -942,7 +942,7 @@ u16 main_update_pause(void) {
             func_8001F724(3);
             func_8001802C(i);
             if (main_pause_cursor == 0) {
-                D_801D3D64.unk_62 = 0;
+                D_801D3D64.pause_state = 0;
                 main_free_kind(0x301);
                 main_free_kind(0x550);
                 func_8001F704();
@@ -954,7 +954,7 @@ u16 main_update_pause(void) {
                 func_80060A7C(0x7B4, 0x808080, 4);
             } else {
                 main_pause_cursor = 1;
-                D_801D3D64.unk_62 |= 3;
+                D_801D3D64.pause_state |= 3;
                 main_free_kind(0x301);
                 D_800AA2EC = 0x44;
                 func_8001ED54(&D_80089398);
@@ -993,7 +993,7 @@ u16 main_update_pause(void) {
             func_8001F724(3);
             func_8001802C(i);
             if (main_pause_cursor == 1) {
-                D_801D3D64.unk_62 = 0;
+                D_801D3D64.pause_state = 0;
                 main_free_kind(0x301);
                 main_free_kind(0x550);
                 func_8001F704();
@@ -1003,7 +1003,7 @@ u16 main_update_pause(void) {
                 func_80060A7C(0x402, 0x808080, 4);
                 func_80060A7C(0x7B4, 0x808080, 4);
             } else {
-                D_801D3D64.unk_62 = 0;
+                D_801D3D64.pause_state = 0;
                 func_8001F6B4();
                 D_801FA984[0] = 0;
                 D_801FA984[1] = 0;
@@ -2631,9 +2631,9 @@ void main_init_level(void) {
     D_801FA9B8 = 1;
     D_801D3758 = 0;
     D_8007A698 = 0;
-    D_801D3D64.unk_26 = 0;
+    D_801D3D64.scroll_vx = 0;
     D_801D3D64.unk_2C = 0;
-    D_801D3D64.unk_28 = 0;
+    D_801D3D64.scroll_state = 0;
     D_801D3D64.unk_24 = 0;
     D_801F9ACC.w = 0;
     D_801F9AC8.w = 0;
@@ -3381,10 +3381,10 @@ GameObject *func_8001DCB4(void) {
     } else {
         obj->flags |= D_800AA248.unk_74;
     }
-    D_800AA248.unk_60 = *(s32 *) p;
+    D_800AA248.def_flags = *(s32 *) p;
     p += 2;
     D_800AA248.unk_38 = 0x7FF;
-    if (D_800AA248.unk_60 & 0x40) {
+    if (D_800AA248.def_flags & 0x40) {
         D_800AA248.unk_74 = *(s32 *) p;
         p += 2;
         if (D_800AA248.unk_74 != 0) {
@@ -3392,7 +3392,7 @@ GameObject *func_8001DCB4(void) {
         }
     }
     obj->kind = D_800AA248.unk_38;
-    if (D_800AA248.unk_60 & 0x20) {
+    if (D_800AA248.def_flags & 0x20) {
         D_800AA248.unk_54 = *(s32 *) p;
         p += 2;
         D_800AA248.unk_50 = *(s32 *) p;
@@ -3411,7 +3411,7 @@ GameObject *func_8001DCB4(void) {
     }
     D_800AA248.unk_38 = 0;
     D_800AA248.unk_74 = 0;
-    if (D_800AA248.unk_60 & 1) {
+    if (D_800AA248.def_flags & 1) {
         D_800AA248.unk_74 = *(s32 *) p;
         p += 2;
         if (D_800AA248.unk_74 != 0) {
@@ -3420,30 +3420,30 @@ GameObject *func_8001DCB4(void) {
     }
     obj->unk_82 = D_800AA248.unk_38;
     D_800AA248.unk_38 = 0;
-    if (D_800AA248.unk_60 & 2) {
+    if (D_800AA248.def_flags & 2) {
         D_800AA248.unk_38 = *(s32 *) p;
         p += 2;
     }
     obj->priority = D_800AA248.unk_38;
-    if (D_800AA248.unk_60 & 4) {
+    if (D_800AA248.def_flags & 4) {
         D_800AA248.unk_74 = *(s32 *) p;
         p += 2;
         if (D_800AA248.unk_74 != 0) {
             func_80024964(D_800AA248.unk_74, obj);
         }
     }
-    if (D_800AA248.unk_60 & 8) {
+    if (D_800AA248.def_flags & 8) {
         D_800AA248.unk_74 = *(s32 *) p;
         p += 2;
         if (D_800AA248.unk_74 != 0) {
             func_8001E698(obj, D_800AA248.unk_74);
         }
     }
-    if (D_800AA248.unk_60 & 0x10) {
-        D_800AA248.unk_58 = *(void (**)(void)) p;
-        if (D_800AA248.unk_58 != NULL) {
+    if (D_800AA248.def_flags & 0x10) {
+        D_800AA248.on_create = *(void (**)(void)) p;
+        if (D_800AA248.on_create != NULL) {
             D_800AA248.unk_00 = (s32) obj;
-            D_800AA248.unk_58();
+            D_800AA248.on_create();
         }
     }
     if (D_800AA2A8 & 0x80) {
@@ -4013,25 +4013,25 @@ void main_print_text(void) {
     func_8001F400();
     func_8001F4EC();
     func_8001F4F4();
-    if (D_801D8588.unk_10.s.hi != 0) {
-        D_801D8588.unk_32 = D_801D8588.unk_10.s.hi;
-        D_801D8588.unk_10.s.hi = 0;
+    if (D_801D8588.advance.s.hi != 0) {
+        D_801D8588.unk_32 = D_801D8588.advance.s.hi;
+        D_801D8588.advance.s.hi = 0;
     }
-    *(s32 *) &D_801D8588.unk_34 = *(s32 *) &D_801D8588.pen_x;
+    *(s32 *) &D_801D8588.line_start = *(s32 *) &D_801D8588.pen_x;
     func_8001F464();
     for (D_801D8588.unk_3A = *D_801D8588.text; D_801D8588.unk_3A != 0; D_801D8588.unk_3A = *D_801D8588.text) {
         D_801D8588.unk_38 = 0;
         D_801D8588.text++;
         if (D_801D8588.unk_3A > 0x20) {
-            saved10 = D_801D8588.unk_10.w;
+            saved10 = D_801D8588.advance.w;
             saved0 = D_801D8588.unk_00;
-            saved34 = *(s32 *) &D_801D8588.unk_34;
+            saved34 = *(s32 *) &D_801D8588.line_start;
             saved8 = D_801D8588.unk_08;
-            saved30 = *(s32 *) &D_801D8588.unk_30;
+            saved30 = *(s32 *) &D_801D8588.space_width;
             code = D_801D8588.glyphs[D_801D8588.unk_3A - 0x21];
             id = code;
             glyph = func_8001B128(code);
-            func_8001E638((Unk1E638 *) glyph, D_801D8588.unk_20, (Fixed *) &D_801D8588.unk_30, &off.w);
+            func_8001E638((Unk1E638 *) glyph, D_801D8588.unk_20, (Fixed *) &D_801D8588.space_width, &off.w);
             if (D_801D8588.flags & 0x10000) {
             if ((D_800AA248.cur_obj = func_8001E204()) != NULL) {
                 D_800AA248.cur_obj->frame = (SpriteFrame *) glyph;
@@ -4059,11 +4059,11 @@ void main_print_text(void) {
             }
             if (D_801D8588.unk_38 != 0) {
                 D_801D8588.unk_00 = saved0;
-                *(s32 *) &D_801D8588.unk_34 = saved34;
+                *(s32 *) &D_801D8588.line_start = saved34;
                 D_801D8588.unk_08 = saved8;
-                *(s32 *) &D_801D8588.unk_30 = saved30;
-                D_801D8588.unk_10.w = saved10;
-                *(s32 *) &D_801D8588.pen_x = D_801D8588.unk_3C;
+                *(s32 *) &D_801D8588.space_width = saved30;
+                D_801D8588.advance.w = saved10;
+                *(s32 *) &D_801D8588.pen_x = D_801D8588.saved_pen;
                 continue;
             }
             width = glyph->unk_4;
@@ -4071,12 +4071,12 @@ void main_print_text(void) {
                 D_801D8588.pen_x += width;
             }
             D_801D8588.unk_00 = saved0;
-            D_801D8588.unk_10.w = saved10;
-            *(s32 *) &D_801D8588.unk_34 = saved34;
+            D_801D8588.advance.w = saved10;
+            *(s32 *) &D_801D8588.line_start = saved34;
             D_801D8588.unk_08 = saved8;
-            *(s32 *) &D_801D8588.unk_30 = saved30;
-            D_801D8588.pen_x += D_801D8588.unk_10.s.lo;
-            D_801D8588.pen_y += D_801D8588.unk_10.s.hi;
+            *(s32 *) &D_801D8588.space_width = saved30;
+            D_801D8588.pen_x += D_801D8588.advance.s.lo;
+            D_801D8588.pen_y += D_801D8588.advance.s.hi;
             } else {
                 func_8001B5E8(2);
                 continue;
@@ -4086,12 +4086,12 @@ void main_print_text(void) {
             continue;
         } else {
             D_801D8588.unk_3A = 0;
-            D_801D8588.unk_3C = *(s32 *) &D_801D8588.pen_x;
+            D_801D8588.saved_pen = *(s32 *) &D_801D8588.pen_x;
             if (!(D_801D8588.flags & 0x2000)) {
-                D_801D8588.pen_x += D_801D8588.unk_30;
+                D_801D8588.pen_x += D_801D8588.space_width;
             }
-            D_801D8588.pen_x += D_801D8588.unk_10.s.lo;
-            D_801D8588.pen_y += D_801D8588.unk_10.s.hi;
+            D_801D8588.pen_x += D_801D8588.advance.s.lo;
+            D_801D8588.pen_y += D_801D8588.advance.s.hi;
         }
     }
 }
@@ -4106,7 +4106,7 @@ void func_8001F270(void) {
     u16 y;
 
     y = D_801D8588.unk_36 + D_801D8588.unk_32;
-    D_801D8588.pen_x = D_801D8588.unk_34;
+    D_801D8588.pen_x = D_801D8588.line_start;
     D_801D8588.pen_y = y;
     D_801D8588.unk_36 = y;
     func_8001F464();
@@ -4142,7 +4142,7 @@ void func_8001F39C(TextMessage *msg) {
     D_801D8588.unk_08 = msg->unk_0C;
     D_801D8588.pen_x = msg->x;
     D_801D8588.pen_y = msg->y;
-    D_801D8588.unk_10.w = msg->spacing;
+    D_801D8588.advance.w = msg->spacing;
     D_801D8588.glyphs = msg->glyphs;
     D_801D8588.unk_18 = msg->kind;
     D_801D8588.text = msg->text;
@@ -4152,7 +4152,7 @@ void func_8001F400(void) {
     Glyph *glyph;
 
     glyph = func_8001B128(D_801D8588.glyphs[0x27]);
-    D_801D8588.unk_30 = glyph->unk_4 >> 1;
+    D_801D8588.space_width = glyph->unk_4 >> 1;
     D_801D8588.unk_32 = glyph->unk_6 + (glyph->unk_6 >> 1);
 }
 
@@ -4191,28 +4191,28 @@ s32 func_8001F50C(u8 *text) {
     u8 c;
 
     saved0 = D_801D8588.unk_00;
-    saved30 = *(s32 *) &D_801D8588.unk_30;
-    saved10 = D_801D8588.unk_10.w;
+    saved30 = *(s32 *) &D_801D8588.space_width;
+    saved10 = D_801D8588.advance.w;
     p = text;
     func_8001F400();
     c = *p;
     width = 0;
     while (c != 0 && c != 13 && c != 10) {
         if (D_801D8588.flags & 0x2000) {
-            width += D_801D8588.unk_10.s.lo;
+            width += D_801D8588.advance.s.lo;
         } else {
             if (c == 0x20) {
-                width += D_801D8588.unk_30 + D_801D8588.unk_10.s.lo;
+                width += D_801D8588.space_width + D_801D8588.advance.s.lo;
             } else {
-                width += func_8001B128(D_801D8588.glyphs[*p - 0x21])->unk_4 + D_801D8588.unk_10.s.lo;
+                width += func_8001B128(D_801D8588.glyphs[*p - 0x21])->unk_4 + D_801D8588.advance.s.lo;
             }
         }
         p++;
         c = *p;
     }
     D_801D8588.unk_00 = saved0;
-    *(s32 *) &D_801D8588.unk_30 = saved30;
-    D_801D8588.unk_10.w = saved10;
+    *(s32 *) &D_801D8588.space_width = saved30;
+    D_801D8588.advance.w = saved10;
     return width;
 }
 
@@ -4229,7 +4229,7 @@ void func_8001F61C(u8 *text, s16 x, s16 y, s32 spacing, s32 arg4, s32 *glyphs, s
     D_801D8588.unk_08 = arg4;
     D_801D8588.pen_x = x;
     D_801D8588.pen_y = y;
-    D_801D8588.unk_10.w = spacing;
+    D_801D8588.advance.w = spacing;
     D_801D8588.glyphs = glyphs;
     D_801D8588.unk_18 = arg7;
     D_801D8588.text = text;
@@ -7562,7 +7562,7 @@ void main_update_monsters(void) {
                     m->dir = 0;
                     m->buttons = 0;
                 } else if ((func_8005E4E4() & 2) && D_801FB46C == 0) {
-                    if (&D_801E0B78[func_80025DF8(D_8007BD78.unk_04)] == m && D_801D8740 != D_801E28C8
+                    if (&D_801E0B78[func_80025DF8(D_8007BD78.turn_player)] == m && D_801D8740 != D_801E28C8
                         && !(D_8007BD78.flags & 0x200)) {
                         func_80053DE4(m);
                         func_80027FD0(m, i);
@@ -8696,9 +8696,9 @@ void func_80028140(u16 arg0, Monster *arg1, u16 arg2) {
 }
 
 void main_reset_camera_y(void) {
-    D_801D3D64.unk_26 = 0;
+    D_801D3D64.scroll_vx = 0;
     D_801F9A30.unk_0 = 0;
-    D_801D3D64.unk_28 = 0;
+    D_801D3D64.scroll_state = 0;
     D_801F9ACC.w = 0;
 }
 
@@ -8734,7 +8734,7 @@ void main_update_camera(void) {
     main_find_camera_pair();
     func_800288B0(&vel2, &vel1);
     x = D_801FA9A8;
-    speed = scroll->unk_26 << 16;
+    speed = scroll->scroll_vx << 16;
     if (speed != 0) {
         if (speed > 0) {
             if (vel1 >= vel2) {
@@ -8750,7 +8750,7 @@ void main_update_camera(void) {
             } else if (x >= 0xBF) {
                 goto clamp_right;
             } else {
-                scroll->unk_26 = 0;
+                scroll->scroll_vx = 0;
                 scroll->unk_2C = 0;
                 goto done;
             }
@@ -8845,7 +8845,7 @@ void main_update_camera(void) {
             }
         } else {
         stop:
-            scroll->unk_26 = 0;
+            scroll->scroll_vx = 0;
             scroll->unk_2C = 0;
             goto done;
         }
@@ -8927,9 +8927,9 @@ void main_update_camera_y(void) {
             min = y;
         }
     }
-    D_801D3D64.unk_30 = max;
-    D_801D3D64.unk_34 = min;
-    if (D_801D3D64.unk_28 == 0) {
+    D_801D3D64.max_y = max;
+    D_801D3D64.min_y = min;
+    if (D_801D3D64.scroll_state == 0) {
         if (D_801E28C8 != 0) {
         high:
             if (min > 0x87FFFF && max > 0xEFFFFF) {
@@ -8966,7 +8966,7 @@ void main_update_camera_y(void) {
         sink:
             main_start_scroll_up();
         }
-    } else if (D_801D3D64.unk_28 == 1) {
+    } else if (D_801D3D64.scroll_state == 1) {
         if (min <= 0x77FFFF && max <= 0xEFFFFF) {
             max = D_801F9ACC.w + D_801F9A30.unk_0;
             D_801F9ACC.w = max;
@@ -8977,7 +8977,7 @@ void main_update_camera_y(void) {
             D_801F9ACC.w = max;
         }
         goto stop;
-    } else if (D_801D3D64.unk_28 == 2) {
+    } else if (D_801D3D64.scroll_state == 2) {
         if (((Fixed *) &D_801D3D64.unk_58)->u.hi == 0 && (max <= 0xC00000 || min <= 0x800000)) {
             goto stop;
         }

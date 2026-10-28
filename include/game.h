@@ -423,9 +423,10 @@ typedef struct GameState {
     /* 0x4C */ s32 unk_4C;
     /* 0x50 */ s32 unk_50;
     /* 0x54 */ s32 unk_54;
-    /* 0x58 */ void (*unk_58)(void);          /* the creation callback of an ObjectDef (func_8001DCB4) */
+    /* 0x58 */ void (*on_create)(void);       /* the creation callback of an ObjectDef (func_8001DCB4) */
     /* 0x5C */ u8 unk_5C[0x04];
-    /* 0x60 */ s32 unk_60;
+    /* 0x60 */ s32 def_flags;                  /* the ObjectDef stream's flags: which optional words follow
+                                                * (func_8001DCB4; D_800AA2A8) */
     /* 0x64 */ u8 unk_64[0x10];
     /* 0x74 */ s32 unk_74;
     /* 0x78 */ s16 result;                     /* the last test's result, also returned (the current object gone,
@@ -647,14 +648,15 @@ extern u16 D_801E29A4;
 /* Level-wide flags and per-player counters at D_8007BD78 (.data of main.c; cleared as 0x94 bytes). */
 typedef struct LevelFlags {
     /* 0x00 */ s32 flags;                      /* 0x20, 0x40 */
-    /* 0x04 */ s32 unk_04;
-    /* 0x08 */ s32 unk_08[3];                  /* per player (D_801FA8A0[monster id - 1] - 1): the bonus round's tally */
+    /* 0x04 */ s32 turn_player;                /* the player whose turn it is in a bonus round taken in turns
+                                                * (cdload_get_next_player) */
+    /* 0x08 */ s32 tally[3];                   /* per player (D_801FA8A0[monster id - 1] - 1): the bonus round's tally */
     /* 0x14 */ s32 round_timer;                /* the bonus round's time left in seconds, 0x14..0x3C by round (D_8007BD8C) */
-    /* 0x18 */ u16 unk_18[4];                  /* per player - 1: frames counted towards a second (bonus_update_counters) */
-    /* 0x20 */ u32 unk_20;                     /* frames since the awards screen opened (bonus_update_awards) */
+    /* 0x18 */ u16 second_frames[4];           /* per player - 1: frames counted towards a second (bonus_update_counters) */
+    /* 0x20 */ u32 award_frames;               /* frames since the awards screen opened (bonus_update_awards) */
     /* 0x24 */ GameObject *digits[4][3];       /* per player - 1: digit sprites (bonus_create_counter) */
-    /* 0x54 */ s32 unk_54;
-    /* 0x58 */ s32 unk_58[3];                  /* the award messages sliding in (kinds 0x7D2, 0x7D3, 0x7D1; bonus_update_awards) */
+    /* 0x54 */ s32 award_msg;                  /* the awards screen's title message (kind 0x7D0) */
+    /* 0x58 */ s32 award_line_msgs[3];         /* the award messages sliding in (kinds 0x7D2, 0x7D3, 0x7D1; bonus_update_awards) */
     /* 0x64 */ s32 health_icons[3];            /* the award icons shown (bonus_give_awards), by kind: health, */
     /* 0x70 */ s32 meter_icons[3];             /* meter, */
     /* 0x7C */ s32 lives_icons[6];             /* extra lives */
@@ -672,18 +674,21 @@ typedef struct Unk1D3D64 {
     /* 0x1C */ u16 unk_1C;
     /* 0x1E */ u8 unk_1E[0x06];
     /* 0x24 */ s16 unk_24;
-    /* 0x26 */ s16 unk_26;
-    /* 0x28 */ s16 unk_28;
+    /* 0x26 */ s16 scroll_vx;                  /* the camera's x speed in pixels a frame (main_update_camera): thrown
+                                                * objects add it to their speed (D_801D3D8A) */
+    /* 0x28 */ s16 scroll_state;               /* the camera's vertical scroll: 0 still, 1 up, 2 down
+                                                * (main_update_camera_y) */
     /* 0x2A */ u8 unk_2A[0x02];
     /* 0x2C */ s32 unk_2C;
-    /* 0x30 */ s32 unk_30;
-    /* 0x34 */ s32 unk_34;                     /* D_801D3D98[0] */
+    /* 0x30 */ s32 max_y;                      /* the players' lowest and highest screen y (D_801D3DA8[]) this frame */
+    /* 0x34 */ s32 min_y;                      /* (main_update_camera_y); min_y is also D_801D3D98[0] */
     /* 0x38 */ u8 unk_38[0x20];
     /* 0x58 */ s32 unk_58;
     /* 0x5C */ u16 unk_5C;
     /* 0x5E */ u16 unk_5E;
     /* 0x60 */ u8 unk_60[0x02];
-    /* 0x62 */ u16 unk_62;
+    /* 0x62 */ u16 pause_state;                /* bits 0-1: the pause menu's state, 8-11: the unplugged pad's player,
+                                                * 12-13: the pausing player (main_update_pause) */
 } Unk1D3D64;
 
 extern Unk1D3D64 D_801D3D64;
@@ -712,7 +717,7 @@ typedef struct TextState {
     /* 0x08 */ s32 unk_08;
     /* 0x0C */ u16 pen_x;
     /* 0x0E */ u16 pen_y;
-    /* 0x10 */ Fixed unk_10;                /* the advance per glyph: x in s.lo, a line feed in s.hi */
+    /* 0x10 */ Fixed advance;               /* the advance per glyph: x in s.lo, a line feed in s.hi */
     /* 0x14 */ s32 *glyphs;                /* the font */
     /* 0x18 */ s32 unk_18;
     /* 0x1C */ u8 *text;                   /* the string being printed */
@@ -723,14 +728,15 @@ typedef struct TextState {
     /* 0x2A */ u16 unk_2A;
     /* 0x2C */ s16 unk_2C;
     /* 0x2E */ s16 unk_2E;
-    /* 0x30 */ s16 unk_30;
+    /* 0x30 */ s16 space_width;             /* a space's advance: half the font's first glyph's width */
     /* 0x32 */ u16 unk_32;
-    /* 0x34 */ u16 unk_34;
+    /* 0x34 */ u16 line_start;              /* the pen's x at the line's start (with the y at 0x36): a line feed goes
+                                            * back to it */
     /* 0x36 */ u16 unk_36;
     /* 0x38 */ s16 unk_38;
     /* 0x3A */ u8 unk_3A;
     /* 0x3B */ u8 unk_3B;
-    /* 0x3C */ s32 unk_3C;
+    /* 0x3C */ s32 saved_pen;               /* pen_x and pen_y, saved around a glyph (main_print_text) */
 } TextState;
 
 extern TextState D_801D8588;
@@ -787,7 +793,7 @@ extern u16 D_801D36FC;                   /* the game mode */
 extern u16 D_801D376C;                   /* the screen's right edge, in pixels */
 extern u16 D_801D37B8;
 extern u16 D_801D37BC;
-extern s16 D_801D3D8A;                   /* D_801D3D64.unk_26 */
+extern s16 D_801D3D8A;                   /* D_801D3D64.scroll_vx */
 extern s32 D_801D3D98[];
 extern u16 D_801D8738;
 extern u16 D_801D8740;
