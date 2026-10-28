@@ -75,6 +75,8 @@ main_pause_keys = 0x8007A6B8; // size:0x30
 main_pause_cursor = 0x8007A6F0;
 main_pause_delay = 0x8007A6F4;
 
+main_track_player = 0x80029D5C; // type:func  the camera kept on one player (mode 2, the player D_8007BD7C) with the speed its action gives, eased by D_8007BD78 bits 0-1, vertical with bit 2, x wrapped by the level width and capped at 0x666
+
 // The Psy-Q library objects (config/main.yaml's psyq/ units), function by function (tools/psyq_match.py
 // --functions; docs/TOOLCHAIN.md). Byte-identical twins were settled from callers and callees: PadStartCom,
 // SpuWrite, CdFlush/CdSync/CdReady, DsReadyCallback.
