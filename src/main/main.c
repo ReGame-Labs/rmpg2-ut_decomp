@@ -1117,20 +1117,17 @@ void func_80018D84(void) {
     MemCardStart();
 }
 
-#ifdef NON_MATCHING
-/* 93.14%: register allocation. With chan0 an s16 (port << 4) it gets no register, as in the original, and the
- * hoisted D_801E1C90 takes fp. What remains: the original gives buttons (D_800AFB78, set in the prologue) s7 and
- * leaves the multitap loop's hoisted constant 1 without a register (li t0,1 at each use, and reload_cse's sllv by
- * t0); here the constant 1 (7 refs over 196 insns, priority 0.071) ranks above buttons (7 refs over 348, 0.040) and
- * buttons is rematerialised at each use. Buttons would need 9 refs, or the constant 1 one ref less. The original
- * also reloads chan0 with lhu from its stack slot in the single-pad path (here recomputed from port). The pad
- * reader: a multitap's four pads or one, the buttons inverted, the analog stick as d-pad bits */
+/* The pad reader: a multitap's four pads or one pad, the buttons inverted, the analog stick as d-pad bits. The
+ * no-pad loop clears D_801E1C90[base], not [i]: the original's bug, kept. The multitap's two "no pad" arms are
+ * separate blocks that cross-jumping merges; their references rank buttons above the loop's constant 1 in global
+ * allocation. */
 s32 main_read_pad(u8 *buf, u16 n, s16 base, s16 port) {
-    s16 chan0;
+    u16 chan0;
     u16 chan;
     u16 state;
     u16 i;
     u8 *pad;
+    u16 v;
     u16 *buttons = D_800AFB78;
 
     if (buf[0] != 0) {
@@ -1155,22 +1152,28 @@ s32 main_read_pad(u8 *buf, u16 n, s16 base, s16 port) {
                 }
             }
             pad = &buf[i * 8 + 2];
-            if (pad[0] == 0 && (pad[1] == 0x41 || pad[1] == 0x73)) {
-                D_801E1C90[i + base] = 1;
-                buttons[i + base] = ~((pad[2] << 8) | pad[3]);
-                if (pad[1] == 0x73) {
-                    if (pad[7] < 0x50) {
-                        buttons[i + base] |= 0x1000;
+            if (pad[0] == 0) {
+                if (pad[1] == 0x41 || pad[1] == 0x73) {
+                    D_801E1C90[i + base] = 1;
+                    v = (pad[2] << 8) | pad[3];
+                    buttons[i + base] = ~v;
+                    if (pad[1] == 0x73) {
+                        if (pad[7] < 0x50) {
+                            buttons[i + base] |= 0x1000;
+                        }
+                        if (pad[7] > 0xB0) {
+                            buttons[i + base] |= 0x4000;
+                        }
+                        if (pad[6] < 0x50) {
+                            buttons[i + base] |= 0x8000;
+                        }
+                        if (pad[6] > 0xB0) {
+                            buttons[i + base] |= 0x2000;
+                        }
                     }
-                    if (pad[7] > 0xB0) {
-                        buttons[i + base] |= 0x4000;
-                    }
-                    if (pad[6] < 0x50) {
-                        buttons[i + base] |= 0x8000;
-                    }
-                    if (pad[6] > 0xB0) {
-                        buttons[i + base] |= 0x2000;
-                    }
+                } else {
+                    D_801E1C90[i + base] = 0;
+                    buttons[i + base] = 0;
                 }
             } else {
                 D_801E1C90[i + base] = 0;
@@ -1195,7 +1198,8 @@ s32 main_read_pad(u8 *buf, u16 n, s16 base, s16 port) {
     }
     if (buf[1] == 0x41 || buf[1] == 0x73) {
         D_801E1C90[base] = 1;
-        buttons[base] = ~((buf[2] << 8) | buf[3]);
+        v = (buf[2] << 8) | buf[3];
+        buttons[base] = ~v;
         if (buf[1] == 0x73) {
             if (buf[7] < 0x50) {
                 buttons[base] |= 0x1000;
@@ -1216,9 +1220,6 @@ s32 main_read_pad(u8 *buf, u16 n, s16 base, s16 port) {
     }
     return 1;
 }
-#else
-INCLUDE_ASM("asm/main/nonmatchings/main", main_read_pad);
-#endif
 
 void func_80019268(void) {
     s32 i;
