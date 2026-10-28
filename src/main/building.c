@@ -3320,11 +3320,6 @@ void func_80030D14(UnkStruct19 *p) {
 
 
 
-#ifdef NON_MATCHING
-/* 99.88%: 99.88 %: the state test written on each path (merged by cross-jumping) gives the original's registers;
- * left: combine_givs keeps the first giv of bl->giv, the last one found, which is a state access (+20), so the loop
- * pointer is p + 20; the original's is p + 152 (items[0].obj), so its last giv found was the items access or the
- * state accesses were not givs; index loops, a pointer for the items and the load orders were tried */
 void building_count_standing(void) {
     u16 n = D_801E29A4;
     s16 count = 0;
@@ -3342,16 +3337,21 @@ void building_count_standing(void) {
             } else if (o == NULL) {
                 if (p->state < 0x10) count++;
             } else if (!(o->unk_6C & 0x80)) {
-                if (p->state < 0x10) count++;
+                if (p->state < 0x10) {
+                    /* FAKE: a test of the items' address with equal arms (jump2 deletes it) leaves a late p + 0x98
+                     * giv, so loop.c's combine_givs bases the loop pointer on items[0].obj as in the original */
+                    if (p->items != NULL) {
+                        count++;
+                    } else {
+                        count++;
+                    }
+                }
             }
             p++;
         } while (--n != 0);
         D_801FA734 = count;
     }
 }
-#else
-INCLUDE_ASM("asm/main/nonmatchings/building", building_count_standing);
-#endif
 
 void func_80030E04(Monster *m, BuildingItem *rec) {
     GameObject *saved;
