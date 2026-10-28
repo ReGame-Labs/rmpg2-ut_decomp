@@ -845,8 +845,11 @@ s32 bonus_get_round_kind(void) {
  * original's store order; global-alloc then ranks x (16 refs over 114 insns, priority 0.56) above i (10 over 78,
  * 0.38); the original allocates i first (i and kind share s2). Declared s16, x gets the original's registers (cse
  * moves the first-part stores onto the SImode sum, so x drops to 14 refs, 0.37) but keeps that sum in v1 and copies
- * it into x (one move, size +4, 99.3 %); stepwise, reordered and cast forms of the first x keep the copy; a single
- * pos_x store or an id variable lose the store order */
+ * it into x (one move, size +4, 99.3 %): the sum (4 refs over 13, 0.62) is allocated before x, so it does not take
+ * x's register by preference. Stepwise, reordered and cast forms of the first x keep the copy; a single pos_x store
+ * or an id variable lose the store order. A separate loop variable (px = x + 0x5B) is 99.38 % too: px has 11 refs
+ * over 79 (0.418) against i's 0.385, one ref short; a first-part t copied into x (x 14 refs) shortens x's life to
+ * 100 (0.42); the increment of i in each arm changes the loop's layout */
 void bonus_create_counter(s32 kind, s32 n) {
     GameObject *saved;
     ObjectDef *def;
@@ -911,12 +914,6 @@ void bonus_create_counter(s32 kind, s32 n) {
 INCLUDE_ASM("asm/main/nonmatchings/bonus", bonus_create_counter);
 #endif
 
-#ifdef NON_MATCHING
-/* 99.83%: global-alloc order in case 2: the inner loop's copy of &D_801FB49C[n] (loop.c's hoist of the inner
- * invariant, rewritten as a copy of the outer giv: set at depth 2, one use at depth 3, 5 refs over 34 insns, 0.29)
- * outranks the D_8007BD78 base (14 over 170, 0.25), so the copy takes s4; the base needs 16 refs or a live length
- * of 142 to come first. Loop-variable (j for the inner loop changes the size: the original shares i with the round-
- * timer loop), ++/+= and loop-bound forms tried */
 void bonus_update_counters(s32 round) {
     Monster *m;
     GameObject *obj;
@@ -968,7 +965,11 @@ void bonus_update_counters(s32 round) {
     case 2:
         for (n = 0; n < D_801D8740; n++) {
             m = &D_801E0B78[func_80025DF8(D_801FB49C[n])];
-            if (bonus_get_round_kind() != 2 || m->climb_side == 3) {
+            /* The increment in each arm (merged by cross-jumping) gives the D_8007BD78 base the references that
+             * put it before the inner loop's copy of &D_801FB49C[n] in global-alloc's order. */
+            if (bonus_get_round_kind() != 2) {
+                D_8007BD78.second_frames[D_801FB49C[n] - 1]++;
+            } else if (m->climb_side == 3) {
                 D_8007BD78.second_frames[D_801FB49C[n] - 1]++;
             }
             if (D_8007BD78.second_frames[D_801FB49C[n] - 1] == 0x3C) {
@@ -1002,9 +1003,6 @@ void bonus_update_counters(s32 round) {
         break;
     }
 }
-#else
-INCLUDE_ASM("asm/main/nonmatchings/bonus", bonus_update_counters);
-#endif
 
 void bonus_save_health(void) {
     Monster *e;
