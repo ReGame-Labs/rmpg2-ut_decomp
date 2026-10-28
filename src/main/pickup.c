@@ -240,13 +240,6 @@ void pickup_clear(Pickup *p) {
     D_801E29B0 = 0;
 }
 
-#ifdef NON_MATCHING
-/* 98.10%: 98.10 %: dx doubles as l and w as r (negu in place, then left = dx + x copied back), y is reused for the
- * monster's bottom (its load gets no sched1 birth boost, so it leads the four box loads as in the original) and the
- * compare is func_8004D6F8's (l < right, r > left, top < bottom, bottom > top); left: allocation order, the
- * original takes x, r, l, box for a2, a3, t0, t1, but x has 6 refs over 24 insns (0.50) against l 0.74 and r 0.70;
- * x reused for the monster's left gives it 8 refs and the registers, but then that load loses the birth boost and
- * moves above the right's (96.2 %); separate dx/w, per-path left, declaration and swap orders were tried */
 s32 pickup_test_touch(GameObject *obj, Monster *m) {
     SpriteFrame *box;
     s16 x;
@@ -260,7 +253,6 @@ s32 pickup_test_touch(GameObject *obj, Monster *m) {
     s16 right;
     s16 top;
     s16 bottom;
-    s16 m_right;
     s16 m_left;
     s16 m_top;
 
@@ -288,21 +280,20 @@ s32 pickup_test_touch(GameObject *obj, Monster *m) {
     right = r;
     bottom = h + y;
     if (flip) {
-        r = left;
         l = right;
+        r = left;
     }
+    /* y and x are reused for the monster's bottom and right edges: the original's load order (a reused variable
+     * gets no sched1 birth boost) and x's register (the extra references put it ahead of l and r) */
     y = m->hit_bottom;
-    m_right = m->hit_right;
+    x = m->hit_right;
     m_left = m->hit_left;
     m_top = m->hit_top;
-    if (l < m_right && r > m_left && top < y && bottom > m_top) {
+    if (l < x && r > m_left && top < y && bottom > m_top) {
         return 1;
     }
     return 0;
 }
-#else
-INCLUDE_ASM("asm/main/nonmatchings/pickup", pickup_test_touch);
-#endif
 
 
 
@@ -676,18 +667,18 @@ void func_8003C674(u16 *q, ObjectDef *def) {
 }
 
 #ifdef NON_MATCHING
-/* 88.43%: the original compares top with a register holding 2 that it reuses as the draw's argument (min here keeps
- * the compare but cse still gives the argument as li); find_and_verify_loops moves the i >= 4 exit block out of the
- * loop (to the barrier of the idx == 1 if/else), where cross-jumping merges its store with the success path's; the
- * original keeps it in the loop, its store through the hoisted s2. loop.c leaves such a block in place only when a
- * label or a jump sits between the i test and the block's own jump (a test inside the block keeps it in the loop
- * here, as in throw_update_flight), so the original's exit block had one at loop time; while, for (;;), goto and
- * ++i forms, a NULL return through a variable and the 2 as a constant or a u16/s16/s32 local were tried; round 10
- * also tried: a goto loop (no loop notes: 77.7 %), while (call != 1) with the exit after the body (continue),
- * if/else around the body, for (;;) or while (++i < 4) with goto to the success code, and a break plus a second i
- * test after the loop (all below 81 %); the a0 of the in-loop unk_04 load (lhu a0, where v0 is free) suggests that
- * value was a global pseudo in the original */
-// WIP in src/main/pickup.c: the original compares top with a register holding 2 that it reuses as the draw's argument (min here keeps the compare but cse still gives the argument as li); find_and_verify_loops moves the i >= 4 exit block out of the loop (to the barrier of the idx == 1 if/else), where cross-jumping merges its store with the success path's; the original keeps it in the loop, its store through the hoisted s2. loop.c leaves such a block in place only when a label or a jump sits between the i test and the block's own jump (a test inside the block keeps it in the loop here, as in throw_update_flight), so the original's exit block had one at loop time; while, for (;;), goto and ++i forms, a NULL return through a variable and the 2 as a constant or a u16/s16/s32 local were tried
+/* 88.43%: two structural causes, found in round 11. (1) find_and_verify_loops moves the i >= 4 exit block out of the
+ * loop to a barrier at the return label's depth (the idx == 1 if/else's); the original kept it in the loop, so its
+ * barriers before the loop sat inside a loop at loop time: one do { } while (0) from the top > min test through the
+ * idx == 1 if/else gives the original's layout (95.56 %; wrapping either if/else alone does not). (2) The 2 that is
+ * compared with top sits in v1 and is passed to main_random_between as move a1,v1: cse did not know the register
+ * held 2, so a label separated min = 2 from the compare at cse time, and i = 0 (the beqz's delay slot) came after
+ * that label; a do { } while (0) has no label by then (jump deletes it before cse). Both point to a real loop
+ * starting after min = 2 whose back edge disappeared after cse. Left with the do { } while (0): min's register, idx
+ * in a0 (the original's idx register also takes part->unk_04 in the loop), and the s registers (the D_801F9980 high
+ * before top, i before u). Earlier rounds tried while, for (;;), goto and ++i loop forms, a NULL return through a
+ * variable, the 2 as a constant or a u16/s16/s32 local, while (call != 1) with the exit after the body, if/else
+ * around the body and a break with a second i test */
 BuildingPart *func_8003C67C(Building *u, UnkStructB2 *rec) {
     BuildingItem *item;
     BuildingPart *part;

@@ -2220,13 +2220,6 @@ void func_8004BAC0(void) {
     func_8006353C(7);
 }
 
-#ifdef NON_MATCHING
-/* 99.86%: 99.86 %: registers only: obj (3 refs over 12 insns, 0.25) is allocated before the &D_800AA248 pseudo (4
- * over 34, 0.235); the base's life is sched1's 17 doubled by update_equiv_regs (its REG_EQUIV constant address), so
- * the original needs obj below 0.235 (13 insns: one more insn between npc->obj's load and case 1's store) or the
- * base without its equivalence (set twice) or with a fifth ref; obj first as its own statement, case 1 through obj
- * or npc->obj, a local for the action and a GameState pointer local (set at the top or in case 4, any mix of the
- * accesses through it) change nothing or more */
 void func_8003831C(void);
 extern Anim D_8008AA58;
 extern Anim D_8008AA78;
@@ -2251,8 +2244,13 @@ void func_8004BBC8(Npc *npc) {
         if (npc->unk_1C == 0) {
             npc->unk_1C = 0xBE;
             npc->action = 0x33;
-            D_800AA248.cur_obj->pos_y.w = 0x2000000;
-            D_800AA248.cur_obj->pos_x.w = 0x2000000;
+            /* Class B: the block's loop notes count the D_800AA248 base's references twice, so it gets a0 before
+             * npc->obj (with scheduling off the plain form differs only in those two registers); a macro setting
+             * the position */
+            LOOP_BLOCK(
+                D_800AA248.cur_obj->pos_y.w = 0x2000000;
+                D_800AA248.cur_obj->pos_x.w = 0x2000000;
+            );
             func_8003831C();
         } else {
             npc->unk_1C--;
@@ -2334,9 +2332,6 @@ void func_8004BBC8(Npc *npc) {
         break;
     }
 }
-#else
-INCLUDE_ASM("asm/main/nonmatchings/throw", func_8004BBC8);
-#endif
 
 void func_8004BFE0(void) {
     ObjectDef *def = func_8001D110();
