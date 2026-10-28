@@ -1117,20 +1117,17 @@ void func_80018D84(void) {
     MemCardStart();
 }
 
-#ifdef NON_MATCHING
-/* 93.14%: register allocation. With chan0 an s16 (port << 4) it gets no register, as in the original, and the
- * hoisted D_801E1C90 takes fp. What remains: the original gives buttons (D_800AFB78, set in the prologue) s7 and
- * leaves the multitap loop's hoisted constant 1 without a register (li t0,1 at each use, and reload_cse's sllv by
- * t0); here the constant 1 (7 refs over 196 insns, priority 0.071) ranks above buttons (7 refs over 348, 0.040) and
- * buttons is rematerialised at each use. Buttons would need 9 refs, or the constant 1 one ref less. The original
- * also reloads chan0 with lhu from its stack slot in the single-pad path (here recomputed from port). The pad
- * reader: a multitap's four pads or one, the buttons inverted, the analog stick as d-pad bits */
+/* The pad reader: a multitap's four pads or one pad, the buttons inverted, the analog stick as d-pad bits. The
+ * no-pad loop clears D_801E1C90[base], not [i]: the original's bug, kept. The multitap's two "no pad" arms are
+ * separate blocks that cross-jumping merges; their references rank buttons above the loop's constant 1 in global
+ * allocation. */
 s32 main_read_pad(u8 *buf, u16 n, s16 base, s16 port) {
-    s16 chan0;
+    u16 chan0;
     u16 chan;
     u16 state;
     u16 i;
     u8 *pad;
+    u16 v;
     u16 *buttons = D_800AFB78;
 
     if (buf[0] != 0) {
@@ -1155,22 +1152,28 @@ s32 main_read_pad(u8 *buf, u16 n, s16 base, s16 port) {
                 }
             }
             pad = &buf[i * 8 + 2];
-            if (pad[0] == 0 && (pad[1] == 0x41 || pad[1] == 0x73)) {
-                D_801E1C90[i + base] = 1;
-                buttons[i + base] = ~((pad[2] << 8) | pad[3]);
-                if (pad[1] == 0x73) {
-                    if (pad[7] < 0x50) {
-                        buttons[i + base] |= 0x1000;
+            if (pad[0] == 0) {
+                if (pad[1] == 0x41 || pad[1] == 0x73) {
+                    D_801E1C90[i + base] = 1;
+                    v = (pad[2] << 8) | pad[3];
+                    buttons[i + base] = ~v;
+                    if (pad[1] == 0x73) {
+                        if (pad[7] < 0x50) {
+                            buttons[i + base] |= 0x1000;
+                        }
+                        if (pad[7] > 0xB0) {
+                            buttons[i + base] |= 0x4000;
+                        }
+                        if (pad[6] < 0x50) {
+                            buttons[i + base] |= 0x8000;
+                        }
+                        if (pad[6] > 0xB0) {
+                            buttons[i + base] |= 0x2000;
+                        }
                     }
-                    if (pad[7] > 0xB0) {
-                        buttons[i + base] |= 0x4000;
-                    }
-                    if (pad[6] < 0x50) {
-                        buttons[i + base] |= 0x8000;
-                    }
-                    if (pad[6] > 0xB0) {
-                        buttons[i + base] |= 0x2000;
-                    }
+                } else {
+                    D_801E1C90[i + base] = 0;
+                    buttons[i + base] = 0;
                 }
             } else {
                 D_801E1C90[i + base] = 0;
@@ -1195,7 +1198,8 @@ s32 main_read_pad(u8 *buf, u16 n, s16 base, s16 port) {
     }
     if (buf[1] == 0x41 || buf[1] == 0x73) {
         D_801E1C90[base] = 1;
-        buttons[base] = ~((buf[2] << 8) | buf[3]);
+        v = (buf[2] << 8) | buf[3];
+        buttons[base] = ~v;
         if (buf[1] == 0x73) {
             if (buf[7] < 0x50) {
                 buttons[base] |= 0x1000;
@@ -1216,9 +1220,6 @@ s32 main_read_pad(u8 *buf, u16 n, s16 base, s16 port) {
     }
     return 1;
 }
-#else
-INCLUDE_ASM("asm/main/nonmatchings/main", main_read_pad);
-#endif
 
 void func_80019268(void) {
     s32 i;
@@ -1268,7 +1269,12 @@ u16 *func_800192A0(void) {
  * between the base and 5, so the threshold (58 without calls, -3 per moved value) is 25 at 5 against 53 insns, and
  * cse2 derives D_801CA474 from the hoisted +0xB8 base. 5 and 40 are moved only when about four values precede them,
  * so the original's tile address had no i*0x4940 product in the inner loop ahead of the setlen constants; a
- * DrawState pointer per outer pass removes it but also the two symbol bases (90.7 %). The start-up: callbacks, CD,
+ * DrawState pointer per outer pass removes it but also the two symbol bases (90.7 %). The counts, from
+ * move_movables (threshold * savings * lifetime >= insn count, savings 1 and lifetime 1 for 5 and 40): with the jump
+ * table and the base moved first, 5 needs at most 46 insns and 40 at most 43; the inner loop here has 53 (the i chain
+ * is 7, j*24 is 3), so the original's inner loop was about 10 insns smaller at loop time. 400 (lifetime 2) staying
+ * puts at least 3 more moved values between 40 and it. An offset variable per outer pass (47 insns), a POLY_F4
+ * pointer per tile, and (*(D_801CA474 + i)).tiles[j] all score lower. The start-up: callbacks, CD,
  * pads, the two frame buffers, VRAM cleared, the font */
 void main_init_system(void) {
     RECT rect;
@@ -3992,16 +3998,16 @@ void func_8001EE60(void) {
 }
 
 #ifdef NON_MATCHING
-/* 98.71%: the size matches; the frame is 0x40 (original 0x48: one more 4-byte slot, at 24, never accessed) and
- * three registers differ: the original loads the glyph code into s1, copies it to s3 (the anim_frame) after
- * func_8001B128 and gives the glyph s1; here id keeps the code in s1 throughout and the glyph takes s3. With 0x2000
- * clear the original reloads pen_y after adding the width, a dead lhu: pen_y was written back unchanged and
- * reload_cse deleted the store. Written here as id reused for that round trip, which gives the dead load and the
- * original's s1/s2. The unused slot, the dead load and s3 fit one variable that reload took out of its register
- * after global allocation (its slot comes after the one of &off) and served with reload registers (s3, then v1),
- * delete_output_reload removing its stack stores: the code's copy and the pen_y round trip were one variable, but
- * no form found makes it lose its register here. Prints D_801D8588's text: a sprite per glyph, control codes below
- * 0x20 through D_8007B04C */
+/* 98.71%: 98.71%: one instruction short (0x3C4, original 0x3C8) and the frame is 0x40 (original 0x48: one more
+ * 4-byte slot, at 24, never accessed). The pen_y round trip with 0x2000 clear is a HImode local: its load is the
+ * original's dead lhu and reload_cse deletes its store only because the register was set from the same HImode
+ * memory (an s32 local keeps the store: the recorded value is the zero_extend). What remains: the original loads
+ * the glyph code into s1, copies it to s3 (the anim_frame) after func_8001B128 and gives the glyph s1; here the
+ * code stays in one register and the glyph takes s3. A copy after the call needs a second pseudo set there (an
+ * inline helper's parameter, a variable assigned after the call): plain copies are coalesced (global-alloc's
+ * preference), and a static inline taking (glyph, id) loses the copies too. The unused slot follows the spill slot
+ * of &off (pseudo order), so it belongs to a pseudo created after that call and spilled with all its stack accesses
+ * deleted. Prints D_801D8588's text: a sprite per glyph, control codes below 0x20 through D_8007B04C */
 extern void (*D_8007B04C[])(void);
 extern GameObject *D_801FB17C;
 
@@ -4015,6 +4021,7 @@ void main_print_text(void) {
     s32 saved30;
     s32 saved10;
     s16 width;
+    u16 y;
 
     D_801FB17C = NULL;
     func_8001F400();
@@ -4074,9 +4081,9 @@ void main_print_text(void) {
             }
             width = glyph->unk_4;
             if (!(D_801D8588.flags & 0x2000)) {
-                id = D_801D8588.pen_y;
+                y = D_801D8588.pen_y;
                 D_801D8588.pen_x += width;
-                D_801D8588.pen_y = id;
+                D_801D8588.pen_y = y;
             }
             D_801D8588.unk_00 = saved0;
             D_801D8588.advance.w = saved10;
