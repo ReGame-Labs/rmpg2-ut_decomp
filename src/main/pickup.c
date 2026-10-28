@@ -681,8 +681,13 @@ void func_8003C674(u16 *q, ObjectDef *def) {
  * loop (to the barrier of the idx == 1 if/else), where cross-jumping merges its store with the success path's; the
  * original keeps it in the loop, its store through the hoisted s2. loop.c leaves such a block in place only when a
  * label or a jump sits between the i test and the block's own jump (a test inside the block keeps it in the loop
- * here, as in throw_update_flight), so the original's exit block had one at loop time; while, for (;;), goto and ++i
- * forms, a NULL return through a variable and the 2 as a constant or a u16/s16/s32 local were tried */
+ * here, as in throw_update_flight), so the original's exit block had one at loop time; while, for (;;), goto and
+ * ++i forms, a NULL return through a variable and the 2 as a constant or a u16/s16/s32 local were tried; round 10
+ * also tried: a goto loop (no loop notes: 77.7 %), while (call != 1) with the exit after the body (continue),
+ * if/else around the body, for (;;) or while (++i < 4) with goto to the success code, and a break plus a second i
+ * test after the loop (all below 81 %); the a0 of the in-loop unk_04 load (lhu a0, where v0 is free) suggests that
+ * value was a global pseudo in the original */
+// WIP in src/main/pickup.c: the original compares top with a register holding 2 that it reuses as the draw's argument (min here keeps the compare but cse still gives the argument as li); find_and_verify_loops moves the i >= 4 exit block out of the loop (to the barrier of the idx == 1 if/else), where cross-jumping merges its store with the success path's; the original keeps it in the loop, its store through the hoisted s2. loop.c leaves such a block in place only when a label or a jump sits between the i test and the block's own jump (a test inside the block keeps it in the loop here, as in throw_update_flight), so the original's exit block had one at loop time; while, for (;;), goto and ++i forms, a NULL return through a variable and the 2 as a constant or a u16/s16/s32 local were tried
 BuildingPart *func_8003C67C(Building *u, UnkStructB2 *rec) {
     BuildingItem *item;
     BuildingPart *part;
