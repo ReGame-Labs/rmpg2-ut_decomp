@@ -2726,14 +2726,12 @@ void func_8001C784(void) {
 void func_8001C834(void) {
 }
 
-#ifdef NON_MATCHING
-/* 96.98%: the switch runs on a copy of the state in the original (move v1,s3); here the state register itself, and
- * the address of D_801D3780 is computed once at the top where the original enters the default case with it rebuilt
- * in a0 from every jump; one instruction more. u32 state gives the original's unsigned test (sltiu 5). The attract
- * screen's state machine (D_801D3780), its screens in OVERATTR (func_800996CC, func_800991EC, func_8009C828) */
+/* The attract screen's state machine (D_801D3780), its screens in OVERATTR (func_800996CC, func_800991EC,
+ * func_8009C828). The state is read from the global each time: its copy for the switch and the store of 2 (the
+ * known state) into D_800A9840 come from that */
 void func_800991EC(void);
 void func_800996CC(void);
-s32 func_8009C828(u16 *state);
+s32 func_8009C828(void);  /* menu_update_credits in OVERATTR */
 void func_800A1720(s16 id);
 extern s32 D_8007AAE0[];
 extern s32 D_8007AAFC[];
@@ -2753,8 +2751,6 @@ extern s16 D_801F9AAC;
 extern s16 D_801FB468;
 
 void main_update_attract(void) {
-    u32 state;
-    s32 prev;
     s32 i;
     s32 id;
 
@@ -2762,9 +2758,8 @@ void main_update_attract(void) {
         func_80017B24();
         D_801D3780 = 5;
     }
-    state = D_801D3780;
-    if (state != 0) {
-        if (state >= 5) {
+    if (D_801D3780 != 0) {
+        if (D_801D3780 >= 5) {
             switch (D_801D3780) {
             case 5:
                 if (D_800AA2DC != 0) {
@@ -2821,7 +2816,7 @@ void main_update_attract(void) {
                 }
                 goto reset;
             case 8:
-                if (func_8009C828(&D_801D3780) == 0) {
+                if (func_8009C828() == 0) {
                     D_801FA960 = 0;
                     D_801F9AE0 = 0;
                     D_801E29BC = 0x78;
@@ -2836,13 +2831,13 @@ void main_update_attract(void) {
             case 7:
             default:
             reset:
-                D_801E29BC = 0x78;
                 D_801D3780 = 0;
+                D_801E29BC = 0x78;
                 if (D_801FA960 == 0x7C) {
                     D_801D3780 = 8;
                     D_800A92B8 = 0;
                     D_800A9298 = 0;
-                    func_8009C828(&D_801D3780);
+                    func_8009C828();
                     return;
                 }
                 if (D_800AA2DC != 0) {
@@ -2855,7 +2850,7 @@ void main_update_attract(void) {
                 return;
             }
         }
-        if (state == 1) {
+        if (D_801D3780 == 1) {
             func_800991EC();
             return;
         }
@@ -2863,7 +2858,7 @@ void main_update_attract(void) {
             D_801D3780 = 5;
             return;
         }
-        if (state == 2) {
+        if (D_801D3780 == 2) {
             func_800180E4();
             D_800AA2EC = 0x44;
             func_8001ED54(&D_800897A0);
@@ -2872,20 +2867,19 @@ void main_update_attract(void) {
             D_800AA2EC = 0x45;
             func_8001ED54(&D_800897C4);
             D_800A92D0 = 0;
-            D_800A9840 = state;
+            D_800A9840 = 2;
             D_801E2A44 = 0x45;
             D_801F9AAC = 0x47;
             D_801D3780++;
             return;
         }
-        if (state == 3) {
+        if (D_801D3780 == 3) {
             if (D_801F9944 != 0) {
                 D_801F9944--;
             }
             func_80019268();
-            prev = D_800A9220;
+            D_800A9250 = D_800A9220;
             D_800A9220 = D_801E0D7C & 0x3FFFFFFF;
-            D_800A9250 = prev;
             if ((D_800A9220 & 0x100401) && D_801F9944 == 0) {
                 if (--D_800A92D0 < 0) {
                     D_800A92D0 = D_800A9840 - 1;
@@ -2934,9 +2928,6 @@ void main_update_attract(void) {
         D_801D3780 = 1;
     }
 }
-#else
-INCLUDE_ASM("asm/main/nonmatchings/main", main_update_attract);
-#endif
 
 s32 func_8001CFAC(void) {
     return 0x200;
@@ -3985,10 +3976,12 @@ void func_8001EE60(void) {
 }
 
 #ifdef NON_MATCHING
-/* 96.28%: the frame is 8 bytes smaller (0x40, original 0x48), the saved registers are assigned in another order
- * (the original moves the glyph id from s1 to s3 after func_8001B128), and the original loads the glyph's width
- * before the 0x2000 test and pen_y in that branch. Prints D_801D8588's text: a sprite per glyph, control codes
- * below 0x20 through D_8007B04C */
+/* 98.46%: 98.46 %: the frame is 8 bytes smaller (0x40, original 0x48: the original has a second 4-byte slot after
+ * the caller-save slot of &off, never accessed) and the saved registers differ: the original keeps the glyph code
+ * in s1 until after func_8001B128, copies it to s3 (id) there and reuses s1 for the glyph, so &D_800AA248 lands in
+ * s2; here cse folds id into code (s2) and the glyph takes s3. The glyph width is read before the 0x2000 test and
+ * the advance is written in each branch (the original's cross-jumped tail); the original also has a dead lhu of
+ * pen_y in that block. Prints D_801D8588's text: a sprite per glyph, control codes below 0x20 through D_8007B04C */
 extern void (*D_8007B04C[])(void);
 extern GameObject *D_801FB17C;
 
@@ -4002,6 +3995,7 @@ void main_print_text(void) {
     s32 saved8;
     s32 saved30;
     s32 saved10;
+    s16 width;
 
     D_801FB17C = NULL;
     func_8001F400();
@@ -4017,14 +4011,14 @@ void main_print_text(void) {
         D_801D8588.unk_38 = 0;
         D_801D8588.text++;
         if (D_801D8588.unk_3A > 0x20) {
+            saved10 = D_801D8588.unk_10.w;
             saved0 = D_801D8588.unk_00;
             saved34 = *(s32 *) &D_801D8588.unk_34;
             saved8 = D_801D8588.unk_08;
             saved30 = *(s32 *) &D_801D8588.unk_30;
             code = D_801D8588.glyphs[D_801D8588.unk_3A - 0x21];
-            saved10 = D_801D8588.unk_10.w;
-            glyph = func_8001B128(code);
             id = code;
+            glyph = func_8001B128(code);
             func_8001E638((Unk1E638 *) glyph, D_801D8588.unk_20, (Fixed *) &D_801D8588.unk_30, &off.w);
             if (D_801D8588.flags & 0x10000) {
             if ((D_800AA248.cur_obj = func_8001E204()) != NULL) {
@@ -4060,14 +4054,17 @@ void main_print_text(void) {
                 *(s32 *) &D_801D8588.pen_x = D_801D8588.unk_3C;
                 continue;
             }
+            width = glyph->unk_4;
             if (!(D_801D8588.flags & 0x2000)) {
-                D_801D8588.pen_x += glyph->unk_4;
+                D_801D8588.pen_x += width;
             }
             D_801D8588.unk_00 = saved0;
             D_801D8588.unk_10.w = saved10;
             *(s32 *) &D_801D8588.unk_34 = saved34;
             D_801D8588.unk_08 = saved8;
             *(s32 *) &D_801D8588.unk_30 = saved30;
+            D_801D8588.pen_x += D_801D8588.unk_10.s.lo;
+            D_801D8588.pen_y += D_801D8588.unk_10.s.hi;
             } else {
                 func_8001B5E8(2);
                 continue;
@@ -4081,9 +4078,9 @@ void main_print_text(void) {
             if (!(D_801D8588.flags & 0x2000)) {
                 D_801D8588.pen_x += D_801D8588.unk_30;
             }
+            D_801D8588.pen_x += D_801D8588.unk_10.s.lo;
+            D_801D8588.pen_y += D_801D8588.unk_10.s.hi;
         }
-        D_801D8588.pen_x += D_801D8588.unk_10.s.lo;
-        D_801D8588.pen_y += D_801D8588.unk_10.s.hi;
     }
 }
 #else
@@ -4305,16 +4302,13 @@ void func_8001F9BC(GameObject *head, GameObject *end) {
     main_draw_objects(head, end);
 }
 
-#ifdef NON_MATCHING
-/* 99.90%: 99.9 %: only the texture page differs: the original copies it to s2 after main_get_tpage (move s2,s1 in
- * the delay slot of the first test) and stores the copy into the quad; here one register (u16/s32 copies, a chained
- * assignment and a reused variable all fold into it). The colour block's gotos give the original's block order (the
- * unlit case last, falling into the test), as an inline helper returning the flag would. The colour and unk_24
- * bytes are read through casts (lbu): they want byte views in GameObject. Draws the object list: boxes (POLY_F4; a
- * line of width 3 for 0x1000, a free quad for 0x2000), sprites (SPRT) and flipped sprites (POLY_FT4), with a
- * DR_TPAGE whenever the texture page changes */
 extern u32 D_801FB41C;  /* the lit sprites' colour (building.c) */
 
+/* Draws the object list: boxes (POLY_F4; a line of width 3 for 0x1000, a free quad for 0x2000), sprites (SPRT) and
+ * flipped sprites (POLY_FT4), with a DR_TPAGE whenever the texture page changes. The colour block's gotos give the
+ * original's block order (the unlit case last, falling into the test). The colour and unk_24 bytes are read through
+ * casts (lbu). The final reset of page is never read again: it is the original's (it keeps page and tpage in two
+ * registers) */
 void main_draw_objects(GameObject *head, GameObject *end) {
     GameObject *obj;
     POLY_F4 *box;
@@ -4324,7 +4318,8 @@ void main_draw_objects(GameObject *head, GameObject *end) {
     s32 x0, y0, x1, y1, x2, y2;
     s32 ax, ay, bx, by, cx, cy, dx, dy;
     s32 angle;
-    s16 tpage;
+    s16 page;
+    u16 tpage;
     s32 mode;
     s32 du, dv;
     u8 lit;
@@ -4406,8 +4401,8 @@ void main_draw_objects(GameObject *head, GameObject *end) {
         if (!(obj->unk_6C & 0x408)) {
             func_8001A554(obj->anim_frame, obj);
         }
-        tpage = main_get_tpage(obj, obj->flags & 0x700);
-        if (D_801FAC80->unk_493E != tpage) {
+        tpage = page = main_get_tpage(obj, obj->flags & 0x700);
+        if (D_801FAC80->unk_493E != page) {
             if (D_801FAC80->unk_493C != D_801FAC80->unk_493E) {
                 tp = (DR_TPAGE *) D_801FAC80->next_prim;
                 D_801FAC80->next_prim += sizeof(DR_TPAGE);
@@ -4415,7 +4410,7 @@ void main_draw_objects(GameObject *head, GameObject *end) {
                 AddPrim(D_801FAC80->ot, tp);
                 D_801FAC80->unk_493C = D_801FAC80->unk_493E;
             }
-            D_801FAC80->unk_493E = tpage;
+            D_801FAC80->unk_493E = page;
         }
         mode = (obj->flags & 0x30) >> 4;
         if (mode == 0) {
@@ -4582,13 +4577,9 @@ quad_lit:
         D_801FAC80->next_prim += sizeof(DR_TPAGE);
         SetDrawTPage(tp, 0, 0, D_801FAC80->unk_493E);
         AddPrim(D_801FAC80->ot, tp);
-        D_801FAC80->unk_493E = 0xFFFF;
-        D_801FAC80->unk_493C = 0xFFFF;
+        D_801FAC80->unk_493C = D_801FAC80->unk_493E = page = 0xFFFF;
     }
 }
-#else
-INCLUDE_ASM("asm/main/nonmatchings/main", main_draw_objects);
-#endif
 
 void main_run_calls(void) {
     s32 *list;
