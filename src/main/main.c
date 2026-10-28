@@ -5728,20 +5728,20 @@ void func_80022E58(Npc *npc) {
     }
 }
 
-#ifdef NON_MATCHING
-/* 90.64%: 90.6 %: the table part now matches but for registers (step in a1, the original v1); the start keeps x - y
- * in v1 and copies it to a0 after the pos_y load, the original copies it to a3 before */
+/* dx is set twice (dx = x; dx -= y), which gives the original's load, subtract and copy; the x = y store is the
+ * original's (x is address-taken, so it stays). Each table arm indexes on its own, so the loads come in the
+ * original's order. */
 void func_80022EC0(Npc *npc) {
     s16 x;
     s16 y;
     s16 dx;
     s16 dy;
-    NpcStep **table;
     NpcStep *step;
     s32 v;
 
     main_unwrap_target_x(&x, &y, npc);
-    dx = x - y;
+    dx = x;
+    dx -= y;
     x = y;
     y = npc->target_y;
     y -= D_800AA268.p->pos_y.s.hi;
@@ -5758,17 +5758,12 @@ void func_80022EC0(Npc *npc) {
             x >>= 1;
         } while (dy >= 8 || x >= 8);
     }
-    {
-        s32 i = x & 7;
-        s32 j = dy & 7;
-        x = i;
-        if (npc->kind == 0x11) {
-            table = D_8007B660;
-        } else {
-            table = D_8007B980;
-        }
-        step = table[j];
-        step += i;
+    x &= 7;
+    dy &= 7;
+    if (npc->kind == 0x11) {
+        step = D_8007B660[dy] + x;
+    } else {
+        step = D_8007B980[dy] + x;
     }
     v = step->vel_x;
     if (D_800AA248.cur_obj->vel_x.w & 0x10) {
@@ -5779,9 +5774,6 @@ void func_80022EC0(Npc *npc) {
     D_800AA248.cur_obj->vel_y.w = y > 0 ? v : -v;
     func_8003EB5C(step->anim, D_800AA248.cur_obj);
 }
-#else
-INCLUDE_ASM("asm/main/nonmatchings/main", func_80022EC0);
-#endif
 
 void func_80023064(s32 arg0) {
     D_800AA268.p->pos_y.u.hi = (s16) (D_801F9ACE + arg0);
@@ -7995,32 +7987,27 @@ void func_80026F58(Monster *arg0) {
     func_80057DD8();
 }
 
-#ifdef NON_MATCHING
-/* 89.85%: 89.9 %: the call's argument (move a0,s0) sits first in the block after the 0x53 test in the original, so
- * reorg puts it in the bne's delay slot; sched1 here keeps it next to the jal and the delay slot takes the addiu.
- * The (u16)(state - 5) truncation stays; types, the statement order, if/else and early-return forms tried */
-void func_80026F98(Monster *arg0) {
-    u16 temp_v1;
+/* func_800272FC takes the monster: the caller passes it, and the move into a0 (already holding it) is deleted only
+ * after reload. Until then a0 is set twice, so sched1 does not lift the later call's argument move. */
+void func_80026F98(Monster *m) {
+    u16 action;
 
-    D_800AA248.cur_obj = arg0->obj;
-    if ((arg0->pressed & 4) && !(func_800272FC() & 0xFFFF)) {
-        temp_v1 = arg0->action;
-        if (temp_v1 == 0x53) {
-            arg0->action = 0x54U;
-            return;
+    D_800AA268.p = m->obj;
+    if ((m->pressed & 4) && !(func_800272FC(m) & 0xFFFF)) {
+        action = m->action;
+        if (action == 0x53) {
+            m->action = 0x54;
+        } else {
+            m->unk_152 = (u16) (action - 5) < 2;
+            m->action = 2;
+            func_800580F8(m);
+            if (m->unk_18E == 0) {
+                m->action = 0x4E;
+            }
+            m->climb_side = 0;
         }
-        arg0->unk_152 = (u16) (temp_v1 - 5) < 2;
-        arg0->action = 2U;
-        func_800580F8(arg0);
-        if (arg0->unk_18E == 0) {
-            arg0->action = 0x4EU;
-        }
-        arg0->climb_side = 0;
     }
 }
-#else
-INCLUDE_ASM("asm/main/nonmatchings/main", func_80026F98);
-#endif
 
 extern s16 D_80084278;
 
