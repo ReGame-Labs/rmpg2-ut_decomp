@@ -91,52 +91,45 @@ void func_8004E658(void) {
     D_800AA248.cur_obj->vel_x.w = 0;
 }
 
-#ifdef NON_MATCHING
-/* 96.89%: registers only. Here local-alloc ties s to the index (operand 1 of the addu, a block-local that dies
- * there), the original to the table's address (operand 2), so its index was not a block-local dying once. Written
- * s = D_8007F878; s += off (u32 off = m->dir; off <<= 3), s is set twice and ties to nothing: then the table's
- * quantity (its %hi and s, 7 refs over 14) and the index's (4 refs over 8) tie at priority 1.0 and the index, born
- * first, takes v0 (95.51%). A temporary for s->vel_y ends s one insn earlier and gives the original's registers, but
- * loads vel_y before the cur_obj reload (99.24%). combine_regs (local-alloc.c) skips operand 1 only when that
- * register has no quantity, i.e. is not block-local or dies more than once, so the original's shifted index lived
- * in two blocks or died twice. Also tried: the index in a variable reused for the unk_18E test, a byte offset
- * variable (u8 * + off), a 2-D table D_8007F830[2][9], the pair copied by value, s = &s[dir], every -fno-* flag of
- * the round's list, and the permuter (15 min): all 96.89% or less */
+/* One variable holds the table's byte offset, then unk_18E: the reuse keeps the offset out of local-alloc, so the
+ * sum ties to the table's address as in the original */
 void func_8004E6F0(void) {
     Monster *m = D_800AA248.cur_obj->owner.monster;
-    SpeedPair *s = &D_8007F878[m->dir];
+    u32 v;
+    SpeedPair *s;
 
+    v = m->dir;
+    v <<= 3;
+    s = (SpeedPair *) ((u8 *) D_8007F878 + v);
     m->unk_100 = s->speed;
     D_800AA248.cur_obj->vel_y.w = s->vel_y;
     m->unk_104 = 0x4000;
-    if (m->unk_18E != 0) {
+    v = m->unk_18E;
+    if (v != 0) {
         D_800AA248.cur_obj->vel_y.w = 0xFFFA0000;
         m->unk_104 = 0x2000;
     }
     D_800AA248.cur_obj->vel_x.w = 0;
 }
-#else
-INCLUDE_ASM("asm/main/nonmatchings/game_8004E574", func_8004E6F0);
-#endif
 
-#ifdef NON_MATCHING
-/* 96.89%: as func_8004E6F0 (see there): s is tied to the index, the original's to the table's address */
 void func_8004E764(void) {
     Monster *m = D_800AA248.cur_obj->owner.monster;
-    SpeedPair *s = &D_8007F830[m->dir];
+    u32 v;
+    SpeedPair *s;
 
+    v = m->dir;
+    v <<= 3;
+    s = (SpeedPair *) ((u8 *) D_8007F830 + v);
     m->unk_100 = s->speed;
     D_800AA248.cur_obj->vel_y.w = s->vel_y;
     m->unk_104 = 0x4000;
-    if (m->unk_18E != 0) {
+    v = m->unk_18E;
+    if (v != 0) {
         D_800AA248.cur_obj->vel_y.w = 0xFFFA0000;
         m->unk_104 = 0x2000;
     }
     D_800AA248.cur_obj->vel_x.w = 0;
 }
-#else
-INCLUDE_ASM("asm/main/nonmatchings/game_8004E574", func_8004E764);
-#endif
 
 void func_8004E7D8(void) {
     D_800AA248.cur_obj->pos_y.s.hi = *D_800AA248.cur_obj->arg.h;

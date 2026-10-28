@@ -224,14 +224,6 @@ void func_800506BC(Monster *e) {
     }
 }
 
-#ifdef NON_MATCHING
-/* 95.83%: the structure is the original's: dy loaded then reduced in place (4 refs, so it is allocated before the
- * D_800AA248 base and takes a3, which puts the base in t0 and x in t1 and e's copy in a1), dx = d before the facing
- * test (the delay-slot move) with d referenced again at the end, so cse keeps d canonical and the left arm negates
- * d into dx (the original's two registers; without the late reference dx becomes canonical and the two share one
- * register). Left: the original loads pt->x first and keeps the y sum in v0, so its late reference to d was not the
- * y sum (here d holds it, a0); a dead d = 0 at the end gives 95.93 % with the sum in v0 but the same load order. d
- * first, in-place d, statement and operand orders tried */
 void monster_follow_holder(Monster *e) {
     GameObject *holder;
     SpriteFrame *frame;
@@ -241,6 +233,8 @@ void monster_follow_holder(Monster *e) {
     s32 d;
     s32 dx;
     s32 dy;
+    s32 px;
+    s32 py;
 
     holder = e->holder;
     if (holder != NULL) {
@@ -252,9 +246,11 @@ void monster_follow_holder(Monster *e) {
         pt = (FramePoint *) &frame->unk_10;
         i = e->id - 1;
         pt += i;
+        /* pt->x goes into dx, a variable set again below, so sched1 leaves its load first. */
+        dx = pt->x;
         dy = pt->y;
         dy -= frame->origin.u.hi;
-        d = pt->x - frame->origin.u.lo;
+        d = dx - frame->origin.u.lo;
         dx = d;
         if (holder->flags & 0x10) {
             dx = -d;
@@ -262,14 +258,15 @@ void monster_follow_holder(Monster *e) {
         } else {
             D_800AA248.cur_obj->flags &= ~0x10;
         }
-        D_800AA248.cur_obj->pos_x.w = D_801D8864.w & ((x + dx) << 16);
-        d = dy + holder->pos_y.u.hi;
-        D_800AA248.cur_obj->pos_y.s.hi = d;
+        px = x + dx;
+        D_800AA248.cur_obj->pos_x.w = D_801D8864.w & (px << 16);
+        py = dy + holder->pos_y.u.hi;
+        D_800AA248.cur_obj->pos_y.s.hi = py;
+        /* FAKE: a dead store; d's later reference keeps it cse's canonical copy of dx, so the left arm negates d
+         * into dx (two registers, the delay-slot move) rather than dx in place. */
+        d = 0;
     }
 }
-#else
-INCLUDE_ASM("asm/main/nonmatchings/monster", monster_follow_holder);
-#endif
 
 void monster_update_climb(Monster *e) {
     s32 *speeds;
@@ -476,8 +473,11 @@ void func_80050E58(Monster *e) {
  * the facing-each-other branch (act chosen by one test) gives m 18 and e 13 refs, enough for that order, but the
  * loop then has 112 real insns instead of 117 and loop.c hoists &D_801E0B78 (threshold 29 x savings 2 x life 2 =
  * 116 >= 112; -dL), which the original keeps in the loop. So the original's loop had the per-path code's size with
- * fewer m/e references, or a 4th..5th dead insn (deleted by flow after loop.c). Per-path ternary tests, gotos,
- * for/do loops, operand orders and an else-branch d tried */
+ * fewer m/e references, or a 4th..5th dead insn (deleted by flow after loop.c). By refs alone, one more use each
+ * of obj (16 refs, 2.0) and i inside the loop (9, 0.46) would also give the original's order. Also: the original's
+ * else-branch abs is a block-local (v0, used once: `(s16) abs(dist) < 0x19`) with dist in v1, not the shared ad;
+ * written so, the first branch's d moves to v1 (98.53 %). Per-path ternary tests, gotos, for/do loops, operand
+ * orders, written-out abs (folded to ABS_EXPR) and an else-branch d tried */
 void func_80050E88(Monster *e) {
     Monster *m;
     GameObject *obj;
@@ -1453,7 +1453,11 @@ void func_80052E94(void) {
  * value suggests v0, free over its life); the original's sits in a1 after the temporaries took v0/v1/a0, which is
  * what a block-local pseudo without that suggestion (allocated by priority after the short temporaries) or a global
  * pseudo gets (case 3's building pointer, global, takes a0 the same way). Read-back through D_800AA284/new_def,
- * chained stores, a second set, a dead assignment in another block, an argument to func_8001DCB4: no change */
+ * chained stores, a second set, a dead assignment in another block, an argument to func_8001DCB4, an inline helper,
+ * the call inside a loop block: no change. A test use of def in another case (def global) gives the original's a1 and
+ * every instruction of the tail but one register: the second e->obj load, a fresh block-local, takes v0 where the
+ * original's takes a0, so v0 and v1 were still busy there, which this C's dependences (the load follows the pos_y
+ * store) do not allow; the original's def was global and its tail scheduled differently */
 void func_80052E9C(Monster *e) {
     s32 *speeds;
     s32 speed;

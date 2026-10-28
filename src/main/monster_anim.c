@@ -2135,7 +2135,9 @@ void func_8005BB04(Monster *e, s16 want, s16 max, Building *u) {
  * most 15 insns (16 and declared before frame for the tie). REG_N_REFS is counted by flow before combine, so the
  * ref may be one combine later removes. oy as s32/u32/int, y1 = unk_16 + oy, y0 = fy0 = y0 + oy, oy reused for
  * pos_y in the flags 2/4 boxes: no 4th ref or worse. Loading unk_16 before unk_14 scores 98.72 but is not the
- * original's order */
+ * original's order. Also tried: y1 += oy in each arm of the swap test (size changes), v/h reused for both points as
+ * in npc.c's box code (worse), the y sum in each arm of the first flip test; `LOOP_BLOCK(y1 += oy;)` (oy's use counted
+ * twice) fixes this block but moves the overlap tests' registers (99.53 %), so no evidence for a loop block either */
 s32 monster_anim_test_box(s16 x, s16 y, s32 w, s32 h, GameObject *obj, u16 flags) {
     SpriteFrame *frame;
     s16 left;
