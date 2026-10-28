@@ -368,7 +368,7 @@ ObjectDef *func_8001D110(void);
 void func_8002503C(Building *, GameObject *);
 void func_800252CC(Building *);
 void func_80025124(Building *);
-void func_80024E08(Building *);
+void main_create_building_items(Building *);
 void main_set_building_sides(void);
 extern u8 D_80082E94[];
 s32 bonus_get_round_kind(void);
@@ -4951,7 +4951,7 @@ void func_800211F4(Npc *npc) {
             func_800242A8();
             return;
         }
-        func_80024138(npc);
+        main_pick_free_aim(npc);
         if (npc->aim != 3) {
             npc->start = main_random_between(7, 0) & 1;
         } else {
@@ -6358,14 +6358,7 @@ void func_800240F0(Npc *npc) {
     }
 }
 
-#ifdef NON_MATCHING
-/* 99.69%: 99.7 %: a for (;;) whose exit is a break after a continue gives the original's loop (loop.c hoists the
- * table and the copy of used, jump.c duplicates no exit test; a goto loop hoists nothing, a plain break duplicates
- * the test); sel = k at the top of each pass is the original's copy in the test's delay slot, and used |= bit the
- * exit's registers. Only the hoisted copy of used and sel swap a1/v1: sel (3 refs, live 6) is allocated before that
- * copy and takes a1, the original gives the copy a1 (sel s32/u16, the bit forms, the assignment inside the index
- * tried) */
-u16 func_80024138(Npc *npc) {
+u16 main_pick_free_aim(Npc *npc) {
     s16 used;
     s16 k;
     s32 bit;
@@ -6391,12 +6384,12 @@ u16 func_80024138(Npc *npc) {
             break;
         }
         npc->aim = k;
-        bit = 1;
-        if (sel != 0) {
+        if (sel == 0) {
+            bit = 1;
+        } else if (sel == 1) {
+            bit = 2;
+        } else {
             bit = 4;
-            if (sel == 1) {
-                bit = 2;
-            }
         }
         used |= bit;
         D_801E2A50 = used;
@@ -6405,9 +6398,6 @@ u16 func_80024138(Npc *npc) {
     npc->aim = 3;
     return 3;
 }
-#else
-INCLUDE_ASM("asm/main/nonmatchings/main", func_80024138);
-#endif
 
 void func_8002423C(Npc *npc) {
     s16 temp_v1;
@@ -6839,7 +6829,7 @@ void main_create_buildings(void) {
             rec->unk_034 = 1;
             rec->unk_036 = 1;
             rec->unk_02A = 1;
-            func_80024E08(rec);
+            main_create_building_items(rec);
         } else {
             func_80025124(rec);
         }
@@ -6864,7 +6854,7 @@ extern s16 D_8007A686;
 extern s32 D_800AA25C;
 void func_80025474(Building *b);
 
-void func_80024E08(Building *rec) {
+void main_create_building_items(Building *rec) {
     ObjectDef *req;
     BuildingItem *item;
     GameObject *obj;
@@ -6951,7 +6941,7 @@ void func_80024E08(Building *rec) {
     }
 }
 #else
-INCLUDE_ASM("asm/main/nonmatchings/main", func_80024E08);
+INCLUDE_ASM("asm/main/nonmatchings/main", main_create_building_items);
 #endif
 
 void func_8002503C(Building *building, GameObject *obj) {
