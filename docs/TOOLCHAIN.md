@@ -98,7 +98,8 @@ of the library exported it, such as libgpu's `_addque` and `set_alarm`), and the
 ## Compiler: GCC 2.8.1 `-O2 -G0`
 
 The game's code was built with **GCC 2.8.1 (or 2.8.0, which generates the same code) at `-O2`, with `-G0`**, through
-ASPSX; the build uses old-gcc's `gcc-2.8.1-psx` with maspsx emulating ASPSX 2.80 (`tools/cc_psx.sh`). 2.8.1 is the
+ASPSX; the build uses old-gcc's `gcc-2.8.1-psx`, rebuilt with `-fwrapv` (below), with maspsx emulating ASPSX 2.80
+(`tools/cc_psx.sh`). 2.8.1 is the
 compiler of Psy-Q 4.3, the SDK the libraries point at; 2.8.0 is Psy-Q 4.1's.
 
 The evidence is `tools/compiler_id.py`: m2c drafts of game functions taken from `asm/main/game.s` with no hand edits
@@ -168,6 +169,22 @@ cc1 writes a division by a variable as the three-operand `div`/`divu` macro, and
 divide-by-zero check (`bnez divisor` / `break 7`) and, for `div`, the overflow check (`-1` and `0x80000000`, `break 6`):
 every such division in the executable has them, in both compilers' code. `tools/cc_psx.sh` runs maspsx with
 `--expand-div` for that.
+
+### The `-fwrapv` build of 2.8.1
+
+old-gcc's release binaries are built by a modern host GCC, which treats signed overflow as undefined. GCC 2.8.1's
+`cse.c` (`fold_rtx`, `case PLUS`) keeps INT_MIN out of a rewrite with `INTVAL (c) < 0 && - INTVAL (c) >= 0`, and
+the host compiler folds that to `INTVAL (c) <= 0`: in the released `cc1` the test passes for `0x80000000`, and
+`x + 0x80000000` with the constant in a register becomes `subu` where the original compiler emits `addu`
+(`func_8001F2B0`'s range test). Psy-Q 4.3's own `CC1PSX.EXE` (`scripts/setup.sh psyq`) emits the `addu`.
+
+`scripts/build_gcc_wrapv.sh` runs old-gcc's own recipe for `gcc-2.8.1-psx` at its 0.17 commit with `-fwrapv` added
+to the host CFLAGS, and nothing else changed; without the flag the recipe reproduces old-gcc's 0.17 binaries bit for
+bit, and with it the build is just as reproducible (a run without Docker's cache gives the same files). Its tarball
+and the corresponding source are this repository's release `gcc-2.8.1-psx-wrapv-1`, which `scripts/setup.sh`
+installs as `tools/gcc/2.8.1`, pinned by SHA-256. Every other function of the three targets compiles to the same
+code with either binary. 2.8.0 has the same test and the same fault (`compiler_id.py` still uses old-gcc's); 2.7.2
+has no such test, and 2.95.2's rewritten one already gives `addu`.
 
 ### `-G0` everywhere
 

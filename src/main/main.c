@@ -4127,10 +4127,8 @@ void func_8001F270(void) {
     func_8001F464();
 }
 
-#ifdef NON_MATCHING
-/* 98.57%: 98.6 %: the original adds 0x80000000 (addu), every C form of the RAM range test gives subu here (also in
- * a standalone file); the rest matches. Formats the text with the word after its terminator, dereferenced when it
- * is a word-aligned RAM address */
+/* Formats the text with the word after its terminator, dereferenced when it is a word-aligned RAM address. The range
+ * test's addu of 0x80000000 needs the -fwrapv build of the compiler (docs/TOOLCHAIN.md "Compiler"). */
 void func_8001F2B0(void) {
     s32 word;
 
@@ -4142,9 +4140,6 @@ void func_8001F2B0(void) {
     }
     D_801D85A4 = D_801FAF7C;
 }
-#else
-INCLUDE_ASM("asm/main/nonmatchings/main", func_8001F2B0);
-#endif
 
 void func_8001F358(void) {
     sprintf(D_801FAF7C, D_801D8588.text);
