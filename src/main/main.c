@@ -5800,18 +5800,12 @@ void func_80023080(Npc *npc) {
     npc->unk_30 = 0;
 }
 
-#ifdef NON_MATCHING
-/* 92.01%: 92 %: the second branch keeps the %hi of D_801F9AC8 in a1 from its top and reloads the value through it
- * at the end of the inner block (reorg then skips that load on the path that still holds it in v1); the C reloads
- * with a fresh lui. So cse knew the %hi there but not the memory value. With the tail written in each branch (a
- * return after the inner block and one after the if), cse follows the jump and drops the reload entirely (89 %); a
- * Fixed pointer to the camera gives a1 the full address. The original's distance is the builtin abs() in its two-
- * register form (bgez v0; move v1,v0; negu v1,v1, where the C's copy negates v0); written as abs() here the inner
- * block changes shape (82.5 %) */
+/* The camera clamp's shape (func_80053204): c is set again from D_801F9AC8 at the end of the inner block, so cse
+ * reloads the camera there through the %hi it still holds. */
 u16 func_80023114() {
     s32 x;
+    s32 c;
     s32 d;
-    s32 dist;
 
     x = D_800AA268.p->pos_x.w;
     if (D_800AA268.p->vel_x.w < 0) {
@@ -5822,24 +5816,20 @@ u16 func_80023114() {
         return x <= 0x480000;
     }
     if (D_800AA268.p->vel_x.w > 0) {
-        if (D_801F9AC8.w >= x) {
-            d = x - D_801F9AC8.w;
-            dist = d;
-            if (d < 0) {
-                dist = -dist;
-            }
-            if (dist > 0xC7FFFF) {
+        c = D_801F9AC8.w;
+        if (c >= x) {
+            d = x - c;
+            c = d >= 0 ? d : -d;
+            if (c > 0xC7FFFF) {
                 x += D_801D8864.w;
             }
+            c = D_801F9AC8.w;
         }
-        d = x - D_801F9AC8.w;
-        return (u32) (d + 0xFEA20000) <= 0x01C20000;
+        x -= c;
+        return (u32) (x + 0xFEA20000) <= 0x01C20000;
     }
     return 0;
 }
-#else
-INCLUDE_ASM("asm/main/nonmatchings/main", func_80023114);
-#endif
 
 u16 func_800231E4(Npc *npc) {
     s16 x;
@@ -6440,25 +6430,20 @@ void func_800242A8(void) {
     D_800AA248.cur_obj->pos_y.w = 0x2000000;
 }
 
-#ifdef NON_MATCHING
-/* 97.14%: 97.1 %: abs() and an if/else for x give the original's reload of pos_x in the last branch, but then x and
- * dx share v1. The original has dx in a1 and x in v1, which global-alloc gives only when x conflicts with dx (x =
- * dx before the test, x allocated first); that form keeps pos_x in a register through cse's skipped block (98.97 %
- * with -fno-cse-skip-blocks or -fno-cse-follow-jumps, and then dx/x swap: dx's subtraction temporary, 4 refs over
- * 10 insns, outranks x, 7 over 19) */
-s32 abs(s32);
+s32 abs(s32); /* GCC's builtin: inlined */
 
+/* x is set from pos_x, then reused for the distance, so cse forgets the field and the last branch reloads it. */
 void func_800242D8(Npc *npc) {
     GameObject *obj;
     s16 dx;
     s16 x;
 
     obj = D_800AA268.p;
-    dx = obj->pos_x.s.hi - D_801F9ACA;
+    x = obj->pos_x.s.hi;
+    dx = x - D_801F9ACA;
+    x = dx;
     if (abs(dx) >= 0x2BC) {
         x = D_801D8866 + dx;
-    } else {
-        x = dx;
     }
     if (obj->flags & 0x10) {
         if (x > 0x258) {
@@ -6470,23 +6455,10 @@ void func_800242D8(Npc *npc) {
     }
     func_80024508(npc);
 }
-#else
-INCLUDE_ASM("asm/main/nonmatchings/main", func_800242D8);
-#endif
-
-#ifdef NON_MATCHING
-/* 96.45%: 96.5 %: abs() is GCC's builtin. The first coordinate (s16 x = npc->target_x) loads as the original's lh
- * into a temporary and a copy: combine's three-insn split of the load and its sign extension (combine.c, a PARALLEL
- * of both loads split into a load and a register copy). The second, written the same way, gets the other split (two
- * loads, lh and lhu) as an s16, and loads straight into its variable as an s32; swapping the two blocks swaps which
- * one gets the copy, so the choice depends on the position, not the C (types, a local pointer, the field read
- * twice, an assignment in the test tried) */
-s32 abs(s32);
 
 s16 func_8002439C(Npc *npc) {
     s16 x;
-    s32 mx;
-    s32 d;
+    s16 mx;
 
     x = npc->target_x;
     if (x < D_801F9ACA) {
@@ -6496,12 +6468,8 @@ s16 func_8002439C(Npc *npc) {
     if (mx < D_801F9ACA) {
         mx += D_801D8866;
     }
-    d = abs((s16) (mx - x));
-    return d < 0x60;
+    return abs((s16) (mx - x)) < 0x60;
 }
-#else
-INCLUDE_ASM("asm/main/nonmatchings/main", func_8002439C);
-#endif
 
 void main_unwrap_target_x(s16 *px, s16 *pcur, Npc *npc) {
     s32 x;
