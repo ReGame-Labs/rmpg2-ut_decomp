@@ -803,22 +803,18 @@ s32 cdload_unpack_rle4(u8 *src, u8 *dst) {
     return dst - start;
 }
 
-#ifdef NON_MATCHING
-/* 78.86%: the bit reader written as in the matched cdload_unpack_vlc8 (index-first table reads, x += base, count -=
- * 1 + x); the original copies hdr to t3 in the prologue (a0 then takes cur >> 26), loads t->values before the table
- * copies, spills run_lens/run_bases/values at 36/32/24(sp) in a 0x60 frame (here 0x58) and computes w/4 and the
- * count before the stride */
 void cdload_unpack_vlc(VlcHeader *hdr, u32 *in, u32 dims, u8 *dst) {
+    s32 stride;
+    VlcBases *bases;
+    u8 *values;
     VlcTable *t;
     u32 cur;
     u32 next;
     s32 left;
     s32 x;
-    s32 n;
     s32 k;
-    u8 *values;
-    u8 *pix;
     u8 *row2;
+    u8 *pix;
     s32 w;
     s32 words;
     s32 count;
@@ -826,20 +822,19 @@ void cdload_unpack_vlc(VlcHeader *hdr, u32 *in, u32 dims, u8 *dst) {
     s32 skip;
     s32 rows;
     s32 depth;
-    s32 stride;
     u32 c;
     u32 c2;
     s32 bleft;
     VlcLens *lens;
     VlcRunLens *run_lens;
-    VlcBases *bases;
     VlcRunBases *run_bases;
 
     cur = *in++;
     next = *in++;
     left = 26;
     rows = hdr->rows;
-    t = &hdr->tables[cur >> 26];
+    x = cur >> 26;
+    t = &hdr->tables[x];
     depth = t->depth;
     cur <<= 6;
     if (depth == 8) {
@@ -850,33 +845,22 @@ void cdload_unpack_vlc(VlcHeader *hdr, u32 *in, u32 dims, u8 *dst) {
     bases = (VlcBases *)0x1F800020;
     run_bases = (VlcRunBases *)0x1F800054;
     lens = (VlcLens *)0x1F800000;
-    *lens = t->lens;
     values = (u8 *)&hdr->tables[hdr->count] + t->values;
+    *lens = t->lens;
     *bases = t->bases;
-    w = dims & 0xFFFF;
     *run_lens = t->run_lens;
     *run_bases = t->run_bases;
-    count = (w / 4) * (((s32)dims >> 16) / rows);
-    words = w / 4;
-    stride = rows * (depth * 4) / 8;
+    count = ((s32)(dims & 0xFFFF) / 4) * (((s32)dims >> 16) / rows);
+    words = (s32)(dims & 0xFFFF) / 4;
+    w = dims & 0xFFFF;
+    stride = rows * 4 * depth / 8;
     col = 0;
     skip = (rows - 1) * w;
     do {
-        n = 4;
-        x = 0;
-        if (left < n) {
-            x = cur >> (32 - n);
-            cur = next;
-            next = *in++;
-            n -= left;
-            left = 32;
-        }
-        x |= cur >> (32 - n);
-        left -= n;
-        cur <<= n;
-        if (x >= 13) {
-            k = x - 13;
-            n = *(run_lens->len + k);
+        {
+            s32 n;
+
+            n = 4;
             x = 0;
             if (left < n) {
                 x = cur >> (32 - n);
@@ -888,6 +872,25 @@ void cdload_unpack_vlc(VlcHeader *hdr, u32 *in, u32 dims, u8 *dst) {
             x |= cur >> (32 - n);
             left -= n;
             cur <<= n;
+        }
+        if (x >= 13) {
+            k = x - 13;
+            {
+                s32 n;
+
+                n = *(run_lens->len + k);
+                x = 0;
+                if (left < n) {
+                    x = cur >> (32 - n);
+                    cur = next;
+                    next = *in++;
+                    n -= left;
+                    left = 32;
+                }
+                x |= cur >> (32 - n);
+                left -= n;
+                cur <<= n;
+            }
             x += *(run_bases->base + k);
             count -= 1 + x;
             for (; x >= 0; x--) {
@@ -903,36 +906,46 @@ void cdload_unpack_vlc(VlcHeader *hdr, u32 *in, u32 dims, u8 *dst) {
             }
         } else {
             k = x;
-            n = *(lens->len + k);
-            x = 0;
-            if (left < n) {
-                n -= left;
-                x = cur >> (32 - *(lens->len + k));
-                left = 32;
-                cur = next;
-                next = *in++;
+            {
+                s32 n;
+
+                n = *(lens->len + k);
+                x = 0;
+                if (left < n) {
+                    n -= left;
+                    x = cur >> (32 - *(lens->len + k));
+                    left = 32;
+                    cur = next;
+                    next = *in++;
+                }
+                x |= cur >> (32 - n);
+                left -= n;
+                cur <<= n;
             }
-            x |= cur >> (32 - n);
-            left -= n;
-            cur <<= n;
             x += *(bases->base + k);
             pix = values + x * stride;
             c = *pix++;
             c2 = *pix++;
             bleft = 8;
 #define VLC_PIXEL(out)                  \
-            n = depth;                  \
-            x = 0;                      \
-            if (bleft < n) {            \
-                x = c >> (8 - n);       \
-                c = c2;                 \
-                c2 = *pix++;            \
-                n -= bleft;             \
-                bleft = 8;              \
-            }                           \
-            out = x | (c >> (8 - n));   \
-            bleft -= n;                 \
-            c = (u8)(c << n);
+            {                           \
+                s32 n;                  \
+                                        \
+                n = depth;              \
+                x = 0;                  \
+                if (bleft < n) {        \
+                    x = c >> (8 - n);   \
+                    c = c2;             \
+                    c2 = *pix++;        \
+                    n -= bleft;         \
+                    bleft = 8;          \
+                }                       \
+                x |= c >> (8 - n);      \
+                bleft -= n;             \
+                c <<= n;                \
+                c &= 0xFF;              \
+                out = x;                \
+            }
             VLC_PIXEL(dst[0]);
             VLC_PIXEL(dst[1]);
             VLC_PIXEL(dst[2]);
@@ -943,8 +956,8 @@ void cdload_unpack_vlc(VlcHeader *hdr, u32 *in, u32 dims, u8 *dst) {
             VLC_PIXEL(row2[2]);
             VLC_PIXEL(row2[3]);
 #undef VLC_PIXEL
-            col++;
             dst += 4;
+            col++;
             if (col == words) {
                 dst += skip;
                 col = 0;
@@ -953,9 +966,6 @@ void cdload_unpack_vlc(VlcHeader *hdr, u32 *in, u32 dims, u8 *dst) {
         }
     } while (count > 0);
 }
-#else
-INCLUDE_ASM("asm/main/nonmatchings/cdload", cdload_unpack_vlc);
-#endif
 
 void cdload_unpack_vlc8(VlcHeader *hdr, u32 *in, u32 dims, u8 *dst) {
     VlcTable *t;
