@@ -9,7 +9,7 @@
 void func_8003EB5C(void *anim, GameObject *obj);           /* start an animation on obj */
 void func_8001E698(GameObject *obj, void *anim);           /* start an animation on obj (the other calling order) */
 u16 func_8003E79C(void);
-s32 func_8001EB10(s32 range, s32 arg1);                     /* a random number */
+s32 main_random_between(s32 range, s32 arg1);                     /* a random number */
 void func_80034B68(s32 vel);
 void func_8001E4B0(GameObject *obj);                        /* free an object */
 ObjectDef *func_8001D110(void);                             /* a fresh definition to fill in */
@@ -295,7 +295,7 @@ found:
 }
 
 void func_800443AC(s32 vel) {
-    if (func_8001EB10(0x190, 0) & 1) {
+    if (main_random_between(0x190, 0) & 1) {
         D_800AA248.cur_obj->flags |= 0x10;
     } else {
         D_800AA248.cur_obj->flags &= ~0x10;
@@ -387,7 +387,7 @@ void func_80044638(Attacker *a) {
     a->state = 0x15;
     a->unk_0A = 0;
     obj = D_800AA248.cur_obj;
-    if (func_8001EB10(0x3E8, 0) & 1) {
+    if (main_random_between(0x3E8, 0) & 1) {
         vel = -0x7000;
     } else {
         vel = 0x7000;
@@ -837,7 +837,7 @@ void func_80045530(void) {
 void func_80045550(void) {
     Attacker *a = D_800AA248.cur_obj->owner.attacker;
 
-    a->state = D_8007F224[func_8001EB10(0x1F, 0) & 1];
+    a->state = D_8007F224[main_random_between(0x1F, 0) & 1];
     a->unk_0A = 0;
     a->unk_16 = 1;
 }

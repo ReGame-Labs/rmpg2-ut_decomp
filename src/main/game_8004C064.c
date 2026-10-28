@@ -9,7 +9,7 @@
 /* The current object as a scalar: the same word as D_800AA248.cur_obj, which some functions read on its own
  * (func_8004C738). */
 
-s32 func_8001EB10(s32 range, s32 arg1);                     /* a random number */
+s32 main_random_between(s32 range, s32 arg1);                     /* a random number */
 void func_8001E4B0(GameObject *obj);                        /* free an object */
 void func_8001F724(u16);
 void func_8001F7CC(s32 sound, s32 variant);
@@ -874,19 +874,13 @@ void func_8004D614(void) {
     D_800AA248.result = 0;
 }
 
-#ifdef NON_MATCHING
-/* 94.96%: registers: the original's t-registers are one higher (n t6, p t5, the giv t4, D_801F9AC8 t7) because its
- * bottom takes t3: all four m_* values are loaded while top and bottom are live, and its m_top (t2) is allocated
- * before bottom; here bottom shares y's t2. No order of the six box statements changes the allocation */
 u16 func_8004D6F8(Monster *m, Ai **out) {
     u16 n;
     Ai *p;
     GameObject *o;
     SpriteFrame *f;
     s16 x;
-    s32 t;
     u16 y;
-    s16 left;
     s16 right;
     s16 top;
     s16 bottom;
@@ -901,19 +895,18 @@ u16 func_8004D6F8(Monster *m, Ai **out) {
         do {
             if ((u32) (p->action - 9) < 0x5C && p->unk_34.u.hi == 0) {
                 o = p->obj;
-                t = o->pos_x.s.hi;
+                x = o->pos_x.s.hi; /* then the box's left edge */
                 y = o->pos_y.u.hi;
                 f = o->frame;
-                x = t;
-                if (t < D_801F9AC8.s.hi && t < D_801F9AC8.s.hi - 0x50) {
+                if (x < D_801F9AC8.s.hi && x < D_801F9AC8.s.hi - 0x50) {
                     x += (D_801D8864.w + 1) >> 16;
                 }
                 if (o->flags & 0x10) {
                     right = x + f->origin.u.lo;
-                    left = right - f->size.u.lo;
+                    x = right - f->size.u.lo;
                 } else {
-                    left = x - f->origin.u.lo;
-                    right = f->size.u.lo + left;
+                    x -= f->origin.u.lo;
+                    right = f->size.u.lo + x;
                 }
                 top = y - f->origin.u.hi;
                 bottom = top + f->size.u.hi;
@@ -921,7 +914,7 @@ u16 func_8004D6F8(Monster *m, Ai **out) {
                 m_right = m->hit_right;
                 m_left = m->hit_left;
                 m_top = m->hit_top;
-                if (left < m_right && m_left < right && top < m_bottom && m_top < bottom) {
+                if (x < m_right && right > m_left && top < m_bottom && bottom > m_top) {
                     m->unk_18A = 1;
                     *out = p;
                     return 1;
@@ -933,9 +926,6 @@ u16 func_8004D6F8(Monster *m, Ai **out) {
     *out = NULL;
     return 0;
 }
-#else
-INCLUDE_ASM("asm/main/nonmatchings/game_8004C064", func_8004D6F8);
-#endif
 
 void func_8004D860(void) {
     Monster *m = D_800AA248.cur_obj->owner.monster;
@@ -967,7 +957,7 @@ void func_8004D860(void) {
         m->action = 0x15;
         break;
     }
-    func_8001EB10(3, 0);
+    main_random_between(3, 0);
 }
 
 void func_8004D948(void) {
@@ -1063,7 +1053,7 @@ void func_8004DC08(Monster *m, Monster *other) {
 void func_8004DC7C(Monster *m, Monster *other) {
     s16 action;
 
-    if (func_8001EB10(0xF, 0) & 1) {
+    if (main_random_between(0xF, 0) & 1) {
         action = 0x39;
     } else {
         action = 0x1C;

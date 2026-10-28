@@ -55,7 +55,7 @@ void func_80029118(s16, u16);
 void func_80053C50(s32, Monster *m);
 void func_8006353C(s32);
 u16 func_8004A9B0();
-s32 func_8001EB10(s32 range, s32 x);
+s32 main_random_between(s32 range, s32 x);
 s16 func_8003FCD8(s32, s32);              /* a horizontal distance */
 extern s32 D_800916D8[];
 void func_8004B204(void);
@@ -129,7 +129,7 @@ extern s32 D_801FA7D8;
 extern void (*D_8007F228[])(void);
 
 void func_8004750C(void) {
-    s32 i = func_8001EB10(0xE, 2);
+    s32 i = main_random_between(0xE, 2);
 
     D_8007F228[i & 0xF]();
 }
@@ -366,7 +366,7 @@ void func_80047B6C(void) {
             if (kind != 1) {
                 if (func_8004A9B0(m, a, 5, b, c) == 0) {
                     m->unk_02A = 0;
-                    m->unk_01C = func_8001EB10(4, 2);
+                    m->unk_01C = main_random_between(4, 2);
                 }
             } else {
                 if (variant != 0) {
@@ -620,12 +620,12 @@ u16 func_80048384(u16 b, Throw *t) {
     t->kind = b;
     t->state = 1;
     D_800AA248.cur_obj->unk_94.p = t;
-    D_800AA248.cur_obj->vel_y.w = -(((func_8001EB10(0x7F, 1) & 3) + 0xE) << 15);
+    D_800AA248.cur_obj->vel_y.w = -(((main_random_between(0x7F, 1) & 3) + 0xE) << 15);
     if (saved->unk_68.monster != NULL) {
         vx = abs(func_8003FCD8(saved->pos_x.s.hi, saved->unk_68.monster->obj->pos_x.s.hi));
         vx = ((vx >> 5) << 15) + 0x4000;
     } else {
-        vx = ((func_8001EB10(0x7F, 1) & 7) + 2) << 15;
+        vx = ((main_random_between(0x7F, 1) & 7) + 2) << 15;
     }
     if (left) {
         vx = -vx;
@@ -678,12 +678,12 @@ u16 func_80048558(u16 b, Throw *t) {
     t->kind = b;
     t->state = 1;
     D_800AA248.cur_obj->unk_94.p = t;
-    D_800AA248.cur_obj->vel_y.w = -(((func_8001EB10(0x7F, 1) & 3) + 0xC) << 15);
+    D_800AA248.cur_obj->vel_y.w = -(((main_random_between(0x7F, 1) & 3) + 0xC) << 15);
     if (saved->unk_68.monster != NULL) {
         vx = abs(func_8003FCD8(saved->unk_68.monster->obj->pos_x.s.hi, saved->pos_x.s.hi));
         vx = ((vx >> 5) << 15) + 0x8000;
     } else {
-        vx = ((func_8001EB10(0x7F, 1) & 7) + 5) << 15;
+        vx = ((main_random_between(0x7F, 1) & 7) + 5) << 15;
     }
     if (left) {
         vx = -vx;
@@ -694,11 +694,17 @@ u16 func_80048558(u16 b, Throw *t) {
 }
 
 #ifdef NON_MATCHING
-/* 93 %: the original copies the state block's address into a second saved register after the facing test (move s0,s2) and uses both; here one register holds it throughout, so the frame has one saved register less */
+/* 97.23%: 97.2 %: h (set at the facing join, a copy of the top's &D_800AA248) is cse's canonical register for the
+ * middle's references, as in the original (move s0,s2); left: the original loads vel_x's object before the facing
+ * branch through h (the store's address first: a ?: store), but with the ?: form the end's references join h and
+ * the copy is coalesced away; here vel_x is reloaded after the join through the top's pseudo, which gives it 8 refs
+ * (0.18) against saved's 0.15, so the two swap s1/s2 */
 extern s32 D_8009186C[];
 
 u16 func_8004874C(u16 b, Throw *t) {
-    GameObject *saved = D_800AA248.cur_obj;
+    GameState *h;
+    s32 vx;
+    GameObject *saved;
     ObjectDef *def;
     GameObject *cur;
     GameObject *obj;
@@ -706,8 +712,8 @@ u16 func_8004874C(u16 b, Throw *t) {
     s16 dx;
     s16 dy;
     s16 x;
-    s32 vx;
 
+    saved = D_800AA248.cur_obj;
     def = func_8001D110();
     D_800AA248.new_def = def;
     cur = D_800AA248.cur_obj;
@@ -718,6 +724,7 @@ u16 func_8004874C(u16 b, Throw *t) {
     if (cur->flags & 0x10) {
         x = -dx;
     }
+    h = &D_800AA248;
     def->pos_x.s.hi = cur->pos_x.s.hi + x;
     def->pos_y.s.hi = D_800AA248.cur_obj->pos_y.s.hi + dy;
     def->flags = 0x1005;
@@ -741,8 +748,8 @@ u16 func_8004874C(u16 b, Throw *t) {
         vx = -0x70000;
     }
     D_800AA248.cur_obj->vel_x.w = vx;
-    D_800AA248.cur_obj->vel_y.w = -0x40000;
-    D_800AA248.cur_obj = saved;
+    h->cur_obj->vel_y.w = -0x40000;
+    h->cur_obj = saved;
     return 0;
 }
 #else
@@ -820,12 +827,12 @@ u16 func_800489C0(u16 b, Throw *t) {
     t->kind = b;
     t->state = 1;
     D_800AA248.cur_obj->unk_94.p = t;
-    D_800AA248.cur_obj->vel_y.w = -(((func_8001EB10(0x7F, 1) & 3) + 0xE) << 15);
+    D_800AA248.cur_obj->vel_y.w = -(((main_random_between(0x7F, 1) & 3) + 0xE) << 15);
     if (saved->unk_68.monster != NULL) {
         vx = abs(func_8003FCD8(saved->unk_68.monster->obj->pos_x.s.hi, saved->pos_x.s.hi));
         vx = ((vx >> 5) << 15) + 0x8000;
     } else {
-        vx = ((func_8001EB10(0x7F, 1) & 3) + 5) << 15;
+        vx = ((main_random_between(0x7F, 1) & 3) + 5) << 15;
     }
     if (left) {
         vx = -vx;
@@ -2239,7 +2246,10 @@ void func_8004BAC0(void) {
 
 #ifdef NON_MATCHING
 /* 99.86%: 99.86 %: registers only: obj (3 refs over 12 insns, 0.25) is allocated before the &D_800AA248 pseudo (4
- * over 34, 0.235); the original needs obj below 0.235 (13 insns) or the base above 0.25 */
+ * over 34, 0.235); the base's life is sched1's 17 doubled by update_equiv_regs (its REG_EQUIV constant address), so
+ * the original needs obj below 0.235 (13 insns: one more insn between npc->obj's load and case 1's store) or the
+ * base without its equivalence (set twice) or with a fifth ref; obj first as its own statement, case 1 through obj
+ * or npc->obj and a local for the action change nothing or more */
 void func_8003831C(void);
 extern Anim D_8008AA58;
 extern Anim D_8008AA78;

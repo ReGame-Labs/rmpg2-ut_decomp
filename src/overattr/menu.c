@@ -256,9 +256,12 @@ void func_8009BF94(u8 *dst, s32 index) {
 }
 
 #ifdef NON_MATCHING
-/* 99.24%: the movie line's text address (3 refs over 136 insns, priority 0.02) comes last in global-alloc's order,
- * after the colour's and the cursor's %hi (0.13, 0.12), and gets s3; the original gives it s1 before them, which
- * this form's priorities cannot do */
+/* 99.24%: registers only. The movie line's text address (3 refs over 136 insns, priority 0.02) comes last in
+ * global-alloc's order, after the %hi of D_801F9AAC and of D_800A92D0 (6 refs over ~95, 0.13 and 0.12), and gets s3;
+ * the original gives it s1, i.e. allocates it before them, which needs a priority above 0.13 (a life under 24 insns
+ * for 3 refs): the original's address was not this one long pseudo. A user variable for it, a TextMessage pointer
+ * and the struct forms of the first four strings (&D_800A6300.text[6], ...: cse then reuses them, 95% and less)
+ * do not change it */
 void menu_draw_cheats(void) {
     func_8009BF40(D_800A631E, D_801FA960);
     func_8001ECB4(D_800A6359, D_8007A684, 0);
@@ -364,7 +367,7 @@ void menu_update_name_entry(void) {
             menu_fade_out();
         }
     }
-    func_80018C14();
+    main_cycle_highlight();
 }
 
 INCLUDE_RODATA("asm/overattr/nonmatchings/menu", D_80097F58);
@@ -1862,7 +1865,7 @@ s16 func_8009FF38(void) {
         } else {
             cur = D_800A92C0;
             D_800A9800 = 0;
-            func_80018C14();
+            main_cycle_highlight();
             menu = cur;
             if (cur[1].sub != NULL) {
                 ((void (*)(void)) cur[1].sub)();
@@ -1939,7 +1942,7 @@ s16 func_8009FF38(void) {
             }
         }
         menu_light_choices(D_800A92C0, (s16) D_801E2A44, D_801F9AAC);
-        func_80018C14();
+        main_cycle_highlight();
         if ((D_800A9220 & 0x1C0701C) && D_801F9944 == 0) {
             D_800A9860 = 0x708;
             if (D_800A9220 & 0x1C) {
@@ -2080,22 +2083,17 @@ void menu_update_load_screen(void) {
             D_801D872C /= 2;
         }
         func_8009E310((s16) D_801E2A44, D_801F9AAC);
-        func_80018C14();
+        main_cycle_highlight();
         break;
     }
 }
 
-#ifdef NON_MATCHING
-/* 98.00%: the body is the original's; only the prologue differs: the original sets y (li s6,60) after the slots'
- * address (s5), which loop.c hoists in front of the outer loop, so its y = 60 came after the hoisting point; every
- * order of the four initialisations keeps y first */
 s32 menu_list_saves(void) {
     char buf[0x18];
     s32 limit;
     s32 n;
     s32 slot;
     s32 best;
-    s32 y;
     s32 i;
     s32 j;
     s32 count;
@@ -2105,7 +2103,6 @@ s32 menu_list_saves(void) {
     limit = 10000000;
     n = 0;
     slot = 0;
-    y = 60;
     for (;;) {
         best = -1;
         for (i = 0; i < 6; i++) {
@@ -2127,17 +2124,13 @@ s32 menu_list_saves(void) {
         name = D_8007C704[city];
         D_800A9830[n] = slot;
         D_800A9820[n] = 0x20;
-        D_800A9810[n] = y;
-        y += 23;
+        D_800A9810[n] = n * 23 + 60;
         sprintf(buf, "%s   %dP", name, count);
         func_8001F61C(buf, D_800A9820[n], D_800A9810[n], 1, D_801F9AAC, D_8007AD4C, 1, 0x450 + n);
         n++;
         limit = best;
     }
 }
-#else
-INCLUDE_ASM("asm/overattr/nonmatchings/menu", menu_list_saves);
-#endif
 
 void menu_load_slot(s32 slot) {
     s32 i;
@@ -2381,7 +2374,7 @@ void menu_ask_format(void) {
         menu_format_card();
         break;
     }
-    func_80018C14();
+    main_cycle_highlight();
 }
 
 INCLUDE_RODATA("asm/overattr/nonmatchings/menu", D_80098260);
@@ -2539,7 +2532,7 @@ void menu_delete_save(void) {
         }
         break;
     }
-    func_80018C14();
+    main_cycle_highlight();
 }
 
 s32 menu_find_save(s32 id) {
