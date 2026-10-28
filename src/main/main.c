@@ -5809,13 +5809,17 @@ void func_800240F0(Npc *npc) {
 }
 
 #ifdef NON_MATCHING
-/* 86.15%: 86.2 %: used and k now copy the masked value as the original does; the loop still uses used in s0
- * directly (the original copies it to a1 and hoists the table address to a2), and the bit selection reuses the
- * loop's sign-extended k where the original copies k at the exit */
+/* 99.69%: 99.7 %: a for (;;) whose exit is a break after a continue gives the original's loop (loop.c hoists the
+ * table and the copy of used, jump.c duplicates no exit test; a goto loop hoists nothing, a plain break duplicates
+ * the test); sel = k at the top of each pass is the original's copy in the test's delay slot, and used |= bit the
+ * exit's registers. Only the hoisted copy of used and sel swap a1/v1: sel (3 refs, live 6) is allocated before that
+ * copy and takes a1, the original gives the copy a1 (sel s32/u16, the bit forms, the assignment inside the index
+ * tried) */
 u16 func_80024138(Npc *npc) {
     s16 used;
     s16 k;
     s32 bit;
+    s16 sel;
 
     if (D_801E289A == 0) {
         used = D_801E2A50 & 7;
@@ -5826,22 +5830,26 @@ u16 func_80024138(Npc *npc) {
         if (k == 3) {
             k = 0;
         }
-    loop:
-        if (used & D_8007BA20[k]) {
-            if (++k >= 3) {
-                k = 0;
+        for (;;) {
+            sel = k;
+            if (used & D_8007BA20[k]) {
+                if (++k >= 3) {
+                    k = 0;
+                }
+                continue;
             }
-            goto loop;
+            break;
         }
         npc->aim = k;
         bit = 1;
-        if (k != 0) {
+        if (sel != 0) {
             bit = 4;
-            if (k == 1) {
+            if (sel == 1) {
                 bit = 2;
             }
         }
-        D_801E2A50 = used | bit;
+        used |= bit;
+        D_801E2A50 = used;
         return k;
     }
     npc->aim = 3;
@@ -5939,20 +5947,20 @@ INCLUDE_ASM("asm/main/nonmatchings/main", func_8002439C);
 #endif
 
 #ifdef NON_MATCHING
-/* 85.97%: 86.0 %: abs() (GCC's builtin: bgez, nop, negu) and an s32 x (its lhu apart from the lh of the
- * difference) give the original's shape; sched1 still loads D_801D8866 after npc->unk_26 where the original loads it
- * before, so half takes npc's a2 instead of t1 */
-s32 abs(s32);
-
+/* 86.11%: 86.1 %: abs() is GCC's builtin (bgez, nop, negu); an s32 x (its lhu apart from the lh of the difference)
+ * and an s32 half (x += half adds in the original's order) give the original's operations. Only sched1's order
+ * differs: the original loads D_801D8866 before the second npc->unk_26 (lh) and shifts it in that load's delay, so
+ * half takes t1 and cur t2; here half, a once-set live pseudo (birthing_insn_p, top priority), is loaded last, into
+ * npc's a2. Statement orders do not change it */
 void main_unwrap_target_x(s16 *px, s16 *pcur, Npc *npc) {
     s32 x;
     s16 cur;
-    u16 half;
+    s32 half;
     s16 d;
 
     x = (u16) npc->unk_26;
     cur = D_800AA268.p->pos_x.s.hi;
-    half = D_801D8866;
+    half = (u16) D_801D8866;
     d = abs(npc->unk_26 - cur);
     if (d >= (s16) half >> 1) {
         d = abs(D_801F9ACA - cur);
