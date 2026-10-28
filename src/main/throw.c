@@ -693,17 +693,10 @@ u16 func_80048558(u16 b, Throw *t) {
     return 0;
 }
 
-#ifdef NON_MATCHING
-/* 97.23%: 97.2 %: h (set at the facing join, a copy of the top's &D_800AA248) is cse's canonical register for the
- * middle's references, as in the original (move s0,s2); left: the original loads vel_x's object before the facing
- * branch through h (the store's address first: a ?: store), but with the ?: form the end's references join h and
- * the copy is coalesced away; here vel_x is reloaded after the join through the top's pseudo, which gives it 8 refs
- * (0.18) against saved's 0.15, so the two swap s1/s2 */
 extern s32 D_8009186C[];
 
 u16 func_8004874C(u16 b, Throw *t) {
     GameState *h;
-    s32 vx;
     GameObject *saved;
     ObjectDef *def;
     GameObject *cur;
@@ -742,19 +735,11 @@ u16 func_8004874C(u16 b, Throw *t) {
     t->kind = b;
     t->state = 1;
     D_800AA248.cur_obj->unk_94.p = t;
-    if (saved->flags & 0x10) {
-        vx = 0x70000;
-    } else {
-        vx = -0x70000;
-    }
-    D_800AA248.cur_obj->vel_x.w = vx;
+    h->cur_obj->vel_x.w = (saved->flags & 0x10) ? 0x70000 : -0x70000;
     h->cur_obj->vel_y.w = -0x40000;
-    h->cur_obj = saved;
+    D_800AA248.cur_obj = saved;
     return 0;
 }
-#else
-INCLUDE_ASM("asm/main/nonmatchings/throw", func_8004874C);
-#endif
 
 extern s32 D_80091B24[];
 extern u16 D_801E28A8;
