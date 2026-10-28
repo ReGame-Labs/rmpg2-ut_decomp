@@ -19,7 +19,7 @@ u16 func_8004A9B0(void *a, s32 b, s32 c, s32 d, s32 e);
 void func_8001BB68(GameObject *mover);
 GameObject *main_create_box(s32 a, s32 b, s32 c, s32 d, s32 color);
 void func_8001BB88(GameObject *mover);
-s16 func_8001EB10(s32 arg0, s32 arg1);
+s16 main_random_between(s32 arg0, s32 arg1);
 s32 *func_80025C08(void *list);
 extern s32 D_8007DA48[];
 extern s32 D_8007D470[];                /* speeds by kind - 1 (func_800360D8) */
@@ -221,7 +221,7 @@ extern Anim D_8008C828;
 
 void func_80034590(Pickup *npc) {
     npc->unk_08 = 2;
-    npc->unk_1E = func_8001EB10(0x190, 0);
+    npc->unk_1E = main_random_between(0x190, 0);
     npc->unk_22 = 0;
     func_8003EB5C(D_8007D4C0[npc->kind - 1], D_800AA248.cur_obj);
 }
@@ -972,7 +972,7 @@ void func_80035FF0(void) {
 }
 
 s32 func_80036028(void) {
-    if (func_8001EB10(0xFF, 0) & 1) {
+    if (main_random_between(0xFF, 0) & 1) {
         D_800AA248.cur_obj->flags |= 0x10;
         D_800AA248.cur_obj->pos_x.w = D_801F9AC8.w + 0x2440000;
         D_800AA248.cur_obj->vel_x.w = -0x32000;
@@ -1243,7 +1243,7 @@ void func_8003684C(void) {
         obj->priority = item->unk_0C;
         obj->kind = 0x713;
         if (item->unk_0E == -1) {
-            npc->unk_1C = func_8001EB10(0xC8, 0x64);
+            npc->unk_1C = main_random_between(0xC8, 0x64);
         } else {
             npc->unk_1C = item->unk_0E;
         }

@@ -198,7 +198,7 @@ extern u16 D_8007C144[];
 extern s16 D_800A92A0;                 /* the format question's state: 0 ask, 3 answer, 4 format */
 extern u8 D_80098260[];                /* "YES" */
 extern u8 D_80098264[];                /* "NO" */
-void func_80018C14(void);
+void main_cycle_highlight(void);
 void menu_format_card(void);
 extern s16 D_801FA958;
 extern s16 D_800A9880;
