@@ -240,13 +240,6 @@ void pickup_clear(Pickup *p) {
     D_801E29B0 = 0;
 }
 
-#ifdef NON_MATCHING
-/* 98.10%: 98.10 %: dx doubles as l and w as r (negu in place, then left = dx + x copied back), y is reused for the
- * monster's bottom (its load gets no sched1 birth boost, so it leads the four box loads as in the original) and the
- * compare is func_8004D6F8's (l < right, r > left, top < bottom, bottom > top); left: allocation order, the
- * original takes x, r, l, box for a2, a3, t0, t1, but x has 6 refs over 24 insns (0.50) against l 0.74 and r 0.70;
- * x reused for the monster's left gives it 8 refs and the registers, but then that load loses the birth boost and
- * moves above the right's (96.2 %); separate dx/w, per-path left, declaration and swap orders were tried */
 s32 pickup_test_touch(GameObject *obj, Monster *m) {
     SpriteFrame *box;
     s16 x;
@@ -260,7 +253,6 @@ s32 pickup_test_touch(GameObject *obj, Monster *m) {
     s16 right;
     s16 top;
     s16 bottom;
-    s16 m_right;
     s16 m_left;
     s16 m_top;
 
@@ -288,21 +280,20 @@ s32 pickup_test_touch(GameObject *obj, Monster *m) {
     right = r;
     bottom = h + y;
     if (flip) {
-        r = left;
         l = right;
+        r = left;
     }
+    /* y and x are reused for the monster's bottom and right edges: the original's load order (a reused variable
+     * gets no sched1 birth boost) and x's register (the extra references put it ahead of l and r) */
     y = m->hit_bottom;
-    m_right = m->hit_right;
+    x = m->hit_right;
     m_left = m->hit_left;
     m_top = m->hit_top;
-    if (l < m_right && r > m_left && top < y && bottom > m_top) {
+    if (l < x && r > m_left && top < y && bottom > m_top) {
         return 1;
     }
     return 0;
 }
-#else
-INCLUDE_ASM("asm/main/nonmatchings/pickup", pickup_test_touch);
-#endif
 
 
 
