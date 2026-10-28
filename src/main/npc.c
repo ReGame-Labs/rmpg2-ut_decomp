@@ -459,7 +459,8 @@ void func_80034DAC(Pickup *npc) {
 #ifdef NON_MATCHING
 /* 96.82%: 96.8 %: the slot pointer and n are loop.c's givs of i (the prologue now matches); left: the original
  * keeps the giv increment of n after the x store and the mflo after the loads, here both go to the top of the join
- * block */
+ * block (loop.c inserts the giv increments before i++, sched1 hoists them); for/while loops, i++ before the y copy
+ * and the forms of the x and y lines change nothing */
 void func_80034E48(Pickup *npc) {
     GameObject *mover;
     GameObject *spawned;

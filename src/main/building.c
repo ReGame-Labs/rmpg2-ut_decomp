@@ -1959,8 +1959,9 @@ void func_8002E348(Monster *arg0, BuildingItem *rec) {
 
 #ifdef NON_MATCHING
 /* 94.22%: 94.2 %: the original's li v1,5 in the zero test's delay slot is the else block's constant, so either
- * reorg predicted the branch taken (mostly_true_jump gives EQ not taken) or the 5 was a pseudo set before the
- * branch (global, hence v1) */
+ * reorg predicted the branch taken (mostly_true_jump gives EQ not taken; rare_destination is 0 both ways) or the 5
+ * was a pseudo set before the branch (global, hence v1); a static inline taking the level, a level local and the
+ * == 0 test first do not keep such a pseudo (cse folds it back to constants) */
 void func_8002E440(Monster *arg0, BuildingItem *rec) {
     BuildingPart *part;
     u16 n;
@@ -3309,7 +3310,8 @@ void func_80030D14(UnkStruct19 *p) {
 
 #ifdef NON_MATCHING
 /* 98.63%: 98.63 %: combine_givs keeps the first giv of bl->giv, the last one found (the state access, +20); the
- * original kept the items[0].obj access (+152), so it was found last, or the state access was not a giv */
+ * original kept the items[0].obj access (+152), so it was found last, or the state access was not a giv; an index
+ * loop (D_801D3DC8[i]) makes &D_801D3DC8[i] the base (95.8 %), the load order of q and o changes nothing */
 void building_count_standing(void) {
     u16 n = D_801E29A4;
     s16 count = 0;
