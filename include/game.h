@@ -347,11 +347,11 @@ typedef struct Monster {
     /* 0x1E4 */ s16 *unk_1E4;                  /* the demo's input script: 12-byte records (frame, direction, buttons), 0x7FFF ends it */
     /* 0x1E8 */ u8 unk_1E8[0x10];
     /* 0x1F8 */ s32 unk_1F8;
-    /* 0x1FC */ GameObject *shadow;          /* its shadow, moved with it (func_800535E4) */
+    /* 0x1FC */ GameObject *shadow;          /* its shadow, moved with it (monster_update_bounce) */
     /* 0x200 */ struct Monster *bump_target;   /* a monster it bounces off (func_80053204) */
     /* 0x204 */ u16 unk_204;
     /* 0x206 */ u8 unk_206[0x02];
-    /* 0x208 */ s32 bounce_vy;               /* a bounce off another monster (func_80053204, func_800535E4): the
+    /* 0x208 */ s32 bounce_vy;               /* a bounce off another monster (func_80053204, monster_update_bounce): the
                                                 * velocity, */
     /* 0x20C */ s32 bounce_vx;
     /* 0x210 */ s32 bounce_dy;               /* and what each frame adds to it, until it crosses zero */
