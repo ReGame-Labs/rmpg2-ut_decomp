@@ -1331,12 +1331,6 @@ s32 wess_module_size(s32 name) {
     return (s32) mem;
 }
 
-#ifdef NON_MATCHING
-/* 99.85%: the module data's size: the original loads it into a1 (L, the read's argument, also added to mem) and
- * copies it into s1 (S, compared after the call) before the call. cse keeps such a copy only when S's set comes
- * after the argument's (S canonical from then on); every form here sets S first or uses one pseudo, which takes s1
- * at the load. Tried: the size parameter reused as in the first two reads (99.82%, and the compare's operands
- * swap), mem += the field then size = the field, size = len in the then-block, a separate len */
 extern s32 D_80087120;
 extern s32 D_80087124;
 
@@ -1346,6 +1340,7 @@ s32 wess_load_module(s32 name, s32 buf, s32 size) {
     s32 len;
     u8 *idx;
     s32 count;
+    s32 request;
 
     if (D_80087110 != 0) {
         wess_unload_module();
@@ -1367,25 +1362,25 @@ s32 wess_load_module(s32 name, s32 buf, s32 size) {
         return D_80087110;
     }
     D_80087108 = func_80070868(name);
+    request = 0x20;
     if (D_80087108 == 0) {
         wess_report_module_error(1);
         wess_free_module_memory();
         return D_80087110;
     }
-    size = 0x20;
     D_801FDEFC.unk_00 = &D_80087188;
     D_801FDF20 = &D_801FDEFC;
     D_801FDEFC.unk_0C = &D_801FDEBC;
     D_801FDEFC.unk_14 = &D_801FDEE0;
     D_801FDEFC.unk_07[0] = D_80087158;
-    if (func_80070898(&D_801FDEBC, size, D_80087108) != size) {
+    if (func_80070898(&D_801FDEBC, request, D_80087108) != request) {
         goto read_error;
     }
     if (D_801FDF20->unk_0C->magic != D_8001709C || D_801FDF20->unk_0C->version != 2) {
         goto error;
     }
-    size = 0x18;
-    if (func_80070898(&D_801FDEE0, size, D_80087108) != size) {
+    request = 0x18;
+    if (func_80070898(&D_801FDEE0, request, D_80087108) != request) {
         goto read_error;
     }
     mem = (u8 *)D_8008711C;
@@ -1396,7 +1391,8 @@ s32 wess_load_module(s32 name, s32 buf, s32 size) {
     len = D_801FDF20->unk_0C->unk_18;
     mem += len;
     if (D_801FDF20->unk_0C->unk_08[8] == 0) {
-        if (len != func_80070898(D_801FDF20->unk_14->unk_18, len, D_80087108)) {
+        request = len;
+        if (request != func_80070898(D_801FDF20->unk_14->unk_18, len, D_80087108)) {
         read_error:
             wess_report_module_error(2);
         error:
@@ -1459,9 +1455,6 @@ s32 wess_load_module(s32 name, s32 buf, s32 size) {
     func_80070454();
     return 1;
 }
-#else
-INCLUDE_ASM("asm/main/nonmatchings/wess", wess_load_module);
-#endif
 
 void wess_init_channel(SoundChannel *ch, SoundTrack *track, SoundTrackOpts *opts) {
     s32 mask;

@@ -456,11 +456,6 @@ void func_80034DAC(Pickup *npc) {
     }
 }
 
-#ifdef NON_MATCHING
-/* 96.82%: 96.8 %: the slot pointer and n are loop.c's givs of i (the prologue now matches); left: the original
- * keeps the giv increment of n after the x store and the mflo after the loads, here both go to the top of the join
- * block (loop.c inserts the giv increments before i++, sched1 hoists them); for/while loops, i++ before the y copy
- * and the forms of the x and y lines change nothing */
 void func_80034E48(Pickup *npc) {
     GameObject *mover;
     GameObject *spawned;
@@ -469,8 +464,6 @@ void func_80034E48(Pickup *npc) {
     s32 kind;
     s32 i;
     s32 step;
-    s32 offset;
-    s32 x;
 
     mover = D_800AA248.cur_obj;
     i = 0;
@@ -495,13 +488,16 @@ void func_80034E48(Pickup *npc) {
             step = 0x64;
         }
         if (mover->flags & 0x10) {
-            offset = (i + 1) * step;
+            s32 x = mover->pos_x.u.hi + (i + 1) * step;
+
+            x &= (s16)D_801D8866;
+            spawned->pos_x.s.hi = x;
         } else {
-            offset = (i + 1) * -step;
+            s32 x = mover->pos_x.u.hi + (i + 1) * -step;
+
+            x &= (s16)D_801D8866;
+            spawned->pos_x.s.hi = x;
         }
-        x = mover->pos_x.u.hi + offset;
-        x &= (s16)D_801D8866;
-        spawned->pos_x.s.hi = x;
         ((u16 *)&spawned->pos_y.w)[1] = ((u16 *)&mover->pos_y.w)[1];
         i++;
     } while (i < 3);
@@ -521,9 +517,6 @@ void func_80034E48(Pickup *npc) {
     }
     npc->unk_08 = 2;
 }
-#else
-INCLUDE_ASM("asm/main/nonmatchings/npc", func_80034E48);
-#endif
 
 void func_80035040(void) {
     s32 i;

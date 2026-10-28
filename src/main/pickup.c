@@ -241,61 +241,61 @@ void pickup_clear(Pickup *p) {
 }
 
 #ifdef NON_MATCHING
-/* 93.06%: the shape is right (the negu-then-add copies, the swap); registers differ, and the original loads the y
- * before the flags; the original reads the box in func_8004D6F8's order (bottom, right, left, top), but in that
- * order local-alloc sinks some loads into the compare blocks (91.7 %), and an earlier y read costs more */
+/* 98.10%: 98.10 %: dx doubles as l and w as r (negu in place, then left = dx + x copied back), y is reused for the
+ * monster's bottom (its load gets no sched1 birth boost, so it leads the four box loads as in the original) and the
+ * compare is func_8004D6F8's (l < right, r > left, top < bottom, bottom > top); left: allocation order, the
+ * original takes x, r, l, box for a2, a3, t0, t1, but x has 6 refs over 24 insns (0.50) against l 0.74 and r 0.70;
+ * x reused for the monster's left gives it 8 refs and the registers, but then that load loses the birth boost and
+ * moves above the right's (96.2 %); separate dx/w, per-path left, declaration and swap orders were tried */
 s32 pickup_test_touch(GameObject *obj, Monster *m) {
     SpriteFrame *box;
     s16 x;
-    u16 y;
+    s16 y;
     s32 flip;
-    u16 dx;
+    s16 l;
+    s16 r;
     u16 dy;
-    u16 w;
     u16 h;
     s16 left;
     s16 right;
     s16 top;
     s16 bottom;
-    s16 l;
-    s16 r;
     s16 m_right;
     s16 m_left;
     s16 m_top;
-    s16 m_bottom;
 
     x = obj->pos_x.s.hi;
     box = obj->frame;
     if (x < D_801F9ACA) {
         x += (D_801D8864.w + 1) >> 16;
     }
-    flip = obj->flags & 0x10;
-    dx = box->unk_10;
-    dy = box->unk_12;
     y = obj->pos_y.u.hi;
+    flip = obj->flags & 0x10;
+    l = box->unk_10;
+    dy = box->unk_12;
     if (flip) {
-        dx = -dx;
+        l = -l;
     }
-    left = dx + x;
-    l = left;
-    w = box->unk_14;
+    l += x;
+    left = l;
+    r = box->unk_14;
     h = box->unk_16;
     top = dy + y;
     if (flip) {
-        w = -w;
+        r = -r;
     }
-    right = w + x;
-    r = right;
+    r += x;
+    right = r;
     bottom = h + y;
     if (flip) {
-        l = right;
         r = left;
+        l = right;
     }
+    y = m->hit_bottom;
     m_right = m->hit_right;
-    m_top = m->hit_top;
-    m_bottom = m->hit_bottom;
     m_left = m->hit_left;
-    if (l < m_right && m_left < r && top < m_bottom && m_top < bottom) {
+    m_top = m->hit_top;
+    if (l < m_right && r > m_left && top < y && bottom > m_top) {
         return 1;
     }
     return 0;
@@ -681,8 +681,13 @@ void func_8003C674(u16 *q, ObjectDef *def) {
  * loop (to the barrier of the idx == 1 if/else), where cross-jumping merges its store with the success path's; the
  * original keeps it in the loop, its store through the hoisted s2. loop.c leaves such a block in place only when a
  * label or a jump sits between the i test and the block's own jump (a test inside the block keeps it in the loop
- * here, as in throw_update_flight), so the original's exit block had one at loop time; while, for (;;), goto and ++i
- * forms, a NULL return through a variable and the 2 as a constant or a u16/s16/s32 local were tried */
+ * here, as in throw_update_flight), so the original's exit block had one at loop time; while, for (;;), goto and
+ * ++i forms, a NULL return through a variable and the 2 as a constant or a u16/s16/s32 local were tried; round 10
+ * also tried: a goto loop (no loop notes: 77.7 %), while (call != 1) with the exit after the body (continue),
+ * if/else around the body, for (;;) or while (++i < 4) with goto to the success code, and a break plus a second i
+ * test after the loop (all below 81 %); the a0 of the in-loop unk_04 load (lhu a0, where v0 is free) suggests that
+ * value was a global pseudo in the original */
+// WIP in src/main/pickup.c: the original compares top with a register holding 2 that it reuses as the draw's argument (min here keeps the compare but cse still gives the argument as li); find_and_verify_loops moves the i >= 4 exit block out of the loop (to the barrier of the idx == 1 if/else), where cross-jumping merges its store with the success path's; the original keeps it in the loop, its store through the hoisted s2. loop.c leaves such a block in place only when a label or a jump sits between the i test and the block's own jump (a test inside the block keeps it in the loop here, as in throw_update_flight), so the original's exit block had one at loop time; while, for (;;), goto and ++i forms, a NULL return through a variable and the 2 as a constant or a u16/s16/s32 local were tried
 BuildingPart *func_8003C67C(Building *u, UnkStructB2 *rec) {
     BuildingItem *item;
     BuildingPart *part;
