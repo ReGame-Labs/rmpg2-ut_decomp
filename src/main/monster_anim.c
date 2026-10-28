@@ -1688,11 +1688,6 @@ void func_8005A7C4(void) {
     D_800AA268.p = self;
 }
 
-#ifdef NON_MATCHING
-/* 99.93%: the falling bomb's vel_y: the original loads it into a0 (vy) and increments a copy in v1 (vx, the move in
- * the beqz delay slot); here vx gets the load and vy the copy. Written vx = vy = load, cse swaps the pair when vx
- * outlives vy (vx reused for vel_x below) and otherwise folds the copy into the add (size -4); a separate w for
- * vel_x gives this form */
 void monster_anim_update_bomb(Monster *e) {
     GameObject *obj;
     GameObject *self;
@@ -1701,7 +1696,6 @@ void monster_anim_update_bomb(Monster *e) {
     s16 max;
     s32 vy;
     s32 vx;
-    s32 w;
 
     obj = e->extra[0];
     self = D_800AA268.p;
@@ -1709,12 +1703,11 @@ void monster_anim_update_bomb(Monster *e) {
         return;
     }
     if (e->obj->anim == (s32)&D_80011A80) {
-        vy = vx = obj->vel_y.w;
-       if (vy != 0) {
-            vx += 0x2100;
-            obj->vel_y.w = vx;
+        vy = obj->vel_y.w;
+        if (vy != 0) {
             obj->pos_y.w += vy;
-            if (vx > 0) {
+            obj->vel_y.w += 0x2100;
+            if (obj->vel_y.w > 0) {
                 func_8001F724(5);
                 func_80029118(0xB, 0x12);
                 obj->anim = (s32)&D_80011B60;
@@ -1732,9 +1725,9 @@ void monster_anim_update_bomb(Monster *e) {
             }
         }
     } else {
-        w = obj->vel_x.w;
-        if (w != 0) {
-            obj->pos_x.w += w;
+        vx = obj->vel_x.w;
+        if (vx != 0) {
+            obj->pos_x.w += vx;
             obj->pos_y.w += obj->vel_y.w;
             if (obj->pos_y.w > 0xE10000) {
                 func_8001F724(0x4B);
@@ -1818,9 +1811,6 @@ void monster_anim_update_bomb(Monster *e) {
     }
     D_800AA268.p = self;
 }
-#else
-INCLUDE_ASM("asm/main/nonmatchings/monster_anim", monster_anim_update_bomb);
-#endif
 
 void monster_anim_update_special(Monster *e) {
     Ai *ai;
@@ -2141,8 +2131,11 @@ void func_8005BB04(Monster *e, s16 want, s16 max, Building *u) {
 #ifdef NON_MATCHING
 /* 98.36%: the instructions and their order are the original's (the frame offsets loaded straight into x0/y0/x1/y1);
  * only the registers differ: the original gives oy t0, frame t1, ox t2, obj t3, so oy was allocated before frame.
- * Here oy has 3 refs over 14 insns (priority 0.21) and frame 5 over 20 (0.50): oy needs a 4th ref. Loading unk_16
- * before unk_14 scores 98.72 but is not the original's order */
+ * Here oy has 3 refs over 14 insns (priority 0.21) and frame 5 over 20 (0.50): oy needs a 4th ref with a life of at
+ * most 15 insns (16 and declared before frame for the tie). REG_N_REFS is counted by flow before combine, so the
+ * ref may be one combine later removes. oy as s32/u32/int, y1 = unk_16 + oy, y0 = fy0 = y0 + oy, oy reused for
+ * pos_y in the flags 2/4 boxes: no 4th ref or worse. Loading unk_16 before unk_14 scores 98.72 but is not the
+ * original's order */
 s32 monster_anim_test_box(s16 x, s16 y, s32 w, s32 h, GameObject *obj, u16 flags) {
     SpriteFrame *frame;
     s16 left;
