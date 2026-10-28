@@ -471,10 +471,13 @@ void func_80050E58(Monster *e) {
 }
 
 #ifdef NON_MATCHING
-/* 98.60%: 98.6 %: global-alloc order: m (22 refs over 63 insns, 1.40) outranks obj (14 over 32, 1.31) and e (17
- * over 176, 0.39) outranks i (7 over 59, 0.24); obj and i each need one more reference (15 and 8) to come first as
- * in the original. Merging the per-path action stores lowers m and e enough, but the smaller loop then hoists
- * &D_801E0B78 and drops the 0x1C/0xB constants from s4/s5 */
+/* 98.60%: global-alloc order: m (22 refs over 63 insns, 1.40) outranks obj (14 over 32, 1.31) and e (17 over 176,
+ * 0.39) outranks i (7 over 59, 0.24); the original allocates obj, m, i, e. One store pair for the 0x1C/0xB paths of
+ * the facing-each-other branch (act chosen by one test) gives m 18 and e 13 refs, enough for that order, but the
+ * loop then has 112 real insns instead of 117 and loop.c hoists &D_801E0B78 (threshold 29 x savings 2 x life 2 =
+ * 116 >= 112; -dL), which the original keeps in the loop. So the original's loop had the per-path code's size with
+ * fewer m/e references, or a 4th..5th dead insn (deleted by flow after loop.c). Per-path ternary tests, gotos,
+ * for/do loops, operand orders and an else-branch d tried */
 void func_80050E88(Monster *e) {
     Monster *m;
     GameObject *obj;
@@ -1552,7 +1555,7 @@ void func_800531C0(Monster *e) {
     e->unk_104 = 0;
 }
 
-/* The camera clamp as in func_800535E4: c is set again (c += 0x500000), so the later reads of D_801F9AC8 are
+/* The camera clamp as in monster_update_bounce: c is set again (c += 0x500000), so the later reads of D_801F9AC8 are
  * loads of their own. */
 void func_80053204(Monster *e) {
     GameObject *shadow;
@@ -1683,7 +1686,7 @@ void func_80053204(Monster *e) {
 
 /* The camera clamp reuses step for the camera's left edge: setting it again (step += 0x500000) ends cse's
  * knowledge that it holds D_801F9AC8, so the arms and the second bound read the camera again, as the original does. */
-void func_800535E4(Monster *e) {
+void monster_update_bounce(Monster *e) {
     GameObject *shadow;
     s32 v;
     s32 step;
@@ -2206,7 +2209,7 @@ void func_800544D8(Monster *e, GameObject *dst, GameObject *src) {
 
 /* b holds box_x0, then box_x1: setting it again ends cse's knowledge of box_x0, so the facing-left test reads it
  * again, as the original does. */
-s32 func_8005453C(s16 x, s32 unused, Monster *m) {
+s32 monster_test_in_front(s16 x, s32 unused, Monster *m) {
     GameObject *obj;
     s16 px;
     s16 b;

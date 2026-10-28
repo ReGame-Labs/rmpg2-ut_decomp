@@ -24,7 +24,7 @@ s32 func_8004D150(u16 *, Monster *m, void *);
 void monster_start_jump(Monster *m);
 void func_80053C50(s32, Monster *m);
 void func_8005404C(Monster *m);
-u16 func_8005453C(s16 x, s16 y, Monster *m);
+u16 monster_test_in_front(s16 x, s16 y, Monster *m);
 Building *monster_get_building(u16);
 void func_80056488(Monster *m);
 void func_800564D8(Monster *m);
@@ -388,7 +388,7 @@ void func_8004EFE8(void) {
                     if (o != NULL && !(o->unk_6C & 0x80)) {
                         if (other->unk_0DC != 0 && other->action == 3 && o->pos_y.s.hi == 0xE1 &&
                             (D_800AA248.cur_obj->flags & 0x10) != (o->flags & 0x10)) {
-                            if (func_8005453C(m->pos.s.lo, m->pos.s.hi, other)) {
+                            if (monster_test_in_front(m->pos.s.lo, m->pos.s.hi, other)) {
                                 m->unk_18A = 1;
                                 other->unk_0E4 = m->id;
                                 other->action = 0x41;
