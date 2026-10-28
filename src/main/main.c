@@ -1376,8 +1376,8 @@ void main_begin_frame(void) {
     D_801FAC80 = (D_801FAC80 == &D_801CA474[0]) ? &D_801CA474[1] : &D_801CA474[0];
     ClearOTagR(D_801FAC80->ot, 4);
     D_801FAC80->next_prim = D_801FAC80->prims;
-    D_801FAC80->unk_493E = 0xFFFF;
-    D_801FAC80->unk_493C = 0xFFFF;
+    D_801FAC80->tpage = 0xFFFF;
+    D_801FAC80->last_tpage = 0xFFFF;
     func_80018D38();
     func_80063744();
     if (D_801E28EC != 0) {
@@ -4413,15 +4413,15 @@ void main_draw_objects(GameObject *head, GameObject *end) {
             func_8001A554(obj->anim_frame, obj);
         }
         tpage = page = main_get_tpage(obj, obj->flags & 0x700);
-        if (D_801FAC80->unk_493E != page) {
-            if (D_801FAC80->unk_493C != D_801FAC80->unk_493E) {
+        if (D_801FAC80->tpage != page) {
+            if (D_801FAC80->last_tpage != D_801FAC80->tpage) {
                 tp = (DR_TPAGE *) D_801FAC80->next_prim;
                 D_801FAC80->next_prim += sizeof(DR_TPAGE);
-                SetDrawTPage(tp, 0, 0, D_801FAC80->unk_493E);
+                SetDrawTPage(tp, 0, 0, D_801FAC80->tpage);
                 AddPrim(D_801FAC80->ot, tp);
-                D_801FAC80->unk_493C = D_801FAC80->unk_493E;
+                D_801FAC80->last_tpage = D_801FAC80->tpage;
             }
-            D_801FAC80->unk_493E = page;
+            D_801FAC80->tpage = page;
         }
         mode = (obj->flags & 0x30) >> 4;
         if (mode == 0) {
@@ -4579,15 +4579,15 @@ quad_lit:
                                                : D_801C51D4[D_800AFB54[obj->bank] + obj->frame->unk_0C];
         AddPrim(D_801FAC80->ot, ft4);
     }
-    if (D_801FAC80->unk_493C != D_801FAC80->unk_493E) {
+    if (D_801FAC80->last_tpage != D_801FAC80->tpage) {
         tp = (DR_TPAGE *) D_801FAC80->next_prim;
         if ((u8 *) (tp + 1) >= (u8 *) &D_801FAC80->next_prim) {
             func_8001B5E8(0x14);
         }
         D_801FAC80->next_prim += sizeof(DR_TPAGE);
-        SetDrawTPage(tp, 0, 0, D_801FAC80->unk_493E);
+        SetDrawTPage(tp, 0, 0, D_801FAC80->tpage);
         AddPrim(D_801FAC80->ot, tp);
-        D_801FAC80->unk_493C = D_801FAC80->unk_493E = page = 0xFFFF;
+        D_801FAC80->last_tpage = D_801FAC80->tpage = page = 0xFFFF;
     }
 }
 

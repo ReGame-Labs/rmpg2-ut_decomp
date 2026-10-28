@@ -704,8 +704,9 @@ typedef struct DrawState {
     /* 0x148 */ unsigned long ot[4];        /* cleared reversed, drawn from ot[3] */
     /* 0x158 */ u8 prims[0x47E0];           /* the frame's primitives */
     /* 0x4938 */ u8 *next_prim;
-    /* 0x493C */ u16 unk_493C;
-    /* 0x493E */ u16 unk_493E;
+    /* 0x493C */ u16 last_tpage;            /* the texture page the last DR_TPAGE set, 0xFFFF none */
+    /* 0x493E */ u16 tpage;                 /* the page of the sprites added since: the list is drawn in reverse, so
+                                             * the DR_TPAGE added after them sets it (main_draw_objects) */
 } DrawState;                                /* two at D_801CA474, the frames' double buffer */
 
 extern DrawState *D_801FAC80;
