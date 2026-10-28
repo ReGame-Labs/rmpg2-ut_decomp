@@ -34,7 +34,7 @@ void func_80059270(Monster *);
 void func_80059294(Monster *);
 void func_800595E4(Monster *);
 void func_800531C0(Monster *);
-s16 func_8001EB10(s32, s32);
+s16 main_random_between(s32, s32);
 void func_8002D370(Monster *, BuildingItem *, Building *);
 void func_8002DBF4(u16, s32, Monster *, BuildingItem *);
 BuildingPart *func_8002ED30(u16, BuildingItem *);
@@ -1201,13 +1201,13 @@ void func_80059710(Monster *e, s16 want, s16 max) {
         u = D_801D3DC8;
         if ((s16)D_801E29A4 >= 2) {
             do {
-                idx = func_8001EB10((s16)D_801E29A4, 0) - 1;
+                idx = main_random_between((s16)D_801E29A4, 0) - 1;
             } while (idx == last);
             u = &D_801D3DC8[idx];
         }
         if (u->unk_058 == 0 && func_8004F7A4(u) == 1) {
             if (u->state < 4) {
-                item = &u->items[func_8001EB10(u->unk_000 - 2, 0)];
+                item = &u->items[main_random_between(u->unk_000 - 2, 0)];
                 part = building_pick_part(u);
                 if (func_8002ED30(part, item)->unk_06 < 5) {
                     func_8002DBF4(part, 6, e, item);
@@ -2131,7 +2131,7 @@ void func_8005BB04(Monster *e, s16 want, s16 max, Building *u) {
         if (u->unk_058 != 1) {
             e->unk_188++;
             if (u->state < 4) {
-                func_8002D370(e, &u->items[func_8001EB10(u->unk_000 - 2, 0)], u);
+                func_8002D370(e, &u->items[main_random_between(u->unk_000 - 2, 0)], u);
             }
         }
         i++;

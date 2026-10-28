@@ -9,7 +9,7 @@
 /* The current object as a scalar: the same word as D_800AA248.cur_obj, which some functions read on its own
  * (func_8004C738). */
 
-s32 func_8001EB10(s32 range, s32 arg1);                     /* a random number */
+s32 main_random_between(s32 range, s32 arg1);                     /* a random number */
 void func_8001E4B0(GameObject *obj);                        /* free an object */
 void func_8001F724(u16);
 void func_8001F7CC(s32 sound, s32 variant);
@@ -967,7 +967,7 @@ void func_8004D860(void) {
         m->action = 0x15;
         break;
     }
-    func_8001EB10(3, 0);
+    main_random_between(3, 0);
 }
 
 void func_8004D948(void) {
@@ -1063,7 +1063,7 @@ void func_8004DC08(Monster *m, Monster *other) {
 void func_8004DC7C(Monster *m, Monster *other) {
     s16 action;
 
-    if (func_8001EB10(0xF, 0) & 1) {
+    if (main_random_between(0xF, 0) & 1) {
         action = 0x39;
     } else {
         action = 0x1C;

@@ -549,7 +549,7 @@ void func_800305C8(s32 *, s16, GameObject *, Building *);
 void func_8002DE08();   /* a K&R definition: (u16 which, s16 n, Monster *, BuildingItem *) */
 void *func_8002DAAC(u16, u16, BuildingItem *);
 void func_80030754(BuildingPart *, s16, Monster *, BuildingItem *);
-s32 func_8001EB10(s32, s32);
+s32 main_random_between(s32, s32);
 void func_8002CA8C(void);
 extern s32 D_80011E10[];
 extern s32 D_80011E90[];
@@ -646,7 +646,7 @@ typedef struct Unk801FB190 {
 } Unk801FB190;
 extern Unk801FB190 D_801FB190;
 extern GameObject *D_801FB194;
-u32 func_8001EAC4(s32);   /* a random number 1..range */
+u32 main_random_range(s32);   /* a random number 1..range */
 void func_8002F100(Building *);
 extern s16 D_801F9ACE;   /* the camera y's integer half (D_801F9ACC) */
 extern u8 D_80097E64[];
