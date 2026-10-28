@@ -144,7 +144,7 @@ extern u16 D_801D370C;
 extern u16 D_801FA730;                  /* the calls main_run_calls ran this frame */
 extern s32 D_801F9A2C;
 s32 func_8001E59C(GameObject *sprite, s32 image);
-extern s32 D_800AA2A8;                  /* D_800AA248.unk_60 by its own name */
+extern s32 D_800AA2A8;                  /* D_800AA248.def_flags by its own name */
 
 /* The Npc chain's speeds (main_approach_x, main_approach_xy): (vel_x, vel_y) pairs by direction, its bits 1 and 2 for x,
  * 4 and 8 for y. */

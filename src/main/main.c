@@ -69,7 +69,6 @@ extern s16 D_801D8854;
 extern s16 D_801E0D64;
 extern s32 D_801E0D6C;
 extern GameObject *D_801E1C7C;
-extern s16 D_801E1CA4;
 extern s16 D_801E1CAC;
 extern u16 D_801E1CB0;
 extern s16 D_801E1E18;
@@ -531,7 +530,7 @@ restart:
                 goto restart;
             }
             func_8001B7F4();
-            if (D_801D3D64.unk_62 == 0) {
+            if (D_801D3D64.pause_state == 0) {
                 func_8001B858();
             }
         }
@@ -614,7 +613,7 @@ void func_80017B90(void) {
 }
 
 void func_80017B98(void) {
-    if (D_801D3D64.unk_62 == 0) {
+    if (D_801D3D64.pause_state == 0) {
         D_801D3D64.unk_1C += 1;
         D_800AA2E8 += 1;
         D_801FA72C += 1;
@@ -702,7 +701,7 @@ void main_create_pause_box(s16 x, s16 y, GameObject *link, s32 script) {
         D_800AA248.cur_obj = obj;
         obj->unk_40.obj = link;
         D_800AA248.cur_obj->script.pc = script;
-        D_800AA248.cur_obj->colour = 0;
+        D_800AA248.cur_obj->colour.w = 0;
         D_800AA248.cur_obj->flags |= 0x40C;
         D_8007A698 = 1;
         D_800AA248.cur_obj->unk_6C |= 0x20;
@@ -751,7 +750,7 @@ void func_800180E4(void) {
     if (sprite != head) {
         do {
             if (sprite->kind == 0x550) {
-                sprite->colour = 0x808080;
+                sprite->colour.w = 0x808080;
             }
             sprite = sprite->next;
         } while (sprite != head);
@@ -789,7 +788,7 @@ typedef struct {
     /* 0x00 */ u32 pause;     /* START */
     /* 0x04 */ u32 confirm;
     /* 0x08 */ u32 move;      /* up and down */
-    /* 0x0C */ u16 owner;     /* player << 12, as D_801D3D64.unk_62 holds the pausing player */
+    /* 0x0C */ u16 owner;     /* player << 12, as D_801D3D64.pause_state holds the pausing player */
     /* 0x0E */ u16 pad_0E;
 } MainPauseKeys;
 
@@ -821,7 +820,7 @@ void func_800636B0(void);
  * is shared with the replugged pad's path through the label, as the original's code is. */
 u16 main_update_pause(void) {
     s16 who;    /* the player whose pad was unplugged (0xFF: no pad at all), then each monster's player */
-    u16 flags;  /* D_801D3D64.unk_62: bits 0-1 the menu state, 8-11 the unplugged pad's player, 12-13 the pausing player */
+    u16 flags;  /* D_801D3D64.pause_state: bits 0-1 the menu state, 8-11 the unplugged pad's player, 12-13 the pausing player */
     s16 player;
     s16 i;      /* also the pausing player in the menu states */
     OverattrPlayer *p;
@@ -830,10 +829,10 @@ u16 main_update_pause(void) {
         main_pause_delay--;
     }
     who = main_find_unplugged_pad();
-    if ((who != 0 && (D_801D36FC == 0x150 || D_801D36FC == 0x240 || D_801D36FC == 0x220)) || (D_801D3D64.unk_62 & 0xF00)) {
-        if (!(D_801D3D64.unk_62 & 0xF00)) {
+    if ((who != 0 && (D_801D36FC == 0x150 || D_801D36FC == 0x240 || D_801D36FC == 0x220)) || (D_801D3D64.pause_state & 0xF00)) {
+        if (!(D_801D3D64.pause_state & 0xF00)) {
             main_cycle_highlight();
-            if (D_801D3D64.unk_62 & 3) {
+            if (D_801D3D64.pause_state & 3) {
                 main_free_kind(0x300);
                 main_free_kind(0x301);
                 main_free_kind(0x302);
@@ -858,15 +857,15 @@ u16 main_update_pause(void) {
                 func_8001ED54(&D_80089534);
                 func_8001ED54(&D_80089560);
             }
-            D_801D3D64.unk_62 |= who << 8;
+            D_801D3D64.pause_state |= who << 8;
         } else {
-            player = (D_801D3D64.unk_62 & 0xF00) >> 8;
+            player = (D_801D3D64.pause_state & 0xF00) >> 8;
             if (D_801FA898[player - 1] == D_801E1C90[player - 1]) {
                 main_free_kind(0x300);
                 main_free_kind(0x550);
-                D_801D3D64.unk_62 &= 0xF0FF;
+                D_801D3D64.pause_state &= 0xF0FF;
                 main_cycle_highlight();
-                switch (D_801D3D64.unk_62 & 3) {
+                switch (D_801D3D64.pause_state & 3) {
                 case 2:
                     D_800AA2EC = 0x44;
                     func_8001ED54(&D_80089374);
@@ -893,7 +892,7 @@ u16 main_update_pause(void) {
         }
         return 0;
     }
-    flags = D_801D3D64.unk_62;
+    flags = D_801D3D64.pause_state;
     switch (flags & 3) {
     case 0:
         if (D_801E28E0 != 0) {
@@ -925,7 +924,7 @@ u16 main_update_pause(void) {
         }
         break;
     case 1:
-        D_801D3D64.unk_62 = (flags & 0xFFFC) | 2;
+        D_801D3D64.pause_state = (flags & 0xFFFC) | 2;
         main_cycle_highlight();
         D_800AA2EC = D_801E2A44;
         func_8001ED54(&D_800893BC);
@@ -942,7 +941,7 @@ u16 main_update_pause(void) {
             func_8001F724(3);
             func_8001802C(i);
             if (main_pause_cursor == 0) {
-                D_801D3D64.unk_62 = 0;
+                D_801D3D64.pause_state = 0;
                 main_free_kind(0x301);
                 main_free_kind(0x550);
                 func_8001F704();
@@ -954,7 +953,7 @@ u16 main_update_pause(void) {
                 func_80060A7C(0x7B4, 0x808080, 4);
             } else {
                 main_pause_cursor = 1;
-                D_801D3D64.unk_62 |= 3;
+                D_801D3D64.pause_state |= 3;
                 main_free_kind(0x301);
                 D_800AA2EC = 0x44;
                 func_8001ED54(&D_80089398);
@@ -993,7 +992,7 @@ u16 main_update_pause(void) {
             func_8001F724(3);
             func_8001802C(i);
             if (main_pause_cursor == 1) {
-                D_801D3D64.unk_62 = 0;
+                D_801D3D64.pause_state = 0;
                 main_free_kind(0x301);
                 main_free_kind(0x550);
                 func_8001F704();
@@ -1003,7 +1002,7 @@ u16 main_update_pause(void) {
                 func_80060A7C(0x402, 0x808080, 4);
                 func_80060A7C(0x7B4, 0x808080, 4);
             } else {
-                D_801D3D64.unk_62 = 0;
+                D_801D3D64.pause_state = 0;
                 func_8001F6B4();
                 D_801FA984[0] = 0;
                 D_801FA984[1] = 0;
@@ -1262,13 +1261,12 @@ u16 *func_800192A0(void) {
 }
 
 #ifdef NON_MATCHING
-/* 96.21%: 96.21 % (96.93 % with POLY_G4 sky[2] at DrawState 0x70, which makes everything up to the tile loop match:
- * the casts here send the sky quads' x stores through the quads' addresses). The tiles' stores are written in the
- * original's order (setlen and setcode through the P_TAG cast, the rest as direct fields, which gives the
- * original's two bases). What remains is loop.c: the original hoists the constants 5 and 40 out of the inner loop
- * (life 1 each) and loads D_801CA474 and D_801CA474+0xB8 separately; here they are not desirable (threshold 27
- * after the jump table, the base and the 7-insn i*0x4940 chain, against 53 insns), and cse derives one base from
- * the other. The start-up: callbacks, CD, pads, the two frame buffers, VRAM cleared, the font */
+/* 96.93%: everything up to the tile loop matches. The tiles' stores are written in the original's order (setlen and
+ * setcode through the P_TAG cast, the rest as direct fields, which gives the original's two bases). What remains is
+ * loop.c: the original hoists the constants 5 and 40 out of the inner loop (life 1 each) and loads D_801CA474 and
+ * D_801CA474+0xB8 separately; here they are not desirable (threshold 27 after the jump table, the base and the 7-insn
+ * i*0x4940 chain, against 53 insns), and cse derives one base from the other. The start-up: callbacks, CD, pads, the
+ * two frame buffers, VRAM cleared, the font */
 void main_init_system(void) {
     RECT rect;
     s32 colour;
@@ -1303,16 +1301,16 @@ void main_init_system(void) {
     setRGB0(&D_801CA474[0].draw, 0, 0, 0);
     setRGB0(&D_801CA474[1].draw, 0, 0, 0);
     for (i = 0; i < 2; i++) {
-        SetPolyG4((POLY_G4 *) &D_801CA474[i].unk_70);
-        SetPolyG4((POLY_G4 *) &D_801CA474[i].unk_94);
-        ((POLY_G4 *) &D_801CA474[i].unk_70)->x0 = 0;
-        ((POLY_G4 *) &D_801CA474[i].unk_70)->x1 = 0x190;
-        ((POLY_G4 *) &D_801CA474[i].unk_70)->x2 = 0;
-        ((POLY_G4 *) &D_801CA474[i].unk_70)->x3 = 0x190;
-        ((POLY_G4 *) &D_801CA474[i].unk_94)->x0 = 0;
-        ((POLY_G4 *) &D_801CA474[i].unk_94)->x1 = 0x190;
-        ((POLY_G4 *) &D_801CA474[i].unk_94)->x2 = 0;
-        ((POLY_G4 *) &D_801CA474[i].unk_94)->x3 = 0x190;
+        SetPolyG4(&D_801CA474[i].sky[0]);
+        SetPolyG4(&D_801CA474[i].sky[1]);
+        D_801CA474[i].sky[0].x0 = 0;
+        D_801CA474[i].sky[0].x1 = 0x190;
+        D_801CA474[i].sky[0].x2 = 0;
+        D_801CA474[i].sky[0].x3 = 0x190;
+        D_801CA474[i].sky[1].x0 = 0;
+        D_801CA474[i].sky[1].x1 = 0x190;
+        D_801CA474[i].sky[1].x2 = 0;
+        D_801CA474[i].sky[1].x3 = 0x190;
     }
     for (i = 0; i < 2; i++) {
         for (j = 0; j < 6; j++) {
@@ -1336,14 +1334,14 @@ void main_init_system(void) {
                 colour = 0xFF00FF;
                 break;
             }
-            SetPolyF4(&D_801CA474[i].unk_B8[j]);
-            D_801CA474[i].unk_B8[j].x1 = 0x190;
-            D_801CA474[i].unk_B8[j].x3 = 0x190;
-            D_801CA474[i].unk_B8[j].r0 = colour >> 16;
-            D_801CA474[i].unk_B8[j].g0 = colour >> 8;
-            D_801CA474[i].unk_B8[j].x0 = 0;
-            D_801CA474[i].unk_B8[j].x2 = 0;
-            D_801CA474[i].unk_B8[j].b0 = colour;
+            SetPolyF4(&D_801CA474[i].tiles[j]);
+            D_801CA474[i].tiles[j].x1 = 0x190;
+            D_801CA474[i].tiles[j].x3 = 0x190;
+            D_801CA474[i].tiles[j].r0 = colour >> 16;
+            D_801CA474[i].tiles[j].g0 = colour >> 8;
+            D_801CA474[i].tiles[j].x0 = 0;
+            D_801CA474[i].tiles[j].x2 = 0;
+            D_801CA474[i].tiles[j].b0 = colour;
         }
     }
     D_801FAC80 = D_801FAC80 == &D_801CA474[0] ? &D_801CA474[1] : &D_801CA474[0];
@@ -1377,8 +1375,8 @@ void main_begin_frame(void) {
     D_801FAC80 = (D_801FAC80 == &D_801CA474[0]) ? &D_801CA474[1] : &D_801CA474[0];
     ClearOTagR(D_801FAC80->ot, 4);
     D_801FAC80->next_prim = D_801FAC80->prims;
-    D_801FAC80->unk_493E = 0xFFFF;
-    D_801FAC80->unk_493C = 0xFFFF;
+    D_801FAC80->tpage = 0xFFFF;
+    D_801FAC80->last_tpage = 0xFFFF;
     func_80018D38();
     func_80063744();
     if (D_801E28EC != 0) {
@@ -1762,17 +1760,17 @@ SpriteFrame *func_8001A554(s32 id, GameObject *obj) {
     u16 flags;
     Unk1F9AE4 *e;
 
-    if ((obj->unk_6C & 0x400) && obj->unk_3C != id) {
+    if ((obj->unk_6C & 0x400) && obj->last_frame != id) {
         obj->unk_6C &= 0xFBFF;
-        func_8001B350(obj->unk_6E);
+        func_8001B350(obj->vram_slot);
     }
     if (id < 0) {
         frame = (SpriteFrame *) id;
         obj->unk_6C |= 8;
-        obj->unk_24 = frame->unk_00;
+        obj->tex.w = frame->unk_00;
     } else {
         index = (u32) (id & 0xFFFFFF) >> 1;
-        obj->unk_72 = b = ((u32) id >> 24) & 0x3F;
+        obj->bank = b = ((u32) id >> 24) & 0x3F;
         obj->anim_frame = id;
         if (index >= 0x2135) {
             index = 0;
@@ -1782,29 +1780,29 @@ SpriteFrame *func_8001A554(s32 id, GameObject *obj) {
         if ((D_801D8868[index] & 0x7FFFFFFF) == 0) {
             id = D_8007AD4C[(main_random_between(0x8000, 0xE) & 0x1F) + 10];
             frame = (SpriteFrame *) func_8001B128(id);
-            obj->unk_24 = frame->unk_00;
+            obj->tex.w = frame->unk_00;
         }
         if (frame->unk_00 & 0x40000000) {
             obj->unk_6C |= 8;
-            obj->unk_24 = frame->unk_00;
-        } else if (obj->unk_3C != id || !(obj->unk_6C & 0x400)) {
+            obj->tex.w = frame->unk_00;
+        } else if (obj->last_frame != id || !(obj->unk_6C & 0x400)) {
             flags = obj->unk_6C;
             obj->unk_6C = flags & 0xFFF7;
             if (!(flags & 0x80)) {
                 obj->unk_6C = (flags & 0xFFF7) | 0x400;
                 if (frame->unk_00 & 0x20000000) {
-                    obj->unk_6E = main_alloc_vram_slot(frame, D_801FA738[b].unk_0, 1);
-                    e = &D_801F9AE4[obj->unk_6E];
-                    obj->unk_24 = e->unk_0.w | 0x20000000;
+                    obj->vram_slot = main_alloc_vram_slot(frame, D_801FA738[b].unk_0, 1);
+                    e = &D_801F9AE4[obj->vram_slot];
+                    obj->tex.w = e->unk_0.w | 0x20000000;
                 } else {
-                    obj->unk_6E = main_alloc_vram_slot(frame, D_801FA738[b].unk_0, 0);
-                    e = &D_801F9AE4[obj->unk_6E];
-                    obj->unk_24 = e->unk_0.w;
+                    obj->vram_slot = main_alloc_vram_slot(frame, D_801FA738[b].unk_0, 0);
+                    e = &D_801F9AE4[obj->vram_slot];
+                    obj->tex.w = e->unk_0.w;
                 }
             }
         }
     }
-    obj->unk_3C = id;
+    obj->last_frame = id;
     return frame;
 }
 
@@ -2014,9 +2012,9 @@ u16 main_get_tpage(GameObject *obj, u16 mode) {
     s32 n;
 
     n = 0;
-    word = obj->unk_24;
+    word = obj->tex.w;
     if (obj->unk_6C & 0x400) {
-        rec = &D_801F9AE4[obj->unk_6E];
+        rec = &D_801F9AE4[obj->vram_slot];
         if (mode & 0x400) {
             return rec->unk_0.u.hi | ((mode & 0x300) >> 3);
         }
@@ -2047,7 +2045,7 @@ void func_8001B054(GameObject *arg0) {
     arg0->unk_6C = temp_v1;
     if (temp_v1 & 0x400) {
         arg0->unk_6C = (u16) (temp_v1 & 0xFBFF);
-        func_8001B350(arg0->unk_6E, arg0);
+        func_8001B350(arg0->vram_slot, arg0);
     }
 }
 
@@ -2632,9 +2630,9 @@ void main_init_level(void) {
     D_801FA9B8 = 1;
     D_801D3758 = 0;
     D_8007A698 = 0;
-    D_801D3D64.unk_26 = 0;
+    D_801D3D64.scroll_vx = 0;
     D_801D3D64.unk_2C = 0;
-    D_801D3D64.unk_28 = 0;
+    D_801D3D64.scroll_state = 0;
     D_801D3D64.unk_24 = 0;
     D_801F9ACC.w = 0;
     D_801F9AC8.w = 0;
@@ -3382,10 +3380,10 @@ GameObject *func_8001DCB4(void) {
     } else {
         obj->flags |= D_800AA248.unk_74;
     }
-    D_800AA248.unk_60 = *(s32 *) p;
+    D_800AA248.def_flags = *(s32 *) p;
     p += 2;
     D_800AA248.unk_38 = 0x7FF;
-    if (D_800AA248.unk_60 & 0x40) {
+    if (D_800AA248.def_flags & 0x40) {
         D_800AA248.unk_74 = *(s32 *) p;
         p += 2;
         if (D_800AA248.unk_74 != 0) {
@@ -3393,7 +3391,7 @@ GameObject *func_8001DCB4(void) {
         }
     }
     obj->kind = D_800AA248.unk_38;
-    if (D_800AA248.unk_60 & 0x20) {
+    if (D_800AA248.def_flags & 0x20) {
         D_800AA248.unk_54 = *(s32 *) p;
         p += 2;
         D_800AA248.unk_50 = *(s32 *) p;
@@ -3412,7 +3410,7 @@ GameObject *func_8001DCB4(void) {
     }
     D_800AA248.unk_38 = 0;
     D_800AA248.unk_74 = 0;
-    if (D_800AA248.unk_60 & 1) {
+    if (D_800AA248.def_flags & 1) {
         D_800AA248.unk_74 = *(s32 *) p;
         p += 2;
         if (D_800AA248.unk_74 != 0) {
@@ -3421,30 +3419,30 @@ GameObject *func_8001DCB4(void) {
     }
     obj->unk_82 = D_800AA248.unk_38;
     D_800AA248.unk_38 = 0;
-    if (D_800AA248.unk_60 & 2) {
+    if (D_800AA248.def_flags & 2) {
         D_800AA248.unk_38 = *(s32 *) p;
         p += 2;
     }
     obj->priority = D_800AA248.unk_38;
-    if (D_800AA248.unk_60 & 4) {
+    if (D_800AA248.def_flags & 4) {
         D_800AA248.unk_74 = *(s32 *) p;
         p += 2;
         if (D_800AA248.unk_74 != 0) {
             func_80024964(D_800AA248.unk_74, obj);
         }
     }
-    if (D_800AA248.unk_60 & 8) {
+    if (D_800AA248.def_flags & 8) {
         D_800AA248.unk_74 = *(s32 *) p;
         p += 2;
         if (D_800AA248.unk_74 != 0) {
             func_8001E698(obj, D_800AA248.unk_74);
         }
     }
-    if (D_800AA248.unk_60 & 0x10) {
-        D_800AA248.unk_58 = *(void (**)(void)) p;
-        if (D_800AA248.unk_58 != NULL) {
+    if (D_800AA248.def_flags & 0x10) {
+        D_800AA248.on_create = *(void (**)(void)) p;
+        if (D_800AA248.on_create != NULL) {
             D_800AA248.unk_00 = (s32) obj;
-            D_800AA248.unk_58();
+            D_800AA248.on_create();
         }
     }
     if (D_800AA2A8 & 0x80) {
@@ -3662,7 +3660,7 @@ void func_8001E4B0(GameObject *sprite) {
 
 void func_8001E528(GameObject *arg0) {
     if (arg0->unk_6C & 0x400) {
-        func_8001B350(arg0->unk_6E);
+        func_8001B350(arg0->vram_slot);
     }
     D_801D3768 += 1;
     if (D_801D8764 != NULL) {
@@ -3684,7 +3682,7 @@ s32 func_8001E59C(GameObject *sprite, s32 image) {
         return 1;
     }
     sprite->unk_74 = 0xFFFF;
-    sprite->colour = -1;
+    sprite->colour.w = -1;
     sprite->frame = img;
     offset = img->size.w;
     sprite->flags = 0;
@@ -3905,7 +3903,7 @@ GameObject *main_create_box(s16 x, s16 y, s16 width, s16 height, u32 colour) {
     g->cur_obj = func_8001DCB4();
     g->cur_obj->unk_40.w = width;
     g->cur_obj->script.height = height;
-    g->cur_obj->colour = colour;
+    g->cur_obj->colour.w = colour;
     g->cur_obj->flags |= 0xC;
     g->cur_obj->unk_6C |= 0x20;
     return g->cur_obj;
@@ -4014,34 +4012,34 @@ void main_print_text(void) {
     func_8001F400();
     func_8001F4EC();
     func_8001F4F4();
-    if (D_801D8588.unk_10.s.hi != 0) {
-        D_801D8588.unk_32 = D_801D8588.unk_10.s.hi;
-        D_801D8588.unk_10.s.hi = 0;
+    if (D_801D8588.advance.s.hi != 0) {
+        D_801D8588.unk_32 = D_801D8588.advance.s.hi;
+        D_801D8588.advance.s.hi = 0;
     }
-    *(s32 *) &D_801D8588.unk_34 = *(s32 *) &D_801D8588.pen_x;
+    *(s32 *) &D_801D8588.line_start = *(s32 *) &D_801D8588.pen_x;
     func_8001F464();
     for (D_801D8588.unk_3A = *D_801D8588.text; D_801D8588.unk_3A != 0; D_801D8588.unk_3A = *D_801D8588.text) {
         D_801D8588.unk_38 = 0;
         D_801D8588.text++;
         if (D_801D8588.unk_3A > 0x20) {
-            saved10 = D_801D8588.unk_10.w;
+            saved10 = D_801D8588.advance.w;
             saved0 = D_801D8588.unk_00;
-            saved34 = *(s32 *) &D_801D8588.unk_34;
+            saved34 = *(s32 *) &D_801D8588.line_start;
             saved8 = D_801D8588.unk_08;
-            saved30 = *(s32 *) &D_801D8588.unk_30;
+            saved30 = *(s32 *) &D_801D8588.space_width;
             code = D_801D8588.glyphs[D_801D8588.unk_3A - 0x21];
             id = code;
             glyph = func_8001B128(code);
-            func_8001E638((Unk1E638 *) glyph, D_801D8588.unk_20, (Fixed *) &D_801D8588.unk_30, &off.w);
+            func_8001E638((Unk1E638 *) glyph, D_801D8588.unk_20, (Fixed *) &D_801D8588.space_width, &off.w);
             if (D_801D8588.flags & 0x10000) {
             if ((D_800AA248.cur_obj = func_8001E204()) != NULL) {
                 D_800AA248.cur_obj->frame = (SpriteFrame *) glyph;
                 D_800AA248.cur_obj->anim_frame = id;
                 D_800AA248.cur_obj->unk_2C.w = ((Unk1E638 *) glyph)->unk_4.w;
-                D_800AA248.cur_obj->unk_24 = glyph->unk_0;
+                D_800AA248.cur_obj->tex.w = glyph->unk_0;
                 D_800AA248.cur_obj->unk_74 = D_800AA2EC;
-                D_800AA248.cur_obj->colour = 0xFFFFFFFF;
-                D_800AA248.cur_obj->unk_72 = 0xF;
+                D_800AA248.cur_obj->colour.w = 0xFFFFFFFF;
+                D_800AA248.cur_obj->bank = 0xF;
                 D_800AA248.cur_obj->unk_28.s.lo = D_800AA248.cur_obj->pos_x.s.hi = D_801D8588.pen_x - D_801D8588.unk_32;
                 D_800AA248.cur_obj->unk_28.s.hi = D_800AA248.cur_obj->pos_y.s.hi = D_801D8588.pen_y - off.s.hi;
                 D_800AA248.cur_obj->unk_20 = D_801D8588.unk_20;
@@ -4060,11 +4058,11 @@ void main_print_text(void) {
             }
             if (D_801D8588.unk_38 != 0) {
                 D_801D8588.unk_00 = saved0;
-                *(s32 *) &D_801D8588.unk_34 = saved34;
+                *(s32 *) &D_801D8588.line_start = saved34;
                 D_801D8588.unk_08 = saved8;
-                *(s32 *) &D_801D8588.unk_30 = saved30;
-                D_801D8588.unk_10.w = saved10;
-                *(s32 *) &D_801D8588.pen_x = D_801D8588.unk_3C;
+                *(s32 *) &D_801D8588.space_width = saved30;
+                D_801D8588.advance.w = saved10;
+                *(s32 *) &D_801D8588.pen_x = D_801D8588.saved_pen;
                 continue;
             }
             width = glyph->unk_4;
@@ -4072,12 +4070,12 @@ void main_print_text(void) {
                 D_801D8588.pen_x += width;
             }
             D_801D8588.unk_00 = saved0;
-            D_801D8588.unk_10.w = saved10;
-            *(s32 *) &D_801D8588.unk_34 = saved34;
+            D_801D8588.advance.w = saved10;
+            *(s32 *) &D_801D8588.line_start = saved34;
             D_801D8588.unk_08 = saved8;
-            *(s32 *) &D_801D8588.unk_30 = saved30;
-            D_801D8588.pen_x += D_801D8588.unk_10.s.lo;
-            D_801D8588.pen_y += D_801D8588.unk_10.s.hi;
+            *(s32 *) &D_801D8588.space_width = saved30;
+            D_801D8588.pen_x += D_801D8588.advance.s.lo;
+            D_801D8588.pen_y += D_801D8588.advance.s.hi;
             } else {
                 func_8001B5E8(2);
                 continue;
@@ -4087,12 +4085,12 @@ void main_print_text(void) {
             continue;
         } else {
             D_801D8588.unk_3A = 0;
-            D_801D8588.unk_3C = *(s32 *) &D_801D8588.pen_x;
+            D_801D8588.saved_pen = *(s32 *) &D_801D8588.pen_x;
             if (!(D_801D8588.flags & 0x2000)) {
-                D_801D8588.pen_x += D_801D8588.unk_30;
+                D_801D8588.pen_x += D_801D8588.space_width;
             }
-            D_801D8588.pen_x += D_801D8588.unk_10.s.lo;
-            D_801D8588.pen_y += D_801D8588.unk_10.s.hi;
+            D_801D8588.pen_x += D_801D8588.advance.s.lo;
+            D_801D8588.pen_y += D_801D8588.advance.s.hi;
         }
     }
 }
@@ -4107,7 +4105,7 @@ void func_8001F270(void) {
     u16 y;
 
     y = D_801D8588.unk_36 + D_801D8588.unk_32;
-    D_801D8588.pen_x = D_801D8588.unk_34;
+    D_801D8588.pen_x = D_801D8588.line_start;
     D_801D8588.pen_y = y;
     D_801D8588.unk_36 = y;
     func_8001F464();
@@ -4143,7 +4141,7 @@ void func_8001F39C(TextMessage *msg) {
     D_801D8588.unk_08 = msg->unk_0C;
     D_801D8588.pen_x = msg->x;
     D_801D8588.pen_y = msg->y;
-    D_801D8588.unk_10.w = msg->spacing;
+    D_801D8588.advance.w = msg->spacing;
     D_801D8588.glyphs = msg->glyphs;
     D_801D8588.unk_18 = msg->kind;
     D_801D8588.text = msg->text;
@@ -4153,7 +4151,7 @@ void func_8001F400(void) {
     Glyph *glyph;
 
     glyph = func_8001B128(D_801D8588.glyphs[0x27]);
-    D_801D8588.unk_30 = glyph->unk_4 >> 1;
+    D_801D8588.space_width = glyph->unk_4 >> 1;
     D_801D8588.unk_32 = glyph->unk_6 + (glyph->unk_6 >> 1);
 }
 
@@ -4192,28 +4190,28 @@ s32 func_8001F50C(u8 *text) {
     u8 c;
 
     saved0 = D_801D8588.unk_00;
-    saved30 = *(s32 *) &D_801D8588.unk_30;
-    saved10 = D_801D8588.unk_10.w;
+    saved30 = *(s32 *) &D_801D8588.space_width;
+    saved10 = D_801D8588.advance.w;
     p = text;
     func_8001F400();
     c = *p;
     width = 0;
     while (c != 0 && c != 13 && c != 10) {
         if (D_801D8588.flags & 0x2000) {
-            width += D_801D8588.unk_10.s.lo;
+            width += D_801D8588.advance.s.lo;
         } else {
             if (c == 0x20) {
-                width += D_801D8588.unk_30 + D_801D8588.unk_10.s.lo;
+                width += D_801D8588.space_width + D_801D8588.advance.s.lo;
             } else {
-                width += func_8001B128(D_801D8588.glyphs[*p - 0x21])->unk_4 + D_801D8588.unk_10.s.lo;
+                width += func_8001B128(D_801D8588.glyphs[*p - 0x21])->unk_4 + D_801D8588.advance.s.lo;
             }
         }
         p++;
         c = *p;
     }
     D_801D8588.unk_00 = saved0;
-    *(s32 *) &D_801D8588.unk_30 = saved30;
-    D_801D8588.unk_10.w = saved10;
+    *(s32 *) &D_801D8588.space_width = saved30;
+    D_801D8588.advance.w = saved10;
     return width;
 }
 
@@ -4230,7 +4228,7 @@ void func_8001F61C(u8 *text, s16 x, s16 y, s32 spacing, s32 arg4, s32 *glyphs, s
     D_801D8588.unk_08 = arg4;
     D_801D8588.pen_x = x;
     D_801D8588.pen_y = y;
-    D_801D8588.unk_10.w = spacing;
+    D_801D8588.advance.w = spacing;
     D_801D8588.glyphs = glyphs;
     D_801D8588.unk_18 = arg7;
     D_801D8588.text = text;
@@ -4297,16 +4295,16 @@ void main_draw_lists(void) {
     if (D_801D36FC == 0x150 || (D_801D36FC == 0x160 && D_801FA960 != 0x7C)
         || (D_801D36FC == 0x120 && D_801F9AE0 == 2)) {
         if (D_801F9A38 != 0) {
-            D_801FAC80->unk_7A = -(D_801F9ACC.w >> 16);
-            D_801FAC80->unk_82 = -(D_801F9ACC.w >> 16);
-            D_801FAC80->unk_8A = bottom - (D_801F9ACC.w >> 16);
-            D_801FAC80->unk_92 = bottom - (D_801F9ACC.w >> 16);
-            D_801FAC80->unk_9E = -0xA0 - (D_801F9ACC.w >> 16);
-            D_801FAC80->unk_A6 = -0xA0 - (D_801F9ACC.w >> 16);
-            D_801FAC80->unk_AE = -(D_801F9ACC.w >> 16);
-            D_801FAC80->unk_B6 = -(D_801F9ACC.w >> 16);
-            AddPrim(D_801FAC80->ot, D_801FAC80->unk_70);
-            AddPrim(D_801FAC80->ot, &D_801FAC80->unk_94);
+            D_801FAC80->sky[0].y0 = -(D_801F9ACC.w >> 16);
+            D_801FAC80->sky[0].y1 = -(D_801F9ACC.w >> 16);
+            D_801FAC80->sky[0].y2 = bottom - (D_801F9ACC.w >> 16);
+            D_801FAC80->sky[0].y3 = bottom - (D_801F9ACC.w >> 16);
+            D_801FAC80->sky[1].y0 = -0xA0 - (D_801F9ACC.w >> 16);
+            D_801FAC80->sky[1].y1 = -0xA0 - (D_801F9ACC.w >> 16);
+            D_801FAC80->sky[1].y2 = -(D_801F9ACC.w >> 16);
+            D_801FAC80->sky[1].y3 = -(D_801F9ACC.w >> 16);
+            AddPrim(D_801FAC80->ot, D_801FAC80->sky);
+            AddPrim(D_801FAC80->ot, &D_801FAC80->sky[1]);
         }
     }
 }
@@ -4319,9 +4317,8 @@ extern u32 D_801FB41C;  /* the lit sprites' colour (building.c) */
 
 /* Draws the object list: boxes (POLY_F4; a line of width 3 for 0x1000, a free quad for 0x2000), sprites (SPRT) and
  * flipped sprites (POLY_FT4), with a DR_TPAGE whenever the texture page changes. The colour block's gotos give the
- * original's block order (the unlit case last, falling into the test). The colour and unk_24 bytes are read through
- * casts (lbu). The final reset of page is never read again: it is the original's (it keeps page and tpage in two
- * registers) */
+ * original's block order (the unlit case last, falling into the test). The final reset of page is never read again:
+ * it is the original's (it keeps page and tpage in two registers) */
 void main_draw_objects(GameObject *head, GameObject *end) {
     GameObject *obj;
     POLY_F4 *box;
@@ -4397,9 +4394,9 @@ void main_draw_objects(GameObject *head, GameObject *end) {
                 box->y3 = obj->pos_y.u.hi + obj->script.height;
             }
             /* the colour's bytes: 0x78 blue, 0x79 green, 0x7A red */
-            cr = ((u8 *) &obj->colour)[2];
-            cg = ((u8 *) &obj->colour)[1];
-            cb = ((u8 *) &obj->colour)[0];
+            cr = obj->colour.rgb.r;
+            cg = obj->colour.rgb.g;
+            cb = obj->colour.rgb.b;
             box->r0 = cr;
             box->g0 = cg;
             box->b0 = cb;
@@ -4415,15 +4412,15 @@ void main_draw_objects(GameObject *head, GameObject *end) {
             func_8001A554(obj->anim_frame, obj);
         }
         tpage = page = main_get_tpage(obj, obj->flags & 0x700);
-        if (D_801FAC80->unk_493E != page) {
-            if (D_801FAC80->unk_493C != D_801FAC80->unk_493E) {
+        if (D_801FAC80->tpage != page) {
+            if (D_801FAC80->last_tpage != D_801FAC80->tpage) {
                 tp = (DR_TPAGE *) D_801FAC80->next_prim;
                 D_801FAC80->next_prim += sizeof(DR_TPAGE);
-                SetDrawTPage(tp, 0, 0, D_801FAC80->unk_493E);
+                SetDrawTPage(tp, 0, 0, D_801FAC80->tpage);
                 AddPrim(D_801FAC80->ot, tp);
-                D_801FAC80->unk_493C = D_801FAC80->unk_493E;
+                D_801FAC80->last_tpage = D_801FAC80->tpage;
             }
-            D_801FAC80->unk_493E = page;
+            D_801FAC80->tpage = page;
         }
         mode = (obj->flags & 0x30) >> 4;
         if (mode == 0) {
@@ -4435,10 +4432,9 @@ void main_draw_objects(GameObject *head, GameObject *end) {
             sprt->y0 = obj->unk_28.u.hi - 8;
             sprt->w = obj->size.u.lo;
             sprt->h = obj->size.u.hi;
-            /* unk_24's bytes: the frame's texture v at 0x24, u at 0x25 */
-            sprt->u0 = ((u8 *) &obj->unk_24)[1];
-            sprt->v0 = ((u8 *) &obj->unk_24)[0];
-            if (obj->colour == 0xFFFFFFFF) {
+            sprt->u0 = obj->tex.uv.u;
+            sprt->v0 = obj->tex.uv.v;
+            if (obj->colour.w == 0xFFFFFFFF) {
                 if (obj->kind >= 0x500 && obj->kind < 0x780) {
                     rgb[0] = (D_801FB41C >> 16) & 0xFF;
                     rgb[1] = (D_801FB41C >> 8) & 0xFF;
@@ -4447,10 +4443,10 @@ void main_draw_objects(GameObject *head, GameObject *end) {
                     goto sprt_lit;
                 }
             } else {
-                rgb[0] = (obj->colour >> 16) & 0xFF;
-                rgb[1] = (obj->colour >> 8) & 0xFF;
+                rgb[0] = (obj->colour.w >> 16) & 0xFF;
+                rgb[1] = (obj->colour.w >> 8) & 0xFF;
                 lit = 1;
-                rgb[2] = obj->colour & 0xFF;
+                rgb[2] = obj->colour.w & 0xFF;
                 goto sprt_lit;
             }
             lit = 0;
@@ -4468,8 +4464,8 @@ sprt_lit:
             } else {
                 sprt->code &= ~2;
             }
-            sprt->clut = (obj->unk_74 != 0xFFFF) ? D_801C51D4[D_800AFB54[obj->unk_72] + obj->unk_74]
-                                                   : D_801C51D4[D_800AFB54[obj->unk_72] + obj->frame->unk_0C];
+            sprt->clut = (obj->unk_74 != 0xFFFF) ? D_801C51D4[D_800AFB54[obj->bank] + obj->unk_74]
+                                                   : D_801C51D4[D_800AFB54[obj->bank] + obj->frame->unk_0C];
             AddPrim(D_801FAC80->ot, sprt);
             continue;
         }
@@ -4513,7 +4509,7 @@ sprt_lit:
             func_8001B5E8(0xA);
             break;
         }
-        if (obj->colour == 0xFFFFFFFF) {
+        if (obj->colour.w == 0xFFFFFFFF) {
             if (obj->kind >= 0x500 && obj->kind < 0x780) {
                 rgb[0] = (D_801FB41C >> 16) & 0xFF;
                 rgb[1] = (D_801FB41C >> 8) & 0xFF;
@@ -4522,10 +4518,10 @@ sprt_lit:
                 goto quad_lit;
             }
         } else {
-            rgb[0] = (obj->colour >> 16) & 0xFF;
-            rgb[1] = (obj->colour >> 8) & 0xFF;
+            rgb[0] = (obj->colour.w >> 16) & 0xFF;
+            rgb[1] = (obj->colour.w >> 8) & 0xFF;
             lit = 1;
-            rgb[2] = obj->colour & 0xFF;
+            rgb[2] = obj->colour.w & 0xFF;
             goto quad_lit;
         }
         lit = 0;
@@ -4543,8 +4539,8 @@ quad_lit:
         } else {
             ft4->code &= ~2;
         }
-        u = ((u8 *) &obj->unk_24)[1];
-        v = ((u8 *) &obj->unk_24)[0];
+        u = obj->tex.uv.u;
+        v = obj->tex.uv.v;
         w = obj->size.s.lo;
         h = obj->size.s.hi;
         du = ft4->x3 - ft4->x0;
@@ -4578,19 +4574,19 @@ quad_lit:
         ft4->u3 = u + w;
         ft4->v3 = v + h;
         ft4->tpage = tpage;
-        ft4->clut = (obj->unk_74 != 0xFFFF) ? D_801C51D4[D_800AFB54[obj->unk_72] + obj->unk_74]
-                                               : D_801C51D4[D_800AFB54[obj->unk_72] + obj->frame->unk_0C];
+        ft4->clut = (obj->unk_74 != 0xFFFF) ? D_801C51D4[D_800AFB54[obj->bank] + obj->unk_74]
+                                               : D_801C51D4[D_800AFB54[obj->bank] + obj->frame->unk_0C];
         AddPrim(D_801FAC80->ot, ft4);
     }
-    if (D_801FAC80->unk_493C != D_801FAC80->unk_493E) {
+    if (D_801FAC80->last_tpage != D_801FAC80->tpage) {
         tp = (DR_TPAGE *) D_801FAC80->next_prim;
         if ((u8 *) (tp + 1) >= (u8 *) &D_801FAC80->next_prim) {
             func_8001B5E8(0x14);
         }
         D_801FAC80->next_prim += sizeof(DR_TPAGE);
-        SetDrawTPage(tp, 0, 0, D_801FAC80->unk_493E);
+        SetDrawTPage(tp, 0, 0, D_801FAC80->tpage);
         AddPrim(D_801FAC80->ot, tp);
-        D_801FAC80->unk_493C = D_801FAC80->unk_493E = page = 0xFFFF;
+        D_801FAC80->last_tpage = D_801FAC80->tpage = page = 0xFFFF;
     }
 }
 
@@ -5341,7 +5337,7 @@ void func_80021FDC(Npc *npc) {
             if (b < a) {
                 side = 1;
             }
-            npc->unk_38 = side;
+            npc->side = side;
         }
     }
 }
@@ -5361,7 +5357,7 @@ void func_800220D0(Npc *npc) {
         npc->unk_2A = 0;
         npc->unk_22 = 0x30;
         npc->state++;
-        npc->unk_38 = (npc->unk_38 == 1) ? 2 : 1;
+        npc->side = (npc->side == 1) ? 2 : 1;
         func_800232D8(npc);
         if (npc->kind == 0x11) {
             func_8003EB5C(&D_80097C90, D_800AA268.p);
@@ -5428,7 +5424,7 @@ void func_8002235C(Npc *npc) {
             npc->unk_0C = 0;
             npc->unk_22 = 0x30;
             npc->state++;
-            if (npc->unk_38 != 2) {
+            if (npc->side != 2) {
                 if (npc->kind == 0x11) {
                     func_8003EB5C(&D_80097750, D_800AA268.p);
                 } else {
@@ -5878,7 +5874,7 @@ void func_800232D8(Npc *npc) {
             target = npc->unk_10;
             if ((target == NULL) || !(target->unk_058 & 1) || (target->action == 0x37)) {
                 npc->target_y = 0x64;
-                npc->unk_26 = (D_801F9ACA + 0xC8) & D_801D8866;
+                npc->target_x = (D_801F9ACA + 0xC8) & D_801D8866;
                 return;
             }
             sprite = target->obj;
@@ -5890,9 +5886,9 @@ void func_800232D8(Npc *npc) {
         npc->target_y = y;
         x = sprite->pos_x.u.hi;
         if (sprite->flags & 0x10) {
-            npc->unk_26 = x - 1;
+            npc->target_x = x - 1;
         } else {
-            npc->unk_26 = x + 0x10;
+            npc->target_x = x + 0x10;
         }
     }
 }
@@ -5910,13 +5906,13 @@ void func_800233E0(Npc *npc) {
             return;
         }
         npc->target_y = (s16) (temp_v1->pos_y.u.hi - 0x1E);
-        npc->unk_3C = (u16) temp_v1->flags;
+        npc->target_flags = (u16) temp_v1->flags;
         if (temp_v1->flags & 0x10) {
             var_v0 = temp_v1->pos_x.u.hi - 1;
         } else {
             var_v0 = temp_v1->pos_x.u.hi + 0x10;
         }
-        npc->unk_26 = var_v0;
+        npc->target_x = var_v0;
     }
 }
 
@@ -5937,7 +5933,7 @@ u16 main_approach_xy(Npc *npc) {
         dir = 4;
     }
     main_unwrap_target_x(&x, &cx, npc);
-    if (npc->unk_3C & 0x10) {
+    if (npc->target_flags & 0x10) {
         if (cx < x) {
             dir |= 1;
         } else {
@@ -5986,7 +5982,7 @@ u16 main_approach_x(Npc *npc) {
 
     main_unwrap_target_x(&x, &cx, npc);
     dir = 0;
-    if (npc->unk_38 == 1) {
+    if (npc->side == 1) {
         if (cx > x) {
             dir = 2;
         } else {
@@ -6181,7 +6177,7 @@ u16 main_approach_y(Npc *npc) {
     }
     if (dist < 0x1F && D_800AA248.cur_obj->vel_x.w == 0) {
         npc->unk_0C = 0;
-        if (npc->unk_38 != 1) {
+        if (npc->side != 1) {
             D_800AA248.cur_obj->vel_x.w = 0x10000;
             if (npc->kind == 0x11) {
                 func_8003EB5C(&D_80097750, D_800AA248.cur_obj);
@@ -6255,14 +6251,14 @@ void func_80023CFC(Npc *npc) {
             }
         }
         if ((s16) mx >= (s16) tx) {
-            npc->unk_38 = 1;
+            npc->side = 1;
             if (npc->kind == 0x11) {
                 func_8003EB5C(&D_80097850, D_800AA268.p);
             } else {
                 func_8003EB5C(&D_8008B458, D_800AA268.p);
             }
         } else {
-            npc->unk_38 = 2;
+            npc->side = 2;
             if (npc->kind == 0x11) {
                 func_8003EB5C(&D_80097750, D_800AA268.p);
             } else {
@@ -6477,7 +6473,7 @@ INCLUDE_ASM("asm/main/nonmatchings/main", func_800242D8);
 #endif
 
 #ifdef NON_MATCHING
-/* 96.45%: 96.5 %: abs() is GCC's builtin. The first coordinate (s16 x = npc->unk_26) loads as the original's lh
+/* 96.45%: 96.5 %: abs() is GCC's builtin. The first coordinate (s16 x = npc->target_x) loads as the original's lh
  * into a temporary and a copy: combine's three-insn split of the load and its sign extension (combine.c, a PARALLEL
  * of both loads split into a load and a register copy). The second, written the same way, gets the other split (two
  * loads, lh and lhu) as an s16, and loads straight into its variable as an s32; swapping the two blocks swaps which
@@ -6490,7 +6486,7 @@ s16 func_8002439C(Npc *npc) {
     s32 mx;
     s32 d;
 
-    x = npc->unk_26;
+    x = npc->target_x;
     if (x < D_801F9ACA) {
         x += D_801D8866;
     }
@@ -6508,7 +6504,7 @@ INCLUDE_ASM("asm/main/nonmatchings/main", func_8002439C);
 #ifdef NON_MATCHING
 /* 86.11%: 86.1 %: abs() is GCC's builtin (bgez, nop, negu); an s32 x (its lhu apart from the lh of the difference)
  * and an s32 half (x += half adds in the original's order) give the original's operations. Only sched1's order
- * differs: the original loads D_801D8866 before the second npc->unk_26 (lh) and shifts it in that load's delay, so
+ * differs: the original loads D_801D8866 before the second npc->target_x (lh) and shifts it in that load's delay, so
  * half takes t1 and cur t2; here half, a once-set live pseudo (birthing_insn_p, top priority), is loaded last, into
  * npc's a2. Statement orders do not change it */
 void main_unwrap_target_x(s16 *px, s16 *pcur, Npc *npc) {
@@ -6517,10 +6513,10 @@ void main_unwrap_target_x(s16 *px, s16 *pcur, Npc *npc) {
     s32 half;
     s16 d;
 
-    x = (u16) npc->unk_26;
+    x = (u16) npc->target_x;
     cur = D_800AA268.p->pos_x.s.hi;
     half = (u16) D_801D8866;
-    d = abs(npc->unk_26 - cur);
+    d = abs(npc->target_x - cur);
     if (d >= (s16) half >> 1) {
         d = abs(D_801F9ACA - cur);
         if (d >= (s16) half >> 1) {
@@ -7496,10 +7492,10 @@ void func_800268BC(void);
 void main_scroll_layers(void);
 void main_count_monsters(void);
 s32 func_8005E4E4(void);
-void func_80053DE4();
-void func_80027FD0();
+void func_80053DE4(Monster *);
+void func_80027FD0(Monster *, u16);
 s32 func_8003F378(Monster *);
-void monster_dispatch_action();
+void monster_dispatch_action(Monster *, GameObject *, u16);
 void func_800267CC(Monster *);
 u16 func_800291DC(Monster *, GameObject *);
 void func_80026C04(Monster *);
@@ -7559,13 +7555,13 @@ void main_update_monsters(void) {
         obj = D_800AA268.p = m->obj;
         if (m->id != 0 && obj != NULL) {
             func_80029CF8();
-            m->unk_12C = obj->priority;
+            m->body_priority = obj->priority;
             if (m->unk_058 & 1) {
                 if (D_801FB18C != 0) {
                     m->dir = 0;
                     m->buttons = 0;
                 } else if ((func_8005E4E4() & 2) && D_801FB46C == 0) {
-                    if (&D_801E0B78[func_80025DF8(D_8007BD78.unk_04)] == m && D_801D8740 != D_801E28C8
+                    if (&D_801E0B78[func_80025DF8(D_8007BD78.turn_player)] == m && D_801D8740 != D_801E28C8
                         && !(D_8007BD78.flags & 0x200)) {
                         func_80053DE4(m);
                         func_80027FD0(m, i);
@@ -7589,7 +7585,7 @@ void main_update_monsters(void) {
                     goto reset;
                 }
                 if (m->action != 0x37 && m->action != 0x26) {
-                    m->unk_040++;
+                    m->play_frames++;
                 }
                 func_80026C04(m);
                 main_move_monster(m);
@@ -7630,7 +7626,7 @@ void main_update_monsters(void) {
                     D_801E0D70 = D_801FB468;
                 }
                 if ((u16) (m->climb_side - 1) < 2) {
-                    m->unk_0D0 |= 4;
+                    m->pressed |= 4;
                     func_80026F98(m);
                 }
                 func_800636B0();
@@ -7752,8 +7748,8 @@ void func_800267CC(Monster *monster) {
     s32 i;
 
     i = 0;
-    if (monster->id == 5 && monster->meter.w == 0x440000 && !(monster->unk_01A & 0xF)) {
-        monster->unk_01A |= 3;
+    if (monster->id == 5 && monster->meter.w == 0x440000 && !(monster->extra_uses & 0xF)) {
+        monster->extra_uses |= 3;
         func_8002A1AC(monster, 3);
         i = 0;
     }
@@ -7830,9 +7826,9 @@ void func_800268BC(void) {
             }
         }
     }
-    m1->unk_128 = r1;
-    m2->unk_128 = r2;
-    m3->unk_128 = r3;
+    m1->depth = r1;
+    m2->depth = r2;
+    m3->depth = r3;
 }
 
 void func_80026A6C(void) {
@@ -7913,7 +7909,7 @@ void func_80026C04(Monster *monster) {
 void func_80026C4C(Monster *arg0) {
     u16 value;
 
-    if ((arg0->unk_0D0 & 2) && !(func_80027348() & 0xFFFF) && !(func_80026D54(arg0) & 0xFFFF)) {
+    if ((arg0->pressed & 2) && !(func_80027348() & 0xFFFF) && !(func_80026D54(arg0) & 0xFFFF)) {
         if (arg0->unk_18E == 0) {
             value = arg0->unk_03C;
             if (value != 0) {
@@ -7948,7 +7944,7 @@ s32 func_80026D54(Monster *monster) {
     u16 state;
 
     state = monster->action;
-    if (state != 2 && state != 0x4E && state != 0x11 && monster->unk_05C == 0x16) {
+    if (state != 2 && state != 0x4E && state != 0x11 && monster->prev_action == 0x16) {
         return 1;
     }
     return 0;
@@ -7980,7 +7976,7 @@ void func_80026E0C(Monster *arg0) {
 
     temp_v0 = arg0->action;
     temp_v1 = temp_v0 & 0xFFFF;
-    arg0->unk_05C = temp_v0;
+    arg0->prev_action = temp_v0;
     if ((temp_v1 == 2) || (temp_v1 == 0x4E)) {
         if (arg0->unk_104 == 0) {
             arg0->unk_104 = 0x4000;
@@ -7993,7 +7989,7 @@ void func_80026E0C(Monster *arg0) {
 }
 
 void func_80026E6C(Monster *m) {
-    if ((m->unk_0D0 & 1) && func_800272B0(m) == 0) {
+    if ((m->pressed & 1) && func_800272B0(m) == 0) {
         if (m->action == 2) {
             if (m->unk_104 == 0 || D_800AA268.p->vel_y.w == 0) {
                 return;
@@ -8002,11 +7998,11 @@ void func_80026E6C(Monster *m) {
             m->action = 0x54;
             return;
         } else if (m->action == 0x2C && m->unk_104 != 0 && D_800AA268.p->vel_y.w != 0) {
-            m->unk_05C = 2;
+            m->prev_action = 2;
             func_80026F58(m);
             return;
         }
-        m->unk_05C = m->action;
+        m->prev_action = m->action;
         func_80026F58(m);
     }
 }
@@ -8028,7 +8024,7 @@ void func_80026F98(Monster *arg0) {
     u16 temp_v1;
 
     D_800AA248.cur_obj = arg0->obj;
-    if ((arg0->unk_0D0 & 4) && !(func_800272FC() & 0xFFFF)) {
+    if ((arg0->pressed & 4) && !(func_800272FC() & 0xFFFF)) {
         temp_v1 = arg0->action;
         if (temp_v1 == 0x53) {
             arg0->action = 0x54U;
@@ -8053,7 +8049,7 @@ void main_use_full_meter(Monster *m) {
     u16 action;
     s16 n;
 
-    if ((m->unk_0D0 & 8) && (D_800AA2DC == 0 || (D_800AA2DC & 0x7000)) && m->meter.w == 0x440000) {
+    if ((m->pressed & 8) && (D_800AA2DC == 0 || (D_800AA2DC & 0x7000)) && m->meter.w == 0x440000) {
         switch (m->id) {
         case 1:
         case 2:
@@ -8077,24 +8073,24 @@ void main_use_full_meter(Monster *m) {
                 action = m->action;
                 if (action == 1 || action == 5 || action == 6 || action == 0) {
                     func_800531C0(m);
-                    m->unk_05C = m->action;
+                    m->prev_action = m->action;
                     m->action = 0x63;
                 } else if (action == 2 || action == 0x19) {
                     if (m->obj->vel_y.s.hi != 0) {
-                        m->unk_05C = action;
+                        m->prev_action = action;
                         m->action = 0x63;
                     }
                 }
                 if (m->action == 0x63) {
-                    if ((m->unk_01A & 0xF) != 0) {
-                        n = (m->unk_01A & 0xF) - 1;
-                        m->unk_01A &= 0xFFF0;
-                        m->unk_01A |= n;
+                    if ((m->extra_uses & 0xF) != 0) {
+                        n = (m->extra_uses & 0xF) - 1;
+                        m->extra_uses &= 0xFFF0;
+                        m->extra_uses |= n;
                         if (n < 3 && m->extra[n + 2] != NULL) {
                             func_8001E4B0(m->extra[n + 2]);
                             m->extra[n + 2] = NULL;
                         }
-                        if (!(m->unk_01A & 0xF)) {
+                        if (!(m->extra_uses & 0xF)) {
                             m->meter.w = 0;
                         }
                     } else {
@@ -8371,7 +8367,7 @@ void main_update_screen_pos(Monster *m) {
     if (!(m->unk_058 & 1) || (u16) m->unk_05E != 0 || (u16) m->unk_1C8 != 0) {
         *px = 0x12C0000;
         *py = 0x12C0000;
-        m->unk_1C0 = 0x12C0000;
+        m->screen_y = 0x12C0000;
         return;
     }
     obj = m->obj;
@@ -8383,7 +8379,7 @@ void main_update_screen_pos(Monster *m) {
     }
     pos -= cam;
     *px = pos;
-    m->unk_1C4.w = pos;
+    m->screen_x.w = pos;
     pos = obj->pos_y.w;
     pos -= D_801F9ACC.w;
     if (m->climb_side == 0) {
@@ -8408,7 +8404,7 @@ void main_update_screen_pos(Monster *m) {
         pos = 1;
     }
     *py = pos;
-    m->unk_1C0 = pos;
+    m->screen_y = pos;
 }
 
 void func_80027AB0(void) {
@@ -8449,7 +8445,7 @@ void main_reset_screen_pos(u16 id, Monster *monster) {
         b += *p - 1;
         *a = 0x12C0000;
         *b = 0;
-        monster->unk_1C0 = 0;
+        monster->screen_y = 0;
     }
 }
 
@@ -8471,7 +8467,7 @@ void main_update_priority(Monster *m) {
         if (m->climb_building != 0) {
             b = monster_get_building(m->climb_building);
             if (b != NULL) {
-                n = m->unk_128 + 9;
+                n = m->depth + 9;
                 obj->priority = b->priority - n;
             }
         }
@@ -8481,7 +8477,7 @@ void main_update_priority(Monster *m) {
         return;
     }
     if (m->climb_side == 0) {
-        prio = m->unk_128 + 0x1000;
+        prio = m->depth + 0x1000;
     } else {
         if (m->climb_building == 0) {
             return;
@@ -8491,7 +8487,7 @@ void main_update_priority(Monster *m) {
             return;
         }
         top = b->priority;
-        n = m->unk_128;
+        n = m->depth;
         if (m->action == 9 || m->climb_side == 3) {
             n += 9;
             prio = top - n;
@@ -8635,7 +8631,7 @@ void main_update_boxes(Monster *m) {
 void func_80027FC8(void) {
 }
 
-void func_80027FD0(Monster *m) {
+void func_80027FD0(Monster *m, u16 index) {
     u32 dir;
     void (**table)(Monster *);
 
@@ -8650,7 +8646,7 @@ void func_80027FD0(Monster *m) {
     table = D_8007C170;
     if (m->action == 0x4D) {
         table = D_8007C14C;
-    } else if (m->action == 2 || m->action == 0x4E || m->unk_05C == 2 || m->unk_05C == 0x4E) {
+    } else if (m->action == 2 || m->action == 0x4E || m->prev_action == 2 || m->prev_action == 0x4E) {
         table = D_8007C194;
     }
     table = &table[dir];
@@ -8679,7 +8675,7 @@ void func_8002808C(u16 buttons, u16 held, Monster *monster) {
         pressed |= 8;
         count++;
     }
-    monster->unk_0D0 = pressed;
+    monster->pressed = pressed;
     monster->unk_18C = count;
     if (buttons & 4) {
         if (monster->unk_1AA == 0) {
@@ -8699,9 +8695,9 @@ void func_80028140(u16 arg0, Monster *arg1, u16 arg2) {
 }
 
 void main_reset_camera_y(void) {
-    D_801D3D64.unk_26 = 0;
+    D_801D3D64.scroll_vx = 0;
     D_801F9A30.unk_0 = 0;
-    D_801D3D64.unk_28 = 0;
+    D_801D3D64.scroll_state = 0;
     D_801F9ACC.w = 0;
 }
 
@@ -8737,7 +8733,7 @@ void main_update_camera(void) {
     main_find_camera_pair();
     func_800288B0(&vel2, &vel1);
     x = D_801FA9A8;
-    speed = scroll->unk_26 << 16;
+    speed = scroll->scroll_vx << 16;
     if (speed != 0) {
         if (speed > 0) {
             if (vel1 >= vel2) {
@@ -8753,7 +8749,7 @@ void main_update_camera(void) {
             } else if (x >= 0xBF) {
                 goto clamp_right;
             } else {
-                scroll->unk_26 = 0;
+                scroll->scroll_vx = 0;
                 scroll->unk_2C = 0;
                 goto done;
             }
@@ -8848,7 +8844,7 @@ void main_update_camera(void) {
             }
         } else {
         stop:
-            scroll->unk_26 = 0;
+            scroll->scroll_vx = 0;
             scroll->unk_2C = 0;
             goto done;
         }
@@ -8930,9 +8926,9 @@ void main_update_camera_y(void) {
             min = y;
         }
     }
-    D_801D3D64.unk_30 = max;
-    D_801D3D64.unk_34 = min;
-    if (D_801D3D64.unk_28 == 0) {
+    D_801D3D64.max_y = max;
+    D_801D3D64.min_y = min;
+    if (D_801D3D64.scroll_state == 0) {
         if (D_801E28C8 != 0) {
         high:
             if (min > 0x87FFFF && max > 0xEFFFFF) {
@@ -8969,7 +8965,7 @@ void main_update_camera_y(void) {
         sink:
             main_start_scroll_up();
         }
-    } else if (D_801D3D64.unk_28 == 1) {
+    } else if (D_801D3D64.scroll_state == 1) {
         if (min <= 0x77FFFF && max <= 0xEFFFFF) {
             max = D_801F9ACC.w + D_801F9A30.unk_0;
             D_801F9ACC.w = max;
@@ -8980,7 +8976,7 @@ void main_update_camera_y(void) {
             D_801F9ACC.w = max;
         }
         goto stop;
-    } else if (D_801D3D64.unk_28 == 2) {
+    } else if (D_801D3D64.scroll_state == 2) {
         if (((Fixed *) &D_801D3D64.unk_58)->u.hi == 0 && (max <= 0xC00000 || min <= 0x800000)) {
             goto stop;
         }
@@ -9350,7 +9346,7 @@ u16 func_800291DC(Monster *m, GameObject *obj) {
     m->health.w = 0x440000;
     m->unk_018 = 1;
     m->unk_14C = 0;
-    m->unk_040 = 0;
+    m->play_frames = 0;
     m->lives--;
     func_8001F724(0x14);
     func_8001F724(0x72);
@@ -9605,7 +9601,7 @@ void func_80029C6C(Monster *arg0) {
     if (sprite != NULL) {
         state = arg0->action;
         if (((state != 2) && (state != 0x4E)) || (arg0->skip_building == 0) || (sprite->vel_y.w > 0)) {
-            if (arg0->unk_12C != sprite->priority) {
+            if (arg0->body_priority != sprite->priority) {
                 func_8001E39C(sprite);
                 func_8001E2F8(sprite);
             }

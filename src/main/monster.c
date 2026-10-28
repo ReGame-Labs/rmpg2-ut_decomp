@@ -5,7 +5,7 @@
 #include "game.h"
 #include "monster.h"
 
-void monster_dispatch_action(Monster *e, GameObject *obj) {
+void monster_dispatch_action(Monster *e, GameObject *obj, u16 index) {
     s16 x;
     s16 half;
     s16 state;
@@ -141,7 +141,7 @@ void func_800504B4(Monster *e) {
 void func_80050520(Monster *e) {
     D_800AA248.cur_obj->vel_x.w = 0;
     e->unk_104 = 0;
-    D_800AA248.cur_obj->vel_y.w = e->unk_1C0 <= 0x6FFFFF ? 0x20000 : 0xC0000;
+    D_800AA248.cur_obj->vel_y.w = e->screen_y <= 0x6FFFFF ? 0x20000 : 0xC0000;
     if (e->unk_168 == 7) {
         func_80054E1C(e);
     } else {
@@ -642,7 +642,7 @@ void func_800512CC(Monster *e, Monster *e2) {
 void func_80051330(Monster *e, Monster *other) {
     u16 id;
 
-    if ((u16) e->unk_164 == 0) {
+    if (e->unk_164 == 0) {
         id = e->id;
         e->unk_18A = 1;
         other->action = 0x41;
@@ -710,7 +710,7 @@ void func_800514CC(Monster *e) {
                     func_800511B4(e, m);
                     return;
                 }
-                if ((u16) e->unk_164 != 0) {
+                if (e->unk_164 != 0) {
                     func_80051248(e, m);
                     return;
                 }
@@ -1577,20 +1577,20 @@ void func_80053204(Monster *e) {
         b = m->obj;
         if ((a->pos_x.w == b->pos_x.w && a->pos_y.w > b->pos_y.w) || a->pos_x.w >= b->pos_x.w) {
             if (a->pos_y.w > b->pos_y.w) {
-                e->unk_208 = 0x40000;
-                e->unk_210 = -0x8000;
+                e->bounce_vy = 0x40000;
+                e->bounce_dy = -0x8000;
             } else {
-                e->unk_208 = -0x40000;
-                e->unk_210 = 0x8000;
+                e->bounce_vy = -0x40000;
+                e->bounce_dy = 0x8000;
             }
-            e->unk_20C = -0x80000;
-            e->unk_214 = 0x8000;
+            e->bounce_vx = -0x80000;
+            e->bounce_dx = 0x8000;
             e->action = 0x58;
             e->bump_target = 0;
             return;
         }
     }
-    shadow = e->unk_1FC;
+    shadow = e->shadow;
     e->bump_target = 0;
     switch (e->dir) {
     case 3:
@@ -1698,32 +1698,32 @@ void func_800535E4(Monster *e) {
     s32 v;
     s32 step;
 
-    v = e->unk_20C;
-    step = e->unk_214;
-    shadow = e->unk_1FC;
+    v = e->bounce_vx;
+    step = e->bounce_dx;
+    shadow = e->shadow;
     e->bump_target = 0;
     e->unk_218 = 0;
     v += step;
-    e->unk_20C = v;
+    e->bounce_vx = v;
     v = abs(v);
     step = abs(step);
     if (step >= v) {
-        e->unk_214 = 0;
+        e->bounce_dx = 0;
     }
-    v = e->unk_20C;
+    v = e->bounce_vx;
     D_800AA248.cur_obj->vel_x.w = v;
-    v = e->unk_208;
-    step = e->unk_210;
+    v = e->bounce_vy;
+    step = e->bounce_dy;
     v += step;
-    e->unk_208 = v;
+    e->bounce_vy = v;
     v = abs(v);
     step = abs(step);
     if (step >= v) {
-        e->unk_210 = 0;
+        e->bounce_dy = 0;
     }
-    v = e->unk_208;
+    v = e->bounce_vy;
     D_800AA248.cur_obj->vel_y.w = v;
-    if ((e->unk_210 | e->unk_214) == 0) {
+    if ((e->bounce_dy | e->bounce_dx) == 0) {
         e->action = 0x50;
     }
     v = D_800AA248.cur_obj->pos_x.w;
@@ -1769,9 +1769,9 @@ INCLUDE_ASM("asm/main/nonmatchings/monster", func_800535E4);
 void func_80053804(s32 unused, Monster *e) {
     /* LOOP_BLOCK class A2: the plain statements give the original's order only with -fno-schedule-insns
      * -fno-schedule-insns2 (sched2 sinks the two zero stores below the constants); a macro's block, likely. */
-    LOOP_BLOCK(e->unk_208 = 0; e->unk_210 = 0;);
-    e->unk_20C = 0xFFF60000;
-    e->unk_214 = 0x4000;
+    LOOP_BLOCK(e->bounce_vy = 0; e->bounce_dy = 0;);
+    e->bounce_vx = 0xFFF60000;
+    e->bounce_dx = 0x4000;
     e->action = 0x58;
     e->bump_target = 0;
 }
@@ -1912,7 +1912,7 @@ void func_80053C50(s32 amount, Monster *e) {
     if (e->icon_timers[0] == 0 && D_801E2A54 < 9 && D_801FA890 == 0) {
         if ((u32) (e->action - 0x34) >= 2) {
             if (D_800AA2DC == 0) {
-                if (e->unk_040 < 0x78) {
+                if (e->play_frames < 0x78) {
                     level = amount / 20000;
                     if (level >= 0x10) {
                         level = 0xF;
@@ -1951,7 +1951,7 @@ void func_80053D68(s32 amount, Monster *e) {
     }
 }
 
-void func_80053DE4(void) {
+void func_80053DE4(Monster *e) {
 }
 
 void func_80053DEC(void) {
@@ -2922,7 +2922,7 @@ void func_80055FBC(Monster *e, Building *city) {
         e->unk_168 = 3;
         D_800AA248.cur_obj->vel_x.w = 0;
         D_800AA248.cur_obj->vel_y.w = 0;
-        e->unk_05C = 0;
+        e->prev_action = 0;
     } else {
         D_800AA248.action = 0xD;
         e->action = 0xD;
@@ -2941,7 +2941,7 @@ void func_80056050(Monster *e, Building *city) {
     e->unk_168 = 3;
     D_800AA248.cur_obj->vel_x.w = 0;
     D_800AA248.cur_obj->vel_y.w = 0;
-    e->unk_05C = 0;
+    e->prev_action = 0;
 }
 
 void func_800560A8(Monster *e, Building *city) {
@@ -2959,7 +2959,7 @@ void func_800560A8(Monster *e, Building *city) {
         e->action = 6;
         D_800AA25C = 6;
         e->unk_168 = 7;
-        e->unk_05C = 0;
+        e->prev_action = 0;
     } else {
         D_800AA248.action = 0xD;
         e->action = 0xD;
@@ -2978,7 +2978,7 @@ void func_80056134(Monster *e, Building *city) {
     e->unk_168 = 7;
     D_800AA248.cur_obj->vel_x.w = 0;
     D_800AA248.cur_obj->vel_y.w = 0;
-    e->unk_05C = 0;
+    e->prev_action = 0;
 }
 
 void func_8005618C(Monster *e, Building *city) {
@@ -3085,7 +3085,7 @@ void func_8005640C(Monster *e, Building *city) {
     n = e->climb_side;
     g->unk_08 = n;
     if ((s16) city->top + 0x34 >= g->unk_10) {
-        h = e->unk_1C4.s.hi;
+        h = e->screen_x.s.hi;
         if (h < 0x30) {
             if (n == 1) {
                 goto stand;
@@ -3766,7 +3766,7 @@ void func_800578E0(Monster *e, Building *city) {
             func_80056E78(e);
             return;
         }
-        if (D_801D3D64.unk_5E >= 0x1E || (e->unk_1C0 <= 0x700000 && D_801D3D64.unk_58 != 0)) {
+        if (D_801D3D64.unk_5E >= 0x1E || (e->screen_y <= 0x700000 && D_801D3D64.unk_58 != 0)) {
             func_80056E2C(e, city);
         }
         return;

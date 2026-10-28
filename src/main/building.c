@@ -75,31 +75,31 @@ void building_set_sky_colours(void) {
     }
     D_801F9A38 = 1;
     c = D_8007CAFC;
-    D_801FAC80->unk_74 = c[3];
-    D_801FAC80->unk_75 = c[4];
-    D_801FAC80->unk_76 = c[5];
-    D_801FAC80->unk_7C = D_801FAC80->unk_74;
-    D_801FAC80->unk_7D = D_801FAC80->unk_75;
-    D_801FAC80->unk_7E = D_801FAC80->unk_76;
-    D_801FAC80->unk_84 = c[0];
-    D_801FAC80->unk_85 = c[1];
-    D_801FAC80->unk_86 = c[2];
-    D_801FAC80->unk_8C = D_801FAC80->unk_84;
-    D_801FAC80->unk_8D = D_801FAC80->unk_85;
-    D_801FAC80->unk_8E = D_801FAC80->unk_86;
-    D_801FAC80->unk_98 = c[6];
-    D_801FAC80->unk_99 = c[7];
-    D_801FAC80->unk_9A = c[8];
-    D_801FAC80->unk_A0 = D_801FAC80->unk_98;
-    D_801FAC80->unk_A1 = D_801FAC80->unk_99;
-    D_801FAC80->unk_A2 = D_801FAC80->unk_9A;
-    D_801FAC80->unk_A8 = D_801FAC80->unk_74;
-    D_801FAC80->unk_A9 = D_801FAC80->unk_75;
-    D_801FAC80->unk_AA = D_801FAC80->unk_76;
-    D_801FAC80->unk_B0 = D_801FAC80->unk_7C;
-    D_801FAC80->unk_B1 = D_801FAC80->unk_7D;
-    D_801FAC80->unk_B2 = D_801FAC80->unk_7E;
-    D_801FA9A4 = (D_801FAC80->unk_98 << 16) | (D_801FAC80->unk_99 << 8) | D_801FAC80->unk_9A;
+    D_801FAC80->sky[0].r0 = c[3];
+    D_801FAC80->sky[0].g0 = c[4];
+    D_801FAC80->sky[0].b0 = c[5];
+    D_801FAC80->sky[0].r1 = D_801FAC80->sky[0].r0;
+    D_801FAC80->sky[0].g1 = D_801FAC80->sky[0].g0;
+    D_801FAC80->sky[0].b1 = D_801FAC80->sky[0].b0;
+    D_801FAC80->sky[0].r2 = c[0];
+    D_801FAC80->sky[0].g2 = c[1];
+    D_801FAC80->sky[0].b2 = c[2];
+    D_801FAC80->sky[0].r3 = D_801FAC80->sky[0].r2;
+    D_801FAC80->sky[0].g3 = D_801FAC80->sky[0].g2;
+    D_801FAC80->sky[0].b3 = D_801FAC80->sky[0].b2;
+    D_801FAC80->sky[1].r0 = c[6];
+    D_801FAC80->sky[1].g0 = c[7];
+    D_801FAC80->sky[1].b0 = c[8];
+    D_801FAC80->sky[1].r1 = D_801FAC80->sky[1].r0;
+    D_801FAC80->sky[1].g1 = D_801FAC80->sky[1].g0;
+    D_801FAC80->sky[1].b1 = D_801FAC80->sky[1].b0;
+    D_801FAC80->sky[1].r2 = D_801FAC80->sky[0].r0;
+    D_801FAC80->sky[1].g2 = D_801FAC80->sky[0].g0;
+    D_801FAC80->sky[1].b2 = D_801FAC80->sky[0].b0;
+    D_801FAC80->sky[1].r3 = D_801FAC80->sky[0].r1;
+    D_801FAC80->sky[1].g3 = D_801FAC80->sky[0].g1;
+    D_801FAC80->sky[1].b3 = D_801FAC80->sky[0].b1;
+    D_801FA9A4 = (D_801FAC80->sky[1].r0 << 16) | (D_801FAC80->sky[1].g0 << 8) | D_801FAC80->sky[1].b0;
 }
 
 
@@ -164,34 +164,34 @@ void building_update_sky_colours(void) {
     if (D_801FB198 != base) {
         f = ((D_801FB198 - base) << 16) / 21600;
     }
-    D_801FAC80->unk_74 = (((to[3] - from[3]) * f) >> 16) + from[3];
-    D_801FAC80->unk_75 = (((to[4] - from[4]) * f) >> 16) + from[4];
-    D_801FAC80->unk_76 = (((to[5] - from[5]) * f) >> 16) + from[5];
-    D_801FAC80->unk_7C = D_801FAC80->unk_74;
-    D_801FAC80->unk_7D = D_801FAC80->unk_75;
-    D_801FAC80->unk_7E = D_801FAC80->unk_76;
-    D_801FAC80->unk_84 = (((to[0] - from[0]) * f) >> 16) + from[0];
-    D_801FAC80->unk_85 = (((to[1] - from[1]) * f) >> 16) + from[1];
-    D_801FAC80->unk_86 = (((to[2] - from[2]) * f) >> 16) + from[2];
-    D_801FAC80->unk_8C = D_801FAC80->unk_84;
-    D_801FAC80->unk_8D = D_801FAC80->unk_85;
-    D_801FAC80->unk_8E = D_801FAC80->unk_86;
-    D_801FAC80->unk_98 = (((to[6] - from[6]) * f) >> 16) + from[6];
-    D_801FAC80->unk_99 = (((to[7] - from[7]) * f) >> 16) + from[7];
-    D_801FAC80->unk_9A = (((to[8] - from[8]) * f) >> 16) + from[8];
-    D_801FAC80->unk_A0 = D_801FAC80->unk_98;
-    D_801FAC80->unk_A1 = D_801FAC80->unk_99;
-    D_801FAC80->unk_A2 = D_801FAC80->unk_9A;
-    D_801FAC80->unk_A8 = D_801FAC80->unk_74;
-    D_801FAC80->unk_A9 = D_801FAC80->unk_75;
-    D_801FAC80->unk_AA = D_801FAC80->unk_76;
-    D_801FAC80->unk_B0 = D_801FAC80->unk_7C;
-    D_801FAC80->unk_B1 = D_801FAC80->unk_7D;
-    D_801FAC80->unk_B2 = D_801FAC80->unk_7E;
+    D_801FAC80->sky[0].r0 = (((to[3] - from[3]) * f) >> 16) + from[3];
+    D_801FAC80->sky[0].g0 = (((to[4] - from[4]) * f) >> 16) + from[4];
+    D_801FAC80->sky[0].b0 = (((to[5] - from[5]) * f) >> 16) + from[5];
+    D_801FAC80->sky[0].r1 = D_801FAC80->sky[0].r0;
+    D_801FAC80->sky[0].g1 = D_801FAC80->sky[0].g0;
+    D_801FAC80->sky[0].b1 = D_801FAC80->sky[0].b0;
+    D_801FAC80->sky[0].r2 = (((to[0] - from[0]) * f) >> 16) + from[0];
+    D_801FAC80->sky[0].g2 = (((to[1] - from[1]) * f) >> 16) + from[1];
+    D_801FAC80->sky[0].b2 = (((to[2] - from[2]) * f) >> 16) + from[2];
+    D_801FAC80->sky[0].r3 = D_801FAC80->sky[0].r2;
+    D_801FAC80->sky[0].g3 = D_801FAC80->sky[0].g2;
+    D_801FAC80->sky[0].b3 = D_801FAC80->sky[0].b2;
+    D_801FAC80->sky[1].r0 = (((to[6] - from[6]) * f) >> 16) + from[6];
+    D_801FAC80->sky[1].g0 = (((to[7] - from[7]) * f) >> 16) + from[7];
+    D_801FAC80->sky[1].b0 = (((to[8] - from[8]) * f) >> 16) + from[8];
+    D_801FAC80->sky[1].r1 = D_801FAC80->sky[1].r0;
+    D_801FAC80->sky[1].g1 = D_801FAC80->sky[1].g0;
+    D_801FAC80->sky[1].b1 = D_801FAC80->sky[1].b0;
+    D_801FAC80->sky[1].r2 = D_801FAC80->sky[0].r0;
+    D_801FAC80->sky[1].g2 = D_801FAC80->sky[0].g0;
+    D_801FAC80->sky[1].b2 = D_801FAC80->sky[0].b0;
+    D_801FAC80->sky[1].r3 = D_801FAC80->sky[0].r1;
+    D_801FAC80->sky[1].g3 = D_801FAC80->sky[0].g1;
+    D_801FAC80->sky[1].b3 = D_801FAC80->sky[0].b1;
     r = (((to[9] - from[9]) * f) >> 16) + from[9];
     g = (((to[10] - from[10]) * f) >> 16) + from[10];
     b = (((to[11] - from[11]) * f) >> 16) + from[11];
-    D_801FA9A4 = (D_801FAC80->unk_98 << 16) | (D_801FAC80->unk_99 << 8) | D_801FAC80->unk_9A;
+    D_801FA9A4 = (D_801FAC80->sky[1].r0 << 16) | (D_801FAC80->sky[1].g0 << 8) | D_801FAC80->sky[1].b0;
     D_801FB41C = (r << 16) | (g << 8) | b;
     func_8002AC34(D_801FB194);
 }
@@ -237,25 +237,25 @@ void func_8002AD84(void) {
 }
 
 void func_8002ADE8(void) {
-    D_801FAC80->unk_74 = 0xA0;
-    D_801FAC80->unk_75 = 0xA0;
-    D_801FAC80->unk_76 = 0x80;
-    D_801FAC80->unk_7C = 0xA0;
-    D_801FAC80->unk_7D = 0xA0;
-    D_801FAC80->unk_7E = 0x80;
-    D_801FAC80->unk_98 = 0xA0;
-    D_801FAC80->unk_99 = 0xA0;
-    D_801FAC80->unk_9A = 0x80;
-    D_801FAC80->unk_A0 = 0xA0;
-    D_801FAC80->unk_A1 = 0xA0;
-    D_801FAC80->unk_A2 = 0x80;
-    D_801FAC80->unk_A8 = 0xA0;
-    D_801FAC80->unk_A9 = 0xA0;
-    D_801FAC80->unk_AA = 0x80;
-    D_801FAC80->unk_B0 = 0xA0;
-    D_801FAC80->unk_B1 = 0xA0;
-    D_801FAC80->unk_B2 = 0x80;
-    D_801FA9A4 = (D_801FAC80->unk_98 << 16) | (D_801FAC80->unk_99 << 8) | D_801FAC80->unk_9A;
+    D_801FAC80->sky[0].r0 = 0xA0;
+    D_801FAC80->sky[0].g0 = 0xA0;
+    D_801FAC80->sky[0].b0 = 0x80;
+    D_801FAC80->sky[0].r1 = 0xA0;
+    D_801FAC80->sky[0].g1 = 0xA0;
+    D_801FAC80->sky[0].b1 = 0x80;
+    D_801FAC80->sky[1].r0 = 0xA0;
+    D_801FAC80->sky[1].g0 = 0xA0;
+    D_801FAC80->sky[1].b0 = 0x80;
+    D_801FAC80->sky[1].r1 = 0xA0;
+    D_801FAC80->sky[1].g1 = 0xA0;
+    D_801FAC80->sky[1].b1 = 0x80;
+    D_801FAC80->sky[1].r2 = 0xA0;
+    D_801FAC80->sky[1].g2 = 0xA0;
+    D_801FAC80->sky[1].b2 = 0x80;
+    D_801FAC80->sky[1].r3 = 0xA0;
+    D_801FAC80->sky[1].g3 = 0xA0;
+    D_801FAC80->sky[1].b3 = 0x80;
+    D_801FA9A4 = (D_801FAC80->sky[1].r0 << 16) | (D_801FAC80->sky[1].g0 << 8) | D_801FAC80->sky[1].b0;
     D_801FB41C = ((((D_801FB41C >> 16) & 0xFF) + 0x20) << 16) | ((((D_801FB41C >> 8) & 0xFF) + 0x20) << 8) | ((D_801FB41C & 0xFF) + 0x20);
 }
 
@@ -542,7 +542,7 @@ void building_reset_monster(s32 n) {
     saved = D_800AA248.cur_obj;
     building_clear_monster(m);
     m->id = n;
-    m->unk_128 = n;
+    m->depth = n;
     building_spawn_monster(m);
     D_800AA248.cur_obj = saved;
 }
@@ -589,7 +589,7 @@ void building_spawn_monster(Monster *m) {
         D_800AA268.p->pos_x.s.hi = (D_801FA8A0[m->id - 1] - 2) * 125 + 200;
         break;
     }
-    D_800AA248.cur_obj->unk_72 = D_8007CDA4[m->id - 1][0];
+    D_800AA248.cur_obj->bank = D_8007CDA4[m->id - 1][0];
     if (m->id == 7) {
         D_800AA248.cur_obj->unk_74 = D_801F9ABC;
     } else {
@@ -604,8 +604,8 @@ void building_spawn_monster(Monster *m) {
     m->unk_1E0 = 0;
     m->unk_1E2 = 0;
     m->unk_174 = -1;
-    if (m->unk_01A & 0xF) {
-        func_8002A1AC(m, m->unk_01A & 0xF);
+    if (m->extra_uses & 0xF) {
+        func_8002A1AC(m, m->extra_uses & 0xF);
     }
     if (D_800AA2DC == 0) {
         bonus_create_bars(m);
@@ -2443,7 +2443,7 @@ void func_8002F100(Building *b) {
             t = b->unk_010;
             if (t >= 0x32 && t < 0x4B) {
                 if (b->items[0].obj->anim != (s32) &D_800168B8) {
-                    D_801FB448->colour = 0xFFFF00;
+                    D_801FB448->colour.w = 0xFFFF00;
                     func_8002CBF4((Monster *) b);
                     func_80029118(8, 8);
                     building_set_players_action(10);
@@ -2470,8 +2470,8 @@ void func_8002F100(Building *b) {
                     b->top += 0x14;
                     func_8001E698(b->items[0].obj, &D_800168D8);
                 } else {
-                    if (t > 0x64 && D_801FB448->colour != 0xFF0000) {
-                        D_801FB448->colour = 0xFF0000;
+                    if (t > 0x64 && D_801FB448->colour.w != 0xFF0000) {
+                        D_801FB448->colour.w = 0xFF0000;
                     }
                     func_8001E698(b->falling, &D_80016964);
                     if (b->unk_010 >= b->unk_012) {
@@ -2950,7 +2950,7 @@ void func_800302AC(u16 kind, Monster *m) {
         return;
     }
     m->action = action;
-    m->unk_05C = 0;
+    m->prev_action = 0;
     func_80053C50(push, m);
     m->unk_13C = 0x4B;
 }

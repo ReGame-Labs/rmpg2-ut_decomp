@@ -33,29 +33,29 @@ typedef struct SoundChannel {
                                      * its sequence's slot, byte 3 its class (0 effects, 1 music) */
     /* 0x04 */ s16 unk_04;          /* set from a sequence byte (command 7) */
     /* 0x06 */ s16 unk_06;          /* set from a 16-bit sequence parameter (command 9) */
-    /* 0x08 */ s32 unk_08;          /* the delay before the next command (a variable-length number) */
+    /* 0x08 */ s32 delay;           /* the delay before the next command (a variable-length number) */
     /* 0x0C */ u8 unk_0C;
     /* 0x0D */ u8 unk_0D;           /* set from a sequence byte (command 12) */
     /* 0x0E */ u8 unk_0E;           /* set from a sequence byte (command 13) */
     /* 0x0F */ u8 unk_0F;
-    /* 0x10 */ u8 unk_10;           /* the command set (D_80087130[]) */
+    /* 0x10 */ u8 cmd_set;          /* the command set (D_80087130[]) */
     /* 0x11 */ u8 unk_11;
     /* 0x12 */ u8 unk_12[0x2];
-    /* 0x14 */ s16 unk_14;
-    /* 0x16 */ s16 unk_16;          /* a 16-bit parameter read from the sequence, low byte first */
-    /* 0x18 */ s16 unk_18;          /* the number of labels in unk_38 */
+    /* 0x14 */ s16 ppq;             /* the pulses per quarter note (func_80070588) */
+    /* 0x16 */ s16 tempo;           /* the quarter notes per minute, read from the sequence low byte first */
+    /* 0x18 */ s16 label_count;     /* the number of labels */
     /* 0x1A */ u16 unk_1A;
-    /* 0x1C */ s32 unk_1C;          /* the time step per tick (func_80070588) */
-    /* 0x20 */ u32 unk_20;          /* the time accumulator: 16.16 */
-    /* 0x24 */ u32 unk_24;          /* the time elapsed towards unk_08 */
-    /* 0x28 */ u32 unk_28;          /* the time elapsed in all */
-    /* 0x2C */ u32 unk_2C;          /* the end time when flag 0x10 is set */
-    /* 0x30 */ u8 *unk_30;          /* the sequence's start */
-    /* 0x34 */ u8 *unk_34;          /* the sequence pointer (func_80076C8C) */
-    /* 0x38 */ s32 *unk_38;         /* the labels: offsets from unk_30 */
-    /* 0x3C */ u8 **unk_3C;         /* the return stack's base */
-    /* 0x40 */ u8 **unk_40;         /* a return stack: popped by func_80077F2C */
-    /* 0x44 */ u8 **unk_44;         /* the return stack's end */
+    /* 0x1C */ s32 tick_step;       /* the time step per tick (func_80070588) */
+    /* 0x20 */ u32 accum;           /* the time accumulator: 16.16 */
+    /* 0x24 */ u32 delay_time;      /* the time elapsed towards delay */
+    /* 0x28 */ u32 elapsed;         /* the time elapsed in all */
+    /* 0x2C */ u32 end_time;        /* the end time when flag 0x10 is set */
+    /* 0x30 */ u8 *seq_start;       /* the sequence's start */
+    /* 0x34 */ u8 *seq;             /* the sequence pointer (func_80076C8C) */
+    /* 0x38 */ s32 *labels;         /* the labels: offsets from seq_start */
+    /* 0x3C */ u8 **stack_base;     /* the return stack's base, */
+    /* 0x40 */ u8 **stack;          /* its pointer (popped by func_80077F2C), */
+    /* 0x44 */ u8 **stack_end;      /* and its end */
     /* 0x48 */ s32 unk_48;
     /* 0x4C */ s32 unk_4C;
 } SoundChannel;
@@ -87,7 +87,7 @@ typedef struct SoundDriver SoundDriver;
 u8 *func_80076C8C(u8 *p, s32 *value);
 
 /* The command handlers: D_80087F00[] the sequencer's own, indexed by a sequence's command byte; D_80087130[] one
- * table per command set (SoundChannel.unk_10), the first being D_80087F00. Entry 1 takes the driver state, the
+ * table per command set (SoundChannel.cmd_set), the first being D_80087F00. Entry 1 takes the driver state, the
  * others a channel. */
 typedef void (*SoundCmd)();
 extern SoundCmd D_80087F00[];
@@ -104,9 +104,9 @@ typedef struct SoundTrackHeader {
     /* 0x07 */ u8 unk_07;           /* -> unk_0E */
     /* 0x08 */ u8 unk_08;
     /* 0x09 */ u8 unk_09;           /* -> unk_0F */
-    /* 0x0A */ s16 unk_0A;          /* -> unk_14 */
-    /* 0x0C */ s16 unk_0C;          /* -> unk_16 */
-    /* 0x0E */ u16 label_count;     /* -> unk_18 */
+    /* 0x0A */ s16 unk_0A;          /* -> ppq */
+    /* 0x0C */ s16 unk_0C;          /* -> tempo */
+    /* 0x0E */ u16 label_count;     /* -> label_count */
     /* 0x10 */ s32 data_size;       /* the sequence data's size */
 } SoundTrackHeader;
 

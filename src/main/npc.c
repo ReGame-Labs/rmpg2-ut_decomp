@@ -8,7 +8,7 @@
 
 /* Other units. */
 ObjectDef *func_8001D110(void);
-GameObject *func_8001DCB4(void);         /* spawns D_800AA248.unk_3C */
+GameObject *func_8001DCB4(void);         /* spawns D_800AA248.new_def */
 void func_8001E4B0(GameObject *mover);
 void func_80029118(s16, u16);
 void func_8004BFE0(void);
@@ -1102,7 +1102,7 @@ void npc_create_searchlight(Npc *npc, s32 depth) {
     mover->unk_40.w = -0x3E7;
     mover->flags = (mover->flags & ~0x20) | 0x400;
     mover->unk_6C |= 0x2000;
-    npc->unk_70 = mover;
+    npc->searchlight = mover;
     func_8001BB68(mover);
     effect = func_8001D110();
     effect->id = 0x4F000986;
@@ -1110,7 +1110,7 @@ void npc_create_searchlight(Npc *npc, s32 depth) {
     D_800AA284.p = effect;
     mover = func_8001DCB4();
     mover->flags |= 0x400;
-    npc->unk_74 = mover;
+    npc->spot = mover;
     func_8001BB68(mover);
 }
 
@@ -1161,12 +1161,12 @@ void npc_place_searchlight(GameObject *line, GameObject *obj, GameObject *end) {
                 dx -= 0x10000;
                 line->unk_50.xy = ((u32)dx >> 16) | (dy & 0xFFFF0000);
                 dx += 0x30000;
-                line->unk_54.w = ((u32)dx >> 16) | (dy & 0xFFFF0000);
+                line->unk_54.xy = ((u32)dx >> 16) | (dy & 0xFFFF0000);
                 step = len / D_8007D5F0[i + 1];
                 if (obj->flags & 0x10) {
                     step = -step - 0x30000;
                 }
-                prev = line->unk_40.w;
+                prev = line->unk_40.prev_x;
                 if (prev != -999) {
                     nx = (x + step) & D_801D8864.w;
                     x = prev;
@@ -1182,7 +1182,7 @@ void npc_place_searchlight(GameObject *line, GameObject *obj, GameObject *end) {
                 line->arg.xy = ((u32)ex >> 16) | (dy & 0xFFFF0000);
                 ex += 0x300000;
                 line->unk_60 = ((u32)ex >> 16) | (dy & 0xFFFF0000);
-                line->unk_40.w = nx;
+                line->unk_40.prev_x = nx;
                 end->pos_x.w = x + step - 0x180000;
                 end->pos_y.w = y + len;
                 func_8001BB88(line);
@@ -1197,9 +1197,9 @@ hide:
 }
 
 void npc_update_searchlight(Npc *npc) {
-    GameObject *a = npc->unk_70;
+    GameObject *a = npc->searchlight;
     GameObject *b = npc->obj;
-    GameObject *c = npc->unk_74;
+    GameObject *c = npc->spot;
 
     if (a != NULL) {
         npc_place_searchlight(a, b, c);
@@ -1334,25 +1334,25 @@ u16 func_80036C30(Monster *player, Npc *npc, GameObject *mover, s32 reach) {
     x = player->pos.u.lo;
     y = player->pos.u.hi;
     func_80037960(npc, mover);
-    e = npc->unk_3E;
+    e = npc->box_left;
     if (x < e && x < (s16)(e - 4)) {
         if (player->unk_0DE == 0 || player->unk_0EA != 1 || x < (s16)(e - 4) - 0x19) {
             goto second;
         }
     }
-    e = npc->unk_40;
+    e = npc->box_right;
     if (x > e && x > (s16)(e + 4)) {
         if (player->unk_0DE == 0 || player->unk_0EA != 2 || x > (s16)(e + 4) + 0x19) {
             goto second;
         }
     }
-    e = npc->unk_44;
+    e = npc->box_top;
     if (y < e && y < (s16)(e - 4)) {
         if (player->unk_0DE == 0 || player->unk_0EA != 3 || y < (s16)(e - 4) - 0x19) {
             goto second;
         }
     }
-    e = npc->unk_42;
+    e = npc->box_bottom;
     if (y > e && y > (s16)(e + 4)) {
         if (player->unk_0DE == 0 || player->unk_0EA != 4 || y > (s16)(e + 4) + 0x19) {
             goto second;
@@ -1361,25 +1361,25 @@ u16 func_80036C30(Monster *player, Npc *npc, GameObject *mover, s32 reach) {
     }
     goto first;
 second:
-    e = npc->unk_46;
+    e = npc->box2_left;
     if (x < e && x < (s16)(e - 4)) {
         if (player->unk_0DE == 0 || player->unk_0EA != 1 || x < (s16)(e - 4) - 0x19) {
             return 0;
         }
     }
-    e = npc->unk_48;
+    e = npc->box2_right;
     if (x > e && x > (s16)(e + 4)) {
         if (player->unk_0DE == 0 || player->unk_0EA != 2 || x > (s16)(e + 4) + 0x19) {
             return 0;
         }
     }
-    e = npc->unk_4C;
+    e = npc->box2_top;
     if (y < e && y < (s16)(e - 4)) {
         if (player->unk_0DE == 0 || player->unk_0EA != 3 || y < (s16)(e - 4) - 0x19) {
             return 0;
         }
     }
-    e = npc->unk_4A;
+    e = npc->box2_bottom;
     if (y > e && y > (s16)(e + 4)) {
         if (player->unk_0DE == 0 || player->unk_0EA != 4 || y > (s16)(e + 4) + 0x19) {
             return 0;
@@ -1483,37 +1483,37 @@ u16 func_800372DC(s16 x, s16 y, Monster *player, Npc *npc, GameObject *mover) {
     s16 e;
 
     func_80037960(npc, mover);
-    e = npc->unk_3E;
+    e = npc->box_left;
     if (x < e && x < (s16)(e - 4)) {
         goto second;
     }
-    e = npc->unk_40;
+    e = npc->box_right;
     if (x > e && x > (s16)(e + 4)) {
         goto second;
     }
-    e = npc->unk_44;
+    e = npc->box_top;
     if (y < e && y < (s16)(e - 4)) {
         goto second;
     }
-    e = npc->unk_42;
+    e = npc->box_bottom;
     if (y > e && y > (s16)(e + 4)) {
         goto second;
     }
     goto hit;
 second:
-    e = npc->unk_46;
+    e = npc->box2_left;
     if (x < e && x < (s16)(e - 4)) {
         return 0;
     }
-    e = npc->unk_48;
+    e = npc->box2_right;
     if (x > e && x > (s16)(e + 4)) {
         return 0;
     }
-    e = npc->unk_4C;
+    e = npc->box2_top;
     if (y < e && y < (s16)(e - 4)) {
         return 0;
     }
-    e = npc->unk_4A;
+    e = npc->box2_bottom;
     if (y > e && y > (s16)(e + 4)) {
         return 0;
     }
@@ -1574,7 +1574,7 @@ u16 func_8003761C(s16 x, s16 y, Monster *player, Npc *npc) {
     npc->unk_54 = D_800AA248.cur_obj->flags;
     npc->unk_5C = x;
     npc->unk_5E = y;
-    D_800AA248.cur_obj->unk_98 = npc;
+    D_800AA248.cur_obj->unk_98.p = npc;
     npc->unk_1A += 0xA;
     return 1;
 }
@@ -1652,8 +1652,8 @@ void npc_pick_target(Npc *npc) {
     k = 1;
     do {
         m = &D_801E0B78[k];
-        if ((m->unk_058 & 1) && m->unk_040 >= 0x1C20 && m->unk_040 >= best) {
-            best = m->unk_040;
+        if ((m->unk_058 & 1) && m->play_frames >= 0x1C20 && m->play_frames >= best) {
+            best = m->play_frames;
         }
         k++;
     } while (--i != 0);
@@ -1667,7 +1667,7 @@ void npc_pick_target(Npc *npc) {
         }
         m = &D_801E0B78[slot];
         if (m->unk_058 & 1) {
-            if (m->unk_040 + 0x12C >= best) {
+            if (m->play_frames + 0x12C >= best) {
                 break;
             }
         } else {
@@ -1699,19 +1699,19 @@ void func_80037960(Npc *npc, GameObject *obj) {
         v = -v;
     }
     a = v + x;
-    npc->unk_3E = a;
-    npc->unk_44 = h + y;
+    npc->box_left = a;
+    npc->box_top = h + y;
     v = f->unk_14;
     h = f->unk_16;
     if (obj->flags & 0x10) {
         v = -v;
     }
     b = v + x;
-    npc->unk_40 = b;
-    npc->unk_42 = h + y;
+    npc->box_right = b;
+    npc->box_bottom = h + y;
     if (obj->flags & 0x10) {
-        npc->unk_40 = a;
-        npc->unk_3E = b;
+        npc->box_right = a;
+        npc->box_left = b;
     }
     v = f->unk_18;
     h = f->unk_1A;
@@ -1719,19 +1719,19 @@ void func_80037960(Npc *npc, GameObject *obj) {
         v = -v;
     }
     a = v + x;
-    npc->unk_46 = a;
-    npc->unk_4C = h + y;
+    npc->box2_left = a;
+    npc->box2_top = h + y;
     v = f->unk_1C;
     h = f->unk_1E;
     if (obj->flags & 0x10) {
         v = -v;
     }
     b = v + x;
-    npc->unk_48 = b;
-    npc->unk_4A = h + y;
+    npc->box2_right = b;
+    npc->box2_bottom = h + y;
     if (obj->flags & 0x10) {
-        npc->unk_48 = a;
-        npc->unk_46 = b;
+        npc->box2_right = a;
+        npc->box2_left = b;
     }
 }
 
@@ -2168,7 +2168,7 @@ void func_80038920(Npc *npc) {
             func_8003EB5C(*row, D_800AA268.p);
         }
     } else {
-        row = D_8007DA78[npc->unk_2C & 3];
+        row = D_8007DA78[npc->level & 3];
         row += which;
         anim = *row;
         if (anim != (u8 *)D_800AA268.p->anim) {
@@ -2191,7 +2191,7 @@ void func_80038A2C(Npc *npc) {
     u16 move = npc->unk_2A;
 
     if (move != 0) {
-        npc->unk_2C = move;
+        npc->level = move;
         if (func_80038DA8(npc) != 0) {
             s32 kind = npc->unk_2A;
 
@@ -2342,14 +2342,14 @@ u16 npc_pick_level(u16 *out, Npc *npc) {
         case 2:
         case 8:
             low = 1;
-            if (npc->unk_2C == 3) {
+            if (npc->level == 3) {
                 low = 0;
                 mid = 1;
             }
             break;
         default:
             high = 1;
-            if (npc->unk_2C < 2) {
+            if (npc->level < 2) {
                 high = 0;
                 mid = 1;
             }
@@ -2377,7 +2377,7 @@ u16 npc_pick_level(u16 *out, Npc *npc) {
     if (*out == 0) {
         return 0;
     }
-    switch (npc->unk_2C) {
+    switch (npc->level) {
     case 1:
         if (high > mid) {
             goto high_level;
@@ -2430,7 +2430,7 @@ u16 npc_pick_level(u16 *out, Npc *npc) {
 }
 
 u16 func_800391F8(u16 *out, Npc *npc) {
-    *out = npc->unk_2C;
+    *out = npc->level;
     if (npc->unk_64 != NULL) {
         npc->unk_04 = 3;
     }
@@ -2555,10 +2555,10 @@ void npc_update_throw(Throw *t) {
     Npc *npc;
 
     if (t->state == 0x10 || t->state == 1) {
-        if (saved->unk_98 == (void *) 2) {
+        if (saved->unk_98.result == 2) {
             t->state = 0x10;
             func_8003EB5C(D_80096084, D_800AA248.cur_obj);
-        } else if (saved->unk_98 == (void *) 1) {
+        } else if (saved->unk_98.result == 1) {
             t->state = 0x10;
             func_8003EB5C(D_80096018, D_800AA248.cur_obj);
         } else {
@@ -2589,7 +2589,7 @@ void npc_update_throw(Throw *t) {
                         func_80053C50(0x54000, m);
                         func_8004EFAC();
                         t->state = 0x10;
-                        D_800AA248.cur_obj->unk_98 = (void *) 1;
+                        D_800AA248.cur_obj->unk_98.result = 1;
                         if (body->pos_y.s.hi <= 0xE0) {
                             m->action = 0xF;
                         } else if ((D_800AA248.cur_obj->flags & 0x10) == (body->flags & 0x10)) {
@@ -2609,7 +2609,7 @@ void npc_update_throw(Throw *t) {
                     v = D_800AA268.p->unk_8C - 1;
                     if (v == 0) {
                     fall:
-                        D_800AA268.p->unk_98 = (void *) 2;
+                        D_800AA268.p->unk_98.result = 2;
                     } else {
                         D_800AA268.p->unk_8C = v;
                     }
