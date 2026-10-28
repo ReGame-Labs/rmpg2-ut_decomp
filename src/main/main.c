@@ -1262,13 +1262,12 @@ u16 *func_800192A0(void) {
 }
 
 #ifdef NON_MATCHING
-/* 96.21%: 96.21 % (96.93 % with POLY_G4 sky[2] at DrawState 0x70, which makes everything up to the tile loop match:
- * the casts here send the sky quads' x stores through the quads' addresses). The tiles' stores are written in the
- * original's order (setlen and setcode through the P_TAG cast, the rest as direct fields, which gives the
- * original's two bases). What remains is loop.c: the original hoists the constants 5 and 40 out of the inner loop
- * (life 1 each) and loads D_801CA474 and D_801CA474+0xB8 separately; here they are not desirable (threshold 27
- * after the jump table, the base and the 7-insn i*0x4940 chain, against 53 insns), and cse derives one base from
- * the other. The start-up: callbacks, CD, pads, the two frame buffers, VRAM cleared, the font */
+/* 96.93%: everything up to the tile loop matches. The tiles' stores are written in the original's order (setlen and
+ * setcode through the P_TAG cast, the rest as direct fields, which gives the original's two bases). What remains is
+ * loop.c: the original hoists the constants 5 and 40 out of the inner loop (life 1 each) and loads D_801CA474 and
+ * D_801CA474+0xB8 separately; here they are not desirable (threshold 27 after the jump table, the base and the 7-insn
+ * i*0x4940 chain, against 53 insns), and cse derives one base from the other. The start-up: callbacks, CD, pads, the
+ * two frame buffers, VRAM cleared, the font */
 void main_init_system(void) {
     RECT rect;
     s32 colour;
@@ -1303,16 +1302,16 @@ void main_init_system(void) {
     setRGB0(&D_801CA474[0].draw, 0, 0, 0);
     setRGB0(&D_801CA474[1].draw, 0, 0, 0);
     for (i = 0; i < 2; i++) {
-        SetPolyG4((POLY_G4 *) &D_801CA474[i].unk_70);
-        SetPolyG4((POLY_G4 *) &D_801CA474[i].unk_94);
-        ((POLY_G4 *) &D_801CA474[i].unk_70)->x0 = 0;
-        ((POLY_G4 *) &D_801CA474[i].unk_70)->x1 = 0x190;
-        ((POLY_G4 *) &D_801CA474[i].unk_70)->x2 = 0;
-        ((POLY_G4 *) &D_801CA474[i].unk_70)->x3 = 0x190;
-        ((POLY_G4 *) &D_801CA474[i].unk_94)->x0 = 0;
-        ((POLY_G4 *) &D_801CA474[i].unk_94)->x1 = 0x190;
-        ((POLY_G4 *) &D_801CA474[i].unk_94)->x2 = 0;
-        ((POLY_G4 *) &D_801CA474[i].unk_94)->x3 = 0x190;
+        SetPolyG4(&D_801CA474[i].sky[0]);
+        SetPolyG4(&D_801CA474[i].sky[1]);
+        D_801CA474[i].sky[0].x0 = 0;
+        D_801CA474[i].sky[0].x1 = 0x190;
+        D_801CA474[i].sky[0].x2 = 0;
+        D_801CA474[i].sky[0].x3 = 0x190;
+        D_801CA474[i].sky[1].x0 = 0;
+        D_801CA474[i].sky[1].x1 = 0x190;
+        D_801CA474[i].sky[1].x2 = 0;
+        D_801CA474[i].sky[1].x3 = 0x190;
     }
     for (i = 0; i < 2; i++) {
         for (j = 0; j < 6; j++) {
@@ -1336,14 +1335,14 @@ void main_init_system(void) {
                 colour = 0xFF00FF;
                 break;
             }
-            SetPolyF4(&D_801CA474[i].unk_B8[j]);
-            D_801CA474[i].unk_B8[j].x1 = 0x190;
-            D_801CA474[i].unk_B8[j].x3 = 0x190;
-            D_801CA474[i].unk_B8[j].r0 = colour >> 16;
-            D_801CA474[i].unk_B8[j].g0 = colour >> 8;
-            D_801CA474[i].unk_B8[j].x0 = 0;
-            D_801CA474[i].unk_B8[j].x2 = 0;
-            D_801CA474[i].unk_B8[j].b0 = colour;
+            SetPolyF4(&D_801CA474[i].tiles[j]);
+            D_801CA474[i].tiles[j].x1 = 0x190;
+            D_801CA474[i].tiles[j].x3 = 0x190;
+            D_801CA474[i].tiles[j].r0 = colour >> 16;
+            D_801CA474[i].tiles[j].g0 = colour >> 8;
+            D_801CA474[i].tiles[j].x0 = 0;
+            D_801CA474[i].tiles[j].x2 = 0;
+            D_801CA474[i].tiles[j].b0 = colour;
         }
     }
     D_801FAC80 = D_801FAC80 == &D_801CA474[0] ? &D_801CA474[1] : &D_801CA474[0];
@@ -4297,16 +4296,16 @@ void main_draw_lists(void) {
     if (D_801D36FC == 0x150 || (D_801D36FC == 0x160 && D_801FA960 != 0x7C)
         || (D_801D36FC == 0x120 && D_801F9AE0 == 2)) {
         if (D_801F9A38 != 0) {
-            D_801FAC80->unk_7A = -(D_801F9ACC.w >> 16);
-            D_801FAC80->unk_82 = -(D_801F9ACC.w >> 16);
-            D_801FAC80->unk_8A = bottom - (D_801F9ACC.w >> 16);
-            D_801FAC80->unk_92 = bottom - (D_801F9ACC.w >> 16);
-            D_801FAC80->unk_9E = -0xA0 - (D_801F9ACC.w >> 16);
-            D_801FAC80->unk_A6 = -0xA0 - (D_801F9ACC.w >> 16);
-            D_801FAC80->unk_AE = -(D_801F9ACC.w >> 16);
-            D_801FAC80->unk_B6 = -(D_801F9ACC.w >> 16);
-            AddPrim(D_801FAC80->ot, D_801FAC80->unk_70);
-            AddPrim(D_801FAC80->ot, &D_801FAC80->unk_94);
+            D_801FAC80->sky[0].y0 = -(D_801F9ACC.w >> 16);
+            D_801FAC80->sky[0].y1 = -(D_801F9ACC.w >> 16);
+            D_801FAC80->sky[0].y2 = bottom - (D_801F9ACC.w >> 16);
+            D_801FAC80->sky[0].y3 = bottom - (D_801F9ACC.w >> 16);
+            D_801FAC80->sky[1].y0 = -0xA0 - (D_801F9ACC.w >> 16);
+            D_801FAC80->sky[1].y1 = -0xA0 - (D_801F9ACC.w >> 16);
+            D_801FAC80->sky[1].y2 = -(D_801F9ACC.w >> 16);
+            D_801FAC80->sky[1].y3 = -(D_801F9ACC.w >> 16);
+            AddPrim(D_801FAC80->ot, D_801FAC80->sky);
+            AddPrim(D_801FAC80->ot, &D_801FAC80->sky[1]);
         }
     }
 }
