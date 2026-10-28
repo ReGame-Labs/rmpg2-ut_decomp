@@ -1119,9 +1119,13 @@ void func_80018D84(void) {
 }
 
 #ifdef NON_MATCHING
-/* 89.73%: register allocation: the original keeps buttons (D_800AFB78) in s7 from the prologue and
- * D_801E1C90 in s8, and leaves port << 4 in a stack halfword; here port << 4 takes fp and the constant 1 a saved
- * register. The pad reader: a multitap's four pads or one, the buttons inverted, the analog stick as d-pad bits */
+/* 89.73%: 89.73 %: register allocation. The original gives buttons (D_800AFB78, set in the prologue) s7 and the
+ * hoisted D_801E1C90 fp, and leaves without a register port << 4 (a stack halfword), the loop's hoisted constant 1
+ * and &D_800AA2F0 (reloaded through t0: li t0,1, and reload_cse's sllv by t0); the single-pad path has its own
+ * pseudos (state in s4, &D_800AA2F0[base] in s1, the constant 1 in n's s5). Here global-alloc ranks the constant 1
+ * and port << 4 (priority 0.07) above D_801E1C90 (0.05) and buttons (0.04: 7 refs over 348 insns), so buttons is
+ * rematerialised at each use. The pad reader: a multitap's four pads or one, the buttons inverted, the analog stick
+ * as d-pad bits */
 s32 main_read_pad(u8 *buf, u16 n, s16 base, s16 port) {
     u16 chan0;
     u16 chan;
@@ -1258,10 +1262,13 @@ u16 *func_800192A0(void) {
 }
 
 #ifdef NON_MATCHING
-/* 94.08%: with DrawState's sky quads as fields (POLY_G4 sky[2] at 0x70, in place of unk_70..unk_B7) the
- * first 114 instructions match: the casts here make the x stores go through the quads' addresses. What remains is
- * the tile loop: the original keeps setlen 5 and setcode 0x28 in registers and reloads 400, and takes the tiles'
- * addresses from D_801CA52C. The start-up: callbacks, CD, pads, the two frame buffers, VRAM cleared, the font */
+/* 96.21%: 96.21 % (96.93 % with POLY_G4 sky[2] at DrawState 0x70, which makes everything up to the tile loop match:
+ * the casts here send the sky quads' x stores through the quads' addresses). The tiles' stores are written in the
+ * original's order (setlen and setcode through the P_TAG cast, the rest as direct fields, which gives the
+ * original's two bases). What remains is loop.c: the original hoists the constants 5 and 40 out of the inner loop
+ * (life 1 each) and loads D_801CA474 and D_801CA474+0xB8 separately; here they are not desirable (threshold 27
+ * after the jump table, the base and the 7-insn i*0x4940 chain, against 53 insns), and cse derives one base from
+ * the other. The start-up: callbacks, CD, pads, the two frame buffers, VRAM cleared, the font */
 void main_init_system(void) {
     RECT rect;
     s32 colour;
@@ -1330,11 +1337,13 @@ void main_init_system(void) {
                 break;
             }
             SetPolyF4(&D_801CA474[i].unk_B8[j]);
-            D_801CA474[i].unk_B8[j].x0 = 0;
             D_801CA474[i].unk_B8[j].x1 = 0x190;
-            D_801CA474[i].unk_B8[j].x2 = 0;
             D_801CA474[i].unk_B8[j].x3 = 0x190;
-            setRGB0(&D_801CA474[i].unk_B8[j], colour >> 16, colour >> 8, colour);
+            D_801CA474[i].unk_B8[j].r0 = colour >> 16;
+            D_801CA474[i].unk_B8[j].g0 = colour >> 8;
+            D_801CA474[i].unk_B8[j].x0 = 0;
+            D_801CA474[i].unk_B8[j].x2 = 0;
+            D_801CA474[i].unk_B8[j].b0 = colour;
         }
     }
     D_801FAC80 = D_801FAC80 == &D_801CA474[0] ? &D_801CA474[1] : &D_801CA474[0];
@@ -3255,8 +3264,12 @@ s32 func_8001D974(void) {
 }
 
 #ifdef NON_MATCHING
-/* 85.59%: register allocation (the original keeps copies of box, pos and off: t5, t4) and a frame 8 bytes
- * larger (0x38): an unused 5-12 bytes of locals */
+/* 85.59%: 85.59 %: register allocation (the original keeps copies of box, pos and off in t5, t4, a2: inline
+ * parameters copied from arguments still live) and a frame 8 bytes larger (0x38) whose slots are never accessed:
+ * the trace of locals whose address was taken and that addressof purged back to registers. Pointer helpers
+ * (main_pair_add(&pos, wrap)) give the 0x38 frame but keep the variable in memory, since its halves are accessed as
+ * halfwords; with the helpers taking pointers everywhere the frame grows to 0x50. The wrap add's high half uses srl
+ * in the original (an unsigned half) */
 static inline Fixed main_pair_add(Fixed a, Fixed b) {
     a.s.lo += b.s.lo;
     a.s.hi += b.s.hi;
