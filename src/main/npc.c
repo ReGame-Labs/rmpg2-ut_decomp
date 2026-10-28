@@ -137,7 +137,7 @@ void func_80038754(Npc *npc);
 void func_80038800(Npc *npc);
 void func_80038838(Npc *npc);
 u16 func_80038C1C();                 /* called without the record it reads: no prototype in the original */
-u16 func_80038F3C(u16 *out, Npc *npc);
+u16 npc_pick_level(u16 *out, Npc *npc);
 u16 func_800391F8(u16 *out, Npc *npc);
 u16 func_80039220(u16 *out, Npc *npc);
 void func_800398D4();                /* called without the record it reads: no prototype in the original */
@@ -2323,17 +2323,12 @@ u16 func_80038DA8(Npc *npc) {
     return 0;
 }
 
-#ifdef NON_MATCHING
-/* 85.43%: 85.4 %: the counting part matches but for the registers of the three counts; the original's choice part
- * has three state blocks, one per level, each reached from two cases by cross-jumping, with the state in v1; here
- * the blocks merge differently */
-u16 func_80038F3C(u16 *out, Npc *npc) {
+u16 npc_pick_level(u16 *out, Npc *npc) {
     Monster *m;
     u16 high;
     u16 mid;
     u16 low;
     u16 i;
-    u16 level;
     u16 state;
 
     high = 0;
@@ -2365,7 +2360,9 @@ u16 func_80038F3C(u16 *out, Npc *npc) {
         do {
             m = &D_801E0B78[i];
             if ((m->unk_058 & 1) && m->action != 0x1F) {
-                if (m->climb_side == 0 || m->obj->pos_y.s.hi >= 0xD1) {
+                if (m->climb_side == 0) {
+                    low++;
+                } else if (m->obj->pos_y.s.hi >= 0xD1) {
                     low++;
                 } else if (m->obj->pos_y.s.hi >= 0x71) {
                     mid++;
@@ -2382,80 +2379,55 @@ u16 func_80038F3C(u16 *out, Npc *npc) {
     }
     switch (npc->unk_2C) {
     case 1:
-        if (mid >= high) {
-            if (mid == 0 && npc->unk_04 == 0) {
-                return func_800391F8(out, npc);
-            }
+        if (high > mid) {
+            goto high_level;
+        }
+        if (mid == 0 && npc->unk_04 == 0) {
+            return func_800391F8(out, npc);
+        }
+        goto mid_level;
+    case 2:
+        if (low > high) {
+            goto low_level;
+        }
+        if (high == 0 && npc->unk_04 == 0) {
+            return func_800391F8(out, npc);
+        }
+    high_level:
+        state = high ? 1 : 3;
+        if (npc->unk_64 != NULL) {
+            state = 3;
+        }
+        npc->unk_04 = state;
+        *out = 3;
+        return 1;
+    default:
+        if (low > mid) {
+            goto low_level;
+        }
+        if (mid != 0) {
+        mid_level:
             state = mid ? 1 : 3;
             if (npc->unk_64 != NULL) {
                 state = 3;
             }
             npc->unk_04 = state;
-            level = 2;
-        } else {
-            state = high ? 1 : 3;
-            if (npc->unk_64 != NULL) {
-                state = 3;
-            }
-            npc->unk_04 = state;
-            level = 3;
+            *out = 2;
+            return 1;
         }
-        break;
-    case 2:
-        if (high >= low) {
-            if (high == 0 && npc->unk_04 == 0) {
-                return func_800391F8(out, npc);
-            }
-            state = high ? 1 : 3;
-            if (npc->unk_64 != NULL) {
-                state = 3;
-            }
-            npc->unk_04 = state;
-            level = 3;
-        } else {
-            state = low ? 1 : 3;
-            if (npc->unk_64 != NULL) {
-                state = 3;
-            }
-            npc->unk_04 = state;
-            level = 1;
+        if (npc->unk_04 == 0) {
+            return func_800391F8(out, npc);
         }
-        break;
-    default:
-        if (mid >= low) {
-            if (mid != 0) {
-                state = mid ? 1 : 3;
-                if (npc->unk_64 != NULL) {
-                    state = 3;
-                }
-                npc->unk_04 = state;
-                level = 2;
-            } else if (npc->unk_04 != 0) {
-                state = low ? 1 : 3;
-                if (npc->unk_64 != NULL) {
-                    state = 3;
-                }
-                npc->unk_04 = state;
-                level = 1;
-            } else {
-                return func_800391F8(out, npc);
-            }
-        } else {
-            state = low ? 1 : 3;
-            if (npc->unk_64 != NULL) {
-                state = 3;
-            }
-            npc->unk_04 = state;
-            level = 1;
+    low_level:
+        state = low ? 1 : 3;
+        if (npc->unk_64 != NULL) {
+            state = 3;
         }
-        break;
+        npc->unk_04 = state;
+        *out = 1;
+        return 1;
     }
-    *out = level;
-    return 1;
 }
-#else
-INCLUDE_ASM("asm/main/nonmatchings/npc", func_80038F3C);
-#endif
 
 u16 func_800391F8(u16 *out, Npc *npc) {
     *out = npc->unk_2C;
@@ -2479,7 +2451,7 @@ u16 func_80039220(u16 *out, Npc *npc) {
         }
         return 0;
     }
-    return func_80038F3C(out, npc);
+    return npc_pick_level(out, npc);
 }
 
 void func_80039290(void) {

@@ -104,9 +104,11 @@ void building_set_sky_colours(void) {
 
 
 #ifdef NON_MATCHING
-/* 86.67%: 86.7 %: the sky's keyframe blend; the original's products land in v0 (mflo right after each mult, the
- * from byte loaded after the shift), here in v1 with the lbu scheduled before the mflo; also the order of the i *
- * 21600 chain */
+/* 86.96%: the sky's keyframe blend; base = i * 21600 in a variable gives the original's chain (3i, 48i, 45i, 675i,
+ * 21600i, shared with keys[i]); sched1 still moves f = 0 to the join's start (the original has it after the chain,
+ * as here with -fno-schedule-insns); the products land in v1 with the from byte's lbu before the mflo (the
+ * original: mflo v0, sra, then lbu); writing from[k] + (...) puts keys and from in the original's a3 and t0, but
+ * not f (t3) and to (t4); else-forms of f, a 2-D keys[i][k] and the statement orders were tried */
 extern s16 D_8007C974;
 extern s32 D_8007C97C[4][12];
 extern s32 D_8007CA3C[4][12];
@@ -118,6 +120,7 @@ void building_update_sky_colours(void) {
     s32 *to;
     u32 i;
     s32 next;
+    u32 base;
     s32 f;
     s32 r;
     s32 g;
@@ -154,11 +157,12 @@ void building_update_sky_colours(void) {
     if (next == 4) {
         next = 0;
     }
+    base = i * 21600;
+    f = 0;
     from = keys[i];
     to = keys[next];
-    f = 0;
-    if (D_801FB198 != i * 21600) {
-        f = ((D_801FB198 - i * 21600) << 16) / 21600;
+    if (D_801FB198 != base) {
+        f = ((D_801FB198 - base) << 16) / 21600;
     }
     D_801FAC80->unk_74 = (((to[3] - from[3]) * f) >> 16) + from[3];
     D_801FAC80->unk_75 = (((to[4] - from[4]) * f) >> 16) + from[4];
@@ -1408,8 +1412,12 @@ void func_8002D448(Monster *m, Building *b) {
 }
 
 #ifdef NON_MATCHING
-/* 92.52%: 92.5%: the control flow and the shared restore at the end are the original's; the original keeps rec in
- * t0 (here a2, so F65C's move a2 is gone, 2 instructions short) and allocates m/saved/next/p0/p1 differently */
+/* 95.11%: next and prev are read before rec takes them (rec = next after the unk_070 test, rec = prev per arm), as
+ * the original's delay-slot copies show; what differs is allocation: the original takes b, p2, p0, p1, prev, next,
+ * saved, m for s0..s7 (here prev and next, 0.40 and 0.35, go before p0 and p1, 0.25, and m, 0.14, before saved,
+ * 0.03), and keeps rec (1.17 here, a2) in t0, so the D844 call's stack store lands in the delay slot. A restore and
+ * return per exit (94.2 %) puts saved (9 refs, 0.23) before m as in the original, but cse then shares the start's
+ * %hi of D_800AA268 with the first exits, where the original loads it again at each exit */
 void func_8002D844(BuildingPart *p0, BuildingPart *p1, Monster *a, BuildingPart *p2, BuildingItem *rec);
 
 void func_8002D5B8(Monster *m, BuildingItem *rec) {
@@ -1489,11 +1497,11 @@ void func_8002D5B8(Monster *m, BuildingItem *rec) {
         goto go_prev;
     }
 go_next:
-    rec = next;
     if (b->unk_070 == next) {
         func_8002F5B0(m, b);
         goto end;
     }
+    rec = next;
     p0 = (BuildingPart *)((BuildingItem *)p0 + 1);
     p1 = (BuildingPart *)((BuildingItem *)p1 + 1);
     if (p2 != NULL) {
@@ -1501,8 +1509,8 @@ go_next:
     }
     goto place;
 go_prev:
-    rec = prev;
     if (prev->unk_04 == 1) {
+        rec = prev;
     single:
         if (rec->unk_06 == 0) {
             func_8002FAA4(m, rec);
@@ -1515,6 +1523,7 @@ go_prev:
         }
         goto end;
     }
+    rec = prev;
     p0 = (BuildingPart *)((BuildingItem *)p0 - 1);
     p1 = (BuildingPart *)((BuildingItem *)p1 - 1);
     if (p2 != NULL) {

@@ -675,10 +675,13 @@ void func_8003C674(void) {
 }
 
 #ifdef NON_MATCHING
-/* 88.43%: 88.4 %: the original compares top with a register holding 2 that it reuses as the draw's argument (min
- * here keeps the compare but cse still gives the argument as li); loop.c moves the i >= 4 exit block out of the
- * loop (after the item selection's jump), where cross-jumping merges its store with the success path's; the
- * original keeps it in the loop, its store through the hoisted s2 */
+/* 88.43%: the original compares top with a register holding 2 that it reuses as the draw's argument (min here keeps
+ * the compare but cse still gives the argument as li); find_and_verify_loops moves the i >= 4 exit block out of the
+ * loop (to the barrier of the idx == 1 if/else), where cross-jumping merges its store with the success path's; the
+ * original keeps it in the loop, its store through the hoisted s2. loop.c leaves such a block in place only when a
+ * label or a jump sits between the i test and the block's own jump (a test inside the block keeps it in the loop
+ * here, as in throw_update_flight), so the original's exit block had one at loop time; while, for (;;), goto and ++i
+ * forms, a NULL return through a variable and the 2 as a constant or a u16/s16/s32 local were tried */
 BuildingPart *func_8003C67C(Building *u, UnkStructB2 *rec) {
     BuildingItem *item;
     BuildingPart *part;
