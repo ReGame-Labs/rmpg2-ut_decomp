@@ -38,12 +38,15 @@ BINUTILS_SHA256=154ab23b60070e8f27013c22977f1129425d67d1e8acd6e13010e617811e4cff
 MKPSXISO_TAG=v2.30
 
 # decompals/old-gcc release: GNU GCC built with Psy-Q's PSX patches (static i386 binaries).
-# Psy-Q 4.0/4.3/4.4/4.5/4.6 shipped 2.7.2/2.8.0/2.8.1/2.91.66/2.95.2. SHA-256 of each tarball.
+# Psy-Q 4.0/4.3/4.4/4.5/4.6 shipped 2.7.2/2.8.0/2.8.1/2.91.66/2.95.2. SHA-256 of each tarball, and the tarball's URL
+# when it isn't old-gcc's release: 2.8.1, the build's compiler, is old-gcc's recipe rebuilt with -fwrapv
+# (scripts/build_gcc_wrapv.sh, docs/TOOLCHAIN.md "Compiler"), published as this repository's release GCC_WRAPV_TAG.
 OLDGCC_TAG=0.17
+GCC_WRAPV_TAG=gcc-2.8.1-psx-wrapv-1
 OLDGCC=(
     "2.7.2   500a459b3485e885a8d302cac23c2a4632f3900e03a09153f6190699fd723571"
     "2.8.0   1a3c956fe8aea5ebdb251749d95de2c84f023530584d7bd663744b5ec24050b7"
-    "2.8.1   f6f6e883942d4d3289d048236c672e71ed410e546aaae8ff655952f1567e1be0"
+    "2.8.1   e0332c9ba8b720dc06fc86683a3075d208762e414c3a51f58c329d5a46581d1d https://github.com/ReGame-Labs/rmpg2-ut_decomp/releases/download/$GCC_WRAPV_TAG/gcc-2.8.1-psx-wrapv.tar.gz"
     "2.91.66 f773a0a9659fa4ff74313ac4363d939312e8125675cd09ad9f8c1202f587f1fd"
     "2.95.2  932ed3669710a82b12570c29c46ff42989b6505b2af10db84d4551d55dfc0b1c"
 )
@@ -177,20 +180,20 @@ step_venv() {
 
 # old-gcc PSX builds into tools/gcc/<version>/ (cpp, cc1, gcc, ...).
 step_gcc() {
-    local entry ver sha dir tarball
+    local entry ver sha url dir tarball
     mkdir -p "$SRC" "$INSTALL/gcc"
     for entry in "${OLDGCC[@]}"; do
-        read -r ver sha <<<"$entry"
+        read -r ver sha url <<<"$entry"
+        url="${url:-https://github.com/decompals/old-gcc/releases/download/$OLDGCC_TAG/gcc-$ver-psx.tar.gz}"
         dir="$INSTALL/gcc/$ver"
         if [[ -x "$dir/cc1" && -f "$dir/.sha256" && "$(cat "$dir/.sha256")" == "$sha" ]]; then
             log "gcc: $ver already installed"
             continue
         fi
-        tarball="$SRC/gcc-$ver-psx.tar.gz"
+        tarball="$SRC/${url##*/}"
         if [[ ! -f "$tarball" ]] || ! echo "$sha  $tarball" | sha256sum -c --quiet - 2>/dev/null; then
-            log "gcc: downloading $ver (old-gcc $OLDGCC_TAG)"
-            fetch "https://github.com/decompals/old-gcc/releases/download/$OLDGCC_TAG/gcc-$ver-psx.tar.gz" \
-                "$tarball.part"
+            log "gcc: downloading $ver ($url)"
+            fetch "$url" "$tarball.part"
             mv "$tarball.part" "$tarball"
         fi
         echo "$sha  $tarball" | sha256sum -c --quiet - || die "gcc: checksum mismatch for $ver"
