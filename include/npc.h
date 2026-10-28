@@ -65,7 +65,8 @@ typedef struct ActorLink {
  * which reaches 0x50. */
 typedef struct Npc {
     /* 0x00 */ GameObject *obj;            /* the object it drives */
-    /* 0x04 */ u16 unk_04;                 /* the player slot last targeted (npc_pick_target) */
+    /* 0x04 */ u16 unk_04;                 /* by action: the player slot last targeted (npc_pick_target), a state 1 or
+                                            * 3 (npc_pick_level), a counter */
     /* 0x06 */ u16 kind;                   /* picks the dispatcher (func_80036300) */
     /* 0x08 */ u16 action;                 /* the current action */
     /* 0x0A */ u16 state;                  /* the index into the action's handler table */
@@ -81,24 +82,25 @@ typedef struct Npc {
     /* 0x22 */ u16 unk_22;
     /* 0x24 */ u16 aim;                    /* the slope band, 0..2 (D_8007DB04 holds the animations [old][new]); 3 in
                                             * func_80020EDC's tables */
-    /* 0x26 */ s16 unk_26;
+    /* 0x26 */ s16 target_x;               /* the x it flies to (beside its target, func_800232D8) */
     /* 0x28 */ s16 target_y;               /* the y it flies to (main_approach_y) */
     /* 0x2A */ u16 unk_2A;
-    /* 0x2C */ u16 unk_2C;
+    /* 0x2C */ u16 level;                  /* the height band it works at: 1 the ground, 2 the middle, 3 high
+                                            * (npc_pick_level) */
     /* 0x2E */ u16 unk_2E;
     /* 0x30 */ s32 unk_30;
     /* 0x34 */ s32 unk_34;
-    /* 0x38 */ u16 unk_38;
+    /* 0x38 */ u16 side;                   /* the side its target is on: 1 left, 2 right */
     /* 0x3A */ u16 start;                  /* the start position, an index into D_8007B358/D_8007B348 */
-    /* 0x3C */ u16 unk_3C;
-    /* 0x3E */ s16 unk_3E;
-    /* 0x40 */ s16 unk_40;
-    /* 0x42 */ s16 unk_42;
-    /* 0x44 */ s16 unk_44;
-    /* 0x46 */ s16 unk_46;
-    /* 0x48 */ s16 unk_48;
-    /* 0x4A */ s16 unk_4A;
-    /* 0x4C */ s16 unk_4C;
+    /* 0x3C */ u16 target_flags;           /* its target's object's flags (0x10: faces left; func_800233E0) */
+    /* 0x3E */ s16 box_left;               /* two boxes from its frame's points (func_80037960), left and right */
+    /* 0x40 */ s16 box_right;              /* swapped when it faces left; func_80036C30 tests a monster against */
+    /* 0x42 */ s16 box_bottom;             /* them */
+    /* 0x44 */ s16 box_top;
+    /* 0x46 */ s16 box2_left;
+    /* 0x48 */ s16 box2_right;
+    /* 0x4A */ s16 box2_bottom;
+    /* 0x4C */ s16 box2_top;
     /* 0x4E */ u16 unk_4E;
     /* 0x50 */ GameObject *unk_50;         /* a second object it makes (kinds 0x11, 0x12: func_80020EDC) */
     /* 0x54 */ u16 unk_54;
@@ -108,10 +110,11 @@ typedef struct Npc {
     /* 0x5C */ u16 unk_5C;
     /* 0x5E */ u16 unk_5E;
     /* 0x60 */ Monster *unk_60;
-    /* 0x64 */ Monster *unk_64;
+    /* 0x64 */ Monster *unk_64;            /* a monster it holds (func_80038754 lets it go); npc_pick_level follows
+                                            * its direction */
     /* 0x68 */ u8 unk_68[0x8];
-    /* 0x70 */ GameObject *unk_70;
-    /* 0x74 */ GameObject *unk_74;
+    /* 0x70 */ GameObject *searchlight;    /* the searchlight's beam, a quad box (npc_create_searchlight) */
+    /* 0x74 */ GameObject *spot;           /* the spot it lights */
 } Npc;                      /* 0x78 */
 
 extern Npc D_801FAC9C[6];

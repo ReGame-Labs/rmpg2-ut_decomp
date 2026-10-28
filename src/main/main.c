@@ -5338,7 +5338,7 @@ void func_80021FDC(Npc *npc) {
             if (b < a) {
                 side = 1;
             }
-            npc->unk_38 = side;
+            npc->side = side;
         }
     }
 }
@@ -5358,7 +5358,7 @@ void func_800220D0(Npc *npc) {
         npc->unk_2A = 0;
         npc->unk_22 = 0x30;
         npc->state++;
-        npc->unk_38 = (npc->unk_38 == 1) ? 2 : 1;
+        npc->side = (npc->side == 1) ? 2 : 1;
         func_800232D8(npc);
         if (npc->kind == 0x11) {
             func_8003EB5C(&D_80097C90, D_800AA268.p);
@@ -5425,7 +5425,7 @@ void func_8002235C(Npc *npc) {
             npc->unk_0C = 0;
             npc->unk_22 = 0x30;
             npc->state++;
-            if (npc->unk_38 != 2) {
+            if (npc->side != 2) {
                 if (npc->kind == 0x11) {
                     func_8003EB5C(&D_80097750, D_800AA268.p);
                 } else {
@@ -5875,7 +5875,7 @@ void func_800232D8(Npc *npc) {
             target = npc->unk_10;
             if ((target == NULL) || !(target->unk_058 & 1) || (target->action == 0x37)) {
                 npc->target_y = 0x64;
-                npc->unk_26 = (D_801F9ACA + 0xC8) & D_801D8866;
+                npc->target_x = (D_801F9ACA + 0xC8) & D_801D8866;
                 return;
             }
             sprite = target->obj;
@@ -5887,9 +5887,9 @@ void func_800232D8(Npc *npc) {
         npc->target_y = y;
         x = sprite->pos_x.u.hi;
         if (sprite->flags & 0x10) {
-            npc->unk_26 = x - 1;
+            npc->target_x = x - 1;
         } else {
-            npc->unk_26 = x + 0x10;
+            npc->target_x = x + 0x10;
         }
     }
 }
@@ -5907,13 +5907,13 @@ void func_800233E0(Npc *npc) {
             return;
         }
         npc->target_y = (s16) (temp_v1->pos_y.u.hi - 0x1E);
-        npc->unk_3C = (u16) temp_v1->flags;
+        npc->target_flags = (u16) temp_v1->flags;
         if (temp_v1->flags & 0x10) {
             var_v0 = temp_v1->pos_x.u.hi - 1;
         } else {
             var_v0 = temp_v1->pos_x.u.hi + 0x10;
         }
-        npc->unk_26 = var_v0;
+        npc->target_x = var_v0;
     }
 }
 
@@ -5934,7 +5934,7 @@ u16 main_approach_xy(Npc *npc) {
         dir = 4;
     }
     main_unwrap_target_x(&x, &cx, npc);
-    if (npc->unk_3C & 0x10) {
+    if (npc->target_flags & 0x10) {
         if (cx < x) {
             dir |= 1;
         } else {
@@ -5983,7 +5983,7 @@ u16 main_approach_x(Npc *npc) {
 
     main_unwrap_target_x(&x, &cx, npc);
     dir = 0;
-    if (npc->unk_38 == 1) {
+    if (npc->side == 1) {
         if (cx > x) {
             dir = 2;
         } else {
@@ -6178,7 +6178,7 @@ u16 main_approach_y(Npc *npc) {
     }
     if (dist < 0x1F && D_800AA248.cur_obj->vel_x.w == 0) {
         npc->unk_0C = 0;
-        if (npc->unk_38 != 1) {
+        if (npc->side != 1) {
             D_800AA248.cur_obj->vel_x.w = 0x10000;
             if (npc->kind == 0x11) {
                 func_8003EB5C(&D_80097750, D_800AA248.cur_obj);
@@ -6252,14 +6252,14 @@ void func_80023CFC(Npc *npc) {
             }
         }
         if ((s16) mx >= (s16) tx) {
-            npc->unk_38 = 1;
+            npc->side = 1;
             if (npc->kind == 0x11) {
                 func_8003EB5C(&D_80097850, D_800AA268.p);
             } else {
                 func_8003EB5C(&D_8008B458, D_800AA268.p);
             }
         } else {
-            npc->unk_38 = 2;
+            npc->side = 2;
             if (npc->kind == 0x11) {
                 func_8003EB5C(&D_80097750, D_800AA268.p);
             } else {
@@ -6474,7 +6474,7 @@ INCLUDE_ASM("asm/main/nonmatchings/main", func_800242D8);
 #endif
 
 #ifdef NON_MATCHING
-/* 96.45%: 96.5 %: abs() is GCC's builtin. The first coordinate (s16 x = npc->unk_26) loads as the original's lh
+/* 96.45%: 96.5 %: abs() is GCC's builtin. The first coordinate (s16 x = npc->target_x) loads as the original's lh
  * into a temporary and a copy: combine's three-insn split of the load and its sign extension (combine.c, a PARALLEL
  * of both loads split into a load and a register copy). The second, written the same way, gets the other split (two
  * loads, lh and lhu) as an s16, and loads straight into its variable as an s32; swapping the two blocks swaps which
@@ -6487,7 +6487,7 @@ s16 func_8002439C(Npc *npc) {
     s32 mx;
     s32 d;
 
-    x = npc->unk_26;
+    x = npc->target_x;
     if (x < D_801F9ACA) {
         x += D_801D8866;
     }
@@ -6505,7 +6505,7 @@ INCLUDE_ASM("asm/main/nonmatchings/main", func_8002439C);
 #ifdef NON_MATCHING
 /* 86.11%: 86.1 %: abs() is GCC's builtin (bgez, nop, negu); an s32 x (its lhu apart from the lh of the difference)
  * and an s32 half (x += half adds in the original's order) give the original's operations. Only sched1's order
- * differs: the original loads D_801D8866 before the second npc->unk_26 (lh) and shifts it in that load's delay, so
+ * differs: the original loads D_801D8866 before the second npc->target_x (lh) and shifts it in that load's delay, so
  * half takes t1 and cur t2; here half, a once-set live pseudo (birthing_insn_p, top priority), is loaded last, into
  * npc's a2. Statement orders do not change it */
 void main_unwrap_target_x(s16 *px, s16 *pcur, Npc *npc) {
@@ -6514,10 +6514,10 @@ void main_unwrap_target_x(s16 *px, s16 *pcur, Npc *npc) {
     s32 half;
     s16 d;
 
-    x = (u16) npc->unk_26;
+    x = (u16) npc->target_x;
     cur = D_800AA268.p->pos_x.s.hi;
     half = (u16) D_801D8866;
-    d = abs(npc->unk_26 - cur);
+    d = abs(npc->target_x - cur);
     if (d >= (s16) half >> 1) {
         d = abs(D_801F9ACA - cur);
         if (d >= (s16) half >> 1) {

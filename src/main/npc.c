@@ -1102,7 +1102,7 @@ void npc_create_searchlight(Npc *npc, s32 depth) {
     mover->unk_40.w = -0x3E7;
     mover->flags = (mover->flags & ~0x20) | 0x400;
     mover->unk_6C |= 0x2000;
-    npc->unk_70 = mover;
+    npc->searchlight = mover;
     func_8001BB68(mover);
     effect = func_8001D110();
     effect->id = 0x4F000986;
@@ -1110,7 +1110,7 @@ void npc_create_searchlight(Npc *npc, s32 depth) {
     D_800AA284.p = effect;
     mover = func_8001DCB4();
     mover->flags |= 0x400;
-    npc->unk_74 = mover;
+    npc->spot = mover;
     func_8001BB68(mover);
 }
 
@@ -1197,9 +1197,9 @@ hide:
 }
 
 void npc_update_searchlight(Npc *npc) {
-    GameObject *a = npc->unk_70;
+    GameObject *a = npc->searchlight;
     GameObject *b = npc->obj;
-    GameObject *c = npc->unk_74;
+    GameObject *c = npc->spot;
 
     if (a != NULL) {
         npc_place_searchlight(a, b, c);
@@ -1334,25 +1334,25 @@ u16 func_80036C30(Monster *player, Npc *npc, GameObject *mover, s32 reach) {
     x = player->pos.u.lo;
     y = player->pos.u.hi;
     func_80037960(npc, mover);
-    e = npc->unk_3E;
+    e = npc->box_left;
     if (x < e && x < (s16)(e - 4)) {
         if (player->unk_0DE == 0 || player->unk_0EA != 1 || x < (s16)(e - 4) - 0x19) {
             goto second;
         }
     }
-    e = npc->unk_40;
+    e = npc->box_right;
     if (x > e && x > (s16)(e + 4)) {
         if (player->unk_0DE == 0 || player->unk_0EA != 2 || x > (s16)(e + 4) + 0x19) {
             goto second;
         }
     }
-    e = npc->unk_44;
+    e = npc->box_top;
     if (y < e && y < (s16)(e - 4)) {
         if (player->unk_0DE == 0 || player->unk_0EA != 3 || y < (s16)(e - 4) - 0x19) {
             goto second;
         }
     }
-    e = npc->unk_42;
+    e = npc->box_bottom;
     if (y > e && y > (s16)(e + 4)) {
         if (player->unk_0DE == 0 || player->unk_0EA != 4 || y > (s16)(e + 4) + 0x19) {
             goto second;
@@ -1361,25 +1361,25 @@ u16 func_80036C30(Monster *player, Npc *npc, GameObject *mover, s32 reach) {
     }
     goto first;
 second:
-    e = npc->unk_46;
+    e = npc->box2_left;
     if (x < e && x < (s16)(e - 4)) {
         if (player->unk_0DE == 0 || player->unk_0EA != 1 || x < (s16)(e - 4) - 0x19) {
             return 0;
         }
     }
-    e = npc->unk_48;
+    e = npc->box2_right;
     if (x > e && x > (s16)(e + 4)) {
         if (player->unk_0DE == 0 || player->unk_0EA != 2 || x > (s16)(e + 4) + 0x19) {
             return 0;
         }
     }
-    e = npc->unk_4C;
+    e = npc->box2_top;
     if (y < e && y < (s16)(e - 4)) {
         if (player->unk_0DE == 0 || player->unk_0EA != 3 || y < (s16)(e - 4) - 0x19) {
             return 0;
         }
     }
-    e = npc->unk_4A;
+    e = npc->box2_bottom;
     if (y > e && y > (s16)(e + 4)) {
         if (player->unk_0DE == 0 || player->unk_0EA != 4 || y > (s16)(e + 4) + 0x19) {
             return 0;
@@ -1483,37 +1483,37 @@ u16 func_800372DC(s16 x, s16 y, Monster *player, Npc *npc, GameObject *mover) {
     s16 e;
 
     func_80037960(npc, mover);
-    e = npc->unk_3E;
+    e = npc->box_left;
     if (x < e && x < (s16)(e - 4)) {
         goto second;
     }
-    e = npc->unk_40;
+    e = npc->box_right;
     if (x > e && x > (s16)(e + 4)) {
         goto second;
     }
-    e = npc->unk_44;
+    e = npc->box_top;
     if (y < e && y < (s16)(e - 4)) {
         goto second;
     }
-    e = npc->unk_42;
+    e = npc->box_bottom;
     if (y > e && y > (s16)(e + 4)) {
         goto second;
     }
     goto hit;
 second:
-    e = npc->unk_46;
+    e = npc->box2_left;
     if (x < e && x < (s16)(e - 4)) {
         return 0;
     }
-    e = npc->unk_48;
+    e = npc->box2_right;
     if (x > e && x > (s16)(e + 4)) {
         return 0;
     }
-    e = npc->unk_4C;
+    e = npc->box2_top;
     if (y < e && y < (s16)(e - 4)) {
         return 0;
     }
-    e = npc->unk_4A;
+    e = npc->box2_bottom;
     if (y > e && y > (s16)(e + 4)) {
         return 0;
     }
@@ -1699,19 +1699,19 @@ void func_80037960(Npc *npc, GameObject *obj) {
         v = -v;
     }
     a = v + x;
-    npc->unk_3E = a;
-    npc->unk_44 = h + y;
+    npc->box_left = a;
+    npc->box_top = h + y;
     v = f->unk_14;
     h = f->unk_16;
     if (obj->flags & 0x10) {
         v = -v;
     }
     b = v + x;
-    npc->unk_40 = b;
-    npc->unk_42 = h + y;
+    npc->box_right = b;
+    npc->box_bottom = h + y;
     if (obj->flags & 0x10) {
-        npc->unk_40 = a;
-        npc->unk_3E = b;
+        npc->box_right = a;
+        npc->box_left = b;
     }
     v = f->unk_18;
     h = f->unk_1A;
@@ -1719,19 +1719,19 @@ void func_80037960(Npc *npc, GameObject *obj) {
         v = -v;
     }
     a = v + x;
-    npc->unk_46 = a;
-    npc->unk_4C = h + y;
+    npc->box2_left = a;
+    npc->box2_top = h + y;
     v = f->unk_1C;
     h = f->unk_1E;
     if (obj->flags & 0x10) {
         v = -v;
     }
     b = v + x;
-    npc->unk_48 = b;
-    npc->unk_4A = h + y;
+    npc->box2_right = b;
+    npc->box2_bottom = h + y;
     if (obj->flags & 0x10) {
-        npc->unk_48 = a;
-        npc->unk_46 = b;
+        npc->box2_right = a;
+        npc->box2_left = b;
     }
 }
 
@@ -2168,7 +2168,7 @@ void func_80038920(Npc *npc) {
             func_8003EB5C(*row, D_800AA268.p);
         }
     } else {
-        row = D_8007DA78[npc->unk_2C & 3];
+        row = D_8007DA78[npc->level & 3];
         row += which;
         anim = *row;
         if (anim != (u8 *)D_800AA268.p->anim) {
@@ -2191,7 +2191,7 @@ void func_80038A2C(Npc *npc) {
     u16 move = npc->unk_2A;
 
     if (move != 0) {
-        npc->unk_2C = move;
+        npc->level = move;
         if (func_80038DA8(npc) != 0) {
             s32 kind = npc->unk_2A;
 
@@ -2342,14 +2342,14 @@ u16 npc_pick_level(u16 *out, Npc *npc) {
         case 2:
         case 8:
             low = 1;
-            if (npc->unk_2C == 3) {
+            if (npc->level == 3) {
                 low = 0;
                 mid = 1;
             }
             break;
         default:
             high = 1;
-            if (npc->unk_2C < 2) {
+            if (npc->level < 2) {
                 high = 0;
                 mid = 1;
             }
@@ -2377,7 +2377,7 @@ u16 npc_pick_level(u16 *out, Npc *npc) {
     if (*out == 0) {
         return 0;
     }
-    switch (npc->unk_2C) {
+    switch (npc->level) {
     case 1:
         if (high > mid) {
             goto high_level;
@@ -2430,7 +2430,7 @@ u16 npc_pick_level(u16 *out, Npc *npc) {
 }
 
 u16 func_800391F8(u16 *out, Npc *npc) {
-    *out = npc->unk_2C;
+    *out = npc->level;
     if (npc->unk_64 != NULL) {
         npc->unk_04 = 3;
     }
