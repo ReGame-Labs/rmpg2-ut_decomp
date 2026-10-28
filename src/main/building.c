@@ -3318,9 +3318,10 @@ void func_80030D14(UnkStruct19 *p) {
 
 
 #ifdef NON_MATCHING
-/* 98.63%: 98.63 %: combine_givs keeps the first giv of bl->giv, the last one found (the state access, +20); the
- * original kept the items[0].obj access (+152), so it was found last, or the state access was not a giv; an index
- * loop (D_801D3DC8[i]) makes &D_801D3DC8[i] the base (95.8 %), the load order of q and o changes nothing */
+/* 99.88%: 99.88 %: the state test written on each path (merged by cross-jumping) gives the original's registers;
+ * left: combine_givs keeps the first giv of bl->giv, the last one found, which is a state access (+20), so the loop
+ * pointer is p + 20; the original's is p + 152 (items[0].obj), so its last giv found was the items access or the
+ * state accesses were not givs; index loops, a pointer for the items and the load orders were tried */
 void building_count_standing(void) {
     u16 n = D_801E29A4;
     s16 count = 0;
@@ -3333,10 +3334,12 @@ void building_count_standing(void) {
         do {
             q = p->items[0].obj;
             o = p->unk_070->obj;
-            if (!(q->unk_6C & 0x80) || o == NULL || !(o->unk_6C & 0x80)) {
-                if (p->state < 0x10) {
-                    count++;
-                }
+            if (!(q->unk_6C & 0x80)) {
+                if (p->state < 0x10) count++;
+            } else if (o == NULL) {
+                if (p->state < 0x10) count++;
+            } else if (!(o->unk_6C & 0x80)) {
+                if (p->state < 0x10) count++;
             }
             p++;
         } while (--n != 0);

@@ -241,61 +241,61 @@ void pickup_clear(Pickup *p) {
 }
 
 #ifdef NON_MATCHING
-/* 93.06%: the shape is right (the negu-then-add copies, the swap); registers differ, and the original loads the y
- * before the flags; the original reads the box in func_8004D6F8's order (bottom, right, left, top), but in that
- * order local-alloc sinks some loads into the compare blocks (91.7 %), and an earlier y read costs more */
+/* 98.10%: 98.10 %: dx doubles as l and w as r (negu in place, then left = dx + x copied back), y is reused for the
+ * monster's bottom (its load gets no sched1 birth boost, so it leads the four box loads as in the original) and the
+ * compare is func_8004D6F8's (l < right, r > left, top < bottom, bottom > top); left: allocation order, the
+ * original takes x, r, l, box for a2, a3, t0, t1, but x has 6 refs over 24 insns (0.50) against l 0.74 and r 0.70;
+ * x reused for the monster's left gives it 8 refs and the registers, but then that load loses the birth boost and
+ * moves above the right's (96.2 %); separate dx/w, per-path left, declaration and swap orders were tried */
 s32 pickup_test_touch(GameObject *obj, Monster *m) {
     SpriteFrame *box;
     s16 x;
-    u16 y;
+    s16 y;
     s32 flip;
-    u16 dx;
+    s16 l;
+    s16 r;
     u16 dy;
-    u16 w;
     u16 h;
     s16 left;
     s16 right;
     s16 top;
     s16 bottom;
-    s16 l;
-    s16 r;
     s16 m_right;
     s16 m_left;
     s16 m_top;
-    s16 m_bottom;
 
     x = obj->pos_x.s.hi;
     box = obj->frame;
     if (x < D_801F9ACA) {
         x += (D_801D8864.w + 1) >> 16;
     }
-    flip = obj->flags & 0x10;
-    dx = box->unk_10;
-    dy = box->unk_12;
     y = obj->pos_y.u.hi;
+    flip = obj->flags & 0x10;
+    l = box->unk_10;
+    dy = box->unk_12;
     if (flip) {
-        dx = -dx;
+        l = -l;
     }
-    left = dx + x;
-    l = left;
-    w = box->unk_14;
+    l += x;
+    left = l;
+    r = box->unk_14;
     h = box->unk_16;
     top = dy + y;
     if (flip) {
-        w = -w;
+        r = -r;
     }
-    right = w + x;
-    r = right;
+    r += x;
+    right = r;
     bottom = h + y;
     if (flip) {
-        l = right;
         r = left;
+        l = right;
     }
+    y = m->hit_bottom;
     m_right = m->hit_right;
-    m_top = m->hit_top;
-    m_bottom = m->hit_bottom;
     m_left = m->hit_left;
-    if (l < m_right && m_left < r && top < m_bottom && m_top < bottom) {
+    m_top = m->hit_top;
+    if (l < m_right && r > m_left && top < y && bottom > m_top) {
         return 1;
     }
     return 0;
