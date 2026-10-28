@@ -15,13 +15,13 @@ extern u16 D_8007BFD4[];
 extern u16 D_8007BFBC[];
 void func_80024C08(void *);
 void func_8001C02C(void);
-void func_8001C83C(void);
+void main_update_attract(void);
 extern s16 D_801CA464;
 extern s16 D_801D87C8;
 void func_80017758(void);
 extern u16 D_800AA2C8;
 void main_update_pressed(void);
-u16 func_8001828C(void);
+u16 main_update_pause(void);
 void func_8001B858(void);
 extern u32 D_801FA894;
 extern s16 D_8007A698;
@@ -122,15 +122,15 @@ void func_8001E664(Fixed *, s32, Fixed *, s32 *);
 s32 func_8001B660(s32);
 void func_8001E700(GameObject *);
 void func_8001E7C8(GameObject *);
-s16 func_8001EA10(void);
-s32 func_8001EAC4(s32);
+s16 main_random(void);
+s32 main_random_range(s32);
 void func_8001F2B0(void);
 void func_8001F358(void);
 void func_8001F39C(TextMessage *);
 void func_8001F6B4(void);
 void func_8001F7F8(s32);
 void main_draw_lists(void);
-void func_8001F9DC(GameObject *head, GameObject *end);
+void main_draw_objects(GameObject *head, GameObject *end);
 void main_run_calls(void);
 void func_80022EC0(Npc *npc);
 void func_80023080(Npc *);
@@ -172,7 +172,7 @@ void func_80017A40(void);
 void func_80017AC8(void);
 void func_80017B88(void);
 void func_80017B90(void);
-void func_80018008(void);
+void main_free_pause_box(void);
 void func_80018CB0(void);
 void func_80018CD0(void);
 void func_80018CF0(void);
@@ -221,9 +221,9 @@ void func_8001E7A0(void);
 void func_8001E94C(s32 arg0, s32 arg1, GameObject *arg2);
 void func_8001E978(GameObject *obj);
 void func_8001E980(void);
-void func_8001E9C4(s16 arg0, s16 arg1);
+void main_seed_random(s16 arg0, s16 arg1);
 s32 func_8001EA78(void);
-s32 func_8001EB10(s32 arg0, s32 arg1);
+s32 main_random_between(s32 arg0, s32 arg1);
 void func_8001EB3C(void);
 void func_8001ED54(TextMessage *arg0);
 void func_8001ED7C(void);
@@ -290,7 +290,7 @@ extern u16 D_801FA898[];
 void func_80019268(void);
 extern s16 D_801D36F8;
 extern s16 D_801F9A34;
-u16 func_80017C80(u16 id);
+u16 main_can_pause(u16 id);
 void func_80020CE4(s32 arg0, s32 arg1);
 u16 func_8001D844(void);
 void func_8001D598(void);
@@ -401,7 +401,7 @@ void func_8001D6A0(void);
 extern s32 D_801E299C;
 extern s32 D_801FA974;
 Glyph *func_8001B128(u32);
-void func_8001EEA0(void);
+void main_print_text(void);
 void func_8001EDE4(void);
 void func_8001EE24(void);
 void func_8001EE60(void);
@@ -527,7 +527,7 @@ restart:
             if (D_801F9A34 > 0) {
                 D_801F9A34--;
             }
-            if (func_8001828C() == 1) {
+            if (main_update_pause() == 1) {
                 goto restart;
             }
             func_8001B7F4();
@@ -561,7 +561,7 @@ void func_80017964(void) {
     D_801FA8A0[4] = 0;
     D_801FA8A0[5] = 0;
     D_801FA8A0[6] = 0;
-    func_8001E9C4(GetRCnt(0xF2000001), GetRCnt(0xF2000001));
+    main_seed_random(GetRCnt(0xF2000001), GetRCnt(0xF2000001));
     func_8001B848();
     main_init_objects();
     func_8001E980();
@@ -645,7 +645,7 @@ void main_update_pressed(void) {
     D_801E28E0 = pressed;
 }
 
-u16 func_80017C80(u16 id) {
+u16 main_can_pause(u16 id) {
     u16 temp_v1;
     Monster *temp_a1;
 
@@ -656,7 +656,7 @@ u16 func_80017C80(u16 id) {
     return 1;
 }
 
-u16 func_80017D8C(void) {
+u16 main_find_unplugged_pad(void) {
     s32 player;
     s32 id;
     s32 count;
@@ -669,7 +669,7 @@ u16 func_80017D8C(void) {
         if (D_801E1C90[player] == 0 && D_801FA898[player] != 0) {
             for (id = 0; id < 7; id++) {
                 who = D_801FA8A0[id];
-                if (who == player + 1 && func_80017C80(id + 1) == 1) {
+                if (who == player + 1 && main_can_pause(id + 1) == 1) {
                     if (++D_8007A6E8[player] >= 3) {
                         winner = who;
                         count++;
@@ -687,7 +687,7 @@ u16 func_80017D8C(void) {
     return winner;
 }
 
-void func_80017F14(s16 x, s16 y, GameObject *link, s32 script) {
+void main_create_pause_box(s16 x, s16 y, GameObject *link, s32 script) {
     GameObject *saved;
     GameObject *obj;
     ObjectDef *def;
@@ -711,7 +711,7 @@ void func_80017F14(s16 x, s16 y, GameObject *link, s32 script) {
     D_800AA248.cur_obj = saved;
 }
 
-void func_80018008(void) {
+void main_free_pause_box(void) {
     main_free_kind(0x7FE);
     D_8007A698 = 0;
 }
@@ -793,9 +793,9 @@ typedef struct {
     /* 0x0E */ u16 pad_0E;
 } MainPauseKeys;
 
-extern MainPauseKeys D_8007A6B8[3];
-extern s32 D_8007A6F0;   /* the menu's cursor: 0 the first line, 1 the second */
-extern s32 D_8007A6F4;   /* frames before the menu reads the pad again */
+extern MainPauseKeys main_pause_keys[3];
+extern s32 main_pause_cursor;   /* the menu's cursor: 0 the first line, 1 the second */
+extern s32 main_pause_delay;   /* frames before the menu reads the pad again */
 extern s32 D_800AA2C4;   /* the printed message's %d */
 extern TextMessage D_80089374;
 extern TextMessage D_80089398;
@@ -819,20 +819,20 @@ void func_800636B0(void);
 /* The pause handler, once per frame: an unplugged pad pauses the game with a message until it is back; START pauses;
  * the menu is CONTINUE/QUIT, then ABORT GAME YES/NO. Returns 1 when the player quits to the menu. The pause block
  * is shared with the replugged pad's path through the label, as the original's code is. */
-u16 func_8001828C(void) {
+u16 main_update_pause(void) {
     s16 who;    /* the player whose pad was unplugged (0xFF: no pad at all), then each monster's player */
     u16 flags;  /* D_801D3D64.unk_62: bits 0-1 the menu state, 8-11 the unplugged pad's player, 12-13 the pausing player */
     s16 player;
     s16 i;      /* also the pausing player in the menu states */
     OverattrPlayer *p;
 
-    if (D_8007A6F4 != 0) {
-        D_8007A6F4--;
+    if (main_pause_delay != 0) {
+        main_pause_delay--;
     }
-    who = func_80017D8C();
+    who = main_find_unplugged_pad();
     if ((who != 0 && (D_801D36FC == 0x150 || D_801D36FC == 0x240 || D_801D36FC == 0x220)) || (D_801D3D64.unk_62 & 0xF00)) {
         if (!(D_801D3D64.unk_62 & 0xF00)) {
-            func_80018C14();
+            main_cycle_highlight();
             if (D_801D3D64.unk_62 & 3) {
                 main_free_kind(0x300);
                 main_free_kind(0x301);
@@ -843,7 +843,7 @@ u16 func_8001828C(void) {
             }
             func_8001F6E4();
             func_80062E64();
-            func_80017F14(0x50, 0x3C, (GameObject *)0xF0, 0x5A);
+            main_create_pause_box(0x50, 0x3C, (GameObject *)0xF0, 0x5A);
             D_800AA2EC = 0x44;
             if (who == 0xFF) {
                 func_8001ED54(&D_80089438);
@@ -865,7 +865,7 @@ u16 func_8001828C(void) {
                 main_free_kind(0x300);
                 main_free_kind(0x550);
                 D_801D3D64.unk_62 &= 0xF0FF;
-                func_80018C14();
+                main_cycle_highlight();
                 switch (D_801D3D64.unk_62 & 3) {
                 case 2:
                     D_800AA2EC = 0x44;
@@ -874,10 +874,10 @@ u16 func_8001828C(void) {
                     func_8001ED54(&D_800893BC);
                     D_800AA2EC = 0x47;
                     func_8001ED54(&D_800893E0);
-                    D_8007A6F0 = 0;
+                    main_pause_cursor = 0;
                     break;
                 case 3:
-                    D_8007A6F0 = 1;
+                    main_pause_cursor = 1;
                     D_800AA2EC = 0x44;
                     func_8001ED54(&D_80089398);
                     D_800AA2EC = D_801E2A44;
@@ -902,15 +902,15 @@ u16 func_8001828C(void) {
                 who = D_801FA8A0[i];
                 if (who != 0) {
                     player = who - 1;
-                    if ((D_801E28E0 & D_8007A6B8[player].pause) && func_80017C80(i + 1) == 1) {
+                    if ((D_801E28E0 & main_pause_keys[player].pause) && main_can_pause(i + 1) == 1) {
                     pause:
-                        D_8007A6F0 = 0;
-                        D_8007A6F4 = 12;
-                        D_801D3DC6 = D_8007A6B8[player].owner | 1;
+                        main_pause_cursor = 0;
+                        main_pause_delay = 12;
+                        D_801D3DC6 = main_pause_keys[player].owner | 1;
                         func_800636B0();
                         func_8001F6E4();
                         func_80062E64();
-                        func_80017F14(0x50, 0x3C, (GameObject *)0xF0, 0x5A);
+                        main_create_pause_box(0x50, 0x3C, (GameObject *)0xF0, 0x5A);
                         D_800AA2EC = 0x44;
                         func_8001ED54(&D_80089374);
                         func_800180E4();
@@ -926,7 +926,7 @@ u16 func_8001828C(void) {
         break;
     case 1:
         D_801D3D64.unk_62 = (flags & 0xFFFC) | 2;
-        func_80018C14();
+        main_cycle_highlight();
         D_800AA2EC = D_801E2A44;
         func_8001ED54(&D_800893BC);
         D_800AA2EC = 0x47;
@@ -934,26 +934,26 @@ u16 func_8001828C(void) {
         break;
     case 2:
         i = (flags & 0x3000) >> 12;
-        func_80018C14();
-        if ((D_801E0D7C & D_8007A6B8[i].confirm) && D_8007A6F4 == 0) {
+        main_cycle_highlight();
+        if ((D_801E0D7C & main_pause_keys[i].confirm) && main_pause_delay == 0) {
             main_free_kind(0x302);
             main_free_kind(0x303);
-            D_8007A6F4 = 12;
+            main_pause_delay = 12;
             func_8001F724(3);
             func_8001802C(i);
-            if (D_8007A6F0 == 0) {
+            if (main_pause_cursor == 0) {
                 D_801D3D64.unk_62 = 0;
                 main_free_kind(0x301);
                 main_free_kind(0x550);
                 func_8001F704();
                 func_80062E88();
                 func_800181D0();
-                func_80018008();
+                main_free_pause_box();
                 func_80060A7C(0x401, 0x808080, 4);
                 func_80060A7C(0x402, 0x808080, 4);
                 func_80060A7C(0x7B4, 0x808080, 4);
             } else {
-                D_8007A6F0 = 1;
+                main_pause_cursor = 1;
                 D_801D3D64.unk_62 |= 3;
                 main_free_kind(0x301);
                 D_800AA2EC = 0x44;
@@ -963,19 +963,19 @@ u16 func_8001828C(void) {
                 D_800AA2EC = 0x47;
                 func_8001ED54(&D_80089400);
             }
-        } else if ((D_801E0D7C & D_8007A6B8[i].move) && D_8007A6F4 == 0) {
+        } else if ((D_801E0D7C & main_pause_keys[i].move) && main_pause_delay == 0) {
             main_free_kind(0x302);
             main_free_kind(0x303);
-            D_8007A6F4 = 12;
+            main_pause_delay = 12;
             func_8001F724(0x1E);
-            if (D_8007A6F0 == 0) {
-                D_8007A6F0 = 1;
+            if (main_pause_cursor == 0) {
+                main_pause_cursor = 1;
                 D_800AA2EC = 0x47;
                 func_8001ED54(&D_800893BC);
                 D_800AA2EC = D_801E2A44;
                 func_8001ED54(&D_800893E0);
             } else {
-                D_8007A6F0 = 0;
+                main_pause_cursor = 0;
                 D_800AA2EC = D_801E2A44;
                 func_8001ED54(&D_800893BC);
                 D_800AA2EC = 0x47;
@@ -985,20 +985,20 @@ u16 func_8001828C(void) {
         break;
     case 3:
         i = (flags & 0x3000) >> 12;
-        func_80018C14();
-        if ((D_801E0D7C & D_8007A6B8[i].confirm) && D_8007A6F4 == 0) {
+        main_cycle_highlight();
+        if ((D_801E0D7C & main_pause_keys[i].confirm) && main_pause_delay == 0) {
             main_free_kind(0x304);
             main_free_kind(0x305);
-            D_8007A6F4 = 12;
+            main_pause_delay = 12;
             func_8001F724(3);
             func_8001802C(i);
-            if (D_8007A6F0 == 1) {
+            if (main_pause_cursor == 1) {
                 D_801D3D64.unk_62 = 0;
                 main_free_kind(0x301);
                 main_free_kind(0x550);
                 func_8001F704();
                 func_80062E88();
-                func_80018008();
+                main_free_pause_box();
                 func_80060A7C(0x401, 0x808080, 4);
                 func_80060A7C(0x402, 0x808080, 4);
                 func_80060A7C(0x7B4, 0x808080, 4);
@@ -1030,19 +1030,19 @@ u16 func_8001828C(void) {
                 func_8001D084();
                 return 1;
             }
-        } else if ((D_801E0D7C & D_8007A6B8[i].move) && D_8007A6F4 == 0) {
+        } else if ((D_801E0D7C & main_pause_keys[i].move) && main_pause_delay == 0) {
             main_free_kind(0x304);
             main_free_kind(0x305);
-            D_8007A6F4 = 12;
+            main_pause_delay = 12;
             func_8001F724(0x1E);
-            if (D_8007A6F0 == 1) {
-                D_8007A6F0 = 0;
+            if (main_pause_cursor == 1) {
+                main_pause_cursor = 0;
                 D_800AA2EC = 0x47;
                 func_8001ED54(&D_8008941C);
                 D_800AA2EC = D_801E2A44;
                 func_8001ED54(&D_80089400);
             } else {
-                D_8007A6F0 = 1;
+                main_pause_cursor = 1;
                 D_800AA2EC = D_801E2A44;
                 func_8001ED54(&D_8008941C);
                 D_800AA2EC = 0x47;
@@ -1054,7 +1054,7 @@ u16 func_8001828C(void) {
     return 0;
 }
 
-void func_80018BD4(s32 from, s32 to) {
+void main_recolour_objects(s32 from, s32 to) {
     GameObject *head;
     GameObject *sprite;
 
@@ -1070,7 +1070,7 @@ void func_80018BD4(s32 from, s32 to) {
     }
 }
 
-void func_80018C14(void) {
+void main_cycle_highlight(void) {
     s16 prev;
 
     if (--D_801FAC7C <= 0) {
@@ -1079,7 +1079,7 @@ void func_80018C14(void) {
             D_801F9AB8 = 0;
         }
         D_801E2A44 = D_8007A6F8[D_801F9AB8];
-        func_80018BD4(D_8007A6F8[prev], D_8007A6F8[D_801F9AB8]);
+        main_recolour_objects(D_8007A6F8[prev], D_8007A6F8[D_801F9AB8]);
         D_801FAC7C = 4;
     }
 }
@@ -1771,7 +1771,7 @@ SpriteFrame *func_8001A554(s32 id, GameObject *obj) {
         }
         frame = (SpriteFrame *) (D_801FA738[b].unk_0 + (D_801D8868[index] & 0x7FFFFFFF));
         if ((D_801D8868[index] & 0x7FFFFFFF) == 0) {
-            id = D_8007AD4C[(func_8001EB10(0x8000, 0xE) & 0x1F) + 10];
+            id = D_8007AD4C[(main_random_between(0x8000, 0xE) & 0x1F) + 10];
             frame = (SpriteFrame *) func_8001B128(id);
             obj->unk_24 = frame->unk_00;
         }
@@ -1806,7 +1806,7 @@ s32 func_8001A784(u32 id) {
         index = (id & 0xFFFFFF) >> 1;
         id = D_801FA738[(id >> 24) & 0x3F].unk_0 + (D_801D8868[index] & 0x7FFFFFFF);
         if ((D_801D8868[index] & 0x7FFFFFFF) == 0) {
-            id = D_8007AD4C[(func_8001EB10(0x8000, 0xE) & 0x1F) + 10];
+            id = D_8007AD4C[(main_random_between(0x8000, 0xE) & 0x1F) + 10];
         }
     }
     return id;
@@ -2295,7 +2295,7 @@ void func_8001B858(void) {
         func_8001C784();
         break;
     case 0x160:
-        func_8001C83C();
+        main_update_attract();
         break;
     case 0x170:
         D_801D87C8 = 0;
@@ -2752,7 +2752,7 @@ extern s16 D_800A98B8;
 extern s16 D_801F9AAC;
 extern s16 D_801FB468;
 
-void func_8001C83C(void) {
+void main_update_attract(void) {
     u32 state;
     s32 prev;
     s32 i;
@@ -2922,7 +2922,7 @@ void func_8001C83C(void) {
                 func_8001EC74(0x405, D_801F9AAC);
                 func_8001EC74(0x406, (s16) D_801E2A44);
             }
-            func_80018C14();
+            main_cycle_highlight();
             return;
         }
         func_800A1720(D_801FA960);
@@ -2935,7 +2935,7 @@ void func_8001C83C(void) {
     }
 }
 #else
-INCLUDE_ASM("asm/main/nonmatchings/main", func_8001C83C);
+INCLUDE_ASM("asm/main/nonmatchings/main", main_update_attract);
 #endif
 
 s32 func_8001CFAC(void) {
@@ -3828,14 +3828,14 @@ void func_8001E980(void) {
     main_init_objects();
 }
 
-void func_8001E9C4(s16 arg0, s16 arg1) {
+void main_seed_random(s16 arg0, s16 arg1) {
     D_801FAF70 = arg0;
     D_801FAF6C = arg1;
     D_801FAF6E = (arg0 * arg1) / 3;
 }
 
-/* The random number generator: its state is D_801FAF6C/6E/70 (seeded by func_8001E9C4). */
-s16 func_8001EA10(void) {
+/* The random number generator: its state is D_801FAF6C/6E/70 (seeded by main_seed_random). */
+s16 main_random(void) {
     u16 prev;
     u16 seed;
     u16 next;
@@ -3858,21 +3858,21 @@ s32 func_8001EA78(void) {
     s16 temp_s0;
     s32 temp_lo;
 
-    temp_s0 = func_8001EA10();
-    temp_lo = temp_s0 * func_8001EA10();
+    temp_s0 = main_random();
+    temp_lo = temp_s0 * main_random();
     D_801E0D6C = temp_lo;
     return temp_lo;
 }
 
-s32 func_8001EAC4(s32 range) {
+s32 main_random_range(s32 range) {
     if (range == 0) {
         return 0;
     }
     return func_8001EA78() % (u32) range + 1;
 }
 
-s32 func_8001EB10(s32 arg0, s32 arg1) {
-    return arg1 + func_8001EAC4(arg0 - arg1);
+s32 main_random_between(s32 arg0, s32 arg1) {
+    return arg1 + main_random_range(arg0 - arg1);
 }
 
 void func_8001EB3C(void) {
@@ -3967,21 +3967,21 @@ void func_8001EDE4(void) {
     D_801D8588.unk_20 = 0x8002;
     D_801D8588.flags = 0x10001;
     D_801D8588.unk_28 = 0x8101;
-    func_8001EEA0();
+    main_print_text();
 }
 
 void func_8001EE24(void) {
     D_801D8588.unk_20 = 0x8002;
     D_801D8588.flags = 0x10000;
     D_801D8588.unk_28 = 0x8101;
-    func_8001EEA0();
+    main_print_text();
 }
 
 void func_8001EE60(void) {
     D_801D8588.unk_20 = 0x8002;
     D_801D8588.flags = 0x10002;
     D_801D8588.unk_28 = 0x8101;
-    func_8001EEA0();
+    main_print_text();
 }
 
 #ifdef NON_MATCHING
@@ -3992,7 +3992,7 @@ void func_8001EE60(void) {
 extern void (*D_8007B04C[])(void);
 extern GameObject *D_801FB17C;
 
-void func_8001EEA0(void) {
+void main_print_text(void) {
     Fixed off;
     Glyph *glyph;
     u32 id;
@@ -4087,7 +4087,7 @@ void func_8001EEA0(void) {
     }
 }
 #else
-INCLUDE_ASM("asm/main/nonmatchings/main", func_8001EEA0);
+INCLUDE_ASM("asm/main/nonmatchings/main", main_print_text);
 #endif
 
 void func_8001F268(void) {
@@ -4302,7 +4302,7 @@ void main_draw_lists(void) {
 }
 
 void func_8001F9BC(GameObject *head, GameObject *end) {
-    func_8001F9DC(head, end);
+    main_draw_objects(head, end);
 }
 
 #ifdef NON_MATCHING
@@ -4315,7 +4315,7 @@ void func_8001F9BC(GameObject *head, GameObject *end) {
  * DR_TPAGE whenever the texture page changes */
 extern u32 D_801FB41C;  /* the lit sprites' colour (building.c) */
 
-void func_8001F9DC(GameObject *head, GameObject *end) {
+void main_draw_objects(GameObject *head, GameObject *end) {
     GameObject *obj;
     POLY_F4 *box;
     SPRT *sprt;
@@ -4587,7 +4587,7 @@ quad_lit:
     }
 }
 #else
-INCLUDE_ASM("asm/main/nonmatchings/main", func_8001F9DC);
+INCLUDE_ASM("asm/main/nonmatchings/main", main_draw_objects);
 #endif
 
 void main_run_calls(void) {
@@ -4959,7 +4959,7 @@ void func_800211F4(Npc *npc) {
         }
         func_80024138(npc);
         if (npc->aim != 3) {
-            npc->start = func_8001EB10(7, 0) & 1;
+            npc->start = main_random_between(7, 0) & 1;
         } else {
             npc->start = 1;
         }
@@ -5788,7 +5788,7 @@ void func_80023080(Npc *npc) {
     func_8002423C(npc);
     D_800AA248.cur_obj->flags &= ~0x10;
     npc->action = 1;
-    npc->unk_1C = func_8001EB10(0xC8, 0x64);
+    npc->unk_1C = main_random_between(0xC8, 0x64);
     D_800AA248.cur_obj->pos_y.w = 0x02000000;
     D_800AA248.cur_obj->pos_x.w = 0x02000000;
     npc->state = 0;
@@ -6375,7 +6375,7 @@ u16 func_80024138(Npc *npc) {
         if (used == 7) {
             used = 0;
         }
-        k = func_8001EB10(0x1F, 0) & 3;
+        k = main_random_between(0x1F, 0) & 3;
         if (k == 3) {
             k = 0;
         }
@@ -6832,7 +6832,7 @@ void main_create_buildings(void) {
             rec->frames = def->frames;
             rec->unk_08C = def->unk_18;
             rec->kind = def->unk_00.u.lo;
-            rec->unk_01C = func_8001EB10(0x1E, 0) % 2 + 1;
+            rec->unk_01C = main_random_between(0x1E, 0) % 2 + 1;
             rec->unk_034 = 1;
             rec->unk_036 = 1;
             rec->unk_02A = 1;

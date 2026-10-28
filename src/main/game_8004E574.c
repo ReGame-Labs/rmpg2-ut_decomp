@@ -6,7 +6,7 @@
 #include "game.h"
 #include "game_8004E574.h"
 
-s32 func_8001EB10(s32 range, s32 arg1);                     /* a random number */
+s32 main_random_between(s32 range, s32 arg1);                     /* a random number */
 s32 func_8001EA78(void);                                    /* a random number */
 void func_8001F7CC(s32 sound, s32 variant);                 /* play a sound */
 ObjectDef *func_8001D110(void);                             /* a fresh definition to fill in */
@@ -446,7 +446,7 @@ void func_8004F300(void) {
 void func_8004F33C(void) {
     GameObject *obj = D_800AA248.cur_obj;
 
-    obj->frames_left = func_8001EB10(0x12C, 0x1E);
+    obj->frames_left = main_random_between(0x12C, 0x1E);
 }
 
 void func_8004F370(void) {
@@ -628,7 +628,7 @@ void func_8004F910(void) {
     Monster *other = obj->unk_94.monster;
     Monster *m = obj->owner.monster;
 
-    if (other->unk_18C <= m->unk_18C || !(func_8001EB10(0xF, 0) & 1)) {
+    if (other->unk_18C <= m->unk_18C || !(main_random_between(0xF, 0) & 1)) {
         other->action = 0x43;
         m->action = 0x1E;
         other->unk_1C8 = 0;

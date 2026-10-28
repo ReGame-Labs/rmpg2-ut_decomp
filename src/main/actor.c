@@ -28,7 +28,7 @@ typedef struct ActorPair {
 } ActorPair;
 
 void func_8001E698(GameObject *mover, Anim *anim);
-s32 func_8001EB10(s32 arg0, s32 arg1);
+s32 main_random_between(s32 arg0, s32 arg1);
 void func_8001F724(u16);
 void func_8003C894(Actor *actor);
 void func_8003C8D4(Actor *actor);
@@ -797,7 +797,7 @@ void func_8003DFD4(void) {
         def->unk_0C = 0x781;
         ai->state = 0;
         if (D_801D36FC != 0x120) {
-            ai->timer = func_8001EB10(0x64, 0x32) + 0x96;
+            ai->timer = main_random_between(0x64, 0x32) + 0x96;
         }
         ai->kind = *init;
         init++;
@@ -850,7 +850,7 @@ BuildingItem *actor_pick_building_part(BuildingPart **part, Ai *ai) {
     if (*(s16 *)&D_801E29A4 == 0) {
         goto fail;
     }
-    idx = func_8001EB10(*(s16 *)&D_801E29A4, 0);
+    idx = main_random_between(*(s16 *)&D_801E29A4, 0);
     if (idx == 0) {
         idx = count;
     }
@@ -907,7 +907,7 @@ retry:
         goto fail;
     }
     tries++;
-    r = func_8001EB10(0x8000, 0);
+    r = main_random_between(0x8000, 0);
     if (b->kind != 2) {
         s = r & 3;
         if (s != 0) {
@@ -941,7 +941,7 @@ have_limit:
             goto fail;
         }
         row = D_8007DEC0[n];
-        row += func_8001EB10(0x8000, 0) & 7;
+        row += main_random_between(0x8000, 0) & 7;
         limit = *row;
         if (limit == 0) {
             goto fail;
@@ -1065,7 +1065,7 @@ void func_8003E6A4(Ai *ai) {
         ai->delay = 0;
         return;
     }
-    ai->timer = func_8001EB10(0x258, 0x168);
+    ai->timer = main_random_between(0x258, 0x168);
 }
 
 void func_8003E764(Ai *ai) {
@@ -1147,7 +1147,7 @@ void func_8003EAB8(Ai *ai) {
     Anim *anim;
 
     if (ai->unk_0C == 0) {
-        if (func_8001EB10(0x8000, 0) & 1) {
+        if (main_random_between(0x8000, 0) & 1) {
             anim = &D_8008AB4C;
         } else {
             anim = &D_8008AB80;

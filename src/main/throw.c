@@ -55,7 +55,7 @@ void func_80029118(s16, u16);
 void func_80053C50(s32, Monster *m);
 void func_8006353C(s32);
 u16 func_8004A9B0();
-s32 func_8001EB10(s32 range, s32 x);
+s32 main_random_between(s32 range, s32 x);
 s16 func_8003FCD8(s32, s32);              /* a horizontal distance */
 extern s32 D_800916D8[];
 void func_8004B204(void);
@@ -129,7 +129,7 @@ extern s32 D_801FA7D8;
 extern void (*D_8007F228[])(void);
 
 void func_8004750C(void) {
-    s32 i = func_8001EB10(0xE, 2);
+    s32 i = main_random_between(0xE, 2);
 
     D_8007F228[i & 0xF]();
 }
@@ -366,7 +366,7 @@ void func_80047B6C(void) {
             if (kind != 1) {
                 if (func_8004A9B0(m, a, 5, b, c) == 0) {
                     m->unk_02A = 0;
-                    m->unk_01C = func_8001EB10(4, 2);
+                    m->unk_01C = main_random_between(4, 2);
                 }
             } else {
                 if (variant != 0) {
@@ -620,12 +620,12 @@ u16 func_80048384(u16 b, Throw *t) {
     t->kind = b;
     t->state = 1;
     D_800AA248.cur_obj->unk_94.p = t;
-    D_800AA248.cur_obj->vel_y.w = -(((func_8001EB10(0x7F, 1) & 3) + 0xE) << 15);
+    D_800AA248.cur_obj->vel_y.w = -(((main_random_between(0x7F, 1) & 3) + 0xE) << 15);
     if (saved->unk_68.monster != NULL) {
         vx = abs(func_8003FCD8(saved->pos_x.s.hi, saved->unk_68.monster->obj->pos_x.s.hi));
         vx = ((vx >> 5) << 15) + 0x4000;
     } else {
-        vx = ((func_8001EB10(0x7F, 1) & 7) + 2) << 15;
+        vx = ((main_random_between(0x7F, 1) & 7) + 2) << 15;
     }
     if (left) {
         vx = -vx;
@@ -678,12 +678,12 @@ u16 func_80048558(u16 b, Throw *t) {
     t->kind = b;
     t->state = 1;
     D_800AA248.cur_obj->unk_94.p = t;
-    D_800AA248.cur_obj->vel_y.w = -(((func_8001EB10(0x7F, 1) & 3) + 0xC) << 15);
+    D_800AA248.cur_obj->vel_y.w = -(((main_random_between(0x7F, 1) & 3) + 0xC) << 15);
     if (saved->unk_68.monster != NULL) {
         vx = abs(func_8003FCD8(saved->unk_68.monster->obj->pos_x.s.hi, saved->pos_x.s.hi));
         vx = ((vx >> 5) << 15) + 0x8000;
     } else {
-        vx = ((func_8001EB10(0x7F, 1) & 7) + 5) << 15;
+        vx = ((main_random_between(0x7F, 1) & 7) + 5) << 15;
     }
     if (left) {
         vx = -vx;
@@ -820,12 +820,12 @@ u16 func_800489C0(u16 b, Throw *t) {
     t->kind = b;
     t->state = 1;
     D_800AA248.cur_obj->unk_94.p = t;
-    D_800AA248.cur_obj->vel_y.w = -(((func_8001EB10(0x7F, 1) & 3) + 0xE) << 15);
+    D_800AA248.cur_obj->vel_y.w = -(((main_random_between(0x7F, 1) & 3) + 0xE) << 15);
     if (saved->unk_68.monster != NULL) {
         vx = abs(func_8003FCD8(saved->unk_68.monster->obj->pos_x.s.hi, saved->pos_x.s.hi));
         vx = ((vx >> 5) << 15) + 0x8000;
     } else {
-        vx = ((func_8001EB10(0x7F, 1) & 3) + 5) << 15;
+        vx = ((main_random_between(0x7F, 1) & 3) + 5) << 15;
     }
     if (left) {
         vx = -vx;

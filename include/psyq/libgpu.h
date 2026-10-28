@@ -88,7 +88,7 @@ typedef struct POLY_G4 {
 
 DRAWENV *SetDefDrawEnv(DRAWENV *env, int x, int y, int w, int h);
 
-/* Appended for the object drawer (main.c func_8001F9DC): the sprite, the textured quad and the texture page change. */
+/* Appended for the object drawer (main.c main_draw_objects): the sprite, the textured quad and the texture page change. */
 typedef struct SPRT {
     unsigned long tag;
     unsigned char r0, g0, b0, code;

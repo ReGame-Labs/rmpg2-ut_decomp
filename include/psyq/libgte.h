@@ -6,7 +6,7 @@
 void InitGeom(void);
 void SetGeomScreen(long h);
 
-/* Appended for the object drawer (main.c func_8001F9DC): angles in 4096ths of a turn, results 4096 = 1.0. */
+/* Appended for the object drawer (main.c main_draw_objects): angles in 4096ths of a turn, results 4096 = 1.0. */
 int ratan2(int y, int x);
 int rcos(int a);
 int rsin(int a);
