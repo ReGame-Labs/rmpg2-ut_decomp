@@ -1967,10 +1967,13 @@ void func_8002E348(Monster *arg0, BuildingItem *rec) {
 }
 
 #ifdef NON_MATCHING
-/* 94.22%: 94.2 %: the original's li v1,5 in the zero test's delay slot is the else block's constant, so either
- * reorg predicted the branch taken (mostly_true_jump gives EQ not taken; rare_destination is 0 both ways) or the 5
- * was a pseudo set before the branch (global, hence v1); a static inline taking the level, a level local and the
- * == 0 test first do not keep such a pseudo (cse folds it back to constants) */
+/* 94.22%: 94.2 %: the original's li v1,5 in the zero test's delay slot comes from the test block (reorg's backward
+ * fill; here the slot takes the fall-through's move a0,s0): a pseudo holding 5 set before the test, global (v0
+ * holds the loaded unk_06), used by the else arm's store (a store of a constant needs a register, so cse cannot
+ * fold it); a local set to 5 before the test gives exactly that delay slot, but cse then also gives the then arm's
+ * store after the call the same pseudo (an s register); u8..s32 locals, a static inline taking the level, ?: and
+ * per-arm n++ do not separate the two */
+// WIP in src/main/building.c: 94.2 %: the original's li v1,5 in the zero test's delay slot is the else block's constant, so either reorg predicted the branch taken (mostly_true_jump gives EQ not taken; rare_destination is 0 both ways) or the 5 was a pseudo set before the branch (global, hence v1); a static inline taking the level, a level local and the == 0 test first do not keep such a pseudo (cse folds it back to constants)
 void func_8002E440(Monster *arg0, BuildingItem *rec) {
     BuildingPart *part;
     u16 n;
@@ -3318,9 +3321,10 @@ void func_80030D14(UnkStruct19 *p) {
 
 
 #ifdef NON_MATCHING
-/* 98.63%: 98.63 %: combine_givs keeps the first giv of bl->giv, the last one found (the state access, +20); the
- * original kept the items[0].obj access (+152), so it was found last, or the state access was not a giv; an index
- * loop (D_801D3DC8[i]) makes &D_801D3DC8[i] the base (95.8 %), the load order of q and o changes nothing */
+/* 99.88%: 99.88 %: the state test written on each path (merged by cross-jumping) gives the original's registers;
+ * left: combine_givs keeps the first giv of bl->giv, the last one found, which is a state access (+20), so the loop
+ * pointer is p + 20; the original's is p + 152 (items[0].obj), so its last giv found was the items access or the
+ * state accesses were not givs; index loops, a pointer for the items and the load orders were tried */
 void building_count_standing(void) {
     u16 n = D_801E29A4;
     s16 count = 0;
@@ -3333,10 +3337,12 @@ void building_count_standing(void) {
         do {
             q = p->items[0].obj;
             o = p->unk_070->obj;
-            if (!(q->unk_6C & 0x80) || o == NULL || !(o->unk_6C & 0x80)) {
-                if (p->state < 0x10) {
-                    count++;
-                }
+            if (!(q->unk_6C & 0x80)) {
+                if (p->state < 0x10) count++;
+            } else if (o == NULL) {
+                if (p->state < 0x10) count++;
+            } else if (!(o->unk_6C & 0x80)) {
+                if (p->state < 0x10) count++;
             }
             p++;
         } while (--n != 0);
