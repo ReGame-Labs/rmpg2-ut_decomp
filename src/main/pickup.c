@@ -204,7 +204,7 @@ void pickup_spawn_all(void) {
         }
         obj->kind = 0x71A;
         if (item->unk_0E == -1) {
-            r->unk_1C = func_8001EB10(0xC8, 0x64);
+            r->unk_1C = main_random_between(0xC8, 0x64);
         } else {
             r->unk_1C = item->unk_0E;
         }
@@ -241,7 +241,8 @@ void pickup_clear(Pickup *p) {
 
 #ifdef NON_MATCHING
 /* 93.06%: the shape is right (the negu-then-add copies, the swap); registers differ, and the original loads the y
- * before the flags */
+ * before the flags; the original reads the box in func_8004D6F8's order (bottom, right, left, top), but in that
+ * order local-alloc sinks some loads into the compare blocks (91.7 %), and an earlier y read costs more */
 s32 pickup_test_touch(GameObject *obj, Monster *m) {
     SpriteFrame *box;
     s16 x;
@@ -488,7 +489,7 @@ void func_8003C0E0(void) {
 void func_8003C0E8(void) {
     s32 i;
 
-    i = func_8001EB10(0x1F, 0);
+    i = main_random_between(0x1F, 0);
     D_8007DDB4[i & 7]();
 }
 
@@ -603,7 +604,7 @@ void pickup_hide_items(void) {
     }
     func_8003C344();
     list = (SpawnItem *)func_80025C08(D_800830AC);
-    D_800AA248.unk_00 = func_8001EB10(10, 0);
+    D_800AA248.unk_00 = main_random_between(10, 0);
     if (D_800AA248.unk_00 != 0) {
         D_800AA248.unk_00--;
     }
@@ -691,7 +692,7 @@ BuildingPart *func_8003C67C(Building *u, UnkStructB2 *rec) {
     i = 0;
     min = 2;
     if (top > min) {
-        idx = func_8001EB10(top, min) + (D_801FA72C & 3);
+        idx = main_random_between(top, min) + (D_801FA72C & 3);
         if (idx > top) {
             idx -= top;
             if (idx == 0) {

@@ -841,9 +841,12 @@ s32 bonus_get_round_kind(void) {
 }
 
 #ifdef NON_MATCHING
-/* 99.38%: 99.4 %: registers only: x and i swap s2/s3. The per-arm pos_x/id stores (merged by cross-jumping) give
- * the original's store order; global-alloc then ranks x (16 refs over 114 insns, priority 0.56) above i (10 over
- * 78, 0.38), so x takes s2 and i and kind share s3; the original allocates i (or kind) first */
+/* 99.38%: registers only: x and i swap s2/s3. The per-arm pos_x/id stores (merged by cross-jumping) give the
+ * original's store order; global-alloc then ranks x (16 refs over 114 insns, priority 0.56) above i (10 over 78,
+ * 0.38); the original allocates i first (i and kind share s2). Declared s16, x gets the original's registers (cse
+ * moves the first-part stores onto the SImode sum, so x drops to 14 refs, 0.37) but keeps that sum in v1 and copies
+ * it into x (one move, size +4, 99.3 %); stepwise, reordered and cast forms of the first x keep the copy; a single
+ * pos_x store or an id variable lose the store order */
 void bonus_create_counter(s32 kind, s32 n) {
     GameObject *saved;
     ObjectDef *def;
@@ -909,9 +912,11 @@ INCLUDE_ASM("asm/main/nonmatchings/bonus", bonus_create_counter);
 #endif
 
 #ifdef NON_MATCHING
-/* 99.83%: 99.83 %: global-alloc order in case 2: the inner loop's copy of &D_801FB49C[n] (5 refs over 34 insns,
- * 0.29) outranks the D_8007BD78 base (14 over 170, 0.25), so the copy takes s4; the base needs 16 refs or a live
- * length of 142 to come first (loop-variable, ++/+= and loop-bound forms tried) */
+/* 99.83%: global-alloc order in case 2: the inner loop's copy of &D_801FB49C[n] (loop.c's hoist of the inner
+ * invariant, rewritten as a copy of the outer giv: set at depth 2, one use at depth 3, 5 refs over 34 insns, 0.29)
+ * outranks the D_8007BD78 base (14 over 170, 0.25), so the copy takes s4; the base needs 16 refs or a live length
+ * of 142 to come first. Loop-variable (j for the inner loop changes the size: the original shares i with the round-
+ * timer loop), ++/+= and loop-bound forms tried */
 void bonus_update_counters(s32 round) {
     Monster *m;
     GameObject *obj;

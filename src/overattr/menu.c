@@ -367,7 +367,7 @@ void menu_update_name_entry(void) {
             menu_fade_out();
         }
     }
-    func_80018C14();
+    main_cycle_highlight();
 }
 
 INCLUDE_RODATA("asm/overattr/nonmatchings/menu", D_80097F58);
@@ -1865,7 +1865,7 @@ s16 func_8009FF38(void) {
         } else {
             cur = D_800A92C0;
             D_800A9800 = 0;
-            func_80018C14();
+            main_cycle_highlight();
             menu = cur;
             if (cur[1].sub != NULL) {
                 ((void (*)(void)) cur[1].sub)();
@@ -1942,7 +1942,7 @@ s16 func_8009FF38(void) {
             }
         }
         menu_light_choices(D_800A92C0, (s16) D_801E2A44, D_801F9AAC);
-        func_80018C14();
+        main_cycle_highlight();
         if ((D_800A9220 & 0x1C0701C) && D_801F9944 == 0) {
             D_800A9860 = 0x708;
             if (D_800A9220 & 0x1C) {
@@ -2083,7 +2083,7 @@ void menu_update_load_screen(void) {
             D_801D872C /= 2;
         }
         func_8009E310((s16) D_801E2A44, D_801F9AAC);
-        func_80018C14();
+        main_cycle_highlight();
         break;
     }
 }
@@ -2374,7 +2374,7 @@ void menu_ask_format(void) {
         menu_format_card();
         break;
     }
-    func_80018C14();
+    main_cycle_highlight();
 }
 
 INCLUDE_RODATA("asm/overattr/nonmatchings/menu", D_80098260);
@@ -2532,7 +2532,7 @@ void menu_delete_save(void) {
         }
         break;
     }
-    func_80018C14();
+    main_cycle_highlight();
 }
 
 s32 menu_find_save(s32 id) {
