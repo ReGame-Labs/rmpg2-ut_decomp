@@ -4269,23 +4269,20 @@ void func_80020CE4(s32 arg0, s32 arg1) {
     D_801FA9A4 = arg1 & 0xFFFF;
 }
 
-#ifdef NON_MATCHING
-/* 99.36%: 99.36 %: expand_binop swaps (vel + v) into (v + vel) whenever the target is v or vel is still a MEM; the
- * original's (plus vel v) in v's register needs vel in a register and a target other than v (combine then folding
- * the copy) */
 s32 func_80020D20(Npc *npc) {
     s32 v;
+    s32 t;
 
-    v = npc->unk_30;
-    v = D_800AA248.cur_obj->vel_y.w + v;
+    t = npc->unk_30;
+    v = D_800AA248.cur_obj->vel_y.w + t;
     D_800AA248.cur_obj->vel_y.w = v;
     D_800AA248.cur_obj->pos_y.w += v;
-    v = npc->unk_34;
-    v = D_800AA248.cur_obj->vel_x.w + v;
+    t = npc->unk_34;
+    v = D_800AA248.cur_obj->vel_x.w + t;
     D_800AA248.cur_obj->vel_x.w = v;
-    v = D_800AA248.cur_obj->pos_x.w + v;
-    v &= D_801D8864.w;
-    D_800AA248.cur_obj->pos_x.w = v;
+    t = D_800AA248.cur_obj->pos_x.w + v;
+    t &= D_801D8864.w;
+    D_800AA248.cur_obj->pos_x.w = t;
     if (npc->unk_4E != 0) {
         return (u8) D_800AA248.cur_obj->unk_6C >> 7;
     }
@@ -4294,9 +4291,6 @@ s32 func_80020D20(Npc *npc) {
     }
     return 1;
 }
-#else
-INCLUDE_ASM("asm/main/nonmatchings/main", func_80020D20);
-#endif
 
 void func_80020DDC(Npc *npc) {
     D_800AA268.p = npc->obj;
@@ -6075,8 +6069,13 @@ void func_8002469C(s32 *p, s16 arg1, s16 arg2) {
 }
 
 #ifdef NON_MATCHING
-/* 96.07%: the order and the operations match; the width and the distance swap registers (a0/v1), and the left
- * branch shifts the width into v0 where the original uses v1 */
+/* 97.61%: 97.6 %: the order and the operations match (abs() is GCC's builtin; d reused in the left branch). Only d
+ * and width swap registers (a0/v1): with d = size << 16; d -= 1, d is set twice, so local-alloc does not tie the lh
+ * temporary to it (lh v0, as the original) and sched2 places the load as the original, but nothing local holds v1,
+ * so the 0x3FFFFFF constant takes v1, width prefers it and d gets a0. Writing (size << 16) - 1 makes the shift a
+ * block-local in v1 (the constant then takes a0 and d v1, as the original) but local-alloc ties the lh temporary to
+ * it (lh v1; sll v1,v1) and sched2 moves the load down (99.76 % with -fno-schedule-insns2). The original has both:
+ * the lh in v0 and the shift in a v1 local not tied to it */
 void main_wrap_layer_x(GameObject *obj, s32 left, s32 right) {
     s32 x;
     s32 width;
@@ -6090,17 +6089,19 @@ void main_wrap_layer_x(GameObject *obj, s32 left, s32 right) {
             d -= 1;
             width = D_801D8864.w & 0x3FFFFFF;
             d -= width;
-            if (d < 0) {
-                d = -d;
-            }
+            d = abs(d);
             if (x >= d) {
                 x = x - (width + 1);
             }
         }
     } else {
         x += left;
-        if (x < 0 && (obj->size.s.lo << 16) + x <= 0) {
-            x = x + (1 + (D_801D8864.w & 0x3FFFFFF));
+        if (x < 0) {
+            d = obj->size.s.lo << 16;
+            d += x;
+            if (d <= 0) {
+                x = x + (1 + (D_801D8864.w & 0x3FFFFFF));
+            }
         }
     }
     obj->pos_x.w = x;
@@ -6524,8 +6525,11 @@ void func_8002546C(Building *rec) {
 }
 
 #ifdef NON_MATCHING
-/* 94.53%: 94.5 %: the sum y and last swap registers (a1/a3), which moves last's subtract out of the branch's delay
- * slot; statement and declaration orders tried */
+/* 99.89%: 99.9 %: only the loop counter's register differs (v1, the original a1). The size goes through its own
+ * variable so that expand_binop keeps (pos + size) with the size loaded first (no swap: the target is not the
+ * second operand), which frees a1 for last; n > last orders the shifts; blk->unk_00 is stored after unk_1E. The
+ * counter (5 refs, live 8) is global-alloc's first pseudo and takes the first free register, v1; the original's
+ * counter shares last's a1, as if allocated after last (counter forms, types and reuses of last or n tried) */
 void func_80025474(Building *b) {
     BuildingBlock *blk;
     ObjectDef *def;
@@ -6535,6 +6539,7 @@ void func_80025474(Building *b) {
     s16 last;
     s16 k;
     s32 y;
+    s32 sz;
     s16 h;
 
     if (b->unk_018 != NULL) {
@@ -6547,11 +6552,12 @@ void func_80025474(Building *b) {
         n = b->unk_08A;
         last = b->unk_000 - 1;
         top = b->unk_070->obj;
-        y = top->pos_y.u.hi + top->size.u.hi;
+        sz = top->size.u.hi;
+        y = top->pos_y.u.hi + sz;
         if (n < 2) {
             n = 2;
         }
-        if (last < n) {
+        if (n > last) {
             n = last;
         }
         blk->unk_0A = n;
@@ -6568,8 +6574,8 @@ void func_80025474(Building *b) {
         obj = func_8001DCB4();
         h = obj->pos_y.s.hi - obj->unk_1C.s.hi;
         blk->unk_0E = h;
-        blk->unk_00 = obj;
         blk->unk_1E = h + obj->size.u.hi;
+        blk->unk_00 = obj;
         b->unk_018 = blk;
         obj->unk_94.p = blk;
         obj->owner.building = b;
@@ -8130,10 +8136,6 @@ void main_reset_camera_y(void) {
     D_801F9ACC.w = 0;
 }
 
-#ifdef NON_MATCHING
-/* 99.01%: 99.0 %: only flags and the D_801D3D64 pointer swap s0/s1: both have 5 refs, and the pointer is live 150
- * insns to the flags' 141 (the blocks that jump to stop), so global-alloc takes flags first; the original took the
- * pointer first */
 extern s32 D_8007BD7C;
 extern s32 D_801D3D90;
 extern s16 D_801FA724;
@@ -8182,7 +8184,9 @@ void main_update_camera(void) {
             } else if (x >= 0xBF) {
                 goto clamp_right;
             } else {
-                goto stop;
+                scroll->unk_26 = 0;
+                scroll->unk_2C = 0;
+                goto done;
             }
         } else {
             if (vel1 <= vel2) {
@@ -8226,9 +8230,10 @@ void main_update_camera(void) {
                 goto stop;
             }
         right:
-            d = vel2;
-            if (vel1 >= d) {
+            if (vel1 >= vel2) {
                 d = vel1;
+            } else {
+                d = vel2;
             }
             D_801D3D90 = d;
             if (x > 0x12C) {
@@ -8256,9 +8261,10 @@ void main_update_camera(void) {
                 goto stop;
             }
         left:
-            d = vel2;
-            if (vel1 <= d) {
+            if (vel1 <= vel2) {
                 d = vel1;
+            } else {
+                d = vel2;
             }
             D_801D3D90 = d;
             if (x < 0x64) {
@@ -8293,9 +8299,6 @@ void main_update_camera(void) {
 done:
     main_update_camera_y();
 }
-#else
-INCLUDE_ASM("asm/main/nonmatchings/main", main_update_camera);
-#endif
 
 void main_start_scroll_down(void) {
     s32 var_v1;
@@ -8437,12 +8440,14 @@ void main_update_camera_y(void) {
 }
 
 #ifdef NON_MATCHING
-/* 96.69%: 96.7 %: each case's load of m1->obj sits before the second call's li a0 (the original has li a0 first, so
- * its three tails cross-jump from the load); then x1/x2 get a3/a2 instead of t1/t0 */
+/* 96.69%: 96.7 %: each case's load of m1->obj sits before the second call's li a0. In the original, reorg put li
+ * a0,2 in case 1's jump delay slot and the tails cross-jump from the lw, so sched1 had placed the li before the lw
+ * in each case. Both are ready together, of equal priority, and sched1 breaks the tie by RTL order (the arg move is
+ * emitted right before the call, after the lw), unless the lw sets a once-set live pseudo (birthing_insn_p: top
+ * priority, placed last), which o1, set in each case and by the NULL fix-up, is not. Moving the second call after
+ * the switch (a per-case player index) gives the li/lw order but loses the D_801E0B78 base held in s0 across the
+ * join, which only the per-case tails cross-jumped after allocation give. x1/x2 then get a3/a2 instead of t1/t0 */
 extern s16 D_801D8844;
-extern s16 D_801FA724;
-extern s16 D_801FA728;
-extern s16 D_801FA9A8;
 s16 main_get_midpoint(s32, s32);
 
 void func_800288B0(s32 *vel2, s32 *vel1) {
