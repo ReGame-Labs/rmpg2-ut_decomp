@@ -261,7 +261,8 @@ void func_8009BF94(u8 *dst, s32 index) {
  * the original gives it s1, i.e. allocates it before them, which needs a priority above 0.13 (a life under 24 insns
  * for 3 refs): the original's address was not this one long pseudo. A user variable for it, a TextMessage pointer
  * and the struct forms of the first four strings (&D_800A6300.text[6], ...: cse then reuses them, 95% and less)
- * do not change it */
+ * do not change it. The text address carries a REG_EQUIV note, so update_equiv_regs doubles its life (68 -> 136);
+ * the %hi pseudos are doubled too. No -fno-* flag of the round's list changes the order, nor the permuter (25 min) */
 void menu_draw_cheats(void) {
     func_8009BF40(D_800A631E, D_801FA960);
     func_8001ECB4(D_800A6359, D_8007A684, 0);
