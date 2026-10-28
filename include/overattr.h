@@ -112,12 +112,16 @@ extern OverattrPlacement D_800A73C4[4];
 typedef struct { u32 colors[8]; } CardClut;   /* the save icon's 16-colour CLUT, two per word */
 typedef struct { u32 pixels[32]; } CardIcon;  /* a 16x16 4-bit icon frame */
 
-/* A menu: record 0 holds the item count, a parent menu and the cursor; record 1's sub is the menu's function, a
- * void (*)(void) run when it opens and every frame (func_8009FF38); the items start at record 2. */
+/* A menu: record 0 holds the item count, a parent menu and the cursor; record 1's sub.fn is the menu's function, run
+ * when it opens and every frame (func_8009FF38); the items start at record 2. */
 typedef struct MenuRecord {
     /* 0x00 */ s32 unk_00;             /* record 0: the item count; an item: its TextMessage */
-    /* 0x04 */ struct MenuRecord *sub; /* record 0: another menu, whose item at the cursor is lit too; an item:
-                                        * its action, a void (*)(void) (menu_update_name_entry) */
+    /* 0x04 */ union {
+                   struct MenuRecord *menu; /* record 0: another menu, whose item at the cursor is lit too; an item:
+                                             * the menu it opens */
+                   void (*fn)(void);        /* record 1: the menu's function; an item: its action
+                                             * (menu_update_name_entry) */
+               } sub;
     /* 0x08 */ s16 kind;               /* an item: the kind of its objects; record 0: the cursor */
     /* 0x0A */ u8 unk_0A[0x02];
 } MenuRecord;

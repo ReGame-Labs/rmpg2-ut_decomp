@@ -193,7 +193,7 @@ void func_8006BBA0(s32 mute, s32 kinds) {
                     if (*idx != 0xFF) {
                         ch = &D_801FDF20->unk_1C[*idx];
                         if (mute == 1) {
-                            D_80087130[ch->unk_10][6](ch);
+                            D_80087130[ch->cmd_set][6](ch);
                         }
                         func_8006BB60(ch, seq);
                         if (--playing == 0) {
@@ -571,7 +571,7 @@ void func_8006CEE4(SoundChannel *ch) {
     u8 *p;
     s16 v;
 
-    p = ch->unk_34;
+    p = ch->seq;
     v = p[1] | (p[2] << 8);
     D_801FD9C0 = v;
     ch->unk_04 = v;
@@ -592,7 +592,7 @@ void wess_pitch_mod(SoundChannel *ch) {
     u8 *p;
     s16 v;
 
-    p = ch->unk_34;
+    p = ch->seq;
     D_801FD9DC = p[1] | (p[2] << 8);
     if (ch->unk_06 != D_801FD9DC) {
         ch->unk_06 = D_801FD9DC;
@@ -646,7 +646,7 @@ extern s16 D_801FD9F0;
 extern u8 D_801FD9F4;
 
 void wess_volume_mod(SoundChannel *ch) {
-    D_801FD9F4 = ch->unk_34[1];
+    D_801FD9F4 = ch->seq[1];
     if (ch->unk_0D != D_801FD9F4) {
         ch->unk_0D = D_801FD9F4;
         D_801FD9E0 = ch->unk_11;
@@ -726,7 +726,7 @@ extern s16 D_801FDA08;
 extern u8 D_801FDA0C;
 
 void wess_pan_mod(SoundChannel *ch) {
-    D_801FDA0C = ch->unk_34[1];
+    D_801FDA0C = ch->seq[1];
     if (ch->unk_0E != D_801FDA0C) {
         ch->unk_0E = D_801FDA0C;
         if (D_800870F2 != 0) {
@@ -793,7 +793,7 @@ void wess_pan_mod(SoundChannel *ch) {
 void func_8006DBC0(SoundChannel *ch) {
     u8 n;
 
-    if (ch->unk_34[1] == 0) {
+    if (ch->seq[1] == 0) {
         n = ch->unk_11;
         ch->unk_00.w |= 0x80;
         D_801FDA10 = n;
@@ -820,7 +820,7 @@ void func_8006DBC0(SoundChannel *ch) {
 void func_8006DD10(SoundChannel *ch) {
     u8 v;
 
-    v = ch->unk_34[1];
+    v = ch->seq[1];
     D_801FDA1C = v;
     if (ch->unk_0C != v) {
         ch->unk_0C = v;
@@ -939,8 +939,8 @@ extern SoundPatchmap *D_801FDA5C;
 extern SoundEntry *D_801FDA60;
 
 void func_8006E244(SoundChannel *ch) {
-    D_801FDA4C = ch->unk_34[1];
-    D_801FDA50 = ch->unk_34[2];
+    D_801FDA4C = ch->seq[1];
+    D_801FDA50 = ch->seq[2];
     D_801FDA58 = &D_801FDA88[ch->unk_04];
     D_801FDA54 = D_801FDA58->unk_00;
     D_801FDA48 = 0;
@@ -958,7 +958,7 @@ void func_8006E3B8(SoundChannel *ch) {
     D_801FDA68 = D_801FDA78;
     D_801FDA64 = D_801FDA7C;
     while (--D_801FDA64 != -1) {
-        if ((D_801FDA68->unk_00.w & 3) == 1 && D_801FDA68->unk_05 == ch->unk_34[1]
+        if ((D_801FDA68->unk_00.w & 3) == 1 && D_801FDA68->unk_05 == ch->seq[1]
             && D_801FDA68->unk_00.b[3] == ch->unk_00.b[1]) {
             if (ch->unk_00.w & 0x80) {
                 func_8006DF68(D_801FDA68);
@@ -1446,9 +1446,9 @@ s32 wess_load_module(s32 name, s32 buf, s32 size) {
     D_801FDF20->unk_0B = D_80087174;
     for (i = 0; i < D_80087160; i++) {
         D_801FDF20->unk_1C[i].unk_00.b[1] = i;
-        D_801FDF20->unk_1C[i].unk_3C = (u8 **)mem;
+        D_801FDF20->unk_1C[i].stack_base = (u8 **)mem;
         mem += D_801FDF20->unk_0B * 4;
-        D_801FDF20->unk_1C[i].unk_44 = (u8 **)mem;
+        D_801FDF20->unk_1C[i].stack_end = (u8 **)mem;
     }
     mem += (s32)mem & 1;
     mem += (s32)mem & 2;
@@ -1472,14 +1472,14 @@ void wess_init_channel(SoundChannel *ch, SoundTrack *track, SoundTrackOpts *opts
     ch->unk_00.w &= ~0x40;
     ch->unk_00.w |= 0x80;
     ch->unk_00.b[3] = track->unk_00->class;
-    ch->unk_10 = 1;
+    ch->cmd_set = 1;
     ch->unk_11 = 0;
-    ch->unk_14 = track->unk_00->unk_0A;
-    ch->unk_20 = 0;
-    ch->unk_24 = 0;
-    ch->unk_28 = 0;
-    ch->unk_40 = ch->unk_3C;
-    ch->unk_18 = track->unk_00->label_count;
+    ch->ppq = track->unk_00->unk_0A;
+    ch->accum = 0;
+    ch->delay_time = 0;
+    ch->elapsed = 0;
+    ch->stack = ch->stack_base;
+    ch->label_count = track->unk_00->label_count;
     ch->unk_48 = track->unk_00->data_size;
     ch->unk_0F = track->unk_00->unk_09;
     if (opts == NULL || opts->mask == 0) {
@@ -1513,13 +1513,13 @@ void wess_init_channel(SoundChannel *ch, SoundTrack *track, SoundTrackOpts *opts
         ch->unk_00.w &= ~2;
     }
     if (mask & 0x20) {
-        ch->unk_16 = opts->unk_0C;
+        ch->tempo = opts->unk_0C;
     } else {
-        ch->unk_16 = track->unk_00->unk_0C;
+        ch->tempo = track->unk_00->unk_0C;
     }
-    ch->unk_1C = func_80070588(func_8007050C(), ch->unk_14, ch->unk_16);
+    ch->tick_step = func_80070588(func_8007050C(), ch->ppq, ch->tempo);
     if (mask & 0x40) {
-        ch->unk_2C = ch->unk_28 + opts->unk_10;
+        ch->end_time = ch->elapsed + opts->unk_10;
         ch->unk_00.w |= 0x10;
     } else {
         ch->unk_00.w &= ~0x10;
@@ -1542,9 +1542,9 @@ void wess_set_channel_data(SoundChannel *ch, SoundTrack *track) {
     ch->unk_4C = track->unk_00->data_size;
     ch->unk_1A = track->unk_00->label_count;
     seq = track->unk_08;
-    ch->unk_30 = seq;
-    ch->unk_34 = func_80076C8C(seq, &ch->unk_08);
-    ch->unk_38 = track->unk_04;
+    ch->seq_start = seq;
+    ch->seq = func_80076C8C(seq, &ch->delay);
+    ch->labels = track->unk_04;
 }
 
 s32 wess_start_sequence(SoundSlot *slot, s32 n, s32 arg2, s32 arg3, SoundTrackOpts *opts) {
@@ -1667,7 +1667,7 @@ void func_8006FCD4(s32 n, s32 set_rate, s32 rate) {
                     while (--entries != -1) {
                         if (*idx != 0xFF) {
                             ch = &D_801FDF20->unk_1C[*idx];
-                            D_80087130[ch->unk_10][5](ch);
+                            D_80087130[ch->cmd_set][5](ch);
                             if (--playing == 0) {
                                 break;
                             }
@@ -1723,7 +1723,7 @@ void func_8006FED8(s32 set_rate, s32 rate) {
                 while (--entries != -1) {
                     if (*idx != 0xFF) {
                         ch = &D_801FDF20->unk_1C[*idx];
-                        D_80087130[ch->unk_10][5](ch);
+                        D_80087130[ch->cmd_set][5](ch);
                         if (--playing == 0) {
                             break;
                         }
@@ -1776,13 +1776,13 @@ void func_800700CC(u8 volume) {
                     if (*idx != 0xFF) {
                         ch = &D_801FDF20->unk_1C[*idx];
                         if (ch->unk_00.b[3] == 0) {
-                            pos = ch->unk_34;
-                            ch->unk_34 = cmd;
+                            pos = ch->seq;
+                            ch->seq = cmd;
                             cmd[0] = 12;
-                            ch->unk_34[1] = ch->unk_0D;
+                            ch->seq[1] = ch->unk_0D;
                             ch->unk_0D = 0;
-                            D_80087130[ch->unk_10][12](ch);
-                            ch->unk_34 = pos;
+                            D_80087130[ch->cmd_set][12](ch);
+                            ch->seq = pos;
                         }
                         if (--playing == 0) {
                             break;

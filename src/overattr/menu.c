@@ -331,7 +331,7 @@ void menu_update_name_entry(void) {
         func_8001F724(0x1E);
     } else if ((D_800A9220 & 0x01304C13) && D_801F9944 == 0) {
         D_800A9860 = 0x708;
-        ((void (*)(void)) D_800A92C0[D_800A92D0 + 2].sub)();
+        D_800A92C0[D_800A92D0 + 2].sub.fn();
         D_801F9944 = 0xB;
         D_801D872C /= 2;
         if (D_800A92D0 == 5) {
@@ -339,8 +339,8 @@ void menu_update_name_entry(void) {
         }
     } else if ((D_800A9220 & 0x04010040) && D_801F9944 == 0) {
         D_800A9860 = 0x708;
-        if (menu->sub != NULL) {
-            D_800A92D8 = menu->sub;
+        if (menu->sub.menu != NULL) {
+            D_800A92D8 = menu->sub.menu;
             D_800A9800 = 1;
             D_800A9870 = menu->kind;
             func_8001F724(3);
@@ -360,7 +360,7 @@ void menu_update_name_entry(void) {
         if (strcmp(D_800A9890, D_8007A69C[i]) == 0) {
             D_800A6F5C[i]();
             func_8001F724(3);
-            D_800A92D8 = menu->sub;
+            D_800A92D8 = menu->sub.menu;
             D_800A9800 = 1;
             D_800A9870 = menu->kind;
             func_8001F724(3);
@@ -871,7 +871,7 @@ void menu_back(void) {
     menu = D_800A92C0;
     if ((D_800A9220 & 0x1004010) && D_801F9944 == 0) {
         D_800A9800 = 1;
-        D_800A92D8 = menu[0].sub;
+        D_800A92D8 = menu[0].sub.menu;
         D_800A9870 = menu[0].kind;
         func_8001F724(3);
         menu_fade_out();
@@ -897,7 +897,7 @@ void func_8009DE00(void) {
     menu = D_800A92C0;
     if ((D_800A9220 & 0x1004010) && D_801F9944 == 0) {
         D_800A9800 = 1;
-        D_800A92D8 = menu[0].sub;
+        D_800A92D8 = menu[0].sub.menu;
         D_800A9870 = menu[0].kind;
         func_8001F724(3);
         menu_fade_out();
@@ -917,9 +917,9 @@ void menu_free_others(void *list, s32 selected) {
             main_free_kind(menu[i].kind);
         }
     }
-    if (menu->sub != NULL) {
+    if (menu->sub.menu != NULL) {
         i = menu->kind;
-        main_free_kind(menu->sub[i + 2].kind);
+        main_free_kind(menu->sub.menu[i + 2].kind);
     }
 }
 
@@ -951,8 +951,8 @@ s16 menu_draw(void *list, s32 selected, s32 lit, s32 normal) {
     if (D_800A9800 == 1 && menu != D_800A6FCC) {
         i = menu->kind + 2;
         D_800AA2EC = D_801D885C;
-        func_8001ED54((TextMessage *) menu->sub[i].unk_00);
-        kind = menu->sub[i].kind;
+        func_8001ED54((TextMessage *) menu->sub.menu[i].unk_00);
+        kind = menu->sub.menu[i].kind;
         menu_set_colour(kind, 0);
         head = &D_801E28C0;
         obj = head->next;
@@ -1064,9 +1064,9 @@ void menu_fade_others(void *list, s32 selected) {
             menu_set_colour(menu[i].kind, 0x808080);
         }
     }
-    if (menu[0].sub != NULL) {
+    if (menu[0].sub.menu != NULL) {
         i = menu[0].kind;
-        menu_set_colour(menu[0].sub[i + 2].kind, 0x808080);
+        menu_set_colour(menu[0].sub.menu[i + 2].kind, 0x808080);
     }
     D_800A9888 = 1;
 }
@@ -1736,7 +1736,7 @@ s16 func_8009FF38(void) {
     case 6:
         menu = D_800A92D8;
         if (D_800A9800 == 0) {
-            menu->sub = D_800A92C0;
+            menu->sub.menu = D_800A92C0;
             menu->kind = D_800A92D0;
         }
         D_800A92C0 = D_800A92D8;
@@ -1766,8 +1766,8 @@ s16 func_8009FF38(void) {
         }
         cur = D_800A92C0;
         D_801D3780 = 7;
-        if (cur[1].sub != NULL) {
-            ((void (*)(void)) cur[1].sub)();
+        if (cur[1].sub.fn != NULL) {
+            cur[1].sub.fn();
         }
         menu_fade_in(D_800A92C0);
         break;
@@ -1867,8 +1867,8 @@ s16 func_8009FF38(void) {
             D_800A9800 = 0;
             main_cycle_highlight();
             menu = cur;
-            if (cur[1].sub != NULL) {
-                ((void (*)(void)) cur[1].sub)();
+            if (cur[1].sub.fn != NULL) {
+                cur[1].sub.fn();
             }
             if ((D_800A9220 & 0x100401) && D_801F9944 == 0) {
                 D_800A9860 = 0x708;
@@ -1890,7 +1890,7 @@ s16 func_8009FF38(void) {
                 func_8001F724(0x1E);
             } else if ((D_800A9220 & 0x1C0701C) && D_801F9944 == 0) {
                 D_800A9860 = 0x708;
-                ((void (*)(void)) D_800A92C0[D_800A92D0 + 2].sub)();
+                D_800A92C0[D_800A92D0 + 2].sub.fn();
                 D_801F9944 = 0xB;
                 D_801D872C /= 2;
             } else if ((D_800A9220 & 0x4010040) && D_801F9944 == 0) {
@@ -1898,8 +1898,8 @@ s16 func_8009FF38(void) {
                 if (D_800A92C0 == D_800A6FCC) {
                     D_800A9860 = 0;
                 }
-                if (menu->sub != NULL) {
-                    D_800A92D8 = menu->sub;
+                if (menu->sub.menu != NULL) {
+                    D_800A92D8 = menu->sub.menu;
                     D_800A9800 = 1;
                     D_800A9870 = menu->kind;
                     func_8001F724(3);
@@ -1914,8 +1914,8 @@ s16 func_8009FF38(void) {
         cur = D_800A92C0;
         D_800A9800 = 0;
         menu = cur;
-        if (cur[1].sub != NULL) {
-            ((void (*)(void)) cur[1].sub)();
+        if (cur[1].sub.fn != NULL) {
+            cur[1].sub.fn();
         }
         for (i = 0; i < 3; i++) {
             bit = 1 << (i * 10);
@@ -1946,18 +1946,18 @@ s16 func_8009FF38(void) {
         if ((D_800A9220 & 0x1C0701C) && D_801F9944 == 0) {
             D_800A9860 = 0x708;
             if (D_800A9220 & 0x1C) {
-                ((void (*)(void)) D_800A92C0[D_800A92B0[0] + 2].sub)();
+                D_800A92C0[D_800A92B0[0] + 2].sub.fn();
             } else if (D_800A9220 & 0x7000) {
-                ((void (*)(void)) D_800A92C0[D_800A92B2 + 2].sub)();
+                D_800A92C0[D_800A92B2 + 2].sub.fn();
             } else if (D_800A9220 & 0x1C00000) {
-                ((void (*)(void)) D_800A92C0[D_800A92B4 + 2].sub)();
+                D_800A92C0[D_800A92B4 + 2].sub.fn();
             }
             D_801F9944 = 0xB;
             D_801D872C /= 2;
         } else if ((D_800A9220 & 0x4010040) && D_801F9944 == 0) {
             D_800A9860 = 0x708;
-            if (menu->sub != NULL) {
-                D_800A92D8 = menu->sub;
+            if (menu->sub.menu != NULL) {
+                D_800A92D8 = menu->sub.menu;
                 D_800A9800 = 1;
                 D_800A9870 = menu->kind;
                 func_8001F724(3);
@@ -1973,8 +1973,8 @@ s16 func_8009FF38(void) {
     case 0xA:
         cur = D_800A92C0;
         D_800A9800 = 0;
-        if (cur[1].sub != NULL) {
-            ((void (*)(void)) cur[1].sub)();
+        if (cur[1].sub.fn != NULL) {
+            cur[1].sub.fn();
         }
         break;
     }
@@ -2073,8 +2073,8 @@ void menu_update_load_screen(void) {
             menu_load_slot(D_800A9830[D_800A92D0]);
             D_801F9944 = 0xB;
             D_801D872C /= 2;
-        } else if ((D_800A9220 & 0x04010040) && D_801F9944 == 0 && menu[0].sub != NULL) {
-            D_800A92D8 = menu[0].sub;
+        } else if ((D_800A9220 & 0x04010040) && D_801F9944 == 0 && menu[0].sub.menu != NULL) {
+            D_800A92D8 = menu[0].sub.menu;
             D_800A9800 = 1;
             D_800A9870 = menu[0].kind;
             func_8001F724(3);
