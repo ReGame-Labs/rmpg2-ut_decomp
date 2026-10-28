@@ -29,7 +29,9 @@ compared (listed with --all).
   tools/venv/bin/python tools/unit_diff.py main                 # every function's result
   tools/venv/bin/python tools/unit_diff.py main func_8001781C   # + side-by-side instruction diff
   options: -G N / -V VER to override the file's -G or compiler; --all to list INCLUDE_ASM ones too;
-           -D NON_MATCHING (repeatable) to score the WIP C instead of its INCLUDE_ASM
+           -D NON_MATCHING (repeatable) to score the WIP C instead of its INCLUDE_ASM;
+           --cc1 FLAG (repeatable) one more cc1 flag, e.g. -fno-schedule-insns2: a diagnostic (a function that
+           matches only with -fno-X: the original's code stopped X there), never the build's result
 Adapted from gascarcella/dw2003recomp's tools/unit_diff.py (MIT; docs/THIRD_PARTY.md).
 """
 import argparse
@@ -519,16 +521,32 @@ def disasm(obj: Path, func: str):
     return [text for _, text in disasm_at(obj, func)]
 
 
-def compile_unit(target: str, unit: str, out: Path, src: Path = None, defines=(), cc: str = None, g: int = None):
+def compile_unit(target: str, unit: str, out: Path, src: Path = None, defines=(), cc: str = None, g: int = None,
+                 cc1=()):
     """Compile the unit's C (or `src`, a copy of it) as build.ninja compiles src/<target>/<unit>.c: its compiler, -G
-    and flags from configure.py. Returns tools/cc_psx.sh's CompletedProcess."""
+    and flags from configure.py, plus the extra cc1 flags `cc1`. Returns tools/cc_psx.sh's CompletedProcess."""
     path = f"src/{target}/{unit}.c"
     cc = cc or configure.CC_OVERRIDES.get(path, configure.DEFAULT_CC)
     g = g if g is not None else configure.g_for(path)
     out.parent.mkdir(parents=True, exist_ok=True)
     extra = [f"-I{Path(path).parent}"] if src is not None else []  # a copy finds the headers next to the unit
     return run(["tools/cc_psx.sh", "-V", cc, "-G", str(g), *configure.cc_flags(path), *(f"-D{d}" for d in defines),
-                *configure.CC_INCLUDES.split(), *extra, str(src or path), "-o", str(out)])
+                *configure.CC_INCLUDES.split(), *extra, *(x for f in cc1 for x in ("--cc1", f)),
+                str(src or path), "-o", str(out)])
+
+
+def cc1_argv(argv: list) -> list:
+    """The command line with `--cc1 FLAG` joined as `--cc1=FLAG`: argparse takes a value that starts with `-` (every
+    cc1 flag) only joined."""
+    out, i = [], 0
+    while i < len(argv):
+        if argv[i] == "--cc1" and i + 1 < len(argv):
+            out.append("--cc1=" + argv[i + 1])
+            i += 2
+        else:
+            out.append(argv[i])
+            i += 1
+    return out
 
 
 def compiler_of(target: str, unit: str, cc: str = None, g: int = None):
@@ -598,13 +616,15 @@ def main():
     ap.add_argument("-V")
     ap.add_argument("--all", action="store_true", help="also list functions still in INCLUDE_ASM")
     ap.add_argument("-D", action="append", default=[], metavar="DEF", help="extra preprocessor define")
-    args = ap.parse_args()
+    ap.add_argument("--cc1", action="append", default=[], metavar="FLAG",
+                    help="one more cc1 flag (repeatable): a diagnostic, not the build's result")
+    args = ap.parse_args(cc1_argv(sys.argv[1:]))
 
     checker = Checker(args.target, args.unit)
     expected = checker.expected
     out = ROOT / f"build/unit_diff/{args.target}/{args.unit}.c.o"
     cc, g = compiler_of(args.target, args.unit, args.V, args.G)
-    r = compile_unit(args.target, args.unit, out, defines=args.D, cc=cc, g=g)
+    r = compile_unit(args.target, args.unit, out, defines=args.D, cc=cc, g=g, cc1=args.cc1)
     if r.returncode != 0:
         sys.exit(r.stdout + r.stderr)
     try:
@@ -635,6 +655,9 @@ def main():
                else "the unit does not link to the original bytes: " + "; ".join(res.unit))
     print(f"{args.unit} (gcc {cc}, -G{g}): {ok}/{done} C functions match"
           + (f" ({by_addr} by address)" if by_addr else "") + f", {still_asm} still asm; {verdict}")
+    if args.cc1:
+        print(f"  --cc1 {' '.join(args.cc1)}: compiled with these extra cc1 flags, a diagnostic, not the build's"
+              " result")
 
     if args.func:
         if args.func not in res.words:

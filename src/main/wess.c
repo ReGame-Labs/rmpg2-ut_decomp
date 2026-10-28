@@ -1544,11 +1544,6 @@ void wess_set_channel_data(SoundChannel *ch, SoundTrack *track) {
     ch->unk_38 = track->unk_04;
 }
 
-#ifdef NON_MATCHING
-/* 98.90%: the channel's address adds the base to the index (addu s1,v1,v0), the original the index to the base, and
- * the slot pointer is reloaded from the stack one instruction earlier; the index forms &p[i], p + i, p += i give
- * the same. An integer sum, (SoundChannel *)((s32)i * sizeof(SoundChannel) + (s32)D_801FDF20->unk_1C), gives the
- * original's addu (98.95%); no form of the track's address moves the reload. */
 s32 wess_start_sequence(SoundSlot *slot, s32 n, s32 arg2, s32 arg3, SoundTrackOpts *opts) {
     u8 seq;
     u8 max;
@@ -1559,6 +1554,7 @@ s32 wess_start_sequence(SoundSlot *slot, s32 n, s32 arg2, s32 arg3, SoundTrackOp
     SoundSeqStat *stat;
     SoundChannel *ch;
     SoundTrack *track;
+    SoundWord *flags;
 
     if (wess_sequence_loaded(n) == 0) {
         return 0;
@@ -1581,17 +1577,20 @@ s32 wess_start_sequence(SoundSlot *slot, s32 n, s32 arg2, s32 arg3, SoundTrackOp
     max = D_80087160;
     idx = stat->unk_0C;
     for (i = 0; i < max; i++) {
-        ch = &D_801FDF20->unk_1C[i];
+        /* FAKE: the original adds the base to the index (addu s1,index,base); &p[i], p + i, i + p, p += i and
+         * the (u8 *) sums all give addu base,index, and GCC 2.7.2 keeps an integer sum's operand order */
+        ch = (SoundChannel *)((s32)i * sizeof(SoundChannel) + (s32)D_801FDF20->unk_1C);
         if (!(ch->unk_00.w & 1)) {
             track = &slot->unk_0C[started];
             ch->unk_00.b[2] = seq;
             wess_init_channel(ch, track, opts);
             wess_set_channel_data(ch, track);
+            flags = &ch->unk_00;
             if (arg3 != 0) {
-                ch->unk_00.w |= 0xC;
+                flags->w |= 0xC;
             } else {
-                ch->unk_00.w &= ~4;
-                ch->unk_00.w &= ~8;
+                flags->w &= ~4;
+                flags->w &= ~8;
                 stat->unk_05++;
             }
             started++;
@@ -1624,9 +1623,6 @@ s32 wess_start_sequence(SoundSlot *slot, s32 n, s32 arg2, s32 arg3, SoundTrackOp
     }
     return 0;
 }
-#else
-INCLUDE_ASM("asm/main/nonmatchings/wess", wess_start_sequence);
-#endif
 
 void func_8006FC6C(s32 n) {
     func_80078A40(n, 0);

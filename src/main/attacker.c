@@ -111,8 +111,8 @@ void func_80046F60(void);
 void func_80044638(Attacker *a);
 void func_800446E4(Attacker *a);
 void func_80044A08(Attacker *a);
-void func_8004489C(Attacker *a);
-void func_800447F0(Attacker *a);
+void attacker_update_knockback(Attacker *a);
+void attacker_start_knockback(Attacker *a);
 void func_80044B28(Attacker *a);
 void func_80044BE0(Attacker *a);
 void func_80044CC8(Attacker *a);
@@ -336,10 +336,10 @@ void func_80044494(Attacker *a) {
         func_80044A08(a);
         return;
     case 27:
-        func_8004489C(a);
+        attacker_update_knockback(a);
         return;
     case 28:
-        func_800447F0(a);
+        attacker_start_knockback(a);
         return;
     case 23:
         func_80044B28(a);
@@ -433,7 +433,7 @@ void func_80044790(Attacker *a) {
     }
 }
 
-void func_800447F0(Attacker *a) {
+void attacker_start_knockback(Attacker *a) {
     s32 accel;
     s32 vel;
 
@@ -456,32 +456,33 @@ void func_800447F0(Attacker *a) {
     }
 }
 
-#ifdef NON_MATCHING
-/* 98.87%: registers only at the start: the original loads cur_obj into v1 and reloads it into a0 after the
- * pos_x store */
-void func_8004489C(Attacker *a) {
+void attacker_update_knockback(Attacker *a) {
+    s32 pos;
     s32 vel;
-    s32 vy;
+    s32 vx;
+    s32 v;
     s16 ground;
 
     if (a->unk_18 != 0) {
         func_80044790(a);
         return;
     }
+    pos = D_800AA248.cur_obj->pos_x.w;
     vel = D_800AA248.cur_obj->vel_x.w;
-    D_800AA248.cur_obj->pos_x.w += vel;
-    vel += D_800AA248.cur_obj->unk_84;
-    D_800AA248.cur_obj->vel_x.w = vel;
-    if (abs(vel) < 0x7001) {
+    v = pos + vel;
+    D_800AA248.cur_obj->pos_x.w = v;
+    vx = vel + D_800AA248.cur_obj->unk_84;
+    D_800AA248.cur_obj->vel_x.w = vx;
+    if (abs(vx) < 0x7001) {
         D_800AA248.cur_obj->unk_84 = 0;
         D_800AA248.cur_obj->vel_x.w = 0;
     }
-    vy = D_800AA248.cur_obj->vel_y.w + a->unk_10;
-    if (vy > 0xC000) {
-        vy = 0xC000;
+    v = D_800AA248.cur_obj->vel_y.w + a->unk_10;
+    if (v > 0xC000) {
+        v = 0xC000;
     }
-    D_800AA248.cur_obj->vel_y.w = vy;
-    D_800AA248.cur_obj->pos_y.w += vy;
+    D_800AA248.cur_obj->vel_y.w = v;
+    D_800AA248.cur_obj->pos_y.w += v;
     ground = 0xD9;
     if (a->type == 9) {
         ground = 0xE0;
@@ -499,16 +500,13 @@ void func_8004489C(Attacker *a) {
         }
     }
 }
-#else
-INCLUDE_ASM("asm/main/nonmatchings/attacker", func_8004489C);
-#endif
 
 void func_80044A08(Attacker *a) {
     s32 v;
     s16 ground;
 
     if (a->unk_18 != 0) {
-        func_800447F0(a);
+        attacker_start_knockback(a);
         return;
     }
     v = D_800AA248.cur_obj->pos_x.w;

@@ -1024,12 +1024,6 @@ void bonus_restore_health(void) {
     }
 }
 
-#ifdef NON_MATCHING
-/* 98.44%: 98.4 %: the score loop (0x200..0x800), loop.c: with the indexed search (as in the 0x08 loop) the inner
- * loop's hoist of &D_8008433C makes the outer loop double its insn count (halved since already moved), so
- * &D_80084314 stays in the loop as in the original; but the outer loop then hoists &D_8008433C itself (life 16, 18
- * x 1 x 16 >= 112) where the original rebuilds it each pass. With a pointer search (p = D_8008433C) nothing doubles
- * the count and &D_80084314 is hoisted (18 x 2 x 3 >= 52) (98.0 %) */
 void bonus_award_places(void) {
     Monster *m;
     s32 i;
@@ -1088,10 +1082,9 @@ void bonus_award_places(void) {
         bestx = 0;
         best = -1;
         for (i = 0; i < D_801D8740; i++) {
-            func_80025DF8(D_801FB49C[i]);
-            k = 0;
+            m = &D_801E0B78[func_80025DF8(D_801FB49C[i])];
             score = D_8007BD78.unk_08[D_801FB49C[i] - 1];
-            for (; k < 4; k++) {
+            for (k = 0; k < 4; k++) {
                 if (score < D_8008433C[k]) {
                     break;
                 }
@@ -1111,9 +1104,6 @@ void bonus_award_places(void) {
         break;
     }
 }
-#else
-INCLUDE_ASM("asm/main/nonmatchings/bonus", bonus_award_places);
-#endif
 
 void bonus_give_awards(s32 player, s32 awards) {
     Monster *m;

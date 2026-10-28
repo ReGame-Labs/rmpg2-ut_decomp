@@ -92,7 +92,10 @@ void func_8004E658(void) {
 }
 
 #ifdef NON_MATCHING
-/* 97%: register names only (the level state's address in a1, the monster in a0) */
+/* 96.89%: registers only. local-alloc ties s to the index (operand 1 of the addu, in v1), the original to the
+ * table's address (operand 2, v0), so here s holds v1 and the cur_obj reload needs a0, which pushes m and
+ * &D_800AA248 to a1/a2 (the original's a0/a1). The original's index could not be tied; every index and pointer form
+ * tried ties it */
 void func_8004E6F0(void) {
     Monster *m = D_800AA248.cur_obj->owner.monster;
     SpeedPair *s = &D_8007F878[m->dir];
@@ -111,7 +114,7 @@ INCLUDE_ASM("asm/main/nonmatchings/game_8004E574", func_8004E6F0);
 #endif
 
 #ifdef NON_MATCHING
-/* 97%: as func_8004E6F0 */
+/* 96.89%: as func_8004E6F0: s is tied to the index, the original's to the table's address */
 void func_8004E764(void) {
     Monster *m = D_800AA248.cur_obj->owner.monster;
     SpeedPair *s = &D_8007F830[m->dir];
@@ -579,8 +582,10 @@ s32 func_8004F7A4(u8 *list) {
 }
 
 #ifdef NON_MATCHING
-/* 97.11%: registers: the copy of the x, the other x and the definition take a3/a1/a2 for the original's
- * a1/a2/a3, and one nop more */
+/* 97.11%: registers and one nop: in the original the x is loaded once (lh a0), copied to x1 (move a1,a0) before the
+ * compare, which then overwrites a0, and the then-block adds to x1 in place. Written t = load, x2 = load, x1 = t,
+ * cse keeps the copy only when x1 is narrower than t, and then the then-block adds to t (x1 = t + width, 96.3%);
+ * with both s32 the copy is folded */
 void func_8004F7F4(GameObject *obj, Monster *m1, Monster *m2, GameObject *cur) {
     ObjectDef *def;
     GameObject *o;

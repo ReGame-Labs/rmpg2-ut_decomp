@@ -642,7 +642,7 @@ extern s32 D_8007CB4C[];   /* per city: the rain chance in the high half, the sn
 /* A one-member struct: its store stays after func_8002A3A4's table load only so (docs/MATCHING.md "Structs, globals
  * and aliasing"); likely the head of a weather record with D_801FB194 and D_801FB198. */
 typedef struct Unk801FB190 {
-    s8 unk_00;
+    u8 unk_00;
 } Unk801FB190;
 extern Unk801FB190 D_801FB190;
 extern GameObject *D_801FB194;

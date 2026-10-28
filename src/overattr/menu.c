@@ -256,7 +256,9 @@ void func_8009BF94(u8 *dst, s32 index) {
 }
 
 #ifdef NON_MATCHING
-/* 99.3 %: the movie line's text address is in s3, the original's s1 (s1/s2 hold the colour's and the cursor's %hi). */
+/* 99.24%: the movie line's text address (3 refs over 136 insns, priority 0.02) comes last in global-alloc's order,
+ * after the colour's and the cursor's %hi (0.13, 0.12), and gets s3; the original gives it s1 before them, which
+ * this form's priorities cannot do */
 void menu_draw_cheats(void) {
     func_8009BF40(D_800A631E, D_801FA960);
     func_8001ECB4(D_800A6359, D_8007A684, 0);
@@ -1423,10 +1425,6 @@ void menu_update_player_select(void) {
     }
 }
 
-#ifdef NON_MATCHING
-/* 89.18%: with the record pointer stepped the invariants and the record pointer at unk_08 are the original's; the
- * original shifts the pad bits before it loads the slot's object and copies them to a1 for the later tests, and
- * loads a new animation before the D_800A9860 store */
 void menu_choose_monsters(s32 unused, s32 *timer) {
     s32 i;
     OverattrPlayer *rec;
@@ -1434,7 +1432,7 @@ void menu_choose_monsters(s32 unused, s32 *timer) {
     s32 found;
     s16 m;
     s32 monster;
-    u32 pad;
+    u16 pad;
     GameObject *obj;
 
     for (i = 0, rec = D_800A8FD4; i < 3; i++, rec++) {
@@ -1449,8 +1447,8 @@ void menu_choose_monsters(s32 unused, s32 *timer) {
         } else if (rec->unk_06 != 0) {
             if ((pad & 0x10) && D_800AA244[i] == 1) {
                 D_800A9860 = 0x708;
-                obj->frames_left = 0;
                 obj->anim = D_800A8F00[rec->unk_04 + 0xE];
+                obj->frames_left = 0;
                 rec->unk_06 = 0;
                 D_800AA244[i] = 0;
                 D_801FA8A0[rec->unk_04] = 0;
@@ -1469,8 +1467,8 @@ void menu_choose_monsters(s32 unused, s32 *timer) {
                 rec->unk_06 = 1;
                 D_801FA8A0[rec->unk_04] = i + 1;
                 func_8001F724(D_800A8FC4[rec->unk_04]);
-                obj->frames_left = 0;
                 obj->anim = D_800A8F00[rec->unk_04 + 0x23];
+                obj->frames_left = 0;
             }
             *timer = 0xE10;
         } else if ((pad & 0xA) && D_800AA244[i] == 0) {
@@ -1495,8 +1493,8 @@ void menu_choose_monsters(s32 unused, s32 *timer) {
             } while (found);
             func_8001F724(0x2D);
             rec->unk_08 = 0xB;
-            obj->frames_left = 0;
             obj->anim = D_800A8F00[monster + 0x15];
+            obj->frames_left = 0;
             *timer = 0xE10;
         } else if (((pad & 4) || (pad & 1)) && D_800AA244[i] == 0) {
             D_800A9860 = 0x708;
@@ -1520,8 +1518,8 @@ void menu_choose_monsters(s32 unused, s32 *timer) {
             } while (found);
             func_8001F724(0x2D);
             rec->unk_08 = 0xB;
-            obj->frames_left = 0;
             obj->anim = D_800A8F00[monster + 0x15];
+            obj->frames_left = 0;
             *timer = 0xE10;
         } else if (pad & 0x40) {
             func_8001F724(3);
@@ -1529,9 +1527,6 @@ void menu_choose_monsters(s32 unused, s32 *timer) {
         }
     }
 }
-#else
-INCLUDE_ASM("asm/overattr/nonmatchings/menu", menu_choose_monsters);
-#endif
 
 void menu_place_objects(OverattrPlacement *p, s32 n, s32 color) {
     s32 i;
@@ -2091,9 +2086,9 @@ void menu_update_load_screen(void) {
 }
 
 #ifdef NON_MATCHING
-/* 83.19%: the city read as its own statement keeps the names' address in the loop, as in the original (frame 88);
- * the original sets up sprintf's buffer and format before the three stores, and the counting loop's index and slot
- * offset swap v1/a0 */
+/* 98.00%: the body is the original's; only the prologue differs: the original sets y (li s6,60) after the slots'
+ * address (s5), which loop.c hoists in front of the outer loop, so its y = 60 came after the hoisting point; every
+ * order of the four initialisations keeps y first */
 s32 menu_list_saves(void) {
     char buf[0x18];
     s32 limit;
@@ -2102,8 +2097,10 @@ s32 menu_list_saves(void) {
     s32 best;
     s32 y;
     s32 i;
+    s32 j;
     s32 count;
     s32 city;
+    u8 *name;
 
     limit = 10000000;
     n = 0;
@@ -2121,17 +2118,18 @@ s32 menu_list_saves(void) {
             return n;
         }
         count = 0;
-        for (i = 0; i < 7; i++) {
-            if (D_800A9300.slots[slot].unk_49[i] != 0) {
+        for (j = 0; j < 7; j++) {
+            if (D_800A9300.slots[slot].unk_49[j] != 0) {
                 count++;
             }
         }
         city = D_800A9300.slots[slot].city;
+        name = D_8007C704[city];
         D_800A9830[n] = slot;
         D_800A9820[n] = 0x20;
         D_800A9810[n] = y;
         y += 23;
-        sprintf(buf, "%s   %dP", D_8007C704[city], count);
+        sprintf(buf, "%s   %dP", name, count);
         func_8001F61C(buf, D_800A9820[n], D_800A9810[n], 1, D_801F9AAC, D_8007AD4C, 1, 0x450 + n);
         n++;
         limit = best;

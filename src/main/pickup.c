@@ -240,7 +240,7 @@ void pickup_clear(Pickup *p) {
 }
 
 #ifdef NON_MATCHING
-/* 91.74%: the shape is right (the negu-then-add copies, the swap); registers differ, and the original loads the y
+/* 93.06%: the shape is right (the negu-then-add copies, the swap); registers differ, and the original loads the y
  * before the flags */
 s32 pickup_test_touch(GameObject *obj, Monster *m) {
     SpriteFrame *box;
@@ -289,10 +289,10 @@ s32 pickup_test_touch(GameObject *obj, Monster *m) {
         l = right;
         r = left;
     }
-    m_bottom = m->hit_bottom;
     m_right = m->hit_right;
-    m_left = m->hit_left;
     m_top = m->hit_top;
+    m_bottom = m->hit_bottom;
+    m_left = m->hit_left;
     if (l < m_right && m_left < r && top < m_bottom && m_top < bottom) {
         return 1;
     }
@@ -363,48 +363,45 @@ void pickup_collect(Monster *e) {
     } while (--n != 0);
 }
 
-#ifdef NON_MATCHING
-/* 85 %: the original loads the limit once into v0 and copies it to v1 (a separate variable from the tested
- * value); every form tried loads it once into the variable or twice. */
 void func_8003BD48(Pickup *b) {
-    s32 limit;
+    s16 limit;
     u16 x;
-    u16 d;
     GameObject *obj;
 
     if (b->unk_08 == 2) {
-        if (D_801FAC84 != 0) {
-            limit = D_801FAC84;
+        limit = D_801FAC84;
+        if (limit != 0) {
             obj = D_800AA268.p;
             x = obj->pos_x.u.hi;
             if (obj->flags & 0x10) {
-                d = (u16) D_801F9AB0 - x + 0x31;
+                if ((u16)(D_801F9AB0 - x + 0x31) < 0x32) {
+                    func_8003BF34(obj, b, x);
+                }
             } else {
-                d = (u16) (limit - x);
-            }
-            if (d < 0x32) {
-                func_8003BF34(obj, b, x);
+                limit -= x;
+                if ((u16)limit < 0x32) {
+                    func_8003BF34(obj, b, x);
+                }
             }
         } else if (D_801D37BC == 0) {
-            if (D_801FA98C != 0) {
-                limit = D_801FA98C;
+            limit = D_801FA98C;
+            if (limit != 0) {
                 obj = D_800AA268.p;
                 x = obj->pos_x.u.hi;
                 if (obj->flags & 0x10) {
-                    d = (u16) D_801FA990 - x + 0x31;
+                    if ((u16)(D_801FA990 - x + 0x31) < 0x32) {
+                        func_8003BF34(obj, b, x);
+                    }
                 } else {
-                    d = (u16) (limit - x);
-                }
-                if (d < 0x32) {
-                    func_8003BF34(obj, b, x);
+                    limit -= x;
+                    if ((u16)limit < 0x32) {
+                        func_8003BF34(obj, b, x);
+                    }
                 }
             }
         }
     }
 }
-#else
-INCLUDE_ASM("asm/main/nonmatchings/pickup", func_8003BD48);
-#endif
 
 s32 func_8003BE34(Pickup *rec) {
     D_800AA248.cur_obj->vel_y.w += rec->unk_30;
@@ -677,20 +674,24 @@ void func_8003C674(void) {
 }
 
 #ifdef NON_MATCHING
-/* 81.9 %: the control flow is the original's (a first try, then a do-while stepping through the parts); the original compares top with a register holding 2 that it reuses as the random draw's argument, keeps the draw in a0, and is 3 instructions longer */
+/* 88.43%: 88.4 %: the original compares top with a register holding 2 that it reuses as the draw's argument (min
+ * here keeps the compare but cse still gives the argument as li); loop.c moves the i >= 4 exit block out of the
+ * loop (after the item selection's jump), where cross-jumping merges its store with the success path's; the
+ * original keeps it in the loop, its store through the hoisted s2 */
 BuildingPart *func_8003C67C(Building *u, UnkStructB2 *rec) {
     BuildingItem *item;
-    BuildingItem *next;
     BuildingPart *part;
     u32 top;
     u32 idx;
     u16 i;
+    u32 min;
 
     D_801F9988 = u->unk_01E;
     top = u->unk_000 - 1;
     i = 0;
-    if (top > 2) {
-        idx = main_random_between(top, 2) + (D_801FA72C & 3);
+    min = 2;
+    if (top > min) {
+        idx = main_random_between(top, min) + (D_801FA72C & 3);
         if (idx > top) {
             idx -= top;
             if (idx == 0) {
@@ -722,14 +723,14 @@ BuildingPart *func_8003C67C(Building *u, UnkStructB2 *rec) {
             if (part->unk_04 < 2) {
                 part++;
             } else {
-                next = (BuildingItem *)(part + 2);
-                if (top < next->unk_04) {
+                part += 2;
+                if (top >= part->unk_04) {
+                    part = &((BuildingItem *)part)->unk_0C;
+                } else {
                     item = &u->items[1];
                     part = &u->items[1].unk_0C;
                     D_801F9980 = 1;
                     D_801F9984 = 2;
-                } else {
-                    part = &next->unk_0C;
                 }
             }
         } while (func_8003C858(part, (s32)item, (s32)rec) != 1);

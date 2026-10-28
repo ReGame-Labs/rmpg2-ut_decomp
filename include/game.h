@@ -96,6 +96,7 @@ typedef struct GameObject {
                    struct GameObject *obj;  /* a link */
                    s32 cam_start;           /* OVERATTR's camera: its start point, y << 16 | x (tour_update_map) */
                    s32 count;               /* a monster's bomb (kind 0x73A): its bounces */
+                   s32 xy;                  /* a quad box's corner, y << 16 | x (npc_place_searchlight) */
                } unk_50;
     /* 0x54 */ union {
                    s32 w;
@@ -107,6 +108,7 @@ typedef struct GameObject {
                    u16 *h;
                    s32 *w;
                    s32 cam_point;           /* OVERATTR's camera: its current point, y << 16 | x */
+                   s32 xy;                  /* a quad box's corner, y << 16 | x (npc_place_searchlight) */
                } arg;
     /* 0x60 */ s32 unk_60;
     /* 0x64 */ union {                  /* by kind */
@@ -207,7 +209,7 @@ typedef struct Monster {
     /* 0x0A4 */ GameObject *bars[3];           /* the results bars, one per tally (OVERATTR, tour_create_bars) */
     /* 0x0B0 */ u8 unk_0B0[0x04];
     /* 0x0B4 */ GameObject *extra[5];          /* its own sprites (5's, 7's: kind 0x73A; 2-4 func_8002A1AC), or NULL */
-    /* 0x0C8 */ u16 buttons;                   /* the pad's buttons held, pad bits >> 4 (func_800273F4); & 0xF: the
+    /* 0x0C8 */ u16 buttons;                   /* the pad's buttons held, pad bits >> 4 (main_update_input); & 0xF: the
                                                 * direction bits, the index into the action's handler table (func_80027FD0) */
     /* 0x0CA */ u8 unk_0CA[0x02];
     /* 0x0CC */ u16 dir;                       /* the d-pad direction, 0 none (D_8007C124[pad bits & 0xF]); an index
