@@ -262,8 +262,8 @@ void monster_follow_holder(Monster *e) {
         D_800AA248.cur_obj->pos_x.w = D_801D8864.w & (px << 16);
         py = dy + holder->pos_y.u.hi;
         D_800AA248.cur_obj->pos_y.s.hi = py;
-        /* A dead store: d's later reference keeps it cse's canonical copy of dx, so the left arm negates d into
-         * dx (two registers, the delay-slot move) rather than dx in place. */
+        /* FAKE: a dead store; d's later reference keeps it cse's canonical copy of dx, so the left arm negates d
+         * into dx (two registers, the delay-slot move) rather than dx in place. */
         d = 0;
     }
 }
