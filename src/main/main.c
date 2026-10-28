@@ -368,7 +368,7 @@ ObjectDef *func_8001D110(void);
 void func_8002503C(Building *, GameObject *);
 void func_800252CC(Building *);
 void func_80025124(Building *);
-void func_80024E08(Building *);
+void main_create_building_items(Building *);
 void main_set_building_sides(void);
 extern u8 D_80082E94[];
 s32 bonus_get_round_kind(void);
@@ -4960,7 +4960,7 @@ void func_800211F4(Npc *npc) {
             func_800242A8();
             return;
         }
-        func_80024138(npc);
+        main_pick_free_aim(npc);
         if (npc->aim != 3) {
             npc->start = main_random_between(7, 0) & 1;
         } else {
@@ -5803,8 +5803,11 @@ void func_80023080(Npc *npc) {
 #ifdef NON_MATCHING
 /* 92.01%: 92 %: the second branch keeps the %hi of D_801F9AC8 in a1 from its top and reloads the value through it
  * at the end of the inner block (reorg then skips that load on the path that still holds it in v1); the C reloads
- * with a fresh lui. The original's distance is the builtin abs() in its two-register form (bgez v0; move v1,v0;
- * negu v1,v1, where the C's copy negates v0); written as abs() here the inner block changes shape (82.5 %) */
+ * with a fresh lui. So cse knew the %hi there but not the memory value. With the tail written in each branch (a
+ * return after the inner block and one after the if), cse follows the jump and drops the reload entirely (89 %); a
+ * Fixed pointer to the camera gives a1 the full address. The original's distance is the builtin abs() in its two-
+ * register form (bgez v0; move v1,v0; negu v1,v1, where the C's copy negates v0); written as abs() here the inner
+ * block changes shape (82.5 %) */
 u16 func_80023114() {
     s32 x;
     s32 d;
@@ -6367,14 +6370,7 @@ void func_800240F0(Npc *npc) {
     }
 }
 
-#ifdef NON_MATCHING
-/* 99.69%: 99.7 %: a for (;;) whose exit is a break after a continue gives the original's loop (loop.c hoists the
- * table and the copy of used, jump.c duplicates no exit test; a goto loop hoists nothing, a plain break duplicates
- * the test); sel = k at the top of each pass is the original's copy in the test's delay slot, and used |= bit the
- * exit's registers. Only the hoisted copy of used and sel swap a1/v1: sel (3 refs, live 6) is allocated before that
- * copy and takes a1, the original gives the copy a1 (sel s32/u16, the bit forms, the assignment inside the index
- * tried) */
-u16 func_80024138(Npc *npc) {
+u16 main_pick_free_aim(Npc *npc) {
     s16 used;
     s16 k;
     s32 bit;
@@ -6400,12 +6396,12 @@ u16 func_80024138(Npc *npc) {
             break;
         }
         npc->aim = k;
-        bit = 1;
-        if (sel != 0) {
+        if (sel == 0) {
+            bit = 1;
+        } else if (sel == 1) {
+            bit = 2;
+        } else {
             bit = 4;
-            if (sel == 1) {
-                bit = 2;
-            }
         }
         used |= bit;
         D_801E2A50 = used;
@@ -6414,9 +6410,6 @@ u16 func_80024138(Npc *npc) {
     npc->aim = 3;
     return 3;
 }
-#else
-INCLUDE_ASM("asm/main/nonmatchings/main", func_80024138);
-#endif
 
 void func_8002423C(Npc *npc) {
     s16 temp_v1;
@@ -6510,36 +6503,29 @@ s16 func_8002439C(Npc *npc) {
 INCLUDE_ASM("asm/main/nonmatchings/main", func_8002439C);
 #endif
 
-#ifdef NON_MATCHING
-/* 86.11%: 86.1 %: abs() is GCC's builtin (bgez, nop, negu); an s32 x (its lhu apart from the lh of the difference)
- * and an s32 half (x += half adds in the original's order) give the original's operations. Only sched1's order
- * differs: the original loads D_801D8866 before the second npc->target_x (lh) and shifts it in that load's delay, so
- * half takes t1 and cur t2; here half, a once-set live pseudo (birthing_insn_p, top priority), is loaded last, into
- * npc's a2. Statement orders do not change it */
 void main_unwrap_target_x(s16 *px, s16 *pcur, Npc *npc) {
     s32 x;
     s16 cur;
-    s32 half;
+    s32 width;
     s16 d;
+    s32 w;
 
     x = (u16) npc->target_x;
     cur = D_800AA268.p->pos_x.s.hi;
-    half = (u16) D_801D8866;
+    width = D_801D8866;
+    w = (s16) width;
     d = abs(npc->target_x - cur);
-    if (d >= (s16) half >> 1) {
+    if (d >= w >> 1) {
         d = abs(D_801F9ACA - cur);
-        if (d >= (s16) half >> 1) {
-            x += half;
+        if (d >= w >> 1) {
+            x += width;
         } else {
-            cur += half;
+            cur += width;
         }
     }
     *px = x;
     *pcur = cur;
 }
-#else
-INCLUDE_ASM("asm/main/nonmatchings/main", main_unwrap_target_x);
-#endif
 
 void func_800244A8(void) {
     GameObject *obj;
@@ -6855,7 +6841,7 @@ void main_create_buildings(void) {
             rec->unk_034 = 1;
             rec->unk_036 = 1;
             rec->unk_02A = 1;
-            func_80024E08(rec);
+            main_create_building_items(rec);
         } else {
             func_80025124(rec);
         }
@@ -6868,37 +6854,43 @@ void main_create_buildings(void) {
 }
 
 #ifdef NON_MATCHING
-/* 72.10%: 72 %: the original keeps the address of D_80011BA4 computed twice and one compare of def against it (an
- * if/else-if on D_80011BA4/_alt whose bodies vanished after flow); without that remnant the loop is smaller,
- * %hi(D_801F9948) is hoisted into a saved register and priority spills to the stack */
+/* 94.13%: 94.1 %: the structure matches (two compares against D_80011BA4 whose bodies flow deletes, the parts
+ * through a BuildingPart pointer so loop.c reduces only the +4/+8 givs, count kept apart from i). Left: global-
+ * alloc puts y in s3 and rec in s4 (y 9 refs/61 live, 0.44, above rec 24/222, 0.43; the original's y life is about
+ * 63, statement orders trade it against req's); cse2 merges the memset's %hi(D_801F9948) with the copy loop.c
+ * hoists, and that pseudo takes s7 where the original rematerializes it; the division's p takes v1 and its sign
+ * shift is scheduled before the mfhi (the original a1, after) */
 extern u8 D_80011BA4[];
 extern u8 D_80011BA4_alt[];
 extern s16 D_8007A686;
 extern s32 D_800AA25C;
 void func_80025474(Building *b);
 
-void func_80024E08(Building *rec) {
+void main_create_building_items(Building *rec) {
     ObjectDef *req;
     BuildingItem *item;
     GameObject *obj;
     SpriteFrame *frame;
     BuildingDef *def;
+    BuildingPart *part;
     s32 *ids;
     s32 id;
     s16 i;
     s16 y;
     u16 prio;
     u16 count;
-    s32 unused;
+    s32 n;
+    s32 kind;
 
     req = func_8001D110();
     item = rec->items;
-    i = 1;
     req->unk_0C = 0x710;
+    i = 1;
+    y = rec->bottom;
     req->pos_x.s.hi = rec->left;
-    y = rec->bottom - 0x1D;
     prio = rec->priority;
     def = rec->def;
+    y -= 0x1D;
     memset(D_801F9948, 0, 0xCC);
     ids = def->unk_20;
     id = def->unk_20[0];
@@ -6910,10 +6902,13 @@ void func_80024E08(Building *rec) {
                 y -= frame->size.u.hi;
             }
             req->pos_y.s.hi = y;
+            /* The bodies only set frame, which the next pass overwrites: cse keeps them (frame's use comes
+             * earlier in the loop), flow deletes them, and jump2 then leaves the first compare and the
+             * second one's address load, as in the original */
             if (rec->def == (BuildingDef *) D_80011BA4) {
-                unused = 1;
+                frame = (SpriteFrame *) 0;
             } else if (rec->def == (BuildingDef *) D_80011BA4_alt) {
-                unused = 2;
+                frame = (SpriteFrame *) 0;
             }
             D_800AA284.p = req;
             obj = func_8001DCB4();
@@ -6925,9 +6920,12 @@ void func_80024E08(Building *rec) {
                 obj->priority = rec->priority - 9;
             }
             item->building = rec;
-            item->unk_24.unk_04 = 2;
-            item->unk_0C.unk_04 = 1;
-            item->unk_3C.unk_04 = 3;
+            part = &item->unk_0C;
+            part->unk_04 = 1;
+            part = &item->unk_24;
+            part->unk_04 = 2;
+            part++;
+            part->unk_04 = 3;
             item++;
             ids++;
             id = *ids;
@@ -6937,21 +6935,25 @@ void func_80024E08(Building *rec) {
     item--;
     rec->unk_070 = item;
     obj = item->obj;
-    count = i - 1;
+    i--; /* count = i - 1 would let cse fold the later count - 1 into i - 2 */
+    count = i;
+    rec->top = obj->pos_y.u.hi + obj->size.u.hi - 0xC;
     rec->state = 0;
     rec->unk_000 = count;
-    rec->top = obj->pos_y.u.hi + obj->size.u.hi - 0xC;
     func_80025BBC(rec);
     func_8002546C(rec);
     func_800252CC(rec);
-    D_800AA25C = rec->kind;
-    rec->unk_012 = ((rec->kind * (((s16) (count - 1) - 1) * 3) + 2) * (D_8007A686 << 16)) / 100 >> 16;
+    count--;
+    n = ((s16) count - 1) * 3;
+    kind = rec->kind;
+    D_800AA25C = kind;
+    rec->unk_012 = ((kind * n + 2) * (D_8007A686 << 16)) / 100 >> 16;
     if (rec->unk_018 != NULL) {
         func_80025474(rec);
     }
 }
 #else
-INCLUDE_ASM("asm/main/nonmatchings/main", func_80024E08);
+INCLUDE_ASM("asm/main/nonmatchings/main", main_create_building_items);
 #endif
 
 void func_8002503C(Building *building, GameObject *obj) {
@@ -9097,12 +9099,8 @@ void func_800288B0(s32 *vel2, s32 *vel1) {
 INCLUDE_ASM("asm/main/nonmatchings/main", func_800288B0);
 #endif
 
-#ifdef NON_MATCHING
-/* 91.25%: 91.3 %: the original copies the larger value into v0 (move v0,a2) and uses the copy for both the
- * difference and the result; here both uses read hi's own register. A second variable (r = hi) is merged by cse,
- * which keeps hi canonical since r does not outlive the block; s16 parameters, s32/u16 locals, the swap through a
- * temporary, a ternary and a static inline helper tried */
 s16 main_get_midpoint(s32 a, s32 b) {
+    s16 mid = 0; /* never read: set before the blocks, it becomes cse's canonical copy of hi (the move v0) */
     s16 lo;
     s16 hi;
 
@@ -9112,11 +9110,9 @@ s16 main_get_midpoint(s32 a, s32 b) {
         lo = b;
         hi = a;
     }
-    return hi - ((s16) (hi - lo) >> 1);
+    mid = hi;
+    return mid - ((s16) (mid - lo) >> 1);
 }
-#else
-INCLUDE_ASM("asm/main/nonmatchings/main", main_get_midpoint);
-#endif
 
 extern s16 D_801D8844;
 extern s16 D_801E1E24[8];
@@ -9268,8 +9264,10 @@ void func_80029170(void) {
 
 #ifdef NON_MATCHING
 /* 95.77%: 95.8 %: the original keeps 0x37 from the first compare in a2 and stores it (m->action = 0x37) where the C
- * loads it again (cse's path is longer here); its two range tests (action - 9 < 6, action - 0x34 < 2) keep an andi
- * the C folds away */
+ * loads it again (cse's path is longer here). Its two range tests (action - 9 < 6, action - 0x34 < 2) keep an andi
+ * that combine folds here: a u16 d = action - 9 set before the 0x34/0x35 test (another block) keeps the first andi
+ * and gives the original's size (94.8 % by objdiff, registers then differ); the end test's andi folds in every
+ * placement tried (a u16 temporary, a reread of m->action, & 0xFFFF with an unsigned compare) */
 u16 func_800291DC(Monster *m, GameObject *obj) {
     u16 action;
     u16 next;
