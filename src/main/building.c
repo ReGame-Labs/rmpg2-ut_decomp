@@ -108,7 +108,10 @@ void building_set_sky_colours(void) {
  * 21600i, shared with keys[i]); sched1 still moves f = 0 to the join's start (the original has it after the chain,
  * as here with -fno-schedule-insns); the products land in v1 with the from byte's lbu before the mflo (the
  * original: mflo v0, sra, then lbu); writing from[k] + (...) puts keys and from in the original's a3 and t0, but
- * not f (t3) and to (t4); else-forms of f, a 2-D keys[i][k] and the statement orders were tried */
+ * not f (t3) and to (t4); else-forms of f, a 2-D keys[i][k] and the statement orders were tried. Round 11: sched1
+ * already gives the original's order per channel (mult, lui, sra, lbu, lw, addu); sched2 moves the lbu up only
+ * because the product is in v1: the products are LO_REG pseudos that reload spills (the mults need HI/LO) and
+ * retry_global_alloc's find_reg puts in v1 (it conflicts only with a1 and sp), where the original's went to v0 */
 extern s16 D_8007C974;
 extern s32 D_8007C97C[4][12];
 extern s32 D_8007CA3C[4][12];
@@ -1415,9 +1418,13 @@ void func_8002D448(Monster *m, Building *b) {
 /* 95.11%: next and prev are read before rec takes them (rec = next after the unk_070 test, rec = prev per arm), as
  * the original's delay-slot copies show; what differs is allocation: the original takes b, p2, p0, p1, prev, next,
  * saved, m for s0..s7 (here prev and next, 0.40 and 0.35, go before p0 and p1, 0.25, and m, 0.14, before saved,
- * 0.03), and keeps rec (1.17 here, a2) in t0, so the D844 call's stack store lands in the delay slot. A restore and
- * return per exit (94.2 %) puts saved (9 refs, 0.23) before m as in the original, but cse then shares the start's
- * %hi of D_800AA268 with the first exits, where the original loads it again at each exit */
+ * 0.03), and keeps rec in t0. rec is allocated first (1.17) and prefers a2 (the F65C call's copy), so t0 means it
+ * conflicted with a2 and a3: its stack store for the D844 call came after the a2/a3 moves in sched1's order, while
+ * expand_call emits stack arguments first and sched1's LUID tie keeps them first (so the original's call block
+ * differed). A do { } while (0) around the call (with place: inside) gives p0..next the original's s2..s5 (95.35 %;
+ * p0 and p1 then swap by 0.43 against 0.44) but not rec or saved/m. A restore and return per exit (94.2 %) puts
+ * saved (9 refs, 0.23) before m as in the original, but cse then shares the start's %hi of D_800AA268 with the
+ * first exits, where the original loads it again at each exit */
 void func_8002D844(BuildingPart *p0, BuildingPart *p1, Monster *a, BuildingPart *p2, BuildingItem *rec);
 
 void func_8002D5B8(Monster *m, BuildingItem *rec) {
@@ -1967,13 +1974,14 @@ void func_8002E348(Monster *arg0, BuildingItem *rec) {
 }
 
 #ifdef NON_MATCHING
-/* 94.22%: 94.2 %: the original's li v1,5 in the zero test's delay slot comes from the test block (reorg's backward
- * fill; here the slot takes the fall-through's move a0,s0): a pseudo holding 5 set before the test, global (v0
- * holds the loaded unk_06), used by the else arm's store (a store of a constant needs a register, so cse cannot
- * fold it); a local set to 5 before the test gives exactly that delay slot, but cse then also gives the then arm's
- * store after the call the same pseudo (an s register); u8..s32 locals, a static inline taking the level, ?: and
- * per-arm n++ do not separate the two */
-// WIP in src/main/building.c: 94.2 %: the original's li v1,5 in the zero test's delay slot is the else block's constant, so either reorg predicted the branch taken (mostly_true_jump gives EQ not taken; rare_destination is 0 both ways) or the 5 was a pseudo set before the branch (global, hence v1); a static inline taking the level, a level local and the == 0 test first do not keep such a pseudo (cse folds it back to constants)
+/* 94.22%: the original's li v1,5 in the zero test's delay slot comes from the test block (reorg's backward fill;
+ * here the slot takes the fall-through's move a0,s0): a pseudo holding 5 set before the test, global (v0 holds the
+ * loaded unk_06), used by the else arm's store (a store of a constant needs a register, so cse cannot fold it). Not
+ * reorg stealing the else block's li: mostly_true_jump predicts EQ not taken, the fall-through is owned (no label),
+ * and a block-local constant would get v0. A local set to 5 before the test gives exactly that delay slot, but cse
+ * then also gives the then arm's store after the call the same pseudo (an s register; the permuter's n = 5 is the
+ * same); u8..s32 locals, a static inline taking the level, ?:, per-arm n++, the == 0 test first and a do { } while
+ * (0) around either arm do not separate the two */
 void func_8002E440(Monster *arg0, BuildingItem *rec) {
     BuildingPart *part;
     u16 n;
