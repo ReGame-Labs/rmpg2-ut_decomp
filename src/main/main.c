@@ -862,33 +862,33 @@ u16 func_8001828C(void) {
         } else {
             player = (D_801D3D64.unk_62 & 0xF00) >> 8;
             if (D_801FA898[player - 1] == D_801E1C90[player - 1]) {
-            main_free_kind(0x300);
-            main_free_kind(0x550);
-            D_801D3D64.unk_62 &= 0xF0FF;
-            func_80018C14();
-            switch (D_801D3D64.unk_62 & 3) {
-            case 2:
-                D_800AA2EC = 0x44;
-                func_8001ED54(&D_80089374);
-                D_800AA2EC = D_801E2A44;
-                func_8001ED54(&D_800893BC);
-                D_800AA2EC = 0x47;
-                func_8001ED54(&D_800893E0);
-                D_8007A6F0 = 0;
-                break;
-            case 3:
-                D_8007A6F0 = 1;
-                D_800AA2EC = 0x44;
-                func_8001ED54(&D_80089398);
-                D_800AA2EC = D_801E2A44;
-                func_8001ED54(&D_8008941C);
-                D_800AA2EC = 0x47;
-                func_8001ED54(&D_80089400);
-                break;
-            default:
-                player--;
-                goto pause;
-            }
+                main_free_kind(0x300);
+                main_free_kind(0x550);
+                D_801D3D64.unk_62 &= 0xF0FF;
+                func_80018C14();
+                switch (D_801D3D64.unk_62 & 3) {
+                case 2:
+                    D_800AA2EC = 0x44;
+                    func_8001ED54(&D_80089374);
+                    D_800AA2EC = D_801E2A44;
+                    func_8001ED54(&D_800893BC);
+                    D_800AA2EC = 0x47;
+                    func_8001ED54(&D_800893E0);
+                    D_8007A6F0 = 0;
+                    break;
+                case 3:
+                    D_8007A6F0 = 1;
+                    D_800AA2EC = 0x44;
+                    func_8001ED54(&D_80089398);
+                    D_800AA2EC = D_801E2A44;
+                    func_8001ED54(&D_8008941C);
+                    D_800AA2EC = 0x47;
+                    func_8001ED54(&D_80089400);
+                    break;
+                default:
+                    player--;
+                    goto pause;
+                }
             }
         }
         return 0;
@@ -2727,8 +2727,9 @@ void func_8001C834(void) {
 }
 
 #ifdef NON_MATCHING
-/* 96.86%: the state test is unsigned in the original (sltiu 5) and its switch runs on a copy of it; the default
- * case is entered with D_801D3780's address already in a0 from every jump; one instruction more. The attract
+/* 96.98%: the switch runs on a copy of the state in the original (move v1,s3); here the state register itself, and
+ * the address of D_801D3780 is computed once at the top where the original enters the default case with it rebuilt
+ * in a0 from every jump; one instruction more. u32 state gives the original's unsigned test (sltiu 5). The attract
  * screen's state machine (D_801D3780), its screens in OVERATTR (func_800996CC, func_800991EC, func_8009C828) */
 void func_800991EC(void);
 void func_800996CC(void);
@@ -2752,7 +2753,7 @@ extern s16 D_801F9AAC;
 extern s16 D_801FB468;
 
 void func_8001C83C(void) {
-    s32 state;
+    u32 state;
     s32 prev;
     s32 i;
     s32 id;
@@ -2764,7 +2765,7 @@ void func_8001C83C(void) {
     state = D_801D3780;
     if (state != 0) {
         if (state >= 5) {
-            switch (state) {
+            switch (D_801D3780) {
             case 5:
                 if (D_800AA2DC != 0) {
                     switch ((s16) (D_801FA960 % 25)) {
@@ -3833,30 +3834,25 @@ void func_8001E9C4(s16 arg0, s16 arg1) {
     D_801FAF6E = (arg0 * arg1) / 3;
 }
 
-#ifdef NON_MATCHING
-/* 99.2 %: the two shifts of `mix` come out in the other order (prev first); with the other operand order the
- * registers a1/a2 swap instead. The random number generator (its state D_801FAF6C/6E/70). */
+/* The random number generator: its state is D_801FAF6C/6E/70 (seeded by func_8001E9C4). */
 s16 func_8001EA10(void) {
     u16 prev;
+    u16 seed;
     u16 next;
-    s32 mix;
     s16 result;
 
     prev = D_801FAF6E;
+    seed = D_801FAF6C;
     next = prev + 1;
-    mix = ((prev * 8) + (D_801FAF6C << 5)) - 1;
     D_801FAF6E = next;
-    result = prev ^ ((D_801FAF70 ^ mix) - D_801FAF6C);
-    if ((D_801FAF6C << 0x10) < (next << 0x10)) {
+    result = prev ^ ((D_801FAF70 ^ ((seed << 5) + (prev << 3) - 1)) - seed);
+    if ((seed << 0x10) < (next << 0x10)) {
         D_801FAF6E = prev + 2;
     }
-    D_801FAF70 = D_801FAF6C;
+    D_801FAF70 = seed;
     D_801FAF6C = (u16) result;
     return result;
 }
-#else
-INCLUDE_ASM("asm/main/nonmatchings/main", func_8001EA10);
-#endif
 
 s32 func_8001EA78(void) {
     s16 temp_s0;
@@ -4310,12 +4306,13 @@ void func_8001F9BC(GameObject *head, GameObject *end) {
 }
 
 #ifdef NON_MATCHING
-/* 98.08%: 98.1 %: the tpage is copied to s2 for the quad in the original (one register here); the unlit branch (lit
- * = 0) falls into the test in the original, after the object-colour branch; the SPRT clut store goes in the jump's
- * delay slot; the flipped quad's x1 loads the width first. The colour and unk_24 bytes are read through casts
- * (lbu): they want byte views in GameObject. Draws the object list: boxes (POLY_F4; a line of width 3 for 0x1000, a
- * free quad for 0x2000), sprites (SPRT) and flipped sprites (POLY_FT4), with a DR_TPAGE whenever the texture page
- * changes */
+/* 99.90%: 99.9 %: only the texture page differs: the original copies it to s2 after main_get_tpage (move s2,s1 in
+ * the delay slot of the first test) and stores the copy into the quad; here one register (u16/s32 copies, a chained
+ * assignment and a reused variable all fold into it). The colour block's gotos give the original's block order (the
+ * unlit case last, falling into the test), as an inline helper returning the flag would. The colour and unk_24
+ * bytes are read through casts (lbu): they want byte views in GameObject. Draws the object list: boxes (POLY_F4; a
+ * line of width 3 for 0x1000, a free quad for 0x2000), sprites (SPRT) and flipped sprites (POLY_FT4), with a
+ * DR_TPAGE whenever the texture page changes */
 extern u32 D_801FB41C;  /* the lit sprites' colour (building.c) */
 
 void func_8001F9DC(GameObject *head, GameObject *end) {
@@ -4439,15 +4436,17 @@ void func_8001F9DC(GameObject *head, GameObject *end) {
                     rgb[1] = (D_801FB41C >> 8) & 0xFF;
                     lit = 1;
                     rgb[2] = D_801FB41C & 0xFF;
-                } else {
-                    lit = 0;
+                    goto sprt_lit;
                 }
             } else {
                 rgb[0] = (obj->colour >> 16) & 0xFF;
                 rgb[1] = (obj->colour >> 8) & 0xFF;
                 lit = 1;
                 rgb[2] = obj->colour & 0xFF;
+                goto sprt_lit;
             }
+            lit = 0;
+sprt_lit:
             if (lit) {
                 sprt->code &= ~1;
                 sprt->r0 = rgb[0];
@@ -4461,11 +4460,8 @@ void func_8001F9DC(GameObject *head, GameObject *end) {
             } else {
                 sprt->code &= ~2;
             }
-            if (obj->unk_74 != 0xFFFF) {
-                sprt->clut = D_801C51D4[D_800AFB54[obj->unk_72] + obj->unk_74];
-            } else {
-                sprt->clut = D_801C51D4[D_800AFB54[obj->unk_72] + obj->frame->unk_0C];
-            }
+            sprt->clut = (obj->unk_74 != 0xFFFF) ? D_801C51D4[D_800AFB54[obj->unk_72] + obj->unk_74]
+                                                   : D_801C51D4[D_800AFB54[obj->unk_72] + obj->frame->unk_0C];
             AddPrim(D_801FAC80->ot, sprt);
             continue;
         }
@@ -4487,11 +4483,11 @@ void func_8001F9DC(GameObject *head, GameObject *end) {
         case 2:
             ft4->x0 = obj->unk_28.s.lo - 8;
             ft4->y0 = obj->unk_28.s.hi - 8;
-            ft4->x1 = obj->unk_28.s.lo + (obj->size.s.lo - 8);
+            ft4->x1 = obj->size.s.lo + (obj->unk_28.s.lo - 8);
             ft4->y1 = obj->unk_28.s.hi - 8;
             ft4->x2 = obj->unk_28.s.lo - 8;
             ft4->y2 = obj->unk_28.s.hi - obj->size.s.hi - 8;
-            ft4->x3 = obj->unk_28.s.lo + (obj->size.s.lo - 8);
+            ft4->x3 = obj->size.s.lo + (obj->unk_28.s.lo - 8);
             ft4->y3 = obj->unk_28.s.hi - obj->size.s.hi - 8;
             break;
         case 3:
@@ -4515,15 +4511,17 @@ void func_8001F9DC(GameObject *head, GameObject *end) {
                 rgb[1] = (D_801FB41C >> 8) & 0xFF;
                 lit = 1;
                 rgb[2] = D_801FB41C & 0xFF;
-            } else {
-                lit = 0;
+                goto quad_lit;
             }
         } else {
             rgb[0] = (obj->colour >> 16) & 0xFF;
             rgb[1] = (obj->colour >> 8) & 0xFF;
             lit = 1;
             rgb[2] = obj->colour & 0xFF;
+            goto quad_lit;
         }
+        lit = 0;
+quad_lit:
         if (lit) {
             ft4->code &= ~1;
             ft4->r0 = rgb[0];
@@ -4572,11 +4570,8 @@ void func_8001F9DC(GameObject *head, GameObject *end) {
         ft4->u3 = u + w;
         ft4->v3 = v + h;
         ft4->tpage = tpage;
-        if (obj->unk_74 != 0xFFFF) {
-            ft4->clut = D_801C51D4[D_800AFB54[obj->unk_72] + obj->unk_74];
-        } else {
-            ft4->clut = D_801C51D4[D_800AFB54[obj->unk_72] + obj->frame->unk_0C];
-        }
+        ft4->clut = (obj->unk_74 != 0xFFFF) ? D_801C51D4[D_800AFB54[obj->unk_72] + obj->unk_74]
+                                               : D_801C51D4[D_800AFB54[obj->unk_72] + obj->frame->unk_0C];
         AddPrim(D_801FAC80->ot, ft4);
     }
     if (D_801FAC80->unk_493C != D_801FAC80->unk_493E) {
