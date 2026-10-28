@@ -24,7 +24,7 @@ s32 func_8004D150(u16 *, Monster *m, void *);
 void monster_start_jump(Monster *m);
 void func_80053C50(s32, Monster *m);
 void func_8005404C(Monster *m);
-u16 func_8005453C(s16 x, s16 y, Monster *m);
+u16 monster_test_in_front(s16 x, s16 y, Monster *m);
 Building *monster_get_building(u16);
 void func_80056488(Monster *m);
 void func_800564D8(Monster *m);
@@ -97,7 +97,11 @@ void func_8004E658(void) {
  * s = D_8007F878; s += off (u32 off = m->dir; off <<= 3), s is set twice and ties to nothing: then the table's
  * quantity (its %hi and s, 7 refs over 14) and the index's (4 refs over 8) tie at priority 1.0 and the index, born
  * first, takes v0 (95.51%). A temporary for s->vel_y ends s one insn earlier and gives the original's registers, but
- * loads vel_y before the cur_obj reload (99.24%) */
+ * loads vel_y before the cur_obj reload (99.24%). combine_regs (local-alloc.c) skips operand 1 only when that
+ * register has no quantity, i.e. is not block-local or dies more than once, so the original's shifted index lived
+ * in two blocks or died twice. Also tried: the index in a variable reused for the unk_18E test, a byte offset
+ * variable (u8 * + off), a 2-D table D_8007F830[2][9], the pair copied by value, s = &s[dir], every -fno-* flag of
+ * the round's list, and the permuter (15 min): all 96.89% or less */
 void func_8004E6F0(void) {
     Monster *m = D_800AA248.cur_obj->owner.monster;
     SpeedPair *s = &D_8007F878[m->dir];
@@ -388,7 +392,7 @@ void func_8004EFE8(void) {
                     if (o != NULL && !(o->unk_6C & 0x80)) {
                         if (other->unk_0DC != 0 && other->action == 3 && o->pos_y.s.hi == 0xE1 &&
                             (D_800AA248.cur_obj->flags & 0x10) != (o->flags & 0x10)) {
-                            if (func_8005453C(m->pos.s.lo, m->pos.s.hi, other)) {
+                            if (monster_test_in_front(m->pos.s.lo, m->pos.s.hi, other)) {
                                 m->unk_18A = 1;
                                 other->unk_0E4 = m->id;
                                 other->action = 0x41;
