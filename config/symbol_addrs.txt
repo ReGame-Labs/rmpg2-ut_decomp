@@ -6,6 +6,13 @@ game_main = 0x8001781C; // type:func  main, which crt0 calls right after setting
 
 // main (src/main/main.c)
 main_update_pressed = 0x80017C04; // type:func
+main_can_pause = 0x80017C80; // type:func
+main_find_unplugged_pad = 0x80017D8C; // type:func
+main_create_pause_box = 0x80017F14; // type:func
+main_free_pause_box = 0x80018008; // type:func
+main_update_pause = 0x8001828C; // type:func
+main_recolour_objects = 0x80018BD4; // type:func
+main_cycle_highlight = 0x80018C14; // type:func
 main_read_pad = 0x80018DBC; // type:func
 main_init_system = 0x800193B8; // type:func
 main_begin_frame = 0x80019764; // type:func
@@ -17,6 +24,7 @@ main_load_font = 0x8001B178; // type:func
 main_alloc_vram_slot = 0x8001B3C4; // type:func
 main_get_monster_player = 0x8001C3E4; // type:func
 main_init_level = 0x8001C404; // type:func
+main_update_attract = 0x8001C83C; // type:func
 main_start_demo = 0x8001D28C; // type:func
 main_cull_objects = 0x8001D998; // type:func
 main_sort_objects = 0x8001DF98; // type:func
@@ -24,8 +32,14 @@ main_resort_objects = 0x8001E010; // type:func
 main_init_objects = 0x8001E0AC; // type:func
 main_free_kind = 0x8001E450; // type:func
 main_free_kind_masked = 0x8001E8C0; // type:func
+main_seed_random = 0x8001E9C4; // type:func
+main_random = 0x8001EA10; // type:func
+main_random_range = 0x8001EAC4; // type:func
+main_random_between = 0x8001EB10; // type:func
 main_create_box = 0x8001EB9C; // type:func
+main_print_text = 0x8001EEA0; // type:func
 main_draw_lists = 0x8001F848; // type:func
+main_draw_objects = 0x8001F9DC; // type:func
 main_run_calls = 0x800205AC; // type:func
 main_step_anim = 0x8002075C; // type:func
 main_set_frame = 0x80020BA0; // type:func
@@ -57,6 +71,9 @@ main_get_midpoint = 0x80028ADC; // type:func  (a, b) the s16 midpoint, the large
 main_find_camera_pair = 0x80028B1C; // type:func  the x distance and midpoint of each pair of the players' monsters in play (D_801E1E24), D_801D8844 the farthest pair
 main_apply_health = 0x80029510; // type:func
 main_count_monsters = 0x8002958C; // type:func
+main_pause_keys = 0x8007A6B8; // size:0x30
+main_pause_cursor = 0x8007A6F0;
+main_pause_delay = 0x8007A6F4;
 
 // The Psy-Q library objects (config/main.yaml's psyq/ units), function by function (tools/psyq_match.py
 // --functions; docs/TOOLCHAIN.md). Byte-identical twins were settled from callers and callees: PadStartCom,

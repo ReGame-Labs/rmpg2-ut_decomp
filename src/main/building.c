@@ -35,9 +35,9 @@ void func_8002A3A4(void) {
     players = D_8007A690;
     rain = chance >> 16;
     if (players == 1) {
-        if (func_8001EAC4(100) < rain) {
+        if (main_random_range(100) < rain) {
             D_8007C976 = players;
-        } else if (func_8001EAC4(100) < (s16) chance) {
+        } else if (main_random_range(100) < (s16) chance) {
             D_8007C976 = 2;
         }
     }
@@ -1474,7 +1474,7 @@ void func_8002D5B8(Monster *m, BuildingItem *rec) {
     l = prev->unk_06;
     both = r | l;
     if (both == 0) {
-        if (!(func_8001EB10(0x8000, 0) & 1)) {
+        if (!(main_random_between(0x8000, 0) & 1)) {
             goto go_next;
         }
         goto go_prev;
@@ -1611,7 +1611,7 @@ void *func_8002DAAC(u16 which, u16 n, BuildingItem *rec) {
             if (k < 3) {
                 p += k - 1;
                 t = *p;
-                t += func_8001EB10(0x20, 0) & 1;
+                t += main_random_between(0x20, 0) & 1;
                 r = t[n * 2];
             }
         }
@@ -1959,8 +1959,9 @@ void func_8002E348(Monster *arg0, BuildingItem *rec) {
 
 #ifdef NON_MATCHING
 /* 94.22%: 94.2 %: the original's li v1,5 in the zero test's delay slot is the else block's constant, so either
- * reorg predicted the branch taken (mostly_true_jump gives EQ not taken) or the 5 was a pseudo set before the
- * branch (global, hence v1) */
+ * reorg predicted the branch taken (mostly_true_jump gives EQ not taken; rare_destination is 0 both ways) or the 5
+ * was a pseudo set before the branch (global, hence v1); a static inline taking the level, a level local and the
+ * == 0 test first do not keep such a pseudo (cse folds it back to constants) */
 void func_8002E440(Monster *arg0, BuildingItem *rec) {
     BuildingPart *part;
     u16 n;
@@ -2076,7 +2077,7 @@ s32 *func_8002E658(u16 which, BuildingItem *rec) {
     }
     bld = rec->building;
     if (bld->state != 9) {
-        D_800AA248.unk_00 = func_8001EB10(0x8000, 0) & 0x3F;
+        D_800AA248.unk_00 = main_random_between(0x8000, 0) & 0x3F;
         if ((u32) D_800AA248.unk_00 >= 0x20) {
             def->anim = &D_80011F10;
             def->id = D_80011F10.id;
@@ -2510,7 +2511,7 @@ void building_set_players_action(u16 action) {
 u16 building_pick_part(Building *a) {
     s32 r;
 
-    r = func_8001EB10(0x8000, 0);
+    r = main_random_between(0x8000, 0);
     if (a->kind == 2) {
         return (r & 1) + 1;
     }
@@ -3012,7 +3013,7 @@ void func_8003047C(void) {
         func_8001E698(D_800AA248.cur_obj, D_80012110);
         return;
     }
-    r = func_8001EB10(0x7001, 0) + owner->unk_000;
+    r = main_random_between(0x7001, 0) + owner->unk_000;
     r &= 0x4F;
     if (r < 0x20) {
         switch (r & 7) {
@@ -3053,7 +3054,7 @@ void func_800305C8(s32 *anim, s16 y, GameObject *body, Building *rec) {
     r->anim = anim;
     r->id = *anim;
     x = (s16) rec->left + ((rec->kind == 2) ? 0x4F : 0x77);
-    r->pos_x.u.hi = D_801D8866 & func_8001EB10(x, (s16) rec->left);
+    r->pos_x.u.hi = D_801D8866 & main_random_between(x, (s16) rec->left);
     r->flags = body->priority + 1;
     D_800AA248.new_def = r;
     func_8001DCB4();
@@ -3309,7 +3310,8 @@ void func_80030D14(UnkStruct19 *p) {
 
 #ifdef NON_MATCHING
 /* 98.63%: 98.63 %: combine_givs keeps the first giv of bl->giv, the last one found (the state access, +20); the
- * original kept the items[0].obj access (+152), so it was found last, or the state access was not a giv */
+ * original kept the items[0].obj access (+152), so it was found last, or the state access was not a giv; an index
+ * loop (D_801D3DC8[i]) makes &D_801D3DC8[i] the base (95.8 %), the load order of q and o changes nothing */
 void building_count_standing(void) {
     u16 n = D_801E29A4;
     s16 count = 0;
@@ -3424,7 +3426,7 @@ void func_80031074(void) {
     saved = D_800AA268.p;
     if (rec != NULL && rec->obj != NULL && rec->building != NULL) {
         rec = saved->owner.item;
-        func_800305C8(func_8001EB10(rec->unk_04 + 0x5ABC, rec->unk_04) & 1 ? D_800121AC : D_8001214C,
+        func_800305C8(main_random_between(rec->unk_04 + 0x5ABC, rec->unk_04) & 1 ? D_800121AC : D_8001214C,
                       rec->obj->pos_y.s.hi + 12, saved, rec->building);
         D_800AA268.p = saved;
     }
