@@ -57,6 +57,7 @@ main_get_midpoint = 0x80028ADC; // type:func  (a, b) the s16 midpoint, the large
 main_find_camera_pair = 0x80028B1C; // type:func  the x distance and midpoint of each pair of the players' monsters in play (D_801E1E24), D_801D8844 the farthest pair
 main_apply_health = 0x80029510; // type:func
 main_count_monsters = 0x8002958C; // type:func
+main_track_player = 0x80029D5C; // type:func  the camera kept on one player (mode 2, the player D_8007BD7C) with the speed its action gives, eased by D_8007BD78 bits 0-1, vertical with bit 2, x wrapped by the level width and capped at 0x666
 
 // The Psy-Q library objects (config/main.yaml's psyq/ units), function by function (tools/psyq_match.py
 // --functions; docs/TOOLCHAIN.md). Byte-identical twins were settled from callers and callees: PadStartCom,

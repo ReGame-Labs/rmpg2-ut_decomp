@@ -8143,7 +8143,7 @@ extern s16 D_801FA728;
 extern s16 D_801FA9A8;
 void main_find_camera_pair(void);
 void func_800288B0(s32 *vel2, s32 *vel1);
-void func_80029D5C(s32, s32);
+void main_track_player(s32, s32);
 
 void main_update_camera(void) {
     s32 flags;
@@ -8162,7 +8162,7 @@ void main_update_camera(void) {
         return;
     }
     if (flags & 2) {
-        func_80029D5C(flags, D_8007BD7C);
+        main_track_player(flags, D_8007BD7C);
         return;
     }
     main_find_camera_pair();
@@ -9059,27 +9059,24 @@ void func_80029D1C(void) {
     }
 }
 
-#ifdef NON_MATCHING
-/* 91.81%: 91.8 %: a first draft, the logic complete; registers differ from the start (the original keeps mode in s5
- * and sx in s6), the screen x is computed into a2 and copied to sx, and the dy, dx sums still reassociate */
-extern s32 D_8007BD7C;
 void func_8005E214(void);
 
-void func_80029D5C(s32 mode, s32 player) {
+void main_track_player(s32 mode, s32 player) {
     Monster *m;
     s32 bonus;
-    s32 boost;
+    u16 boost;
     u16 camx;
     u16 camy;
     u16 sx;
-    u16 ox;
     u16 oy;
     u16 right;
     u16 edge;
     u16 dx;
-    u16 dy;
+    s16 dy;
     u16 x;
     s32 flags;
+    u16 cam;
+    s32 top;
 
     sx = 0;
     boost = 0;
@@ -9098,15 +9095,15 @@ void func_80029D5C(s32 mode, s32 player) {
         }
         m = &D_801E0B78[func_80025DF8(player)];
         right = camx + 0x131;
+        sx = m->obj->pos_x.u.hi;
         edge = right;
-        ox = m->obj->pos_x.u.hi;
+        x = sx;
         oy = m->obj->pos_y.u.hi;
         if ((s16) D_801D8866 < (s16) right) {
             edge = right - D_801D8866;
         }
-        x = ox;
-        if ((s16) camx < (s16) ox && (s16) ox < (s16) edge) {
-            x = ox - camx;
+        if ((s16) sx > (s16) camx && (s16) sx < (s16) edge) {
+            x = sx - camx;
         }
         sx = x;
         if (m->action == 2 || m->action == 0x19) {
@@ -9136,21 +9133,23 @@ void func_80029D5C(s32 mode, s32 player) {
         }
         oy -= 0xE1;
         if (((s16) camy - (s16) oy >= 0x6F || (D_8007BD78.flags & 4)) && m->action != 2 && m->action != 0x2C) {
+            D_8007BD78.flags |= 4;
             dy = camy - 0x6E;
             dy = oy - dy;
-            D_8007BD78.flags |= 4;
-            if ((s16) dy < -4) {
+            if (dy < -4) {
                 dy = -4;
-            } else if ((s16) dy == 0) {
+            } else if (dy == 0) {
                 D_8007BD78.flags &= ~4;
             }
-        } else if ((s16) oy - ((s16) camy - 0x32) > 0) {
+        } else if ((s16) oy - (top = (s16) camy - 0x32) > 0) { /* FAKE: top keeps camy - 0x32 a value of its own:
+            * inline, fold reassociates oy - (camy - 0x32) into (oy + 0x32) - camy; a statement before the test
+            * computes it in another block */
             dy = camy - 0x32;
             dy = oy - dy;
-            if ((s16) dy >= 5) {
+            if (dy >= 5) {
                 dy = 4;
             }
-            if (-(s16) camy < (s16) dy) {
+            if (dy > -(s16) camy) {
                 dy = -camy;
             }
         }
@@ -9164,7 +9163,7 @@ void func_80029D5C(s32 mode, s32 player) {
             dx = boost + dx;
         } else {
             dx = m->obj->vel_x.s.hi;
-            if (dx == 0) {
+            if (m->obj->vel_x.s.hi == 0) {
                 D_8007BD78.flags &= ~3;
             }
         }
@@ -9172,13 +9171,13 @@ void func_80029D5C(s32 mode, s32 player) {
     if (bonus == 1 && (s16) dx < 0) {
         dx = 0;
     }
-    x = D_801F9AC8.u.hi + dx;
-    D_801F9AC8.u.hi = x;
+    cam = D_801F9AC8.u.hi + dx;
+    D_801F9AC8.u.hi = cam;
     D_801F9ACC.u.hi += dy;
-    if ((s16) D_801D8866 < (s16) x) {
-        D_801F9AC8.s.hi = x - D_801D8866;
-    } else if ((s16) x < 0) {
-        D_801F9AC8.s.hi = x + D_801D8866;
+    if ((s16) D_801D8866 < (s16) cam) {
+        D_801F9AC8.s.hi = cam - D_801D8866;
+    } else if ((s16) cam < 0) {
+        D_801F9AC8.s.hi = cam + D_801D8866;
     }
     if (D_801F9ACC.s.hi > 0) {
         D_801F9ACC.s.hi = 0;
@@ -9187,9 +9186,6 @@ void func_80029D5C(s32 mode, s32 player) {
         D_801F9AC8.s.hi = 0x666;
     }
 }
-#else
-INCLUDE_ASM("asm/main/nonmatchings/main", func_80029D5C);
-#endif
 
 void func_8002A1AC(Monster *m, s16 count) {
     GameObject *saved;
