@@ -5794,8 +5794,11 @@ void func_80023080(Npc *npc) {
 #ifdef NON_MATCHING
 /* 92.01%: 92 %: the second branch keeps the %hi of D_801F9AC8 in a1 from its top and reloads the value through it
  * at the end of the inner block (reorg then skips that load on the path that still holds it in v1); the C reloads
- * with a fresh lui. The original's distance is the builtin abs() in its two-register form (bgez v0; move v1,v0;
- * negu v1,v1, where the C's copy negates v0); written as abs() here the inner block changes shape (82.5 %) */
+ * with a fresh lui. So cse knew the %hi there but not the memory value. With the tail written in each branch (a
+ * return after the inner block and one after the if), cse follows the jump and drops the reload entirely (89 %); a
+ * Fixed pointer to the camera gives a1 the full address. The original's distance is the builtin abs() in its two-
+ * register form (bgez v0; move v1,v0; negu v1,v1, where the C's copy negates v0); written as abs() here the inner
+ * block changes shape (82.5 %) */
 u16 func_80023114() {
     s32 x;
     s32 d;
@@ -9252,8 +9255,10 @@ void func_80029170(void) {
 
 #ifdef NON_MATCHING
 /* 95.77%: 95.8 %: the original keeps 0x37 from the first compare in a2 and stores it (m->action = 0x37) where the C
- * loads it again (cse's path is longer here); its two range tests (action - 9 < 6, action - 0x34 < 2) keep an andi
- * the C folds away */
+ * loads it again (cse's path is longer here). Its two range tests (action - 9 < 6, action - 0x34 < 2) keep an andi
+ * that combine folds here: a u16 d = action - 9 set before the 0x34/0x35 test (another block) keeps the first andi
+ * and gives the original's size (94.8 % by objdiff, registers then differ); the end test's andi folds in every
+ * placement tried (a u16 temporary, a reread of m->action, & 0xFFFF with an unsigned compare) */
 u16 func_800291DC(Monster *m, GameObject *obj) {
     u16 action;
     u16 next;
