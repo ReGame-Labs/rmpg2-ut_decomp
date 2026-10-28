@@ -1967,10 +1967,13 @@ void func_8002E348(Monster *arg0, BuildingItem *rec) {
 }
 
 #ifdef NON_MATCHING
-/* 94.22%: 94.2 %: the original's li v1,5 in the zero test's delay slot is the else block's constant, so either
- * reorg predicted the branch taken (mostly_true_jump gives EQ not taken; rare_destination is 0 both ways) or the 5
- * was a pseudo set before the branch (global, hence v1); a static inline taking the level, a level local and the
- * == 0 test first do not keep such a pseudo (cse folds it back to constants) */
+/* 94.22%: 94.2 %: the original's li v1,5 in the zero test's delay slot comes from the test block (reorg's backward
+ * fill; here the slot takes the fall-through's move a0,s0): a pseudo holding 5 set before the test, global (v0
+ * holds the loaded unk_06), used by the else arm's store (a store of a constant needs a register, so cse cannot
+ * fold it); a local set to 5 before the test gives exactly that delay slot, but cse then also gives the then arm's
+ * store after the call the same pseudo (an s register); u8..s32 locals, a static inline taking the level, ?: and
+ * per-arm n++ do not separate the two */
+// WIP in src/main/building.c: 94.2 %: the original's li v1,5 in the zero test's delay slot is the else block's constant, so either reorg predicted the branch taken (mostly_true_jump gives EQ not taken; rare_destination is 0 both ways) or the 5 was a pseudo set before the branch (global, hence v1); a static inline taking the level, a level local and the == 0 test first do not keep such a pseudo (cse folds it back to constants)
 void func_8002E440(Monster *arg0, BuildingItem *rec) {
     BuildingPart *part;
     u16 n;

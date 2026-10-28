@@ -2225,7 +2225,8 @@ void func_8004BAC0(void) {
  * over 34, 0.235); the base's life is sched1's 17 doubled by update_equiv_regs (its REG_EQUIV constant address), so
  * the original needs obj below 0.235 (13 insns: one more insn between npc->obj's load and case 1's store) or the
  * base without its equivalence (set twice) or with a fifth ref; obj first as its own statement, case 1 through obj
- * or npc->obj and a local for the action change nothing or more */
+ * or npc->obj, a local for the action and a GameState pointer local (set at the top or in case 4, any mix of the
+ * accesses through it) change nothing or more */
 void func_8003831C(void);
 extern Anim D_8008AA58;
 extern Anim D_8008AA78;
