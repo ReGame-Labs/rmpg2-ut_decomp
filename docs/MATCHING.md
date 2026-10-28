@@ -81,7 +81,11 @@ GCC 2.8.1's sources, for reading why the compiler chose something:
      takes the pseudos by priority = floor_log2(refs) × refs / live length, each into a register it prefers
      (`prefers`) when free, else the first free one (an `s` register for a pseudo crossing a call): more refs or a
      shorter life move a value up. `--dump L` (`c`, `lg`, `loop,combine`, ...) also prints those dumps' text of the
-     function.
+     function: `.lreg`'s "used X times across Y insns" gives a pseudo's refs and live length, `.greg`'s
+     `regs_someone_prefers` and its pass 0 explain a swap between two registers.
+   - A live length about twice the pseudo's span is `update_equiv_regs` (local-alloc.c) doubling a pseudo with a
+     `REG_EQUIV` note, a constant address or a parameter: the doubling lowers it in global-alloc's order, not in
+     local-alloc's.
    - A C function is `OK` when its size is the original's and every instruction is the original's word once linked
      (relocations and branch targets resolved to addresses, the names `config/aliases.ld` gives one address
      included), its jump table too; `OK (by address)` when objdiff scores it below 100% while the linked words are
@@ -102,7 +106,9 @@ GCC 2.8.1's sources, for reading why the compiler chose something:
      independently) times every choice among the alternatives marked `//@G<name>` (a bare `//@G1` is the empty
      alternative), stops at the first match and writes the best to `build/variant/`. The marker starts the line
      (`//@P a->x = 0;`) or ends it (`a->x = 0; //@P`). Up to `--max` candidates (5040), sampled beyond; `-j` compiles
-     in parallel (`RMPG2_JOBS`); `-k` keeps the best.
+     in parallel (`RMPG2_JOBS`); `-k` keeps the best. perm does not know which lines depend on each other: check
+     that the winning order still means the same. In a large unit it compiles about one candidate a second, so cut
+     the function down first.
    - `--cc1 FLAG` (repeatable; `put`, `try`, `perm`, `get --dump` and `unit_diff.py`) adds a cc1 flag to every compile,
      as a diagnostic that is never kept: a candidate that matches only with `-fno-cse-follow-jumps`,
      `-fno-cse-skip-blocks`, `-fno-schedule-insns` or `-fno-schedule-insns2` has the original's operations, and
@@ -174,7 +180,8 @@ known of them are in [`DISC_LAYOUT.md`](DISC_LAYOUT.md) "The files".
 
 ## C patterns
 
-Each pattern below matched at least one GCC 2.8.1 function. Try them before searching blindly.
+Each pattern below matched at least one GCC 2.8.1 function; a function named with it is matched C in `src/`. Try them
+before searching blindly.
 
 ### Types and calls
 - A missing argument load means the callee takes no arguments; a register the original never sets is not an argument;
@@ -189,6 +196,8 @@ Each pattern below matched at least one GCC 2.8.1 function. Try them before sear
   (`func_80031154(kind, m)`).
 - A result masked with `andi 0xFFFF` after every call: the callee returns `u16` (`func_80038C1C`). A call with no
   prototype in scope returns `int` and loses the mask.
+- A bound held in a `u16` variable gives `li tN,k` + `sltu` where the constant gives `sltiu` (`max = 8; if (slot >=
+  max)` in `npc_pick_target`).
 
 ### Structs, globals and aliasing
 - GCC 2.8 assumes a struct field and a scalar global never alias. A global reloaded after a struct-field store is a
@@ -224,12 +233,20 @@ Each pattern below matched at least one GCC 2.8.1 function. Try them before sear
   register (`func_8003C0E8`).
 - A mask or wrap written stepwise keeps its `and`: `x = pos; x += vel; x &= w; pos = x;` (`func_80044F08`); the
   single expression folds it.
-- `abs()` is a call to `s32 abs(s32)` (`func_80039D04`). Inline, `d >= 0 ? d : -d` negates a copy (`move` + `negu`)
-  and `if (d < 0) d = -d;` negates in place (`func_80023CFC`).
+- `abs()`, declared `s32 abs(s32)`, is GCC's builtin, expanded by the `abssi2` pattern: `bgez x; nop; negu x` in
+  place, or `bgez a; move b,a; negu b` into another register (`attacker_update_knockback`, `func_80039D04`). Written
+  out, `d >= 0 ? d : -d` negates a copy (`move` + `negu`) and `if (d < 0) d = -d;` negates in place
+  (`func_80023CFC`).
+- A commutative add of a memory operand and a register: `force_mem` loads both operands, then swaps them when the
+  target is the second one. A sum into another variable keeps the original's order: `t = npc->unk_30; v =
+  obj->vel_y.w + t;`, not `t = obj->vel_y.w + t;` (`func_80020D20`).
+- `x & (1 << n)` folds into `srav` + `andi`; the bit in a local, `bit = 1 << n; if (x & bit)`, keeps `sllv` + `and`
+  (`func_8009FF38`).
 - `if (c) v = -v; a = v + x;` puts a copy of the add in the delay slot after the `negu` (`func_80037960`).
 - fold reassociates `y + (t + c)` into `(y + c) + t`: write `y + c + t` to get `t + c` first. `v + c + i * k` keeps
   the original's order; `a - -b` keeps `a` first.
-- The left operand of a comparison loads first, so `a > b` and `b < a` differ.
+- The left operand of a comparison loads first, so `a > b` and `b < a` differ: try every order on a compare chain
+  (`x < m_right && right > m_left` in `func_8004D6F8`; `d > half && abs(d - 4) > half` in `func_8004718C`).
 - GCC computes an assignment's left-hand array address before the right-hand side; only an inlined call on the right
   reverses it.
 - `n = 3; n -= x;` and `n = 3 - x` differ. `1 - (x != 0)` folds to `x == 0`: if the original subtracts, the `!= 0`
@@ -247,16 +264,26 @@ Each pattern below matched at least one GCC 2.8.1 function. Try them before sear
   pseudo); references inside a loop count twice. Code repeated per case or branch and merged later by cross-jumping
   still counts.
 - Give each job its own variable: one per loop, one per switch case (block-local), one per branch when branches swap
-  fields, fresh block-locals for intermediates. Yet the original also reuses counters and flags across loops: try a
-  rename search over both directions.
+  fields, fresh block-locals for intermediates. Yet the original also reuses counters, flags and scratch values
+  across jobs (`d` for the x distance, then the y one, in `func_8003F50C`): try a rename search over both directions.
 - A value used both before and after a call wants its own variable assigned once.
+- An assignment written in each arm adds references and raises the variable's priority: `if (x == 0) x = v; else if
+  (c) x = v;` (`func_80049650`), `if (a) low++; else if (b) low++;` (`npc_pick_level`).
 - local-alloc ties a block-local result to its dying first operand (and never to a pseudo set more than once in its
-  block); global-alloc then prefers that operand's variable for the result.
-- A value used in two blocks becomes a global pseudo, which changes local-alloc's `v0`/`v1` choices.
+  block), to the second operand only when the first is not a dying block-local, and breaks equal priorities by
+  creation order; global-alloc then prefers that operand's variable for the result.
+- A value used in two blocks becomes a global pseudo, which changes local-alloc's `v0`/`v1` choices: one `edge`
+  variable for both sides' bounds, set in two blocks (`func_8003AC74`).
 - A local initialised at its declaration has a longer live range. Statement order within store runs changes live
   lengths; declaration order rarely matters.
-- cse makes the longer-lived copy canonical (after `tim = p`, later uses of `p` become `tim`). A local holding a
-  `lui/ori` constant stays in one register. Constant-init order decides which register cse copies from.
+- cse makes the longer-lived copy canonical (after `tim = p`, later uses of `p` become `tim`): `make_regs_eqv` picks
+  the register whose last use comes later. A `move sX,sY` copy of an address comes from a pointer local set
+  mid-function and used after the pointer it copies. Two registers for one value need a later reference to the first
+  variable, even a dead store: `tpage = page = main_get_tpage(...)` and the closing `... = page = 0xFFFF`
+  (`main_draw_objects`). A local holding a `lui/ori` constant stays in one register. Constant-init order decides
+  which register cse copies from.
+- Load, copy, then add to the copy: a field `+=` whose old value cse already holds in a variable, `vy =
+  obj->vel_y.w; if (vy != 0) { obj->pos_y.w += vy; obj->vel_y.w += 0x2100; ...` (`monster_anim_update_bomb`).
 - reload_cse has no cost check: `move vX,sY` at a constant store means the constant was stored before the variable
   was set.
 - When the original copies a value just stored into a field, write the read through the field: `D_800AA248.new_def =
@@ -266,7 +293,7 @@ Each pattern below matched at least one GCC 2.8.1 function. Try them before sear
 - An `andi 0xFFFF` re-extending a counter before a call: the counter variable was reused for another value
   (`func_8004B540`).
 - A pointer parameter whose `move` sits late in the prologue was copied into a typed local (`MenuRecord *menu =
-  list;`, `func_8009DF98`).
+  list;`, `menu_draw`).
 - When the original advances one register through a packet (`POLY_FT4` → `SPRT` → `DR_TPAGE`), keep one running
   pointer (`poly = (POLY_FT4 *)(sprt + 1)`), and step it in place.
 - Repeated `lui`/`li` before each use inside a loop is reload rematerialising a hoisted constant that got no register.
@@ -276,11 +303,17 @@ Each pattern below matched at least one GCC 2.8.1 function. Try them before sear
 - sched1 gives top priority to an insn setting a live, once-assigned pseudo, so a load into a fresh block-local sits
   right before its use; a variable assigned more than once keeps its statement position. A value read before a store
   it could alias is a block-local initialiser.
+- A jump's priority in sched1 lifts every once-assigned value still live at it, and a load goes before an `slt` (the
+  load's delay). Reusing a variable takes it out of that boost: an `s16` loaded and compared in one block, then
+  reused for another value, gives `lh` + `move` (combine splits the sign extension) and keeps its statement position
+  (`x`, the object's x and then the box's left edge, in `func_8004D6F8`).
+- `x = c ? T[a] : T[b];` stores `x` once in the join block, where an `if`/`else` stores in each arm
+  (`main_draw_objects`' `clut`).
 - Scheduling ties go to the later insn in RTL order: an unrelated statement between a copy and a test can decide.
 - A store fed by a load sinks below independent constant stores (load latency).
-- An object definition's positions are stored before its constant fields (`func_80017F14`). A load from another
-  object comes before the stores into a new one, which may alias it: such store orders are found with `variant.py
-  perm`.
+- An object definition's positions are stored before its constant fields (`main_create_pause_box`). A load from
+  another object comes before the stores into a new one, which may alias it: such store orders are found with
+  `variant.py perm`.
 - A statement placed after a call moves delay-slot fills; code after a branch can decide that branch's delay slot.
 - Pass order: sched1 → … → sched2 → jump2 (cross-jumping) → reorg. Analyse tail merges in sched2's order.
 
@@ -292,13 +325,21 @@ Each pattern below matched at least one GCC 2.8.1 function. Try them before sear
 - Hidden empty cases decide codegen: `case 0: break;` when the table starts at 0; `case 0: default:` in object
   `switch (state)`es; a `slti` in a `u8` switch tree means an explicit `case 0:` sharing the default; an unbalanced
   compare tree means an empty case whose test jump optimisation deleted (`case 0x240:` in `func_8001B858`).
-- Two case values make a compare chain, three a tree; an unsigned switch value drops the range test; a 6-entry table
+- A switch index copied from the register of an earlier test is the global read again in the `switch`: `if
+  (D_801D3780 >= 5) { switch (D_801D3780) {` (`main_update_attract`).
+- Two case values make a compare chain, three a tree; an unsigned switch value drops the range test (a pointer field
+  holding a number: `switch ((u32)obj->arg.p)`, `tour_update_selection`); a 6-entry table
   can need its empty cases written out (`case 1: case 2: case 3: default:`, `card_write_save`). A 3-value switch
   after a range test is `if (k < 4) … else switch (k)`, one call per arm (`func_80031154`).
 - An out-of-line stub jumping into a shared tail means the source wrote the tail in each branch: write the final call,
   `return` or clear per branch when the original has them per branch. A variable per case stops tail merging. Two
   arms calling one function, each with its own argument, are two calls, not a `?:` or a selector local
-  (`func_80023CFC`).
+  (`func_80023CFC`); calls with the same arguments in both arms are written in each and merged by cross-jumping, so
+  write mirrored arms the same way (the `func_8001F7CC(0x64, 0x50)` of each arm in `func_8003AC74`).
+- Arms that store the same fields, then one call: the stores in each arm, the call once after the join
+  (`func_80032008`).
+- Equal arms survive until jump2: `if (f) x = a; else x = a;` still counts `x` as set twice in register allocation,
+  so it takes its saved register earlier in global-alloc's order (`monster_anim_blast_npcs`).
 - When both arms return, the source wrote the later block first: `if (id < 0) return id; return …;` (`func_8001B660`).
 - Some layouts match only with the asm's block order written as labels and `goto`s (`func_8003FF54`). Invariants
   hoisted into an inner loop's preheader mean the outer loop was a label (`restart:` in `game_main`); a `goto retry`
@@ -310,11 +351,34 @@ Each pattern below matched at least one GCC 2.8.1 function. Try them before sear
 
 ### Loops
 - loop.c hoists an invariant when threshold × savings × lifetime ≥ the loop's insn count (threshold 1 + the number of
-  non-fixed registers, 29 here, with calls; −3 per value already moved; a `%hi/%lo` pair has life 2). `-dL` prints each
-  decision. If the original reloads inside the loop, its loop was bigger: one more use, a per-branch tail or a type
-  change can flip it, never `-f` flags.
+  non-fixed registers, 29 here, with calls, twice that without; −3 per value already moved; a `%hi/%lo` pair has life
+  2). `-dL` prints each decision. If the original reloads inside the loop, its loop was bigger: one more use, a
+  per-branch tail or a type change can flip it, never `-f` flags. If it hoists what the C reloads, shorten the
+  invariant's life or add to its savings: a high half used twice is hoisted where one use is not, and `s16 x` for
+  `u16 x` hoists the camera's high half in `throw_start_next_pass`.
+- A register already moved out of an inner loop doubles the insn count of its test, and of every later candidate in
+  that loop (`-dL`: "halved since already moved").
+- Dead code counts in the insn count: an unused statement left in a copied block can block a hoist, though flow
+  deletes the statement later (`bonus_award_places`).
+- jump.c copies a loop's exit test to its entry only when the exit code is at most 20 insns, with no call or label.
+  When the original enters a loop by a jump to its test at the bottom, with the exit code after that test, write the
+  normal-exit code inside the loop before a `break`: `for (;;) { floor++; if (floor >= n) { n--; floor = n; break; }
+  ... }` (`monster_find_floor`, `attacker_spawn`).
+- A loop entered at its advance at the bottom: a `goto` into the advance statement, with a local for the list's head
+  sentinel (`head = &D_801E28C0; cur = head; goto next; while (obj != head) { ... next: obj = cur->next; }`,
+  `main_sort_objects`).
+- A jump from code before a loop into its body: jump2 replaced the earlier of two identical blocks with a jump into
+  the later one; a `goto` into the loop gives it (`goto pause;` in `main_update_pause`).
+- `while (i < n) { ...; i++; }` and a `for` loop differ: the `for` loop's continue note changes reorg's delay-slot
+  filling (`main_update_pause`).
+- find_and_verify_loops moves a block that leaves the loop out of line, to the nearest barrier, unless a label or a
+  jump sits inside it. An exit block the original keeps in the loop had one: write the tail on each path with its
+  `if` (the landing sound check in each exit of `throw_update_flight`). An `s` register base kept across a call
+  means the same extended basic block, so a tail copied per path, not a join label.
 - GCC 2.8.1 reverses count-up loops into count-down pointer loops: write them count-up.
-- Screen positions are `i * step + base` (loop.c reduces them), not `x += step` counters.
+- Screen positions are `i * step + base` (loop.c reduces them), not `x += step` counters: the product puts the `li`
+  of the step after the hoisted invariants, a counter before them (`D_800A9810[n] = n * 23 + 60` in
+  `menu_list_saves`).
 - Table scans: an index loop (`T[i].x`) when the asm sets the walking pointer in the preheader and hoists the sentinel
   separately; `for (i = 0; D[i].x != -1; i++) { t = &D[i]; … }` avoids an extra induction variable. Some really are
   pointer walks.
@@ -330,16 +394,21 @@ Each pattern below matched at least one GCC 2.8.1 function. Try them before sear
 - Countdown loops are `do { …; p++; } while (--n != 0)` with a `u16 n` (`func_8004B540`); a table scan is `while (*t
   != NULL) { if (*t == target) break; t++; }` (`func_80031280`).
 - Operands read in sequence go through a stepped pointer: `p = obj->arg.h; a = *p++; b = *p;` (`func_800476FC`).
+- A pointer stepped in two registers is a cursor copied from the walking pointer: `cur = ++b;`
+  (`bonus_check_round_end`).
 - A chained `a = b = c = 0` changes loop.c's hoisting against three stores (`game_main`).
 
 ### GCC 2.7.2 (the sound driver)
 The units of `configure.py`'s `CC_OVERRIDES`. The patterns above hold unless one here says otherwise.
+- `(a << 8) | b` stored to a halfword goes through an `s32` local (`root = (p->root << 8) | p->fine;` in
+  `wess_start_voice`).
+- `left = right = expr >> 7` gives `srl`; two separate stores keep `sra` (`wess_start_voice`).
 - A global counter `while (G-- != 0)` stores, then tests (`func_8006DBC0`); `G = x; while (--G != -1)` keeps both
   stores only with a statement between them.
 - `x->f &= ~2; x->f &= ~8;` gives two `and`s and one store; a local folds them (`func_8006BB14`).
 - `for (i = 0, p = table; …; i++, p++)` decides the loop's registers (`func_8006BF08`).
 - `if (p != NULL) return x; return 0;` gives the `bnez` layout (`func_8006EC18`); `if (n < 0 || n >= N) return 0;
-  return 1;` the branchy range check (`func_8006E504`).
+  return 1;` the branchy range check (`wess_valid_sequence`).
 
 ### Small data and data in C
 - ASPSX uses `$gp` only for symbols defined earlier in the same file, so a `$gp` user and its variable share a file,
@@ -364,20 +433,22 @@ A loop's begin/end notes are scheduling barriers, and blocks leaving a loop are 
 only inside `do { } while (0)`, use `LOOP_BLOCK(body)` or `LOOP_BARRIER()` (`include/common.h`) with a comment naming
 the evidence class, found by compiling the macro form and the plain form:
 - **A1:** identical with `-fno-schedule-insns` (a sched1 barrier). **A2:** identical only with
-  `-fno-schedule-insns -fno-schedule-insns2` too (a post-reload reorder).
+  `-fno-schedule-insns -fno-schedule-insns2` too (a post-reload reorder; `func_80053804`).
 - **C:** still different with scheduling off, in instructions or layout: the loop pass puts a block out of line or
   reorg fills a delay slot differently.
 - **B:** still different with scheduling off, but only in register names (references inside a loop count twice).
   The weakest evidence: first try the natural alternatives (case order, a duplicated tail, `return` for `break`, a
-  fresh variable).
+  fresh variable). The same block shape in several functions points to a macro (`bonus_create_lives` and
+  `bonus_give_awards`; `tour_init_map`).
 A bare `do { } while (0)` is not accepted.
 
 ### Forced (FAKE) matches
 Only after natural C has been given up for that function. Mark the forced line with `/* FAKE: <what is forced and
-why> */`. Forms in use elsewhere: a copy variable, mixed spellings of one access (`(p + i)->f` and `p[i].f`), a cast
-chain, one variable reused for two jobs, a pointer computed from an index instead of stepped. `tools/hacks.py`
-(CI's `check` job) fails on a `FAKE:` without its reason, a `LOOP_BLOCK` without its class, inline asm or `#if 0` in
-game code.
+why> */`. Forms in use: a copy variable, mixed spellings of one access (`(p + i)->f` and `p[i].f`), a cast chain, one
+variable reused for two jobs, a pointer computed from an index instead of stepped, an address written as an integer
+sum to keep its operand order (`wess_start_sequence`), an assignment inside a test that keeps a subexpression out of
+fold's reassociation (`main_track_player`). `tools/hacks.py` (CI's `check` job) fails on a `FAKE:` without its
+reason, a `LOOP_BLOCK` without its class, inline asm or `#if 0` in game code.
 
 ## Search techniques
 
@@ -386,6 +457,9 @@ game code.
 - **Hand searches that worked:** renaming variables across loops (one fresh variable per loop, declared first or last),
   case splitting and case order, hidden empty cases, duplicating tails per branch, statement-order searches (`variant.py perm`),
   permuting declarations and types.
+- **Structure before registers:** a difference in registers or hoisting often comes from the original's control flow
+  (a tail copied per path, a label inside a loop, gotos into shared blocks) more than from priorities: find that
+  shape first (`throw_update_flight`, `npc_pick_level`).
 - **Mini reproductions:** a standalone C file with the function's shape (fake types), compiled with `tools/cc_psx.sh`
   and cut down until the choice flips, finds a scheduler or reorg cause in minutes.
 - **Permuter:** a hint only, about 10 minutes per function, `-j1`; keep its output only if it reads as natural C.
