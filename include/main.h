@@ -117,7 +117,7 @@ typedef struct Glyph {
     s16 unk_6;
 } Glyph;
 
-/* A step of an Npc's flight towards its target (func_80022EC0): the speed and the animation for one of 8x8
+/* A step of an Npc's flight towards its target (main_steer_to_target): the speed and the animation for one of 8x8
  * direction classes (the distances halved until both are below 8). */
 typedef struct NpcStep {
     s32 vel_x;
