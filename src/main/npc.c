@@ -3200,13 +3200,11 @@ void func_8003ABE8(Npc *npc) {
     }
 }
 
-#ifdef NON_MATCHING
-/* 99.85%: 99.85 %: the original ties the sum to the constant (op 2), so the tie with the reloaded D_801F9AC8 (op 1)
- * failed: that load was not a block-local pseudo dying once */
 void func_8003AC74(Npc *npc) {
     s32 x;
     u16 t;
     u16 n;
+    s32 edge;
 
     npc->unk_04++;
     t = npc->unk_14;
@@ -3246,19 +3244,20 @@ void func_8003AC74(Npc *npc) {
             if (x < D_801F9AC8.w) {
                 x += D_801D8864.w + 1;
             }
-            if (x < D_801F9AC8.w + 0xBE0000 && (D_800AA268.p->flags & 0x10)) {
+            edge = D_801F9AC8.w + 0xBE0000;
+            if (x < edge && (D_800AA268.p->flags & 0x10)) {
                 func_8003EB5C(D_80095800, D_800AA268.p);
                 npc->unk_0C = 0;
-            } else if (D_801F9AC8.w + 0xD20000 < x && !(D_800AA268.p->flags & 0x10)) {
+            } else {
+                edge = D_801F9AC8.w + 0xD20000;
+                if (edge < x && !(D_800AA268.p->flags & 0x10)) {
                 func_8003EB5C(D_800957A4, D_800AA268.p);
                 npc->unk_0C = 0;
+                }
             }
         }
     }
 }
-#else
-INCLUDE_ASM("asm/main/nonmatchings/npc", func_8003AC74);
-#endif
 
 void func_8003AEA0(Npc *npc) {
     if (func_80039C40(D_800AA248.cur_obj->pos_x.w, 0x460000, 0x460000) == 0) {
