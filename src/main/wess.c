@@ -1332,8 +1332,11 @@ s32 wess_module_size(s32 name) {
 }
 
 #ifdef NON_MATCHING
-/* 99.85%: the module data's size gets s1 when it is loaded (the original loads it into a1, the read call's
- * argument, and copies it to s1 in the call's delay slot) */
+/* 99.85%: the module data's size: the original loads it into a1 (L, the read's argument, also added to mem) and
+ * copies it into s1 (S, compared after the call) before the call. cse keeps such a copy only when S's set comes
+ * after the argument's (S canonical from then on); every form here sets S first or uses one pseudo, which takes s1
+ * at the load. Tried: the size parameter reused as in the first two reads (99.82%, and the compare's operands
+ * swap), mem += the field then size = the field, size = len in the then-block, a separate len */
 extern s32 D_80087120;
 extern s32 D_80087124;
 

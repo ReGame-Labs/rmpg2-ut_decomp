@@ -92,10 +92,12 @@ void func_8004E658(void) {
 }
 
 #ifdef NON_MATCHING
-/* 96.89%: registers only. local-alloc ties s to the index (operand 1 of the addu, in v1), the original to the
- * table's address (operand 2, v0), so here s holds v1 and the cur_obj reload needs a0, which pushes m and
- * &D_800AA248 to a1/a2 (the original's a0/a1). The original's index could not be tied; every index and pointer form
- * tried ties it */
+/* 96.89%: registers only. Here local-alloc ties s to the index (operand 1 of the addu, a block-local that dies
+ * there), the original to the table's address (operand 2), so its index was not a block-local dying once. Written
+ * s = D_8007F878; s += off (u32 off = m->dir; off <<= 3), s is set twice and ties to nothing: then the table's
+ * quantity (its %hi and s, 7 refs over 14) and the index's (4 refs over 8) tie at priority 1.0 and the index, born
+ * first, takes v0 (95.51%). A temporary for s->vel_y ends s one insn earlier and gives the original's registers, but
+ * loads vel_y before the cur_obj reload (99.24%) */
 void func_8004E6F0(void) {
     Monster *m = D_800AA248.cur_obj->owner.monster;
     SpeedPair *s = &D_8007F878[m->dir];
@@ -114,7 +116,7 @@ INCLUDE_ASM("asm/main/nonmatchings/game_8004E574", func_8004E6F0);
 #endif
 
 #ifdef NON_MATCHING
-/* 96.89%: as func_8004E6F0: s is tied to the index, the original's to the table's address */
+/* 96.89%: as func_8004E6F0 (see there): s is tied to the index, the original's to the table's address */
 void func_8004E764(void) {
     Monster *m = D_800AA248.cur_obj->owner.monster;
     SpeedPair *s = &D_8007F830[m->dir];
@@ -581,6 +583,8 @@ s32 func_8004F7A4(u8 *list) {
     return 0;
 }
 
+/* Creates object 0x743 at the two objects' midpoint (x wrapped at the level's width), moving both there; x1 ends as
+ * the midpoint */
 void func_8004F7F4(GameObject *obj, Monster *m1, Monster *m2, GameObject *cur) {
     ObjectDef *def;
     GameObject *o;
