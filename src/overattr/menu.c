@@ -261,7 +261,8 @@ void func_8009BF94(u8 *dst, s32 index) {
  * the original gives it s1, i.e. allocates it before them, which needs a priority above 0.13 (a life under 24 insns
  * for 3 refs): the original's address was not this one long pseudo. A user variable for it, a TextMessage pointer
  * and the struct forms of the first four strings (&D_800A6300.text[6], ...: cse then reuses them, 95% and less)
- * do not change it */
+ * do not change it. The text address carries a REG_EQUIV note, so update_equiv_regs doubles its life (68 -> 136);
+ * the %hi pseudos are doubled too. No -fno-* flag of the round's list changes the order, nor the permuter (25 min) */
 void menu_draw_cheats(void) {
     func_8009BF40(D_800A631E, D_801FA960);
     func_8001ECB4(D_800A6359, D_8007A684, 0);
@@ -493,9 +494,6 @@ s32 menu_update_credits(void) {
     return 1;
 }
 
-#ifdef NON_MATCHING
-/* 81.21%: the shape is the original's (size 0x2A4, original 0x2C8); the loops' registers differ: the original
- * spills i, &D_800A6FBC[i] and i * 2, and steps the picture table's index as (k - 4) * 4. */
 void menu_draw_controls(void) {
     u16 *cfg[3];
     s32 i;
@@ -504,62 +502,69 @@ void menu_draw_controls(void) {
     s32 j;
     s32 obj;
     s32 kind;
-    s32 end;
-    s16 *base;
+    s32 first;
 
     for (i = 0; i < 3; i++) {
+        obj = i * 4;
         if (D_800A92A8[i] != D_801D8800[i]) {
             D_800A92A8[i] = D_801D8800[i];
-            obj = i * 4;
-            base = &D_800A6FBC[i];
             cfg[i] = D_8007A7C0[D_801D8800[i]];
-            kind = *base;
-            end = kind + 4;
+            first = D_800A6FBC[i];
             n = 0;
-            for (; kind < end; kind++) {
+            for (kind = first; kind < first + 4; kind++) {
                 main_free_kind(kind);
             }
-            for (k = 4, j = 0; k < 8; k++, j++) {
+            for (k = 4, j = 0; k < 8; j++, k++) {
                 switch (cfg[i][k]) {
                 case 0x10:
                     D_800A6718.x = D_800A6FAC[i];
                     D_800A6718.y = D_800A6FB4[n];
-                    D_800A6718.kind = *base + n;
+                    D_800A6718.kind = D_800A6FBC[i] + n;
                     func_8001ED54(&D_800A6718);
+                    main_set_frame(D_800A6F7C[j], D_801E28F4[obj]->flags, D_801E28F4[obj]);
+                    D_801E28F4[obj]->pos_x.s.hi = D_800A6F8C[i];
+                    D_801E28F4[obj]->pos_y.s.hi = D_800A6F94[obj];
+                    n++;
+                    obj++;
                     break;
                 case 0x20:
                     D_800A6738.x = D_800A6FAC[i];
                     D_800A6738.y = D_800A6FB4[n];
-                    D_800A6738.kind = *base + n;
+                    D_800A6738.kind = D_800A6FBC[i] + n;
                     func_8001ED54(&D_800A6738);
+                    main_set_frame(D_800A6F7C[j], D_801E28F4[obj]->flags, D_801E28F4[obj]);
+                    D_801E28F4[obj]->pos_x.s.hi = D_800A6F8C[i];
+                    D_801E28F4[obj]->pos_y.s.hi = D_800A6F94[obj];
+                    n++;
+                    obj++;
                     break;
                 case 0x40:
                     D_800A6758.x = D_800A6FAC[i];
                     D_800A6758.y = D_800A6FB4[n];
-                    D_800A6758.kind = *base + n;
+                    D_800A6758.kind = D_800A6FBC[i] + n;
                     func_8001ED54(&D_800A6758);
+                    main_set_frame(D_800A6F7C[j], D_801E28F4[obj]->flags, D_801E28F4[obj]);
+                    D_801E28F4[obj]->pos_x.s.hi = D_800A6F8C[i];
+                    D_801E28F4[obj]->pos_y.s.hi = D_800A6F94[obj];
+                    n++;
+                    obj++;
                     break;
                 case 0x80:
                     D_800A6778.x = D_800A6FAC[i];
                     D_800A6778.y = D_800A6FB4[n];
-                    D_800A6778.kind = *base + n;
+                    D_800A6778.kind = D_800A6FBC[i] + n;
                     func_8001ED54(&D_800A6778);
+                    main_set_frame(D_800A6F7C[j], D_801E28F4[obj]->flags, D_801E28F4[obj]);
+                    D_801E28F4[obj]->pos_x.s.hi = D_800A6F8C[i];
+                    D_801E28F4[obj]->pos_y.s.hi = D_800A6F94[obj];
+                    n++;
+                    obj++;
                     break;
-                default:
-                    continue;
                 }
-                main_set_frame(D_800A6F7C[j], D_801E28F4[obj]->flags, D_801E28F4[obj]);
-                D_801E28F4[obj]->pos_x.s.hi = D_800A6F8C[i];
-                D_801E28F4[obj]->pos_y.s.hi = D_800A6F94[obj];
-                n++;
-                obj++;
             }
         }
     }
 }
-#else
-INCLUDE_ASM("asm/overattr/nonmatchings/menu", menu_draw_controls);
-#endif
 
 void func_8009CD30(void) {
     s32 i;

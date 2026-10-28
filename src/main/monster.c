@@ -225,9 +225,13 @@ void func_800506BC(Monster *e) {
 }
 
 #ifdef NON_MATCHING
-/* 83.56%: the original keeps the x offset and its copy (negated when the holder faces left) in two registers, reads
- * the holder's x before the index and copies e into a1 (frame takes a0); here they share one. dx = d before the
- * facing test (the original's delay-slot move) and the x read before the frame: 81.5 % */
+/* 95.83%: the structure is the original's: dy loaded then reduced in place (4 refs, so it is allocated before the
+ * D_800AA248 base and takes a3, which puts the base in t0 and x in t1 and e's copy in a1), dx = d before the facing
+ * test (the delay-slot move) with d referenced again at the end, so cse keeps d canonical and the left arm negates
+ * d into dx (the original's two registers; without the late reference dx becomes canonical and the two share one
+ * register). Left: the original loads pt->x first and keeps the y sum in v0, so its late reference to d was not the
+ * y sum (here d holds it, a0); a dead d = 0 at the end gives 95.93 % with the sum in v0 but the same load order. d
+ * first, in-place d, statement and operand orders tried */
 void monster_follow_holder(Monster *e) {
     GameObject *holder;
     SpriteFrame *frame;
@@ -248,17 +252,19 @@ void monster_follow_holder(Monster *e) {
         pt = (FramePoint *) &frame->unk_10;
         i = e->id - 1;
         pt += i;
-        dy = pt->y - frame->origin.u.hi;
+        dy = pt->y;
+        dy -= frame->origin.u.hi;
         d = pt->x - frame->origin.u.lo;
+        dx = d;
         if (holder->flags & 0x10) {
             dx = -d;
             D_800AA248.cur_obj->flags |= 0x10;
         } else {
-            dx = d;
             D_800AA248.cur_obj->flags &= ~0x10;
         }
         D_800AA248.cur_obj->pos_x.w = D_801D8864.w & ((x + dx) << 16);
-        D_800AA248.cur_obj->pos_y.s.hi = dy + holder->pos_y.u.hi;
+        d = dy + holder->pos_y.u.hi;
+        D_800AA248.cur_obj->pos_y.s.hi = d;
     }
 }
 #else
@@ -465,10 +471,13 @@ void func_80050E58(Monster *e) {
 }
 
 #ifdef NON_MATCHING
-/* 98.60%: 98.6 %: global-alloc order: m (22 refs over 63 insns, 1.40) outranks obj (14 over 32, 1.31) and e (17
- * over 176, 0.39) outranks i (7 over 59, 0.24); obj and i each need one more reference (15 and 8) to come first as
- * in the original. Merging the per-path action stores lowers m and e enough, but the smaller loop then hoists
- * &D_801E0B78 and drops the 0x1C/0xB constants from s4/s5 */
+/* 98.60%: global-alloc order: m (22 refs over 63 insns, 1.40) outranks obj (14 over 32, 1.31) and e (17 over 176,
+ * 0.39) outranks i (7 over 59, 0.24); the original allocates obj, m, i, e. One store pair for the 0x1C/0xB paths of
+ * the facing-each-other branch (act chosen by one test) gives m 18 and e 13 refs, enough for that order, but the
+ * loop then has 112 real insns instead of 117 and loop.c hoists &D_801E0B78 (threshold 29 x savings 2 x life 2 =
+ * 116 >= 112; -dL), which the original keeps in the loop. So the original's loop had the per-path code's size with
+ * fewer m/e references, or a 4th..5th dead insn (deleted by flow after loop.c). Per-path ternary tests, gotos,
+ * for/do loops, operand orders and an else-branch d tried */
 void func_80050E88(Monster *e) {
     Monster *m;
     GameObject *obj;
@@ -1546,26 +1555,15 @@ void func_800531C0(Monster *e) {
     e->unk_104 = 0;
 }
 
-#ifdef NON_MATCHING
-/* 96.30%: everything but the camera clamp matches (the if/else adds give both ternary shapes, b declared before a
- * gives the bump's registers). the camera clamp, as in func_800535E4: the original reuses the wrap test's camera
- * load for the first bound (cse-skip-blocks over the wrap) and keeps the %hi of D_801F9AC8 in a0 for every later
- * access, yet reloads the camera word for the second bound and in both clamp arms and loads each bound's constant
- * afresh there: cse knew the HIGH but no longer the MEM, the sums or the constants. No cc1 flag reproduces it
- * (-fno-cse-follow-jumps, -fno-cse-skip-blocks, -fno-thread-jumps, -fno-rerun-cse-after-loop, -fno-expensive-
- * optimizations, -fno-strength-reduce, scheduling, -fno-force-mem: never the reload). Volatile reads of D_801F9AC8
- * after a local camera copy for the wrap test and first bound, with the inverted if (bound test first, the low arm
- * in the else) and v = K; v += camera in the arms, give the original's layout and reloads (97.7 %, left: the high
- * arm's constant reused, the first bound's sum register), but the camera is not volatile: func_80039C98 (npc.c,
- * matched) reuses one load across its joins. Ternary, MIN/MAX, inverted, two-if and stepwise forms tried with plain
- * reads: no reload */
+/* The camera clamp as in monster_update_bounce: c is set again (c += 0x500000), so the later reads of D_801F9AC8 are
+ * loads of their own. */
 void func_80053204(Monster *e) {
     GameObject *shadow;
     Monster *m;
     GameObject *b;
     GameObject *a;
     s32 v;
-    s32 d;
+    s32 c;
 
     if (e->unk_218 != NULL) {
         func_80053804((s32) e->unk_218, e);
@@ -1645,14 +1643,24 @@ void func_80053204(Monster *e) {
     } else {
         v += D_800AA268.p->vel_x.w;
     }
-    if (v <= D_801F9AC8.w) {
+    c = D_801F9AC8.w;
+    if (v <= c) {
         v += D_801D8864.w;
     }
     if (D_801D3780 == 0) {
-        if (v < D_801F9AC8.w + 0x500000) {
-            v = D_801F9AC8.w + 0x500000;
-        } else if (D_801F9AC8.w + 0x1400000 < v) {
-            v = D_801F9AC8.w + 0x1400000;
+        c += 0x500000;
+        if (v >= c) {
+            c = D_801F9AC8.w;
+            c += 0x1400000;
+            if (c < v) {
+                c = D_801F9AC8.w;
+                v = 0x1400000;
+                v += c;
+            }
+        } else {
+            c = D_801F9AC8.w;
+            v = 0x500000;
+            v += c;
         }
     }
     v &= D_801D8864.w;
@@ -1675,25 +1683,10 @@ void func_80053204(Monster *e) {
     shadow->pos_y.w = v;
     shadow->priority = D_800AA248.cur_obj->priority - 1;
 }
-#else
-INCLUDE_ASM("asm/main/nonmatchings/monster", func_80053204);
-#endif
 
-#ifdef NON_MATCHING
-/* 92.33%: abs() gives the original's in-place negates with the stores before the branches; the if/else adds give
- * both ternary shapes (jump.c turns the one-insn 0x40000 arm into the delay-slot set, the lui/ori 0x18000 arm stays
- * a branch). Left: the step pseudo takes v0 where the original has v1, and the camera clamp, as in func_800535E4:
- * the original reuses the wrap test's camera load for the first bound (cse-skip-blocks over the wrap) and keeps the
- * %hi of D_801F9AC8 in a0 for every later access, yet reloads the camera word for the second bound and in both
- * clamp arms and loads each bound's constant afresh there: cse knew the HIGH but no longer the MEM, the sums or the
- * constants. No cc1 flag reproduces it (-fno-cse-follow-jumps, -fno-cse-skip-blocks, -fno-thread-jumps, -fno-rerun-
- * cse-after-loop, -fno-expensive-optimizations, -fno-strength-reduce, scheduling, -fno-force-mem: never the
- * reload). Volatile reads of D_801F9AC8 after a local camera copy for the wrap test and first bound, with the
- * inverted if (bound test first, the low arm in the else) and v = K; v += camera in the arms, give the original's
- * layout and reloads (97.7 %, left: the high arm's constant reused, the first bound's sum register), but the camera
- * is not volatile: func_80039C98 (npc.c, matched) reuses one load across its joins. Ternary, MIN/MAX, inverted,
- * two-if and stepwise forms tried with plain reads: no reload */
-void func_800535E4(Monster *e) {
+/* The camera clamp reuses step for the camera's left edge: setting it again (step += 0x500000) ends cse's
+ * knowledge that it holds D_801F9AC8, so the arms and the second bound read the camera again, as the original does. */
+void monster_update_bounce(Monster *e) {
     GameObject *shadow;
     s32 v;
     s32 step;
@@ -1732,14 +1725,22 @@ void func_800535E4(Monster *e) {
     } else {
         v += D_800AA248.cur_obj->vel_x.w;
     }
-    if (v <= D_801F9AC8.w) {
+    step = D_801F9AC8.w;
+    if (v <= step) {
         v += D_801D8864.w;
     }
     if (D_801D3780 == 0) {
-        if (v < D_801F9AC8.w + 0x500000) {
-            v = D_801F9AC8.w + 0x500000;
-        } else if (D_801F9AC8.w + 0x1400000 < v) {
-            v = D_801F9AC8.w + 0x1400000;
+        step += 0x500000;
+        if (v < step) {
+            v = 0x500000;
+            v += D_801F9AC8.w;
+        } else {
+            step = D_801F9AC8.w;
+            step += 0x1400000;
+            if (step < v) {
+                v = 0x1400000;
+                v += D_801F9AC8.w;
+            }
         }
     }
     v &= D_801D8864.w;
@@ -1762,9 +1763,6 @@ void func_800535E4(Monster *e) {
     shadow->pos_y.w = v;
     shadow->priority = D_800AA248.cur_obj->priority - 1;
 }
-#else
-INCLUDE_ASM("asm/main/nonmatchings/monster", func_800535E4);
-#endif
 
 void func_80053804(s32 unused, Monster *e) {
     /* LOOP_BLOCK class A2: the plain statements give the original's order only with -fno-schedule-insns
@@ -2209,16 +2207,12 @@ void func_800544D8(Monster *e, GameObject *dst, GameObject *src) {
     dst->priority = src->priority + 0x1000;
 }
 
-#ifdef NON_MATCHING
-/* 95.39%: cse, the camera clamp's class: in the facing-left block the original reloads box_x0 but reuses the sign-
- * extended px (a0): cse knew the register expression but not the MEM. Here cse carries box_x0 into that block by
- * skip-blocks as well as follow-jumps (-fno-cse-follow-jumps alone changes nothing); with both off box_x0 is
- * reloaded but px is extended again. A u16 copy of box_x0 for the first bound keeps the size (the reload slot
- * becomes its re-extension, 93.1 %); s16/s32 copies, in-place x0 -= 0x30, casts on either bound, ternary, ||, goto,
- * result-variable and early-return forms tried */
-s32 func_8005453C(s16 x, s32 unused, Monster *m) {
+/* b holds box_x0, then box_x1: setting it again ends cse's knowledge of box_x0, so the facing-left test reads it
+ * again, as the original does. */
+s32 monster_test_in_front(s16 x, s32 unused, Monster *m) {
     GameObject *obj;
     s16 px;
+    s16 b;
 
     obj = m->obj;
     px = x;
@@ -2228,20 +2222,21 @@ s32 func_8005453C(s16 x, s32 unused, Monster *m) {
     if (x < D_801F9ACA) {
         px = x + ((D_801D8864.w + 1) >> 16);
     }
-    if (px >= m->box_x0 - 0x30 && m->box_x1 + 0x30 >= px) {
-        if (!(obj->flags & 0x10)) {
-            if (px >= m->box_x1) {
+    b = m->box_x0;
+    if (px >= b - 0x30) {
+        b = m->box_x1;
+        if (b + 0x30 >= px) {
+            if (!(obj->flags & 0x10)) {
+                if (px >= b) {
+                    return 1;
+                }
+            } else if (m->box_x0 >= px) {
                 return 1;
             }
-        } else if (m->box_x0 >= px) {
-            return 1;
         }
     }
     return 0;
 }
-#else
-INCLUDE_ASM("asm/main/nonmatchings/monster", func_8005453C);
-#endif
 
 void func_80054608(u16 kind, Monster *e, Building *u) {
     s16 y;
