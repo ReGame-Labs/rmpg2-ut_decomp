@@ -5245,7 +5245,10 @@ void func_80023080(Npc *npc) {
 }
 
 #ifdef NON_MATCHING
-/* 88.9 %: the second branch keeps the address of D_801F9AC8 in a register across the block and reuses it; the C reloads it */
+/* 92.01%: 92 %: the second branch keeps the %hi of D_801F9AC8 in a1 from its top and reloads the value through it
+ * at the end of the inner block (reorg then skips that load on the path that still holds it in v1); the C reloads
+ * with a fresh lui. The original's distance is the builtin abs() in its two-register form (bgez v0; move v1,v0;
+ * negu v1,v1, where the C's copy negates v0); written as abs() here the inner block changes shape (82.5 %) */
 u16 func_80023114() {
     s32 x;
     s32 d;
@@ -5890,8 +5893,10 @@ void func_800242A8(void) {
 
 #ifdef NON_MATCHING
 /* 97.14%: 97.1 %: abs() and an if/else for x give the original's reload of pos_x in the last branch, but then x and
- * dx share v1 (the original keeps dx in a1 and copies it, as with x = dx before an if; that form keeps pos_x in a
- * register through cse's skipped block) */
+ * dx share v1. The original has dx in a1 and x in v1, which global-alloc gives only when x conflicts with dx (x =
+ * dx before the test, x allocated first); that form keeps pos_x in a register through cse's skipped block (98.97 %
+ * with -fno-cse-skip-blocks or -fno-cse-follow-jumps, and then dx/x swap: dx's subtraction temporary, 4 refs over
+ * 10 insns, outranks x, 7 over 19) */
 s32 abs(s32);
 
 void func_800242D8(Npc *npc) {
@@ -5921,9 +5926,12 @@ INCLUDE_ASM("asm/main/nonmatchings/main", func_800242D8);
 #endif
 
 #ifdef NON_MATCHING
-/* 96.45%: 96.5 %: the distance is abs() (GCC's builtin); the sprite's x still loads straight into its s32 variable
- * where the original loads it into a temporary and copies it (lh v0; move v1,v0); as an s16 it loads twice (lh,
- * lhu) */
+/* 96.45%: 96.5 %: abs() is GCC's builtin. The first coordinate (s16 x = npc->unk_26) loads as the original's lh
+ * into a temporary and a copy: combine's three-insn split of the load and its sign extension (combine.c, a PARALLEL
+ * of both loads split into a load and a register copy). The second, written the same way, gets the other split (two
+ * loads, lh and lhu) as an s16, and loads straight into its variable as an s32; swapping the two blocks swaps which
+ * one gets the copy, so the choice depends on the position, not the C (types, a local pointer, the field read
+ * twice, an assignment in the test tried) */
 s32 abs(s32);
 
 s16 func_8002439C(Npc *npc) {
@@ -7462,7 +7470,9 @@ void func_80026F58(Monster *arg0) {
 }
 
 #ifdef NON_MATCHING
-/* 89.9 %: the call's argument is set up early and the (u16)(state - 5) truncation is kept in the original. */
+/* 89.85%: 89.9 %: the call's argument (move a0,s0) sits first in the block after the 0x53 test in the original, so
+ * reorg puts it in the bne's delay slot; sched1 here keeps it next to the jal and the delay slot takes the addiu.
+ * The (u16)(state - 5) truncation stays; types, the statement order, if/else and early-return forms tried */
 void func_80026F98(Monster *arg0) {
     u16 temp_v1;
 
@@ -8531,8 +8541,11 @@ void func_800288B0(s32 *vel2, s32 *vel1) {
 INCLUDE_ASM("asm/main/nonmatchings/main", func_800288B0);
 #endif
 
-/* 91.3 %: the result is computed from a copy of the larger value (move v0,a2) in the original; the C computes it in place */
 #ifdef NON_MATCHING
+/* 91.25%: 91.3 %: the original copies the larger value into v0 (move v0,a2) and uses the copy for both the
+ * difference and the result; here both uses read hi's own register. A second variable (r = hi) is merged by cse,
+ * which keeps hi canonical since r does not outlive the block; s16 parameters, s32/u16 locals, the swap through a
+ * temporary, a ternary and a static inline helper tried */
 s16 main_get_midpoint(s32 a, s32 b) {
     s16 lo;
     s16 hi;
