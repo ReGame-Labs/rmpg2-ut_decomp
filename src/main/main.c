@@ -69,7 +69,6 @@ extern s16 D_801D8854;
 extern s16 D_801E0D64;
 extern s32 D_801E0D6C;
 extern GameObject *D_801E1C7C;
-extern s16 D_801E1CA4;
 extern s16 D_801E1CAC;
 extern u16 D_801E1CB0;
 extern s16 D_801E1E18;
@@ -7493,10 +7492,10 @@ void func_800268BC(void);
 void main_scroll_layers(void);
 void main_count_monsters(void);
 s32 func_8005E4E4(void);
-void func_80053DE4();
-void func_80027FD0();
+void func_80053DE4(Monster *);
+void func_80027FD0(Monster *, u16);
 s32 func_8003F378(Monster *);
-void monster_dispatch_action();
+void monster_dispatch_action(Monster *, GameObject *, u16);
 void func_800267CC(Monster *);
 u16 func_800291DC(Monster *, GameObject *);
 void func_80026C04(Monster *);
@@ -8632,7 +8631,7 @@ void main_update_boxes(Monster *m) {
 void func_80027FC8(void) {
 }
 
-void func_80027FD0(Monster *m) {
+void func_80027FD0(Monster *m, u16 index) {
     u32 dir;
     void (**table)(Monster *);
 

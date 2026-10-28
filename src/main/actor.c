@@ -193,7 +193,9 @@ void func_8003CDAC(u8 *arg0) {
     }
 }
 
-void func_8003CE24(Actor *actor, ObjectDef *effect) {
+struct UnkStructB2;                     /* pickup.h: the third argument pickup_hide_items passes, unread */
+
+void func_8003CE24(Actor *actor, ObjectDef *effect, struct UnkStructB2 *rec) {
     GameObject *mover;
     SpriteFrame *frame;
     u8 *p;

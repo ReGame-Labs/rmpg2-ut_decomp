@@ -39,9 +39,10 @@ extern u8 D_8008A4A0[];
 extern u8 D_8008A4B8[];
 extern u8 D_8008A4C4[];
 void func_8003C1C0(u16, UnkStructB2 *);
-void func_8003C674();                  /* empty; pickup_hide_items passes it two arguments */
+void func_8003C674(u16 *q, ObjectDef *def);
 BuildingPart *func_8003C67C(Building *u, UnkStructB2 *rec);
-void func_8003CE24();                  /* actor.c: (Actor *, ObjectDef *); pickup_hide_items passes it a third argument */
+void func_8003CE24();                  /* actor.c: (Actor *, ObjectDef *, UnkStructB2 *); pickup_hide_items passes a
+                                        * BuildingPart as the first */
 void func_8003C8D4(Pickup *arg0);
 void func_8003C934(Pickup *);
 void func_8003C9E8(Pickup *arg0);
@@ -671,7 +672,7 @@ done:
     D_801D8738 = 0x1C - (u16)D_800AA250;
 }
 
-void func_8003C674(void) {
+void func_8003C674(u16 *q, ObjectDef *def) {
 }
 
 #ifdef NON_MATCHING

@@ -384,7 +384,6 @@ extern u16 D_800A6FC4[];                /* per player number: its bit in D_801E0
 extern s32 D_800A9290;                  /* the player select's frames left */
 extern s16 D_800A92B2;                  /* D_800A92B0[1] and [2], reached as symbols of their own */
 extern s16 D_800A92B4;
-extern s16 D_801E1CA4;
 void tour_clear_objects(void);               /* clears the screen's objects */
 
 /* tour.c */

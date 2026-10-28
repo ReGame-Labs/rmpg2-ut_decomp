@@ -16,7 +16,7 @@ extern SoundDriver *D_80087FA0;
 extern u8 D_80087F94;
 extern SoundChannel *D_80087F98;
 extern SoundSeqStat *D_80087F9C;
-extern s32 D_80087160;
+extern u32 D_80087160;                  /* the channel count (wess.c) */
 extern s32 D_80087164;
 extern s32 D_80087168;
 extern s32 D_8008716C;

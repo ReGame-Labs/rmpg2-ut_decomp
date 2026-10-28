@@ -804,6 +804,7 @@ extern u16 D_801D8866;                   /* the level width's integer half */
 extern s16 D_801E0D4C;
 extern u8 D_801E0D98[];                  /* D_801E0B78[1] */
 extern u16 D_801E1C80;
+extern s16 D_801E1CA4;                   /* main.c clears it; func_8009FF38 passes it to menu_create_player_slots */
 extern s16 D_801E1E40;
 extern GameObject D_801E28C0;            /* the object list's sentinel head */
 extern u16 D_801E2A50;

@@ -5,7 +5,7 @@
 #include "game.h"
 #include "monster.h"
 
-void monster_dispatch_action(Monster *e, GameObject *obj) {
+void monster_dispatch_action(Monster *e, GameObject *obj, u16 index) {
     s16 x;
     s16 half;
     s16 state;
@@ -1951,7 +1951,7 @@ void func_80053D68(s32 amount, Monster *e) {
     }
 }
 
-void func_80053DE4(void) {
+void func_80053DE4(Monster *e) {
 }
 
 void func_80053DEC(void) {
