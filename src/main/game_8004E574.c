@@ -581,37 +581,28 @@ s32 func_8004F7A4(u8 *list) {
     return 0;
 }
 
-#ifdef NON_MATCHING
-/* 97.11%: registers and one nop: in the original the x is loaded once (lh a0), copied to x1 (move a1,a0) before the
- * compare, which then overwrites a0, and the then-block adds to x1 in place. Written t = load, x2 = load, x1 = t,
- * cse keeps the copy only when x1 is narrower than t, and then the then-block adds to t (x1 = t + width, 96.3%);
- * with both s32 the copy is folded */
 void func_8004F7F4(GameObject *obj, Monster *m1, Monster *m2, GameObject *cur) {
     ObjectDef *def;
     GameObject *o;
     s16 x1;
-    u16 x2;
-    s16 x;
-    s32 t;
+    s16 x2;
 
     def = func_8001D110();
-    t = cur->pos_x.s.hi;
-    x1 = t;
-    x = obj->pos_x.s.hi;
-    x2 = x;
-    if (t <= D_801F9ACA) {
+    x1 = cur->pos_x.s.hi;
+    x2 = obj->pos_x.s.hi;
+    if (x1 <= D_801F9ACA) {
         x1 += D_801D8866;
     }
-    if ((s16) x2 <= D_801F9ACA) {
+    if (x2 <= D_801F9ACA) {
         x2 += D_801D8866;
     }
-    x = (s16) (x1 + x2) >> 1;
-    if (x >= (s16) D_801D8866) {
-        x -= D_801D8866;
+    x1 = (s16) (x1 + x2) >> 1;
+    if (x1 >= (s16) D_801D8866) {
+        x1 -= D_801D8866;
     }
-    def->pos_x.s.hi = x;
-    cur->pos_x.s.hi = x;
-    obj->pos_x.s.hi = x;
+    def->pos_x.s.hi = x1;
+    cur->pos_x.s.hi = x1;
+    obj->pos_x.s.hi = x1;
     def->pos_y.s.hi = cur->pos_y.s.hi;
     def->flags = 0x5500;
     def->anim = &D_8009556C;
@@ -624,9 +615,6 @@ void func_8004F7F4(GameObject *obj, Monster *m1, Monster *m2, GameObject *cur) {
     o->unk_94.monster = m1;
     o->owner.monster = m2;
 }
-#else
-INCLUDE_ASM("asm/main/nonmatchings/game_8004E574", func_8004F7F4);
-#endif
 
 void func_8004F910(void) {
     GameObject *obj = D_800AA268.p;
