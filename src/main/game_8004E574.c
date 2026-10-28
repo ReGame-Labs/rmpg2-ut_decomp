@@ -459,8 +459,8 @@ void func_8004F370(void) {
     u16 a;
     GameObject *o;
 
-    if ((m->unk_05C != 0x63 && m->obj->pos_y.s.hi < 0xC3) || m->climb_side != 0) {
-        a = m->unk_05C;
+    if ((m->prev_action != 0x63 && m->obj->pos_y.s.hi < 0xC3) || m->climb_side != 0) {
+        a = m->prev_action;
         m->action = a;
         if (a == 2) {
             o = m->obj;
@@ -684,7 +684,7 @@ void func_8004FAF8(void) {
 
 void func_8004FB10(void) {
     Monster *m = D_800AA248.cur_obj->owner.monster;
-    s32 v = m->unk_1C4.w;
+    s32 v = m->screen_x.w;
 
     if (v <= 0x27FFFF) {
         if (m->unk_168 == 7) {

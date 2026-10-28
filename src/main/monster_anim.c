@@ -271,7 +271,7 @@ void func_80057DD8(Monster *e) {
         func_80058984(e);
         return;
     }
-    type = e->unk_05C;
+    type = e->prev_action;
     if (type == 2 || type == 0x4E) {
         func_80057F28(e);
         return;
@@ -576,7 +576,7 @@ void func_800585C0(Monster *e) {
     if (n == 1 || n == 2) {
         script = D_800847C8;
     } else {
-        state = e->unk_05C;
+        state = e->prev_action;
         if (state == 2 || state == 0x4E) {
             func_80058680(e, n);
             return;
@@ -1829,7 +1829,7 @@ void monster_anim_update_special(Monster *e) {
         }
         if (D_800AA268.p->anim != (s32)D_100032FC && D_800AA268.p->anim != (s32)D_100033F8) {
             func_8004C308(D_100032FC, e);
-            e->unk_124 = 300;
+            e->special_timer = 300;
             D_801FB462 = 0;
         }
         if (e->unk_100 == 0) {
@@ -1840,7 +1840,7 @@ void monster_anim_update_special(Monster *e) {
             func_8004C308(D_100033F8, e);
             break;
         }
-        if (--e->unk_124 == 0) {
+        if (--e->special_timer == 0) {
             goto done;
         }
         func_80036A20(e);
@@ -1903,7 +1903,7 @@ void monster_anim_update_special(Monster *e) {
         }
         if (D_800AA268.p->anim != (s32)D_200032F4 && D_800AA268.p->anim != (s32)D_20003364 && D_800AA268.p->anim != (s32)D_2000339C) {
             func_8004C308(D_200032F4, e);
-            e->unk_124 = 300;
+            e->special_timer = 300;
         }
         if (e->unk_100 == 0) {
             break;
@@ -1913,7 +1913,7 @@ void monster_anim_update_special(Monster *e) {
             func_8004C308(D_20003364, e);
             break;
         }
-        if (--e->unk_124 == 0) {
+        if (--e->special_timer == 0) {
             goto done;
         }
         if (func_800598F4(e) != 0) {
@@ -1948,16 +1948,16 @@ void monster_anim_update_special(Monster *e) {
     case 3:
         if (D_800AA268.p->anim != (s32)D_300032E4) {
             func_8004C2B8(D_300032E4, e);
-            e->unk_124 = 300;
+            e->special_timer = 300;
         }
-        if (--e->unk_124 == 0) {
+        if (--e->special_timer == 0) {
             if (e->climb_side == 3 || e->obj->pos_y.s.hi == 0xE1) {
             done:
                 e->action = 0;
                 e->meter.w = 0;
                 break;
             }
-            e->unk_124 = 1;
+            e->special_timer = 1;
         }
         break;
     case 4:
@@ -1977,7 +1977,7 @@ void monster_anim_update_special(Monster *e) {
                 } else {
                     func_8004C2B8(D_5000333C, e);
                 }
-            } else if ((e->unk_05C == 2 || e->unk_05C == 0x19) && e->obj->pos_y.s.hi < 0xE1 && side == 0) {
+            } else if ((e->prev_action == 2 || e->prev_action == 0x19) && e->obj->pos_y.s.hi < 0xE1 && side == 0) {
                 func_8004C2B8(D_500033F4, e);
             } else {
                 func_8004C2B8(D_500032E4, e);
@@ -2328,7 +2328,7 @@ s16 func_8005C1F8(GameObject *b, Monster *e) {
                     npc->unk_54 = D_800AA248.cur_obj->flags;
                     npc->unk_5C = e->pos.u.lo;
                     npc->unk_5E = e->pos.u.hi;
-                    D_800AA248.cur_obj->unk_98 = npc;
+                    D_800AA248.cur_obj->unk_98.p = npc;
                     npc->unk_1A += 10;
                     return 1;
                 }
@@ -2403,7 +2403,7 @@ void monster_anim_blast_npcs(GameObject *b, Monster *e) {
                     npc->unk_54 = D_800AA248.cur_obj->flags;
                     npc->unk_5C = e->pos.u.lo;
                     npc->unk_5E = e->pos.u.hi;
-                    D_800AA248.cur_obj->unk_98 = npc;
+                    D_800AA248.cur_obj->unk_98.p = npc;
                     npc->unk_1A += 10;
                 }
             }
@@ -2515,7 +2515,7 @@ void func_8005CAA4(GameObject *b, Monster *e) {
                     npc->unk_54 = D_800AA248.cur_obj->flags;
                     npc->unk_5C = e->pos.u.lo;
                     npc->unk_5E = e->pos.u.hi;
-                    D_800AA248.cur_obj->unk_98 = npc;
+                    D_800AA248.cur_obj->unk_98.p = npc;
                     npc->unk_1A += 10;
                 }
             }

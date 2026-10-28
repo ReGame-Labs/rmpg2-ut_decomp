@@ -542,7 +542,7 @@ void building_reset_monster(s32 n) {
     saved = D_800AA248.cur_obj;
     building_clear_monster(m);
     m->id = n;
-    m->unk_128 = n;
+    m->depth = n;
     building_spawn_monster(m);
     D_800AA248.cur_obj = saved;
 }
@@ -589,7 +589,7 @@ void building_spawn_monster(Monster *m) {
         D_800AA268.p->pos_x.s.hi = (D_801FA8A0[m->id - 1] - 2) * 125 + 200;
         break;
     }
-    D_800AA248.cur_obj->unk_72 = D_8007CDA4[m->id - 1][0];
+    D_800AA248.cur_obj->bank = D_8007CDA4[m->id - 1][0];
     if (m->id == 7) {
         D_800AA248.cur_obj->unk_74 = D_801F9ABC;
     } else {
@@ -604,8 +604,8 @@ void building_spawn_monster(Monster *m) {
     m->unk_1E0 = 0;
     m->unk_1E2 = 0;
     m->unk_174 = -1;
-    if (m->unk_01A & 0xF) {
-        func_8002A1AC(m, m->unk_01A & 0xF);
+    if (m->extra_uses & 0xF) {
+        func_8002A1AC(m, m->extra_uses & 0xF);
     }
     if (D_800AA2DC == 0) {
         bonus_create_bars(m);
@@ -2950,7 +2950,7 @@ void func_800302AC(u16 kind, Monster *m) {
         return;
     }
     m->action = action;
-    m->unk_05C = 0;
+    m->prev_action = 0;
     func_80053C50(push, m);
     m->unk_13C = 0x4B;
 }

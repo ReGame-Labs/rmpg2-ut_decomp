@@ -328,7 +328,7 @@ void func_8004C738(void) {
     u16 *arg = obj->arg.h;
     u16 action;
 
-    m->unk_05C = m->action;
+    m->prev_action = m->action;
     action = *arg;
     m->dir_frames = 0;
     m->action = action;
@@ -416,7 +416,7 @@ void func_8004C83C(void) {
         m->unk_100 = speed;
     }
 skip:
-    if (m->unk_0D0 & 4) {
+    if (m->pressed & 4) {
         if (m->dir != 1 && m->dir != 8 && m->dir != 2) {
             speed = D_800AA248.cur_obj->vel_y.w;
             if ((u32) (speed + 0x28000) <= 0x58000 && m->unk_1AA < 2) {
@@ -532,7 +532,7 @@ void func_8004CCAC(void) {
     Monster *m = D_800AA248.cur_obj->owner.monster;
     u16 side;
 
-    switch (m->unk_05C) {
+    switch (m->prev_action) {
     case 0x4E:
         m->action = 2;
         return;
@@ -551,7 +551,7 @@ void func_8004CCAC(void) {
         m->action = 0;
         return;
     default:
-        m->action = m->unk_05C;
+        m->action = m->prev_action;
         return;
     }
 }
@@ -576,7 +576,7 @@ void func_8004CDB0(void) {
     s32 vel;
 
     vel = 0xFFFF0000;
-    if (m->unk_1C4.s.hi < 0xC9) {
+    if (m->screen_x.s.hi < 0xC9) {
         vel = 0x10000;
     }
     D_800AA248.cur_obj->vel_x.w = vel;
@@ -863,7 +863,7 @@ void func_8004D614(void) {
         }
         func_80053D68(0x30000, m);
         p->action = kind;
-        prev = m->unk_05C;
+        prev = m->prev_action;
         if (prev != 2 && prev != 0x4E) {
             m->action = 8;
         }

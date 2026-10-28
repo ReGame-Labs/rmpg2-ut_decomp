@@ -98,7 +98,7 @@ void func_8001E4B0(GameObject *mover);
 s32 func_8003F150(Monster *player);
 u16 func_80030338(GameObject *);
 ObjectDef *func_8001D110(void);
-GameObject *func_8001DCB4(void);       /* spawns D_800AA248.unk_3C */
+GameObject *func_8001DCB4(void);       /* spawns D_800AA248.new_def */
 void func_8004003C(s32 arg0, Ai *link);
 s16 func_80053AC4(s16 x, s16 y, s32 w, s32 h, Monster *player);
 void func_8003CCC0(void *);
@@ -1590,7 +1590,7 @@ void actor_take_hit(Monster *player, Actor *actor) {
             return;
         }
         func_80053D68(0x28000, player);
-        if (player->unk_05C == 0x4E || player->unk_05C == 2) {
+        if (player->prev_action == 0x4E || player->prev_action == 2) {
             return;
         }
         switch (actor->kind) {
@@ -1630,7 +1630,7 @@ void func_8003FB5C(Monster *player, Actor *actor) {
     switch (actor->unk_4) {
     case 0x1F:
         func_80053C50(0x28000, player);
-        if (player->unk_05C != 2 && player->unk_05C != 0x4E) {
+        if (player->prev_action != 2 && player->prev_action != 0x4E) {
             player->action = 0x49;
             player->unk_126 = 1;
         }
@@ -1643,7 +1643,7 @@ void func_8003FB5C(Monster *player, Actor *actor) {
         break;
     default:
         func_80053C50(0x28000, player);
-        if (player->unk_05C != 2 && player->unk_05C != 0x4E) {
+        if (player->prev_action != 2 && player->prev_action != 0x4E) {
             player->action = 8;
             player->unk_126 = 1;
         }

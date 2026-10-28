@@ -8,7 +8,7 @@
 
 /* Other units. */
 ObjectDef *func_8001D110(void);
-GameObject *func_8001DCB4(void);         /* spawns D_800AA248.unk_3C */
+GameObject *func_8001DCB4(void);         /* spawns D_800AA248.new_def */
 void func_8001E4B0(GameObject *mover);
 void func_80029118(s16, u16);
 void func_8004BFE0(void);
@@ -1161,12 +1161,12 @@ void npc_place_searchlight(GameObject *line, GameObject *obj, GameObject *end) {
                 dx -= 0x10000;
                 line->unk_50.xy = ((u32)dx >> 16) | (dy & 0xFFFF0000);
                 dx += 0x30000;
-                line->unk_54.w = ((u32)dx >> 16) | (dy & 0xFFFF0000);
+                line->unk_54.xy = ((u32)dx >> 16) | (dy & 0xFFFF0000);
                 step = len / D_8007D5F0[i + 1];
                 if (obj->flags & 0x10) {
                     step = -step - 0x30000;
                 }
-                prev = line->unk_40.w;
+                prev = line->unk_40.prev_x;
                 if (prev != -999) {
                     nx = (x + step) & D_801D8864.w;
                     x = prev;
@@ -1182,7 +1182,7 @@ void npc_place_searchlight(GameObject *line, GameObject *obj, GameObject *end) {
                 line->arg.xy = ((u32)ex >> 16) | (dy & 0xFFFF0000);
                 ex += 0x300000;
                 line->unk_60 = ((u32)ex >> 16) | (dy & 0xFFFF0000);
-                line->unk_40.w = nx;
+                line->unk_40.prev_x = nx;
                 end->pos_x.w = x + step - 0x180000;
                 end->pos_y.w = y + len;
                 func_8001BB88(line);
@@ -1574,7 +1574,7 @@ u16 func_8003761C(s16 x, s16 y, Monster *player, Npc *npc) {
     npc->unk_54 = D_800AA248.cur_obj->flags;
     npc->unk_5C = x;
     npc->unk_5E = y;
-    D_800AA248.cur_obj->unk_98 = npc;
+    D_800AA248.cur_obj->unk_98.p = npc;
     npc->unk_1A += 0xA;
     return 1;
 }
@@ -1652,8 +1652,8 @@ void npc_pick_target(Npc *npc) {
     k = 1;
     do {
         m = &D_801E0B78[k];
-        if ((m->unk_058 & 1) && m->unk_040 >= 0x1C20 && m->unk_040 >= best) {
-            best = m->unk_040;
+        if ((m->unk_058 & 1) && m->play_frames >= 0x1C20 && m->play_frames >= best) {
+            best = m->play_frames;
         }
         k++;
     } while (--i != 0);
@@ -1667,7 +1667,7 @@ void npc_pick_target(Npc *npc) {
         }
         m = &D_801E0B78[slot];
         if (m->unk_058 & 1) {
-            if (m->unk_040 + 0x12C >= best) {
+            if (m->play_frames + 0x12C >= best) {
                 break;
             }
         } else {
@@ -2555,10 +2555,10 @@ void npc_update_throw(Throw *t) {
     Npc *npc;
 
     if (t->state == 0x10 || t->state == 1) {
-        if (saved->unk_98 == (void *) 2) {
+        if (saved->unk_98.result == 2) {
             t->state = 0x10;
             func_8003EB5C(D_80096084, D_800AA248.cur_obj);
-        } else if (saved->unk_98 == (void *) 1) {
+        } else if (saved->unk_98.result == 1) {
             t->state = 0x10;
             func_8003EB5C(D_80096018, D_800AA248.cur_obj);
         } else {
@@ -2589,7 +2589,7 @@ void npc_update_throw(Throw *t) {
                         func_80053C50(0x54000, m);
                         func_8004EFAC();
                         t->state = 0x10;
-                        D_800AA248.cur_obj->unk_98 = (void *) 1;
+                        D_800AA248.cur_obj->unk_98.result = 1;
                         if (body->pos_y.s.hi <= 0xE0) {
                             m->action = 0xF;
                         } else if ((D_800AA248.cur_obj->flags & 0x10) == (body->flags & 0x10)) {
@@ -2609,7 +2609,7 @@ void npc_update_throw(Throw *t) {
                     v = D_800AA268.p->unk_8C - 1;
                     if (v == 0) {
                     fall:
-                        D_800AA268.p->unk_98 = (void *) 2;
+                        D_800AA268.p->unk_98.result = 2;
                     } else {
                         D_800AA268.p->unk_8C = v;
                     }

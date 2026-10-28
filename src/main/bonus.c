@@ -1196,7 +1196,7 @@ void bonus_give_awards(s32 player, s32 awards) {
         kind = 0x7E1;
         m->health.w = 0x440000;
         m->unk_17C = 0x440000;
-        m->unk_01A &= 0xFFF0;
+        m->extra_uses &= 0xFFF0;
         def->pos_x.s.hi = i * 0x11 + 0xDC;
         def->id = D_80084298[m->id - 1];
         def->pos_y.s.hi = 0x85;

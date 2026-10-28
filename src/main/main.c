@@ -1761,9 +1761,9 @@ SpriteFrame *func_8001A554(s32 id, GameObject *obj) {
     u16 flags;
     Unk1F9AE4 *e;
 
-    if ((obj->unk_6C & 0x400) && obj->unk_3C != id) {
+    if ((obj->unk_6C & 0x400) && obj->last_frame != id) {
         obj->unk_6C &= 0xFBFF;
-        func_8001B350(obj->unk_6E);
+        func_8001B350(obj->vram_slot);
     }
     if (id < 0) {
         frame = (SpriteFrame *) id;
@@ -1771,7 +1771,7 @@ SpriteFrame *func_8001A554(s32 id, GameObject *obj) {
         obj->tex.w = frame->unk_00;
     } else {
         index = (u32) (id & 0xFFFFFF) >> 1;
-        obj->unk_72 = b = ((u32) id >> 24) & 0x3F;
+        obj->bank = b = ((u32) id >> 24) & 0x3F;
         obj->anim_frame = id;
         if (index >= 0x2135) {
             index = 0;
@@ -1786,24 +1786,24 @@ SpriteFrame *func_8001A554(s32 id, GameObject *obj) {
         if (frame->unk_00 & 0x40000000) {
             obj->unk_6C |= 8;
             obj->tex.w = frame->unk_00;
-        } else if (obj->unk_3C != id || !(obj->unk_6C & 0x400)) {
+        } else if (obj->last_frame != id || !(obj->unk_6C & 0x400)) {
             flags = obj->unk_6C;
             obj->unk_6C = flags & 0xFFF7;
             if (!(flags & 0x80)) {
                 obj->unk_6C = (flags & 0xFFF7) | 0x400;
                 if (frame->unk_00 & 0x20000000) {
-                    obj->unk_6E = main_alloc_vram_slot(frame, D_801FA738[b].unk_0, 1);
-                    e = &D_801F9AE4[obj->unk_6E];
+                    obj->vram_slot = main_alloc_vram_slot(frame, D_801FA738[b].unk_0, 1);
+                    e = &D_801F9AE4[obj->vram_slot];
                     obj->tex.w = e->unk_0.w | 0x20000000;
                 } else {
-                    obj->unk_6E = main_alloc_vram_slot(frame, D_801FA738[b].unk_0, 0);
-                    e = &D_801F9AE4[obj->unk_6E];
+                    obj->vram_slot = main_alloc_vram_slot(frame, D_801FA738[b].unk_0, 0);
+                    e = &D_801F9AE4[obj->vram_slot];
                     obj->tex.w = e->unk_0.w;
                 }
             }
         }
     }
-    obj->unk_3C = id;
+    obj->last_frame = id;
     return frame;
 }
 
@@ -2015,7 +2015,7 @@ u16 main_get_tpage(GameObject *obj, u16 mode) {
     n = 0;
     word = obj->tex.w;
     if (obj->unk_6C & 0x400) {
-        rec = &D_801F9AE4[obj->unk_6E];
+        rec = &D_801F9AE4[obj->vram_slot];
         if (mode & 0x400) {
             return rec->unk_0.u.hi | ((mode & 0x300) >> 3);
         }
@@ -2046,7 +2046,7 @@ void func_8001B054(GameObject *arg0) {
     arg0->unk_6C = temp_v1;
     if (temp_v1 & 0x400) {
         arg0->unk_6C = (u16) (temp_v1 & 0xFBFF);
-        func_8001B350(arg0->unk_6E, arg0);
+        func_8001B350(arg0->vram_slot, arg0);
     }
 }
 
@@ -3661,7 +3661,7 @@ void func_8001E4B0(GameObject *sprite) {
 
 void func_8001E528(GameObject *arg0) {
     if (arg0->unk_6C & 0x400) {
-        func_8001B350(arg0->unk_6E);
+        func_8001B350(arg0->vram_slot);
     }
     D_801D3768 += 1;
     if (D_801D8764 != NULL) {
@@ -4040,7 +4040,7 @@ void main_print_text(void) {
                 D_800AA248.cur_obj->tex.w = glyph->unk_0;
                 D_800AA248.cur_obj->unk_74 = D_800AA2EC;
                 D_800AA248.cur_obj->colour.w = 0xFFFFFFFF;
-                D_800AA248.cur_obj->unk_72 = 0xF;
+                D_800AA248.cur_obj->bank = 0xF;
                 D_800AA248.cur_obj->unk_28.s.lo = D_800AA248.cur_obj->pos_x.s.hi = D_801D8588.pen_x - D_801D8588.unk_32;
                 D_800AA248.cur_obj->unk_28.s.hi = D_800AA248.cur_obj->pos_y.s.hi = D_801D8588.pen_y - off.s.hi;
                 D_800AA248.cur_obj->unk_20 = D_801D8588.unk_20;
@@ -4465,8 +4465,8 @@ sprt_lit:
             } else {
                 sprt->code &= ~2;
             }
-            sprt->clut = (obj->unk_74 != 0xFFFF) ? D_801C51D4[D_800AFB54[obj->unk_72] + obj->unk_74]
-                                                   : D_801C51D4[D_800AFB54[obj->unk_72] + obj->frame->unk_0C];
+            sprt->clut = (obj->unk_74 != 0xFFFF) ? D_801C51D4[D_800AFB54[obj->bank] + obj->unk_74]
+                                                   : D_801C51D4[D_800AFB54[obj->bank] + obj->frame->unk_0C];
             AddPrim(D_801FAC80->ot, sprt);
             continue;
         }
@@ -4575,8 +4575,8 @@ quad_lit:
         ft4->u3 = u + w;
         ft4->v3 = v + h;
         ft4->tpage = tpage;
-        ft4->clut = (obj->unk_74 != 0xFFFF) ? D_801C51D4[D_800AFB54[obj->unk_72] + obj->unk_74]
-                                               : D_801C51D4[D_800AFB54[obj->unk_72] + obj->frame->unk_0C];
+        ft4->clut = (obj->unk_74 != 0xFFFF) ? D_801C51D4[D_800AFB54[obj->bank] + obj->unk_74]
+                                               : D_801C51D4[D_800AFB54[obj->bank] + obj->frame->unk_0C];
         AddPrim(D_801FAC80->ot, ft4);
     }
     if (D_801FAC80->unk_493C != D_801FAC80->unk_493E) {
@@ -7556,7 +7556,7 @@ void main_update_monsters(void) {
         obj = D_800AA268.p = m->obj;
         if (m->id != 0 && obj != NULL) {
             func_80029CF8();
-            m->unk_12C = obj->priority;
+            m->body_priority = obj->priority;
             if (m->unk_058 & 1) {
                 if (D_801FB18C != 0) {
                     m->dir = 0;
@@ -7586,7 +7586,7 @@ void main_update_monsters(void) {
                     goto reset;
                 }
                 if (m->action != 0x37 && m->action != 0x26) {
-                    m->unk_040++;
+                    m->play_frames++;
                 }
                 func_80026C04(m);
                 main_move_monster(m);
@@ -7627,7 +7627,7 @@ void main_update_monsters(void) {
                     D_801E0D70 = D_801FB468;
                 }
                 if ((u16) (m->climb_side - 1) < 2) {
-                    m->unk_0D0 |= 4;
+                    m->pressed |= 4;
                     func_80026F98(m);
                 }
                 func_800636B0();
@@ -7749,8 +7749,8 @@ void func_800267CC(Monster *monster) {
     s32 i;
 
     i = 0;
-    if (monster->id == 5 && monster->meter.w == 0x440000 && !(monster->unk_01A & 0xF)) {
-        monster->unk_01A |= 3;
+    if (monster->id == 5 && monster->meter.w == 0x440000 && !(monster->extra_uses & 0xF)) {
+        monster->extra_uses |= 3;
         func_8002A1AC(monster, 3);
         i = 0;
     }
@@ -7827,9 +7827,9 @@ void func_800268BC(void) {
             }
         }
     }
-    m1->unk_128 = r1;
-    m2->unk_128 = r2;
-    m3->unk_128 = r3;
+    m1->depth = r1;
+    m2->depth = r2;
+    m3->depth = r3;
 }
 
 void func_80026A6C(void) {
@@ -7910,7 +7910,7 @@ void func_80026C04(Monster *monster) {
 void func_80026C4C(Monster *arg0) {
     u16 value;
 
-    if ((arg0->unk_0D0 & 2) && !(func_80027348() & 0xFFFF) && !(func_80026D54(arg0) & 0xFFFF)) {
+    if ((arg0->pressed & 2) && !(func_80027348() & 0xFFFF) && !(func_80026D54(arg0) & 0xFFFF)) {
         if (arg0->unk_18E == 0) {
             value = arg0->unk_03C;
             if (value != 0) {
@@ -7945,7 +7945,7 @@ s32 func_80026D54(Monster *monster) {
     u16 state;
 
     state = monster->action;
-    if (state != 2 && state != 0x4E && state != 0x11 && monster->unk_05C == 0x16) {
+    if (state != 2 && state != 0x4E && state != 0x11 && monster->prev_action == 0x16) {
         return 1;
     }
     return 0;
@@ -7977,7 +7977,7 @@ void func_80026E0C(Monster *arg0) {
 
     temp_v0 = arg0->action;
     temp_v1 = temp_v0 & 0xFFFF;
-    arg0->unk_05C = temp_v0;
+    arg0->prev_action = temp_v0;
     if ((temp_v1 == 2) || (temp_v1 == 0x4E)) {
         if (arg0->unk_104 == 0) {
             arg0->unk_104 = 0x4000;
@@ -7990,7 +7990,7 @@ void func_80026E0C(Monster *arg0) {
 }
 
 void func_80026E6C(Monster *m) {
-    if ((m->unk_0D0 & 1) && func_800272B0(m) == 0) {
+    if ((m->pressed & 1) && func_800272B0(m) == 0) {
         if (m->action == 2) {
             if (m->unk_104 == 0 || D_800AA268.p->vel_y.w == 0) {
                 return;
@@ -7999,11 +7999,11 @@ void func_80026E6C(Monster *m) {
             m->action = 0x54;
             return;
         } else if (m->action == 0x2C && m->unk_104 != 0 && D_800AA268.p->vel_y.w != 0) {
-            m->unk_05C = 2;
+            m->prev_action = 2;
             func_80026F58(m);
             return;
         }
-        m->unk_05C = m->action;
+        m->prev_action = m->action;
         func_80026F58(m);
     }
 }
@@ -8025,7 +8025,7 @@ void func_80026F98(Monster *arg0) {
     u16 temp_v1;
 
     D_800AA248.cur_obj = arg0->obj;
-    if ((arg0->unk_0D0 & 4) && !(func_800272FC() & 0xFFFF)) {
+    if ((arg0->pressed & 4) && !(func_800272FC() & 0xFFFF)) {
         temp_v1 = arg0->action;
         if (temp_v1 == 0x53) {
             arg0->action = 0x54U;
@@ -8050,7 +8050,7 @@ void main_use_full_meter(Monster *m) {
     u16 action;
     s16 n;
 
-    if ((m->unk_0D0 & 8) && (D_800AA2DC == 0 || (D_800AA2DC & 0x7000)) && m->meter.w == 0x440000) {
+    if ((m->pressed & 8) && (D_800AA2DC == 0 || (D_800AA2DC & 0x7000)) && m->meter.w == 0x440000) {
         switch (m->id) {
         case 1:
         case 2:
@@ -8074,24 +8074,24 @@ void main_use_full_meter(Monster *m) {
                 action = m->action;
                 if (action == 1 || action == 5 || action == 6 || action == 0) {
                     func_800531C0(m);
-                    m->unk_05C = m->action;
+                    m->prev_action = m->action;
                     m->action = 0x63;
                 } else if (action == 2 || action == 0x19) {
                     if (m->obj->vel_y.s.hi != 0) {
-                        m->unk_05C = action;
+                        m->prev_action = action;
                         m->action = 0x63;
                     }
                 }
                 if (m->action == 0x63) {
-                    if ((m->unk_01A & 0xF) != 0) {
-                        n = (m->unk_01A & 0xF) - 1;
-                        m->unk_01A &= 0xFFF0;
-                        m->unk_01A |= n;
+                    if ((m->extra_uses & 0xF) != 0) {
+                        n = (m->extra_uses & 0xF) - 1;
+                        m->extra_uses &= 0xFFF0;
+                        m->extra_uses |= n;
                         if (n < 3 && m->extra[n + 2] != NULL) {
                             func_8001E4B0(m->extra[n + 2]);
                             m->extra[n + 2] = NULL;
                         }
-                        if (!(m->unk_01A & 0xF)) {
+                        if (!(m->extra_uses & 0xF)) {
                             m->meter.w = 0;
                         }
                     } else {
@@ -8368,7 +8368,7 @@ void main_update_screen_pos(Monster *m) {
     if (!(m->unk_058 & 1) || (u16) m->unk_05E != 0 || (u16) m->unk_1C8 != 0) {
         *px = 0x12C0000;
         *py = 0x12C0000;
-        m->unk_1C0 = 0x12C0000;
+        m->screen_y = 0x12C0000;
         return;
     }
     obj = m->obj;
@@ -8380,7 +8380,7 @@ void main_update_screen_pos(Monster *m) {
     }
     pos -= cam;
     *px = pos;
-    m->unk_1C4.w = pos;
+    m->screen_x.w = pos;
     pos = obj->pos_y.w;
     pos -= D_801F9ACC.w;
     if (m->climb_side == 0) {
@@ -8405,7 +8405,7 @@ void main_update_screen_pos(Monster *m) {
         pos = 1;
     }
     *py = pos;
-    m->unk_1C0 = pos;
+    m->screen_y = pos;
 }
 
 void func_80027AB0(void) {
@@ -8446,7 +8446,7 @@ void main_reset_screen_pos(u16 id, Monster *monster) {
         b += *p - 1;
         *a = 0x12C0000;
         *b = 0;
-        monster->unk_1C0 = 0;
+        monster->screen_y = 0;
     }
 }
 
@@ -8468,7 +8468,7 @@ void main_update_priority(Monster *m) {
         if (m->climb_building != 0) {
             b = monster_get_building(m->climb_building);
             if (b != NULL) {
-                n = m->unk_128 + 9;
+                n = m->depth + 9;
                 obj->priority = b->priority - n;
             }
         }
@@ -8478,7 +8478,7 @@ void main_update_priority(Monster *m) {
         return;
     }
     if (m->climb_side == 0) {
-        prio = m->unk_128 + 0x1000;
+        prio = m->depth + 0x1000;
     } else {
         if (m->climb_building == 0) {
             return;
@@ -8488,7 +8488,7 @@ void main_update_priority(Monster *m) {
             return;
         }
         top = b->priority;
-        n = m->unk_128;
+        n = m->depth;
         if (m->action == 9 || m->climb_side == 3) {
             n += 9;
             prio = top - n;
@@ -8647,7 +8647,7 @@ void func_80027FD0(Monster *m) {
     table = D_8007C170;
     if (m->action == 0x4D) {
         table = D_8007C14C;
-    } else if (m->action == 2 || m->action == 0x4E || m->unk_05C == 2 || m->unk_05C == 0x4E) {
+    } else if (m->action == 2 || m->action == 0x4E || m->prev_action == 2 || m->prev_action == 0x4E) {
         table = D_8007C194;
     }
     table = &table[dir];
@@ -8676,7 +8676,7 @@ void func_8002808C(u16 buttons, u16 held, Monster *monster) {
         pressed |= 8;
         count++;
     }
-    monster->unk_0D0 = pressed;
+    monster->pressed = pressed;
     monster->unk_18C = count;
     if (buttons & 4) {
         if (monster->unk_1AA == 0) {
@@ -9347,7 +9347,7 @@ u16 func_800291DC(Monster *m, GameObject *obj) {
     m->health.w = 0x440000;
     m->unk_018 = 1;
     m->unk_14C = 0;
-    m->unk_040 = 0;
+    m->play_frames = 0;
     m->lives--;
     func_8001F724(0x14);
     func_8001F724(0x72);
@@ -9602,7 +9602,7 @@ void func_80029C6C(Monster *arg0) {
     if (sprite != NULL) {
         state = arg0->action;
         if (((state != 2) && (state != 0x4E)) || (arg0->skip_building == 0) || (sprite->vel_y.w > 0)) {
-            if (arg0->unk_12C != sprite->priority) {
+            if (arg0->body_priority != sprite->priority) {
                 func_8001E39C(sprite);
                 func_8001E2F8(sprite);
             }
