@@ -258,11 +258,17 @@ void func_8009BF94(u8 *dst, s32 index) {
 #ifdef NON_MATCHING
 /* 99.24%: registers only. The movie line's text address (3 refs over 136 insns, priority 0.02) comes last in
  * global-alloc's order, after the %hi of D_801F9AAC and of D_800A92D0 (6 refs over ~95, 0.13 and 0.12), and gets s3;
- * the original gives it s1, i.e. allocates it before them, which needs a priority above 0.13 (a life under 24 insns
- * for 3 refs): the original's address was not this one long pseudo. A user variable for it, a TextMessage pointer
- * and the struct forms of the first four strings (&D_800A6300.text[6], ...: cse then reuses them, 95% and less)
- * do not change it. The text address carries a REG_EQUIV note, so update_equiv_regs doubles its life (68 -> 136);
- * the %hi pseudos are doubled too. No -fno-* flag of the round's list changes the order, nor the permuter (25 min) */
+ * the original gives it s1, so its priority was above 0.13. Its set carries a REG_EQUIV note, so update_equiv_regs
+ * doubles its life (68 -> 136); the %hi pseudos are doubled too. As a pointer variable reused for the last message
+ * (text = &D_800A63A8.text[7]; ... text -= 0x1F; func_8001ED54((TextMessage *) text)) it is set twice: no REG_EQUIV,
+ * 5 refs over 70 (0.14), and it gets the original's s1. But then its set comes before the D_8007A692 load (96.41%):
+ * sched1 raises the priority of a ready insn that births a register only when that register is set once
+ * (adjust_priority, birthing_insn_p: REG_N_SETS == 1), and without the raise the luid tie puts the a1 load (combined
+ * into the move at the call, after any statement) last. So the original's address was set once, hence doubled, and
+ * a priority above 0.13 then takes 8 refs over 136: five more than the code shows (uses that combine deleted after
+ * flow counted them). Also tried: a temporary for the D_8007A692 argument, the assignment inside the call, an s16
+ * parameter for func_8009BF94, a TextMessage pointer, (TextMessage *) (text - 0x1F), the struct forms of the first
+ * four strings (cse then reuses them, 95% and less), the round's -fno-* flags, and the permuter (25 min) */
 void menu_draw_cheats(void) {
     func_8009BF40(D_800A631E, D_801FA960);
     func_8001ECB4(D_800A6359, D_8007A684, 0);
